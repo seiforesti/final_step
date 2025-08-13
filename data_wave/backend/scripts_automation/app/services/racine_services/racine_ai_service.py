@@ -988,15 +988,143 @@ Could you tell me more about what you're looking to accomplish? I can provide mo
 
     async def _get_user_recent_activities(self, user_id: str, workspace_id: Optional[str]) -> List[Dict[str, Any]]:
         """Get user's recent activities for context."""
-        return []
+        try:
+            # Query actual user activities from activity tracking system
+            from ..racine_activity_service import RacineActivityService
+            activity_service = RacineActivityService(self.db)
+            
+            # Get recent activities (last 24 hours)
+            activities = await activity_service.get_user_activities(
+                user_id=user_id,
+                workspace_id=workspace_id,
+                limit=20,
+                hours_back=24
+            )
+            
+            # Format activities for AI context
+            formatted_activities = []
+            for activity in activities:
+                formatted_activities.append({
+                    'action': activity.get('action_type', 'unknown'),
+                    'resource': activity.get('resource_type', 'unknown'),
+                    'timestamp': activity.get('timestamp', ''),
+                    'context': activity.get('metadata', {})
+                })
+            
+            return formatted_activities
+            
+        except Exception as e:
+            logger.warning(f"Could not fetch user activities: {str(e)}")
+            return []
 
     async def _get_user_ai_preferences(self, user_id: str) -> Dict[str, Any]:
         """Get user's AI preferences."""
-        return {"response_style": "professional", "detail_level": "medium", "include_examples": True}
+        try:
+            # Query actual user preferences from database
+            user_prefs_query = select(RacineAIUserPreferences).where(
+                RacineAIUserPreferences.user_id == user_id
+            )
+            user_prefs = self.db.exec(user_prefs_query).first()
+            
+            if user_prefs:
+                return {
+                    "response_style": user_prefs.response_style,
+                    "detail_level": user_prefs.detail_level,
+                    "include_examples": user_prefs.include_examples,
+                    "language": user_prefs.language,
+                    "technical_level": user_prefs.technical_level,
+                    "notification_frequency": user_prefs.notification_frequency
+                }
+            else:
+                # Create default preferences for new user
+                default_prefs = RacineAIUserPreferences(
+                    user_id=user_id,
+                    response_style="professional",
+                    detail_level="medium",
+                    include_examples=True,
+                    language="english",
+                    technical_level="intermediate",
+                    notification_frequency="normal"
+                )
+                self.db.add(default_prefs)
+                self.db.commit()
+                
+                return {
+                    "response_style": "professional",
+                    "detail_level": "medium", 
+                    "include_examples": True,
+                    "language": "english",
+                    "technical_level": "intermediate",
+                    "notification_frequency": "normal"
+                }
+                
+        except Exception as e:
+            logger.warning(f"Could not fetch user AI preferences: {str(e)}")
+            # Return fallback preferences
+            return {
+                "response_style": "professional", 
+                "detail_level": "medium", 
+                "include_examples": True,
+                "language": "english",
+                "technical_level": "intermediate",
+                "notification_frequency": "normal"
+            }
 
     async def _assess_user_expertise(self, user_id: str) -> str:
-        """Assess user's expertise level."""
-        return "intermediate"
+        """Assess user's expertise level based on activity history and role."""
+        try:
+            # Get user's role and activity history for expertise assessment
+            from ..auth_service import AuthService
+            auth_service = AuthService(self.db)
+            
+            # Get user info and role
+            user_info = await auth_service.get_user_by_id(user_id)
+            if not user_info:
+                return "beginner"
+            
+            # Assess based on role
+            role_expertise_map = {
+                "admin": "expert",
+                "senior_analyst": "expert", 
+                "data_scientist": "advanced",
+                "analyst": "intermediate",
+                "viewer": "beginner",
+                "guest": "beginner"
+            }
+            
+            role_based_expertise = role_expertise_map.get(user_info.get('role', ''), "intermediate")
+            
+            # Get activity history to refine assessment
+            activities = await self._get_user_recent_activities(user_id, None)
+            
+            # Calculate activity-based expertise
+            activity_score = 0
+            complex_actions = ['create_workflow', 'configure_pipeline', 'advanced_search', 'create_rule']
+            
+            for activity in activities:
+                if activity.get('action') in complex_actions:
+                    activity_score += 2
+                else:
+                    activity_score += 1
+            
+            # Adjust expertise based on activity level
+            if activity_score > 50:
+                if role_based_expertise == "intermediate":
+                    role_based_expertise = "advanced"
+                elif role_based_expertise == "beginner":
+                    role_based_expertise = "intermediate"
+            elif activity_score < 10:
+                if role_based_expertise == "advanced":
+                    role_based_expertise = "intermediate"
+                elif role_based_expertise == "expert":
+                    role_based_expertise = "advanced"
+            
+            logger.info(f"Assessed user {user_id} expertise: {role_based_expertise} (activity_score: {activity_score})")
+            return role_based_expertise
+            
+        except Exception as e:
+            logger.warning(f"Could not assess user expertise: {str(e)}")
+            return "intermediate"
 
     async def _get_user_common_tasks(self, user_id: str) -> List[str]:
         """Get user's common tasks."""
