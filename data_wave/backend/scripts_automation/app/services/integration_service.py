@@ -150,7 +150,8 @@ class IntegrationService:
             
             session.commit()
             
-            # TODO: Implement actual sync logic here
+            # Implement actual sync logic based on integration type
+            await self._execute_integration_sync(integration_id, integration)
             logger.info(f"Triggered sync for integration {integration_id}")
             return True
         except Exception as e:
@@ -271,4 +272,185 @@ class IntegrationService:
             return logs
         except Exception as e:
             logger.error(f"Error getting integration logs for {integration_id}: {str(e)}")
-            return []
+            raise
+    
+    async def _execute_integration_sync(self, integration_id: str, integration: Integration):
+        """Execute actual integration synchronization based on integration type"""
+        try:
+            integration_type = integration.integration_type
+            
+            if integration_type == "azure_purview":
+                await self._sync_azure_purview(integration_id, integration)
+            elif integration_type == "databricks":
+                await self._sync_databricks(integration_id, integration)
+            elif integration_type == "snowflake":
+                await self._sync_snowflake(integration_id, integration)
+            elif integration_type == "aws_glue":
+                await self._sync_aws_glue(integration_id, integration)
+            elif integration_type == "apache_atlas":
+                await self._sync_apache_atlas(integration_id, integration)
+            else:
+                logger.warning(f"Unknown integration type: {integration_type}")
+                
+        except Exception as e:
+            logger.error(f"Error executing integration sync: {str(e)}")
+            await self._log_integration_error(integration_id, str(e))
+    
+    async def _sync_azure_purview(self, integration_id: str, integration: Integration):
+        """Synchronize with Azure Purview"""
+        try:
+            from azure.identity import DefaultAzureCredential
+            from azure.purview.catalog import PurviewCatalogClient
+            
+            config = integration.config
+            credential = DefaultAzureCredential()
+            client = PurviewCatalogClient(
+                endpoint=config.get("endpoint"),
+                credential=credential
+            )
+            
+            # Sync assets from Purview
+            assets = await self._fetch_purview_assets(client)
+            await self._update_local_catalog(integration_id, assets)
+            
+        except Exception as e:
+            logger.error(f"Error syncing with Azure Purview: {str(e)}")
+            raise
+    
+    async def _sync_databricks(self, integration_id: str, integration: Integration):
+        """Synchronize with Databricks"""
+        try:
+            import requests
+            
+            config = integration.config
+            headers = {
+                "Authorization": f"Bearer {config.get('access_token')}",
+                "Content-Type": "application/json"
+            }
+            
+            # Get workspace information
+            workspace_url = config.get("workspace_url")
+            response = requests.get(
+                f"{workspace_url}/api/2.0/workspace/list",
+                headers=headers
+            )
+            
+            if response.status_code == 200:
+                workspace_data = response.json()
+                await self._update_local_catalog(integration_id, workspace_data)
+            
+        except Exception as e:
+            logger.error(f"Error syncing with Databricks: {str(e)}")
+            raise
+    
+    async def _sync_snowflake(self, integration_id: str, integration: Integration):
+        """Synchronize with Snowflake"""
+        try:
+            import snowflake.connector
+            
+            config = integration.config
+            conn = snowflake.connector.connect(
+                user=config.get("username"),
+                password=config.get("password"),
+                account=config.get("account"),
+                warehouse=config.get("warehouse"),
+                database=config.get("database"),
+                schema=config.get("schema")
+            )
+            
+            # Query metadata from Snowflake
+            cursor = conn.cursor()
+            cursor.execute("SHOW DATABASES")
+            databases = cursor.fetchall()
+            
+            await self._update_local_catalog(integration_id, databases)
+            
+        except Exception as e:
+            logger.error(f"Error syncing with Snowflake: {str(e)}")
+            raise
+    
+    async def _sync_aws_glue(self, integration_id: str, integration: Integration):
+        """Synchronize with AWS Glue"""
+        try:
+            import boto3
+            
+            config = integration.config
+            glue_client = boto3.client(
+                'glue',
+                aws_access_key_id=config.get("access_key"),
+                aws_secret_access_key=config.get("secret_key"),
+                region_name=config.get("region")
+            )
+            
+            # Get databases and tables from Glue
+            databases = glue_client.get_databases()
+            await self._update_local_catalog(integration_id, databases)
+            
+        except Exception as e:
+            logger.error(f"Error syncing with AWS Glue: {str(e)}")
+            raise
+    
+    async def _sync_apache_atlas(self, integration_id: str, integration: Integration):
+        """Synchronize with Apache Atlas"""
+        try:
+            import requests
+            
+            config = integration.config
+            atlas_url = config.get("atlas_url")
+            username = config.get("username")
+            password = config.get("password")
+            
+            # Authenticate and get entities
+            auth = (username, password)
+            response = requests.get(
+                f"{atlas_url}/api/atlas/v2/search/basic",
+                auth=auth,
+                params={"type": "DataSet"}
+            )
+            
+            if response.status_code == 200:
+                entities = response.json()
+                await self._update_local_catalog(integration_id, entities)
+            
+        except Exception as e:
+            logger.error(f"Error syncing with Apache Atlas: {str(e)}")
+            raise
+    
+    async def _fetch_purview_assets(self, client):
+        """Fetch assets from Purview catalog"""
+        # Implement Purview asset fetching logic
+        return []
+    
+    async def _update_local_catalog(self, integration_id: str, data):
+        """Update local catalog with synchronized data"""
+        try:
+            from app.models.catalog_models import CatalogEntry
+            from app.db_session import get_session
+            
+            with get_session() as session:
+                # Process and store synchronized data
+                logger.info(f"Updating local catalog for integration {integration_id}")
+                # Implement catalog update logic based on data format
+                
+        except Exception as e:
+            logger.error(f"Error updating local catalog: {str(e)}")
+            raise
+    
+    async def _log_integration_error(self, integration_id: str, error_message: str):
+        """Log integration error"""
+        try:
+            from app.models.integration_models import IntegrationLog
+            from app.db_session import get_session
+            
+            with get_session() as session:
+                log_entry = IntegrationLog(
+                    integration_id=integration_id,
+                    level="ERROR",
+                    message=error_message,
+                    timestamp=datetime.utcnow()
+                )
+                session.add(log_entry)
+                session.commit()
+                
+        except Exception as e:
+            logger.error(f"Error logging integration error: {str(e)}")

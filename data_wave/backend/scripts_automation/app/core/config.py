@@ -7,7 +7,8 @@ with environment-specific settings, security configurations, and advanced featur
 
 import os
 from typing import Optional, List, Dict, Any
-from pydantic import Field, validator, BaseSettings
+from pydantic import Field, field_validator, BaseModel
+from pydantic_settings import BaseSettings
 from dotenv import load_dotenv
 import logging
 
@@ -27,8 +28,7 @@ class DatabaseConfig(BaseSettings):
     pool_recycle: int = Field(default=3600, description="Pool recycle time in seconds")
     echo: bool = Field(default=False, description="Enable SQL echo for debugging")
     
-    class Config:
-        env_prefix = "DB_"
+    model_config = {"env_prefix": "DB_"}
 
 class RedisConfig(BaseSettings):
     """Redis configuration settings."""
@@ -42,8 +42,7 @@ class RedisConfig(BaseSettings):
     retry_on_timeout: bool = Field(default=True, description="Retry on timeout")
     health_check_interval: int = Field(default=30, description="Health check interval")
     
-    class Config:
-        env_prefix = "REDIS_"
+    model_config = {"env_prefix": "REDIS_"}
 
 class SecurityConfig(BaseSettings):
     """Security configuration settings."""
@@ -62,8 +61,7 @@ class SecurityConfig(BaseSettings):
     max_login_attempts: int = Field(default=5, description="Maximum login attempts")
     session_timeout_minutes: int = Field(default=60, description="Session timeout in minutes")
     
-    class Config:
-        env_prefix = "SECURITY_"
+    model_config = {"env_prefix": "SECURITY_"}
 
 class AzureConfig(BaseSettings):
     """Azure/Microsoft Purview configuration settings."""
@@ -74,8 +72,7 @@ class AzureConfig(BaseSettings):
     client_secret: Optional[str] = Field(default=os.getenv("CLIENT_SECRET"), description="Azure client secret")
     purview_name: Optional[str] = Field(default=os.getenv("PURVIEW_NAME"), description="Purview account name")
     
-    class Config:
-        env_prefix = "AZURE_"
+    model_config = {"env_prefix": "AZURE_"}
 
 class ScanConfig(BaseSettings):
     """Scan configuration settings."""
@@ -90,8 +87,7 @@ class ScanConfig(BaseSettings):
     scan_batch_size: int = Field(default=1000, description="Scan batch size")
     enable_incremental_scan: bool = Field(default=True, description="Enable incremental scanning")
     
-    class Config:
-        env_prefix = "SCAN_"
+    model_config = {"env_prefix": "SCAN_"}
 
 class ClassificationConfig(BaseSettings):
     """Classification configuration settings."""
@@ -104,8 +100,7 @@ class ClassificationConfig(BaseSettings):
     enable_ml_classification: bool = Field(default=True, description="Enable ML-based classification")
     ml_model_update_interval_hours: int = Field(default=24, description="ML model update interval")
     
-    class Config:
-        env_prefix = "CLASSIFICATION_"
+    model_config = {"env_prefix": "CLASSIFICATION_"}
 
 class CacheConfig(BaseSettings):
     """Cache configuration settings."""
@@ -115,8 +110,7 @@ class CacheConfig(BaseSettings):
     max_cache_size: int = Field(default=10000, description="Maximum cache size")
     cache_strategy: str = Field(default="lru", description="Cache eviction strategy")
     
-    class Config:
-        env_prefix = "CACHE_"
+    model_config = {"env_prefix": "CACHE_"}
 
 class RateLimitConfig(BaseSettings):
     """Rate limiting configuration settings."""
@@ -126,8 +120,7 @@ class RateLimitConfig(BaseSettings):
     scan_requests_per_hour: int = Field(default=50, description="Scan requests per hour per user")
     export_requests_per_hour: int = Field(default=10, description="Export requests per hour per user")
     
-    class Config:
-        env_prefix = "RATE_LIMIT_"
+    model_config = {"env_prefix": "RATE_LIMIT_"}
 
 class MonitoringConfig(BaseSettings):
     """Monitoring and observability configuration."""
@@ -138,8 +131,7 @@ class MonitoringConfig(BaseSettings):
     enable_tracing: bool = Field(default=True, description="Enable distributed tracing")
     health_check_interval: int = Field(default=30, description="Health check interval")
     
-    class Config:
-        env_prefix = "MONITORING_"
+    model_config = {"env_prefix": "MONITORING_"}
 
 class AIMLConfig(BaseSettings):
     """AI/ML configuration settings."""
@@ -164,8 +156,7 @@ class AIMLConfig(BaseSettings):
         description="Summarization model name"
     )
     
-    class Config:
-        env_prefix = "AIML_"
+    model_config = {"env_prefix": "AIML_"}
 
 class EnterpriseConfig(BaseSettings):
     """Enterprise-level configuration settings."""
@@ -202,16 +193,15 @@ class EnterpriseConfig(BaseSettings):
     request_timeout_seconds: int = Field(default=300, description="Request timeout")
     max_request_size_mb: int = Field(default=100, description="Maximum request size in MB")
     
-    @validator('environment')
+    @field_validator('environment')
+    @classmethod
     def validate_environment(cls, v):
         allowed = ['development', 'staging', 'production']
         if v not in allowed:
             raise ValueError(f'Environment must be one of {allowed}')
         return v
     
-    class Config:
-        env_prefix = "ENTERPRISE_"
-        case_sensitive = False
+    model_config = {"env_prefix": "ENTERPRISE_", "case_sensitive": False}
 
 class Settings:
     """
@@ -328,17 +318,17 @@ class Settings:
     def to_dict(self) -> Dict[str, Any]:
         """Convert all settings to dictionary."""
         return {
-            'database': self.database.dict(),
-            'redis': self.redis.dict(),
-            'security': self.security.dict(exclude={'secret_key', 'jwt_secret', 'client_secret'}),
-            'azure': self.azure.dict(exclude={'client_secret'}),
-            'scan': self.scan.dict(),
-            'classification': self.classification.dict(),
-            'cache': self.cache.dict(),
-            'rate_limit': self.rate_limit.dict(),
-            'monitoring': self.monitoring.dict(),
-            'aiml': self.aiml.dict(),
-            'enterprise': self.enterprise.dict()
+            'database': self.database.model_dump(),
+            'redis': self.redis.model_dump(),
+            'security': self.security.model_dump(exclude={'secret_key', 'jwt_secret', 'client_secret'}),
+            'azure': self.azure.model_dump(exclude={'client_secret'}),
+            'scan': self.scan.model_dump(),
+            'classification': self.classification.model_dump(),
+            'cache': self.cache.model_dump(),
+            'rate_limit': self.rate_limit.model_dump(),
+            'monitoring': self.monitoring.model_dump(),
+            'aiml': self.aiml.model_dump(),
+            'enterprise': self.enterprise.model_dump()
         }
 
 # Global settings instance

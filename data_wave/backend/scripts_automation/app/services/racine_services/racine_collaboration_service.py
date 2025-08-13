@@ -1289,8 +1289,8 @@ class RacineCollaborationService:
             'timestamp': datetime.utcnow().isoformat()
         }
         
-        # In a real implementation, this would send WebSocket messages
-        # For now, we'll just track the event
+        # Send real-time WebSocket messages to collaboration session participants
+        await self._broadcast_to_session_participants(session_id, event_type, event_data)
         await self._track_session_event(session_id, event_type, event_data)
     
     async def _track_collaboration_event(
@@ -1472,3 +1472,133 @@ class RacineCollaborationService:
             
         except Exception as e:
             raise Exception(f"Failed to get user collaboration sessions: {str(e)}")
+    
+    async def _broadcast_to_session_participants(self, session_id: str, event_type: str, event_data: dict):
+        """Broadcast real-time events to all session participants via WebSocket"""
+        try:
+            from app.models.racine_models.racine_collaboration_models import CollaborationSession
+            from app.db_session import get_db_session
+            import json
+            
+            async with get_db_session() as session:
+                # Get collaboration session
+                collaboration_session = await session.get(CollaborationSession, session_id)
+                if not collaboration_session:
+                    logger.warning(f"Collaboration session {session_id} not found for broadcasting")
+                    return
+                
+                # Get all active participants
+                participants = collaboration_session.participants or []
+                
+                # Prepare WebSocket message
+                message = {
+                    "type": "collaboration_event",
+                    "session_id": session_id,
+                    "event_type": event_type,
+                    "data": event_data,
+                    "timestamp": datetime.utcnow().isoformat()
+                }
+                
+                # Broadcast to all participants via WebSocket manager
+                await self._send_websocket_messages(participants, message)
+                
+        except Exception as e:
+            logger.error(f"Error broadcasting to session participants: {str(e)}")
+    
+    async def _send_websocket_messages(self, participants: list, message: dict):
+        """Send WebSocket messages to all participants"""
+        try:
+            from app.api.routes.websocket_routes import websocket_manager
+            import json
+            
+            message_json = json.dumps(message)
+            
+            # Send message to each participant
+            for participant in participants:
+                user_id = participant.get("user_id")
+                if user_id:
+                    await websocket_manager.send_personal_message(message_json, user_id)
+                    
+        except Exception as e:
+            logger.error(f"Error sending WebSocket messages: {str(e)}")
+    
+    async def _notify_collaboration_activity(self, session_id: str, activity_type: str, details: dict):
+        """Send notifications about collaboration activities"""
+        try:
+            from app.services.notification_service import NotificationService
+            
+            notification_service = NotificationService()
+            
+            # Create notification for collaboration activity
+            await notification_service.create_collaboration_notification(
+                session_id=session_id,
+                activity_type=activity_type,
+                details=details
+            )
+            
+        except Exception as e:
+            logger.error(f"Error sending collaboration notification: {str(e)}")
+    
+    async def _update_session_analytics(self, session_id: str, event_type: str, participant_count: int):
+        """Update analytics for collaboration session"""
+        try:
+            from app.models.racine_models.racine_collaboration_models import CollaborationAnalytics
+            from app.db_session import get_db_session
+            
+            async with get_db_session() as session:
+                # Get or create analytics record
+                analytics = await session.execute(
+                    select(CollaborationAnalytics).where(
+                        CollaborationAnalytics.session_id == session_id
+                    )
+                )
+                analytics = analytics.scalar_one_or_none()
+                
+                if not analytics:
+                    analytics = CollaborationAnalytics(
+                        session_id=session_id,
+                        total_events=0,
+                        total_participants=participant_count,
+                        created_at=datetime.utcnow()
+                    )
+                    session.add(analytics)
+                
+                # Update analytics
+                analytics.total_events += 1
+                analytics.last_activity = datetime.utcnow()
+                analytics.total_participants = max(analytics.total_participants, participant_count)
+                
+                await session.commit()
+                
+        except Exception as e:
+            logger.error(f"Error updating session analytics: {str(e)}")
+    
+    async def _cleanup_inactive_sessions(self):
+        """Clean up inactive collaboration sessions"""
+        try:
+            from app.models.racine_models.racine_collaboration_models import CollaborationSession
+            from app.db_session import get_db_session
+            
+            # Define inactive threshold (24 hours)
+            inactive_threshold = datetime.utcnow() - timedelta(hours=24)
+            
+            async with get_db_session() as session:
+                # Find inactive sessions
+                inactive_sessions = await session.execute(
+                    select(CollaborationSession).where(
+                        CollaborationSession.last_activity < inactive_threshold,
+                        CollaborationSession.status == "active"
+                    )
+                )
+                inactive_sessions = inactive_sessions.scalars().all()
+                
+                # Mark sessions as inactive
+                for session_obj in inactive_sessions:
+                    session_obj.status = "inactive"
+                    session_obj.ended_at = datetime.utcnow()
+                
+                await session.commit()
+                logger.info(f"Cleaned up {len(inactive_sessions)} inactive collaboration sessions")
+                
+        except Exception as e:
+            logger.error(f"Error cleaning up inactive sessions: {str(e)}")
