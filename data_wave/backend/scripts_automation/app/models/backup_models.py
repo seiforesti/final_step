@@ -54,7 +54,7 @@ class BackupOperation(SQLModel, table=True):
     compression_ratio: Optional[float] = None
     
     # Metadata
-    backup_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    backup_metadata: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Audit fields
     created_by: Optional[str] = None
@@ -85,7 +85,7 @@ class RestoreOperation(SQLModel, table=True):
     progress_percentage: float = Field(default=0.0)
     
     # Metadata
-    restore_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    restore_metadata: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Audit fields
     created_by: Optional[str] = None
@@ -115,7 +115,7 @@ class BackupSchedule(SQLModel, table=True):
     last_run: Optional[datetime] = None
     
     # Metadata
-    schedule_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    schedule_metadata: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Audit fields
     created_by: Optional[str] = None
@@ -186,7 +186,7 @@ class BackupOperationCreate(SQLModel):
     backup_type: BackupType
     backup_name: str
     description: Optional[str] = None
-    backup_metadata: Dict[str, Any] = Field(default_factory=dict)
+    backup_metadata: Dict[str, Any] = Field(default=None)
 
 
 class RestoreOperationCreate(SQLModel):

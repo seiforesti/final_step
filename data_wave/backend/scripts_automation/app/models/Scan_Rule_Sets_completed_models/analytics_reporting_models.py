@@ -150,9 +150,9 @@ class UsageAnalytics(SQLModel, table=True):
     productivity_gain: Optional[float] = Field(default=None, description="Productivity gain percentage")
     
     # Detailed metrics and metadata
-    metrics_data: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    analytics_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    tags: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)))
+    metrics_data: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    analytics_metadata: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    tags: List[str] = Field(default=None, sa_column=Column(ARRAY(str)))
     
     # System context
     environment: Optional[str] = Field(default=None, description="Environment context (prod, dev, test)")
@@ -186,8 +186,8 @@ class TrendAnalysis(SQLModel, table=True):
     
     # Analysis scope
     entity_type: str = Field(description="Type of entity being analyzed")
-    entity_ids: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)))
-    scope_filter: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    entity_ids: List[str] = Field(default=None, sa_column=Column(ARRAY(str)))
+    scope_filter: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Temporal scope
     analysis_start_date: datetime = Field(description="Start date of analysis period")
@@ -215,32 +215,32 @@ class TrendAnalysis(SQLModel, table=True):
     std_deviation: float = Field(description="Standard deviation")
     
     # Seasonality and patterns
-    seasonal_patterns: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    cyclical_patterns: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    anomalies_detected: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    seasonal_patterns: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    cyclical_patterns: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    anomalies_detected: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Predictions and forecasting
     forecast_horizon_days: Optional[int] = Field(default=None, description="Days ahead forecasted")
-    predicted_values: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    prediction_intervals: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    predicted_values: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    prediction_intervals: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     forecast_accuracy: Optional[float] = Field(default=None, ge=0, le=1)
     
     # Model information
     algorithm_used: str = Field(description="Algorithm used for analysis")
-    model_parameters: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    training_metrics: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    model_parameters: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    training_metrics: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Business insights
     business_impact: Optional[str] = Field(default=None, sa_column=Column(Text))
-    recommendations: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    risk_factors: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    opportunities: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    recommendations: List[str] = Field(default=None, sa_column=Column(JSON))
+    risk_factors: List[str] = Field(default=None, sa_column=Column(JSON))
+    opportunities: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Metadata and context
     created_by: Optional[uuid.UUID] = Field(default=None, foreign_key="users.id")
     organization_id: Optional[uuid.UUID] = Field(default=None)
-    tags: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)))
-    trend_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    tags: List[str] = Field(default=None, sa_column=Column(ARRAY(str)))
+    trend_metadata: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Timestamps
     created_at: datetime = Field(default_factory=datetime.utcnow)
@@ -308,19 +308,19 @@ class ROIMetrics(SQLModel, table=True):
     
     # Calculation methodology
     calculation_method: str = Field(description="Method used for ROI calculation")
-    assumptions: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    assumptions: List[str] = Field(default=None, sa_column=Column(JSON))
     confidence_level: float = Field(ge=0, le=1, description="Confidence in calculations (0-1)")
     data_quality_score: float = Field(ge=0, le=1, description="Quality of underlying data (0-1)")
     
     # Detailed breakdowns
-    cost_breakdown: Dict[str, float] = Field(default_factory=dict, sa_column=Column(JSON))
-    benefit_breakdown: Dict[str, float] = Field(default_factory=dict, sa_column=Column(JSON))
-    monthly_projections: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    cost_breakdown: Dict[str, float] = Field(default=None, sa_column=Column(JSON))
+    benefit_breakdown: Dict[str, float] = Field(default=None, sa_column=Column(JSON))
+    monthly_projections: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Benchmarking
     industry_benchmark: Optional[float] = Field(default=None, description="Industry benchmark ROI")
     organization_benchmark: Optional[float] = Field(default=None, description="Organization benchmark ROI")
-    peer_comparison: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    peer_comparison: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Metadata and context
     created_by: Optional[uuid.UUID] = Field(default=None, foreign_key="users.id")
@@ -334,8 +334,8 @@ class ROIMetrics(SQLModel, table=True):
     validated_at: Optional[datetime] = Field(default=None)
     
     # Tags and metadata
-    tags: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)))
-    roi_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    tags: List[str] = Field(default=None, sa_column=Column(ARRAY(str)))
+    roi_metadata: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Timestamps
     created_at: datetime = Field(default_factory=datetime.utcnow)
@@ -380,9 +380,9 @@ class ComplianceIntegration(SQLModel, table=True):
     partially_compliant_requirements: int = Field(description="Number of partially compliant requirements")
     
     # Detailed compliance tracking
-    requirements_status: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    control_mappings: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    evidence_links: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    requirements_status: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    control_mappings: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    evidence_links: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Risk and impact assessment
     risk_level: str = Field(description="Overall risk level (low, medium, high, critical)")
@@ -393,8 +393,8 @@ class ComplianceIntegration(SQLModel, table=True):
     # Remediation tracking
     open_findings: int = Field(default=0, description="Number of open findings")
     critical_findings: int = Field(default=0, description="Number of critical findings")
-    remediation_plans: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    remediation_status: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    remediation_plans: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    remediation_status: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Timeline and deadlines
     implementation_deadline: Optional[datetime] = Field(default=None, description="Implementation deadline")
@@ -409,8 +409,8 @@ class ComplianceIntegration(SQLModel, table=True):
     
     # Documentation and reporting
     compliance_report_url: Optional[str] = Field(default=None, description="URL to compliance report")
-    documentation_links: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    audit_trail: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    documentation_links: List[str] = Field(default=None, sa_column=Column(JSON))
+    audit_trail: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # External integration
     external_system_id: Optional[str] = Field(default=None, description="ID in external compliance system")
@@ -419,9 +419,9 @@ class ComplianceIntegration(SQLModel, table=True):
     last_sync_date: Optional[datetime] = Field(default=None, description="Last synchronization date")
     
     # Notifications and alerts
-    alert_thresholds: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    notification_settings: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    escalation_rules: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    alert_thresholds: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    notification_settings: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    escalation_rules: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Metadata and context
     created_by: Optional[uuid.UUID] = Field(default=None, foreign_key="users.id")
@@ -431,11 +431,11 @@ class ComplianceIntegration(SQLModel, table=True):
     
     # Version and change tracking
     version: str = Field(default="1.0", description="Integration version")
-    change_log: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    change_log: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Tags and metadata
-    tags: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)))
-    compliance_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    tags: List[str] = Field(default=None, sa_column=Column(ARRAY(str)))
+    compliance_metadata: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Timestamps
     created_at: datetime = Field(default_factory=datetime.utcnow)
@@ -627,8 +627,8 @@ class MarketplaceAnalytics(SQLModel, table=True):
     average_session_duration: float = Field(default=0.0, description="Average session duration in minutes")
     
     # Rule performance metrics
-    top_downloaded_rules: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)))
-    top_rated_rules: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)))
+    top_downloaded_rules: List[str] = Field(default=None, sa_column=Column(ARRAY(str)))
+    top_rated_rules: List[str] = Field(default=None, sa_column=Column(ARRAY(str)))
     average_rule_rating: float = Field(default=0.0, ge=0, le=5, description="Average rule rating")
     rule_quality_score: float = Field(default=0.0, ge=0, le=100, description="Overall rule quality score")
     
@@ -645,9 +645,9 @@ class MarketplaceAnalytics(SQLModel, table=True):
     marketplace_uptime: float = Field(default=100.0, ge=0, le=100, description="Marketplace uptime percentage")
     
     # Geographic and demographic data
-    geographic_distribution: Dict[str, int] = Field(default_factory=dict, sa_column=Column(JSON))
-    industry_distribution: Dict[str, int] = Field(default_factory=dict, sa_column=Column(JSON))
-    user_role_distribution: Dict[str, int] = Field(default_factory=dict, sa_column=Column(JSON))
+    geographic_distribution: Dict[str, int] = Field(default=None, sa_column=Column(JSON))
+    industry_distribution: Dict[str, int] = Field(default=None, sa_column=Column(JSON))
+    user_role_distribution: Dict[str, int] = Field(default=None, sa_column=Column(JSON))
     
     # Performance tracking
     response_time_avg: float = Field(default=0.0, description="Average response time in ms")
@@ -691,14 +691,14 @@ class UsageMetrics(SQLModel, table=True):
     # User behavior metrics
     session_count: int = Field(default=1, description="Number of sessions")
     average_session_duration: float = Field(default=0.0, description="Average session duration")
-    feature_usage_pattern: Dict[str, int] = Field(default_factory=dict, sa_column=Column(JSON))
+    feature_usage_pattern: Dict[str, int] = Field(default=None, sa_column=Column(JSON))
     user_satisfaction_score: Optional[float] = Field(default=None, ge=1, le=5, description="User satisfaction score")
     
     # Performance metrics
     execution_time_avg: float = Field(default=0.0, description="Average execution time")
     success_rate: float = Field(default=1.0, ge=0, le=1, description="Success rate percentage")
     error_count: int = Field(default=0, description="Total error count")
-    error_types: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)))
+    error_types: List[str] = Field(default=None, sa_column=Column(ARRAY(str)))
     
     # Business impact metrics
     time_saved_hours: float = Field(default=0.0, description="Time saved in hours")
@@ -713,16 +713,16 @@ class UsageMetrics(SQLModel, table=True):
     integration_method: Optional[str] = Field(default=None, description="Integration method")
     
     # Advanced analytics
-    usage_trends: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    peak_usage_times: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)))
-    seasonal_patterns: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    user_segments: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)))
+    usage_trends: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    peak_usage_times: List[str] = Field(default=None, sa_column=Column(ARRAY(str)))
+    seasonal_patterns: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    user_segments: List[str] = Field(default=None, sa_column=Column(ARRAY(str)))
     
     # Quality and feedback
     bug_reports: int = Field(default=0, description="Number of bug reports")
     feature_requests: int = Field(default=0, description="Number of feature requests")
-    user_feedback: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    improvement_suggestions: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)))
+    user_feedback: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    improvement_suggestions: List[str] = Field(default=None, sa_column=Column(ARRAY(str)))
     
     # Timestamps
     created_at: datetime = Field(default_factory=datetime.utcnow)
@@ -756,7 +756,7 @@ class AnalyticsRequest(BaseModel):
     entity_type: Optional[str] = Field(default=None, description="Entity type to analyze")
     entity_id: Optional[str] = Field(default=None, description="Entity ID to analyze")
     time_range: Optional[str] = Field(default="30d", description="Time range for analysis")
-    filters: Optional[Dict[str, Any]] = Field(default_factory=dict, description="Additional filters")
+    filters: Optional[Dict[str, Any]] = Field(default=None, description="Additional filters")
     include_metadata: bool = Field(default=True, description="Include metadata in response")
 
 class TrendAnalysisRequest(BaseModel):

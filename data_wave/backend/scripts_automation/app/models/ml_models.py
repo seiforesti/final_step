@@ -142,17 +142,17 @@ class MLModelConfiguration(SQLModel, table=True):
     # Model Architecture & Configuration
     model_config: Dict[str, Any] = Field(sa_column=Column(JSON))
     hyperparameters: Dict[str, Any] = Field(sa_column=Column(JSON))
-    architecture_config: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    architecture_config: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Training Configuration
     training_config: Dict[str, Any] = Field(sa_column=Column(JSON))
     validation_config: Dict[str, Any] = Field(sa_column=Column(JSON))
-    optimization_config: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    optimization_config: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Feature Engineering
     feature_config: Dict[str, Any] = Field(sa_column=Column(JSON))
-    preprocessing_pipeline: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    feature_selection: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    preprocessing_pipeline: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    feature_selection: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Model Lifecycle
     model_version: str = Field(default="1.0.0")
@@ -162,8 +162,8 @@ class MLModelConfiguration(SQLModel, table=True):
     
     # Performance Metrics
     performance_metrics: Dict[str, Any] = Field(sa_column=Column(JSON))
-    validation_metrics: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    benchmark_metrics: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    validation_metrics: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    benchmark_metrics: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Training Information
     training_data_hash: Optional[str] = Field(default=None, max_length=64)
@@ -179,13 +179,13 @@ class MLModelConfiguration(SQLModel, table=True):
     retrain_threshold: Optional[float] = Field(default=None, ge=0.0, le=1.0)
     
     # Deployment Configuration
-    deployment_config: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    scaling_config: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    monitoring_config: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    deployment_config: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    scaling_config: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    monitoring_config: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Integration with Classification System
     classification_framework_id: Optional[int] = Field(default=None, foreign_key="classification_frameworks.id")
-    target_sensitivity_levels: Optional[List[str]] = Field(default_factory=list, sa_column=Column(JSON))
+    target_sensitivity_levels: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
     classification_scope: Optional[ClassificationScope] = Field(default=None, sa_column=Column(SQLEnum(ClassificationScope)))
     
     # Relationships
@@ -212,23 +212,23 @@ class MLTrainingDataset(SQLModel, table=True):
     
     # Data Source Integration
     data_source_ids: List[int] = Field(sa_column=Column(JSON))
-    catalog_item_ids: Optional[List[int]] = Field(default_factory=list, sa_column=Column(JSON))
-    scan_result_ids: Optional[List[int]] = Field(default_factory=list, sa_column=Column(JSON))
+    catalog_item_ids: Optional[List[int]] = Field(default=None, sa_column=Column(JSON))
+    scan_result_ids: Optional[List[int]] = Field(default=None, sa_column=Column(JSON))
     
     # Dataset Configuration
     data_config: Dict[str, Any] = Field(sa_column=Column(JSON))
     schema_config: Dict[str, Any] = Field(sa_column=Column(JSON))
-    sampling_config: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    sampling_config: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Labels and Ground Truth
     labeling_config: Dict[str, Any] = Field(sa_column=Column(JSON))
     ground_truth_labels: Dict[str, Any] = Field(sa_column=Column(JSON))
-    label_quality_metrics: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    label_quality_metrics: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Data Quality and Validation
     quality_metrics: Dict[str, Any] = Field(sa_column=Column(JSON))
-    validation_rules: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    data_drift_metrics: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    validation_rules: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    data_drift_metrics: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Dataset Statistics
     total_samples: int = Field(default=0)
@@ -239,12 +239,12 @@ class MLTrainingDataset(SQLModel, table=True):
     # Feature Information
     feature_count: int = Field(default=0)
     feature_schema: Dict[str, Any] = Field(sa_column=Column(JSON))
-    feature_statistics: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    feature_statistics: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Data Lineage and Governance
-    data_lineage: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    privacy_config: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    compliance_metadata: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    data_lineage: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    privacy_config: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    compliance_metadata: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Usage Tracking
     usage_count: int = Field(default=0)
@@ -273,8 +273,8 @@ class MLTrainingJob(SQLModel, table=True):
     
     # Training Parameters
     training_parameters: Dict[str, Any] = Field(sa_column=Column(JSON))
-    hyperparameter_tuning: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    optimization_strategy: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    hyperparameter_tuning: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    optimization_strategy: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Execution Information
     status: MLModelStatus = Field(default=MLModelStatus.DRAFT, sa_column=Column(SQLEnum(MLModelStatus)))
@@ -283,31 +283,31 @@ class MLTrainingJob(SQLModel, table=True):
     duration_seconds: Optional[int] = Field(default=None)
     
     # Resource Utilization
-    compute_resources: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    resource_usage_metrics: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    cost_metrics: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    compute_resources: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    resource_usage_metrics: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    cost_metrics: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Training Progress and Metrics
     progress_percentage: float = Field(default=0.0, ge=0.0, le=100.0)
     current_epoch: Optional[int] = Field(default=None)
     total_epochs: Optional[int] = Field(default=None)
-    training_metrics: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    validation_metrics: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    training_metrics: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    validation_metrics: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Model Artifacts
-    model_artifacts: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    model_checkpoints: Optional[List[str]] = Field(default_factory=list, sa_column=Column(JSON))
+    model_artifacts: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    model_checkpoints: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
     final_model_path: Optional[str] = Field(default=None, max_length=1000)
     
     # Error Handling and Debugging
-    error_messages: Optional[List[str]] = Field(default_factory=list, sa_column=Column(JSON))
+    error_messages: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
     debug_logs: Optional[str] = Field(default=None, sa_column=Column(Text))
     retry_count: int = Field(default=0)
     max_retries: int = Field(default=3)
     
     # Integration Context
     triggered_by: str = Field(default="manual", max_length=100)  # manual, scheduled, threshold, api
-    trigger_context: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    trigger_context: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Relationships
     model_config: Optional[MLModelConfiguration] = Relationship(back_populates="training_jobs")
@@ -342,24 +342,24 @@ class MLPrediction(SQLModel, table=True):
     # Input Data
     input_data: Dict[str, Any] = Field(sa_column=Column(JSON))
     input_features: Dict[str, Any] = Field(sa_column=Column(JSON))
-    preprocessing_applied: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    preprocessing_applied: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Prediction Results
     prediction_result: Dict[str, Any] = Field(sa_column=Column(JSON))
     predicted_class: Optional[str] = Field(default=None, max_length=255)
-    prediction_probabilities: Optional[Dict[str, float]] = Field(default_factory=dict, sa_column=Column(JSON))
+    prediction_probabilities: Optional[Dict[str, float]] = Field(default=None, sa_column=Column(JSON))
     confidence_score: float = Field(ge=0.0, le=1.0)
     confidence_level: ClassificationConfidenceLevel = Field(sa_column=Column(SQLEnum(ClassificationConfidenceLevel)))
     
     # Classification Integration
     sensitivity_prediction: Optional[SensitivityLevel] = Field(default=None, sa_column=Column(SQLEnum(SensitivityLevel)))
-    classification_tags: Optional[List[str]] = Field(default_factory=list, sa_column=Column(JSON))
-    risk_assessment: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    classification_tags: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
+    risk_assessment: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Performance and Quality
     prediction_quality_score: Optional[float] = Field(default=None, ge=0.0, le=1.0)
-    uncertainty_metrics: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    explainability_data: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    uncertainty_metrics: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    explainability_data: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Execution Information
     inference_time_ms: Optional[int] = Field(default=None)
@@ -370,7 +370,7 @@ class MLPrediction(SQLModel, table=True):
     ground_truth_label: Optional[str] = Field(default=None, max_length=255)
     is_correct: Optional[bool] = Field(default=None)
     feedback_score: Optional[float] = Field(default=None, ge=0.0, le=1.0)
-    human_validation: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    human_validation: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Integration with Classification Results
     classification_result_id: Optional[int] = Field(default=None, foreign_key="classification_results.id")
@@ -403,13 +403,13 @@ class MLFeedback(SQLModel, table=True):
     
     # Feedback Content
     original_prediction: Dict[str, Any] = Field(sa_column=Column(JSON))
-    corrected_prediction: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    corrected_prediction: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     feedback_notes: Optional[str] = Field(default=None, sa_column=Column(Text))
     
     # Context and Reasoning
     correction_reasoning: Optional[str] = Field(default=None, sa_column=Column(Text))
-    domain_context: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    business_context: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    domain_context: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    business_context: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Expert Information
     expert_id: Optional[int] = Field(default=None, foreign_key="users.id")
@@ -419,7 +419,7 @@ class MLFeedback(SQLModel, table=True):
     # Impact and Processing
     is_processed: bool = Field(default=False)
     processing_status: str = Field(default="pending", max_length=100)
-    impact_on_model: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    impact_on_model: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     retraining_triggered: bool = Field(default=False)
     
     # Validation and Quality Control
@@ -453,7 +453,7 @@ class MLExperiment(SQLModel, table=True):
     
     # Experiment Parameters
     parameter_space: Dict[str, Any] = Field(sa_column=Column(JSON))
-    search_strategy: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    search_strategy: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     optimization_objective: str = Field(max_length=255)
     
     # Execution Status
@@ -464,19 +464,19 @@ class MLExperiment(SQLModel, table=True):
     completed_runs: int = Field(default=0)
     
     # Results and Analysis
-    best_run_config: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    best_metrics: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    all_runs_summary: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    best_run_config: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    best_metrics: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    all_runs_summary: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Analysis and Insights
-    statistical_analysis: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    feature_importance: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    model_interpretability: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    statistical_analysis: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    feature_importance: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    model_interpretability: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Resource Usage
     total_compute_time: Optional[int] = Field(default=None)
-    resource_utilization: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    cost_analysis: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    resource_utilization: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    cost_analysis: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Relationships
     model_config: Optional[MLModelConfiguration] = Relationship(back_populates="experiments")
@@ -501,7 +501,7 @@ class MLExperimentRun(SQLModel, table=True):
     # Run Configuration
     run_parameters: Dict[str, Any] = Field(sa_column=Column(JSON))
     hyperparameters: Dict[str, Any] = Field(sa_column=Column(JSON))
-    model_architecture: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    model_architecture: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Execution Information
     status: MLModelStatus = Field(default=MLModelStatus.DRAFT, sa_column=Column(SQLEnum(MLModelStatus)))
@@ -512,26 +512,26 @@ class MLExperimentRun(SQLModel, table=True):
     # Training Metrics
     training_metrics: Dict[str, Any] = Field(sa_column=Column(JSON))
     validation_metrics: Dict[str, Any] = Field(sa_column=Column(JSON))
-    test_metrics: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    test_metrics: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Performance Analysis
-    convergence_analysis: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    overfitting_analysis: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    feature_analysis: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    convergence_analysis: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    overfitting_analysis: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    feature_analysis: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Model Artifacts
-    model_artifacts: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    checkpoint_paths: Optional[List[str]] = Field(default_factory=list, sa_column=Column(JSON))
+    model_artifacts: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    checkpoint_paths: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
     final_model_path: Optional[str] = Field(default=None, max_length=1000)
     
     # Resource and Performance
-    resource_usage: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    memory_usage: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    gpu_utilization: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    resource_usage: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    memory_usage: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    gpu_utilization: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Error Handling
-    error_logs: Optional[List[str]] = Field(default_factory=list, sa_column=Column(JSON))
-    warnings: Optional[List[str]] = Field(default_factory=list, sa_column=Column(JSON))
+    error_logs: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
+    warnings: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
     
     # Relationships
     experiment: Optional[MLExperiment] = Relationship(back_populates="experiment_runs")
@@ -558,29 +558,29 @@ class MLFeatureStore(SQLModel, table=True):
     feature_config: Dict[str, Any] = Field(sa_column=Column(JSON))
     
     # Feature Engineering
-    transformation_logic: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    aggregation_logic: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    derivation_logic: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    transformation_logic: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    aggregation_logic: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    derivation_logic: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Feature Statistics
     statistical_properties: Dict[str, Any] = Field(sa_column=Column(JSON))
-    distribution_analysis: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    correlation_analysis: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    distribution_analysis: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    correlation_analysis: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Data Lineage
-    source_tables: Optional[List[str]] = Field(default_factory=list, sa_column=Column(JSON))
-    source_columns: Optional[List[str]] = Field(default_factory=list, sa_column=Column(JSON))
-    lineage_metadata: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    source_tables: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
+    source_columns: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
+    lineage_metadata: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Quality and Monitoring
     quality_metrics: Dict[str, Any] = Field(sa_column=Column(JSON))
-    drift_detection: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    alert_thresholds: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    drift_detection: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    alert_thresholds: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Usage and Performance
-    usage_statistics: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    performance_impact: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    importance_scores: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    usage_statistics: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    performance_impact: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    importance_scores: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Governance
     business_definition: Optional[str] = Field(default=None, sa_column=Column(Text))
@@ -607,28 +607,28 @@ class MLModelMonitoring(SQLModel, table=True):
     prediction_distribution: Dict[str, Any] = Field(sa_column=Column(JSON))
     
     # Data Drift Detection
-    input_drift_metrics: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    prediction_drift_metrics: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    concept_drift_indicators: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    input_drift_metrics: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    prediction_drift_metrics: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    concept_drift_indicators: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Model Behavior Analysis
     confidence_distribution: Dict[str, Any] = Field(sa_column=Column(JSON))
-    error_analysis: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    bias_detection: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    error_analysis: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    bias_detection: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Resource and Performance
     inference_latency_metrics: Dict[str, float] = Field(sa_column=Column(JSON))
     throughput_metrics: Dict[str, float] = Field(sa_column=Column(JSON))
-    resource_utilization: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    resource_utilization: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Alerts and Recommendations
     alert_status: str = Field(default="normal", max_length=100)
-    alerts_triggered: Optional[List[str]] = Field(default_factory=list, sa_column=Column(JSON))
-    recommendations: Optional[List[str]] = Field(default_factory=list, sa_column=Column(JSON))
+    alerts_triggered: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
+    recommendations: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
     
     # Business Impact
-    business_metrics: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    roi_analysis: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    business_metrics: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    roi_analysis: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     __table_args__ = (
         Index("idx_ml_monitoring_model_timestamp", "model_config_id", "monitoring_timestamp"),

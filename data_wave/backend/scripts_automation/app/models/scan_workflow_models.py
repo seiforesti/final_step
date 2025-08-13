@@ -181,9 +181,9 @@ class ScanWorkflowTemplate(SQLModel, table=True):
     category: str = Field(index=True, description="Template category")
     
     # Template Definition
-    stages: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSONB), description="Stage definitions")
-    default_parameters: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Default parameters")
-    variables: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Template variables")
+    stages: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSONB), description="Stage definitions")
+    default_parameters: Dict[str, Any] = Field(default=None, sa_column=Column(JSONB), description="Default parameters")
+    variables: Dict[str, Any] = Field(default=None, sa_column=Column(JSONB), description="Template variables")
     
     # Execution Settings
     timeout_minutes: int = Field(default=60, description="Default timeout in minutes")
@@ -192,7 +192,7 @@ class ScanWorkflowTemplate(SQLModel, table=True):
     parallel_execution: bool = Field(default=False, description="Enable parallel execution")
     
     # Template Metadata
-    tags: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Template tags")
+    tags: List[str] = Field(default=None, sa_column=Column(ARRAY(str)), description="Template tags")
     is_active: bool = Field(default=True, index=True, description="Template status")
     is_system_template: bool = Field(default=False, description="System template flag")
     
@@ -235,9 +235,9 @@ class ScanWorkflow(SQLModel, table=True):
     timeout_at: Optional[datetime] = Field(default=None, description="Timeout timestamp")
     
     # Configuration
-    parameters: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Workflow parameters")
-    variables: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Workflow variables")
-    context: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Execution context")
+    parameters: Dict[str, Any] = Field(default=None, sa_column=Column(JSONB), description="Workflow parameters")
+    variables: Dict[str, Any] = Field(default=None, sa_column=Column(JSONB), description="Workflow variables")
+    context: Dict[str, Any] = Field(default=None, sa_column=Column(JSONB), description="Execution context")
     
     # Results
     output: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSONB), description="Workflow output")
@@ -274,15 +274,15 @@ class WorkflowStage(SQLModel, table=True):
     progress_percentage: float = Field(default=0.0, description="Stage progress")
     
     # Dependencies
-    depends_on: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Dependent stage IDs")
+    depends_on: List[str] = Field(default=None, sa_column=Column(ARRAY(str)), description="Dependent stage IDs")
     can_run_parallel: bool = Field(default=False, description="Parallel execution allowed")
     
     # Conditions
-    preconditions: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSONB), description="Stage preconditions")
-    postconditions: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSONB), description="Stage postconditions")
+    preconditions: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSONB), description="Stage preconditions")
+    postconditions: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSONB), description="Stage postconditions")
     
     # Configuration
-    parameters: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Stage parameters")
+    parameters: Dict[str, Any] = Field(default=None, sa_column=Column(JSONB), description="Stage parameters")
     timeout_minutes: int = Field(default=30, description="Stage timeout")
     retry_strategy: RetryStrategy = Field(default=RetryStrategy.EXPONENTIAL_BACKOFF, description="Retry strategy")
     max_retries: int = Field(default=3, description="Maximum retries")
@@ -319,14 +319,14 @@ class WorkflowTask(SQLModel, table=True):
     progress_percentage: float = Field(default=0.0, description="Task progress")
     
     # Configuration
-    parameters: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Task parameters")
+    parameters: Dict[str, Any] = Field(default=None, sa_column=Column(JSONB), description="Task parameters")
     timeout_minutes: int = Field(default=15, description="Task timeout")
     retry_strategy: RetryStrategy = Field(default=RetryStrategy.LINEAR_BACKOFF, description="Retry strategy")
     max_retries: int = Field(default=3, description="Maximum retries")
     
     # Execution Details
-    execution_details: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Execution details")
-    resource_requirements: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Resource requirements")
+    execution_details: Dict[str, Any] = Field(default=None, sa_column=Column(JSONB), description="Execution details")
+    resource_requirements: Dict[str, Any] = Field(default=None, sa_column=Column(JSONB), description="Resource requirements")
     
     # Timing
     started_at: Optional[datetime] = Field(default=None, description="Task start time")
@@ -361,8 +361,8 @@ class WorkflowCondition(SQLModel, table=True):
     parent_condition_id: Optional[str] = Field(default=None, description="Parent condition for grouping")
     
     # Actions
-    true_action: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Action if condition is true")
-    false_action: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Action if condition is false")
+    true_action: Dict[str, Any] = Field(default=None, sa_column=Column(JSONB), description="Action if condition is true")
+    false_action: Dict[str, Any] = Field(default=None, sa_column=Column(JSONB), description="Action if condition is false")
     
     # Evaluation
     last_evaluated: Optional[datetime] = Field(default=None, description="Last evaluation time")
@@ -387,9 +387,9 @@ class WorkflowTrigger(SQLModel, table=True):
     is_active: bool = Field(default=True, index=True, description="Trigger activation status")
     
     # Trigger Definition
-    trigger_conditions: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Trigger conditions")
+    trigger_conditions: Dict[str, Any] = Field(default=None, sa_column=Column(JSONB), description="Trigger conditions")
     schedule_expression: Optional[str] = Field(default=None, description="Cron expression for scheduled triggers")
-    event_filters: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Event filtering criteria")
+    event_filters: Dict[str, Any] = Field(default=None, sa_column=Column(JSONB), description="Event filtering criteria")
     
     # Execution Control
     max_executions: Optional[int] = Field(default=None, description="Maximum number of executions")
@@ -424,9 +424,9 @@ class WorkflowApproval(SQLModel, table=True):
     description: str = Field(description="Approval description")
     
     # Approvers
-    required_approvers: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Required approver IDs")
-    approved_by: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Users who approved")
-    rejected_by: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Users who rejected")
+    required_approvers: List[str] = Field(default=None, sa_column=Column(ARRAY(str)), description="Required approver IDs")
+    approved_by: List[str] = Field(default=None, sa_column=Column(ARRAY(str)), description="Users who approved")
+    rejected_by: List[str] = Field(default=None, sa_column=Column(ARRAY(str)), description="Users who rejected")
     
     # Status
     status: ApprovalStatus = Field(default=ApprovalStatus.PENDING, index=True, description="Approval status")
@@ -439,7 +439,7 @@ class WorkflowApproval(SQLModel, table=True):
     completed_at: Optional[datetime] = Field(default=None, description="Approval completion time")
     
     # Details
-    approval_criteria: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Approval criteria")
+    approval_criteria: Dict[str, Any] = Field(default=None, sa_column=Column(JSONB), description="Approval criteria")
     approval_notes: Optional[str] = Field(default=None, description="Approval notes")
     rejection_reason: Optional[str] = Field(default=None, description="Rejection reason")
     
@@ -467,8 +467,8 @@ class ScanWorkflowExecutionDetail(SQLModel, table=True):
     
     # State Tracking
     current_status: WorkflowStatus = Field(index=True, description="Current execution status")
-    execution_log: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSONB), description="Detailed execution log")
-    state_changes: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSONB), description="State change history")
+    execution_log: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSONB), description="Detailed execution log")
+    state_changes: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSONB), description="State change history")
     
     # Performance Metrics
     total_stages: int = Field(default=0, description="Total number of stages")

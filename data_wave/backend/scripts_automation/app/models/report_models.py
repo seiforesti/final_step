@@ -60,8 +60,8 @@ class Report(SQLModel, table=True):
     next_run: Optional[datetime] = None
     
     # Configuration
-    parameters: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    filters: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    parameters: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    filters: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Audit fields
     created_at: datetime = Field(default_factory=datetime.now)
@@ -80,8 +80,8 @@ class ReportTemplate(SQLModel, table=True):
     report_type: ReportType
     
     # Template configuration
-    template_config: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    default_parameters: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    template_config: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    default_parameters: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Status
     is_active: bool = Field(default=True)

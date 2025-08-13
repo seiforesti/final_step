@@ -66,16 +66,16 @@ class RuleVersion(SQLModel, table=True):
     pre_release: Optional[str] = Field(default=None, max_length=50)
     
     # Version Content
-    rule_definition: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    rule_logic: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    parameters: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    rule_definition: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    rule_logic: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    parameters: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    metadata: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Change Information
     change_type: ChangeType = Field(default=ChangeType.MINOR)
     change_summary: str = Field(max_length=1000)
-    detailed_changes: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    breaking_changes: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    detailed_changes: List[str] = Field(default=None, sa_column=Column(JSON))
+    breaking_changes: List[str] = Field(default=None, sa_column=Column(JSON))
     migration_notes: Optional[Text] = Field(default=None)
     
     # Version Relationships
@@ -103,20 +103,20 @@ class RuleVersion(SQLModel, table=True):
     
     # Performance and Quality
     validation_status: str = Field(default="pending", max_length=50)
-    test_results: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    performance_metrics: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    test_results: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    performance_metrics: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     quality_score: Optional[float] = Field(default=None, ge=0, le=100)
     
     # Approval and Review
     review_status: str = Field(default="pending", max_length=50)
-    reviewed_by: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    reviewed_by: List[str] = Field(default=None, sa_column=Column(JSON))
     approved_by: Optional[str] = Field(default=None, max_length=100)
     approved_at: Optional[datetime] = Field(default=None)
     approval_notes: Optional[str] = Field(default=None, max_length=2000)
     
     # Deployment Information
-    deployment_environments: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    deployment_status: Dict[str, str] = Field(default_factory=dict, sa_column=Column(JSON))
+    deployment_environments: List[str] = Field(default=None, sa_column=Column(JSON))
+    deployment_status: Dict[str, str] = Field(default=None, sa_column=Column(JSON))
     rollback_plan: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Usage Tracking
@@ -156,9 +156,9 @@ class RuleHistory(SQLModel, table=True):
     action_category: str = Field(max_length=100)  # configuration, content, metadata, deployment
     
     # Change Details
-    changes_made: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    field_changes: Dict[str, Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))  # field -> {old, new}
-    impact_assessment: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    changes_made: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    field_changes: Dict[str, Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))  # field -> {old, new}
+    impact_assessment: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Context Information
     triggered_by: str = Field(max_length=100, index=True)
@@ -168,7 +168,7 @@ class RuleHistory(SQLModel, table=True):
     
     # System Information
     system_version: Optional[str] = Field(default=None, max_length=50)
-    client_info: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    client_info: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     environment: str = Field(default="production", max_length=50)
     
     # State Snapshots
@@ -178,7 +178,7 @@ class RuleHistory(SQLModel, table=True):
     
     # Compliance and Audit
     compliance_impact: Optional[str] = Field(default=None, max_length=500)
-    audit_trail: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    audit_trail: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     retention_period_days: Optional[int] = Field(default=None, ge=0)
     
     # Performance Impact
@@ -237,11 +237,11 @@ class RuleBranch(SQLModel, table=True):
     
     # Collaboration
     owner: str = Field(max_length=100)
-    collaborators: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    reviewers: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    collaborators: List[str] = Field(default=None, sa_column=Column(JSON))
+    reviewers: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Branch Rules
-    merge_requirements: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    merge_requirements: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     auto_merge_enabled: bool = Field(default=False)
     require_reviews: bool = Field(default=True)
     min_reviewers: int = Field(default=1, ge=0)
@@ -294,26 +294,26 @@ class RuleMergeRequest(SQLModel, table=True):
     
     # Conflict Management
     has_conflicts: bool = Field(default=False)
-    conflict_details: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    conflict_details: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     conflict_resolution: Optional[ConflictResolution] = Field(default=None)
-    resolved_conflicts: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    resolved_conflicts: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Review Process
-    reviewers: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    required_reviewers: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    approved_by: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    rejected_by: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    review_comments: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    reviewers: List[str] = Field(default=None, sa_column=Column(JSON))
+    required_reviewers: List[str] = Field(default=None, sa_column=Column(JSON))
+    approved_by: List[str] = Field(default=None, sa_column=Column(JSON))
+    rejected_by: List[str] = Field(default=None, sa_column=Column(JSON))
+    review_comments: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Validation and Testing
     validation_status: str = Field(default="pending", max_length=50)
-    test_results: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    test_results: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     ci_status: str = Field(default="pending", max_length=50)
-    quality_checks: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    quality_checks: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Impact Analysis
-    impact_analysis: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    breaking_changes: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    impact_analysis: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    breaking_changes: List[str] = Field(default=None, sa_column=Column(JSON))
     migration_required: bool = Field(default=False)
     rollback_plan: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
@@ -355,13 +355,13 @@ class RuleComparison(SQLModel, table=True):
     comparison_type: str = Field(max_length=50)  # diff, merge_preview, impact_analysis
     
     # Comparison Results
-    differences: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    differences: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     similarity_score: Optional[float] = Field(default=None, ge=0, le=100)
-    change_summary: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    change_summary: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Impact Analysis
-    impact_assessment: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    compatibility_analysis: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    impact_assessment: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    compatibility_analysis: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     migration_complexity: Optional[str] = Field(default=None, max_length=50)
     
     # Comparison Metadata

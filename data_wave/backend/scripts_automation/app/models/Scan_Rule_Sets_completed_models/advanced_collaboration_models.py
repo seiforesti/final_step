@@ -92,9 +92,9 @@ class RuleReview(SQLModel, table=True):
     review_type: str = Field(max_length=50)  # code_review, design_review, security_review, etc.
     
     # Review Scope
-    scope_areas: List[str] = Field(default_factory=list, sa_column=Column(JSON))  # logic, performance, security, etc.
-    specific_files: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    review_criteria: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    scope_areas: List[str] = Field(default=None, sa_column=Column(JSON))  # logic, performance, security, etc.
+    specific_files: List[str] = Field(default=None, sa_column=Column(JSON))
+    review_criteria: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Review Process
     status: ReviewStatus = Field(default=ReviewStatus.PENDING, index=True)
@@ -104,9 +104,9 @@ class RuleReview(SQLModel, table=True):
     
     # Participants
     requested_by: str = Field(max_length=100, index=True)
-    assigned_reviewers: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    completed_reviewers: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    pending_reviewers: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    assigned_reviewers: List[str] = Field(default=None, sa_column=Column(JSON))
+    completed_reviewers: List[str] = Field(default=None, sa_column=Column(JSON))
+    pending_reviewers: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Review Configuration
     requires_all_approvals: bool = Field(default=False)
@@ -118,18 +118,18 @@ class RuleReview(SQLModel, table=True):
     due_date: Optional[datetime] = Field(default=None)
     sla_hours: Optional[int] = Field(default=None, ge=0)
     escalation_hours: Optional[int] = Field(default=None, ge=0)
-    escalation_recipients: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    escalation_recipients: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Review Results
     overall_decision: Optional[str] = Field(default=None, max_length=50)  # approved, rejected, needs_work
     decision_rationale: Optional[str] = Field(default=None, sa_column=Column(Text))
-    recommendations: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    action_items: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    recommendations: List[str] = Field(default=None, sa_column=Column(JSON))
+    action_items: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Quality Metrics
     quality_score: Optional[float] = Field(default=None, ge=0, le=100)
     complexity_score: Optional[float] = Field(default=None, ge=0, le=100)
-    risk_assessment: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    risk_assessment: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Lifecycle
     created_at: datetime = Field(default_factory=datetime.utcnow)
@@ -138,14 +138,14 @@ class RuleReview(SQLModel, table=True):
     updated_at: datetime = Field(default_factory=datetime.utcnow)
     
     # Notification and Communication
-    notification_settings: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    notification_settings: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     communication_channel: Optional[str] = Field(default=None, max_length=200)
     meeting_scheduled: bool = Field(default=False)
     meeting_details: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Performance Tracking
     review_duration_hours: Optional[float] = Field(default=None, ge=0)
-    reviewer_efficiency: Dict[str, float] = Field(default_factory=dict, sa_column=Column(JSON))
+    reviewer_efficiency: Dict[str, float] = Field(default=None, sa_column=Column(JSON))
     cycle_time_hours: Optional[float] = Field(default=None, ge=0)
     
     # Relationships
@@ -221,23 +221,23 @@ class RuleComment(SQLModel, table=True):
     flag_count: int = Field(default=0, ge=0)
     
     # Metadata
-    tags: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    attachments: List[Dict[str, str]] = Field(default_factory=list, sa_column=Column(JSON))
-    references: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    tags: List[str] = Field(default=None, sa_column=Column(JSON))
+    attachments: List[Dict[str, str]] = Field(default=None, sa_column=Column(JSON))
+    references: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Visibility and Permissions
     visibility: str = Field(default="public", max_length=50)  # public, private, team, reviewers_only
-    restricted_to: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    restricted_to: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Lifecycle
     created_at: datetime = Field(default_factory=datetime.utcnow, index=True)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
     edited_at: Optional[datetime] = Field(default=None)
-    edit_history: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    edit_history: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Notification and Follow-up
-    mentioned_users: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    watchers: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    mentioned_users: List[str] = Field(default=None, sa_column=Column(JSON))
+    watchers: List[str] = Field(default=None, sa_column=Column(JSON))
     notification_sent: bool = Field(default=False)
     
     # Relationships
@@ -273,7 +273,7 @@ class ApprovalWorkflow(SQLModel, table=True):
     workflow_type: str = Field(max_length=50)  # sequential, parallel, conditional
     
     # Approval Stages
-    approval_stages: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    approval_stages: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     current_stage: int = Field(default=0, ge=0)
     total_stages: int = Field(ge=1)
     
@@ -283,30 +283,30 @@ class ApprovalWorkflow(SQLModel, table=True):
     
     # Participants and Roles
     initiator: str = Field(max_length=100, index=True)
-    approvers: Dict[str, Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))  # stage -> approver details
-    current_approvers: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    completed_approvals: Dict[str, Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    approvers: Dict[str, Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))  # stage -> approver details
+    current_approvers: List[str] = Field(default=None, sa_column=Column(JSON))
+    completed_approvals: Dict[str, Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Workflow Rules
     requires_unanimous: bool = Field(default=False)
     allows_delegation: bool = Field(default=True)
     auto_escalation_enabled: bool = Field(default=True)
-    escalation_rules: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    escalation_rules: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Timing and SLA
     sla_hours: Optional[int] = Field(default=None, ge=0)
-    stage_deadlines: Dict[str, datetime] = Field(default_factory=dict, sa_column=Column(JSON))
-    escalation_schedule: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    stage_deadlines: Dict[str, datetime] = Field(default=None, sa_column=Column(JSON))
+    escalation_schedule: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Decision Tracking
-    stage_decisions: Dict[str, Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    decision_history: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    rejection_reasons: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    stage_decisions: Dict[str, Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    decision_history: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    rejection_reasons: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Business Context
     business_justification: Optional[str] = Field(default=None, sa_column=Column(Text))
-    risk_assessment: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    compliance_requirements: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    risk_assessment: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    compliance_requirements: List[str] = Field(default=None, sa_column=Column(JSON))
     regulatory_impact: Optional[str] = Field(default=None, max_length=500)
     
     # Lifecycle
@@ -317,12 +317,12 @@ class ApprovalWorkflow(SQLModel, table=True):
     
     # Performance Metrics
     total_duration_hours: Optional[float] = Field(default=None, ge=0)
-    stage_durations: Dict[str, float] = Field(default_factory=dict, sa_column=Column(JSON))
+    stage_durations: Dict[str, float] = Field(default=None, sa_column=Column(JSON))
     efficiency_score: Optional[float] = Field(default=None, ge=0, le=100)
     
     # Communication
-    notification_settings: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    communication_log: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    notification_settings: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    communication_log: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Relationships
     review: Optional[RuleReview] = Relationship(back_populates="approval_workflow")
@@ -358,21 +358,21 @@ class AdvancedKnowledgeBase(SQLModel, table=True):
     expertise_level: ExpertiseLevel = Field(default=ExpertiseLevel.INTERMEDIATE)
     
     # Tagging and Search
-    tags: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    keywords: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    tags: List[str] = Field(default=None, sa_column=Column(JSON))
+    keywords: List[str] = Field(default=None, sa_column=Column(JSON))
     search_index: Optional[str] = Field(default=None, sa_column=Column(Text))
     
     # Content Structure
-    table_of_contents: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    sections: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    code_examples: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    attachments: List[Dict[str, str]] = Field(default_factory=list, sa_column=Column(JSON))
+    table_of_contents: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    sections: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    code_examples: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    attachments: List[Dict[str, str]] = Field(default=None, sa_column=Column(JSON))
     
     # Related Content
-    related_rules: List[int] = Field(default_factory=list, sa_column=Column(JSON))
-    related_articles: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    prerequisites: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    see_also: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    related_rules: List[int] = Field(default=None, sa_column=Column(JSON))
+    related_articles: List[str] = Field(default=None, sa_column=Column(JSON))
+    prerequisites: List[str] = Field(default=None, sa_column=Column(JSON))
+    see_also: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Quality and Validation
     accuracy_score: Optional[float] = Field(default=None, ge=0, le=100)
@@ -397,8 +397,8 @@ class AdvancedKnowledgeBase(SQLModel, table=True):
     
     # Author and Maintenance
     author: str = Field(max_length=100, index=True)
-    contributors: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    maintainers: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    contributors: List[str] = Field(default=None, sa_column=Column(JSON))
+    maintainers: List[str] = Field(default=None, sa_column=Column(JSON))
     reviewer: Optional[str] = Field(default=None, max_length=100)
     
     # Lifecycle
@@ -408,9 +408,9 @@ class AdvancedKnowledgeBase(SQLModel, table=True):
     last_accessed: Optional[datetime] = Field(default=None)
     
     # Usage Analytics
-    access_patterns: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    user_feedback: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    improvement_suggestions: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    access_patterns: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    user_feedback: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    improvement_suggestions: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Relationships
     consultations: List["ExpertConsultation"] = Relationship(back_populates="knowledge_article")
@@ -446,19 +446,19 @@ class ExpertConsultation(SQLModel, table=True):
     problem_domain: str = Field(max_length=100)
     complexity_level: str = Field(max_length=50)  # low, medium, high, expert
     current_approach: Optional[str] = Field(default=None, sa_column=Column(Text))
-    attempted_solutions: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    specific_challenges: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    attempted_solutions: List[str] = Field(default=None, sa_column=Column(JSON))
+    specific_challenges: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Required Expertise
-    required_skills: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    expertise_areas: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    required_skills: List[str] = Field(default=None, sa_column=Column(JSON))
+    expertise_areas: List[str] = Field(default=None, sa_column=Column(JSON))
     minimum_experience_years: Optional[int] = Field(default=None, ge=0)
-    preferred_experts: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    preferred_experts: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Consultation Process
     status: ConsultationStatus = Field(default=ConsultationStatus.REQUESTED, index=True)
     assigned_expert: Optional[str] = Field(default=None, max_length=100, index=True)
-    expert_pool: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    expert_pool: List[str] = Field(default=None, sa_column=Column(JSON))
     consultation_method: str = Field(default="async", max_length=50)  # async, meeting, pair_programming
     
     # Scheduling and Timing
@@ -466,20 +466,20 @@ class ExpertConsultation(SQLModel, table=True):
     requested_at: datetime = Field(default_factory=datetime.utcnow)
     due_date: Optional[datetime] = Field(default=None)
     estimated_hours: Optional[float] = Field(default=None, ge=0)
-    scheduled_sessions: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    scheduled_sessions: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Consultation Outcome
     expert_recommendations: Optional[str] = Field(default=None, sa_column=Column(Text))
     solution_approach: Optional[str] = Field(default=None, sa_column=Column(Text))
     implementation_plan: Optional[str] = Field(default=None, sa_column=Column(Text))
-    best_practices: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    lessons_learned: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    best_practices: List[str] = Field(default=None, sa_column=Column(JSON))
+    lessons_learned: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Knowledge Capture
     knowledge_article_id: Optional[str] = Field(default=None, foreign_key="knowledge_base.article_id")
-    reusable_patterns: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    templates_created: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    documentation_updates: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    reusable_patterns: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    templates_created: List[str] = Field(default=None, sa_column=Column(JSON))
+    documentation_updates: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Quality and Feedback
     consultation_quality: Optional[float] = Field(default=None, ge=0, le=10)
@@ -494,9 +494,9 @@ class ExpertConsultation(SQLModel, table=True):
     innovation_level: Optional[str] = Field(default=None, max_length=50)
     
     # Communication and Collaboration
-    communication_log: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    shared_resources: List[Dict[str, str]] = Field(default_factory=list, sa_column=Column(JSON))
-    meeting_notes: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    communication_log: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    shared_resources: List[Dict[str, str]] = Field(default=None, sa_column=Column(JSON))
+    meeting_notes: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Lifecycle
     started_at: Optional[datetime] = Field(default=None)
@@ -506,7 +506,7 @@ class ExpertConsultation(SQLModel, table=True):
     # Follow-up and Monitoring
     follow_up_required: bool = Field(default=False)
     follow_up_date: Optional[datetime] = Field(default=None)
-    success_metrics: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    success_metrics: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     implementation_status: Optional[str] = Field(default=None, max_length=50)
     
     # Relationships

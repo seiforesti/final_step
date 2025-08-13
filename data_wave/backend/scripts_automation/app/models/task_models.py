@@ -46,7 +46,7 @@ class ScheduledTask(SQLModel, table=True):
     run_count: int = Field(default=0)
     
     # Configuration
-    task_config: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    task_config: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Audit fields
     created_by: Optional[str] = None
@@ -71,7 +71,7 @@ class TaskExecution(SQLModel, table=True):
     duration_seconds: Optional[int] = None
     
     # Results
-    result_data: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    result_data: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     error_message: Optional[str] = None
     
     # Audit fields

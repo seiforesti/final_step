@@ -48,7 +48,7 @@ class PerformanceMetric(SQLModel, table=True):
     time_range: str = Field(default="1h")  # Time range for the metric
     
     # Additional data stored as JSON
-    metric_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    metric_metadata: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Audit fields
     created_at: datetime = Field(default_factory=datetime.now)
@@ -158,7 +158,7 @@ class PerformanceMetricCreate(SQLModel):
     status: MetricStatus = MetricStatus.UNKNOWN
     trend: str = "stable"
     time_range: str = "1h"
-    metric_metadata: Dict[str, Any] = Field(default_factory=dict)
+    metric_metadata: Dict[str, Any] = Field(default=None)
 
 
 class PerformanceAlertCreate(SQLModel):

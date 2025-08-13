@@ -39,7 +39,7 @@ class Tag(SQLModel, table=True):
     
     # Metadata
     icon: Optional[str] = None  # Icon name or URL
-    tag_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    tag_metadata: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Status and usage
     is_active: bool = Field(default=True)
@@ -109,7 +109,7 @@ class TagRule(SQLModel, table=True):
     description: Optional[str] = None
     
     # Conditions
-    conditions: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    conditions: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Execution
     is_active: bool = Field(default=True)
@@ -141,7 +141,7 @@ class TagUsage(SQLModel, table=True):
     
     # Context
     context: Optional[str] = None
-    usage_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    usage_metadata: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Timestamp
     created_at: datetime = Field(default_factory=datetime.now)

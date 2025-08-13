@@ -159,7 +159,7 @@ class AIModelConfiguration(SQLModel, table=True):
     # Advanced AI Configuration
     prompt_templates: Dict[str, Any] = Field(sa_column=Column(JSON))
     system_prompts: Dict[str, Any] = Field(sa_column=Column(JSON))
-    conversation_config: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    conversation_config: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Reasoning and Intelligence
     reasoning_config: Dict[str, Any] = Field(sa_column=Column(JSON))
@@ -168,39 +168,39 @@ class AIModelConfiguration(SQLModel, table=True):
     explainability_level: ExplainabilityLevel = Field(default=ExplainabilityLevel.DETAILED, sa_column=Column(SQLEnum(ExplainabilityLevel)))
     
     # Knowledge Management
-    knowledge_base_config: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    domain_expertise: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    context_management: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    knowledge_base_config: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    domain_expertise: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    context_management: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Multi-Modal Capabilities
-    multimodal_config: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    supported_modalities: Optional[List[str]] = Field(default_factory=list, sa_column=Column(JSON))
-    cross_modal_reasoning: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    multimodal_config: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    supported_modalities: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
+    cross_modal_reasoning: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Performance and Optimization
     performance_config: Dict[str, Any] = Field(sa_column=Column(JSON))
-    optimization_strategy: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    caching_strategy: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    optimization_strategy: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    caching_strategy: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Rate Limiting and Cost Management
     rate_limiting: Dict[str, Any] = Field(sa_column=Column(JSON))
     cost_optimization: Dict[str, Any] = Field(sa_column=Column(JSON))
-    usage_quotas: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    usage_quotas: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Model Lifecycle
     model_version: str = Field(default="1.0.0")
     status: AIModelStatus = Field(default=AIModelStatus.DRAFT, sa_column=Column(SQLEnum(AIModelStatus)))
-    deployment_config: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    deployment_config: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Integration with Classification System
     classification_framework_id: Optional[int] = Field(default=None, foreign_key="classification_frameworks.id")
-    target_sensitivity_levels: Optional[List[str]] = Field(default_factory=list, sa_column=Column(JSON))
+    target_sensitivity_levels: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
     classification_scope: Optional[ClassificationScope] = Field(default=None, sa_column=Column(SQLEnum(ClassificationScope)))
     
     # Monitoring and Governance
     monitoring_config: Dict[str, Any] = Field(sa_column=Column(JSON))
-    governance_config: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    compliance_config: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    governance_config: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    compliance_config: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Relationships
     classification_framework: Optional[ClassificationFramework] = Relationship()
@@ -231,29 +231,29 @@ class AIConversation(SQLModel, table=True):
     # Conversation State
     conversation_status: str = Field(default="active", max_length=100)
     total_messages: int = Field(default=0)
-    started_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    last_activity: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    started_at: datetime = Field(default=None)
+    last_activity: datetime = Field(default=None)
     completed_at: Optional[datetime] = Field(default=None)
     
     # Conversation Configuration
     conversation_config: Dict[str, Any] = Field(sa_column=Column(JSON))
-    system_context: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    user_preferences: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    system_context: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    user_preferences: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Intelligence and Memory
     conversation_memory: Dict[str, Any] = Field(sa_column=Column(JSON))
-    learned_preferences: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    conversation_insights: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    learned_preferences: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    conversation_insights: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Quality and Feedback
     conversation_quality_score: Optional[float] = Field(default=None, ge=0.0, le=1.0)
     user_satisfaction: Optional[float] = Field(default=None, ge=0.0, le=1.0)
-    effectiveness_metrics: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    effectiveness_metrics: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Integration Context
-    classification_results: Optional[List[int]] = Field(default_factory=list, sa_column=Column(JSON))
-    triggered_actions: Optional[List[str]] = Field(default_factory=list, sa_column=Column(JSON))
-    recommendations_given: Optional[List[str]] = Field(default_factory=list, sa_column=Column(JSON))
+    classification_results: Optional[List[int]] = Field(default=None, sa_column=Column(JSON))
+    triggered_actions: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
+    recommendations_given: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
     
     # Relationships
     ai_model: Optional[AIModelConfiguration] = Relationship(back_populates="ai_conversations")
@@ -279,23 +279,23 @@ class AIMessage(SQLModel, table=True):
     message_type: str = Field(max_length=100)  # user_input, ai_response, system_message, tool_call
     message_role: str = Field(max_length=100)  # user, assistant, system, function
     content: str = Field(sa_column=Column(Text))
-    formatted_content: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    formatted_content: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Message Context
     message_context: Dict[str, Any] = Field(sa_column=Column(JSON))
-    intent_analysis: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    entity_extraction: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    intent_analysis: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    entity_extraction: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # AI Processing Information
     processing_time_ms: Optional[int] = Field(default=None)
-    token_usage: Optional[Dict[str, int]] = Field(default_factory=dict, sa_column=Column(JSON))
+    token_usage: Optional[Dict[str, int]] = Field(default=None, sa_column=Column(JSON))
     model_version_used: Optional[str] = Field(default=None, max_length=100)
     
     # Reasoning and Explainability
-    reasoning_chain: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    reasoning_chain: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     thought_process: Optional[str] = Field(default=None, sa_column=Column(Text))
     confidence_score: Optional[float] = Field(default=None, ge=0.0, le=1.0)
-    uncertainty_factors: Optional[List[str]] = Field(default_factory=list, sa_column=Column(JSON))
+    uncertainty_factors: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
     
     # Quality and Validation
     message_quality_score: Optional[float] = Field(default=None, ge=0.0, le=1.0)
@@ -304,14 +304,14 @@ class AIMessage(SQLModel, table=True):
     helpfulness_score: Optional[float] = Field(default=None, ge=0.0, le=1.0)
     
     # Tool and Function Calls
-    tool_calls: Optional[List[Dict[str, Any]]] = Field(default_factory=list, sa_column=Column(JSON))
-    function_results: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    external_api_calls: Optional[List[str]] = Field(default_factory=list, sa_column=Column(JSON))
+    tool_calls: Optional[List[Dict[str, Any]]] = Field(default=None, sa_column=Column(JSON))
+    function_results: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    external_api_calls: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
     
     # Classification Integration
-    classification_suggestions: Optional[List[Dict[str, Any]]] = Field(default_factory=list, sa_column=Column(JSON))
-    sensitivity_analysis: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    risk_assessment: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    classification_suggestions: Optional[List[Dict[str, Any]]] = Field(default=None, sa_column=Column(JSON))
+    sensitivity_analysis: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    risk_assessment: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Relationships
     conversation: Optional[AIConversation] = Relationship(back_populates="messages")
@@ -335,53 +335,53 @@ class AIPrediction(SQLModel, table=True):
     target_id: str = Field(max_length=500, index=True)
     target_identifier: str = Field(max_length=500)
     target_path: Optional[str] = Field(default=None, max_length=1000)
-    target_metadata: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    target_metadata: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Input Processing
     input_data: Dict[str, Any] = Field(sa_column=Column(JSON))
-    preprocessed_input: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    context_enrichment: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    preprocessed_input: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    context_enrichment: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # AI Prediction Results
     prediction_result: Dict[str, Any] = Field(sa_column=Column(JSON))
     primary_classification: str = Field(max_length=255)
-    alternative_classifications: Optional[List[str]] = Field(default_factory=list, sa_column=Column(JSON))
+    alternative_classifications: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
     classification_probabilities: Dict[str, float] = Field(sa_column=Column(JSON))
     
     # Confidence and Certainty
     confidence_score: float = Field(ge=0.0, le=1.0)
     confidence_level: ClassificationConfidenceLevel = Field(sa_column=Column(SQLEnum(ClassificationConfidenceLevel)))
-    uncertainty_quantification: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    confidence_intervals: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    uncertainty_quantification: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    confidence_intervals: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Advanced AI Reasoning
     reasoning_chain: Dict[str, Any] = Field(sa_column=Column(JSON))
     thought_process: str = Field(sa_column=Column(Text))
     decision_factors: List[Dict[str, Any]] = Field(sa_column=Column(JSON))
-    supporting_evidence: Optional[List[str]] = Field(default_factory=list, sa_column=Column(JSON))
+    supporting_evidence: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
     
     # Explainability and Interpretability
     explanation: str = Field(sa_column=Column(Text))
     detailed_explanation: Dict[str, Any] = Field(sa_column=Column(JSON))
-    visual_explanations: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    counterfactual_analysis: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    visual_explanations: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    counterfactual_analysis: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Sensitivity and Risk Analysis
     sensitivity_prediction: SensitivityLevel = Field(sa_column=Column(SQLEnum(SensitivityLevel)))
     risk_score: float = Field(default=0.0, ge=0.0, le=1.0)
     risk_factors: List[str] = Field(sa_column=Column(JSON))
-    compliance_implications: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    compliance_implications: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Performance Metrics
     processing_time_ms: int = Field(default=0)
     token_usage: Dict[str, int] = Field(sa_column=Column(JSON))
     api_calls_made: int = Field(default=1)
-    cost_metrics: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    cost_metrics: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Quality and Validation
     prediction_quality_score: Optional[float] = Field(default=None, ge=0.0, le=1.0)
-    human_validation: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    expert_review: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    human_validation: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    expert_review: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Integration Context
     classification_result_id: Optional[int] = Field(default=None, foreign_key="classification_results.id")
@@ -416,7 +416,7 @@ class AIFeedback(SQLModel, table=True):
     
     # Detailed Feedback Content
     original_prediction: Dict[str, Any] = Field(sa_column=Column(JSON))
-    corrected_prediction: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    corrected_prediction: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     reasoning_feedback: Optional[str] = Field(default=None, sa_column=Column(Text))
     explanation_feedback: Optional[str] = Field(default=None, sa_column=Column(Text))
     
@@ -428,22 +428,22 @@ class AIFeedback(SQLModel, table=True):
     
     # Learning Impact
     learning_points: List[str] = Field(sa_column=Column(JSON))
-    knowledge_updates: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    prompt_improvements: Optional[List[str]] = Field(default_factory=list, sa_column=Column(JSON))
+    knowledge_updates: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    prompt_improvements: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
     
     # Validation and Consensus
     is_validated: bool = Field(default=False)
     validation_score: Optional[float] = Field(default=None, ge=0.0, le=1.0)
-    consensus_feedback: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    consensus_feedback: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Processing and Integration
     is_processed: bool = Field(default=False)
     processing_status: str = Field(default="pending", max_length=100)
-    integration_impact: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    integration_impact: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Business Context
-    business_impact: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    domain_context: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    business_impact: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    domain_context: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Relationships
     prediction: Optional[AIPrediction] = Relationship(back_populates="feedback_entries")
@@ -485,23 +485,23 @@ class AIExperiment(SQLModel, table=True):
     # Results and Analysis
     experiment_results: Dict[str, Any] = Field(sa_column=Column(JSON))
     performance_metrics: Dict[str, Any] = Field(sa_column=Column(JSON))
-    comparative_analysis: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    comparative_analysis: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Statistical Analysis
-    statistical_significance: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    confidence_intervals: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    effect_size_analysis: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    statistical_significance: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    confidence_intervals: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    effect_size_analysis: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Insights and Recommendations
     key_insights: List[str] = Field(sa_column=Column(JSON))
     recommendations: List[str] = Field(sa_column=Column(JSON))
-    implementation_plan: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    implementation_plan: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Resource Usage
     total_api_calls: int = Field(default=0)
     total_tokens_used: int = Field(default=0)
     total_cost: Optional[float] = Field(default=None)
-    resource_efficiency: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    resource_efficiency: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Relationships
     ai_model: Optional[AIModelConfiguration] = Relationship(back_populates="ai_experiments")
@@ -552,8 +552,8 @@ class AIExperimentRun(SQLModel, table=True):
     cost_incurred: Optional[float] = Field(default=None)
     
     # Error Analysis
-    errors_encountered: Optional[List[str]] = Field(default_factory=list, sa_column=Column(JSON))
-    error_analysis: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    errors_encountered: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
+    error_analysis: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Relationships
     experiment: Optional[AIExperiment] = Relationship(back_populates="test_runs")
@@ -581,9 +581,9 @@ class AIKnowledgeBase(SQLModel, table=True):
     knowledge_type: str = Field(max_length=100)  # fact, rule, pattern, heuristic, example
     
     # Relationships and Context
-    related_concepts: Optional[List[str]] = Field(default_factory=list, sa_column=Column(JSON))
-    prerequisites: Optional[List[str]] = Field(default_factory=list, sa_column=Column(JSON))
-    applications: Optional[List[str]] = Field(default_factory=list, sa_column=Column(JSON))
+    related_concepts: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
+    prerequisites: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
+    applications: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
     
     # Quality and Validation
     confidence_score: float = Field(default=1.0, ge=0.0, le=1.0)
@@ -600,11 +600,11 @@ class AIKnowledgeBase(SQLModel, table=True):
     # Source and Lineage
     knowledge_source: Optional[str] = Field(default=None, max_length=500)
     source_type: str = Field(default="manual", max_length=100)  # manual, extracted, learned, imported
-    source_metadata: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    source_metadata: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Integration with Classification
-    classification_relevance: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    sensitivity_implications: Optional[List[str]] = Field(default_factory=list, sa_column=Column(JSON))
+    classification_relevance: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    sensitivity_implications: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
     
     __table_args__ = (
         Index("idx_ai_knowledge_domain", "domain"),
@@ -619,7 +619,7 @@ class AIModelMonitoring(SQLModel, table=True):
 
     id: Optional[int] = Field(default=None, primary_key=True)
     ai_model_id: int = Field(foreign_key="ai_model_configurations.id")
-    monitoring_timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc), index=True)
+    monitoring_timestamp: datetime = Field(default=None, index=True)
     
     # Performance Metrics
     accuracy_metrics: Dict[str, float] = Field(sa_column=Column(JSON))
@@ -630,7 +630,7 @@ class AIModelMonitoring(SQLModel, table=True):
     hallucination_rate: Optional[float] = Field(default=None, ge=0.0, le=1.0)
     consistency_score: Optional[float] = Field(default=None, ge=0.0, le=1.0)
     contextual_relevance: Optional[float] = Field(default=None, ge=0.0, le=1.0)
-    bias_detection_metrics: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    bias_detection_metrics: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Usage and Performance
     total_predictions: int = Field(default=0)
@@ -645,19 +645,19 @@ class AIModelMonitoring(SQLModel, table=True):
     cost_per_prediction: Optional[float] = Field(default=None)
     
     # Quality Trends
-    quality_trend_analysis: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    performance_degradation: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    improvement_recommendations: Optional[List[str]] = Field(default_factory=list, sa_column=Column(JSON))
+    quality_trend_analysis: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    performance_degradation: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    improvement_recommendations: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
     
     # Alert Status
     alert_status: str = Field(default="normal", max_length=100)
-    active_alerts: Optional[List[str]] = Field(default_factory=list, sa_column=Column(JSON))
-    alert_history: Optional[List[Dict[str, Any]]] = Field(default_factory=list, sa_column=Column(JSON))
+    active_alerts: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
+    alert_history: Optional[List[Dict[str, Any]]] = Field(default=None, sa_column=Column(JSON))
     
     # Business Impact
-    business_value_metrics: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    business_value_metrics: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     user_satisfaction_score: Optional[float] = Field(default=None, ge=0.0, le=1.0)
-    roi_analysis: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    roi_analysis: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     __table_args__ = (
         Index("idx_ai_monitoring_model_timestamp", "ai_model_id", "monitoring_timestamp"),
@@ -692,22 +692,22 @@ class AIInsight(SQLModel, table=True):
     
     # Supporting Evidence
     evidence_data: Dict[str, Any] = Field(sa_column=Column(JSON))
-    supporting_statistics: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    supporting_statistics: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     data_sources_analyzed: List[str] = Field(sa_column=Column(JSON))
     
     # Recommendations
     recommendations: List[str] = Field(sa_column=Column(JSON))
-    implementation_steps: Optional[List[Dict[str, Any]]] = Field(default_factory=list, sa_column=Column(JSON))
-    expected_benefits: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    implementation_steps: Optional[List[Dict[str, Any]]] = Field(default=None, sa_column=Column(JSON))
+    expected_benefits: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Business Impact
     business_priority: str = Field(default="medium", max_length=100)  # low, medium, high, critical
-    estimated_impact: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    compliance_implications: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    estimated_impact: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    compliance_implications: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Validation and Feedback
     is_validated: bool = Field(default=False)
-    validation_feedback: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    validation_feedback: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     implementation_status: str = Field(default="pending", max_length=100)
     
     # Relationships

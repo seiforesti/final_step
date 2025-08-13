@@ -44,8 +44,8 @@ class DataSourceVersion(SQLModel, table=True):
     breaking_changes: bool = Field(default=False)
     
     # Configuration snapshot
-    configuration: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    schema_snapshot: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    configuration: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    schema_snapshot: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Parent version (for tracking lineage)
     parent_version_id: Optional[int] = Field(foreign_key="data_source_versions.id")

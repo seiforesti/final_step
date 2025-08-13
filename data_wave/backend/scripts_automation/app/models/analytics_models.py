@@ -41,7 +41,7 @@ class AnalyticsDataset(SQLModel, table=True):
     # ML-ready features
     is_ml_ready: bool = Field(default=False)
     feature_engineering_applied: bool = Field(default=False)
-    ml_model_compatibility: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    ml_model_compatibility: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Real-time capabilities
     supports_streaming: bool = Field(default=False)
@@ -72,11 +72,11 @@ class DataCorrelation(SQLModel, table=True):
     correlation_coefficient: float = Field(ge=-1.0, le=1.0)
     correlation_type: str  # pearson, spearman, kendall, mutual_information, causality
     p_value: Optional[float] = None
-    confidence_interval: Dict[str, float] = Field(default_factory=dict, sa_column=Column(JSON))
+    confidence_interval: Dict[str, float] = Field(default=None, sa_column=Column(JSON))
     
     # Temporal analysis
     temporal_stability: Optional[float] = Field(ge=0.0, le=1.0)
-    seasonal_patterns: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    seasonal_patterns: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     trend_direction: Optional[str] = None  # increasing, decreasing, stable, cyclic
     
     # Advanced insights
@@ -110,12 +110,12 @@ class AnalyticsInsight(SQLModel, table=True):
     # Content
     title: str
     description: str
-    technical_details: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    technical_details: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # AI-powered analysis
     confidence_score: float = Field(ge=0.0, le=1.0)
     ai_model_used: str = Field(default="hybrid_analytics")
-    evidence: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    evidence: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     statistical_significance: Optional[float] = None
     
     # Business impact
@@ -124,14 +124,14 @@ class AnalyticsInsight(SQLModel, table=True):
     estimated_risk: Optional[float] = None
     
     # Recommendations
-    recommendations: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    action_items: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    recommendations: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    action_items: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     implementation_effort: str = Field(default="medium")  # low, medium, high
     
     # Validation and feedback
     is_validated: bool = Field(default=False)
     validation_score: Optional[float] = Field(ge=0.0, le=1.0)
-    user_feedback: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    user_feedback: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Temporal aspects
     trend_period_days: Optional[int] = None
@@ -165,16 +165,16 @@ class MLModel(SQLModel, table=True):
     auc_roc: Optional[float] = Field(ge=0.0, le=1.0)
     
     # Advanced metrics
-    feature_importance: Dict[str, float] = Field(default_factory=dict, sa_column=Column(JSON))
-    model_explainability: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    bias_metrics: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    feature_importance: Dict[str, float] = Field(default=None, sa_column=Column(JSON))
+    model_explainability: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    bias_metrics: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     fairness_score: Optional[float] = Field(ge=0.0, le=1.0)
     
     # Training details
     training_data_size: Optional[int] = None
     training_duration_minutes: Optional[int] = None
-    hyperparameters: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    cross_validation_scores: List[float] = Field(default_factory=list, sa_column=Column(JSON))
+    hyperparameters: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    cross_validation_scores: List[float] = Field(default=None, sa_column=Column(JSON))
     
     # Deployment and monitoring
     is_deployed: bool = Field(default=False)
@@ -193,8 +193,8 @@ class MLModel(SQLModel, table=True):
     # Governance
     approval_status: str = Field(default="pending")  # pending, approved, rejected, deprecated
     approved_by: Optional[str] = None
-    risk_assessment: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    compliance_checks: Dict[str, bool] = Field(default_factory=dict, sa_column=Column(JSON))
+    risk_assessment: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    compliance_checks: Dict[str, bool] = Field(default=None, sa_column=Column(JSON))
     
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
@@ -228,7 +228,7 @@ class AnalyticsAlert(SQLModel, table=True):
     resolved_at: Optional[datetime] = None
     
     # Metadata
-    alert_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    alert_metadata: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
@@ -245,7 +245,7 @@ class AnalyticsExperiment(SQLModel, table=True):
     experiment_type: str  # ab_test, multivariate, bandit, bayesian
     status: str = Field(default="draft")  # draft, running, completed, paused
     hypothesis: str
-    success_metrics: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    success_metrics: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Statistical design
     sample_size: Optional[int] = None
@@ -254,7 +254,7 @@ class AnalyticsExperiment(SQLModel, table=True):
     power: float = Field(default=0.8)
     
     # Results
-    results: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    results: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     statistical_significance: Optional[bool] = None
     p_value: Optional[float] = None
     effect_size: Optional[float] = None
@@ -270,10 +270,10 @@ class AnalyticsExperiment(SQLModel, table=True):
 class AnalyticsQuery(SQLModel):
     """Analytics query model for comprehensive analytics service"""
     query_type: str  # cross_system, predictive, trend, roi, business_intelligence
-    data_sources: List[str] = Field(default_factory=list)
-    time_range: Dict[str, datetime] = Field(default_factory=dict)
-    filters: Dict[str, Any] = Field(default_factory=dict)
-    parameters: Dict[str, Any] = Field(default_factory=dict)
+    data_sources: List[str] = Field(default=None)
+    time_range: Dict[str, datetime] = Field(default=None)
+    filters: Dict[str, Any] = Field(default=None)
+    parameters: Dict[str, Any] = Field(default=None)
     user_id: Optional[str] = None
     priority: str = Field(default="normal")  # low, normal, high, critical
     cache_ttl_seconds: Optional[int] = None
@@ -287,4 +287,4 @@ class AnalyticsResult(SQLModel):
     execution_time_seconds: float
     generated_at: datetime
     generated_by: str
-    result_metadata: Dict[str, Any] = Field(default_factory=dict)
+    result_metadata: Dict[str, Any] = Field(default=None)

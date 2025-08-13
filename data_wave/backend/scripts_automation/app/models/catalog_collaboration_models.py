@@ -101,15 +101,15 @@ class CatalogCollaborationHub(SQLModel, table=True):
     description: Optional[str] = None
     
     # Hub Configuration
-    config: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    config: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Governance
     governance_enabled: bool = Field(default=True)
-    auto_approval_rules: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    escalation_rules: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    auto_approval_rules: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    escalation_rules: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Analytics
-    analytics_config: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    analytics_config: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Status
     is_active: bool = Field(default=True)
@@ -137,15 +137,15 @@ class CollaborationTeam(SQLModel, table=True):
     purpose: TeamPurpose = Field(default=TeamPurpose.ASSET_MANAGEMENT)
     
     # Permissions
-    permissions: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    permissions: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Assets & Responsibilities
-    assigned_assets: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    responsibilities: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    assigned_assets: List[str] = Field(default=None, sa_column=Column(JSON))
+    responsibilities: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Goals & Metrics
-    goals: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    metrics: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    goals: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    metrics: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Status
     status: str = Field(default="active")
@@ -170,9 +170,9 @@ class TeamMember(SQLModel, table=True):
     
     # Role & Permissions
     role: str = Field(default="member")
-    permissions: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    responsibilities: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    expertise: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    permissions: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    responsibilities: List[str] = Field(default=None, sa_column=Column(JSON))
+    expertise: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Status
     is_active: bool = Field(default=True)
@@ -198,17 +198,17 @@ class CollaborationWorkspace(SQLModel, table=True):
     visibility: str = Field(default="PRIVATE")
     
     # Access Control
-    access_control: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    access_control: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Tools & Features
-    tools: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    features: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    tools: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    features: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Analytics
-    analytics: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    analytics: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Settings
-    settings: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    settings: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Status
     is_active: bool = Field(default=True)
@@ -231,7 +231,7 @@ class CatalogWorkspaceMember(SQLModel, table=True):
     workspace_id: int = Field(foreign_key="collaboration_workspaces.id", index=True)
     user_id: str = Field(index=True)
     role: str = Field(default="member")
-    permissions: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    permissions: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Timestamps
     joined_at: datetime = Field(default_factory=datetime.now)
@@ -251,10 +251,10 @@ class WorkspaceAsset(SQLModel, table=True):
     asset_name: str
     
     # Asset Configuration
-    config: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    config: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Permissions
-    permissions: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    permissions: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Timestamps
     added_at: datetime = Field(default_factory=datetime.now)
@@ -286,7 +286,7 @@ class WorkspaceDiscussion(SQLModel, table=True):
     upvotes: int = Field(default=0)
     
     # Related Assets
-    related_assets: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    related_assets: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Timestamps
     created_at: datetime = Field(default_factory=datetime.now)
@@ -312,7 +312,7 @@ class CollaborationActivity(SQLModel, table=True):
     entity_id: Optional[str] = None
     
     # Metadata
-    activity_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    activity_metadata: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Timestamp
     timestamp: datetime = Field(default_factory=datetime.now)
@@ -332,17 +332,17 @@ class DataStewardshipCenter(SQLModel, table=True):
     name: str = Field(index=True)
     
     # Configuration
-    config: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    config: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Quality Management
-    quality_management: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    quality_management: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Governance
-    governance: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    governance: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Metrics & Reporting
-    metrics: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    reporting: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    metrics: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    reporting: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Status
     is_active: bool = Field(default=True)
@@ -367,21 +367,21 @@ class DataSteward(SQLModel, table=True):
     
     # Role & Responsibilities
     role: str = Field(default="steward")
-    responsibilities: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    responsibilities: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Areas of Expertise
-    expertise_areas: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    domains: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    expertise_areas: List[str] = Field(default=None, sa_column=Column(JSON))
+    domains: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Assigned Assets
-    assigned_assets: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    managed_assets: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    assigned_assets: List[str] = Field(default=None, sa_column=Column(JSON))
+    managed_assets: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Performance
-    performance: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    performance: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Certification
-    certifications: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    certifications: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Status
     status: str = Field(default="active")
@@ -412,10 +412,10 @@ class StewardActivity(SQLModel, table=True):
     
     # Results
     outcome: Optional[str] = None
-    impact: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    impact: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Metadata
-    steward_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    steward_metadata: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Timestamp
     timestamp: datetime = Field(default_factory=datetime.now)
@@ -434,22 +434,22 @@ class StewardshipWorkflow(SQLModel, table=True):
     
     # Workflow Configuration
     workflow_type: str = Field(default="approval")
-    steps: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    steps: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Triggers
-    triggers: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    triggers: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Business Rules
-    business_rules: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    business_rules: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # SLAs
-    slas: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    slas: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Status
     status: str = Field(default="active")
     
     # Metrics
-    metrics: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    metrics: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Timestamps
     created_at: datetime = Field(default_factory=datetime.now)
@@ -469,16 +469,16 @@ class AnnotationManager(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     
     # Configuration
-    config: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    config: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Approval Process
-    approval_process: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    approval_process: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Analytics
-    analytics: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    analytics: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Search Configuration
-    search_config: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    search_config: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Status
     is_active: bool = Field(default=True)
@@ -504,13 +504,13 @@ class AnnotationTypeConfig(SQLModel, table=True):
     description: Optional[str] = None
     
     # Configuration
-    config: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    config: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Validation Rules
-    validation_rules: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    validation_rules: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Permissions
-    permissions: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    permissions: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Status
     is_active: bool = Field(default=True)
@@ -545,11 +545,11 @@ class DataAnnotation(SQLModel, table=True):
     # Classification
     annotation_type: AnnotationType = Field(default=AnnotationType.COMMENT)
     category: Optional[str] = None
-    tags: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    tags: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Visibility & Access
     visibility: str = Field(default="public")
-    permissions: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    permissions: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Lifecycle
     status: AnnotationStatus = Field(default=AnnotationStatus.DRAFT)
@@ -557,7 +557,7 @@ class DataAnnotation(SQLModel, table=True):
     
     # Relationships
     parent_annotation_id: Optional[int] = Field(foreign_key="data_annotations.id")
-    related_annotations: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    related_annotations: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Metrics
     views_count: int = Field(default=0)
@@ -586,13 +586,13 @@ class ReviewWorkflowEngine(SQLModel, table=True):
     name: str = Field(index=True)
     
     # Configuration
-    config: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    config: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Escalation Rules
-    escalation_rules: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    escalation_rules: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Analytics
-    analytics: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    analytics: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Status
     is_active: bool = Field(default=True)
@@ -619,13 +619,13 @@ class ReviewTypeConfig(SQLModel, table=True):
     description: Optional[str] = None
     
     # Configuration
-    config: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    config: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Workflow Steps
-    workflow_steps: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    workflow_steps: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Criteria
-    criteria: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    criteria: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # SLAs
     sla_hours: int = Field(default=72)
@@ -653,34 +653,34 @@ class AssetReview(SQLModel, table=True):
     review_type: ReviewType = Field(default=ReviewType.QUALITY_REVIEW)
     
     # Configuration
-    config: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    config: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Requester
     requester_id: str = Field(index=True)
     requester_name: str
     
     # Review Content
-    review_items: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    criteria: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    review_items: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    criteria: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Status & Progress
     status: ReviewStatus = Field(default=ReviewStatus.PENDING)
-    progress: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    progress: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Results
-    results: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    results: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     decision: Optional[str] = None
     decision_rationale: Optional[str] = None
     
     # Timeline
-    timeline: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    timeline: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # SLA Tracking
     due_date: Optional[datetime] = None
     escalation_date: Optional[datetime] = None
     
     # Metrics
-    metrics: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    metrics: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Timestamps
     created_at: datetime = Field(default_factory=datetime.now)
@@ -703,15 +703,15 @@ class Reviewer(SQLModel, table=True):
     email: str
     
     # Expertise
-    expertise_areas: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    review_types: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    expertise_areas: List[str] = Field(default=None, sa_column=Column(JSON))
+    review_types: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Availability
-    availability: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    availability: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     workload_limit: int = Field(default=10)
     
     # Performance
-    performance: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    performance: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Status
     status: str = Field(default="active")
@@ -740,7 +740,7 @@ class ReviewAssignment(SQLModel, table=True):
     status: str = Field(default="assigned")  # assigned, accepted, declined, completed
     
     # Progress
-    progress: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    progress: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Timeline
     assigned_at: datetime = Field(default_factory=datetime.now)
@@ -766,7 +766,7 @@ class ReviewComment(SQLModel, table=True):
     comment_type: str = Field(default="general")  # general, question, suggestion, issue
     
     # Context
-    context: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    context: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Thread
     parent_comment_id: Optional[int] = Field(foreign_key="review_comments.id")
@@ -797,16 +797,16 @@ class CrowdsourcingPlatform(SQLModel, table=True):
     name: str = Field(index=True)
     
     # Configuration
-    config: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    config: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Quality Control
-    quality_control: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    quality_control: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Analytics
-    analytics: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    analytics: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Governance
-    governance: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    governance: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Status
     is_active: bool = Field(default=True)
@@ -831,17 +831,17 @@ class CrowdsourcingCampaign(SQLModel, table=True):
     
     # Campaign Details
     campaign_type: str = Field(default="annotation")
-    goals: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    goals: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Target Assets
-    target_assets: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    asset_criteria: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    target_assets: List[str] = Field(default=None, sa_column=Column(JSON))
+    asset_criteria: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Incentives
-    incentives: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    incentives: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Progress
-    progress: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    progress: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Timeline
     start_date: datetime = Field(default_factory=datetime.now)
@@ -875,7 +875,7 @@ class CommunityContributor(SQLModel, table=True):
     trust_level: str = Field(default="novice")
     
     # Expertise
-    expertise: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    expertise: List[str] = Field(default=None, sa_column=Column(JSON))
     expertise_level: ExpertiseLevel = Field(default=ExpertiseLevel.NOVICE)
     
     # Contribution Stats
@@ -883,8 +883,8 @@ class CommunityContributor(SQLModel, table=True):
     quality_score: float = Field(default=0.0)
     
     # Rewards & Recognition
-    rewards: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    badges: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    rewards: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    badges: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Activity
     last_contribution: Optional[datetime] = None
@@ -913,11 +913,11 @@ class CommunityContribution(SQLModel, table=True):
     contribution_type: ContributionType = Field(default=ContributionType.ANNOTATION)
     title: str
     description: Optional[str] = None
-    content: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    content: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Target
     target_asset_id: str = Field(index=True)
-    target_context: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    target_context: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Quality
     quality_score: float = Field(default=0.0)
@@ -956,16 +956,16 @@ class ExpertNetworking(SQLModel, table=True):
     name: str = Field(index=True)
     
     # Configuration
-    config: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    config: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Matching Algorithm
-    matching_algorithm: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    matching_algorithm: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Analytics
-    analytics: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    analytics: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Quality Assurance
-    quality_assurance: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    quality_assurance: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Status
     is_active: bool = Field(default=True)
@@ -990,10 +990,10 @@ class ExpertiseDomain(SQLModel, table=True):
     
     # Domain Details
     category: str
-    keywords: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    keywords: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Metadata
-    domain_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    domain_metadata: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Status
     is_active: bool = Field(default=True)
@@ -1020,18 +1020,18 @@ class DomainExpert(SQLModel, table=True):
     bio: Optional[str] = None
     
     # Expertise
-    expertise_domains: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    expertise_domains: List[str] = Field(default=None, sa_column=Column(JSON))
     expertise_level: ExpertiseLevel = Field(default=ExpertiseLevel.INTERMEDIATE)
     
     # Credentials
-    credentials: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    certifications: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    credentials: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    certifications: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Availability
-    availability: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    availability: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Performance
-    performance: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    performance: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Reputation
     reputation_score: float = Field(default=0.0)
@@ -1064,15 +1064,15 @@ class ConsultationRequest(SQLModel, table=True):
     urgency: str = Field(default="medium")
     
     # Context
-    context: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    related_assets: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    context: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    related_assets: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Status
     status: str = Field(default="requested")
     
     # Outcome
     outcome: Optional[str] = None
-    feedback: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    feedback: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     rating: Optional[float] = None
     
     # Timeline
@@ -1098,19 +1098,19 @@ class KnowledgeBase(SQLModel, table=True):
     description: Optional[str] = None
     
     # Configuration
-    config: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    config: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Search Configuration
-    search_config: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    search_config: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Collaboration
-    collaboration: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    collaboration: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Analytics
-    analytics: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    analytics: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Quality Control
-    quality_control: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    quality_control: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Status
     is_active: bool = Field(default=True)
@@ -1136,7 +1136,7 @@ class KnowledgeCategory(SQLModel, table=True):
     parent_category_id: Optional[int] = Field(foreign_key="knowledge_categories.id")
     
     # Configuration
-    config: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    config: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Status
     is_active: bool = Field(default=True)
@@ -1161,16 +1161,16 @@ class KnowledgeArticle(SQLModel, table=True):
     
     # Metadata
     summary: Optional[str] = None
-    keywords: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    tags: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    keywords: List[str] = Field(default=None, sa_column=Column(JSON))
+    tags: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Authors & Contributors
-    authors: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    contributors: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    authors: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    contributors: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Related Content
-    related_assets: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    related_articles: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    related_assets: List[str] = Field(default=None, sa_column=Column(JSON))
+    related_articles: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Lifecycle
     status: str = Field(default="draft")
@@ -1206,16 +1206,16 @@ class CommunityForum(SQLModel, table=True):
     description: Optional[str] = None
     
     # Configuration
-    config: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    config: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Moderation
-    moderation: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    moderation: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Analytics
-    analytics: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    analytics: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Gamification
-    gamification: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    gamification: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Status
     is_active: bool = Field(default=True)
@@ -1239,7 +1239,7 @@ class ForumCategory(SQLModel, table=True):
     description: Optional[str] = None
     
     # Configuration
-    config: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    config: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Status
     is_active: bool = Field(default=True)
@@ -1276,8 +1276,8 @@ class ForumDiscussion(SQLModel, table=True):
     like_count: int = Field(default=0)
     
     # Related Content
-    related_assets: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    tags: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    related_assets: List[str] = Field(default=None, sa_column=Column(JSON))
+    tags: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Timestamps
     created_at: datetime = Field(default_factory=datetime.now)

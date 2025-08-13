@@ -212,29 +212,29 @@ class RacineOrchestrationMaster(SQLModel, table=True):
     
     # CRITICAL: Cross-group integration configuration
     connected_groups: List[str] = Field(
-        default_factory=list,
+        default=None,
         sa_column=Column(JSONB),
         description="List of connected group IDs (data_sources, scan_rule_sets, etc.)"
     )
     group_configurations: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Group-specific configuration settings and parameters"
     )
     cross_group_dependencies: Dict[str, List[str]] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Inter-group dependencies and execution order"
     )
     integration_mappings: Dict[str, Dict[str, Any]] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Mappings between different group resources and operations"
     )
     
     # Performance and monitoring
     performance_metrics: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Real-time performance metrics and KPIs"
     )
@@ -249,12 +249,12 @@ class RacineOrchestrationMaster(SQLModel, table=True):
         description="Timestamp of last health check"
     )
     resource_allocation: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Current resource allocation across groups"
     )
     optimization_settings: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="AI-driven optimization settings and parameters"
     )
@@ -291,36 +291,36 @@ class RacineOrchestrationMaster(SQLModel, table=True):
         description="Number of automatic recovery attempts"
     )
     recovery_settings: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Automatic recovery configuration"
     )
     
     # Security and compliance
     security_context: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Security context and access controls"
     )
     compliance_requirements: List[str] = Field(
-        default_factory=list,
+        default=None,
         sa_column=Column(JSONB),
         description="List of compliance requirements to enforce"
     )
     audit_settings: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Audit trail configuration and settings"
     )
     
     # Metadata and lifecycle
     tags: List[str] = Field(
-        default_factory=list,
+        default=None,
         sa_column=Column(JSONB),
         description="Tags for categorization and search"
     )
     orchestration_metadata: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Additional metadata and custom properties"
     )
@@ -500,61 +500,61 @@ class RacineWorkflowExecution(SQLModel, table=True):
     
     # CRITICAL: Cross-group execution tracking
     involved_groups: List[str] = Field(
-        default_factory=list,
+        default=None,
         sa_column=Column(JSONB),
         description="List of groups involved in this workflow execution"
     )
     group_operations: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Operations executed per group with results"
     )
     step_executions: List[Dict[str, Any]] = Field(
-        default_factory=list,
+        default=None,
         sa_column=Column(JSONB),
         description="Detailed execution information for each step"
     )
     
     # Integration results from ALL groups
     data_source_results: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Results from data source operations"
     )
     scan_rule_results: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Results from scan rule operations"
     )
     classification_results: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Results from classification operations"
     )
     compliance_results: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Results from compliance validation operations"
     )
     catalog_results: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Results from catalog management operations"
     )
     scan_logic_results: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Results from scan orchestration operations"
     )
     rbac_results: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Results from RBAC operations"
     )
     
     # Execution configuration and parameters
     parameters: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Execution parameters and configuration"
     )
@@ -563,24 +563,24 @@ class RacineWorkflowExecution(SQLModel, table=True):
         description="Execution environment (development, staging, production)"
     )
     resource_requirements: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Resource requirements for execution"
     )
     resource_usage: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Actual resource usage during execution"
     )
     
     # Error handling and recovery
     errors: List[Dict[str, Any]] = Field(
-        default_factory=list,
+        default=None,
         sa_column=Column(JSONB),
         description="List of errors encountered during execution"
     )
     warnings: List[Dict[str, Any]] = Field(
-        default_factory=list,
+        default=None,
         sa_column=Column(JSONB),
         description="List of warnings generated during execution"
     )
@@ -593,36 +593,36 @@ class RacineWorkflowExecution(SQLModel, table=True):
         description="Maximum number of retry attempts allowed"
     )
     recovery_actions: List[Dict[str, Any]] = Field(
-        default_factory=list,
+        default=None,
         sa_column=Column(JSONB),
         description="Recovery actions taken during execution"
     )
     
     # Monitoring and logging
     execution_logs: List[Dict[str, Any]] = Field(
-        default_factory=list,
+        default=None,
         sa_column=Column(JSONB),
         description="Detailed execution logs and events"
     )
     performance_metrics: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Performance metrics collected during execution"
     )
     system_metrics: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="System-level metrics during execution"
     )
     
     # Output and results
     output_data: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Output data generated by workflow execution"
     )
     generated_artifacts: List[str] = Field(
-        default_factory=list,
+        default=None,
         sa_column=Column(JSONB),
         description="List of artifacts generated during execution"
     )
@@ -644,7 +644,7 @@ class RacineWorkflowExecution(SQLModel, table=True):
         description="Type of trigger: manual, scheduled, event, api"
     )
     trigger_context: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Additional context about the trigger"
     )
@@ -724,71 +724,71 @@ class RacineSystemHealth(SQLModel, table=True):
     
     # CRITICAL: Group-specific health status for ALL 7 groups
     data_sources_health: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Health status of data sources group"
     )
     scan_rule_sets_health: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Health status of scan rule sets group"
     )
     classifications_health: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Health status of classifications group"
     )
     compliance_rules_health: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Health status of compliance rules group"
     )
     advanced_catalog_health: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Health status of advanced catalog group"
     )
     scan_logic_health: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Health status of scan logic group"
     )
     rbac_system_health: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Health status of RBAC system group"
     )
     
     # System-wide metrics
     system_metrics: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="System-wide performance and resource metrics"
     )
     performance_metrics: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Performance metrics across all groups"
     )
     resource_usage: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Resource usage statistics"
     )
     
     # Alerts and recommendations
     active_alerts: List[Dict[str, Any]] = Field(
-        default_factory=list,
+        default=None,
         sa_column=Column(JSONB),
         description="List of active system alerts"
     )
     resolved_alerts: List[Dict[str, Any]] = Field(
-        default_factory=list,
+        default=None,
         sa_column=Column(JSONB),
         description="List of recently resolved alerts"
     )
     recommendations: List[Dict[str, Any]] = Field(
-        default_factory=list,
+        default=None,
         sa_column=Column(JSONB),
         description="AI-generated recommendations for system optimization"
     )
@@ -799,12 +799,12 @@ class RacineSystemHealth(SQLModel, table=True):
         description="Duration of health check in milliseconds"
     )
     checks_performed: List[str] = Field(
-        default_factory=list,
+        default=None,
         sa_column=Column(JSONB),
         description="List of health checks performed"
     )
     failed_checks: List[str] = Field(
-        default_factory=list,
+        default=None,
         sa_column=Column(JSONB),
         description="List of failed health checks"
     )
@@ -897,22 +897,22 @@ class RacineCrossGroupIntegration(SQLModel, table=True):
     
     # Configuration and mapping
     configuration: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Integration configuration settings"
     )
     mapping_rules: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Data mapping rules between groups"
     )
     transformation_rules: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Data transformation rules"
     )
     validation_rules: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Data validation rules"
     )
@@ -970,7 +970,7 @@ class RacineCrossGroupIntegration(SQLModel, table=True):
         description="Last error message encountered"
     )
     error_history: List[Dict[str, Any]] = Field(
-        default_factory=list,
+        default=None,
         sa_column=Column(JSONB),
         description="History of errors and their resolutions"
     )
@@ -979,7 +979,7 @@ class RacineCrossGroupIntegration(SQLModel, table=True):
         description="Number of automatic recovery attempts"
     )
     recovery_settings: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Automatic recovery configuration"
     )
@@ -990,41 +990,41 @@ class RacineCrossGroupIntegration(SQLModel, table=True):
         description="Total volume of data processed"
     )
     data_flow_metrics: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Detailed data flow metrics"
     )
     throughput_metrics: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Throughput and performance metrics"
     )
     
     # Security and compliance
     security_settings: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Security configuration for integration"
     )
     compliance_requirements: List[str] = Field(
-        default_factory=list,
+        default=None,
         sa_column=Column(JSONB),
         description="Compliance requirements for this integration"
     )
     audit_trail: List[Dict[str, Any]] = Field(
-        default_factory=list,
+        default=None,
         sa_column=Column(JSONB),
         description="Audit trail of integration activities"
     )
     
     # Metadata and configuration
     tags: List[str] = Field(
-        default_factory=list,
+        default=None,
         sa_column=Column(JSONB),
         description="Tags for categorization and search"
     )
     integration_metadata: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Additional metadata and custom properties"
     )
@@ -1083,7 +1083,7 @@ class RacinePerformanceMetrics(SQLModel, table=True):
     metric_unit: str = Field(...)
     metric_category: str = Field(..., index=True)
     timestamp: datetime = Field(default_factory=datetime.utcnow, index=True)
-    tags: Dict[str, str] = Field(default_factory=dict, sa_column=Column(JSONB))
+    tags: Dict[str, str] = Field(default=None, sa_column=Column(JSONB))
     
     orchestration_master: "RacineOrchestrationMaster" = Relationship(back_populates="performance_records")
 
@@ -1113,7 +1113,7 @@ class RacineErrorLog(SQLModel, table=True):
     severity: str = Field(..., index=True)
     source_group: Optional[str] = Field(default=None, index=True)
     stack_trace: Optional[str] = Field(default=None)
-    context: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB))
+    context: Dict[str, Any] = Field(default=None, sa_column=Column(JSONB))
     resolved: bool = Field(default=False, index=True)
     resolution_notes: Optional[str] = Field(default=None)
     occurred_at: datetime = Field(default_factory=datetime.utcnow, index=True)
@@ -1132,4 +1132,4 @@ class RacineIntegrationStatus(SQLModel, table=True):
     response_time_ms: float = Field(...)
     error_message: Optional[str] = Field(default=None)
     health_score: float = Field(default=100.0)
-    status_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB))
+    status_metadata: Dict[str, Any] = Field(default=None, sa_column=Column(JSONB))

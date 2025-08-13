@@ -123,11 +123,11 @@ class DataQualityRule(SQLModel, table=True):
     
     quality_dimension: QualityDimension = Field(index=True, description="Quality dimension addressed")
     description: str = Field(description="Rule description")
-    rule_definition: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Rule logic definition")
+    rule_definition: Dict[str, Any] = Field(default=None, sa_column=Column(JSONB), description="Rule logic definition")
     
     # Rule Configuration
-    parameters: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Rule parameters")
-    thresholds: Dict[str, float] = Field(default_factory=dict, sa_column=Column(JSONB), description="Quality thresholds")
+    parameters: Dict[str, Any] = Field(default=None, sa_column=Column(JSONB), description="Rule parameters")
+    thresholds: Dict[str, float] = Field(default=None, sa_column=Column(JSONB), description="Quality thresholds")
     severity: QualitySeverity = Field(description="Rule failure severity")
     weight: float = Field(default=1.0, description="Rule weight in overall score")
     
@@ -140,7 +140,7 @@ class DataQualityRule(SQLModel, table=True):
     # Business Context
     business_impact: str = Field(description="Business impact description")
     owner: str = Field(description="Rule owner")
-    tags: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Rule tags")
+    tags: List[str] = Field(default=None, sa_column=Column(ARRAY(str)), description="Rule tags")
     
     # Metadata
     created_at: datetime = Field(default_factory=datetime.utcnow, description="Creation timestamp")
@@ -173,9 +173,9 @@ class QualityAssessment(SQLModel, table=True):
     error_records: int = Field(default=0, description="Records with errors")
     
     # Details
-    results: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Detailed results")
-    anomalies: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSONB), description="Detected anomalies")
-    recommendations: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Improvement recommendations")
+    results: Dict[str, Any] = Field(default=None, sa_column=Column(JSONB), description="Detailed results")
+    anomalies: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSONB), description="Detected anomalies")
+    recommendations: List[str] = Field(default=None, sa_column=Column(ARRAY(str)), description="Improvement recommendations")
     
     # Execution Metadata
     execution_time_ms: int = Field(default=0, description="Execution time in milliseconds")
@@ -236,7 +236,7 @@ class QualityScorecard(SQLModel, table=True):
     
     # Custom Properties
     custom_metrics: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSONB), description="Custom quality metrics")
-    tags: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Scorecard tags")
+    tags: List[str] = Field(default=None, sa_column=Column(ARRAY(str)), description="Scorecard tags")
 
 class QualityMonitoringConfig(SQLModel, table=True):
     """Quality monitoring configuration"""
@@ -247,8 +247,8 @@ class QualityMonitoringConfig(SQLModel, table=True):
     config_name: str = Field(index=True, description="Configuration name")
     
     # Monitoring Scope
-    asset_ids: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Assets to monitor")
-    rule_ids: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Rules to apply")
+    asset_ids: List[str] = Field(default=None, sa_column=Column(ARRAY(str)), description="Assets to monitor")
+    rule_ids: List[str] = Field(default=None, sa_column=Column(ARRAY(str)), description="Rules to apply")
     
     # Schedule Configuration
     frequency: MonitoringFrequency = Field(description="Monitoring frequency")
@@ -258,8 +258,8 @@ class QualityMonitoringConfig(SQLModel, table=True):
     
     # Alert Configuration
     enable_alerts: bool = Field(default=True, description="Enable alert generation")
-    alert_thresholds: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Alert threshold configuration")
-    notification_channels: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Notification channels")
+    alert_thresholds: Dict[str, Any] = Field(default=None, sa_column=Column(JSONB), description="Alert threshold configuration")
+    notification_channels: List[str] = Field(default=None, sa_column=Column(ARRAY(str)), description="Notification channels")
     
     # Advanced Settings
     parallel_execution: bool = Field(default=True, description="Enable parallel execution")
@@ -332,15 +332,15 @@ class QualityReport(SQLModel, table=True):
     report_type: QualityReportType = Field(index=True, description="Type of report")
     
     # Report Scope
-    asset_ids: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Assets included in report")
-    date_range: Dict[str, str] = Field(default_factory=dict, sa_column=Column(JSONB), description="Report date range")
-    filters: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Report filters")
+    asset_ids: List[str] = Field(default=None, sa_column=Column(ARRAY(str)), description="Assets included in report")
+    date_range: Dict[str, str] = Field(default=None, sa_column=Column(JSONB), description="Report date range")
+    filters: Dict[str, Any] = Field(default=None, sa_column=Column(JSONB), description="Report filters")
     
     # Report Data
-    summary: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Report summary")
-    detailed_results: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Detailed results")
-    charts_data: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Chart data")
-    recommendations: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Quality recommendations")
+    summary: Dict[str, Any] = Field(default=None, sa_column=Column(JSONB), description="Report summary")
+    detailed_results: Dict[str, Any] = Field(default=None, sa_column=Column(JSONB), description="Detailed results")
+    charts_data: Dict[str, Any] = Field(default=None, sa_column=Column(JSONB), description="Chart data")
+    recommendations: List[str] = Field(default=None, sa_column=Column(ARRAY(str)), description="Quality recommendations")
     
     # Report Metadata
     generated_at: datetime = Field(default_factory=datetime.utcnow, index=True, description="Report generation timestamp")
@@ -348,8 +348,8 @@ class QualityReport(SQLModel, table=True):
     execution_time_ms: int = Field(default=0, description="Report generation time")
     
     # Distribution
-    recipients: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Report recipients")
-    delivery_channels: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Delivery channels")
+    recipients: List[str] = Field(default=None, sa_column=Column(ARRAY(str)), description="Report recipients")
+    delivery_channels: List[str] = Field(default=None, sa_column=Column(ARRAY(str)), description="Delivery channels")
     
     # Status
     status: str = Field(default="completed", index=True, description="Report status")

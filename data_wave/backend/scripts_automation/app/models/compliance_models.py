@@ -59,8 +59,8 @@ class ComplianceRequirement(SQLModel, table=True):
     assessment_notes: Optional[str] = None
     
     # Evidence and documentation
-    evidence_files: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    documentation_links: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    evidence_files: List[str] = Field(default=None, sa_column=Column(JSON))
+    documentation_links: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Risk assessment
     risk_level: str = Field(default="medium")  # low, medium, high, critical
@@ -72,7 +72,7 @@ class ComplianceRequirement(SQLModel, table=True):
     remediation_owner: Optional[str] = None
     
     # Metadata
-    requirement_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    requirement_metadata: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Audit fields
     created_at: datetime = Field(default_factory=datetime.now)
@@ -109,15 +109,15 @@ class ComplianceAssessment(SQLModel, table=True):
     total_requirements: int = Field(default=0)
     
     # Findings
-    findings: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    recommendations: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    findings: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    recommendations: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Documentation
     report_file: Optional[str] = None
     certificate_file: Optional[str] = None
     
     # Metadata
-    assessment_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    assessment_metadata: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Audit fields
     created_at: datetime = Field(default_factory=datetime.now)
@@ -142,7 +142,7 @@ class ComplianceGap(SQLModel, table=True):
     
     # Remediation
     remediation_plan: Optional[str] = None
-    remediation_steps: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    remediation_steps: List[str] = Field(default=None, sa_column=Column(JSON))
     assigned_to: Optional[str] = None
     due_date: Optional[datetime] = None
     
@@ -155,7 +155,7 @@ class ComplianceGap(SQLModel, table=True):
     technical_impact: Optional[str] = None
     
     # Metadata
-    gap_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    gap_metadata: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Audit fields
     created_at: datetime = Field(default_factory=datetime.now)
@@ -189,7 +189,7 @@ class ComplianceEvidence(SQLModel, table=True):
     # Metadata
     collected_by: Optional[str] = None
     collection_method: Optional[str] = None
-    evidence_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    evidence_metadata: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Audit fields
     created_at: datetime = Field(default_factory=datetime.now)
@@ -273,7 +273,7 @@ class ComplianceRequirementCreate(SQLModel):
     risk_level: str = "medium"
     remediation_plan: Optional[str] = None
     remediation_deadline: Optional[datetime] = None
-    requirement_metadata: Dict[str, Any] = Field(default_factory=dict)
+    requirement_metadata: Dict[str, Any] = Field(default=None)
 
 
 class ComplianceAssessmentCreate(SQLModel):
@@ -337,12 +337,12 @@ class ComplianceValidation(SQLModel, table=True):
     total_checks: int = Field(default=0)
     
     # Details
-    validation_details: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    error_messages: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    recommendations: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    validation_details: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    error_messages: List[str] = Field(default=None, sa_column=Column(JSON))
+    recommendations: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Validation metadata
-    validation_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    validation_metadata: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Audit fields
     created_at: datetime = Field(default_factory=datetime.now, index=True)
