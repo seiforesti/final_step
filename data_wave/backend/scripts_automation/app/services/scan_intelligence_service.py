@@ -46,9 +46,10 @@ from sklearn.cluster import DBSCAN, KMeans
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from sklearn.model_selection import train_test_split, cross_val_score
-import spacy
-from transformers import pipeline, AutoTokenizer, AutoModel
-import torch
+# Temporarily commented out for testing
+# import spacy
+# from transformers import pipeline, AutoTokenizer, AutoModel
+# import torch
 
 # Database imports
 from sqlalchemy import select, update, delete, and_, or_, func, desc, asc, text
