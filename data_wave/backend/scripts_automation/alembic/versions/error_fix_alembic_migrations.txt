@@ -1,0 +1,5 @@
+alembic stamp 20250627_add_advanced_rbac_models
+
+alembic upgrade head
+
+This will bring your database and Alembic migration history back in sync, and allow you to apply the new migrations safely.

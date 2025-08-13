@@ -1,0 +1,1271 @@
+from fastapi import APIRouter, Depends, HTTPException, status, Request, Body, Cookie
+from sqlalchemy.orm import Session
+from typing import List, Optional
+from . import schemas, crud, models
+from app.db_session import get_session  # Adjust import as needed for your project structure
+import requests
+from .workflow import vote_on_proposal as workflow_vote_on_proposal, get_proposal_status as workflow_get_proposal_status, WorkflowError
+from app.models.auth_models import User, Role, UserRole
+from app.services.auth_service import get_user_by_email, get_session_by_token, get_user_roles, assign_role_to_user, remove_role_from_user, has_role
+from .suggestion_engine import (
+    suggest_labels_for_object,
+    accept_label_suggestion,
+    modify_label_suggestion,
+    reject_label_suggestion
+)
+from .workflow import notify_label_approved, notify_label_rejected
+from .realtime_events import notify_realtime_event
+from .ml_suggestion_engine import get_ml_suggestion
+from .feature_extraction import extract_features_from_metadata, extract_features_batch
+from .ml_suggestion_engine import ml_suggestion_engine
+from fastapi import UploadFile, File, WebSocketDisconnect, APIRouter, Depends, HTTPException, Cookie, Body
+from fastapi import Query
+from datetime import datetime
+import numpy as np
+from .ml_service import ml_suggestion_service
+from fastapi import BackgroundTasks
+from fastapi.responses import StreamingResponse
+import asyncio
+import json
+import pandas as pd
+import time
+from .notification import send_notification, mark_notification_read, get_notification_preferences, set_notification_preferences
+from .websocket_manager import manager
+from .catalog_tree.router import router as catalog_tree_router
+from .catalog_tree.service import router as catalog_tree_service_router
+
+router = APIRouter(
+    prefix="/sensitivity-labels",
+    tags=["Sensitivity Labels"]
+)
+
+# Helper to get current user from session cookie
+def get_current_user(session_token: str = Cookie(None), db: Session = Depends(get_session)) -> User:
+    if not session_token:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    session = get_session_by_token(db, session_token)
+    if not session or not session.user:
+        raise HTTPException(status_code=401, detail="Invalid session")
+    return session.user
+
+# --- Sensitivity Label Endpoints ---
+
+@router.post("/", response_model=schemas.SensitivityLabel)
+def create_label(label: schemas.SensitivityLabelCreate, db: Session = Depends(get_session)):
+    return crud.create_label(db, label)
+
+@router.get("/", response_model=List[schemas.SensitivityLabel])
+def list_labels(
+    skip: int = 0,
+    limit: int = 100,
+    search: Optional[str] = Query(None),
+    scopes: Optional[str] = Query(None),  # comma-separated
+    colors: Optional[str] = Query(None),  # comma-separated
+    conditional_only: Optional[bool] = Query(False),
+    date_from: Optional[str] = Query(None),  # ISO date
+    date_to: Optional[str] = Query(None),
+    db: Session = Depends(get_session)
+):
+    scopes_list = scopes.split(",") if scopes else []
+    colors_list = colors.split(",") if colors else []
+    date_from_dt = datetime.fromisoformat(date_from) if date_from else None
+    date_to_dt = datetime.fromisoformat(date_to) if date_to else None
+    return crud.get_labels(
+        db,
+        skip=skip,
+        limit=limit,
+        search=search,
+        scopes=scopes_list,
+        colors=colors_list,
+        conditional_only=conditional_only,
+        date_from=date_from_dt,
+        date_to=date_to_dt,
+    )
+
+# --- Proposal Endpoints ---
+
+@router.post("/proposals/", response_model=schemas.LabelProposal)
+def create_proposal(proposal: schemas.LabelProposalCreate, db: Session = Depends(get_session)):
+    return crud.create_proposal(db, proposal)
+
+@router.get("/proposals/", response_model=List[schemas.LabelProposal])
+def list_proposals(object_type: Optional[str] = None, object_id: Optional[str] = None, status: Optional[models.LabelStatus] = None, db: Session = Depends(get_session)):
+    return crud.get_proposals(db, object_type, object_id, status)
+
+@router.patch("/proposals/{proposal_id}/status", response_model=schemas.LabelProposal)
+def update_proposal_status(proposal_id: int, status: models.LabelStatus, db: Session = Depends(get_session)):
+    proposal = crud.update_proposal_status(db, proposal_id, status)
+    if not proposal:
+        raise HTTPException(status_code=404, detail="Proposal not found")
+    return proposal
+
+@router.post("/proposals/bulk", response_model=List[schemas.LabelProposal])
+def create_bulk_proposals(proposals: List[schemas.LabelProposalCreate], db: Session = Depends(get_session)):
+    """
+    Bulk create label proposals.
+    """
+    created = []
+    for proposal in proposals:
+        created.append(crud.create_proposal(db, proposal))
+    return created
+
+@router.post("/proposals/bulk-review", response_model=List[schemas.LabelProposal])
+def bulk_review_proposals(
+    proposal_ids: List[int] = Body(...),
+    action: str = Body(...),  # 'approve' or 'reject'
+    reviewer: str = Body(...),
+    review_note: str = Body(None),
+    db: Session = Depends(get_session)
+):
+    """
+    Bulk review (approve/reject) proposals.
+    """
+    updated = []
+    for pid in proposal_ids:
+        proposal = crud.get_proposals(db, status=None)
+        proposal = next((p for p in proposal if p.id == pid), None)
+        if not proposal:
+            continue
+        status = models.LabelStatus.APPROVED if action == "approve" else models.LabelStatus.REJECTED
+        updated_proposal = crud.update_proposal_status(db, pid, status)
+        # Audit log
+        crud.create_audit(db, schemas.LabelAuditCreate(
+            proposal_id=pid,
+            action=action,
+            performed_by=reviewer,
+            note=review_note
+        ))
+        updated.append(updated_proposal)
+    return updated
+
+# --- Audit Endpoints ---
+
+@router.post("/audits/", response_model=schemas.LabelAudit)
+def create_audit(audit: schemas.LabelAuditCreate, db: Session = Depends(get_session)):
+    return crud.create_audit(db, audit)
+
+@router.get("/audits")
+def list_audits(
+    skip: int = 0,
+    limit: int = 100,
+    user: str = None,
+    entity_type: str = None,
+    entity_id: int = None,
+    action: str = None,
+    start_date: str = None,
+    end_date: str = None,
+    db: Session = Depends(get_session)
+):
+    """
+    List/filter audit events. Supports filtering by user, entity, action, and date range.
+    """
+    audits = crud.list_audits(
+        db,
+        skip=skip,
+        limit=limit,
+        user=user,
+        entity_type=entity_type,
+        entity_id=entity_id,
+        action=action,
+        start_date=start_date,
+        end_date=end_date,
+    )
+    return audits
+
+@router.get("/audits/export")
+def export_audits(
+    format: str = Query("csv", enum=["csv", "json"]),
+    user: str = None,
+    entity_type: str = None,
+    entity_id: int = None,
+    action: str = None,
+    start_date: str = None,
+    end_date: str = None,
+    db: Session = Depends(get_session)
+):
+    """
+    Export audit events in the requested format (CSV/JSON).
+    """
+    result = crud.export_audits(
+        db,
+        user=user,
+        entity_type=entity_type,
+        entity_id=entity_id,
+        action=action,
+        start_date=start_date,
+        end_date=end_date,
+        format=format,
+    )
+    if format == "json":
+        return result
+    from fastapi.responses import Response
+    return Response(content=result, media_type="text/csv")
+
+@router.get("/audits/{audit_id}")
+def get_audit_detail(audit_id: int, db: Session = Depends(get_session)):
+    """
+    Get details for a specific audit event.
+    """
+    audit = crud.get_audit_detail(db, audit_id)
+    if not audit:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Audit event not found")
+    return audit
+
+# --- Review Endpoints ---
+
+@router.post("/reviews/", response_model=schemas.LabelReview)
+def create_review(review: schemas.LabelReviewCreate, db: Session = Depends(get_session)):
+    return crud.create_review(db, review)
+
+@router.get("/reviews/{proposal_id}", response_model=List[schemas.LabelReview])
+def get_reviews(proposal_id: int, db: Session = Depends(get_session)):
+    return crud.get_reviews(db, proposal_id)
+
+@router.patch("/reviews/{review_id}/complete", response_model=schemas.LabelReview)
+def complete_review(review_id: int, note: Optional[str] = Body(None), db: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+    review = crud.get_review_by_id(db, review_id)
+    if not review:
+        raise HTTPException(status_code=404, detail="Review not found")
+    # Only reviewer or admin can complete
+    if review.reviewer != current_user.email and not has_role(current_user, "admin"):
+        raise HTTPException(status_code=403, detail="Not allowed to complete this review")
+    return crud.complete_review(db, review_id, note)
+
+@router.patch("/reviews/{review_id}/escalate", response_model=schemas.LabelReview)
+def escalate_review(review_id: int, note: Optional[str] = Body(None), db: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+    review = crud.get_review_by_id(db, review_id)
+    if not review:
+        raise HTTPException(status_code=404, detail="Review not found")
+    # Only reviewer or admin can escalate
+    if review.reviewer != current_user.email and not has_role(current_user, "admin"):
+        raise HTTPException(status_code=403, detail="Not allowed to escalate this review")
+    return crud.escalate_review(db, review_id, note)
+
+@router.post("/reviews/bulk", response_model=List[schemas.LabelReview])
+def bulk_review(action: str = Body(...), review_ids: List[int] = Body(...), note: Optional[str] = Body(None), db: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+    # Only admin can bulk review
+    if not has_role(current_user, "admin"):
+        raise HTTPException(status_code=403, detail="Only admin can bulk review")
+    if action not in ("approve", "reject"):
+        raise HTTPException(status_code=400, detail="Invalid action")
+    return crud.bulk_review(db, review_ids, action, note, current_user.email)
+
+@router.patch("/reviews/{review_id}/assign", response_model=schemas.LabelReview)
+def assign_review(review_id: int, assignee: str = Body(...), db: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+    review = crud.get_review_by_id(db, review_id)
+    if not review:
+        raise HTTPException(status_code=404, detail="Review not found")
+    # Only admin or current reviewer can assign
+    if review.reviewer != current_user.email and not has_role(current_user, "admin"):
+        raise HTTPException(status_code=403, detail="Not allowed to assign this review")
+    return crud.assign_review(db, review_id, assignee)
+
+@router.patch("/reviews/{review_id}/comment", response_model=schemas.LabelReview)
+def comment_review(review_id: int, comment: str = Body(...), db: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+    review = crud.get_review_by_id(db, review_id)
+    if not review:
+        raise HTTPException(status_code=404, detail="Review not found")
+    return crud.add_review_comment(db, review_id, comment, current_user.email)
+
+# --- Advanced: Suggestion Endpoint (for future ML integration) ---
+
+# @router.get("/suggestions/{object_type}/{object_id}", response_model=List[schemas.SensitivityLabel])
+# def suggest_labels(object_type: str, object_id: str, request: Request, db: Session = Depends(get_session)):
+#     """
+#     Suggest sensitivity labels for a given object (table/column) based on classification/category.
+#     Integrates with the /classified endpoint to fetch current categories.
+#     """
+#     # Get base URL from request
+#     base_url = str(request.base_url).rstrip("/")
+#     try:
+#         classified_resp = requests.get(f"{base_url}/classified")
+#         if classified_resp.status_code == 200:
+#             classified = classified_resp.json()
+#             # Find matching entry
+#             match = None
+#             for entry in classified:
+#                 if object_type == "column" and entry.get("column_name") == object_id:
+#                     match = entry
+#                     break
+#                 elif object_type == "table" and entry.get("table_name") == object_id:
+#                     match = entry
+#                     break
+#             if match:
+#                 # Map categories to sensitivity labels (customize as needed)
+#                 categories = match.get("categories", [])
+#                 all_labels = crud.get_labels(db)
+#                 suggested = []
+#                 for label in all_labels:
+#                     if any(cat.lower() in label.name.lower() for cat in categories):
+#                         suggested.append(label)
+#                 # Fallback: if no match, suggest all
+#                 if not suggested:
+#                     suggested = all_labels
+#                 return suggested
+#     except Exception as e:
+#         pass
+#     # Fallback: return all labels
+#     return crud.get_labels(db)
+
+# # --- Collaborative Workflow Endpoints ---
+
+@router.post("/proposals/{proposal_id}/vote", response_model=schemas.LabelProposal)
+def vote_on_proposal_api(
+    proposal_id: int,
+    approve: bool = Body(..., embed=True),
+    review_note: Optional[str] = Body(None, embed=True),
+    db: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Allow an authenticated reviewer to vote (approve/reject) on a label proposal.
+    Uses the workflow service for business logic.
+    """
+    try:
+        proposal = workflow_vote_on_proposal(
+            db=db,
+            proposal_id=proposal_id,
+            reviewer=current_user,
+            approve=approve,
+            review_note=review_note
+        )
+        # Notification logic: notify proposer after consensus
+        if proposal.status == models.LabelStatus.APPROVED:
+            notify_label_approved(proposal, [proposal.proposed_by])
+        elif proposal.status == models.LabelStatus.REJECTED:
+            notify_label_rejected(proposal, [proposal.proposed_by])
+        return proposal
+    except WorkflowError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+@router.get("/proposals/{proposal_id}/status", response_model=schemas.LabelProposal)
+def get_proposal_status_api(proposal_id: int, db: Session = Depends(get_session)):
+    try:
+        return workflow_get_proposal_status(db, proposal_id)
+    except WorkflowError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+# --- Enhanced Suggestion Engine Endpoint ---
+@router.post("/suggestions/", response_model=List[schemas.SensitivityLabel])
+def advanced_suggest_labels(
+    object_type: str = Body(...),
+    object_id: str = Body(...),
+    schema_metadata: Optional[dict] = Body(None),
+    classifier_results: Optional[List[str]] = Body(None),
+    db: Session = Depends(get_session)
+):
+    """
+    Suggest labels using schema metadata, classifier results, and historical patterns.
+    """
+    return suggest_labels_for_object(db, object_type, object_id, schema_metadata, classifier_results)
+
+# --- User Interaction Endpoints for Suggestions ---
+@router.post("/suggestions/{label_id}/accept", response_model=schemas.LabelProposal)
+def accept_suggestion(
+    label_id: int,
+    object_type: str = Body(...),
+    object_id: str = Body(...),
+    justification: Optional[str] = Body(None),
+    expiry_date: Optional[str] = Body(None),
+    review_cycle_days: Optional[int] = Body(None),
+    db: Session = Depends(get_session),
+    session_token: str = Cookie(None)
+):
+    user = None
+    if session_token:
+        session = get_session_by_token(db, session_token)
+        if session and session.user:
+            user = session.user
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    return accept_label_suggestion(db, label_id, object_type, object_id, user.email, justification, expiry_date, review_cycle_days)
+
+@router.post("/suggestions/{proposal_id}/modify", response_model=schemas.LabelProposal)
+def modify_suggestion(
+    proposal_id: int,
+    new_label_id: int = Body(...),
+    justification: Optional[str] = Body(None),
+    db: Session = Depends(get_session),
+    session_token: str = Cookie(None)
+):
+    user = None
+    if session_token:
+        session = get_session_by_token(db, session_token)
+        if session and session.user:
+            user = session.user
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    return modify_label_suggestion(db, proposal_id, new_label_id, user.email, justification)
+
+@router.post("/suggestions/{proposal_id}/reject", response_model=schemas.LabelProposal)
+def reject_suggestion(
+    proposal_id: int,
+    justification: Optional[str] = Body(None),
+    db: Session = Depends(get_session),
+    session_token: str = Cookie(None)
+):
+    user = None
+    if session_token:
+        session = get_session_by_token(db, session_token)
+        if session and session.user:
+            user = session.user
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    return reject_label_suggestion(db, proposal_id, user.email, justification)
+
+# --- Bulk Operations Endpoints ---
+
+@router.post("/bulk/labels/import")
+def bulk_import_labels(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Bulk import sensitivity labels from a CSV/Excel/JSON file.
+    Returns a summary of created/failed records.
+    """
+    ext = file.filename.split(".")[-1].lower()
+    if ext == "csv":
+        df = pd.read_csv(file.file)
+    elif ext in ("xlsx", "xls"):  # Excel
+        df = pd.read_excel(file.file)
+    elif ext == "json":
+        df = pd.read_json(file.file)
+    else:
+        raise HTTPException(status_code=400, detail="Unsupported file type")
+    created, errors = [], []
+    for i, row in df.iterrows():
+        try:
+            label = schemas.SensitivityLabelCreate(**row.to_dict())
+            obj = crud.create_label(db, label)
+            created.append(obj.id)
+        except Exception as e:
+            errors.append({"row": i, "error": str(e)})
+    return {"created": created, "errors": errors, "total": len(df)}
+
+@router.get("/bulk/labels/export")
+def bulk_export_labels(
+    format: str = Query("csv", enum=["csv", "excel", "json"]),
+    db: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Bulk export sensitivity labels in the requested format.
+    """
+    labels = crud.get_labels(db, skip=0, limit=1000000)
+    df = pd.DataFrame([l.__dict__ for l in labels])
+    if format == "csv":
+        return StreamingResponse(
+            iter([df.to_csv(index=False)]),
+            media_type="text/csv",
+            headers={"Content-Disposition": "attachment; filename=labels.csv"}
+        )
+    elif format == "excel":
+        from io import BytesIO
+        output = BytesIO()
+        df.to_excel(output, index=False)
+        output.seek(0)
+        return StreamingResponse(
+            output,
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={"Content-Disposition": "attachment; filename=labels.xlsx"}
+        )
+    elif format == "json":
+        return StreamingResponse(
+            iter([df.to_json(orient="records")]),
+            media_type="application/json",
+            headers={"Content-Disposition": "attachment; filename=labels.json"}
+        )
+    else:
+        raise HTTPException(status_code=400, detail="Unsupported export format")
+
+@router.post("/bulk/labels/actions")
+def bulk_label_actions(
+    action: str = Body(..., embed=True),
+    label_ids: List[int] = Body(...),
+    db: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Perform bulk actions (approve, reject, delete, assign) on sensitivity labels.
+    """
+    results = []
+    for label_id in label_ids:
+        try:
+            if action == "delete":
+                crud.delete_label(db, label_id)
+            elif action == "approve":
+                crud.update_label_status(db, label_id, "approved")
+            elif action == "reject":
+                crud.update_label_status(db, label_id, "rejected")
+            # Add more actions as needed
+            results.append({"id": label_id, "status": "success"})
+        except Exception as e:
+            results.append({"id": label_id, "status": "error", "error": str(e)})
+    return {"results": results, "action": action}
+
+@router.post("/bulk/proposals/import")
+def bulk_import_proposals(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Bulk import label proposals from a CSV/Excel/JSON file.
+    Returns a summary of created/failed records.
+    """
+    ext = file.filename.split(".")[-1].lower()
+    if ext == "csv":
+        df = pd.read_csv(file.file)
+    elif ext in ("xlsx", "xls"):  # Excel
+        df = pd.read_excel(file.file)
+    elif ext == "json":
+        df = pd.read_json(file.file)
+    else:
+        raise HTTPException(status_code=400, detail="Unsupported file type")
+    created, errors = [], []
+    for i, row in df.iterrows():
+        try:
+            proposal = schemas.LabelProposalCreate(**row.to_dict())
+            obj = crud.create_proposal(db, proposal)
+            created.append(obj.id)
+        except Exception as e:
+            errors.append({"row": i, "error": str(e)})
+    return {"created": created, "errors": errors, "total": len(df)}
+
+@router.get("/bulk/proposals/export")
+def bulk_export_proposals(
+    format: str = Query("csv", enum=["csv", "excel", "json"]),
+    db: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Bulk export label proposals in the requested format.
+    """
+    proposals = crud.get_proposals(db, None, None, None)
+    df = pd.DataFrame([p.__dict__ for p in proposals])
+    if format == "csv":
+        return StreamingResponse(
+            iter([df.to_csv(index=False)]),
+            media_type="text/csv",
+            headers={"Content-Disposition": "attachment; filename=proposals.csv"}
+        )
+    elif format == "excel":
+        from io import BytesIO
+        output = BytesIO()
+        df.to_excel(output, index=False)
+        output.seek(0)
+        return StreamingResponse(
+            output,
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={"Content-Disposition": "attachment; filename=proposals.xlsx"}
+        )
+    elif format == "json":
+        return StreamingResponse(
+            iter([df.to_json(orient="records")]),
+            media_type="application/json",
+            headers={"Content-Disposition": "attachment; filename=proposals.json"}
+        )
+    else:
+        raise HTTPException(status_code=400, detail="Unsupported export format")
+
+@router.post("/bulk/proposals/actions")
+def bulk_proposal_actions(
+    action: str = Body(..., embed=True),
+    proposal_ids: List[int] = Body(...),
+    db: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Perform bulk actions (approve, reject, delete, assign) on label proposals.
+    """
+    results = []
+    for proposal_id in proposal_ids:
+        try:
+            if action == "delete":
+                crud.delete_proposal(db, proposal_id)
+            elif action == "approve":
+                crud.update_proposal_status(db, proposal_id, "approved")
+            elif action == "reject":
+                crud.update_proposal_status(db, proposal_id, "rejected")
+            # Add more actions as needed
+            results.append({"id": proposal_id, "status": "success"})
+        except Exception as e:
+            results.append({"id": proposal_id, "status": "error", "error": str(e)})
+    return {"results": results, "action": action}
+
+# --- Advanced Search/Filter Endpoints ---
+
+@router.post("/search/labels")
+def advanced_search_labels(
+    query: dict = Body(...),
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_session)
+):
+    """
+    Advanced search/filter for sensitivity labels.
+    Accepts a flexible query object for full-text, facets, filters, etc.
+    """
+    q = db.query(models.SensitivityLabel)
+    # Full-text search
+    if 'search' in query and query['search']:
+        search = f"%{query['search']}%"
+        q = q.filter(
+            models.SensitivityLabel.name.ilike(search) |
+            models.SensitivityLabel.description.ilike(search)
+        )
+    # Facet/field filters
+    if 'scopes' in query and query['scopes']:
+        q = q.filter(models.SensitivityLabel.applies_to.in_(query['scopes']))
+    if 'colors' in query and query['colors']:
+        q = q.filter(models.SensitivityLabel.color.in_(query['colors']))
+    if 'conditional_only' in query:
+        if query['conditional_only']:
+            q = q.filter(models.SensitivityLabel.is_conditional == True)
+        else:
+            q = q.filter(models.SensitivityLabel.is_conditional == False)
+    # Date range
+    if 'date_from' in query and query['date_from']:
+        q = q.filter(models.SensitivityLabel.created_at >= datetime.fromisoformat(query['date_from']))
+    if 'date_to' in query and query['date_to']:
+        q = q.filter(models.SensitivityLabel.created_at <= datetime.fromisoformat(query['date_to']))
+    # Additional filters (add as needed)
+    if 'ids' in query and query['ids']:
+        q = q.filter(models.SensitivityLabel.id.in_(query['ids']))
+    # Pagination
+    results = q.offset(skip).limit(limit).all()
+    return [schemas.SensitivityLabel.from_orm(l) for l in results]
+
+@router.post("/search/proposals")
+def advanced_search_proposals(
+    query: dict = Body(...),
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_session)
+):
+    """
+    Advanced search/filter for label proposals.
+    Accepts a flexible query object for full-text, facets, filters, etc.
+    """
+    q = db.query(models.LabelProposal)
+    # Full-text search
+    if 'search' in query and query['search']:
+        search = f"%{query['search']}%"
+        q = q.filter(
+            models.LabelProposal.object_id.ilike(search) |
+            models.LabelProposal.object_type.ilike(search) |
+            models.LabelProposal.justification.ilike(search)
+        )
+    # Facet/field filters
+    if 'status' in query and query['status']:
+        q = q.filter(models.LabelProposal.status == query['status'])
+    if 'object_type' in query and query['object_type']:
+        q = q.filter(models.LabelProposal.object_type == query['object_type'])
+    if 'object_id' in query and query['object_id']:
+        q = q.filter(models.LabelProposal.object_id == query['object_id'])
+    if 'proposed_by' in query and query['proposed_by']:
+        q = q.filter(models.LabelProposal.proposed_by == query['proposed_by'])
+    # Date range
+    if 'date_from' in query and query['date_from']:
+        q = q.filter(models.LabelProposal.created_at >= datetime.fromisoformat(query['date_from']))
+    if 'date_to' in query and query['date_to']:
+        q = q.filter(models.LabelProposal.created_at <= datetime.fromisoformat(query['date_to']))
+    # Additional filters (add as needed)
+    if 'ids' in query and query['ids']:
+        q = q.filter(models.LabelProposal.id.in_(query['ids']))
+    # Pagination
+    results = q.offset(skip).limit(limit).all()
+    return [schemas.LabelProposal.from_orm(p) for p in results]
+
+# --- Documentation ---
+"""
+SENSITIVITY LABELING SYSTEM - ARCHITECTURE & WORKFLOW
+
+Key Features:
+- Label Suggestion Engine: Suggests labels using schema metadata, classifier results, and historical patterns.
+- Collaborative Workflow: Multi-user proposal, voting, and consensus with audit trail.
+- Contextual Labeling: Labels can be applied at table, column, relationship, or data flow level, including conditional logic.
+- Justification & Documentation: All label changes require justification, stored for compliance.
+- Label Expiry & Review: Labels can expire or require periodic review, with notification hooks.
+- Analytics & Reporting: Endpoints for coverage, pending reviews, and label change history.
+- Integration: Hooks for data access controls and extensibility for notifications and review cycles.
+
+Workflow:
+1. Schema Extraction: System extracts schema and runs classifiers.
+2. Label Suggestion: Suggestion engine proposes labels for each object.
+3. User Review: Users can accept, modify, or reject suggestions, providing justification.
+4. Collaborative Approval: Multiple users review/vote; consensus is required for finalization.
+5. Audit Trail: All actions are logged.
+6. Expiry/Review: Labels can expire or require review; notifications are sent.
+7. Integration: Labels can be used to enforce access controls and for analytics.
+
+See code comments and README for further details.
+"""
+
+# --- Access Control Example ---
+def check_access(user: User, object_type: str, object_id: str, db: Session) -> bool:
+    """
+    Example access control: Only allow access if user is authorized for the label(s) on the object.
+    """
+    proposals = db.query(models.LabelProposal).filter(
+        models.LabelProposal.object_type == object_type,
+        models.LabelProposal.object_id == object_id,
+        models.LabelProposal.status == models.LabelStatus.APPROVED
+    ).all()
+    for proposal in proposals:
+        label = crud.get_label(db, proposal.label_id)
+        if label and label.name.lower() == "highly sensitive":
+            # Example: Only allow if user has special permission (pseudo-code)
+            if not hasattr(user, "can_access_highly_sensitive") or not user.can_access_highly_sensitive:
+                return False
+    return True
+
+@router.get("/suggestions/column/{column_name}", response_model=List[schemas.SensitivityLabel])
+def get_label_suggestions_for_column(
+    column_name: str,
+    db: Session = Depends(get_session)
+):
+    """
+    Suggest sensitivity labels for a given column using advanced logic.
+    """
+    schema_metadata = {"name": column_name}
+    classifier_results = None  # Enhance to fetch real classifier results if available
+    suggestions = suggest_labels_for_object(
+        db,
+        object_type="column",
+        object_id=column_name,
+        schema_metadata=schema_metadata,
+        classifier_results=classifier_results
+    )
+    return suggestions
+
+@router.post("/ml-suggest-labels")
+def ml_suggest_labels(
+    features: list = Body(..., example=[0.1, 0.5, 0.3]),
+    db: Session = Depends(get_session)
+):
+    """
+    ML-driven label suggestion with confidence and fallback to rules-based if uncertain.
+    Expects a list of features (preprocessed for the model).
+    """
+    features_np = np.array(features)
+    result = get_ml_suggestion(features_np)
+    return result
+
+@router.post("/ml-train")
+def ml_train(db: Session = Depends(get_session)):
+    """
+    Train the ML model using historical proposals and labels.
+    """
+    proposals = db.query(models.LabelProposal).filter(models.LabelProposal.status == models.LabelStatus.APPROVED).all()
+    X = []
+    y = []
+    for p in proposals:
+        metadata = {
+            "type": p.object_type,
+            "name": p.object_id
+        }
+        X.append(extract_features_from_metadata(metadata))
+        y.append(p.label_id)
+    if X and y:
+        import numpy as np
+        X_np = np.array(X)
+        version = ml_suggestion_service.train(X_np, y, db)
+        return {"status": "trained", "samples": len(y), "version": version}
+    return {"status": "no data"}
+
+@router.post("/ml-retrain")
+def ml_retrain_from_feedback(db: Session = Depends(get_session)):
+    """
+    Retrain the ML model using all feedback in the database.
+    """
+    version = ml_suggestion_service.retrain_from_feedback(db)
+    if version:
+        return {"status": "retrained", "version": version}
+    return {"status": "no feedback data"}
+
+@router.get("/ml-feedback", response_model=List[dict])
+def list_ml_feedback(db: Session = Depends(get_session)):
+    """
+    List all ML feedback for admin/model monitoring.
+    """
+    from .models import Feedback
+    feedbacks = db.query(Feedback).order_by(Feedback.created_at.desc()).all()
+    return [
+        {
+            "id": f.id,
+            "user_email": f.user_email,
+            "features": f.features,
+            "actual_label": f.actual_label,
+            "created_at": f.created_at
+        }
+        for f in feedbacks
+    ]
+
+@router.get("/ml-model-versions", response_model=List[dict])
+def list_ml_model_versions(db: Session = Depends(get_session)):
+    """
+    List all ML model versions and training info.
+    """
+    from .models import MLModelVersion
+    versions = db.query(MLModelVersion).order_by(MLModelVersion.trained_at.desc()).all()
+    return [
+        {
+            "id": v.id,
+            "version": v.version,
+            "trained_at": v.trained_at,
+            "accuracy": v.accuracy,
+            "precision": v.precision,
+            "recall": v.recall,
+            "notes": v.notes
+        }
+        for v in versions
+    ]
+
+@router.post("/ml-set-active-version")
+def set_active_ml_model_version(version: str = Body(...), db: Session = Depends(get_session)):
+    """
+    Set the active ML model version for predictions (rollback or A/B testing).
+    """
+    success = ml_suggestion_service.set_active_version(version, db)
+    if not success:
+        raise HTTPException(status_code=404, detail="Model version not found or model file missing.")
+    return {"status": "active version set", "version": version}
+
+# --- ML Feedback & Model Endpoints ---
+
+@router.post("/ml-feedback/submit")
+def submit_ml_feedback(
+    user_email: str = Body(...),
+    features: dict = Body(...),
+    actual_label: str = Body(...),
+    db: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Submit feedback on an ML prediction for a label.
+    """
+    # Validate input
+    if not features or not actual_label:
+        raise HTTPException(status_code=400, detail="Missing features or actual_label")
+    # Save feedback
+    feedback = models.Feedback(
+        user_email=user_email or current_user.email,
+        features=features,
+        actual_label=actual_label,
+    )
+    db.add(feedback)
+    db.commit()
+    db.refresh(feedback)
+    # Audit log
+    audit = models.LabelAudit(
+        proposal_id=None,
+        action="ml_feedback_submitted",
+        performed_by=user_email or current_user.email,
+        note=f"Feedback for label: {actual_label}"
+    )
+    db.add(audit)
+    db.commit()
+    return {"detail": "Feedback submitted", "feedback_id": feedback.id}
+
+@router.get("/ml-model/status")
+def get_ml_model_status(db: Session = Depends(get_session)):
+    """
+    Get current ML model status and metrics.
+    """
+    # Get latest model version
+    model = db.query(models.MLModelVersion).order_by(models.MLModelVersion.trained_at.desc()).first()
+    if not model:
+        return {"status": "not_trained"}
+    return {
+        "version": model.version,
+        "trained_at": model.trained_at,
+        "accuracy": model.accuracy,
+        "precision": model.precision,
+        "recall": model.recall,
+        "is_active": model.is_active,
+        "notes": model.notes,
+    }
+
+@router.get("/ml-feedback/audit")
+def audit_ml_feedback(
+    skip: int = 0,
+    limit: int = 100,
+    user_email: str = None,
+    label: str = None,
+    db: Session = Depends(get_session)
+):
+    """
+    List/audit all ML feedback and retrain actions.
+    """
+    q = db.query(models.Feedback)
+    if user_email:
+        q = q.filter(models.Feedback.user_email == user_email)
+    if label:
+        q = q.filter(models.Feedback.actual_label == label)
+    feedbacks = q.order_by(models.Feedback.created_at.desc()).offset(skip).limit(limit).all()
+    return feedbacks
+
+# --- Notification Endpoints ---
+
+@router.get("/notifications")
+def list_notifications(
+    user_email: Optional[str] = None,
+    unread_only: bool = False,
+    db: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    List notifications for the current user (or all if admin).
+    """
+    q = db.query(models.Notification)
+    if not has_role(current_user, "admin"):
+        q = q.filter(models.Notification.user_email == current_user.email)
+    elif user_email:
+        q = q.filter(models.Notification.user_email == user_email)
+    if unread_only:
+        q = q.filter(models.Notification.read == False)
+    return q.order_by(models.Notification.created_at.desc()).all()
+
+@router.post("/notifications/send")
+def send_notification_api(
+    user_email: str = Body(...),
+    type: str = Body(...),
+    message: str = Body(...),
+    related_object_type: Optional[str] = Body(None),
+    related_object_id: Optional[str] = Body(None),
+    db: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Send a notification to a user (admin only).
+    """
+    if not has_role(current_user, "admin"):
+        raise HTTPException(status_code=403, detail="Admin only")
+    notif = send_notification(
+        db,
+        user_email=user_email,
+        type=type,
+        message=message,
+        related_object_type=related_object_type,
+        related_object_id=related_object_id
+    )
+    return {"detail": "Notification sent", "notification_id": notif.id}
+
+@router.post("/notifications/mark-read")
+def mark_notification_read_api(
+    notification_id: int = Body(...),
+    db: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Mark a notification as read.
+    """
+    success = mark_notification_read(db, notification_id, current_user.email)
+    if not success:
+        raise HTTPException(status_code=404, detail="Notification not found or not allowed")
+    return {"detail": "Notification marked as read"}
+
+@router.get("/notifications/preferences")
+def get_notification_preferences_api(
+    db: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    prefs = get_notification_preferences(db, current_user.email)
+    return {"preferences": prefs}
+
+@router.post("/notifications/preferences")
+def set_notification_preferences_api(
+    preferences: dict = Body(...),
+    db: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    pref = set_notification_preferences(db, current_user.email, preferences)
+    return {"detail": "Preferences updated", "preferences": pref.preferences}
+
+# --- User Management Enhancements ---
+
+@router.post("/users/{user_id}/deactivate")
+def deactivate_user(user_id: int, db: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+    """
+    Deactivate a user (soft delete). Admin only. Audit logged.
+    """
+    if not has_role(current_user, "admin"):
+        raise HTTPException(status_code=403, detail="Admin only")
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    user.is_active = False
+    db.commit()
+    audit = models.LabelAudit(
+        proposal_id=None,
+        action="user_deactivated",
+        performed_by=current_user.email,
+        note=f"Deactivated user {user.email}"
+    )
+    db.add(audit)
+    db.commit()
+    return {"detail": f"User {user.email} deactivated"}
+
+@router.post("/users/{user_id}/reactivate")
+def reactivate_user(user_id: int, db: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+    """
+    Reactivate a previously deactivated user. Admin only. Audit logged.
+    """
+    if not has_role(current_user, "admin"):
+        raise HTTPException(status_code=403, detail="Admin only")
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    user.is_active = True
+    db.commit()
+    audit = models.LabelAudit(
+        proposal_id=None,
+        action="user_reactivated",
+        performed_by=current_user.email,
+        note=f"Reactivated user {user.email}"
+    )
+    db.add(audit)
+    db.commit()
+    return {"detail": f"User {user.email} reactivated"}
+
+@router.post("/users/bulk-assign-roles")
+def bulk_assign_roles(
+    user_ids: List[int] = Body(...),
+    role_id: int = Body(...),
+    db: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Bulk assign a role to multiple users. Admin only. Audit logged.
+    """
+    if not has_role(current_user, "admin"):
+        raise HTTPException(status_code=403, detail="Admin only")
+    role = db.query(Role).filter(Role.id == role_id).first()
+    if not role:
+        raise HTTPException(status_code=404, detail="Role not found")
+    from app.services.auth_service import assign_role_to_user
+    for user_id in user_ids:
+        user = db.query(User).filter(User.id == user_id).first()
+        if user:
+            assign_role_to_user(db, user, role.name)
+            audit = models.LabelAudit(
+                proposal_id=None,
+                action="role_assigned_bulk",
+                performed_by=current_user.email,
+                note=f"Bulk assigned role {role.name} to user {user.email}"
+            )
+            db.add(audit)
+    db.commit()
+    return {"detail": f"Role {role.name} assigned to users", "role": role.name, "user_ids": user_ids}
+
+# --- Lineage & Impact Analysis Endpoints ---
+
+@router.get("/lineage/{object_type}/{object_id}")
+def get_lineage(object_type: str, object_id: str, direction: str = Query("both", enum=["upstream", "downstream", "both"]), db: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+    """
+    Get lineage edges for a given object (table, column, label, etc.).
+    """
+    edges = crud.get_lineage(db, object_type, object_id, direction)
+    return [
+        {
+            "id": e.id,
+            "source_type": e.source_type,
+            "source_id": e.source_id,
+            "target_type": e.target_type,
+            "target_id": e.target_id,
+            "relationship_type": e.relationship_type,
+        }
+        for e in edges
+    ]
+
+@router.get("/lineage/{object_type}/{object_id}/impact")
+def get_impact(object_type: str, object_id: str, recursive: bool = Query(False), db: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+    """
+    Get impact analysis for a given object (all downstream edges, optionally recursive).
+    """
+    if recursive:
+        edges = crud.get_impact_recursive(db, object_type, object_id)
+    else:
+        edges = crud.get_impact(db, object_type, object_id)
+    return [
+        {
+            "id": e.id,
+            "source_type": e.source_type,
+            "source_id": e.source_id,
+            "target_type": e.target_type,
+            "target_id": e.target_id,
+            "relationship_type": e.relationship_type,
+        }
+        for e in edges
+    ]
+
+# --- Advanced Search & Bulk Import Endpoints ---
+
+@router.get("/labels/advanced-search")
+def advanced_search_labels(
+    query: Optional[str] = Query(None),
+    scopes: Optional[str] = Query(None),
+    colors: Optional[str] = Query(None),
+    status: Optional[str] = Query(None),
+    created_from: Optional[str] = Query(None),
+    created_to: Optional[str] = Query(None),
+    sort_by: Optional[str] = Query("created_at"),
+    sort_dir: Optional[str] = Query("desc"),
+    limit: int = 100,
+    skip: int = 0,
+    db: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Advanced search for sensitivity labels with full-text, filters, and sorting.
+    """
+    q = db.query(models.SensitivityLabel)
+    if query:
+        q = q.filter((models.SensitivityLabel.name.ilike(f"%{query}%")) | (models.SensitivityLabel.description.ilike(f"%{query}%")))
+    if scopes:
+        scopes_list = scopes.split(",")
+        q = q.filter(models.SensitivityLabel.applies_to.in_(scopes_list))
+    if colors:
+        colors_list = colors.split(",")
+        q = q.filter(models.SensitivityLabel.color.in_(colors_list))
+    if status:
+        q = q.join(models.LabelProposal).filter(models.LabelProposal.status == status)
+    if created_from:
+        q = q.filter(models.SensitivityLabel.created_at >= created_from)
+    if created_to:
+        q = q.filter(models.SensitivityLabel.created_at <= created_to)
+    if sort_by in ["created_at", "updated_at", "name"]:
+        sort_col = getattr(models.SensitivityLabel, sort_by)
+        q = q.order_by(sort_col.desc() if sort_dir == "desc" else sort_col.asc())
+    return q.offset(skip).limit(limit).all()
+
+@router.post("/labels/bulk-import")
+def bulk_import_labels(
+    labels: List[schemas.SensitivityLabelCreate] = Body(...),
+    db: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Bulk import sensitivity labels. Admin only. Audit logged.
+    """
+    if not has_role(current_user, "admin"):
+        raise HTTPException(status_code=403, detail="Admin only")
+    created = []
+    for label in labels:
+        db_label = models.SensitivityLabel(**label.dict())
+        db.add(db_label)
+        created.append(db_label)
+    db.commit()
+    for db_label in created:
+        audit = models.LabelAudit(
+            proposal_id=None,
+            action="label_bulk_imported",
+            performed_by=current_user.email,
+            note=f"Bulk imported label {db_label.name}"
+        )
+        db.add(audit)
+    db.commit()
+    return {"detail": f"Imported {len(created)} labels", "ids": [l.id for l in created]}
+
+@router.get("/events/stream")
+def events_stream():
+    def event_generator():
+        # Dummy event stream, replace with real logic as needed
+        for i in range(5):
+            yield f"data: Event {i}\n\n"
+            time.sleep(1)
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
+
+@router.get("/explainability")
+def get_label_explainability(object_id: str, db: Session = Depends(get_session)):
+    """
+    Return ML explainability for a given object (column/table):
+    - predicted label
+    - confidence
+    - top features (with weights)
+    - model version
+    - fallback info
+    """
+    # Fetch metadata for the object (column/table)
+    # This assumes a function exists to fetch metadata by object_id
+    from .feature_extraction import extract_features_from_metadata
+    from .ml_suggestion_engine import ml_suggestion_engine
+    # Example: fetch metadata from DB or external service
+    metadata = crud.get_object_metadata(db, object_id)  # You may need to implement this
+    if not metadata:
+        raise HTTPException(status_code=404, detail="Object metadata not found")
+    features = extract_features_from_metadata(metadata)
+    result = ml_suggestion_engine.predict(features)
+    return {
+        "object_id": object_id,
+        "predicted_label": result["suggestion"],
+        "confidence": result["confidence"],
+        "feature_importance": result["explanation"],
+        "model_version": getattr(ml_suggestion_engine, "current_version", None),
+        "fallback": result["fallback"],
+        "explanation": result["explanation"] if result["fallback"] else None
+    }
+
+from fastapi import WebSocket, WebSocketDisconnect
+from typing import Dict, Any
+
+# --- Real-Time Events (WebSocket) ---
+class ConnectionManager:
+    def __init__(self):
+        self.active_connections: list[WebSocket] = []
+    async def connect(self, websocket: WebSocket):
+        await websocket.accept()
+        self.active_connections.append(websocket)
+    def disconnect(self, websocket: WebSocket):
+        self.active_connections.remove(websocket)
+    async def broadcast(self, message: Dict[str, Any]):
+        for connection in self.active_connections:
+            await connection.send_json(message)
+
+manager = ConnectionManager()
+
+@router.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await manager.connect(websocket)
+    try:
+        while True:
+            await websocket.receive_text()  # Keep alive
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
+
+# Example: Call this function in workflow or CRUD when status changes or notification is created
+
+
+# --- Advanced ML Feedback ---
+from . import models
+
+@router.post("/ml-feedback/advanced")
+def advanced_ml_feedback(
+    object_id: str = Body(...),
+    user_email: str = Body(...),
+    feedback_type: str = Body(...),  # correct, incorrect, partial, retrain
+    comments: str = Body(None),
+    db: Session = Depends(get_session)
+):
+    feedback = models.Feedback(
+        user_email=user_email,
+        features={"object_id": object_id, "feedback_type": feedback_type},
+        actual_label=comments or feedback_type,
+    )
+    db.add(feedback)
+    db.commit()
+    db.refresh(feedback)
+    return {"status": "ok", "feedback_id": feedback.id}
+
+# Register catalog tree router and ML suggestion by path
+from fastapi import FastAPI
+
+def include_catalog_tree(app: FastAPI):
+    app.include_router(catalog_tree_router)
+    app.include_router(catalog_tree_service_router)

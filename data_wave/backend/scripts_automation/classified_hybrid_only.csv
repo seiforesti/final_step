@@ -1,0 +1,7 @@
+id,column_name,nullable,created_at,data_type,database_type,table_name,categories
+13,id,False,2025-05-28T12:13:39.809926,INTEGER,mysql,users,Unclassified [Hybrid]
+28,id,False,2025-05-28T12:13:39.930989,INTEGER,postgresql,clients,Unclassified [Hybrid]
+43,id,False,2025-05-28T22:40:58.470590,INTEGER,mysql,users,Unclassified [Hybrid]
+58,id,False,2025-05-28T22:40:58.592627,INTEGER,postgresql,clients,Unclassified [Hybrid]
+73,id,False,2025-05-28T22:47:28.144867,INTEGER,mysql,users,Unclassified [Hybrid]
+88,id,False,2025-05-28T22:47:28.227523,INTEGER,postgresql,clients,Unclassified [Hybrid]

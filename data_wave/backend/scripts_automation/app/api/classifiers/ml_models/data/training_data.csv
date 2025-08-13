@@ -1,0 +1,11 @@
+column_name,category
+id,Unclassified
+full_name,PII
+email,PII
+password,Sensitive
+iban,Financial
+name,Unclassified
+name,PII
+phone,PII
+card_number,Financial
+_id,Unclassified

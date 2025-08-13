@@ -1,0 +1,7 @@
+{
+    "PII": ["name", "full_name", "first_name", "last_name", "nom", "prenom", "adresse", "email", "phone", "contact", "birthdate", "ssn", "passport"],
+    "Financial": ["iban", "credit_card", "card_number", "transaction", "payment", "montant", "amount", "total", "bank_account"],
+    "Sensitive": ["password", "token", "api_key", "secret", "access_key", "private_key"],
+    "Transaction": ["order", "purchase", "sale", "invoice", "facture", "product", "item", "cart"]
+  }
+  

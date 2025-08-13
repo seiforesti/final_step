@@ -1,0 +1,189 @@
+# ========================================
+# DEPENDENCY SOLUTION OPTION 1: Python 3.11 Compatibility
+# ========================================
+# This section provides dependencies compatible with Python 3.11
+# Use this for immediate deployment with existing codebase
+
+# ------------------------------------------------------------
+# Smaller, faster installs (binary wheels, CPU-only where possible)
+# - Forces pip to prefer prebuilt wheels (no source builds)
+# - Uses PyTorch CPU wheels to avoid large CUDA downloads
+# - Keeps the backend fully advanced and feature-complete
+#   while minimizing image size and build time
+# ------------------------------------------------------------
+--only-binary=:all:
+--prefer-binary
+# CPU-only PyTorch wheels (significantly smaller than CUDA builds)
+--extra-index-url https://download.pytorch.org/whl/cpu
+
+# Core FastAPI and Web Framework (Python 3.11 Compatible)
+fastapi==0.104.1  # Last version compatible with Pydantic 1.x
+pydantic==1.10.13  # Compatible with SQLModel and Python 3.11
+# pydantic-settings==0.2.5  # Not needed - using BaseSettings from pydantic directly
+uvicorn[standard]==0.24.0  # Compatible with FastAPI 0.104.1
+
+# Database ORM (Python 3.11 Compatible)
+sqlmodel==0.0.14  # Compatible with Pydantic 1.x and Python 3.11
+sqlalchemy>=2.0.0,<2.1.0  # Compatible with SQLModel 0.0.14
+psycopg2-binary==2.9.7  # PostgreSQL adapter
+asyncpg>=0.30.0,<1.0.0  # Async PostgreSQL adapter
+pymysql==1.1.0  # MySQL adapter
+pymongo==4.5.0  # MongoDB adapter
+
+# ========================================
+# DEPENDENCY SOLUTION OPTION 2: Modern Stack Migration
+# ========================================
+# This section provides modern dependencies for future migration
+# Uncomment when ready to migrate to Python 3.13+ and modern stack
+
+# # Modern FastAPI and Web Framework (Python 3.13+ Compatible)
+# fastapi>=0.115.0  # Latest version with Pydantic 2.x support
+# pydantic>=2.11.0  # Latest Pydantic with improved performance
+# pydantic-settings>=2.0.0  # Modern settings management
+# uvicorn[standard]>=0.27.0  # Latest ASGI server
+
+# # Modern Database ORM (Python 3.13+ Compatible)
+# sqlmodel>=0.0.25  # Latest SQLModel with Pydantic 2.x support
+# sqlalchemy>=2.0.23  # Latest SQLAlchemy with async support
+# psycopg2-binary>=2.9.7  # PostgreSQL adapter
+# pymysql>=1.1.0  # MySQL adapter
+# pymongo>=4.5.0  # MongoDB adapter
+
+# ========================================
+# ENTERPRISE DATA GOVERNANCE CORE DEPENDENCIES
+# ========================================
+
+# Advanced Machine Learning and AI
+numpy>=1.21.0,<2.0.0  # Numerical computing
+scipy>=1.9.0,<2.0.0  # Scientific computing
+scikit-learn>=1.3.0,<2.0.0  # Machine learning
+transformers>=4.21.0,<5.0.0  # Hugging Face transformers
+datasets>=2.10.0,<3.0.0  # Dataset management
+spacy>=3.4.0,<4.0.0  # NLP processing
+faiss-cpu>=1.7.4,<2.0.0  # Vector similarity search (CPU wheels)
+# Torch CPU-only wheels are provided by the extra index above
+torch>=2.0.0,<3.0.0  # PyTorch deep learning
+sentence-transformers>=2.2.0,<3.0.0  # Sentence embeddings
+openai<2.0.0,>=1.0.0  # OpenAI API integration
+optuna<4.0.0,>=3.0.0  # Hyperparameter optimization
+
+# Data Processing and Analysis
+pandas>=1.5.0,<3.0.0  # Data manipulation
+dask>=2023.5.0,<2024.0.0  # Parallel computing
+pyarrow>=12.0.0,<15.0.0  # Columnar data format
+openpyxl>=3.1.0,<4.0.0  # Excel file handling
+joblib>=1.3.0,<2.0.0  # Parallel processing
+matplotlib>=3.6.0,<4.0.0  # Plotting library
+seaborn>=0.12.0,<1.0.0  # Statistical visualization
+plotly>=5.15.0,<6.0.0  # Interactive plotting
+xgboost>=1.7.0,<2.0.0  # Gradient boosting
+
+# Graph Algorithms and Network Analysis
+networkx>=2.8.0,<3.0.0  # Graph algorithms
+graphviz>=0.20.0,<1.0.0  # Graph visualization
+
+# Natural Language Processing
+nltk>=3.8.0,<4.0.0  # Natural language toolkit
+gensim>=4.3.0,<5.0.0  # Topic modeling
+
+# Advanced Database Features
+elasticsearch>=8.8.0,<9.0.0  # Search engine
+kafka-python>=2.0.2,<3.0.0  # Message broker
+redis>=4.5.0,<5.0.0  # In-memory cache
+mysql-connector-python>=8.0.0,<9.0.0  # MySQL connector
+snowflake-connector-python>=3.0.0,<4.0.0  # Snowflake connector
+
+# Performance and Monitoring
+prometheus-client>=0.16.0,<1.0.0  # Metrics collection
+psutil>=5.9.0,<6.0.0  # System monitoring
+structlog>=22.1.0,<23.0.0  # Structured logging
+
+# Enterprise Security and Configuration
+python-jose[cryptography]>=3.3.0,<4.0.0  # JWT handling
+passlib[bcrypt]>=1.7.4,<2.0.0  # Password hashing
+python-multipart>=0.0.5,<1.0.0  # File uploads
+aiofiles>=0.8.0,<1.0.0  # Async file operations
+cryptography>=37.0.0,<42.0.0  # Cryptographic operations
+pyotp>=2.8.0,<3.0.0  # One-time passwords
+python-decouple>=3.8.0,<4.0.0  # Environment configuration
+pyyaml>=6.0.0,<7.0.0  # YAML configuration
+
+# Authentication and Authorization
+Authlib>=1.2.0,<2.0.0  # OAuth and OpenID Connect
+msal>=1.20.0,<2.0.0  # Microsoft authentication
+
+# Task Scheduling and Workflow
+apscheduler>=3.10.0,<4.0.0  # Task scheduling
+croniter>=1.4.1,<2.0.0  # Cron expression parsing
+cron-descriptor>=1.2.0,<2.0.0  # Cron expression description
+alembic>=1.11.0,<2.0.0  # Database migrations
+
+# Cloud Services and Integrations
+boto3>=1.34.0,<2.0.0  # AWS services
+azure-identity>=1.15.0,<2.0.0  # Azure managed identity
+azure-storage-blob>=12.19.0,<13.0.0  # Azure blob storage
+azure-keyvault-secrets>=4.7.0,<5.0.0  # Azure key vault
+pyapacheatlas>=0.13.0,<1.0.0  # Azure Purview/Apache Atlas integration
+google-cloud-storage>=2.14.0,<3.0.0  # GCP storage
+apache-airflow-client>=2.6.0,<3.0.0  # Workflow orchestration
+
+# HTTP and API
+requests>=2.31.0,<3.0.0  # HTTP library
+aiohttp>=3.8.0,<4.0.0  # Async HTTP client
+httpx>=0.24.0,<1.0.0  # HTTP client for testing
+urllib3>=2.1.0,<3.0.0  # HTTP client library
+
+# Web Server and Deployment
+gunicorn>=20.1.0,<21.0.0  # WSGI server
+Jinja2>=3.0.0,<4.0.0  # Template engine
+
+# Testing and Development
+pytest>=7.0.0,<8.0.0  # Testing framework
+pytest-asyncio>=0.18.0,<1.0.0  # Async testing support
+pytest-cov>=3.0.0,<4.0.0  # Coverage reporting
+
+# Utilities
+python-dotenv>=1.0.0,<2.0.0  # Environment variables
+python-dateutil>=2.8.2,<3.0.0  # Date utilities
+email-validator>=1.1.3,<2.0.0  # Email validation
+tenacity>=8.0.0,<9.0.0  # Retry logic
+asyncio>=3.4.3,<4.0.0  # Async I/O support
+
+# ========================================
+# CONTAINER DEPLOYMENT SPECIFIC DEPENDENCIES
+# ========================================
+
+# Health checks and monitoring
+# healthcheck>=1.3.0,<2.0.0  # Container health checks - Package doesn't exist, using Docker healthcheck instead
+
+# Logging and debugging
+colorlog>=6.7.0,<7.0.0  # Colored logging output
+
+# Performance profiling
+memory-profiler>=0.61.0,<1.0.0  # Memory usage profiling
+
+# ========================================
+# VERSION CONSTRAINTS FOR CONTAINER COMPATIBILITY
+# ========================================
+
+# Ensure all packages are compatible with the target Python version
+# For Option 1 (Python 3.11): All packages above are compatible
+# For Option 2 (Python 3.13+): Uncomment modern stack section above
+
+# ========================================
+# DEPLOYMENT NOTES
+# ========================================
+
+# To use Option 1 (Python 3.11):
+# 1. Use Python 3.11 base image in Dockerfile
+# 2. Install all dependencies as listed above
+# 3. All packages are tested and compatible
+
+# To use Option 2 (Modern Stack):
+# 1. Use Python 3.13+ base image in Dockerfile
+# 2. Comment out Option 1 dependencies
+# 3. Uncomment Option 2 dependencies
+# 4. Update codebase for Pydantic 2.x compatibility
+
+# Current recommendation: Use Option 1 for immediate deployment
+# Migrate to Option 2 in future iterations for enhanced performance

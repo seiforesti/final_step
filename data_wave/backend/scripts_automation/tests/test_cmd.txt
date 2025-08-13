@@ -1,0 +1,93 @@
+$env:PYTHONPATH="backend/scripts_automation"
+$env:DATABASE_URL="postgresql://admin:admin@localhost:5433/schema_metadata"
+pytest backend/scripts_automation/tests --maxfail=3 --disable-warnings -v
+
+
+
+
+test_results_override 
+
+
+
+PS C:\Users\seifa\OneDrive\Desktop\purview scripts> pytest backend/scripts_automation/tests --maxfail=5 --disable-warnings -v
+======================= test session starts =======================
+platform win32 -- Python 3.13.0, pytest-8.4.1, pluggy-1.6.0 -- C:\Users\seifa\AppData\Local\Programs\Python\Python313\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\seifa\OneDrive\Desktop\purview scripts
+plugins: anyio-4.8.0
+collected 24 items                                                 
+
+backend/scripts_automation/tests/test_analytics.py::test_analytics_exports_exist PASSED [  4%]
+backend/scripts_automation/tests/test_analytics_api.py::test_analytics_labeling_coverage_endpoint PASSED [  8%]
+backend/scripts_automation/tests/test_analytics_api.py::test_analytics_labeling_trends_endpoint PASSED [ 12%]
+backend/scripts_automation/tests/test_analytics_api.py::test_analytics_user_analytics_endpoint PASSED [ 16%]
+backend/scripts_automation/tests/test_analytics_api.py::test_analytics_dashboard_export_endpoint PASSED [ 20%]
+backend/scripts_automation/tests/test_api_edge_cases.py::test_create_label_missing_name SKIPPED [ 25%]
+backend/scripts_automation/tests/test_api_edge_cases.py::test_create_proposal_invalid_label_id PASSED [ 29%]
+backend/scripts_automation/tests/test_api_edge_cases.py::test_notification_preferences_invalid_channel PASSED [ 33%]
+backend/scripts_automation/tests/test_crud.py::test_create_and_get_label PASSED [ 37%]
+backend/scripts_automation/tests/test_crud.py::test_create_and_get_proposal PASSED [ 41%]
+backend/scripts_automation/tests/test_crud.py::test_update_proposal_status PASSED [ 45%]
+backend/scripts_automation/tests/test_crud.py::test_create_and_get_review PASSED [ 50%]
+backend/scripts_automation/tests/test_crud.py::test_create_label_missing_fields PASSED [ 54%]
+backend/scripts_automation/tests/test_crud.py::test_create_proposal_invalid_label_id SKIPPED [ 58%]
+backend/scripts_automation/tests/test_ml_service.py::test_ml_service_versioning PASSED [ 62%]
+backend/scripts_automation/tests/test_ml_service_functional.py::test_train_and_predict PASSED [ 66%]
+backend/scripts_automation/tests/test_ml_service_functional.py::test_predict_with_invalid_features PASSED [ 70%]
+backend/scripts_automation/tests/test_ml_service_functional.py::test_feedback_and_retrain PASSED [ 75%]
+backend/scripts_automation/tests/test_ml_service_functional.py::test_version_switching PASSED [ 79%]
+backend/scripts_automation/tests/test_notification_channels.py::test_notification_preferences_sms_channel PASSED [ 83%]
+backend/scripts_automation/tests/test_notification_channels.py::test_notification_preferences_push_channel PASSED [ 87%]
+backend/scripts_automation/tests/test_notifications.py::test_list_notifications PASSED [ 91%]
+backend/scripts_automation/tests/test_notifications.py::test_set_and_get_preferences PASSED [ 95%]
+backend/scripts_automation/tests/test_notifications.py::test_notification_lifecycle SKIPPED [100%]
+
+=========== 21 passed, 3 skipped, 41 warnings in 0.68s ============ 
+PS C:\Users\seifa\OneDrive\Desktop\purview scripts> 
+
+
+//////summarizing_test///////////////
+Here’s a simple summary of the tests you have for the sensitivity_labeling backend and how they are executed:
+
+What Was Tested
+CRUD Operations
+
+Tests for creating, updating, and retrieving labels, proposals, and reviews.
+Edge cases like missing fields or invalid IDs are also checked.
+Analytics Endpoints
+
+API endpoints for analytics (labeling coverage, trends, user analytics, dashboard export) are tested for correct responses and data.
+ML Service
+
+Functional tests for training, predicting, feedback, retraining, and model version switching.
+Edge cases for label types and feature arrays are covered.
+Ensures model files are saved with Windows-compatible filenames.
+Notifications
+
+Tests for listing notifications, setting/getting preferences, and notification lifecycle.
+Notification channels (SMS, push) are tested for correct API behavior.
+API Edge Cases
+
+Tests for invalid or missing data in API requests to ensure robust validation and error handling.
+How the Tests Are Run
+Test Framework:
+All tests use pytest, a popular Python testing framework.
+Mocking:
+Database sessions and some objects are mocked using unittest.mock.MagicMock to simulate DB behavior and isolate logic.
+Test Files:
+Tests are organized in files like:
+test_crud.py
+test_analytics.py
+test_analytics_api.py
+test_ml_service.py
+test_ml_service_functional.py
+test_notifications.py
+test_notification_channels.py
+test_api_edge_cases.py
+Execution:
+All tests are run with the command:
+This runs all test files, shows detailed output, and stops after 5 failures (if any).
+Results
+All tests pass except for a few that are intentionally skipped (due to environment or data requirements).
+The test suite covers all major backend features, including edge cases and platform compatibility.
+If you need a more detailed breakdown or want to see specific test examples, let me know!

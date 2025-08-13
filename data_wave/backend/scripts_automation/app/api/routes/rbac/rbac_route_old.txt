@@ -1,0 +1,1026 @@
+# --- Condition Templates Endpoint ---
+@router.get("/condition-templates")
+def list_condition_templates():
+    # In a real system, these could be loaded from config/db
+    templates = [
+        {"label": "Owner Only", "value": '{"user_id": ":current_user_id"}'},
+        {"label": "Department Match", "value": '{"department": ":user_department"}'},
+        {"label": "Custom", "value": ""}
+    ]
+    return templates
+
+# --- Condition Validation Endpoint ---
+from fastapi import HTTPException
+@router.post("/validate-condition")
+def validate_condition(condition: dict = Body(...)):
+    import json
+    try:
+        # Dummy user/context for validation
+        dummy_user = type("User", (), {"id": 1, "department": "IT", "region": "EU"})()
+        _ = json.dumps(condition)  # Check serializable
+        # Optionally, run through ABAC logic with dummy values (future)
+        return {"valid": True}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Invalid condition: {str(e)}")
+# Pydantic model for role update
+from pydantic import BaseModel
+
+from typing import Optional
+class RoleUpdate(BaseModel):
+    name: str
+    description: Optional[str] = None
+# --- Azure-style Role Assignment Listing ---
+
+
+from fastapi import APIRouter, Depends, HTTPException, Body, Cookie, Request, Header
+from pydantic import BaseModel
+
+from app.db_session import get_session
+# Robust session checker
+def get_current_user(
+    session_token: str = Cookie(None),
+    authorization: str = Header(None),
+    db=Depends(get_session)
+):
+    from app.services.auth_service import get_session_by_token
+    token = session_token
+    # Support Authorization: Bearer <token>
+    if not token and authorization and authorization.lower().startswith("bearer "):
+        token = authorization[7:]
+    session = get_session_by_token(db, token)
+    if session is None or getattr(session, "user", None) is None:
+        raise HTTPException(status_code=401, detail="Invalid or missing session token")
+    return session.user
+from pydantic import BaseModel
+
+# Pydantic model for role creation
+class RoleCreate(BaseModel):
+    name: str
+    description: Optional[str] = None
+from sqlalchemy.orm import Session
+from typing import List, Optional
+from app.db_session import get_session
+from app.models.auth_models import User, Role, UserRole, Permission, ResourceRole, AccessRequest, RbacAuditLog
+from app.services.role_service import (
+    list_users, get_user_role, set_user_role, list_permissions, create_permission, delete_permission, update_permission,
+    user_has_permission, assign_permission_to_role, remove_permission_from_role, get_user_permissions,
+    assign_resource_role, list_resource_roles, create_access_request, review_access_request, log_rbac_action, list_rbac_audit_logs
+)
+from app.services.auth_service import get_session_by_token, assign_role_to_user
+import logging
+
+
+router = APIRouter(prefix="/rbac", tags=["RBAC"])
+
+# --- Condition Templates Endpoint ---
+@router.get("/condition-templates")
+def list_condition_templates():
+    # In a real system, these could be loaded from config/db
+    templates = [
+        {"label": "Owner Only", "value": '{"user_id": ":current_user_id"}'},
+        {"label": "Department Match", "value": '{"department": ":user_department"}'},
+        {"label": "Custom", "value": ""}
+    ]
+    return templates
+
+# --- Condition Validation Endpoint ---
+from fastapi import HTTPException
+@router.post("/validate-condition")
+def validate_condition(condition: dict = Body(...)):
+    import json
+    try:
+        # Dummy user/context for validation
+        dummy_user = type("User", (), {"id": 1, "department": "IT", "region": "EU"})()
+        _ = json.dumps(condition)  # Check serializable
+        # Optionally, run through ABAC logic with dummy values (future)
+        return {"valid": True}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Invalid condition: {str(e)}")
+
+@router.get("/role-assignments")
+def list_role_assignments(
+    user_id: Optional[int] = None,
+    role_id: Optional[int] = None,
+    resource_type: Optional[str] = None,
+    resource_id: Optional[str] = None,
+    db: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    List all role assignments (user, role, resource scope). Azure-style.
+    """
+    if getattr(current_user, "role", None) != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+    q = db.query(ResourceRole)
+    if user_id:
+        q = q.filter(ResourceRole.user_id == user_id)
+    if role_id:
+        q = q.filter(ResourceRole.role_id == role_id)
+    if resource_type:
+        q = q.filter(ResourceRole.resource_type == resource_type)
+    if resource_id:
+        q = q.filter(ResourceRole.resource_id == resource_id)
+    assignments = q.all()
+    return [
+        {
+            "id": a.id,
+            "user_id": a.user_id,
+            "role_id": a.role_id,
+            "resource_type": a.resource_type,
+            "resource_id": a.resource_id,
+            "assigned_at": a.assigned_at,
+        }
+        for a in assignments
+    ]
+
+# --- List Access Requests (Delegation/Review) ---
+@router.get("/access-requests")
+def list_access_requests(
+    user_id: Optional[int] = None,
+    status: Optional[str] = None,
+    db: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    List all access requests (delegation workflow), filterable by user and status.
+    """
+    if getattr(current_user, "role", None) != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+    q = db.query(AccessRequest)
+    if user_id:
+        q = q.filter(AccessRequest.user_id == user_id)
+    if status:
+        q = q.filter(AccessRequest.status == status)
+    reqs = q.order_by(AccessRequest.created_at.desc()).all()
+    return [r.dict() for r in reqs]
+
+# --- Periodic Access Review Trigger ---
+@router.post("/access-review/trigger")
+def trigger_access_review(
+    db: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Trigger a periodic access review (stub: returns all active assignments for review).
+    """
+    if getattr(current_user, "role", None) != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+    assignments = db.query(ResourceRole).all()
+    # In a real system, this would notify reviewers or create review tasks
+    return {"assignments_for_review": [
+        {
+            "id": a.id,
+            "user_id": a.user_id,
+            "role_id": a.role_id,
+            "resource_type": a.resource_type,
+            "resource_id": a.resource_id,
+            "assigned_at": a.assigned_at,
+        }
+        for a in assignments
+    ]}
+
+# --- Enhanced Audit Log Filtering ---
+@router.get("/audit-logs/filter")
+def filter_rbac_audit_logs(
+    user: Optional[str] = None,
+    action: Optional[str] = None,
+    resource_type: Optional[str] = None,
+    resource_id: Optional[str] = None,
+    role: Optional[str] = None,
+    status: Optional[str] = None,
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    if getattr(current_user, "role", None) != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+    q = db.query(RbacAuditLog)
+    if user:
+        q = q.filter(RbacAuditLog.target_user == user)
+    if action:
+        q = q.filter(RbacAuditLog.action == action)
+    if resource_type:
+        q = q.filter(RbacAuditLog.resource_type == resource_type)
+    if resource_id:
+        q = q.filter(RbacAuditLog.resource_id == resource_id)
+    if role:
+        q = q.filter(RbacAuditLog.role == role)
+    if status:
+        q = q.filter(RbacAuditLog.status == status)
+    logs = q.order_by(RbacAuditLog.timestamp.desc()).offset(skip).limit(limit).all()
+    return {"logs": [l.dict() for l in logs], "skip": skip, "limit": limit}
+"""
+RBAC API routes: advanced, Azure-inspired, enterprise-grade RBAC endpoints.
+Handles: user/role/permission/group/service principal management, resource-level scoping, ABAC, delegation, access review, audit logging.
+"""
+# from fastapi import APIRouter, Depends, HTTPException, Body, Cookie, Request
+# from app.models.auth_models import ResourceRole, AccessRequest, RbacAuditLog
+# from sqlalchemy.orm import Session
+# from typing import List, Optional
+# from app.db_session import get_session
+# from app.models.auth_models import User, Role, UserRole, Permission
+# from app.services.role_service import (
+#     list_users, get_user_role, set_user_role, list_permissions, create_permission, delete_permission, update_permission,
+#     user_has_permission, assign_permission_to_role, remove_permission_from_role, get_user_permissions,
+#     assign_resource_role, list_resource_roles, create_access_request, review_access_request, log_rbac_action, list_rbac_audit_logs
+# )
+# from app.services.auth_service import get_session_by_token, assign_role_to_user
+# import logging
+
+
+# --- User Management Endpoints --- 
+@router.get("/users")
+def list_users_api(db: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+    if not user_has_permission(db, current_user, "manage", "rbac") and getattr(current_user, "role", None) != "admin":
+        raise HTTPException(status_code=403, detail="Admin or RBAC manager only")
+    users = list_users(db)
+    result = []
+    for u in users:
+        # Defensive: ensure roles is always a list and serializable
+        roles = []
+        try:
+            user_roles = getattr(u, "roles", []) or []
+            for r in user_roles:
+                if hasattr(r, "name"):
+                    roles.append(r.name)
+                elif isinstance(r, tuple) and len(r) > 1:
+                    roles.append(r[1])
+                else:
+                    roles.append(str(r))
+        except Exception as e:
+            import sys
+            print(f"Error serializing roles for user {u.id}: {e}", file=sys.stderr)
+            roles = []
+        result.append({
+            "id": u.id,
+            "email": u.email,
+            "roles": roles,
+            "is_active": getattr(u, "is_active", True)
+        })
+    return result
+
+@router.post("/users/{user_id}/deactivate")
+def deactivate_user_api(user_id: int, db: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+    if not user_has_permission(db, current_user, "manage", "rbac") and getattr(current_user, "role", None) != "admin":
+        raise HTTPException(status_code=403, detail="Admin or RBAC manager only")
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    user.is_active = False
+    db.commit()
+    return {"detail": f"User {user_id} deactivated"}
+
+@router.post("/users/{user_id}/activate")
+def activate_user_api(user_id: int, db: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+    if not user_has_permission(db, current_user, "manage", "rbac") and getattr(current_user, "role", None) != "admin":
+        raise HTTPException(status_code=403, detail="Admin or RBAC manager only")
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    user.is_active = True
+    db.commit()
+    return {"detail": f"User {user_id} activated"}
+
+@router.post("/users/{user_id}/remove-role")
+def remove_role_from_user_api(user_id: int, role_id: int = Body(...), db: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+    if not user_has_permission(db, current_user, "manage", "rbac") and getattr(current_user, "role", None) != "admin":
+        raise HTTPException(status_code=403, detail="Admin or RBAC manager only")
+    user_role = db.query(UserRole).filter(UserRole.user_id == user_id, UserRole.role_id == role_id).first()
+    if not user_role:
+        raise HTTPException(status_code=404, detail="User does not have this role")
+    db.delete(user_role)
+    db.commit()
+    return {"detail": f"Role {role_id} removed from user {user_id}"}
+
+@router.post("/users/{user_id}/reactivate")
+def reactivate_user(user_id: int, db: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+    if getattr(current_user, "role", None) != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    user.is_active = True
+    db.commit()
+    # TODO: Add audit log
+    return {"detail": f"User {user.email} reactivated"}
+
+@router.post("/users/bulk-assign-roles")
+def bulk_assign_roles(user_ids: List[int] = Body(...), role_id: int = Body(...), db: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+    if getattr(current_user, "role", None) != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+    role = db.query(Role).filter(Role.id == role_id).first()
+    if not role:
+        raise HTTPException(status_code=404, detail="Role not found")
+    for user_id in user_ids:
+        user = db.query(User).filter(User.id == user_id).first()
+        if user:
+            assign_role_to_user(db, user, role.name)
+            # TODO: Add audit log
+    db.commit()
+    return {"detail": f"Role {role.name} assigned to users", "role": role.name, "user_ids": user_ids}
+
+@router.post("/users/bulk-remove-roles")
+def bulk_remove_roles(user_ids: List[int] = Body(...), role_id: int = Body(...), db: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+    if getattr(current_user, "role", None) != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+    role = db.query(Role).filter(Role.id == role_id).first()
+    if not role:
+        raise HTTPException(status_code=404, detail="Role not found")
+    for user_id in user_ids:
+        user = db.query(User).filter(User.id == user_id).first()
+        if user:
+            # Remove role from user
+            user.roles = [r for r in user.roles if r.id != role_id]
+            db.add(user)
+            # TODO: Add audit log
+    db.commit()
+    return {"detail": f"Role {role.name} removed from users", "role": role.name, "user_ids": user_ids}
+
+# --- Permission Management Endpoints ---
+@router.get("/permissions")
+def list_permissions_api(db: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+    return [
+        {"id": p.id, "action": p.action, "resource": p.resource, "conditions": p.conditions}
+        for p in list_permissions(db)
+    ]
+
+@router.post("/permissions")
+def create_permission_api(action: str = Body(...), resource: str = Body(...), conditions: Optional[str] = Body(None), db: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+    if not user_has_permission(db, current_user, "manage", "rbac") and getattr(current_user, "role", None) != "admin":
+        raise HTTPException(status_code=403, detail="Admin or RBAC manager only")
+    perm = create_permission(db, action, resource, conditions)
+    return {"id": perm.id, "action": perm.action, "resource": perm.resource, "conditions": perm.conditions}
+
+@router.delete("/permissions/{permission_id}")
+def delete_permission_api(permission_id: int, db: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+    if not user_has_permission(db, current_user, "manage", "rbac") and getattr(current_user, "role", None) != "admin":
+        raise HTTPException(status_code=403, detail="Admin or RBAC manager only")
+    success = delete_permission(db, permission_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Permission not found")
+    return {"detail": f"Permission {permission_id} deleted"}
+
+@router.put("/permissions/{permission_id}")
+def update_permission_api(permission_id: int, action: Optional[str] = Body(None), resource: Optional[str] = Body(None), conditions: Optional[str] = Body(None), db: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+    if not user_has_permission(db, current_user, "manage", "rbac") and getattr(current_user, "role", None) != "admin":
+        raise HTTPException(status_code=403, detail="Admin or RBAC manager only")
+    perm = update_permission(db, permission_id, action, resource, conditions)
+    if not perm:
+        raise HTTPException(status_code=404, detail="Permission not found")
+    return {"id": perm.id, "action": perm.action, "resource": perm.resource, "conditions": perm.conditions}
+
+
+# --- Current User RBAC Info ---
+@router.get("/me")
+def get_rbac_me(current_user: User = Depends(get_current_user), db: Session = Depends(get_session)):
+    import traceback
+    try:
+        roles = [current_user.role] if hasattr(current_user, "role") else []
+        user_roles = getattr(current_user, "roles", None) or []
+        # Handle both ORM objects and tuples
+        for r in user_roles:
+            if hasattr(r, "name"):
+                roles.append(r.name)
+            elif isinstance(r, tuple) and len(r) > 1:
+                roles.append(r[1])
+            else:
+                roles.append(str(r))
+        permissions = set()
+        for role in user_roles:
+            role_obj = role[0] if isinstance(role, tuple) and hasattr(role[0], "permissions") else role
+            for rp in getattr(role_obj, "permissions", []) or []:
+                permissions.add((rp.action, rp.resource))
+        return {
+            "id": current_user.id,
+            "email": current_user.email,
+            "roles": list(set(roles)),
+            "permissions": list(permissions),
+        }
+    except Exception as e:
+        import sys
+        print("Exception in get_rbac_me:", e, file=sys.stderr)
+        print(traceback.format_exc(), file=sys.stderr)
+        import logging
+        logger = logging.getLogger("rbac_me")
+        logger.error(f"Exception in get_rbac_me: {e}", exc_info=True)
+        logger.error(traceback.format_exc())
+        from fastapi import HTTPException, status
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Internal server error in /me: {e}")
+
+
+
+
+
+
+
+
+
+"""
+RBAC API routes: advanced, Azure-inspired, enterprise-grade RBAC endpoints.
+Handles: user/role/permission/group/service principal management, resource-level scoping, ABAC, delegation, access review, audit logging.
+"""
+# from fastapi import APIRouter, Depends, HTTPException, Body, Cookie, Request
+# from app.models.auth_models import ResourceRole, AccessRequest, RbacAuditLog
+# from sqlalchemy.orm import Session
+# from typing import List, Optional
+# from app.db_session import get_session
+# from app.models.auth_models import User, Role, UserRole, Permission
+# from app.services.role_service import (
+#     list_users, get_user_role, set_user_role, list_permissions, create_permission, delete_permission, update_permission,
+#     user_has_permission, assign_permission_to_role, remove_permission_from_role, get_user_permissions,
+#     assign_resource_role, list_resource_roles, create_access_request, review_access_request, log_rbac_action, list_rbac_audit_logs
+# )
+# from app.services.auth_service import get_session_by_token, assign_role_to_user
+# import logging
+
+
+# --- User Management Endpoints --- 
+@router.get("/users")
+def list_users_api(db: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+    if not user_has_permission(db, current_user, "manage", "rbac") and getattr(current_user, "role", None) != "admin":
+        raise HTTPException(status_code=403, detail="Admin or RBAC manager only")
+    users = list_users(db)
+    result = []
+    for u in users:
+        # Defensive: ensure roles is always a list and serializable
+        roles = []
+        try:
+            user_roles = getattr(u, "roles", []) or []
+            for r in user_roles:
+                if hasattr(r, "name"):
+                    roles.append(r.name)
+                elif isinstance(r, tuple) and len(r) > 1:
+                    roles.append(r[1])
+                else:
+                    roles.append(str(r))
+        except Exception as e:
+            import sys
+            print(f"Error serializing roles for user {u.id}: {e}", file=sys.stderr)
+            roles = []
+        result.append({
+            "id": u.id,
+            "email": u.email,
+            "roles": roles,
+            "is_active": getattr(u, "is_active", True)
+        })
+    return result
+
+@router.post("/users/{user_id}/deactivate")
+def deactivate_user_api(user_id: int, db: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+    if not user_has_permission(db, current_user, "manage", "rbac") and getattr(current_user, "role", None) != "admin":
+        raise HTTPException(status_code=403, detail="Admin or RBAC manager only")
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    user.is_active = False
+    db.commit()
+    return {"detail": f"User {user_id} deactivated"}
+
+@router.post("/users/{user_id}/activate")
+def activate_user_api(user_id: int, db: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+    if not user_has_permission(db, current_user, "manage", "rbac") and getattr(current_user, "role", None) != "admin":
+        raise HTTPException(status_code=403, detail="Admin or RBAC manager only")
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    user.is_active = True
+    db.commit()
+    return {"detail": f"User {user_id} activated"}
+
+@router.post("/users/{user_id}/remove-role")
+def remove_role_from_user_api(user_id: int, role_id: int = Body(...), db: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+    if not user_has_permission(db, current_user, "manage", "rbac") and getattr(current_user, "role", None) != "admin":
+        raise HTTPException(status_code=403, detail="Admin or RBAC manager only")
+    user_role = db.query(UserRole).filter(UserRole.user_id == user_id, UserRole.role_id == role_id).first()
+    if not user_role:
+        raise HTTPException(status_code=404, detail="User does not have this role")
+    db.delete(user_role)
+    db.commit()
+    return {"detail": f"Role {role_id} removed from user {user_id}"}
+
+@router.post("/users/{user_id}/reactivate")
+def reactivate_user(user_id: int, db: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+    if getattr(current_user, "role", None) != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    user.is_active = True
+    db.commit()
+    # TODO: Add audit log
+    return {"detail": f"User {user.email} reactivated"}
+
+@router.post("/users/bulk-assign-roles")
+def bulk_assign_roles(user_ids: List[int] = Body(...), role_id: int = Body(...), db: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+    if getattr(current_user, "role", None) != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+    role = db.query(Role).filter(Role.id == role_id).first()
+    if not role:
+        raise HTTPException(status_code=404, detail="Role not found")
+    for user_id in user_ids:
+        user = db.query(User).filter(User.id == user_id).first()
+        if user:
+            assign_role_to_user(db, user, role.name)
+            # TODO: Add audit log
+    db.commit()
+    return {"detail": f"Role {role.name} assigned to users", "role": role.name, "user_ids": user_ids}
+
+@router.post("/users/bulk-remove-roles")
+def bulk_remove_roles(user_ids: List[int] = Body(...), role_id: int = Body(...), db: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+    if getattr(current_user, "role", None) != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+    role = db.query(Role).filter(Role.id == role_id).first()
+    if not role:
+        raise HTTPException(status_code=404, detail="Role not found")
+    for user_id in user_ids:
+        user = db.query(User).filter(User.id == user_id).first()
+        if user:
+            # Remove role from user
+            user.roles = [r for r in user.roles if r.id != role_id]
+            db.add(user)
+            # TODO: Add audit log
+    db.commit()
+    return {"detail": f"Role {role.name} removed from users", "role": role.name, "user_ids": user_ids}
+
+# --- Permission Management Endpoints ---
+@router.get("/permissions")
+def list_permissions_api(db: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+    return [
+        {"id": p.id, "action": p.action, "resource": p.resource, "conditions": p.conditions}
+        for p in list_permissions(db)
+    ]
+
+@router.post("/permissions")
+def create_permission_api(action: str = Body(...), resource: str = Body(...), conditions: Optional[str] = Body(None), db: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+    if not user_has_permission(db, current_user, "manage", "rbac") and getattr(current_user, "role", None) != "admin":
+        raise HTTPException(status_code=403, detail="Admin or RBAC manager only")
+    perm = create_permission(db, action, resource, conditions)
+    return {"id": perm.id, "action": perm.action, "resource": perm.resource, "conditions": perm.conditions}
+
+@router.delete("/permissions/{permission_id}")
+def delete_permission_api(permission_id: int, db: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+    if not user_has_permission(db, current_user, "manage", "rbac") and getattr(current_user, "role", None) != "admin":
+        raise HTTPException(status_code=403, detail="Admin or RBAC manager only")
+    success = delete_permission(db, permission_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Permission not found")
+    return {"detail": f"Permission {permission_id} deleted"}
+
+@router.put("/permissions/{permission_id}")
+def update_permission_api(permission_id: int, action: Optional[str] = Body(None), resource: Optional[str] = Body(None), conditions: Optional[str] = Body(None), db: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+    if not user_has_permission(db, current_user, "manage", "rbac") and getattr(current_user, "role", None) != "admin":
+        raise HTTPException(status_code=403, detail="Admin or RBAC manager only")
+    perm = update_permission(db, permission_id, action, resource, conditions)
+    if not perm:
+        raise HTTPException(status_code=404, detail="Permission not found")
+    return {"id": perm.id, "action": perm.action, "resource": perm.resource, "conditions": perm.conditions}
+
+@router.post("/roles/bulk-assign-permissions")
+def bulk_assign_permissions(role_ids: List[int] = Body(...), permission_id: int = Body(...), db: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+    if getattr(current_user, "role", None) != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+    perm = db.query(Permission).filter(Permission.id == permission_id).first()
+    if not perm:
+        raise HTTPException(status_code=404, detail="Permission not found")
+    for role_id in role_ids:
+        role = db.query(Role).filter(Role.id == role_id).first()
+        if role:
+            assign_permission_to_role(db, role_id, permission_id)
+            # TODO: Add audit log
+    db.commit()
+    return {"detail": f"Permission {perm.action} assigned to roles", "permission": perm.action, "role_ids": role_ids}
+
+@router.post("/roles/bulk-remove-permissions")
+def bulk_remove_permissions(role_ids: List[int] = Body(...), permission_id: int = Body(...), db: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+    if getattr(current_user, "role", None) != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+    perm = db.query(Permission).filter(Permission.id == permission_id).first()
+    if not perm:
+        raise HTTPException(status_code=404, detail="Permission not found")
+    for role_id in role_ids:
+        role = db.query(Role).filter(Role.id == role_id).first()
+        if role:
+            remove_permission_from_role(db, role_id, permission_id)
+            # TODO: Add audit log
+    db.commit()
+    return {"detail": f"Permission {perm.action} removed from roles", "permission": perm.action, "role_ids": role_ids}
+
+# --- Role Management Endpoints ---
+@router.get("/roles")
+def list_roles_api(db: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+    if not user_has_permission(db, current_user, "manage", "rbac") and getattr(current_user, "role", None) != "admin":
+        raise HTTPException(status_code=403, detail="Admin or RBAC manager only")
+    roles = db.query(Role).all()
+    return [
+        {
+            "id": r.id,
+            "name": r.name,
+            "description": r.description,
+            "permissions": [
+                (p.action, p.resource)
+                for p in (getattr(r, "permissions", []) or [])
+            ],
+        }
+        for r in roles
+    ]
+
+@router.post("/roles")
+def create_role_api(
+    role_in: RoleCreate,
+    db: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    if not user_has_permission(db, current_user, "manage", "rbac") and getattr(current_user, "role", None) != "admin":
+        raise HTTPException(status_code=403, detail="Admin or RBAC manager only")
+    from app.services.role_service import create_role
+    role = create_role(db, role_in.name, role_in.description)
+    return {"id": role.id, "name": role.name, "description": role.description}
+
+@router.delete("/roles/{role_id}")
+def delete_role_api(role_id: int, db: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+    if not user_has_permission(db, current_user, "manage", "rbac") and getattr(current_user, "role", None) != "admin":
+        raise HTTPException(status_code=403, detail="Admin or RBAC manager only")
+    role = db.query(Role).filter(Role.id == role_id).first()
+    if not role:
+        raise HTTPException(status_code=404, detail="Role not found")
+    db.delete(role)
+    db.commit()
+    return {"detail": f"Role {role_id} deleted"}
+
+@router.put("/roles/{role_id}")
+def update_role_api(
+    role_id: int,
+    role_in: RoleUpdate,
+    db: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    if not user_has_permission(db, current_user, "manage", "rbac") and getattr(current_user, "role", None) != "admin":
+        raise HTTPException(status_code=403, detail="Admin or RBAC manager only")
+    role = db.query(Role).filter(Role.id == role_id).first()
+    if not role:
+        raise HTTPException(status_code=404, detail="Role not found")
+    role.name = role_in.name
+    role.description = role_in.description
+    db.commit()
+    db.refresh(role)
+    return {"id": role.id, "name": role.name, "description": role.description}
+
+# --- Current User RBAC Info ---
+@router.get("/me")
+def get_rbac_me(current_user: User = Depends(get_current_user), db: Session = Depends(get_session)):
+    import traceback
+    try:
+        roles = [current_user.role] if hasattr(current_user, "role") else []
+        user_roles = getattr(current_user, "roles", None) or []
+        # Handle both ORM objects and tuples
+        for r in user_roles:
+            if hasattr(r, "name"):
+                roles.append(r.name)
+            elif isinstance(r, tuple) and len(r) > 1:
+                roles.append(r[1])
+            else:
+                roles.append(str(r))
+        permissions = set()
+        for role in user_roles:
+            role_obj = role[0] if isinstance(role, tuple) and hasattr(role[0], "permissions") else role
+            for rp in getattr(role_obj, "permissions", []) or []:
+                permissions.add((rp.action, rp.resource))
+        return {
+            "id": current_user.id,
+            "email": current_user.email,
+            "roles": list(set(roles)),
+            "permissions": list(permissions),
+        }
+    except Exception as e:
+        import sys
+        print("Exception in get_rbac_me:", e, file=sys.stderr)
+        print(traceback.format_exc(), file=sys.stderr)
+        import logging
+        logger = logging.getLogger("rbac_me")
+        logger.error(f"Exception in get_rbac_me: {e}", exc_info=True)
+        logger.error(traceback.format_exc())
+        from fastapi import HTTPException, status
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Internal server error in /me: {e}")
+
+
+# --- Advanced RBAC Features ---
+
+# Resource-level scoping example: assign role/permission to a specific resource (db/schema/table)
+@router.post("/assign-role-scope")
+def assign_role_scope(
+    user_id: int = Body(...),
+    role_id: int = Body(...),
+    resource_type: str = Body(...),  # e.g., 'database', 'schema', 'table'
+    resource_id: str = Body(...),
+    db: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    if getattr(current_user, "role", None) != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+    rr = assign_resource_role(db, user_id, role_id, resource_type, resource_id, performed_by=current_user.email)
+    return {"detail": f"Role {role_id} assigned to user {user_id} for {resource_type}:{resource_id}", "assignment": rr.dict()}
+
+@router.get("/resource-roles")
+def get_resource_roles(
+    user_id: Optional[int] = None,
+    resource_type: Optional[str] = None,
+    resource_id: Optional[str] = None,
+    db: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    if getattr(current_user, "role", None) != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+    roles = list_resource_roles(db, user_id, resource_type, resource_id)
+    return [r.dict() for r in roles]
+
+# Built-in roles endpoint (Azure-style)
+@router.get("/builtin-roles")
+def get_builtin_roles():
+    return [
+        {"name": "DB Reader", "description": "Read-only access to database resources."},
+        {"name": "DB Writer", "description": "Read/write access to database resources."},
+        {"name": "DB Admin", "description": "Full admin access to database resources."},
+        {"name": "RBAC Admin", "description": "Manage RBAC assignments and policies."},
+    ]
+
+# ABAC/conditions: test permission with advanced conditions
+@router.post("/test-abac")
+def test_abac(
+    user_id: int = Body(...),
+    action: str = Body(...),
+    resource: str = Body(...),
+    conditions: dict = Body(...),
+    db: Session = Depends(get_session),
+    current_user: User = Depends(lambda session_token=Cookie(None), db=Depends(get_session): get_session_by_token(db, session_token).user)
+):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    allowed = user_has_permission(db, user, action, resource, conditions=conditions)
+    return {"allowed": allowed}
+
+# Delegation: request access (delegation workflow)
+@router.post("/request-access")
+def request_access(
+    user_id: int = Body(...),
+    resource_type: str = Body(...),
+    resource_id: str = Body(...),
+    requested_role: str = Body(...),
+    justification: str = Body(...),
+    db: Session = Depends(get_session),
+    current_user: User = Depends(lambda session_token=Cookie(None), db=Depends(get_session): get_session_by_token(db, session_token).user)
+):
+    req = create_access_request(db, user_id, resource_type, resource_id, requested_role, justification)
+    return {"detail": "Access request submitted", "status": req.status, "request": req.dict()}
+
+# Access review: approve/reject access requests
+@router.post("/access-review")
+def access_review(
+    request_id: int = Body(...),
+    approve: bool = Body(...),
+    review_note: Optional[str] = Body(None),
+    db: Session = Depends(get_session),
+    current_user: User = Depends(lambda session_token=Cookie(None), db=Depends(get_session): get_session_by_token(db, session_token).user)
+):
+    if getattr(current_user, "role", None) != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+    req = review_access_request(db, request_id, approve, reviewer=current_user.email, review_note=review_note)
+    if not req:
+        raise HTTPException(status_code=404, detail="Access request not found")
+    return {"detail": "Access request reviewed", "approved": approve, "request": req.dict()}
+
+# Audit log: list RBAC-related audit events
+@router.get("/audit-logs")
+def get_rbac_audit_logs(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_session),
+    current_user: User = Depends(lambda session_token=Cookie(None), db=Depends(get_session): get_session_by_token(db, session_token).user)
+):
+    if getattr(current_user, "role", None) != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+    logs = list_rbac_audit_logs(db, skip=skip, limit=limit)
+    return {"logs": [l.dict() for l in logs], "skip": skip, "limit": limit}
+
+# --- Entity-centric Audit Log Endpoint ---
+from typing import Any
+from app.services.role_service import get_entity_audit_history
+
+class EntityAuditQuery(BaseModel):
+    entity_type: str
+    entity_id: str
+    limit: int = 100
+
+@router.post("/audit-logs/entity-history")
+def get_audit_history_for_entity(
+    query: EntityAuditQuery,
+    db: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    if getattr(current_user, "role", None) != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+    logs = get_entity_audit_history(db, query.entity_type, query.entity_id, query.limit)
+    return {"logs": [l.dict() for l in logs], "entity_type": query.entity_type, "entity_id": query.entity_id}
+
+
+---------------------------------------------------------------------------------
+# --- Group Management Endpoints ---
+@router.get("/groups")
+def list_groups_api(db: Session = Depends(get_session), current_user: User = Depends(lambda session_token=Cookie(None), db=Depends(get_session): get_session_by_token(db, session_token).user)):
+    if getattr(current_user, "role", None) != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+    from app.services.role_service import list_groups
+    return list_groups(db)
+
+@router.post("/groups")
+def create_group_api(name: str = Body(...), description: str = Body(None), db: Session = Depends(get_session), current_user: User = Depends(lambda session_token=Cookie(None), db=Depends(get_session): get_session_by_token(db, session_token).user)):
+    if getattr(current_user, "role", None) != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+    from app.services.role_service import create_group
+    group = create_group(db, name, description)
+    return {"id": group.id, "name": group.name, "description": group.description}
+
+from typing import List
+@router.post("/groups/{group_id}/add-user")
+def add_user_to_group_api(group_id: int, user_ids: List[int] = Body(...), db: Session = Depends(get_session), current_user: User = Depends(lambda session_token=Cookie(None), db=Depends(get_session): get_session_by_token(db, session_token).user)):
+    if getattr(current_user, "role", None) != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+    from app.services.role_service import add_user_to_group
+    user_group_ids = []
+    for user_id in user_ids:
+        ug = add_user_to_group(db, user_id, group_id)
+        user_group_ids.append(ug.id)
+    return {"detail": f"Users {user_ids} added to group {group_id}", "user_group_ids": user_group_ids}
+
+class RemoveUserRequest(BaseModel):
+    user_id: int
+
+@router.post("/groups/{group_id}/remove-user")
+def remove_user_from_group_api(group_id: int, req: RemoveUserRequest, db: Session = Depends(get_session), current_user: User = Depends(lambda session_token=Cookie(None), db=Depends(get_session): get_session_by_token(db, session_token).user)):
+    if getattr(current_user, "role", None) != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+    from app.services.role_service import remove_user_from_group, list_groups
+    ug = remove_user_from_group(db, req.user_id, group_id)
+    # Return updated group object for frontend
+    group = [g for g in list_groups(db) if g["id"] == group_id]
+    return {"detail": f"User {req.user_id} removed from group {group_id}", "group": group[0] if group else None}
+
+class RemoveRoleRequest(BaseModel):
+    role_id: int
+
+@router.post("/groups/{group_id}/remove-role")
+def remove_role_from_group_api(group_id: int, req: RemoveRoleRequest, db: Session = Depends(get_session), current_user: User = Depends(lambda session_token=Cookie(None), db=Depends(get_session): get_session_by_token(db, session_token).user)):
+    if getattr(current_user, "role", None) != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+    from app.services.role_service import remove_role_from_group, list_groups
+    gr = remove_role_from_group(db, group_id, req.role_id)
+    group = [g for g in list_groups(db) if g["id"] == group_id]
+    return {"detail": f"Role {req.role_id} removed from group {group_id}", "group": group[0] if group else None}
+@router.post("/groups/{group_id}/assign-role")
+def assign_role_to_group_api(group_id: int, role_ids: List[int] = Body(...), resource_type: str = Body(None), resource_id: str = Body(None), db: Session = Depends(get_session), current_user: User = Depends(lambda session_token=Cookie(None), db=Depends(get_session): get_session_by_token(db, session_token).user)):
+    if getattr(current_user, "role", None) != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+    from app.services.role_service import assign_role_to_group
+    group_role_ids = []
+    for role_id in role_ids:
+        gr = assign_role_to_group(db, group_id, role_id, resource_type, resource_id)
+        group_role_ids.append(gr.id)
+    return {"detail": f"Roles {role_ids} assigned to group {group_id}", "group_role_ids": group_role_ids}
+
+@router.get("/groups/{group_id}/members")
+def list_group_members_api(group_id: int, db: Session = Depends(get_session), current_user: User = Depends(lambda session_token=Cookie(None), db=Depends(get_session): get_session_by_token(db, session_token).user)):
+    if getattr(current_user, "role", None) != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+    from app.services.role_service import list_group_members
+    users = list_group_members(db, group_id)
+    return [
+        {"id": u.id, "email": u.email} for u in users
+    ]
+
+@router.get("/groups/{group_id}/roles")
+def list_group_roles_api(group_id: int, db: Session = Depends(get_session), current_user: User = Depends(lambda session_token=Cookie(None), db=Depends(get_session): get_session_by_token(db, session_token).user)):
+    if getattr(current_user, "role", None) != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+    from app.services.role_service import list_group_roles
+    roles = list_group_roles(db, group_id)
+    return [
+        {"id": r.id, "role_id": r.role_id, "resource_type": r.resource_type, "resource_id": r.resource_id, "assigned_at": r.assigned_at} for r in roles
+    ]
+---------------------------------------
+# --- Deny Assignment Endpoints ---
+@router.get("/deny-assignments")
+def list_deny_assignments_api(principal_type: str = None, principal_id: int = None, resource: str = None, action: str = None, db: Session = Depends(get_session), current_user: User = Depends(lambda session_token=Cookie(None), db=Depends(get_session): get_session_by_token(db, session_token).user)):
+    if getattr(current_user, "role", None) != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+    from app.services.role_service import list_deny_assignments
+    user_id = principal_id if principal_type == "user" else None
+    group_id = principal_id if principal_type == "group" else None
+    denies = list_deny_assignments(db, user_id, group_id, resource, action)
+    return [
+        {
+            "id": d.id,
+            "principal_type": "user" if d.user_id else "group",
+            "principal_id": d.user_id if d.user_id else d.group_id,
+            "user_id": d.user_id,
+            "group_id": d.group_id,
+            "action": d.action,
+            "resource": d.resource,
+            "conditions": d.conditions,
+            "created_at": d.created_at
+        } for d in denies
+    ]
+
+from fastapi import Request
+@router.post("/deny-assignments")
+def create_deny_assignment_api(request: Request, db: Session = Depends(get_session), current_user: User = Depends(lambda session_token=Cookie(None), db=Depends(get_session): get_session_by_token(db, session_token).user)):
+    if getattr(current_user, "role", None) != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+    data = None
+    import asyncio
+    if hasattr(request, 'json'):
+        data = asyncio.run(request.json())
+    if not data:
+        data = getattr(request, '_json', {})
+    principal_type = data.get("principal_type")
+    principal_id = data.get("principal_id")
+    action = data.get("action")
+    resource = data.get("resource")
+    conditions = data.get("conditions")
+    user_id = principal_id if principal_type == "user" else None
+    group_id = principal_id if principal_type == "group" else None
+    from app.services.role_service import create_deny_assignment
+    deny = create_deny_assignment(db, user_id, group_id, action, resource, conditions)
+    return {
+        "id": deny.id,
+        "principal_type": "user" if deny.user_id else "group",
+        "principal_id": deny.user_id if deny.user_id else deny.group_id,
+        "user_id": deny.user_id,
+        "group_id": deny.group_id,
+        "action": deny.action,
+        "resource": deny.resource,
+        "conditions": deny.conditions,
+        "created_at": deny.created_at
+    }
+    ----------------------------
+    # --- Role Inheritance Endpoints (appended at end of file to avoid import/dependency issues) ---
+from app.models.auth_models import RoleInheritance
+from sqlalchemy.orm import joinedload
+
+@router.get("/roles/{role_id}/parents")
+def get_role_parents(role_id: int, db: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+    role = db.query(Role).options(joinedload(Role.parents)).filter(Role.id == role_id).first()
+    if not role:
+        raise HTTPException(status_code=404, detail="Role not found")
+    return [{"id": r.id, "name": r.name, "description": r.description} for r in role.parents]
+
+@router.get("/roles/{role_id}/children")
+def get_role_children(role_id: int, db: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+    role = db.query(Role).options(joinedload(Role.children)).filter(Role.id == role_id).first()
+    if not role:
+        raise HTTPException(status_code=404, detail="Role not found")
+    return [{"id": r.id, "name": r.name, "description": r.description} for r in role.children]
+
+@router.post("/roles/{role_id}/parents")
+def add_role_parent(role_id: int, parent_id: int = Body(...), db: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+    if getattr(current_user, "role", None) != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+    # Prevent cycles
+    if role_id == parent_id:
+        raise HTTPException(status_code=400, detail="Role cannot inherit from itself")
+    # Check existence
+    role = db.query(Role).filter(Role.id == role_id).first()
+    parent = db.query(Role).filter(Role.id == parent_id).first()
+    if not role or not parent:
+        raise HTTPException(status_code=404, detail="Role or parent not found")
+    # Check for existing
+    existing = db.query(RoleInheritance).filter(RoleInheritance.child_role_id == role_id, RoleInheritance.parent_role_id == parent_id).first()
+    if existing:
+        return {"detail": "Already inherited"}
+    inh = RoleInheritance(parent_role_id=parent_id, child_role_id=role_id)
+    db.add(inh)
+    db.commit()
+    return {"detail": "Parent added"}
+
+@router.delete("/roles/{role_id}/parents/{parent_id}")
+def remove_role_parent(role_id: int, parent_id: int, db: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+    if getattr(current_user, "role", None) != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+    inh = db.query(RoleInheritance).filter(RoleInheritance.child_role_id == role_id, RoleInheritance.parent_role_id == parent_id).first()
+    if not inh:
+        raise HTTPException(status_code=404, detail="Inheritance not found")
+    db.delete(inh)
+    db.commit()
+    return {"detail": "Parent removed"}
+
+@router.get("/roles/{role_id}/effective-permissions")
+def get_role_effective_permissions(role_id: int, db: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+    from app.services.role_service import get_effective_permissions_for_role
+    role = db.query(Role).options(joinedload(Role.parents), joinedload(Role.permissions)).filter(Role.id == role_id).first()
+    if not role:
+        raise HTTPException(status_code=404, detail="Role not found")
+    perms = get_effective_permissions_for_role(role)
+    return [
+        {"id": p.id, "action": p.action, "resource": p.resource, "conditions": p.conditions}
+        for p in perms
+    ]

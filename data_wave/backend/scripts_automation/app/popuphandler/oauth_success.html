@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>OAuth Success</title>
+  <script>
+    // This script closes the popup and redirects the main window to home page
+    window.onload = function() {
+      if (window.opener) {
+        window.opener.location.href = "/";
+        window.close();
+      } else {
+        // fallback if no opener
+        window.location.href = "/";
+      }
+    };
+  </script>
+</head>
+<body>
+  <h1>Login successful. You can close this window.</h1>
+</body>
+</html>

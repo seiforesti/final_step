@@ -1,0 +1,190 @@
+version: "3.9"
+
+services:
+  mysql-server:
+    image: mysql:8.0
+    container_name: mysql-server
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: testdb
+    ports:
+      - "3306:3306"
+    networks:
+      - my_network
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d
+
+  postgres-server:
+    image: postgres:14
+    container_name: postgres-server
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: testdb
+      POSTGRES_USER: admin
+    ports:
+      - "5432:5432"
+    networks:
+      - my_network
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d
+
+  mongo-server:
+    image: mongo:5.0
+    container_name: mongo-server
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin
+    ports:
+      - "27017:27017"
+    networks:
+      - my_network
+    volumes:
+      - mongo_data:/data/db
+      - ./docker/mongo_seed:/docker-entrypoint-initdb.d
+    command:
+      [
+        "bash",
+        "-c",
+        "mongod --bind_ip_all & sleep 5 && python3 /docker-entrypoint-initdb.d/seed_mongo.py && fg 1",
+      ]
+
+  extractor:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: extractor
+    ports:
+      - "8000:8000"
+    networks:
+      - my_network
+    volumes:
+      - ../:/app
+      - ./firebase-adminsdk.json:/app/firebase-adminsdk.json
+      - ../.env:/app/.env
+    env_file:
+      - ../.env
+    depends_on:
+      - mysql-server
+      - postgres-server
+      - mongo-server
+      - metadata-db
+    restart: always
+    dns:
+      - 8.8.8.8 # DNS Google
+    entrypoint: ["/bin/bash", "/app/app/entrypoint_seed.sh"]
+
+  scan-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: scan-service
+    ports:
+      - "8001:8001"
+    networks:
+      - my_network
+    volumes:
+      - ../:/app
+    environment:
+      - DATABASE_URL=postgresql://admin:admin@metadata-db:5432/schema_metadata
+      - EXTRACTION_SERVICE_URL=http://extractor:8000
+    depends_on:
+      - extractor
+      - metadata-db
+    restart: always
+    dns:
+      - 8.8.8.8
+
+  metadata-db:
+    image: postgres:14
+    container_name: metadata-db
+    restart: always
+    environment:
+      POSTGRES_DB: schema_metadata
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5433:5432" # ⚠️ port externe 5433 → interne 5432
+    networks:
+      - my_network
+    volumes:
+      - metadata_data:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    networks:
+      - my_network
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - metadata-db
+
+  notification_worker:
+    build:
+      context: ..
+      dockerfile: app/Dockerfile
+    container_name: notification_worker
+    networks:
+      - my_network
+    volumes:
+      - ../:/app
+      - ../.env:/app/.env
+    env_file:
+      - ../.env
+    environment:
+      - PYTHONPATH=/app
+    depends_on:
+      - mysql-server
+      - postgres-server
+      - mongo-server
+      - metadata-db
+    restart: always
+    dns:
+      - 8.8.8.8
+    entrypoint: ["python", "sensitivity_labeling/notification_job.py"]
+
+  ml_retraining_worker:
+    build:
+      context: ..
+      dockerfile: app/Dockerfile
+    container_name: ml_retraining_worker
+    networks:
+      - my_network
+    volumes:
+      - ../:/app
+      - ../.env:/app/.env
+    env_file:
+      - ../.env
+    environment:
+      - PYTHONPATH=/app
+    depends_on:
+      - mysql-server
+      - postgres-server
+      - mongo-server
+      - metadata-db
+    restart: always
+    dns:
+      - 8.8.8.8
+    entrypoint: ["python", "sensitivity_labeling/ml_retraining_job.py"]
+
+networks:
+  my_network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  postgres_data:
+  mongo_data:
+  metadata_data:
+  pgadmin_data:
