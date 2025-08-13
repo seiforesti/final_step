@@ -35,7 +35,7 @@ class Integration(SQLModel, table=True):
     description: Optional[str] = None
     
     # Configuration stored as JSON
-    config: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    config: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Sync information
     sync_frequency: str = Field(default="24h")  # e.g., "1h", "4h", "24h"
@@ -93,8 +93,8 @@ class IntegrationTemplate(SQLModel, table=True):
     category: Optional[str] = None
     
     # Configuration schema
-    config_schema: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    features: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    config_schema: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    features: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Template metadata
     version: str = Field(default="1.0.0")
@@ -129,7 +129,7 @@ class IntegrationCreate(SQLModel):
     type: IntegrationType
     provider: str
     description: Optional[str] = None
-    config: Dict[str, Any] = Field(default_factory=dict)
+    config: Dict[str, Any] = Field(default=None)
     sync_frequency: str = Field(default="24h")
     data_source_id: int
 

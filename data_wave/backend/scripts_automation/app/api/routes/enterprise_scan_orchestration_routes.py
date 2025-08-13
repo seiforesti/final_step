@@ -38,7 +38,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import Session
 
 # Pydantic models
-from pydantic import BaseModel, Field, validator
+from pydantic import field_validator, BaseModel, Field, validator
 from enum import Enum
 
 # Internal imports
@@ -78,7 +78,7 @@ class ScanRequestModel(BaseModel):
     configuration: Dict[str, Any] = Field(default_factory=dict, description="Scan configuration")
     metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
     
-    @validator('scan_rule_ids')
+    @field_validator('scan_rule_ids')
     def validate_scan_rules(cls, v):
         if not v:
             raise ValueError("At least one scan rule ID is required")

@@ -40,7 +40,7 @@ from datetime import datetime, timedelta
 from uuid import UUID
 import json
 import asyncio
-from pydantic import BaseModel, Field, validator
+from pydantic import field_validator, BaseModel, Field, validator
 
 # Database and Authentication
 from ....database import get_db
@@ -94,7 +94,7 @@ class ConversationStartRequest(BaseModel):
     workspace_id: Optional[str] = Field(None, description="Associated workspace ID")
     preferences: Dict[str, Any] = Field(default_factory=dict, description="User preferences")
     
-    @validator('conversation_type')
+    @field_validator('conversation_type')
     def validate_conversation_type(cls, v):
         allowed_types = [
             'general', 'workflow_assistance', 'data_exploration',
@@ -112,7 +112,7 @@ class MessageSendRequest(BaseModel):
     attachments: List[Dict[str, Any]] = Field(default_factory=list, description="Message attachments")
     context_override: Optional[Dict[str, Any]] = Field(None, description="Context override for this message")
     
-    @validator('message_type')
+    @field_validator('message_type')
     def validate_message_type(cls, v):
         allowed_types = ['text', 'query', 'command', 'file_upload', 'code_snippet']
         if v not in allowed_types:
@@ -126,7 +126,7 @@ class RecommendationRequest(BaseModel):
     scope: List[str] = Field(default_factory=list, description="Scope of recommendations")
     preferences: Dict[str, Any] = Field(default_factory=dict, description="User preferences")
     
-    @validator('recommendation_type')
+    @field_validator('recommendation_type')
     def validate_recommendation_type(cls, v):
         allowed_types = [
             'workflow_optimization', 'data_quality_improvement',
@@ -145,7 +145,7 @@ class AnalysisRequest(BaseModel):
     analysis_scope: Dict[str, Any] = Field(default_factory=dict, description="Scope of analysis")
     parameters: Dict[str, Any] = Field(default_factory=dict, description="Analysis parameters")
     
-    @validator('analysis_type')
+    @field_validator('analysis_type')
     def validate_analysis_type(cls, v):
         allowed_types = [
             'anomaly_detection', 'trend_analysis', 'compliance_assessment',
@@ -163,7 +163,7 @@ class QueryRequest(BaseModel):
     context: Dict[str, Any] = Field(default_factory=dict, description="Query context")
     response_format: str = Field(default="conversational", description="Desired response format")
     
-    @validator('response_format')
+    @field_validator('response_format')
     def validate_response_format(cls, v):
         allowed_formats = ['conversational', 'structured', 'chart_data', 'summary', 'detailed']
         if v not in allowed_formats:

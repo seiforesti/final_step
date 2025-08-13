@@ -34,7 +34,7 @@ import asyncio
 
 from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks, Query, Path
 from fastapi.responses import StreamingResponse
-from pydantic import BaseModel, Field, validator
+from pydantic import field_validator, BaseModel, Field, validator
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Core imports
@@ -69,7 +69,7 @@ class OrchestrationRequest(BaseModel):
     parameters: Dict[str, Any] = Field(default_factory=dict, description="Additional orchestration parameters")
     tags: List[str] = Field(default_factory=list, description="Orchestration tags")
     
-    @validator('scan_rules')
+    @field_validator('scan_rules')
     def validate_scan_rules(cls, v):
         if not v:
             raise ValueError("At least one scan rule must be provided")
@@ -81,7 +81,7 @@ class BulkOrchestrationRequest(BaseModel):
     execution_strategy: str = Field(default="parallel", description="Bulk execution strategy")
     max_concurrent: int = Field(default=5, ge=1, le=20, description="Maximum concurrent orchestrations")
     
-    @validator('orchestrations')
+    @field_validator('orchestrations')
     def validate_orchestrations(cls, v):
         if not v:
             raise ValueError("At least one orchestration must be provided")
@@ -96,7 +96,7 @@ class OrchestrationScheduleRequest(BaseModel):
     cron_expression: Optional[str] = Field(default=None, description="Cron expression for recurring execution")
     dependencies: List[str] = Field(default_factory=list, description="Orchestration dependencies")
     
-    @validator('scheduled_time', 'cron_expression')
+    @field_validator('scheduled_time', 'cron_expression')
     def validate_schedule(cls, v, values, field):
         if field.name == 'scheduled_time' and v and v <= datetime.utcnow():
             raise ValueError("Scheduled time must be in the future")

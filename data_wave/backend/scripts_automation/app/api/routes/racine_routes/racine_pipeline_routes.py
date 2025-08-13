@@ -40,7 +40,7 @@ from datetime import datetime, timedelta
 from uuid import UUID
 import json
 import asyncio
-from pydantic import BaseModel, Field, validator
+from pydantic import field_validator, BaseModel, Field, validator
 
 # Database and Authentication
 from ....database import get_db
@@ -101,7 +101,7 @@ class PipelineNodeRequest(BaseModel):
     retry_policy: Dict[str, Any] = Field(default_factory=dict, description="Retry configuration")
     condition: Optional[str] = Field(None, description="Execution condition")
     
-    @validator('node_type')
+    @field_validator('node_type')
     def validate_node_type(cls, v):
         allowed_types = [
             'data_source', 'data_transformation', 'data_validation',
@@ -113,7 +113,7 @@ class PipelineNodeRequest(BaseModel):
             raise ValueError(f"Node type must be one of: {allowed_types}")
         return v
     
-    @validator('group_target')
+    @field_validator('group_target')
     def validate_group_target(cls, v):
         allowed_groups = [
             'data_sources', 'scan_rules', 'classifications',
@@ -136,7 +136,7 @@ class PipelineCreateRequest(BaseModel):
     tags: List[str] = Field(default_factory=list, description="Pipeline tags")
     enable_ai_optimization: bool = Field(default=True, description="Enable AI optimization")
     
-    @validator('pipeline_type')
+    @field_validator('pipeline_type')
     def validate_pipeline_type(cls, v):
         allowed_types = [
             'data_processing', 'data_quality', 'compliance_check',
@@ -165,7 +165,7 @@ class PipelineExecutionRequest(BaseModel):
     enable_debugging: bool = Field(default=False, description="Enable debugging mode")
     checkpoint_enabled: bool = Field(default=True, description="Enable checkpointing")
     
-    @validator('execution_mode')
+    @field_validator('execution_mode')
     def validate_execution_mode(cls, v):
         allowed_modes = ['normal', 'debug', 'dry_run', 'test', 'validation']
         if v not in allowed_modes:
@@ -178,7 +178,7 @@ class PipelineOptimizationRequest(BaseModel):
     constraints: Dict[str, Any] = Field(default_factory=dict, description="Optimization constraints")
     performance_data: Optional[Dict[str, Any]] = Field(None, description="Historical performance data")
     
-    @validator('optimization_goals')
+    @field_validator('optimization_goals')
     def validate_optimization_goals(cls, v):
         allowed_goals = [
             'performance', 'cost', 'reliability', 'accuracy',

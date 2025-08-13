@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, BackgroundTasks, Query, Path
 from sqlalchemy.orm import Session
 from typing import List, Optional, Dict, Any, Union
-from pydantic import BaseModel, Field, validator
+from pydantic import field_validator, BaseModel, Field, validator
 from datetime import datetime
 import json
 import csv
@@ -155,7 +155,7 @@ class ClassificationRuleCreate(BaseModel):
     applies_to_catalog_items: bool = Field(default=True)
     compliance_rule_id: Optional[int] = Field(None, description="Associated compliance rule ID")
 
-    @validator('pattern')
+    @field_validator('pattern')
     def validate_pattern(cls, v, values):
         if 'rule_type' in values:
             rule_type = values['rule_type']
@@ -240,7 +240,7 @@ class ClassificationDictionaryCreate(BaseModel):
     source_reference: Optional[str] = Field(None, description="Source reference")
     imported_from: Optional[str] = Field(None, description="Import source")
 
-    @validator('entries')
+    @field_validator('entries')
     def validate_entries(cls, v):
         if not isinstance(v, dict):
             raise ValueError("Entries must be a dictionary")

@@ -37,7 +37,7 @@ class DataSourcePermission(SQLModel, table=True):
     expires_at: Optional[datetime] = None
     
     # Conditions
-    conditions: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    conditions: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Audit fields
     created_at: datetime = Field(default_factory=datetime.now)
@@ -63,7 +63,7 @@ class AccessLog(SQLModel, table=True):
     session_id: Optional[str] = None
     
     # Metadata
-    access_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    access_metadata: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Audit fields
     created_at: datetime = Field(default_factory=datetime.now)

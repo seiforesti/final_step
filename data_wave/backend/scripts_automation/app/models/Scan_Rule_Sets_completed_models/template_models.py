@@ -9,7 +9,7 @@ from typing import List, Optional, Dict, Any, Union
 from datetime import datetime
 from enum import Enum
 import uuid
-from pydantic import BaseModel, validator
+from pydantic import field_validator, BaseModel, validator
 from sqlalchemy import Index, UniqueConstraint, CheckConstraint
 
 # ===================================
@@ -65,7 +65,7 @@ class TemplateCategory(SQLModel, table=True):
     # Metadata
     icon: Optional[str] = Field(default=None, max_length=100)
     color: Optional[str] = Field(default=None, max_length=20)
-    tags: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    tags: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Usage Statistics
     template_count: int = Field(default=0, ge=0)
@@ -105,15 +105,15 @@ class RuleTemplate(SQLModel, table=True):
     complexity: TemplateComplexity = Field(default=TemplateComplexity.MODERATE)
     
     # Template Definition
-    template_definition: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    parameter_schema: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    default_parameters: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    validation_rules: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    template_definition: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    parameter_schema: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    default_parameters: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    validation_rules: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Requirements
-    minimum_requirements: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    supported_data_sources: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    compliance_frameworks: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    minimum_requirements: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    supported_data_sources: List[str] = Field(default=None, sa_column=Column(JSON))
+    compliance_frameworks: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Template Metadata
     version: str = Field(default="1.0.0", max_length=20)
@@ -129,13 +129,13 @@ class RuleTemplate(SQLModel, table=True):
     
     # Documentation
     documentation: Optional[Text] = Field(default=None)
-    examples: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    best_practices: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    common_issues: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    examples: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    best_practices: List[str] = Field(default=None, sa_column=Column(JSON))
+    common_issues: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Collaboration
     created_by: str = Field(max_length=100)
-    maintained_by: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    maintained_by: List[str] = Field(default=None, sa_column=Column(JSON))
     review_status: str = Field(default="pending", max_length=50)
     approved_by: Optional[str] = Field(default=None, max_length=100)
     approved_at: Optional[datetime] = Field(default=None)
@@ -147,8 +147,8 @@ class RuleTemplate(SQLModel, table=True):
     replacement_template_id: Optional[str] = Field(default=None)
     
     # Tagging and Search
-    tags: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    keywords: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    tags: List[str] = Field(default=None, sa_column=Column(JSON))
+    keywords: List[str] = Field(default=None, sa_column=Column(JSON))
     search_index: Optional[Text] = Field(default=None)
     
     # Relationships
@@ -182,10 +182,10 @@ class TemplateVersion(SQLModel, table=True):
     version_description: Optional[str] = Field(default=None, max_length=1000)
     
     # Version Content
-    template_definition: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    parameter_schema: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    change_summary: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    breaking_changes: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    template_definition: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    parameter_schema: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    change_summary: List[str] = Field(default=None, sa_column=Column(JSON))
+    breaking_changes: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Version Metadata
     is_current: bool = Field(default=False)
@@ -228,18 +228,18 @@ class TemplateUsage(SQLModel, table=True):
     rule_id: Optional[int] = Field(default=None, index=True)
     
     # Usage Details
-    parameters_used: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    customizations: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    parameters_used: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    customizations: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     success: bool = Field(default=True)
     
     # Performance Metrics
     execution_time_seconds: Optional[float] = Field(default=None, ge=0)
-    resource_usage: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    resource_usage: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Feedback
     user_rating: Optional[int] = Field(default=None, ge=1, le=5)
     user_feedback: Optional[str] = Field(default=None, max_length=2000)
-    issues_encountered: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    issues_encountered: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Timing
     used_at: datetime = Field(default_factory=datetime.utcnow, index=True)
@@ -247,7 +247,7 @@ class TemplateUsage(SQLModel, table=True):
     
     # Environment
     environment: str = Field(default="production", max_length=50)
-    client_info: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    client_info: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Relationships
     template: RuleTemplate = Relationship(back_populates="usage_records")
@@ -331,7 +331,7 @@ class TemplateCreateRequest(BaseModel):
     documentation: Optional[str] = None
     tags: Optional[List[str]] = None
     
-    @validator('name')
+    @field_validator('name')
     def validate_name(cls, v):
         if not v or len(v.strip()) == 0:
             raise ValueError("Template name cannot be empty")

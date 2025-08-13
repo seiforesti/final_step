@@ -51,7 +51,7 @@ class Notification(SQLModel, table=True):
     
     # Delivery details
     recipient: str
-    delivery_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    delivery_metadata: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Audit fields
     created_at: datetime = Field(default_factory=datetime.now)

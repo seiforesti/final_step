@@ -7,7 +7,8 @@ with environment-specific settings, security configurations, and advanced featur
 
 import os
 from typing import Optional, List, Dict, Any
-from pydantic import Field, validator, BaseSettings
+from pydantic import field_validator, Field, field_validator
+from pydantic_settings import BaseSettings
 from dotenv import load_dotenv
 import logging
 
@@ -202,7 +203,7 @@ class EnterpriseConfig(BaseSettings):
     request_timeout_seconds: int = Field(default=300, description="Request timeout")
     max_request_size_mb: int = Field(default=100, description="Maximum request size in MB")
     
-    @validator('environment')
+    @field_validator('environment')
     def validate_environment(cls, v):
         allowed = ['development', 'staging', 'production']
         if v not in allowed:

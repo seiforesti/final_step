@@ -40,7 +40,7 @@ from datetime import datetime, timedelta
 from uuid import UUID
 import json
 import asyncio
-from pydantic import BaseModel, Field, validator, HttpUrl
+from pydantic import field_validator, BaseModel, Field, validator, HttpUrl
 
 # Database and Authentication
 from ....database import get_db
@@ -100,7 +100,7 @@ class IntegrationEndpointRequest(BaseModel):
     retry_config: Dict[str, Any] = Field(default_factory=dict, description="Retry configuration")
     is_active: bool = Field(default=True, description="Whether endpoint is active")
     
-    @validator('endpoint_type')
+    @field_validator('endpoint_type')
     def validate_endpoint_type(cls, v):
         allowed_types = [
             'rest_api', 'graphql', 'webhook', 'database', 'message_queue',
@@ -121,7 +121,7 @@ class IntegrationMappingRequest(BaseModel):
     validation_rules: List[Dict[str, Any]] = Field(default_factory=list, description="Data validation rules")
     is_bidirectional: bool = Field(default=False, description="Whether mapping is bidirectional")
     
-    @validator('source_group', 'target_group')
+    @field_validator('source_group', 'target_group')
     def validate_groups(cls, v):
         allowed_groups = [
             'data_sources', 'scan_rules', 'classifications',
@@ -143,7 +143,7 @@ class IntegrationJobRequest(BaseModel):
     execution_config: Dict[str, Any] = Field(default_factory=dict, description="Execution configuration")
     notification_config: Dict[str, Any] = Field(default_factory=dict, description="Notification settings")
     
-    @validator('job_type')
+    @field_validator('job_type')
     def validate_job_type(cls, v):
         allowed_types = [
             'data_sync', 'event_stream', 'batch_transfer', 'real_time_sync',
@@ -162,7 +162,7 @@ class CrossGroupSyncRequest(BaseModel):
     conflict_resolution: str = Field(default="latest_wins", description="Conflict resolution strategy")
     filters: Dict[str, Any] = Field(default_factory=dict, description="Sync filters")
     
-    @validator('sync_type')
+    @field_validator('sync_type')
     def validate_sync_type(cls, v):
         allowed_types = [
             'metadata_sync', 'configuration_sync', 'data_sync', 
@@ -172,7 +172,7 @@ class CrossGroupSyncRequest(BaseModel):
             raise ValueError(f"Sync type must be one of: {allowed_types}")
         return v
     
-    @validator('sync_mode')
+    @field_validator('sync_mode')
     def validate_sync_mode(cls, v):
         allowed_modes = ['full', 'incremental', 'differential', 'snapshot']
         if v not in allowed_modes:
@@ -189,7 +189,7 @@ class ServiceRegistrationRequest(BaseModel):
     metadata: Dict[str, Any] = Field(default_factory=dict, description="Service metadata")
     dependencies: List[str] = Field(default_factory=list, description="Service dependencies")
     
-    @validator('service_type')
+    @field_validator('service_type')
     def validate_service_type(cls, v):
         allowed_types = [
             'data_service', 'processing_service', 'analytics_service',

@@ -25,10 +25,10 @@ uvicorn[standard]==0.24.0  # Compatible with FastAPI 0.104.1
 # Database ORM (Python 3.11 Compatible)
 sqlmodel==0.0.14  # Compatible with Pydantic 1.x and Python 3.11
 sqlalchemy>=2.0.0,<2.1.0  # Compatible with SQLModel 0.0.14
-psycopg2-binary==2.9.7  # PostgreSQL adapter
+psycopg2-binary>=2.9.10  # PostgreSQL adapter
 asyncpg>=0.30.0,<1.0.0  # Async PostgreSQL adapter
 pymysql==1.1.0  # MySQL adapter
-pymongo==4.5.0  # MongoDB adapter
+pymongo>=4.9.0  # MongoDB adapter
 
 # ========================================
 # DEPENDENCY SOLUTION OPTION 2: Modern Stack Migration

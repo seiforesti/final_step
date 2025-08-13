@@ -48,22 +48,22 @@ class Workspace(SQLModel, table=True):
     ai_assistance_enabled: bool = Field(default=True)
     auto_versioning: bool = Field(default=True)
     real_time_collaboration: bool = Field(default=True)
-    version_control_integration: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    version_control_integration: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Governance and compliance
-    data_governance_policy: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    data_governance_policy: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     security_classification: str = Field(default="internal")  # public, internal, confidential, restricted
-    compliance_requirements: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    compliance_requirements: List[str] = Field(default=None, sa_column=Column(JSON))
     retention_policy_days: Optional[int] = None
     
     # Analytics and insights
-    usage_analytics: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    productivity_metrics: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    usage_analytics: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    productivity_metrics: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     collaboration_score: Optional[float] = Field(ge=0.0, le=1.0)
     
     # Integration settings
-    external_integrations: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    webhook_urls: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    external_integrations: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    webhook_urls: List[str] = Field(default=None, sa_column=Column(JSON))
     api_access_enabled: bool = Field(default=False)
     
     created_at: datetime = Field(default_factory=datetime.now)
@@ -89,7 +89,7 @@ class WorkspaceMember(SQLModel, table=True):
     can_manage_data: bool = Field(default=False)
     can_export: bool = Field(default=False)
     can_delete: bool = Field(default=False)
-    custom_permissions: Dict[str, bool] = Field(default_factory=dict, sa_column=Column(JSON))
+    custom_permissions: Dict[str, bool] = Field(default=None, sa_column=Column(JSON))
     
     # Activity tracking
     last_active: datetime = Field(default_factory=datetime.now)
@@ -97,8 +97,8 @@ class WorkspaceMember(SQLModel, table=True):
     time_spent_minutes: int = Field(default=0)
     
     # Preferences
-    notification_preferences: Dict[str, bool] = Field(default_factory=dict, sa_column=Column(JSON))
-    workspace_preferences: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    notification_preferences: Dict[str, bool] = Field(default=None, sa_column=Column(JSON))
+    workspace_preferences: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     joined_at: datetime = Field(default_factory=datetime.now)
     invited_by: Optional[str] = None
@@ -116,7 +116,7 @@ class CollaborativeDocument(SQLModel, table=True):
     document_type: DocumentType = Field(default=DocumentType.NOTEBOOK)
     
     # Content and versioning
-    content: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    content: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     content_format: str = Field(default="json")  # json, markdown, jupyter, sql
     version: str = Field(default="1.0.0")
     is_template: bool = Field(default=False)
@@ -124,24 +124,24 @@ class CollaborativeDocument(SQLModel, table=True):
     # Authorship and editing
     created_by: str = Field(index=True)
     last_edited_by: str = Field(index=True)
-    current_editors: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    current_editors: List[str] = Field(default=None, sa_column=Column(JSON))
     edit_lock: Optional[str] = None  # user_id who has edit lock
     
     # Advanced collaboration features
-    real_time_cursors: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    comments: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    suggestions: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    real_time_cursors: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    comments: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    suggestions: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     change_tracking: bool = Field(default=True)
     
     # AI-powered features
-    ai_insights: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    ai_insights: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     auto_completion_enabled: bool = Field(default=True)
-    smart_suggestions: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    smart_suggestions: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Data lineage and dependencies
-    data_sources: List[int] = Field(default_factory=list, sa_column=Column(JSON))
-    dependencies: List[int] = Field(default_factory=list, sa_column=Column(JSON))
-    output_artifacts: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    data_sources: List[int] = Field(default=None, sa_column=Column(JSON))
+    dependencies: List[int] = Field(default=None, sa_column=Column(JSON))
+    output_artifacts: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Quality and governance
     quality_score: Optional[float] = Field(ge=0.0, le=1.0)
@@ -152,12 +152,12 @@ class CollaborativeDocument(SQLModel, table=True):
     # Publishing and sharing
     is_published: bool = Field(default=False)
     published_url: Optional[str] = None
-    sharing_settings: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    sharing_settings: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     access_count: int = Field(default=0)
     
     # Metadata
-    tags: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    document_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    tags: List[str] = Field(default=None, sa_column=Column(JSON))
+    document_metadata: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
@@ -176,12 +176,12 @@ class DocumentVersion(SQLModel, table=True):
     version: str
     
     # Version details
-    content: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    content: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     change_summary: str
     author: str = Field(index=True)
     
     # Change tracking
-    changes: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    changes: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     lines_added: int = Field(default=0)
     lines_removed: int = Field(default=0)
     files_changed: int = Field(default=0)
@@ -193,7 +193,7 @@ class DocumentVersion(SQLModel, table=True):
     
     # Metadata
     commit_message: Optional[str] = None
-    tags: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    tags: List[str] = Field(default=None, sa_column=Column(JSON))
     
     created_at: datetime = Field(default_factory=datetime.now)
     
@@ -231,14 +231,14 @@ class Discussion(SQLModel, table=True):
     # AI features
     ai_summary: Optional[str] = None
     sentiment_score: Optional[float] = Field(ge=-1.0, le=1.0)
-    topic_classification: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    topic_classification: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Related content
-    related_documents: List[int] = Field(default_factory=list, sa_column=Column(JSON))
-    related_data_sources: List[int] = Field(default_factory=list, sa_column=Column(JSON))
+    related_documents: List[int] = Field(default=None, sa_column=Column(JSON))
+    related_data_sources: List[int] = Field(default=None, sa_column=Column(JSON))
     
     # Metadata
-    tags: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    tags: List[str] = Field(default=None, sa_column=Column(JSON))
     
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
@@ -262,8 +262,8 @@ class DiscussionReply(SQLModel, table=True):
     
     # Formatting and attachments
     content_format: str = Field(default="markdown")
-    attachments: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    code_snippets: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    attachments: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    code_snippets: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Engagement
     upvotes: int = Field(default=0)
@@ -297,7 +297,7 @@ class KnowledgeBase(SQLModel, table=True):
     # Authorship
     author: str = Field(index=True)
     maintainer: Optional[str] = None
-    contributors: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    contributors: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Quality and validation
     accuracy_score: Optional[float] = Field(ge=0.0, le=1.0)
@@ -309,7 +309,7 @@ class KnowledgeBase(SQLModel, table=True):
     auto_generated: bool = Field(default=False)
     ai_confidence: Optional[float] = Field(ge=0.0, le=1.0)
     semantic_embeddings: Optional[List[float]] = Field(default=None, sa_column=Column(JSON))
-    related_topics: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    related_topics: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Access and sharing
     is_public: bool = Field(default=False)
@@ -322,8 +322,8 @@ class KnowledgeBase(SQLModel, table=True):
     review_due_date: Optional[datetime] = None
     
     # Metadata
-    tags: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    knowledge_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    tags: List[str] = Field(default=None, sa_column=Column(JSON))
+    knowledge_metadata: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
@@ -345,11 +345,11 @@ class CollaborationEvent(SQLModel, table=True):
     # Event data
     action: str
     description: str
-    event_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    event_metadata: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Real-time features
     is_real_time: bool = Field(default=True)
-    broadcast_to_users: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    broadcast_to_users: List[str] = Field(default=None, sa_column=Column(JSON))
     notification_sent: bool = Field(default=False)
     
     created_at: datetime = Field(default_factory=datetime.now)

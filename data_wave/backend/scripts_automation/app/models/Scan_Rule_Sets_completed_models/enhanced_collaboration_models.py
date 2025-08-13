@@ -151,25 +151,25 @@ class TeamCollaborationHub(SQLModel, table=True):
     
     # Governance and security
     security_level: str = Field(default="internal", max_length=50, description="Security classification")
-    data_governance_policy: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    compliance_requirements: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    data_governance_policy: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    compliance_requirements: List[str] = Field(default=None, sa_column=Column(JSON))
     audit_trail_enabled: bool = Field(default=True, description="Enable audit trail")
     
     # Analytics and insights
-    activity_metrics: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    activity_metrics: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     collaboration_score: float = Field(default=0.0, ge=0.0, le=1.0, description="Collaboration effectiveness score")
-    productivity_metrics: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    engagement_metrics: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    productivity_metrics: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    engagement_metrics: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Integration configuration
-    external_integrations: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    webhook_endpoints: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    external_integrations: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    webhook_endpoints: List[str] = Field(default=None, sa_column=Column(JSON))
     api_access_enabled: bool = Field(default=False, description="API access enabled")
     
     # Customization
-    custom_fields: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    ui_customization: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    workflow_templates: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    custom_fields: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    ui_customization: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    workflow_templates: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Temporal fields
     created_at: datetime = Field(default_factory=datetime.utcnow, index=True)
@@ -180,7 +180,7 @@ class TeamCollaborationHub(SQLModel, table=True):
     # User tracking
     created_by: str = Field(max_length=255, index=True)
     owner: str = Field(max_length=255, index=True, description="Hub owner")
-    moderators: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    moderators: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Relationships
     members: List["RuleTeamMember"] = Relationship(back_populates="hub")
@@ -211,9 +211,9 @@ class RuleTeamMember(SQLModel, table=True):
     
     # Role and permissions
     role: RoleType = Field(index=True, description="Primary role")
-    secondary_roles: List[RoleType] = Field(default_factory=list, sa_column=Column(JSON))
+    secondary_roles: List[RoleType] = Field(default=None, sa_column=Column(JSON))
     permission_level: str = Field(default="standard", max_length=50, description="Permission level")
-    custom_permissions: Dict[str, bool] = Field(default_factory=dict, sa_column=Column(JSON))
+    custom_permissions: Dict[str, bool] = Field(default=None, sa_column=Column(JSON))
     
     # Member status
     status: str = Field(default="active", max_length=50, index=True)  # active, inactive, suspended, pending
@@ -222,11 +222,11 @@ class RuleTeamMember(SQLModel, table=True):
     is_mentor: bool = Field(default=False, index=True)
     
     # Skills and expertise
-    skills: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    expertise_areas: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    skills: List[str] = Field(default=None, sa_column=Column(JSON))
+    expertise_areas: List[str] = Field(default=None, sa_column=Column(JSON))
     expertise_level: ExpertiseLevel = Field(default=ExpertiseLevel.INTERMEDIATE)
-    certifications: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    specializations: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    certifications: List[str] = Field(default=None, sa_column=Column(JSON))
+    specializations: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Activity and engagement
     last_active: datetime = Field(default_factory=datetime.utcnow, index=True)
@@ -242,9 +242,9 @@ class RuleTeamMember(SQLModel, table=True):
     mentorship_rating: float = Field(default=0.0, ge=0.0, le=5.0, description="Mentorship rating")
     
     # Preferences and settings
-    notification_preferences: Dict[str, bool] = Field(default_factory=dict, sa_column=Column(JSON))
-    communication_preferences: Dict[str, str] = Field(default_factory=dict, sa_column=Column(JSON))
-    availability_schedule: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    notification_preferences: Dict[str, bool] = Field(default=None, sa_column=Column(JSON))
+    communication_preferences: Dict[str, str] = Field(default=None, sa_column=Column(JSON))
+    availability_schedule: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     time_zone: Optional[str] = Field(max_length=50)
     
     # AI and automation
@@ -297,10 +297,10 @@ class EnhancedRuleReview(SQLModel, table=True):
     priority: str = Field(default="normal", max_length=20, index=True)
     
     # Review scope and context
-    review_scope: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    context_information: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    related_rules: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    dependencies: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    review_scope: List[str] = Field(default=None, sa_column=Column(JSON))
+    context_information: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    related_rules: List[str] = Field(default=None, sa_column=Column(JSON))
+    dependencies: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Review status and workflow
     status: str = Field(default="pending", max_length=50, index=True)  # pending, in_progress, completed, cancelled
@@ -310,27 +310,27 @@ class EnhancedRuleReview(SQLModel, table=True):
     current_reviewers: int = Field(default=0, ge=0, description="Current number of reviewers")
     
     # Review criteria and checklist
-    review_criteria: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    checklist_items: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    quality_gates: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    compliance_checks: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    review_criteria: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    checklist_items: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    quality_gates: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    compliance_checks: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Review outcomes
     overall_decision: Optional[str] = Field(max_length=50)  # approved, rejected, conditional, needs_revision
     confidence_score: float = Field(default=0.0, ge=0.0, le=1.0, description="Review confidence")
-    risk_assessment: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    recommendations: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    risk_assessment: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    recommendations: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Review metrics and analytics
-    review_metrics: Dict[str, float] = Field(default_factory=dict, sa_column=Column(JSON))
+    review_metrics: Dict[str, float] = Field(default=None, sa_column=Column(JSON))
     time_spent_minutes: int = Field(default=0, ge=0, description="Total review time")
     complexity_score: float = Field(default=0.0, ge=0.0, description="Review complexity")
     thoroughness_score: float = Field(default=0.0, ge=0.0, le=1.0, description="Review thoroughness")
     
     # Reviewer assignment
-    assigned_reviewers: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    optional_reviewers: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    reviewer_expertise_match: Dict[str, float] = Field(default_factory=dict, sa_column=Column(JSON))
+    assigned_reviewers: List[str] = Field(default=None, sa_column=Column(JSON))
+    optional_reviewers: List[str] = Field(default=None, sa_column=Column(JSON))
+    reviewer_expertise_match: Dict[str, float] = Field(default=None, sa_column=Column(JSON))
     auto_assigned: bool = Field(default=False, description="Automatically assigned reviewers")
     
     # Review lifecycle
@@ -339,9 +339,9 @@ class EnhancedRuleReview(SQLModel, table=True):
     auto_approve_date: Optional[datetime] = Field(description="Auto-approval date")
     
     # Integration and automation
-    automated_checks: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    ai_analysis: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    external_tool_results: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    automated_checks: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    ai_analysis: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    external_tool_results: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Temporal fields
     created_at: datetime = Field(default_factory=datetime.utcnow, index=True)
@@ -396,10 +396,10 @@ class EnhancedRuleComment(SQLModel, table=True):
     is_thread_root: bool = Field(default=False, index=True, description="Root of discussion thread")
     
     # Comment metadata
-    tags: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    mentions: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    attachments: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    references: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    tags: List[str] = Field(default=None, sa_column=Column(JSON))
+    mentions: List[str] = Field(default=None, sa_column=Column(JSON))
+    attachments: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    references: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Code annotation (for code-specific comments)
     line_number: Optional[int] = Field(ge=0, description="Line number for code comments")
@@ -417,18 +417,18 @@ class EnhancedRuleComment(SQLModel, table=True):
     # Engagement and reactions
     upvotes: int = Field(default=0, ge=0, description="Upvote count")
     downvotes: int = Field(default=0, ge=0, description="Downvote count")
-    reactions: Dict[str, int] = Field(default_factory=dict, sa_column=Column(JSON))
+    reactions: Dict[str, int] = Field(default=None, sa_column=Column(JSON))
     helpfulness_score: float = Field(default=0.0, ge=0.0, le=1.0, description="Helpfulness rating")
     
     # AI and automation
     ai_generated: bool = Field(default=False, description="AI-generated comment")
     ai_confidence: Optional[float] = Field(ge=0.0, le=1.0, description="AI confidence score")
-    automated_analysis: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    automated_analysis: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     sentiment_score: Optional[float] = Field(ge=-1.0, le=1.0, description="Sentiment analysis score")
     
     # Visibility and permissions
     visibility: str = Field(default="public", max_length=20, description="Comment visibility")
-    edit_history: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    edit_history: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     last_edited: Optional[datetime] = None
     
     # Temporal fields
@@ -475,15 +475,15 @@ class KnowledgeItem(SQLModel, table=True):
     # Classification and categorization
     item_type: KnowledgeItemType = Field(index=True, description="Knowledge item type")
     category: str = Field(index=True, max_length=100, description="Primary category")
-    subcategories: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    tags: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    keywords: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    subcategories: List[str] = Field(default=None, sa_column=Column(JSON))
+    tags: List[str] = Field(default=None, sa_column=Column(JSON))
+    keywords: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Content metadata
     difficulty_level: ExpertiseLevel = Field(default=ExpertiseLevel.INTERMEDIATE, index=True)
     estimated_read_time: int = Field(default=5, ge=1, description="Estimated reading time in minutes")
-    prerequisites: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    related_items: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    prerequisites: List[str] = Field(default=None, sa_column=Column(JSON))
+    related_items: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Quality and validation
     accuracy_score: float = Field(default=0.0, ge=0.0, le=1.0, description="Content accuracy score")
@@ -502,7 +502,7 @@ class KnowledgeItem(SQLModel, table=True):
     review_status: str = Field(default="draft", max_length=50, index=True)  # draft, review, approved, published
     reviewed_by: Optional[str] = Field(max_length=255)
     approved_by: Optional[str] = Field(max_length=255)
-    review_comments: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    review_comments: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Versioning and maintenance
     version: str = Field(default="1.0", max_length=20, description="Content version")
@@ -515,7 +515,7 @@ class KnowledgeItem(SQLModel, table=True):
     ai_generated: bool = Field(default=False, description="AI-generated content")
     ai_enhanced: bool = Field(default=False, description="AI-enhanced content")
     auto_update_enabled: bool = Field(default=False, description="Auto-update enabled")
-    ml_recommendations: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    ml_recommendations: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Access and permissions
     visibility: str = Field(default="internal", max_length=20, description="Content visibility")
@@ -530,7 +530,7 @@ class KnowledgeItem(SQLModel, table=True):
     
     # User tracking
     author: str = Field(max_length=255, index=True, description="Content author")
-    contributors: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    contributors: List[str] = Field(default=None, sa_column=Column(JSON))
     maintainer: Optional[str] = Field(max_length=255, description="Content maintainer")
     
     # Relationships
@@ -578,8 +578,8 @@ class RuleDiscussion(SQLModel, table=True):
     # Participation and engagement
     participant_count: int = Field(default=0, ge=0, description="Number of participants")
     message_count: int = Field(default=0, ge=0, description="Total messages")
-    active_participants: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    moderators: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    active_participants: List[str] = Field(default=None, sa_column=Column(JSON))
+    moderators: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Decision tracking
     decision_made: bool = Field(default=False, index=True, description="Decision reached")
@@ -588,16 +588,16 @@ class RuleDiscussion(SQLModel, table=True):
     consensus_level: Optional[float] = Field(ge=0.0, le=1.0, description="Consensus level reached")
     
     # Action items and outcomes
-    action_items: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    outcomes: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    action_items: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    outcomes: List[str] = Field(default=None, sa_column=Column(JSON))
     follow_up_required: bool = Field(default=False, description="Follow-up required")
     follow_up_date: Optional[datetime] = Field(description="Follow-up scheduled date")
     
     # Analytics and insights
     engagement_score: float = Field(default=0.0, ge=0.0, le=1.0, description="Engagement level")
     productivity_score: float = Field(default=0.0, ge=0.0, le=1.0, description="Productivity score")
-    sentiment_analysis: Dict[str, float] = Field(default_factory=dict, sa_column=Column(JSON))
-    key_insights: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    sentiment_analysis: Dict[str, float] = Field(default=None, sa_column=Column(JSON))
+    key_insights: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Temporal fields
     created_at: datetime = Field(default_factory=datetime.utcnow, index=True)

@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine, inspect
 from pymongo import MongoClient
 from app.db_session import get_session
-from app.models.schema_models import DataTableSchema, SchemaVersion
+# from app.models.schema_models import DataTableSchema, SchemaVersion
 from sqlmodel import Session
 from uuid import uuid4
 

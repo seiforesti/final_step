@@ -41,7 +41,7 @@ import json
 
 from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks, Query, Path, status
 from fastapi.responses import StreamingResponse, JSONResponse
-from pydantic import BaseModel, Field, validator
+from pydantic import field_validator, BaseModel, Field, validator
 from sqlmodel import Session
 
 # Core imports
@@ -83,7 +83,7 @@ class CreateOrchestrationRequest(BaseModel):
     group_configurations: Dict[str, Any] = Field(default_factory=dict, description="Group-specific configurations")
     priority: OrchestrationPriority = Field(default=OrchestrationPriority.MEDIUM, description="Priority level")
     
-    @validator('connected_groups')
+    @field_validator('connected_groups')
     def validate_groups(cls, v):
         valid_groups = ['data_sources', 'scan_rule_sets', 'classifications', 
                        'compliance_rules', 'advanced_catalog', 'scan_logic', 'rbac_system']
@@ -107,7 +107,7 @@ class ExecuteWorkflowRequest(BaseModel):
     environment: str = Field(default="production", description="Execution environment")
     max_retries: int = Field(default=3, ge=0, le=10, description="Maximum retry attempts")
     
-    @validator('workflow_definition')
+    @field_validator('workflow_definition')
     def validate_workflow(cls, v):
         required_fields = ['name', 'steps']
         missing = [f for f in required_fields if f not in v]

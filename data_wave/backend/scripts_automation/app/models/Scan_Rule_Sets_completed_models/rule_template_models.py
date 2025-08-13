@@ -104,22 +104,22 @@ class RuleTemplate(SQLModel, table=True):
     # Template content and structure
     template_content: Dict[str, Any] = Field(sa_column=Column(JSON), description="Template rule definition")
     template_schema: Dict[str, Any] = Field(sa_column=Column(JSON), description="Template structure schema")
-    parameter_definitions: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    default_parameters: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    validation_rules: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    parameter_definitions: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    default_parameters: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    validation_rules: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Template metadata
-    tags: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    keywords: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    industry_tags: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    regulatory_tags: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    tags: List[str] = Field(default=None, sa_column=Column(JSON))
+    keywords: List[str] = Field(default=None, sa_column=Column(JSON))
+    industry_tags: List[str] = Field(default=None, sa_column=Column(JSON))
+    regulatory_tags: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Template relationships and dependencies
     parent_template_id: Optional[str] = Field(index=True, description="Parent template for inheritance")
-    derived_templates: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    required_templates: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    optional_templates: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    conflicting_templates: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    derived_templates: List[str] = Field(default=None, sa_column=Column(JSON))
+    required_templates: List[str] = Field(default=None, sa_column=Column(JSON))
+    optional_templates: List[str] = Field(default=None, sa_column=Column(JSON))
+    conflicting_templates: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # AI and ML features
     ai_generated: bool = Field(default=False, description="Whether template was AI-generated")
@@ -132,7 +132,7 @@ class RuleTemplate(SQLModel, table=True):
     success_rate: float = Field(default=0.0, ge=0.0, le=1.0, description="Success rate")
     average_performance: float = Field(default=0.0, ge=0.0, description="Average performance score")
     user_rating: float = Field(default=0.0, ge=0.0, le=5.0, description="User rating")
-    performance_metrics: Dict[str, float] = Field(default_factory=dict, sa_column=Column(JSON))
+    performance_metrics: Dict[str, float] = Field(default=None, sa_column=Column(JSON))
     
     # Template lifecycle and status
     status: TemplateStatus = Field(default=TemplateStatus.DRAFT, index=True)
@@ -143,28 +143,28 @@ class RuleTemplate(SQLModel, table=True):
     
     # Access control and security
     visibility_level: str = Field(default="private", max_length=50)
-    access_permissions: Dict[str, List[str]] = Field(default_factory=dict, sa_column=Column(JSON))
+    access_permissions: Dict[str, List[str]] = Field(default=None, sa_column=Column(JSON))
     security_classification: Optional[str] = Field(max_length=50)
-    compliance_requirements: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    compliance_requirements: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Business and commercial
     license_type: str = Field(default="internal", max_length=50)
     cost_per_use: Optional[float] = Field(ge=0.0, description="Cost per template use")
     commercial_value: Optional[float] = Field(ge=0.0, description="Commercial value")
-    roi_metrics: Dict[str, float] = Field(default_factory=dict, sa_column=Column(JSON))
+    roi_metrics: Dict[str, float] = Field(default=None, sa_column=Column(JSON))
     
     # Quality and validation
     quality_score: float = Field(default=0.0, ge=0.0, le=1.0)
     validation_status: str = Field(default="pending", max_length=50)
     last_validation: Optional[datetime] = None
-    validation_errors: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    validation_errors: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Documentation and help
     documentation: Optional[str] = Field(sa_column=Column(Text))
-    examples: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    use_cases: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    best_practices: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    troubleshooting: Dict[str, str] = Field(default_factory=dict, sa_column=Column(JSON))
+    examples: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    use_cases: List[str] = Field(default=None, sa_column=Column(JSON))
+    best_practices: List[str] = Field(default=None, sa_column=Column(JSON))
+    troubleshooting: Dict[str, str] = Field(default=None, sa_column=Column(JSON))
     
     # Temporal fields
     created_at: datetime = Field(default_factory=datetime.utcnow, index=True)
@@ -220,8 +220,8 @@ class TemplateCategory(SQLModel, table=True):
     # Category metadata
     icon: Optional[str] = Field(max_length=100)
     color: Optional[str] = Field(max_length=20)
-    tags: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    keywords: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    tags: List[str] = Field(default=None, sa_column=Column(JSON))
+    keywords: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Category analytics
     template_count: int = Field(default=0, ge=0)
@@ -275,26 +275,26 @@ class TemplateVersion(SQLModel, table=True):
     
     # Version content
     template_content: Dict[str, Any] = Field(sa_column=Column(JSON))
-    parameter_definitions: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    validation_rules: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    parameter_definitions: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    validation_rules: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Change tracking
     change_summary: str = Field(max_length=500)
-    change_details: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    breaking_changes: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    change_details: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    breaking_changes: List[str] = Field(default=None, sa_column=Column(JSON))
     migration_notes: Optional[str] = Field(sa_column=Column(Text))
     
     # Version metrics
     usage_count: int = Field(default=0, ge=0)
     success_rate: float = Field(default=0.0, ge=0.0, le=1.0)
     performance_score: float = Field(default=0.0, ge=0.0, le=1.0)
-    user_feedback: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    user_feedback: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Approval and validation
     approval_status: str = Field(default="pending", max_length=50)
     approved_by: Optional[str] = Field(max_length=255)
     approved_at: Optional[datetime] = None
-    validation_results: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    validation_results: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Temporal fields
     created_at: datetime = Field(default_factory=datetime.utcnow, index=True)
@@ -331,14 +331,14 @@ class TemplateUsage(SQLModel, table=True):
     
     # Usage details
     usage_type: str = Field(max_length=50, index=True)  # create, modify, copy, reference
-    parameters_used: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    customizations: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    parameters_used: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    customizations: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     usage_duration: Optional[int] = Field(ge=0, description="Usage duration in seconds")
     
     # Usage outcomes
     success: bool = Field(index=True)
     error_details: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
-    performance_metrics: Dict[str, float] = Field(default_factory=dict, sa_column=Column(JSON))
+    performance_metrics: Dict[str, float] = Field(default=None, sa_column=Column(JSON))
     user_satisfaction: Optional[float] = Field(ge=0.0, le=5.0)
     
     # Context information
@@ -388,9 +388,9 @@ class TemplateReview(SQLModel, table=True):
     # Review content
     title: str = Field(max_length=200)
     review_text: Optional[str] = Field(sa_column=Column(Text))
-    pros: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    cons: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    suggestions: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    pros: List[str] = Field(default=None, sa_column=Column(JSON))
+    cons: List[str] = Field(default=None, sa_column=Column(JSON))
+    suggestions: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Review validation
     is_verified: bool = Field(default=False)
@@ -438,11 +438,11 @@ class TemplateAnalytics(SQLModel, table=True):
     # Performance metrics
     average_performance_score: float = Field(default=0.0, ge=0.0, le=1.0)
     performance_trend: str = Field(default="stable", max_length=20)
-    performance_percentiles: Dict[str, float] = Field(default_factory=dict, sa_column=Column(JSON))
+    performance_percentiles: Dict[str, float] = Field(default=None, sa_column=Column(JSON))
     
     # User engagement metrics
     average_rating: float = Field(default=0.0, ge=0.0, le=5.0)
-    rating_distribution: Dict[str, int] = Field(default_factory=dict, sa_column=Column(JSON))
+    rating_distribution: Dict[str, int] = Field(default=None, sa_column=Column(JSON))
     user_retention_rate: float = Field(default=0.0, ge=0.0, le=1.0)
     recommendation_score: float = Field(default=0.0, ge=0.0, le=1.0)
     
@@ -453,10 +453,10 @@ class TemplateAnalytics(SQLModel, table=True):
     roi_score: float = Field(default=0.0, ge=0.0)
     
     # AI insights
-    usage_patterns: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    trend_analysis: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    predictive_insights: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    anomaly_detection: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    usage_patterns: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    trend_analysis: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    predictive_insights: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    anomaly_detection: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Temporal fields
     created_at: datetime = Field(default_factory=datetime.utcnow, index=True)

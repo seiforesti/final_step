@@ -49,7 +49,7 @@ class SecurityVulnerability(SQLModel, table=True):
     
     # Remediation
     remediation: Optional[str] = None
-    affected_components: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    affected_components: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Tracking
     discovered_at: datetime = Field(default_factory=datetime.now)
@@ -60,7 +60,7 @@ class SecurityVulnerability(SQLModel, table=True):
     assigned_to: Optional[str] = None
     
     # Additional metadata
-    vulnerability_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    vulnerability_metadata: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Audit fields
     created_at: datetime = Field(default_factory=datetime.now)
@@ -95,7 +95,7 @@ class SecurityControl(SQLModel, table=True):
     assessor: Optional[str] = None
     
     # Metadata
-    control_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    control_metadata: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Audit fields
     created_at: datetime = Field(default_factory=datetime.now)
@@ -130,7 +130,7 @@ class SecurityScan(SQLModel, table=True):
     duration_seconds: Optional[int] = None
     
     # Results storage
-    scan_results: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    scan_results: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Audit fields
     created_at: datetime = Field(default_factory=datetime.now)
@@ -164,13 +164,13 @@ class SecurityIncident(SQLModel, table=True):
     
     # Impact
     impact_assessment: Optional[str] = None
-    affected_systems: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    affected_systems: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Response
-    response_actions: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    response_actions: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Metadata
-    incident_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    incident_metadata: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Audit fields
     created_at: datetime = Field(default_factory=datetime.now)
@@ -267,8 +267,8 @@ class SecurityVulnerabilityCreate(SQLModel):
     cve_id: Optional[str] = None
     cvss_score: Optional[float] = None
     remediation: Optional[str] = None
-    affected_components: List[str] = Field(default_factory=list)
-    vulnerability_metadata: Dict[str, Any] = Field(default_factory=dict)
+    affected_components: List[str] = Field(default=None)
+    vulnerability_metadata: Dict[str, Any] = Field(default=None)
 
 
 class SecurityControlCreate(SQLModel):
@@ -280,7 +280,7 @@ class SecurityControlCreate(SQLModel):
     control_id: str
     status: SecurityControlStatus = SecurityControlStatus.DISABLED
     implementation_notes: Optional[str] = None
-    control_metadata: Dict[str, Any] = Field(default_factory=dict)
+    control_metadata: Dict[str, Any] = Field(default=None)
 
 
 class SecurityScanCreate(SQLModel):
@@ -298,7 +298,7 @@ class SecurityIncidentCreate(SQLModel):
     category: str
     reporter: Optional[str] = None
     impact_assessment: Optional[str] = None
-    affected_systems: List[str] = Field(default_factory=list)
+    affected_systems: List[str] = Field(default=None)
 
 
 # Update Models

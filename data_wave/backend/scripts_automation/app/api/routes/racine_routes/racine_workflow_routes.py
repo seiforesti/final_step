@@ -39,7 +39,7 @@ from datetime import datetime, timedelta
 from uuid import UUID
 import json
 import asyncio
-from pydantic import BaseModel, Field, validator
+from pydantic import field_validator, BaseModel, Field, validator
 
 # Database and Authentication
 from ....database import get_db
@@ -97,7 +97,7 @@ class WorkflowStepRequest(BaseModel):
     retry_count: int = Field(default=3, ge=0, le=10, description="Retry attempts")
     condition: Optional[str] = Field(None, description="Execution condition")
     
-    @validator('step_type')
+    @field_validator('step_type')
     def validate_step_type(cls, v):
         allowed_types = [
             'data_scan', 'compliance_check', 'classification_run',
@@ -108,7 +108,7 @@ class WorkflowStepRequest(BaseModel):
             raise ValueError(f"Step type must be one of: {allowed_types}")
         return v
     
-    @validator('group_target')
+    @field_validator('group_target')
     def validate_group_target(cls, v):
         allowed_groups = [
             'data_sources', 'scan_rules', 'classifications',
@@ -130,7 +130,7 @@ class WorkflowCreateRequest(BaseModel):
     notification_config: Dict[str, Any] = Field(default_factory=dict, description="Notification settings")
     tags: List[str] = Field(default_factory=list, description="Workflow tags")
     
-    @validator('workflow_type')
+    @field_validator('workflow_type')
     def validate_workflow_type(cls, v):
         allowed_types = ['sequential', 'parallel', 'dag', 'conditional']
         if v not in allowed_types:
@@ -154,7 +154,7 @@ class WorkflowExecutionRequest(BaseModel):
     max_parallel_steps: Optional[int] = Field(None, ge=1, description="Max parallel steps")
     timeout_seconds: Optional[int] = Field(None, ge=1, description="Global timeout")
     
-    @validator('execution_mode')
+    @field_validator('execution_mode')
     def validate_execution_mode(cls, v):
         allowed_modes = ['normal', 'debug', 'dry_run', 'test']
         if v not in allowed_modes:
@@ -172,7 +172,7 @@ class WorkflowScheduleRequest(BaseModel):
     execution_parameters: Dict[str, Any] = Field(default_factory=dict, description="Default execution parameters")
     is_active: bool = Field(default=True, description="Whether schedule is active")
     
-    @validator('schedule_type')
+    @field_validator('schedule_type')
     def validate_schedule_type(cls, v):
         allowed_types = ['cron', 'interval', 'event_driven', 'manual']
         if v not in allowed_types:

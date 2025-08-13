@@ -22,7 +22,7 @@ from datetime import datetime, timedelta
 from enum import Enum
 import uuid
 import json
-from pydantic import BaseModel, validator, Field as PydanticField
+from pydantic import field_validator, BaseModel, validator, Field as PydanticField
 from sqlalchemy import Index, UniqueConstraint, CheckConstraint, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 import networkx as nx
@@ -171,17 +171,17 @@ class IntelligentDataAsset(SQLModel, table=True):
     last_scanned: Optional[datetime] = Field(index=True)
     
     # Technical Metadata
-    columns_info: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    schema_definition: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    data_types: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    constraints: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    indexes: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    columns_info: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    schema_definition: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    data_types: List[str] = Field(default=None, sa_column=Column(JSON))
+    constraints: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    indexes: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     partitioning_info: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # AI-Enhanced Metadata
     ai_generated_description: Optional[str] = Field(sa_column=Column(Text))
-    semantic_tags: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    suggested_tags: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    semantic_tags: List[str] = Field(default=None, sa_column=Column(JSON))
+    suggested_tags: List[str] = Field(default=None, sa_column=Column(JSON))
     ai_confidence_score: float = Field(default=0.0, ge=0.0, le=1.0)
     semantic_embedding: Optional[List[float]] = Field(default=None, sa_column=Column(JSON))
     
@@ -200,9 +200,9 @@ class IntelligentDataAsset(SQLModel, table=True):
     size_bytes: Optional[int] = Field(default=None, ge=0)
     null_percentage: float = Field(default=0.0, ge=0.0, le=1.0)
     distinct_values: Optional[int] = Field(default=None, ge=0)
-    data_distribution: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    value_patterns: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    statistical_summary: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    data_distribution: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    value_patterns: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    statistical_summary: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Usage Analytics
     usage_frequency: UsageFrequency = Field(default=UsageFrequency.UNKNOWN, index=True)
@@ -212,13 +212,13 @@ class IntelligentDataAsset(SQLModel, table=True):
     unique_users_count: int = Field(default=0, ge=0)
     last_accessed: Optional[datetime] = Field(index=True)
     peak_usage_time: Optional[datetime] = None
-    usage_trends: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    usage_trends: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Business Context
     business_domain: Optional[str] = Field(max_length=100, index=True)
     business_purpose: Optional[str] = Field(sa_column=Column(Text))
-    business_rules: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    key_performance_indicators: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    business_rules: List[str] = Field(default=None, sa_column=Column(JSON))
+    key_performance_indicators: List[str] = Field(default=None, sa_column=Column(JSON))
     business_value_score: float = Field(default=0.0, ge=0.0, le=10.0)
     
     # Ownership and Stewardship
@@ -231,7 +231,7 @@ class IntelligentDataAsset(SQLModel, table=True):
     responsible_department: Optional[str] = Field(max_length=100)
     
     # Compliance and Governance
-    compliance_requirements: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    compliance_requirements: List[str] = Field(default=None, sa_column=Column(JSON))
     retention_policy: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     privacy_impact_level: str = Field(default="low", max_length=20)
     gdpr_applicable: bool = Field(default=False)
@@ -240,8 +240,8 @@ class IntelligentDataAsset(SQLModel, table=True):
     compliance_score: float = Field(default=0.0, ge=0.0, le=1.0)
     
     # Classification Integration
-    classification_results: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    sensitivity_labels: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    classification_results: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    sensitivity_labels: List[str] = Field(default=None, sa_column=Column(JSON))
     auto_classification_confidence: float = Field(default=0.0, ge=0.0, le=1.0)
     manual_classification_override: bool = Field(default=False)
     
@@ -251,38 +251,38 @@ class IntelligentDataAsset(SQLModel, table=True):
     compute_cost_monthly: Optional[float] = Field(default=None, ge=0.0)
     total_cost_monthly: Optional[float] = Field(default=None, ge=0.0)
     cost_per_query: Optional[float] = Field(default=None, ge=0.0)
-    performance_benchmarks: Dict[str, float] = Field(default_factory=dict, sa_column=Column(JSON))
+    performance_benchmarks: Dict[str, float] = Field(default=None, sa_column=Column(JSON))
     
     # Relationships and Dependencies
     parent_asset_id: Optional[int] = Field(foreign_key="intelligent_data_assets.id", index=True)
-    related_assets: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    related_assets: List[str] = Field(default=None, sa_column=Column(JSON))
     dependency_count: int = Field(default=0, ge=0)
     dependent_assets_count: int = Field(default=0, ge=0)
     
     # Change Management
     version: str = Field(default="1.0.0", max_length=20)
-    version_history: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    version_history: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     last_modified: Optional[datetime] = Field(index=True)
     change_frequency: str = Field(default="unknown", max_length=20)
-    schema_evolution: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    schema_evolution: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Monitoring and Alerting
     monitoring_enabled: bool = Field(default=True)
-    alert_thresholds: Dict[str, float] = Field(default_factory=dict, sa_column=Column(JSON))
+    alert_thresholds: Dict[str, float] = Field(default=None, sa_column=Column(JSON))
     health_score: float = Field(default=1.0, ge=0.0, le=1.0, index=True)
     uptime_percentage: float = Field(default=100.0, ge=0.0, le=100.0)
     availability_sla: Optional[float] = Field(default=None, ge=0.0, le=100.0)
     
     # Tags and Labels
-    user_tags: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    system_tags: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    custom_properties: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    metadata_extensions: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    user_tags: List[str] = Field(default=None, sa_column=Column(JSON))
+    system_tags: List[str] = Field(default=None, sa_column=Column(JSON))
+    custom_properties: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    metadata_extensions: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Audit Information
-    audit_trail: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    access_history: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    modification_history: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    audit_trail: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    access_history: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    modification_history: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Temporal Fields
     created_at: datetime = Field(default_factory=datetime.utcnow, index=True)
@@ -364,16 +364,16 @@ class EnterpriseDataLineage(SQLModel, table=True):
     detection_method: DiscoveryMethod = Field(index=True)
     
     # Column-Level Lineage
-    source_columns: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    target_columns: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    column_mappings: Dict[str, List[str]] = Field(default_factory=dict, sa_column=Column(JSON))
-    transformation_functions: Dict[str, str] = Field(default_factory=dict, sa_column=Column(JSON))
+    source_columns: List[str] = Field(default=None, sa_column=Column(JSON))
+    target_columns: List[str] = Field(default=None, sa_column=Column(JSON))
+    column_mappings: Dict[str, List[str]] = Field(default=None, sa_column=Column(JSON))
+    transformation_functions: Dict[str, str] = Field(default=None, sa_column=Column(JSON))
     
     # Transformation Details
     transformation_logic: Optional[str] = Field(sa_column=Column(Text), description="SQL or transformation code")
     transformation_type: str = Field(default="unknown", max_length=100)
     business_logic: Optional[str] = Field(sa_column=Column(Text))
-    calculation_rules: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    calculation_rules: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     aggregation_level: Optional[str] = Field(max_length=100)
     
     # Process Information
@@ -385,9 +385,9 @@ class EnterpriseDataLineage(SQLModel, table=True):
     
     # Quality and Validation
     data_quality_impact: float = Field(default=0.0, ge=-1.0, le=1.0)
-    validation_rules: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    quality_checks: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    error_handling: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    validation_rules: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    quality_checks: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    error_handling: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Performance Metrics
     processing_time_avg: Optional[float] = Field(ge=0.0, description="Average processing time in seconds")
@@ -400,8 +400,8 @@ class EnterpriseDataLineage(SQLModel, table=True):
     downstream_impact_score: float = Field(default=0.0, ge=0.0, le=10.0)
     critical_path: bool = Field(default=False, index=True)
     business_impact: str = Field(default="medium", max_length=20)
-    affected_reports: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    affected_users: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    affected_reports: List[str] = Field(default=None, sa_column=Column(JSON))
+    affected_users: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Graph Properties
     graph_depth: int = Field(default=1, ge=1)
@@ -414,19 +414,19 @@ class EnterpriseDataLineage(SQLModel, table=True):
     alert_on_failure: bool = Field(default=True)
     alert_on_delay: bool = Field(default=False)
     sla_threshold_minutes: Optional[int] = Field(ge=1)
-    escalation_policy: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    escalation_policy: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Compliance and Governance
     data_classification_inheritance: bool = Field(default=True)
-    privacy_preservation: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    compliance_validations: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    audit_requirements: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    privacy_preservation: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    compliance_validations: List[str] = Field(default=None, sa_column=Column(JSON))
+    audit_requirements: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Metadata and Context
-    technical_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    business_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    operational_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    custom_attributes: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    technical_metadata: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    business_metadata: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    operational_metadata: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    custom_attributes: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Lifecycle Management
     is_active: bool = Field(default=True, index=True)
@@ -436,9 +436,9 @@ class EnterpriseDataLineage(SQLModel, table=True):
     replacement_lineage_id: Optional[str] = None
     
     # Audit Information
-    discovery_details: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    validation_history: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    change_history: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    discovery_details: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    validation_history: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    change_history: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Temporal Fields
     created_at: datetime = Field(default_factory=datetime.utcnow, index=True)
@@ -500,29 +500,29 @@ class DataQualityAssessment(SQLModel, table=True):
     quality_trend: str = Field(default="stable", max_length=20)  # improving, declining, stable
     
     # Detailed Quality Analysis
-    null_value_analysis: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    duplicate_analysis: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    outlier_analysis: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    pattern_analysis: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    statistical_analysis: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    null_value_analysis: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    duplicate_analysis: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    outlier_analysis: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    pattern_analysis: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    statistical_analysis: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Column-Level Quality
-    column_quality_scores: Dict[str, float] = Field(default_factory=dict, sa_column=Column(JSON))
-    column_issues: Dict[str, List[str]] = Field(default_factory=dict, sa_column=Column(JSON))
-    column_recommendations: Dict[str, List[str]] = Field(default_factory=dict, sa_column=Column(JSON))
+    column_quality_scores: Dict[str, float] = Field(default=None, sa_column=Column(JSON))
+    column_issues: Dict[str, List[str]] = Field(default=None, sa_column=Column(JSON))
+    column_recommendations: Dict[str, List[str]] = Field(default=None, sa_column=Column(JSON))
     
     # Quality Rules and Validation
-    quality_rules_applied: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    validation_results: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    business_rule_violations: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    data_constraints_violations: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    quality_rules_applied: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    validation_results: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    business_rule_violations: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    data_constraints_violations: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Issues and Remediation
-    identified_issues: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    identified_issues: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     critical_issues_count: int = Field(default=0, ge=0)
     high_priority_issues_count: int = Field(default=0, ge=0)
-    remediation_suggestions: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    auto_fix_applied: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    remediation_suggestions: List[str] = Field(default=None, sa_column=Column(JSON))
+    auto_fix_applied: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Assessment Execution
     records_assessed: int = Field(ge=0)
@@ -533,32 +533,32 @@ class DataQualityAssessment(SQLModel, table=True):
     # Historical Comparison
     previous_assessment_id: Optional[str] = None
     quality_score_change: Optional[float] = Field(ge=-1.0, le=1.0)
-    improvement_areas: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    degradation_areas: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    improvement_areas: List[str] = Field(default=None, sa_column=Column(JSON))
+    degradation_areas: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # AI-Powered Insights
-    ai_quality_insights: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    anomaly_detection_results: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    predictive_quality_trends: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    ai_quality_insights: List[str] = Field(default=None, sa_column=Column(JSON))
+    anomaly_detection_results: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    predictive_quality_trends: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     ml_model_confidence: float = Field(default=0.0, ge=0.0, le=1.0)
     
     # Business Impact
     business_impact_score: float = Field(default=0.0, ge=0.0, le=10.0)
-    affected_processes: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    downstream_impact_analysis: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    affected_processes: List[str] = Field(default=None, sa_column=Column(JSON))
+    downstream_impact_analysis: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     cost_of_poor_quality: Optional[float] = Field(ge=0.0)
     
     # Monitoring and Alerting
-    alert_thresholds: Dict[str, float] = Field(default_factory=dict, sa_column=Column(JSON))
-    alerts_triggered: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    alert_thresholds: Dict[str, float] = Field(default=None, sa_column=Column(JSON))
+    alerts_triggered: List[str] = Field(default=None, sa_column=Column(JSON))
     escalation_required: bool = Field(default=False)
     notification_sent: bool = Field(default=False)
     
     # Temporal and Context
     assessment_date: datetime = Field(default_factory=datetime.utcnow, index=True)
     data_snapshot_date: datetime = Field(index=True)
-    assessment_context: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    environmental_factors: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    assessment_context: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    environmental_factors: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Audit Information
     created_at: datetime = Field(default_factory=datetime.utcnow, index=True)
@@ -606,30 +606,30 @@ class BusinessGlossaryTerm(SQLModel, table=True):
     maturity_level: str = Field(default="developing", max_length=20)  # developing, mature, declining
     
     # Semantic Understanding
-    synonyms: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    acronyms: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    alternative_names: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    synonyms: List[str] = Field(default=None, sa_column=Column(JSON))
+    acronyms: List[str] = Field(default=None, sa_column=Column(JSON))
+    alternative_names: List[str] = Field(default=None, sa_column=Column(JSON))
     semantic_embedding: Optional[List[float]] = Field(default=None, sa_column=Column(JSON))
-    semantic_tags: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    semantic_tags: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Business Context
     business_definition: Optional[str] = Field(sa_column=Column(Text))
     technical_definition: Optional[str] = Field(sa_column=Column(Text))
     calculation_logic: Optional[str] = Field(sa_column=Column(Text))
-    business_rules: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    usage_examples: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    business_rules: List[str] = Field(default=None, sa_column=Column(JSON))
+    usage_examples: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Relationships and References
-    related_terms: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    opposite_terms: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    broader_terms: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    narrower_terms: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    see_also: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    related_terms: List[str] = Field(default=None, sa_column=Column(JSON))
+    opposite_terms: List[str] = Field(default=None, sa_column=Column(JSON))
+    broader_terms: List[str] = Field(default=None, sa_column=Column(JSON))
+    narrower_terms: List[str] = Field(default=None, sa_column=Column(JSON))
+    see_also: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Data Asset Associations
-    associated_data_types: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    common_patterns: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    validation_rules: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    associated_data_types: List[str] = Field(default=None, sa_column=Column(JSON))
+    common_patterns: List[str] = Field(default=None, sa_column=Column(JSON))
+    validation_rules: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Usage and Analytics
     usage_frequency: int = Field(default=0, ge=0)
@@ -648,8 +648,8 @@ class BusinessGlossaryTerm(SQLModel, table=True):
     # AI Enhancement
     ai_suggested: bool = Field(default=False)
     ai_confidence_score: float = Field(default=0.0, ge=0.0, le=1.0)
-    auto_generated_synonyms: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    ml_topic_classification: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    auto_generated_synonyms: List[str] = Field(default=None, sa_column=Column(JSON))
+    ml_topic_classification: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Governance and Ownership
     owner: Optional[str] = Field(max_length=255, index=True)
@@ -662,20 +662,20 @@ class BusinessGlossaryTerm(SQLModel, table=True):
     
     # Version and Change Management
     version: str = Field(default="1.0.0", max_length=20)
-    version_history: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    version_history: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     change_reason: Optional[str] = Field(max_length=500)
     deprecation_reason: Optional[str] = Field(max_length=500)
     replacement_term_id: Optional[str] = None
     
     # External References
-    external_references: List[Dict[str, str]] = Field(default_factory=list, sa_column=Column(JSON))
-    regulatory_references: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    industry_standards: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    documentation_links: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    external_references: List[Dict[str, str]] = Field(default=None, sa_column=Column(JSON))
+    regulatory_references: List[str] = Field(default=None, sa_column=Column(JSON))
+    industry_standards: List[str] = Field(default=None, sa_column=Column(JSON))
+    documentation_links: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Custom Attributes
-    custom_attributes: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    industry_specific_info: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    custom_attributes: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    industry_specific_info: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Temporal Management
     created_at: datetime = Field(default_factory=datetime.utcnow, index=True)
@@ -789,10 +789,10 @@ class AssetUsageMetrics(SQLModel, table=True):
     success_rate: float = Field(default=1.0, ge=0.0, le=1.0)
     
     # User Behavior Analysis
-    user_segments: Dict[str, int] = Field(default_factory=dict, sa_column=Column(JSON))
-    access_patterns: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    peak_usage_hours: List[int] = Field(default_factory=list, sa_column=Column(JSON))
-    popular_queries: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    user_segments: Dict[str, int] = Field(default=None, sa_column=Column(JSON))
+    access_patterns: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    peak_usage_hours: List[int] = Field(default=None, sa_column=Column(JSON))
+    popular_queries: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Business Value Metrics
     business_value_generated: Optional[float] = Field(ge=0.0)
@@ -803,7 +803,7 @@ class AssetUsageMetrics(SQLModel, table=True):
     # Trend Analysis
     usage_trend: str = Field(default="stable", max_length=20)  # increasing, decreasing, stable, volatile
     growth_rate: Optional[float] = None
-    seasonality_pattern: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    seasonality_pattern: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     anomaly_detected: bool = Field(default=False)
     
     # Resource Utilization
@@ -813,9 +813,9 @@ class AssetUsageMetrics(SQLModel, table=True):
     network_io_mb: Optional[float] = Field(ge=0.0)
     
     # Predictive Analytics
-    predicted_next_period: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    predicted_next_period: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     forecast_confidence: float = Field(default=0.0, ge=0.0, le=1.0)
-    capacity_recommendations: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    capacity_recommendations: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Temporal Management
     created_at: datetime = Field(default_factory=datetime.utcnow, index=True)
@@ -849,7 +849,7 @@ class DataProfilingResult(SQLModel, table=True):
     profiling_type: str = Field(max_length=100, index=True)  # full, sample, incremental, column_specific
     sample_size: int = Field(ge=1)
     sample_percentage: float = Field(ge=0.0, le=100.0)
-    profiling_scope: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    profiling_scope: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Dataset Overview
     total_records: int = Field(ge=0)
@@ -860,46 +860,46 @@ class DataProfilingResult(SQLModel, table=True):
     duplicate_percentage: float = Field(default=0.0, ge=0.0, le=100.0)
     
     # Column-Level Profiling
-    column_profiles: Dict[str, Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    data_type_distribution: Dict[str, int] = Field(default_factory=dict, sa_column=Column(JSON))
-    null_counts_per_column: Dict[str, int] = Field(default_factory=dict, sa_column=Column(JSON))
-    unique_counts_per_column: Dict[str, int] = Field(default_factory=dict, sa_column=Column(JSON))
+    column_profiles: Dict[str, Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    data_type_distribution: Dict[str, int] = Field(default=None, sa_column=Column(JSON))
+    null_counts_per_column: Dict[str, int] = Field(default=None, sa_column=Column(JSON))
+    unique_counts_per_column: Dict[str, int] = Field(default=None, sa_column=Column(JSON))
     
     # Statistical Analysis
-    numerical_statistics: Dict[str, Dict[str, float]] = Field(default_factory=dict, sa_column=Column(JSON))
-    categorical_statistics: Dict[str, Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    correlation_matrix: Dict[str, Dict[str, float]] = Field(default_factory=dict, sa_column=Column(JSON))
-    distribution_analysis: Dict[str, Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    numerical_statistics: Dict[str, Dict[str, float]] = Field(default=None, sa_column=Column(JSON))
+    categorical_statistics: Dict[str, Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    correlation_matrix: Dict[str, Dict[str, float]] = Field(default=None, sa_column=Column(JSON))
+    distribution_analysis: Dict[str, Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Pattern Detection
-    data_patterns: Dict[str, List[str]] = Field(default_factory=dict, sa_column=Column(JSON))
-    format_patterns: Dict[str, Dict[str, int]] = Field(default_factory=dict, sa_column=Column(JSON))
-    value_patterns: Dict[str, Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    regex_patterns: Dict[str, List[str]] = Field(default_factory=dict, sa_column=Column(JSON))
+    data_patterns: Dict[str, List[str]] = Field(default=None, sa_column=Column(JSON))
+    format_patterns: Dict[str, Dict[str, int]] = Field(default=None, sa_column=Column(JSON))
+    value_patterns: Dict[str, Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    regex_patterns: Dict[str, List[str]] = Field(default=None, sa_column=Column(JSON))
     
     # Anomaly Detection
-    outliers_detected: Dict[str, List[Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    anomaly_scores: Dict[str, float] = Field(default_factory=dict, sa_column=Column(JSON))
-    statistical_outliers: Dict[str, Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    business_rule_violations: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    outliers_detected: Dict[str, List[Any]] = Field(default=None, sa_column=Column(JSON))
+    anomaly_scores: Dict[str, float] = Field(default=None, sa_column=Column(JSON))
+    statistical_outliers: Dict[str, Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    business_rule_violations: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Data Relationships
-    primary_key_candidates: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    foreign_key_relationships: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    functional_dependencies: Dict[str, List[str]] = Field(default_factory=dict, sa_column=Column(JSON))
-    referential_integrity_issues: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    primary_key_candidates: List[str] = Field(default=None, sa_column=Column(JSON))
+    foreign_key_relationships: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    functional_dependencies: Dict[str, List[str]] = Field(default=None, sa_column=Column(JSON))
+    referential_integrity_issues: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # AI-Powered Insights
-    ai_insights: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    semantic_classification: Dict[str, List[str]] = Field(default_factory=dict, sa_column=Column(JSON))
-    pii_detection_results: Dict[str, Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
-    data_sensitivity_scores: Dict[str, float] = Field(default_factory=dict, sa_column=Column(JSON))
+    ai_insights: List[str] = Field(default=None, sa_column=Column(JSON))
+    semantic_classification: Dict[str, List[str]] = Field(default=None, sa_column=Column(JSON))
+    pii_detection_results: Dict[str, Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    data_sensitivity_scores: Dict[str, float] = Field(default=None, sa_column=Column(JSON))
     
     # Quality Assessment
     overall_quality_score: float = Field(ge=0.0, le=1.0)
-    quality_issues: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    improvement_recommendations: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    data_completeness_by_column: Dict[str, float] = Field(default_factory=dict, sa_column=Column(JSON))
+    quality_issues: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    improvement_recommendations: List[str] = Field(default=None, sa_column=Column(JSON))
+    data_completeness_by_column: Dict[str, float] = Field(default=None, sa_column=Column(JSON))
     
     # Performance Metrics
     profiling_duration_seconds: float = Field(ge=0.0)
@@ -909,15 +909,15 @@ class DataProfilingResult(SQLModel, table=True):
     
     # Business Impact
     business_relevance_score: float = Field(default=0.0, ge=0.0, le=10.0)
-    data_value_assessment: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    usage_recommendations: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    monetization_opportunities: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    data_value_assessment: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    usage_recommendations: List[str] = Field(default=None, sa_column=Column(JSON))
+    monetization_opportunities: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Historical Comparison
     previous_profiling_id: Optional[str] = None
-    changes_detected: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    schema_evolution: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    trend_analysis: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    changes_detected: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    schema_evolution: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    trend_analysis: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Execution Context
     profiling_timestamp: datetime = Field(default_factory=datetime.utcnow, index=True)
@@ -926,9 +926,9 @@ class DataProfilingResult(SQLModel, table=True):
     error_details: Optional[str] = Field(max_length=2000)
     
     # Metadata and Configuration
-    profiling_parameters: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    environment_context: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    tool_metadata: Dict[str, str] = Field(default_factory=dict, sa_column=Column(JSON))
+    profiling_parameters: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    environment_context: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    tool_metadata: Dict[str, str] = Field(default=None, sa_column=Column(JSON))
     
     # Temporal Management
     created_at: datetime = Field(default_factory=datetime.utcnow, index=True)
@@ -1023,7 +1023,7 @@ class AssetCreateRequest(BaseModel):
     user_tags: Optional[List[str]] = []
     custom_properties: Optional[Dict[str, Any]] = {}
     
-    @validator('qualified_name')
+    @field_validator('qualified_name')
     def validate_qualified_name(cls, v):
         if not v.strip():
             raise ValueError('Qualified name cannot be empty')

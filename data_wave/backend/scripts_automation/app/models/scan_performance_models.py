@@ -160,7 +160,7 @@ class ScanPerformanceMetric(SQLModel, table=True):
     # Metadata
     unit: str = Field(description="Metric unit (e.g., %, MB/s, ms)")
     description: Optional[str] = Field(default=None, description="Metric description")
-    tags: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Metric tags")
+    tags: List[str] = Field(default=None, sa_column=Column(ARRAY(str)), description="Metric tags")
     
     # Timing
     measured_at: datetime = Field(default_factory=datetime.utcnow, index=True, description="Measurement timestamp")
@@ -185,8 +185,8 @@ class PerformanceHistory(SQLModel, table=True):
     sample_count: int = Field(default=1, description="Number of samples in aggregation")
     
     # Context
-    context: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Contextual information")
-    resource_state: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Resource state snapshot")
+    context: Dict[str, Any] = Field(default=None, sa_column=Column(JSONB), description="Contextual information")
+    resource_state: Dict[str, Any] = Field(default=None, sa_column=Column(JSONB), description="Resource state snapshot")
     
     # Timing
     recorded_at: datetime = Field(index=True, description="Recording timestamp")
@@ -221,13 +221,13 @@ class PerformanceBottleneck(SQLModel, table=True):
     
     # Impact Analysis
     performance_impact: float = Field(description="Performance impact percentage")
-    affected_operations: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Affected operations")
-    downstream_impact: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Downstream impact analysis")
+    affected_operations: List[str] = Field(default=None, sa_column=Column(ARRAY(str)), description="Affected operations")
+    downstream_impact: Dict[str, Any] = Field(default=None, sa_column=Column(JSONB), description="Downstream impact analysis")
     
     # Root Cause
     root_cause: str = Field(description="Root cause description")
-    contributing_factors: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Contributing factors")
-    evidence: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Detection evidence")
+    contributing_factors: List[str] = Field(default=None, sa_column=Column(ARRAY(str)), description="Contributing factors")
+    evidence: Dict[str, Any] = Field(default=None, sa_column=Column(JSONB), description="Detection evidence")
     
     # Resolution
     status: str = Field(default="active", index=True, description="Bottleneck status")
@@ -236,12 +236,12 @@ class PerformanceBottleneck(SQLModel, table=True):
     resolution_notes: Optional[str] = Field(default=None, description="Resolution notes")
     
     # Recommendations
-    recommended_actions: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Recommended actions")
+    recommended_actions: List[str] = Field(default=None, sa_column=Column(ARRAY(str)), description="Recommended actions")
     priority: int = Field(default=5, description="Resolution priority (1-10)")
     estimated_effort: Optional[str] = Field(default=None, description="Estimated resolution effort")
     
     # Metadata
-    tags: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Bottleneck tags")
+    tags: List[str] = Field(default=None, sa_column=Column(ARRAY(str)), description="Bottleneck tags")
     custom_properties: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSONB), description="Custom properties")
     
     # Relationships
@@ -263,8 +263,8 @@ class PerformanceOptimization(SQLModel, table=True):
     
     # Optimization Details
     description: str = Field(description="Optimization description")
-    implementation_details: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Implementation details")
-    configuration_changes: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Configuration changes")
+    implementation_details: Dict[str, Any] = Field(default=None, sa_column=Column(JSONB), description="Implementation details")
+    configuration_changes: Dict[str, Any] = Field(default=None, sa_column=Column(JSONB), description="Configuration changes")
     
     # Impact Prediction
     predicted_improvement: float = Field(description="Predicted performance improvement %")
@@ -291,7 +291,7 @@ class PerformanceOptimization(SQLModel, table=True):
     # Metadata
     priority: int = Field(default=5, description="Implementation priority (1-10)")
     estimated_effort: Optional[str] = Field(default=None, description="Estimated implementation effort")
-    tags: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Optimization tags")
+    tags: List[str] = Field(default=None, sa_column=Column(ARRAY(str)), description="Optimization tags")
     
     # Timing
     created_at: datetime = Field(default_factory=datetime.utcnow, description="Creation timestamp")
@@ -336,13 +336,13 @@ class ScanPerformanceAlert(SQLModel, table=True):
     
     # Impact
     impact_assessment: Optional[str] = Field(default=None, description="Impact assessment")
-    affected_services: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Affected services")
+    affected_services: List[str] = Field(default=None, sa_column=Column(ARRAY(str)), description="Affected services")
     business_impact: Optional[str] = Field(default=None, description="Business impact description")
     
     # Escalation
     escalation_level: int = Field(default=0, description="Current escalation level")
     escalated_to: Optional[str] = Field(default=None, description="Escalated to user/team")
-    escalation_history: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSONB), description="Escalation history")
+    escalation_history: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSONB), description="Escalation history")
     
     # Timing
     triggered_at: datetime = Field(default_factory=datetime.utcnow, index=True, description="Alert trigger timestamp")
@@ -350,7 +350,7 @@ class ScanPerformanceAlert(SQLModel, table=True):
     last_updated_at: Optional[datetime] = Field(default=None, description="Last update timestamp")
     
     # Metadata
-    tags: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Alert tags")
+    tags: List[str] = Field(default=None, sa_column=Column(ARRAY(str)), description="Alert tags")
     custom_properties: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSONB), description="Custom properties")
     
     # Relationships
@@ -378,9 +378,9 @@ class PerformanceBenchmark(SQLModel, table=True):
     optimal_range_max: Optional[float] = Field(default=None, description="Optimal range maximum")
     
     # Context
-    conditions: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Benchmark conditions")
+    conditions: Dict[str, Any] = Field(default=None, sa_column=Column(JSONB), description="Benchmark conditions")
     environment: str = Field(description="Environment (prod, staging, test)")
-    workload_characteristics: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Workload characteristics")
+    workload_characteristics: Dict[str, Any] = Field(default=None, sa_column=Column(JSONB), description="Workload characteristics")
     
     # Validation
     last_validated: Optional[datetime] = Field(default=None, description="Last validation timestamp")
@@ -405,7 +405,7 @@ class PerformanceBenchmark(SQLModel, table=True):
     valid_until: Optional[datetime] = Field(default=None, description="Validity end date")
     
     # Tags
-    tags: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Benchmark tags")
+    tags: List[str] = Field(default=None, sa_column=Column(ARRAY(str)), description="Benchmark tags")
 
 class ResourceUtilization(SQLModel, table=True):
     """Real-time resource utilization tracking"""
@@ -441,7 +441,7 @@ class ResourceUtilization(SQLModel, table=True):
     # Context
     component: str = Field(description="Component using resource")
     environment: str = Field(description="Environment context")
-    workload_context: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Workload context")
+    workload_context: Dict[str, Any] = Field(default=None, sa_column=Column(JSONB), description="Workload context")
     
     # Quality Metrics
     efficiency_score: Optional[float] = Field(default=None, description="Resource efficiency score")
@@ -455,7 +455,7 @@ class ResourceUtilization(SQLModel, table=True):
     # Metadata
     unit: str = Field(description="Measurement unit")
     measurement_method: str = Field(description="How measurement was taken")
-    tags: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Utilization tags")
+    tags: List[str] = Field(default=None, sa_column=Column(ARRAY(str)), description="Utilization tags")
 
 class PerformanceReport(SQLModel, table=True):
     """Performance analysis reports"""
@@ -468,24 +468,24 @@ class PerformanceReport(SQLModel, table=True):
     
     # Report Scope
     scope: MonitoringScope = Field(description="Report scope")
-    components: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Components covered")
-    date_range: Dict[str, str] = Field(default_factory=dict, sa_column=Column(JSONB), description="Report date range")
+    components: List[str] = Field(default=None, sa_column=Column(ARRAY(str)), description="Components covered")
+    date_range: Dict[str, str] = Field(default=None, sa_column=Column(JSONB), description="Report date range")
     
     # Report Data
     executive_summary: str = Field(description="Executive summary")
-    key_findings: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Key findings")
-    performance_overview: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Performance overview")
-    detailed_analysis: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Detailed analysis")
+    key_findings: List[str] = Field(default=None, sa_column=Column(ARRAY(str)), description="Key findings")
+    performance_overview: Dict[str, Any] = Field(default=None, sa_column=Column(JSONB), description="Performance overview")
+    detailed_analysis: Dict[str, Any] = Field(default=None, sa_column=Column(JSONB), description="Detailed analysis")
     
     # Metrics and Trends
-    performance_metrics: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Performance metrics")
-    trend_analysis: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Trend analysis")
-    benchmark_comparison: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Benchmark comparison")
+    performance_metrics: Dict[str, Any] = Field(default=None, sa_column=Column(JSONB), description="Performance metrics")
+    trend_analysis: Dict[str, Any] = Field(default=None, sa_column=Column(JSONB), description="Trend analysis")
+    benchmark_comparison: Dict[str, Any] = Field(default=None, sa_column=Column(JSONB), description="Benchmark comparison")
     
     # Issues and Recommendations
-    identified_issues: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSONB), description="Identified issues")
-    bottlenecks: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSONB), description="Performance bottlenecks")
-    recommendations: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSONB), description="Optimization recommendations")
+    identified_issues: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSONB), description="Identified issues")
+    bottlenecks: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSONB), description="Performance bottlenecks")
+    recommendations: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSONB), description="Optimization recommendations")
     
     # Report Metadata
     generated_at: datetime = Field(default_factory=datetime.utcnow, index=True, description="Report generation timestamp")
@@ -494,9 +494,9 @@ class PerformanceReport(SQLModel, table=True):
     data_quality_score: float = Field(description="Data quality score for report")
     
     # Distribution
-    recipients: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Report recipients")
+    recipients: List[str] = Field(default=None, sa_column=Column(ARRAY(str)), description="Report recipients")
     delivery_status: str = Field(default="pending", description="Delivery status")
-    access_permissions: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Access permissions")
+    access_permissions: Dict[str, Any] = Field(default=None, sa_column=Column(JSONB), description="Access permissions")
     
     # Status
     status: str = Field(default="completed", index=True, description="Report status")

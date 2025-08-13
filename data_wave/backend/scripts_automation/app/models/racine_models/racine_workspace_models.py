@@ -210,120 +210,120 @@ class RacineWorkspace(SQLModel, table=True):
     
     # CRITICAL: Cross-group resource integration
     connected_data_sources: List[str] = Field(
-        default_factory=list,
+        default=None,
         sa_column=Column(JSONB),
         description="IDs of connected data sources from data sources group"
     )
     linked_scan_rule_sets: List[str] = Field(
-        default_factory=list,
+        default=None,
         sa_column=Column(JSONB),
         description="IDs of linked scan rule sets from scan rule sets group"
     )
     associated_classifications: List[str] = Field(
-        default_factory=list,
+        default=None,
         sa_column=Column(JSONB),
         description="IDs of associated classifications from classifications group"
     )
     compliance_policies: List[str] = Field(
-        default_factory=list,
+        default=None,
         sa_column=Column(JSONB),
         description="IDs of compliance policies from compliance rules group"
     )
     catalog_items: List[str] = Field(
-        default_factory=list,
+        default=None,
         sa_column=Column(JSONB),
         description="IDs of catalog items from advanced catalog group"
     )
     scan_logic_configurations: List[str] = Field(
-        default_factory=list,
+        default=None,
         sa_column=Column(JSONB),
         description="IDs of scan logic configurations from scan logic group"
     )
     rbac_configurations: List[str] = Field(
-        default_factory=list,
+        default=None,
         sa_column=Column(JSONB),
         description="IDs of RBAC configurations from RBAC system group"
     )
     
     # Cross-group integration settings
     group_permissions: Dict[str, Dict[str, Any]] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Permissions for each group within workspace"
     )
     resource_mappings: Dict[str, Dict[str, Any]] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Mappings between resources across groups"
     )
     integration_settings: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Cross-group integration configuration"
     )
     
     # Workspace settings and configuration
     workspace_settings: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Workspace-specific settings and preferences"
     )
     layout_preferences: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="User interface layout preferences"
     )
     theme_settings: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Theme and appearance settings"
     )
     notification_settings: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Notification preferences and configuration"
     )
     
     # Analytics and monitoring
     usage_analytics: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Workspace usage analytics and metrics"
     )
     performance_metrics: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Performance metrics and optimization data"
     )
     collaboration_metrics: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Collaboration activity and engagement metrics"
     )
     cost_tracking: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Cost tracking and resource usage billing"
     )
     
     # Security and compliance
     security_settings: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Workspace security configuration"
     )
     audit_settings: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Audit trail configuration"
     )
     backup_settings: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Backup and recovery configuration"
     )
     retention_policy: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Data retention and lifecycle policies"
     )
@@ -335,7 +335,7 @@ class RacineWorkspace(SQLModel, table=True):
         description="Template category for organization"
     )
     template_tags: List[str] = Field(
-        default_factory=list,
+        default=None,
         sa_column=Column(JSONB),
         description="Tags for template discovery and categorization"
     )
@@ -350,7 +350,7 @@ class RacineWorkspace(SQLModel, table=True):
     
     # Workspace limits and quotas
     resource_limits: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Resource limits and quotas for workspace"
     )
@@ -365,12 +365,12 @@ class RacineWorkspace(SQLModel, table=True):
     
     # Metadata and lifecycle
     tags: List[str] = Field(
-        default_factory=list,
+        default=None,
         sa_column=Column(JSONB),
         description="Tags for categorization and search"
     )
     workspace_metadata: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Additional metadata and custom properties"
     )
@@ -467,17 +467,17 @@ class RacineWorkspaceMember(SQLModel, table=True):
         description="Member role within workspace"
     )
     permissions: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Specific permissions within workspace"
     )
     group_access: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Access permissions for specific groups within workspace"
     )
     resource_permissions: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Permissions for specific resources within workspace"
     )
@@ -527,29 +527,29 @@ class RacineWorkspaceMember(SQLModel, table=True):
     
     # Collaboration preferences
     collaboration_settings: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Collaboration preferences and settings"
     )
     notification_preferences: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Notification preferences for workspace activities"
     )
     
     # Access restrictions and security
     access_restrictions: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Access restrictions and security constraints"
     )
     ip_restrictions: List[str] = Field(
-        default_factory=list,
+        default=None,
         sa_column=Column(JSONB),
         description="IP address restrictions for member access"
     )
     time_restrictions: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Time-based access restrictions"
     )
@@ -655,7 +655,7 @@ class RacineWorkspaceResource(SQLModel, table=True):
         description="Description of resource within workspace context"
     )
     resource_metadata: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Cached metadata from the original resource"
     )
@@ -672,12 +672,12 @@ class RacineWorkspaceResource(SQLModel, table=True):
         description="Whether resource is shared with workspace members"
     )
     shared_with: List[str] = Field(
-        default_factory=list,
+        default=None,
         sa_column=Column(JSONB),
         description="List of user IDs with whom resource is specifically shared"
     )
     sharing_permissions: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Detailed sharing permissions and restrictions"
     )
@@ -689,7 +689,7 @@ class RacineWorkspaceResource(SQLModel, table=True):
         description="Folder path for organizing resources within workspace"
     )
     tags: List[str] = Field(
-        default_factory=list,
+        default=None,
         sa_column=Column(JSONB),
         description="Tags for resource organization and search"
     )
@@ -719,24 +719,24 @@ class RacineWorkspaceResource(SQLModel, table=True):
         description="User who last accessed this resource"
     )
     access_history: List[Dict[str, Any]] = Field(
-        default_factory=list,
+        default=None,
         sa_column=Column(JSONB),
         description="History of resource access and modifications"
     )
     
     # Resource dependencies and relationships
     depends_on: List[str] = Field(
-        default_factory=list,
+        default=None,
         sa_column=Column(JSONB),
         description="List of resource IDs this resource depends on"
     )
     dependents: List[str] = Field(
-        default_factory=list,
+        default=None,
         sa_column=Column(JSONB),
         description="List of resource IDs that depend on this resource"
     )
     related_resources: List[str] = Field(
-        default_factory=list,
+        default=None,
         sa_column=Column(JSONB),
         description="List of related resource IDs"
     )
@@ -760,24 +760,24 @@ class RacineWorkspaceResource(SQLModel, table=True):
     
     # Resource configuration within workspace
     workspace_config: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Workspace-specific configuration for this resource"
     )
     display_settings: Dict[str, Any] = Field(
-        default_factory=dict,
+        default=None,
         sa_column=Column(JSONB),
         description="Display settings for resource within workspace"
     )
     
     # Collaboration and comments
     comments: List[Dict[str, Any]] = Field(
-        default_factory=list,
+        default=None,
         sa_column=Column(JSONB),
         description="Comments and discussions about this resource"
     )
     annotations: List[Dict[str, Any]] = Field(
-        default_factory=list,
+        default=None,
         sa_column=Column(JSONB),
         description="Annotations and notes for this resource"
     )
@@ -845,17 +845,17 @@ class RacineWorkspaceTemplate(SQLModel, table=True):
     category: Optional[str] = Field(default=None, index=True)
     
     # Template configuration - INCLUDES ALL GROUP CONFIGURATIONS
-    template_config: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB))
-    default_integrations: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB))
-    default_resources: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSONB))
-    default_settings: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB))
+    template_config: Dict[str, Any] = Field(default=None, sa_column=Column(JSONB))
+    default_integrations: Dict[str, Any] = Field(default=None, sa_column=Column(JSONB))
+    default_resources: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSONB))
+    default_settings: Dict[str, Any] = Field(default=None, sa_column=Column(JSONB))
     
     # Template metadata
     is_public: bool = Field(default=False, index=True)
     usage_count: int = Field(default=0)
     average_rating: float = Field(default=0.0)
     total_ratings: int = Field(default=0)
-    tags: List[str] = Field(default_factory=list, sa_column=Column(JSONB))
+    tags: List[str] = Field(default=None, sa_column=Column(JSONB))
     
     # Template management
     version: str = Field(default="1.0.0")
@@ -890,9 +890,9 @@ class RacineWorkspaceAnalytics(SQLModel, table=True):
     compute_hours: float = Field(default=0.0)
     
     # Detailed analytics
-    user_activity_breakdown: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB))
-    resource_usage_breakdown: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB))
-    group_activity_breakdown: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB))
+    user_activity_breakdown: Dict[str, Any] = Field(default=None, sa_column=Column(JSONB))
+    resource_usage_breakdown: Dict[str, Any] = Field(default=None, sa_column=Column(JSONB))
+    group_activity_breakdown: Dict[str, Any] = Field(default=None, sa_column=Column(JSONB))
     
     workspace: "RacineWorkspace" = Relationship(back_populates="analytics_records")
 
@@ -921,7 +921,7 @@ class RacineWorkspaceAudit(SQLModel, table=True):
     performed_by: str = Field(..., foreign_key="users.id", index=True)
     target_type: Optional[str] = Field(default=None, index=True)
     target_id: Optional[str] = Field(default=None, index=True)
-    details: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB))
+    details: Dict[str, Any] = Field(default=None, sa_column=Column(JSONB))
     ip_address: Optional[str] = Field(default=None)
     user_agent: Optional[str] = Field(default=None)
     timestamp: datetime = Field(default_factory=datetime.utcnow, index=True)
@@ -948,7 +948,7 @@ class RacineWorkspaceNotification(SQLModel, table=True):
     dismissed_at: Optional[datetime] = Field(default=None, index=True)
     
     # Notification data
-    data: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB))
+    data: Dict[str, Any] = Field(default=None, sa_column=Column(JSONB))
     action_url: Optional[str] = Field(default=None)
     expires_at: Optional[datetime] = Field(default=None, index=True)
     

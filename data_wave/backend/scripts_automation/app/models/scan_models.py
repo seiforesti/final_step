@@ -398,8 +398,8 @@ class DataSourceHealthResponse(SQLModel, table=True):
 
 class DataSourceStatsResponse(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    entity_stats: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    size_stats: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    entity_stats: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    size_stats: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     last_scan_time: Optional[datetime] = None
     classification_stats: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     sensitivity_stats: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
@@ -425,7 +425,7 @@ class WorkspaceItem(SQLModel, table=True):
     workspace_id: int = Field(foreign_key="userworkspace.id")
     item_type: str
     item_path: str
-    item_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    item_metadata: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
 
 class WorkspacePreference(SQLModel, table=True):
     """Model for workspace preferences"""
@@ -546,21 +546,21 @@ class EnhancedScanRuleSet(SQLModel, table=True):
     priority_level: ScanPriority = Field(default=ScanPriority.NORMAL)
     
     # Advanced Rule Logic
-    advanced_conditions: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    pattern_matching_config: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    ml_model_references: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    semantic_analysis_config: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    advanced_conditions: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    pattern_matching_config: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    ml_model_references: List[str] = Field(default=None, sa_column=Column(JSON))
+    semantic_analysis_config: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Quality and Validation
-    validation_rules: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    quality_thresholds: Dict[str, float] = Field(default_factory=dict, sa_column=Column(JSON))
+    validation_rules: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    quality_thresholds: Dict[str, float] = Field(default=None, sa_column=Column(JSON))
     accuracy_requirements: float = Field(default=0.85, ge=0.0, le=1.0)
     
     # Business Context
     business_criticality: str = Field(default="medium", max_length=20)
-    compliance_requirements: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    cost_constraints: Dict[str, float] = Field(default_factory=dict, sa_column=Column(JSON))
-    sla_requirements: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    compliance_requirements: List[str] = Field(default=None, sa_column=Column(JSON))
+    cost_constraints: Dict[str, float] = Field(default=None, sa_column=Column(JSON))
+    sla_requirements: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Performance Tracking
     execution_count: int = Field(default=0, ge=0)
@@ -569,13 +569,13 @@ class EnhancedScanRuleSet(SQLModel, table=True):
     total_data_processed: float = Field(default=0.0, ge=0.0)
     
     # Integration Points
-    data_source_integrations: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    classification_mappings: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    compliance_integrations: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    catalog_enrichment_config: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    data_source_integrations: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    classification_mappings: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    compliance_integrations: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    catalog_enrichment_config: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Audit and Compliance
-    audit_trail: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    audit_trail: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     compliance_status: str = Field(default="compliant", max_length=50)
     last_compliance_check: Optional[datetime] = None
     
@@ -629,10 +629,10 @@ class ScanOrchestrationJob(SQLModel, table=True):
     enhanced_rule_set_id: Optional[int] = Field(foreign_key="enhanced_scan_rule_sets.id", index=True)
     
     # Target Configuration
-    target_data_sources: List[int] = Field(default_factory=list, sa_column=Column(JSON))
-    target_schemas: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    target_tables: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    exclusion_patterns: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    target_data_sources: List[int] = Field(default=None, sa_column=Column(JSON))
+    target_schemas: List[str] = Field(default=None, sa_column=Column(JSON))
+    target_tables: List[str] = Field(default=None, sa_column=Column(JSON))
+    exclusion_patterns: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Execution Configuration
     max_concurrent_scans: int = Field(default=5, ge=1, le=50)
@@ -641,10 +641,10 @@ class ScanOrchestrationJob(SQLModel, table=True):
     failure_threshold: float = Field(default=0.1, ge=0.0, le=1.0)
     
     # Resource Management
-    resource_requirements: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    resource_constraints: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    allocated_resources: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    resource_usage_tracking: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    resource_requirements: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    resource_constraints: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    allocated_resources: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    resource_usage_tracking: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Advanced Features
     ai_optimization_enabled: bool = Field(default=True)
@@ -654,13 +654,13 @@ class ScanOrchestrationJob(SQLModel, table=True):
     adaptive_performance_tuning: bool = Field(default=False)
     
     # Workflow Configuration
-    workflow_definition: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    conditional_execution: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    dependency_mapping: Dict[str, List[str]] = Field(default_factory=dict, sa_column=Column(JSON))
-    approval_workflow: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    workflow_definition: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    conditional_execution: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    dependency_mapping: Dict[str, List[str]] = Field(default=None, sa_column=Column(JSON))
+    approval_workflow: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Execution Tracking
-    execution_plan: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    execution_plan: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     current_step: Optional[str] = Field(max_length=255)
     progress_percentage: float = Field(default=0.0, ge=0.0, le=100.0)
     estimated_completion: Optional[datetime] = None
@@ -690,34 +690,34 @@ class ScanOrchestrationJob(SQLModel, table=True):
     business_value_score: float = Field(default=0.0, ge=0.0, le=10.0)
     cost_actual: Optional[float] = Field(ge=0.0)
     cost_estimated: Optional[float] = Field(ge=0.0)
-    roi_calculation: Dict[str, float] = Field(default_factory=dict, sa_column=Column(JSON))
+    roi_calculation: Dict[str, float] = Field(default=None, sa_column=Column(JSON))
     
     # Integration Results
-    classification_results: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    compliance_validations: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    catalog_enrichments: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    data_source_insights: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    classification_results: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    compliance_validations: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    catalog_enrichments: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    data_source_insights: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Error Handling and Recovery
-    error_log: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    recovery_actions: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    failure_analysis: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    error_log: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    recovery_actions: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    failure_analysis: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Notifications and Alerts
-    notification_config: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    alert_thresholds: Dict[str, float] = Field(default_factory=dict, sa_column=Column(JSON))
-    stakeholder_notifications: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    notification_config: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    alert_thresholds: Dict[str, float] = Field(default=None, sa_column=Column(JSON))
+    stakeholder_notifications: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Audit and Compliance
-    audit_trail: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    compliance_checks: Dict[str, bool] = Field(default_factory=dict, sa_column=Column(JSON))
-    security_validations: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    audit_trail: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    compliance_checks: Dict[str, bool] = Field(default=None, sa_column=Column(JSON))
+    security_validations: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # User and Context Information
     created_by: str = Field(max_length=255, index=True)
     modified_by: Optional[str] = Field(max_length=255)
-    execution_context: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    tags: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    execution_context: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    tags: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Temporal Management
     created_at: datetime = Field(default_factory=datetime.utcnow, index=True)
@@ -757,9 +757,9 @@ class ScanWorkflowExecution(SQLModel, table=True):
     parent_step_id: Optional[int] = Field(foreign_key="scan_workflow_executions.id")
     
     # Execution Configuration
-    step_config: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    input_parameters: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    expected_outputs: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    step_config: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    input_parameters: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    expected_outputs: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Status and Progress
     status: ScanWorkflowStatus = Field(default=ScanWorkflowStatus.QUEUED, index=True)
@@ -781,40 +781,40 @@ class ScanWorkflowExecution(SQLModel, table=True):
     
     # Execution Results
     exit_code: Optional[int] = None
-    output_data: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    generated_artifacts: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    performance_metrics: Dict[str, float] = Field(default_factory=dict, sa_column=Column(JSON))
+    output_data: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    generated_artifacts: List[str] = Field(default=None, sa_column=Column(JSON))
+    performance_metrics: Dict[str, float] = Field(default=None, sa_column=Column(JSON))
     
     # Quality and Validation
     quality_score: float = Field(default=0.0, ge=0.0, le=1.0)
-    validation_results: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    data_quality_checks: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    validation_results: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    data_quality_checks: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Error Handling
     error_message: Optional[str] = Field(max_length=2000)
-    error_details: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    warning_messages: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    recovery_actions_taken: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    error_details: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    warning_messages: List[str] = Field(default=None, sa_column=Column(JSON))
+    recovery_actions_taken: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Dependencies and Conditions
-    dependency_requirements: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    execution_conditions: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    dependency_requirements: List[str] = Field(default=None, sa_column=Column(JSON))
+    execution_conditions: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     conditional_skip_reason: Optional[str] = Field(max_length=500)
     
     # Business Context
-    business_impact: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    cost_tracking: Dict[str, float] = Field(default_factory=dict, sa_column=Column(JSON))
+    business_impact: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    cost_tracking: Dict[str, float] = Field(default=None, sa_column=Column(JSON))
     sla_compliance: bool = Field(default=True)
     
     # Integration Tracking
-    data_source_interactions: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    external_system_calls: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    api_interactions: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    data_source_interactions: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    external_system_calls: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    api_interactions: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Audit Information
-    execution_log: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    security_context: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    compliance_validations: Dict[str, bool] = Field(default_factory=dict, sa_column=Column(JSON))
+    execution_log: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    security_context: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    compliance_validations: Dict[str, bool] = Field(default=None, sa_column=Column(JSON))
     
     # Relationships
     orchestration_job: Optional[ScanOrchestrationJob] = Relationship(back_populates="workflow_executions")
@@ -878,24 +878,24 @@ class ScanResourceAllocation(SQLModel, table=True):
     
     # Configuration and Constraints
     priority_level: int = Field(default=5, ge=1, le=10)
-    resource_constraints: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    scaling_policy: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    resource_constraints: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    scaling_policy: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Monitoring and Alerting
-    monitoring_config: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    alert_thresholds: Dict[str, float] = Field(default_factory=dict, sa_column=Column(JSON))
-    performance_history: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    monitoring_config: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    alert_thresholds: Dict[str, float] = Field(default=None, sa_column=Column(JSON))
+    performance_history: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Environment Context
     environment: str = Field(max_length=50)  # production, staging, development
     region: Optional[str] = Field(max_length=50)
     availability_zone: Optional[str] = Field(max_length=50)
-    cluster_info: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    cluster_info: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Audit and Tracking
     requested_by: str = Field(max_length=255)
     approved_by: Optional[str] = Field(max_length=255)
-    audit_trail: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    audit_trail: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Temporal Management
     created_at: datetime = Field(default_factory=datetime.utcnow, index=True)
@@ -934,9 +934,9 @@ class ScanClassificationIntegration(SQLModel, table=True):
     integration_status: str = Field(max_length=50, index=True)
     
     # Results and Mappings
-    classification_mappings: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    sensitivity_labels: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    compliance_tags: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    classification_mappings: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    sensitivity_labels: List[str] = Field(default=None, sa_column=Column(JSON))
+    compliance_tags: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Quality Metrics
     accuracy_score: float = Field(default=0.0, ge=0.0, le=1.0)
@@ -972,8 +972,8 @@ class ScanComplianceIntegration(SQLModel, table=True):
     risk_score: float = Field(default=0.0, ge=0.0, le=10.0)
     
     # Validation Details
-    validation_results: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    remediation_actions: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    validation_results: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    remediation_actions: List[str] = Field(default=None, sa_column=Column(JSON))
     exception_granted: bool = Field(default=False)
     exception_reason: Optional[str] = Field(max_length=1000)
     
@@ -1003,18 +1003,18 @@ class ScanCatalogEnrichment(SQLModel, table=True):
     
     # Enrichment Details
     enrichment_type: str = Field(max_length=100)  # metadata, lineage, quality, usage
-    enrichment_data: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    enrichment_data: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     confidence_level: float = Field(ge=0.0, le=1.0)
     
     # Data Quality Contributions
-    quality_metrics: Dict[str, float] = Field(default_factory=dict, sa_column=Column(JSON))
+    quality_metrics: Dict[str, float] = Field(default=None, sa_column=Column(JSON))
     completeness_score: float = Field(default=0.0, ge=0.0, le=1.0)
-    accuracy_indicators: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    accuracy_indicators: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Business Value
-    business_glossary_terms: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    usage_patterns: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    relationship_mappings: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    business_glossary_terms: List[str] = Field(default=None, sa_column=Column(JSON))
+    usage_patterns: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    relationship_mappings: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Status and Validation
     enrichment_status: str = Field(default="active", max_length=50)
@@ -1169,7 +1169,7 @@ class ScanRule(SQLModel, table=True):
     
     # Rule logic and configuration
     rule_expression: str = Field(sa_column=Column(Text))  # The actual rule logic
-    rule_config: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    rule_config: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     validation_rules: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
     dependencies: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
     
@@ -1181,7 +1181,7 @@ class ScanRule(SQLModel, table=True):
     
     # Performance and resource management
     estimated_execution_time: Optional[int] = Field(default=None)  # seconds
-    resource_requirements: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    resource_requirements: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     concurrency_limit: Optional[int] = Field(default=None)
     timeout_seconds: Optional[int] = Field(default=None)
     
@@ -1192,8 +1192,8 @@ class ScanRule(SQLModel, table=True):
     data_retention_policy: Optional[str] = Field(max_length=255)
     
     # Integration capabilities
-    supported_data_sources: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    supported_formats: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    supported_data_sources: List[str] = Field(default=None, sa_column=Column(JSON))
+    supported_formats: List[str] = Field(default=None, sa_column=Column(JSON))
     api_endpoints: Optional[Dict[str, str]] = Field(default=None, sa_column=Column(JSON))
     webhook_config: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
@@ -1205,7 +1205,7 @@ class ScanRule(SQLModel, table=True):
     
     # Metadata and tracking
     tags: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
-    rule_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    rule_metadata: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     created_by: str = Field(index=True, max_length=255)
     created_at: datetime = Field(default_factory=datetime.utcnow, index=True)
     updated_by: Optional[str] = Field(max_length=255)
@@ -1246,7 +1246,7 @@ class ScanExecution(SQLModel, table=True):
     # Execution context
     data_source_id: Optional[int] = Field(foreign_key="datasource.id", index=True)
     environment: str = Field(index=True, max_length=50)  # production, staging, development, test
-    execution_context: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    execution_context: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Execution status and lifecycle
     status: str = Field(index=True, max_length=50)  # pending, running, completed, failed, cancelled, timeout
@@ -1266,7 +1266,7 @@ class ScanExecution(SQLModel, table=True):
     memory_usage: Optional[float] = Field(default=None)
     network_io: Optional[float] = Field(default=None)
     storage_io: Optional[float] = Field(default=None)
-    resource_metrics: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    resource_metrics: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Execution results and output
     result_status: str = Field(default="unknown", max_length=50)  # success, failure, warning, error
@@ -1301,7 +1301,7 @@ class ScanExecution(SQLModel, table=True):
     
     # Metadata and tracking
     tags: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
-    execution_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    execution_metadata: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     created_by: str = Field(index=True, max_length=255)
     created_at: datetime = Field(default_factory=datetime.utcnow, index=True)
     updated_at: Optional[datetime] = Field(default=None)

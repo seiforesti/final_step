@@ -41,7 +41,7 @@ import json
 import asyncio
 import csv
 import io
-from pydantic import BaseModel, Field, validator
+from pydantic import field_validator, BaseModel, Field, validator
 
 # Database and Authentication
 from ....database import get_db
@@ -101,7 +101,7 @@ class ActivityFilterRequest(BaseModel):
     search_term: Optional[str] = Field(None, description="Search term for activity details")
     workspace_id: Optional[str] = Field(None, description="Filter by workspace")
     
-    @validator('groups')
+    @field_validator('groups')
     def validate_groups(cls, v):
         if v:
             allowed_groups = [
@@ -115,7 +115,7 @@ class ActivityFilterRequest(BaseModel):
                     raise ValueError(f"Group must be one of: {allowed_groups}")
         return v
     
-    @validator('activity_types')
+    @field_validator('activity_types')
     def validate_activity_types(cls, v):
         if v:
             allowed_types = [
@@ -135,7 +135,7 @@ class ActivityQueryRequest(BaseModel):
     aggregation: Optional[str] = Field(None, description="Aggregation method")
     time_window: Optional[str] = Field(None, description="Time window for analysis")
     
-    @validator('query_type')
+    @field_validator('query_type')
     def validate_query_type(cls, v):
         allowed_types = [
             'activity_timeline', 'user_activity_summary', 'resource_activity',
@@ -153,7 +153,7 @@ class ActivityCorrelationRequest(BaseModel):
     analysis_scope: Dict[str, Any] = Field(default_factory=dict, description="Analysis scope")
     time_tolerance: Optional[int] = Field(None, description="Time tolerance in seconds")
     
-    @validator('correlation_type')
+    @field_validator('correlation_type')
     def validate_correlation_type(cls, v):
         allowed_types = [
             'causal_analysis', 'temporal_correlation', 'user_behavior_pattern',
@@ -171,7 +171,7 @@ class ActivityReportRequest(BaseModel):
     include_charts: bool = Field(default=False, description="Include chart data")
     include_details: bool = Field(default=True, description="Include detailed activities")
     
-    @validator('report_type')
+    @field_validator('report_type')
     def validate_report_type(cls, v):
         allowed_types = [
             'comprehensive_audit', 'user_activity_report', 'security_report',
@@ -182,7 +182,7 @@ class ActivityReportRequest(BaseModel):
             raise ValueError(f"Report type must be one of: {allowed_types}")
         return v
     
-    @validator('report_format')
+    @field_validator('report_format')
     def validate_report_format(cls, v):
         allowed_formats = ['json', 'csv', 'pdf', 'excel']
         if v not in allowed_formats:

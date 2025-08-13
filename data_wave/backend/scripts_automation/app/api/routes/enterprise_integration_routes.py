@@ -38,7 +38,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import Session
 
 # Pydantic models
-from pydantic import BaseModel, Field, validator
+from pydantic import field_validator, BaseModel, Field, validator
 from enum import Enum
 
 # Internal imports
@@ -77,7 +77,7 @@ class CrossSystemEventTrigger(BaseModel):
     source_service: str = Field(..., description="Source service identifier")
     priority: str = Field(default="medium", description="Event priority")
     
-    @validator('priority')
+    @field_validator('priority')
     def validate_priority(cls, v):
         if v not in ['low', 'medium', 'high', 'critical']:
             raise ValueError('Priority must be one of: low, medium, high, critical')
@@ -91,7 +91,7 @@ class DataSourceIntegrationRequest(BaseModel):
     include_optimization: bool = Field(default=True, description="Include optimization steps")
     priority: str = Field(default="medium", description="Integration priority")
     
-    @validator('integration_type')
+    @field_validator('integration_type')
     def validate_integration_type(cls, v):
         if v not in ['full', 'metadata_only', 'incremental', 'validation_only']:
             raise ValueError('Integration type must be one of: full, metadata_only, incremental, validation_only')

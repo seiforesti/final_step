@@ -90,10 +90,10 @@ class ComplianceReport(SQLModel, table=True):
     
     # Report Configuration
     framework: Optional[str] = None
-    data_source_ids: List[int] = Field(default_factory=list, sa_column=Column(JSON))
-    rule_ids: List[int] = Field(default_factory=list, sa_column=Column(JSON))
-    parameters: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    filters: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    data_source_ids: List[int] = Field(default=None, sa_column=Column(JSON))
+    rule_ids: List[int] = Field(default=None, sa_column=Column(JSON))
+    parameters: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    filters: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Output Configuration
     file_format: str = Field(default="pdf")  # pdf, excel, csv, json, html
@@ -113,7 +113,7 @@ class ComplianceReport(SQLModel, table=True):
     last_run_at: Optional[datetime] = None
     
     # Distribution
-    recipients: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    recipients: List[str] = Field(default=None, sa_column=Column(JSON))
     distribution_method: str = Field(default="download")  # email, download, api, ftp
     
     # Access Control
@@ -127,8 +127,8 @@ class ComplianceReport(SQLModel, table=True):
     compliance_score: Optional[float] = None
     
     # Metadata
-    report_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    tags: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    report_metadata: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    tags: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Audit Fields
     created_at: datetime = Field(default_factory=datetime.now)
@@ -152,9 +152,9 @@ class ComplianceReportTemplate(SQLModel, table=True):
     report_type: ReportType
     
     # Template Configuration
-    sections: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    file_formats: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    default_parameters: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    sections: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    file_formats: List[str] = Field(default=None, sa_column=Column(JSON))
+    default_parameters: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Template Content
     template_content: Optional[str] = None  # JSON or YAML template definition
@@ -193,7 +193,7 @@ class ComplianceWorkflow(SQLModel, table=True):
     framework: Optional[str] = None
     
     # Steps and Execution
-    steps: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    steps: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     current_step: int = Field(default=0)
     total_steps: int = Field(default=0)
     
@@ -204,9 +204,9 @@ class ComplianceWorkflow(SQLModel, table=True):
     priority: str = Field(default="medium")  # low, medium, high, urgent
     
     # Triggers and Conditions
-    triggers: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    conditions: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    variables: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    triggers: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    conditions: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    variables: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Execution Tracking
     started_at: Optional[datetime] = None
@@ -217,7 +217,7 @@ class ComplianceWorkflow(SQLModel, table=True):
     # Results and Outcomes
     execution_results: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     error_message: Optional[str] = None
-    execution_log: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    execution_log: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Approval and Review
     requires_approval: bool = Field(default=False)
@@ -229,8 +229,8 @@ class ComplianceWorkflow(SQLModel, table=True):
     notification_config: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Metadata
-    workflow_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    tags: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    workflow_metadata: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    tags: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Audit Fields
     created_at: datetime = Field(default_factory=datetime.now)
@@ -256,14 +256,14 @@ class ComplianceWorkflowTemplate(SQLModel, table=True):
     framework: Optional[str] = None
     
     # Template Configuration
-    steps_template: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    triggers_template: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    default_variables: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    steps_template: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    triggers_template: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    default_variables: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Estimation and Planning
     estimated_completion_hours: Optional[int] = None
     complexity_level: str = Field(default="intermediate")
-    required_roles: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    required_roles: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Metadata
     category: Optional[str] = None
@@ -291,9 +291,9 @@ class ComplianceIntegration(SQLModel, table=True):
     status: IntegrationStatus = Field(default=IntegrationStatus.PENDING)
     
     # Configuration
-    config: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    credentials: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))  # Encrypted in production
-    connection_settings: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    config: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    credentials: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))  # Encrypted in production
+    connection_settings: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Synchronization
     sync_frequency: str = Field(default="daily")  # real_time, hourly, daily, weekly, manual
@@ -309,15 +309,15 @@ class ComplianceIntegration(SQLModel, table=True):
     max_retries: int = Field(default=3)
     
     # Performance and Statistics
-    sync_statistics: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    sync_statistics: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     average_sync_duration_ms: Optional[int] = None
     total_records_synced: int = Field(default=0)
     success_rate: float = Field(default=0.0)
     
     # Capabilities and Features
-    supported_frameworks: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    capabilities: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    data_mapping: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    supported_frameworks: List[str] = Field(default=None, sa_column=Column(JSON))
+    capabilities: List[str] = Field(default=None, sa_column=Column(JSON))
+    data_mapping: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # API and Communication
     webhook_url: Optional[str] = None
@@ -331,8 +331,8 @@ class ComplianceIntegration(SQLModel, table=True):
     certificate_info: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Metadata
-    integration_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    tags: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    integration_metadata: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    tags: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Audit Fields
     created_at: datetime = Field(default_factory=datetime.now)
@@ -403,7 +403,7 @@ class ComplianceAuditLog(SQLModel, table=True):
     correlation_id: Optional[str] = None
     
     # Metadata
-    audit_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    audit_metadata: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Timestamp
     created_at: datetime = Field(default_factory=datetime.now, index=True)
@@ -435,7 +435,7 @@ class ComplianceCertification(SQLModel, table=True):
     status: str = Field(default="active", index=True)  # active, expired, suspended, revoked
     certificate_url: Optional[str] = None  # URL to certificate document
     scope: Optional[str] = None  # Scope of certification
-    compliance_frameworks: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    compliance_frameworks: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Assessment Information
     assessment_type: Optional[str] = None  # Type I, Type II, etc.
@@ -486,7 +486,7 @@ class ComplianceWorkflowExecution(SQLModel, table=True):
     # Execution Data
     input_parameters: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     output_data: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
-    execution_log: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    execution_log: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Error Handling
     error_message: Optional[str] = None
@@ -494,7 +494,7 @@ class ComplianceWorkflowExecution(SQLModel, table=True):
     retry_count: int = Field(default=0)
     
     # Metadata
-    execution_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    execution_metadata: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Audit
     created_at: datetime = Field(default_factory=datetime.now, index=True)

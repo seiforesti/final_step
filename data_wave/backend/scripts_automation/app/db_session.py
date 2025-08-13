@@ -6,8 +6,9 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
 import os
-from app.models.schema_models import DataTableSchema, SchemaVersion
 from dotenv import load_dotenv
+# Import only specific models to avoid circular imports and conflicts
+# from app.models.schema_models import DataTableSchema, SchemaVersion
 import logging
 # Setup logging
 logger = logging.getLogger(__name__)

@@ -53,7 +53,7 @@ class Workflow(SQLModel, table=True):
     workflow_type: WorkflowType = Field(default=WorkflowType.CUSTOM)
     
     # Workflow definition
-    definition: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    definition: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     version: str = Field(default="1.0.0")
     is_template: bool = Field(default=False)
     
@@ -70,13 +70,13 @@ class Workflow(SQLModel, table=True):
     # Scheduling and triggers
     trigger_type: TriggerType = Field(default=TriggerType.MANUAL)
     cron_expression: Optional[str] = None
-    trigger_conditions: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    trigger_conditions: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Advanced features
     supports_parallel_execution: bool = Field(default=True)
     max_concurrent_runs: int = Field(default=1)
     timeout_minutes: Optional[int] = None
-    retry_policy: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    retry_policy: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Error handling and recovery
     error_handling_strategy: str = Field(default="stop_on_error")  # stop_on_error, continue, retry
@@ -85,18 +85,18 @@ class Workflow(SQLModel, table=True):
     
     # Performance and optimization
     execution_priority: int = Field(default=50, ge=0, le=100)
-    resource_requirements: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    performance_targets: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    resource_requirements: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    performance_targets: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # AI-powered optimization
     ai_optimization_enabled: bool = Field(default=True)
     auto_scaling_enabled: bool = Field(default=False)
     smart_scheduling: bool = Field(default=True)
-    predictive_scaling: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    predictive_scaling: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Governance and compliance
-    governance_policies: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    compliance_requirements: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    governance_policies: List[str] = Field(default=None, sa_column=Column(JSON))
+    compliance_requirements: List[str] = Field(default=None, sa_column=Column(JSON))
     audit_enabled: bool = Field(default=True)
     data_lineage_tracking: bool = Field(default=True)
     
@@ -108,8 +108,8 @@ class Workflow(SQLModel, table=True):
     next_execution: Optional[datetime] = None
     
     # Metadata
-    tags: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    workflow_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    tags: List[str] = Field(default=None, sa_column=Column(JSON))
+    workflow_metadata: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
@@ -135,9 +135,9 @@ class WorkflowStep(SQLModel, table=True):
     is_parallel: bool = Field(default=False)
     
     # Configuration
-    configuration: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    input_parameters: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    output_parameters: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    configuration: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    input_parameters: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    output_parameters: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Conditions and logic
     execution_condition: Optional[str] = None  # JavaScript expression
@@ -154,16 +154,16 @@ class WorkflowStep(SQLModel, table=True):
     cpu_requirement: Optional[float] = None
     memory_requirement_mb: Optional[int] = None
     gpu_requirement: bool = Field(default=False)
-    custom_resources: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    custom_resources: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # AI-powered features
     ai_assisted_configuration: bool = Field(default=False)
     auto_parameter_tuning: bool = Field(default=False)
-    performance_optimization: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    performance_optimization: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Data and security
-    data_access_requirements: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    security_context: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    data_access_requirements: List[str] = Field(default=None, sa_column=Column(JSON))
+    security_context: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     encryption_required: bool = Field(default=False)
     
     created_at: datetime = Field(default_factory=datetime.now)
@@ -185,7 +185,7 @@ class WorkflowExecution(SQLModel, table=True):
     status: WorkflowStatus = Field(default=WorkflowStatus.DRAFT)
     trigger_type: TriggerType
     triggered_by: str = Field(index=True)
-    trigger_data: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    trigger_data: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Timing
     started_at: Optional[datetime] = None
@@ -207,24 +207,24 @@ class WorkflowExecution(SQLModel, table=True):
     cost_estimate: Optional[float] = None
     
     # Results and output
-    output_data: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    artifacts_generated: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    data_products_created: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    output_data: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    artifacts_generated: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    data_products_created: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Error handling
     error_message: Optional[str] = None
-    error_details: Optional[Dict[str, Any]] = Field(default_factory=dict, sa_column=Column(JSON))
+    error_details: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     retry_count: int = Field(default=0)
     
     # Quality and validation
     quality_score: Optional[float] = Field(ge=0.0, le=1.0)
-    validation_results: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    data_quality_checks: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    validation_results: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    data_quality_checks: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Monitoring and observability
     logs_location: Optional[str] = None
-    metrics: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    performance_metrics: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    metrics: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    performance_metrics: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
@@ -251,8 +251,8 @@ class StepExecution(SQLModel, table=True):
     duration_seconds: Optional[float] = None
     
     # Input/Output
-    input_data: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    output_data: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    input_data: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    output_data: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Resource usage
     cpu_usage: Optional[float] = None
@@ -307,15 +307,15 @@ class WorkflowTemplate(SQLModel, table=True):
     category: str = Field(index=True)
     
     # Template definition
-    template_definition: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    parameters: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    default_values: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    template_definition: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    parameters: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
+    default_values: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Template metadata
     workflow_type: WorkflowType
     complexity_level: str = Field(default="intermediate")  # beginner, intermediate, advanced, expert
     estimated_duration_minutes: Optional[int] = None
-    required_permissions: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    required_permissions: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Usage and popularity
     usage_count: int = Field(default=0)
@@ -326,19 +326,19 @@ class WorkflowTemplate(SQLModel, table=True):
     # Authorship
     created_by: str = Field(index=True)
     maintained_by: Optional[str] = None
-    contributors: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    contributors: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Version control
     version: str = Field(default="1.0.0")
-    changelog: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    changelog: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Documentation
     documentation: Optional[str] = None
-    examples: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    best_practices: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    examples: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    best_practices: List[str] = Field(default=None, sa_column=Column(JSON))
     
     # Metadata
-    tags: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    tags: List[str] = Field(default=None, sa_column=Column(JSON))
     
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
@@ -360,13 +360,13 @@ class WorkflowSchedule(SQLModel, table=True):
     smart_scheduling_enabled: bool = Field(default=True)
     resource_optimization: bool = Field(default=True)
     load_balancing: bool = Field(default=True)
-    optimal_execution_time: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    optimal_execution_time: Dict[str, Any] = Field(default=None, sa_column=Column(JSON))
     
     # Constraints
     max_concurrent_executions: int = Field(default=1)
     execution_window_start: Optional[datetime] = None
     execution_window_end: Optional[datetime] = None
-    blackout_periods: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    blackout_periods: List[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Monitoring
     last_execution: Optional[datetime] = None
@@ -378,7 +378,7 @@ class WorkflowSchedule(SQLModel, table=True):
     alert_on_failure: bool = Field(default=True)
     alert_on_delay: bool = Field(default=True)
     max_delay_minutes: int = Field(default=60)
-    notification_channels: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    notification_channels: List[str] = Field(default=None, sa_column=Column(JSON))
     
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
