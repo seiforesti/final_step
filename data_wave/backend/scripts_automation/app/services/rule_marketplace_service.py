@@ -28,7 +28,7 @@ from ..models.advanced_scan_rule_models import (
     ScanRuleTemplate, RuleMarketplaceListing, RuleCollaboration,
     RuleLicense, RuleRating, RuleUsageAnalytics
 )
-from ..models.Scan_Rule_Sets_completed_models.rule_template_models import RuleTemplate, TemplateCategory
+from ..models.Scan_Rule_Sets_completed_models.rule_template_models import RuleTemplate, TemplateCategoryType
 from ..models.Scan_Rule_Sets_completed_models.analytics_reporting_models import MarketplaceAnalytics, UsageMetrics
 from .Scan_Rule_Sets_completed_services.rule_template_service import RuleTemplateService
 from .Scan_Rule_Sets_completed_services.enhanced_collaboration_service import EnhancedCollaborationService

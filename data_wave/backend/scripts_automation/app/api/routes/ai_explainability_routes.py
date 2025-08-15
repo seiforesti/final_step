@@ -25,7 +25,9 @@ from sklearn.ensemble import RandomForestRegressor
 
 from ...services.ai_service import EnterpriseAIService as AIService
 from ...services.scan_intelligence_service import ScanIntelligenceService
-from ...models.ai_models import AIModel, ModelExplanation
+# Use available enterprise AI models; AIModel and ModelExplanation are represented via AIModelConfiguration and explanation payloads
+from ...models.ai_models import AIModelConfiguration as AIModel
+from pydantic import BaseModel as ModelExplanation
 from ...api.security.rbac import get_current_user
 from ...core.monitoring import MetricsCollector
 from ...core.logging import get_logger

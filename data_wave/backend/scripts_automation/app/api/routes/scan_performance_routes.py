@@ -23,8 +23,14 @@ from ...db_session import get_session
 from ...api.security.rbac import get_current_user, require_permission
 from ...core.response_models import SuccessResponse, ErrorResponse
 from ...core.cache import cache_response
-from ...core.rate_limiting import RateLimiter
-from ...core.audit import audit_log
+from ...utils.rate_limiter import get_rate_limiter, rate_limit
+try:
+    from ...utils import audit_logger as _audit
+    audit_log = _audit.audit_log
+except Exception:
+    import logging as _logging
+    async def audit_log(**kwargs):
+        _logging.getLogger(__name__).info("AUDIT_FALLBACK", extra=kwargs)
 from ...services.scan_performance_service import ScanPerformanceService
 from ...models.scan_performance_models import (
     PerformanceMetric, PerformanceHistory, PerformanceBottleneck, PerformanceOptimization,
@@ -44,7 +50,7 @@ from ...models.api import (
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1/scan-performance", tags=["Scan Performance"])
-rate_limiter = RateLimiter()
+rate_limiter = get_rate_limiter()
 
 def get_performance_service() -> ScanPerformanceService:
     """Dependency to get scan performance service instance"""
@@ -53,8 +59,8 @@ def get_performance_service() -> ScanPerformanceService:
 # Performance Metrics Routes
 
 @router.get("/metrics")
-@rate_limiter.limit("300/minute")
-@cache_response(expire_time=30)
+@rate_limit(requests=300, window=60)
+@cache_response(ttl=30)
 async def get_performance_metrics(
     scope: Optional[MonitoringScope] = Query(default=None, description="Monitoring scope"),
     resource_type: Optional[ResourceType] = Query(default=None, description="Resource type filter"),
@@ -99,7 +105,7 @@ async def get_performance_metrics(
         raise HTTPException(status_code=500, detail=f"Metrics retrieval failed: {str(e)}")
 
 @router.post("/metrics")
-@rate_limiter.limit("200/minute")
+@rate_limit(requests=200, window=60)
 async def record_performance_metric(
     request: PerformanceMetricRequest,
     performance_service: ScanPerformanceService = Depends(get_performance_service),
@@ -154,8 +160,8 @@ async def record_performance_metric(
         raise HTTPException(status_code=500, detail=f"Metric recording failed: {str(e)}")
 
 @router.get("/metrics/{metric_id}")
-@rate_limiter.limit("400/minute")
-@cache_response(expire_time=60)
+@rate_limit(requests=400, window=60)
+@cache_response(ttl=60)
 async def get_performance_metric(
     metric_id: str,
     include_history: bool = Query(default=True, description="Include historical data"),
@@ -199,7 +205,7 @@ async def get_performance_metric(
 # Performance Optimization Routes
 
 @router.post("/optimizations")
-@rate_limiter.limit("50/minute")
+@rate_limit(requests=50, window=60)
 async def create_performance_optimization(
     request: PerformanceOptimizationRequest,
     background_tasks: BackgroundTasks,
@@ -258,7 +264,7 @@ async def create_performance_optimization(
         raise HTTPException(status_code=500, detail=f"Optimization creation failed: {str(e)}")
 
 @router.post("/optimizations/{optimization_id}/execute")
-@rate_limiter.limit("30/minute")
+@rate_limit(requests=30, window=60)
 async def execute_performance_optimization(
     optimization_id: str,
     background_tasks: BackgroundTasks,
@@ -305,8 +311,8 @@ async def execute_performance_optimization(
         raise HTTPException(status_code=500, detail=f"Optimization execution failed: {str(e)}")
 
 @router.get("/optimizations")
-@rate_limiter.limit("200/minute")
-@cache_response(expire_time=180)
+@rate_limit(requests=200, window=60)
+@cache_response(ttl=180)
 async def list_performance_optimizations(
     optimization_type: Optional[OptimizationType] = Query(default=None, description="Filter by optimization type"),
     status: Optional[str] = Query(default=None, description="Filter by execution status"),
@@ -370,7 +376,7 @@ async def list_performance_optimizations(
 # Bottleneck Detection Routes
 
 @router.post("/bottlenecks/detect")
-@rate_limiter.limit("100/minute")
+@rate_limit(requests=100, window=60)
 async def detect_performance_bottlenecks(
     scope: Optional[MonitoringScope] = Query(default=MonitoringScope.GLOBAL, description="Detection scope"),
     resource_types: Optional[List[ResourceType]] = Query(default=None, description="Resource types to analyze"),
@@ -423,8 +429,8 @@ async def detect_performance_bottlenecks(
         raise HTTPException(status_code=500, detail=f"Bottleneck detection failed: {str(e)}")
 
 @router.get("/bottlenecks")
-@rate_limiter.limit("200/minute")
-@cache_response(expire_time=120)
+@rate_limit(requests=200, window=60)
+@cache_response(ttl=120)
 async def list_performance_bottlenecks(
     bottleneck_type: Optional[BottleneckType] = Query(default=None, description="Filter by bottleneck type"),
     severity: Optional[AlertSeverity] = Query(default=None, description="Filter by severity"),
@@ -488,7 +494,7 @@ async def list_performance_bottlenecks(
 # Performance Alerts Routes
 
 @router.post("/alerts")
-@rate_limiter.limit("100/minute")
+@rate_limit(requests=100, window=60)
 async def create_performance_alert(
     request: PerformanceAlertRequest,
     background_tasks: BackgroundTasks,
@@ -547,8 +553,8 @@ async def create_performance_alert(
         raise HTTPException(status_code=500, detail=f"Alert creation failed: {str(e)}")
 
 @router.get("/alerts")
-@rate_limiter.limit("200/minute")
-@cache_response(expire_time=180)
+@rate_limit(requests=200, window=60)
+@cache_response(ttl=180)
 async def list_performance_alerts(
     severity: Optional[AlertSeverity] = Query(default=None, description="Filter by severity"),
     status: Optional[str] = Query(default=None, description="Filter by alert status"),
@@ -612,7 +618,7 @@ async def list_performance_alerts(
 # Performance Benchmarks Routes
 
 @router.post("/benchmarks")
-@rate_limiter.limit("30/minute")
+@rate_limit(requests=30, window=60)
 async def create_performance_benchmark(
     request: PerformanceBenchmarkRequest,
     background_tasks: BackgroundTasks,
@@ -666,8 +672,8 @@ async def create_performance_benchmark(
         raise HTTPException(status_code=500, detail=f"Benchmark creation failed: {str(e)}")
 
 @router.get("/benchmarks")
-@rate_limiter.limit("200/minute")
-@cache_response(expire_time=300)
+@rate_limit(requests=200, window=60)
+@cache_response(ttl=300)
 async def list_performance_benchmarks(
     benchmark_type: Optional[BenchmarkType] = Query(default=None, description="Filter by benchmark type"),
     scope: Optional[MonitoringScope] = Query(default=None, description="Filter by scope"),
@@ -724,8 +730,8 @@ async def list_performance_benchmarks(
 # Performance Analytics Routes
 
 @router.get("/analytics")
-@rate_limiter.limit("100/minute")
-@cache_response(expire_time=600)
+@rate_limit(requests=100, window=60)
+@cache_response(ttl=600)
 async def get_performance_analytics(
     scope: Optional[MonitoringScope] = Query(default=MonitoringScope.GLOBAL, description="Analytics scope"),
     time_range: Optional[str] = Query(default="7d", description="Time range for analytics"),
@@ -764,8 +770,8 @@ async def get_performance_analytics(
         raise HTTPException(status_code=500, detail=f"Performance analytics retrieval failed: {str(e)}")
 
 @router.get("/resource-utilization")
-@rate_limiter.limit("300/minute")
-@cache_response(expire_time=60)
+@rate_limit(requests=300, window=60)
+@cache_response(ttl=60)
 async def get_resource_utilization(
     resource_types: Optional[List[ResourceType]] = Query(default=None, description="Resource types to monitor"),
     time_range: Optional[str] = Query(default="1h", description="Time range for utilization data"),
@@ -808,7 +814,7 @@ async def get_resource_utilization(
 # Performance Reports Routes
 
 @router.post("/reports")
-@rate_limiter.limit("30/minute")
+@rate_limit(requests=30, window=60)
 async def generate_performance_report(
     request: PerformanceReportRequest,
     background_tasks: BackgroundTasks,
@@ -865,7 +871,7 @@ async def generate_performance_report(
         raise HTTPException(status_code=500, detail=f"Report generation failed: {str(e)}")
 
 @router.get("/system-health")
-@rate_limiter.limit("400/minute")
+@rate_limit(requests=400, window=60)
 async def get_system_health(
     performance_service: ScanPerformanceService = Depends(get_performance_service),
     current_user: dict = Depends(get_current_user),

@@ -8,6 +8,7 @@ from app.services.extraction_service import (
     classify_and_store_all
 )
 from app.db_session import get_session
+# Back-compat import shim: prefer dedicated export_service; fallback will be provided if needed
 from app.services.export_service import export_schema_to_csv
 from app.api.security.auth import get_current_user_role
 from app.api.security.auth import authenticate_user, create_access_token

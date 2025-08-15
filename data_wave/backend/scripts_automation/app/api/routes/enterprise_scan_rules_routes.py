@@ -52,9 +52,19 @@ from typing_extensions import Annotated
 # Core imports
 from ...db_session import get_session
 from ...api.security.rbac import get_current_user, require_permission
-from ...core.cache import get_cache
-from ...core.monitoring import get_metrics_collector
-from ...core.logging import get_logger
+from ...utils.cache import get_cache
+try:
+    from ...core.monitoring import MetricsCollector as get_metrics_collector
+except Exception:
+    from ...core.monitoring import MetricsCollector
+    def get_metrics_collector():
+        return MetricsCollector()
+try:
+    from ...core.logging import get_logger
+except Exception:
+    import logging
+    def get_logger(name: str):
+        return logging.getLogger(name)
 
 # Service imports
 from ...services.enterprise_scan_rule_service import (

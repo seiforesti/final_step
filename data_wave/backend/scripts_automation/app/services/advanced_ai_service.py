@@ -64,7 +64,7 @@ from ..models.catalog_models import CatalogItem
 from ..models.compliance_models import ComplianceRequirement
 
 # REAL ENTERPRISE INTEGRATIONS - No More Mock Data!
-from .classification_service import EnterpriseClassificationService
+from .classification_service import ClassificationService as EnterpriseClassificationService
 from .scan_service import ScanService
 from .compliance_rule_service import ComplianceRuleService
 from .catalog_service import EnhancedCatalogService
@@ -92,7 +92,7 @@ class AdvancedAIService:
         self.classification_service = EnterpriseClassificationService()
         self.scan_service = ScanService()
         self.compliance_service = ComplianceRuleService()
-        self.catalog_service = CatalogService()
+        self.catalog_service = EnhancedCatalogService()
         self.data_profiling_service = DataProfilingService()
         self.performance_service = PerformanceService()
         self.security_service = SecurityService()
@@ -106,33 +106,43 @@ class AdvancedAIService:
         if ANTHROPIC_AVAILABLE:
             self.anthropic_client = None
             
-        # Load embedding models
-        self._initialize_embedding_models()
-        self._initialize_nlp_pipelines()
+        # Load embedding and NLP models lazily to reduce startup load
+        self._embedding_initialized = False
+        self._nlp_initialized = False
 
     def _initialize_embedding_models(self):
         """Initialize pre-trained embedding models"""
         try:
+            if self._embedding_initialized:
+                return
             if TRANSFORMERS_AVAILABLE:
-                # Load sentence transformer for semantic embeddings
-                self.embedding_models['sentence_transformer'] = SentenceTransformer('all-MiniLM-L6-v2')
-                logger.info("Initialized SentenceTransformer embedding model")
+                # Defer actual model load until first use by setting callable factory
+                def _lazy_st_model():
+                    from sentence_transformers import SentenceTransformer
+                    return SentenceTransformer('all-MiniLM-L6-v2')
+                self.embedding_models['sentence_transformer_factory'] = _lazy_st_model
+                logger.info("Prepared lazy SentenceTransformer factory")
+            self._embedding_initialized = True
         except Exception as e:
             logger.warning(f"Failed to initialize embedding models: {e}")
 
     def _initialize_nlp_pipelines(self):
         """Initialize NLP processing pipelines"""
         try:
-            if NLP_AVAILABLE:
-                # Try to load spaCy model
+            if self._nlp_initialized or not NLP_AVAILABLE:
+                return
+            # Try to load spaCy model lazily via factory
+            def _lazy_spacy():
                 try:
-                    self.nlp_pipelines['spacy'] = spacy.load("en_core_web_sm")
+                    return spacy.load("en_core_web_sm")
                 except IOError:
                     logger.warning("spaCy English model not found. Install with: python -m spacy download en_core_web_sm")
-                    
-                                # Initialize TF-IDF vectorizer
-                self.nlp_pipelines['tfidf'] = TfidfVectorizer(max_features=10000, stop_words='english')
-                logger.info("Initialized NLP processing pipelines")
+                    return spacy.blank("en")
+            self.nlp_pipelines['spacy_factory'] = _lazy_spacy
+            # Initialize TF-IDF vectorizer (lightweight)
+            self.nlp_pipelines['tfidf'] = TfidfVectorizer(max_features=10000, stop_words='english')
+            self._nlp_initialized = True
+            logger.info("Prepared lazy NLP pipelines")
         except Exception as e:
             logger.warning(f"Failed to initialize NLP pipelines: {e}")
 
@@ -808,28 +818,169 @@ class AdvancedAIService:
 
     # Additional helper methods for knowledge base processing
     async def _create_traditional_indices(self, documents: List[Dict[str, Any]], session: AsyncSession) -> Dict[str, Any]:
-        """Create traditional text indices"""
-        return {'tfidf_index': {}, 'word_frequency': {}}
+        """Create traditional text indices using TF-IDF and word frequencies."""
+        try:
+            texts = []
+            doc_ids = []
+            for doc in documents:
+                content = doc.get('cleaned_content', doc.get('content', '')) or ''
+                if content.strip():
+                    texts.append(content)
+                    doc_ids.append(doc.get('document_id') or str(uuid.uuid4()))
+
+            tfidf_index = {}
+            word_frequency: Dict[str, int] = {}
+            if texts and 'tfidf' in self.nlp_pipelines:
+                vectorizer = self.nlp_pipelines['tfidf']
+                try:
+                    matrix = vectorizer.fit_transform(texts)
+                except Exception:
+                    # Create a new vectorizer if not yet fitted
+                    from sklearn.feature_extraction.text import TfidfVectorizer  # type: ignore
+                    vectorizer = TfidfVectorizer(max_features=10000, stop_words='english')
+                    self.nlp_pipelines['tfidf'] = vectorizer
+                    matrix = vectorizer.fit_transform(texts)
+                vocab = vectorizer.get_feature_names_out()
+                for idx, doc_id in enumerate(doc_ids):
+                    row = matrix.getrow(idx)
+                    indices = row.indices
+                    data = row.data
+                    tfidf_index[doc_id] = {vocab[i]: float(val) for i, val in zip(indices, data)}
+                # Word frequencies
+                from collections import Counter
+                for text in texts:
+                    tokens = [t for t in text.lower().split() if t.isalpha() or t.isalnum()]
+                    c = Counter(tokens)
+                    for k, v in c.items():
+                        word_frequency[k] = word_frequency.get(k, 0) + v
+            return {'tfidf_index': tfidf_index, 'word_frequency': word_frequency}
+        except Exception as e:
+            logger.error(f"Error building traditional indices: {e}")
+            return {'tfidf_index': {}, 'word_frequency': {}}
 
     async def _extract_entities(self, documents: List[Dict[str, Any]], session: AsyncSession) -> List[Dict[str, Any]]:
-        """Extract entities from documents"""
-        return []
+        """Extract entities from documents using spaCy if available."""
+        entities: List[Dict[str, Any]] = []
+        try:
+            nlp = self.nlp_pipelines.get('spacy') if hasattr(self, 'nlp_pipelines') else None
+            if not nlp:
+                return entities
+            for doc in documents:
+                content = doc.get('cleaned_content', doc.get('content', '')) or ''
+                if not content.strip():
+                    continue
+                parsed = nlp(content)
+                for ent in parsed.ents:
+                    entities.append({
+                        'document_id': doc.get('document_id'),
+                        'text': ent.text,
+                        'label': ent.label_,
+                        'start_char': ent.start_char,
+                        'end_char': ent.end_char
+                    })
+            return entities
+        except Exception as e:
+            logger.error(f"Error extracting entities: {e}")
+            return entities
 
     async def _extract_relationships(self, documents: List[Dict[str, Any]], entities: List[Dict[str, Any]], session: AsyncSession) -> List[Dict[str, Any]]:
-        """Extract relationships between entities"""
-        return []
+        """Extract simple relationships between co-occurring entities in the same document."""
+        try:
+            from collections import defaultdict
+            rels: List[Dict[str, Any]] = []
+            doc_to_entities: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
+            for ent in entities:
+                did = ent.get('document_id')
+                if did:
+                    doc_to_entities[did].append(ent)
+            for did, ents in doc_to_entities.items():
+                n = len(ents)
+                seen_pairs = set()
+                for i in range(n):
+                    for j in range(i + 1, n):
+                        a = ents[i]['text']
+                        b = ents[j]['text']
+                        key = tuple(sorted([a, b]))
+                        if key in seen_pairs:
+                            continue
+                        seen_pairs.add(key)
+                        rels.append({
+                            'document_id': did,
+                            'source': key[0],
+                            'target': key[1],
+                            'relation': 'co_occurs'
+                        })
+            return rels
+        except Exception as e:
+            logger.error(f"Error extracting relationships: {e}")
+            return []
 
     async def _create_cross_source_relationships(self, knowledge_base: Dict[str, Any], session: AsyncSession) -> List[Dict[str, Any]]:
-        """Create relationships between entities from different sources"""
-        return []
+        """Create relationships between documents across sources sharing identifiers (e.g., data_source_id)."""
+        try:
+            docs = knowledge_base.get('documents', []) if isinstance(knowledge_base, dict) else []
+            index_by_ds: Dict[Any, List[Dict[str, Any]]] = {}
+            relationships: List[Dict[str, Any]] = []
+            for doc in docs:
+                meta = doc.get('metadata', {})
+                ds_id = meta.get('data_source_id')
+                if ds_id is not None:
+                    index_by_ds.setdefault(ds_id, []).append(doc)
+            for ds_id, group_docs in index_by_ds.items():
+                if len(group_docs) < 2:
+                    continue
+                # Link all pairs within same data source
+                for i in range(len(group_docs)):
+                    for j in range(i + 1, len(group_docs)):
+                        relationships.append({
+                            'relation': 'same_data_source',
+                            'data_source_id': ds_id,
+                            'doc_a': group_docs[i].get('document_id'),
+                            'doc_b': group_docs[j].get('document_id')
+                        })
+            return relationships
+        except Exception as e:
+            logger.error(f"Error creating cross-source relationships: {e}")
+            return []
 
     async def _calculate_source_quality(self, documents: List[Dict[str, Any]], entities: List[Dict[str, Any]], relationships: List[Dict[str, Any]]) -> float:
-        """Calculate quality score for a knowledge source"""
-        return 0.8
+        """Calculate quality score for a knowledge source using coverage and linkage metrics."""
+        try:
+            if not documents:
+                return 0.0
+            doc_count = len(documents)
+            avg_len = np.mean([len((d.get('content') or '')) for d in documents]) if documents else 0.0
+            ent_per_doc = len(entities) / float(doc_count)
+            rel_per_doc = len(relationships) / float(doc_count)
+            # Normalize and weight
+            score = 0.3 * min(1.0, avg_len / 2000.0) + 0.4 * min(1.0, ent_per_doc / 10.0) + 0.3 * min(1.0, rel_per_doc / 5.0)
+            return float(round(score, 3))
+        except Exception:
+            return 0.5
 
     async def _calculate_knowledge_base_quality(self, knowledge_base: Dict[str, Any], session: AsyncSession) -> float:
-        """Calculate overall quality score for knowledge base"""
-        return 0.8
+        """Calculate overall quality score for knowledge base based on size, freshness, and connectivity."""
+        try:
+            docs = knowledge_base.get('documents', []) if isinstance(knowledge_base, dict) else []
+            if not docs:
+                return 0.0
+            size_factor = min(1.0, len(docs) / 100.0)
+            now = datetime.utcnow()
+            freshness = []
+            for d in docs:
+                ts = d.get('extraction_timestamp')
+                try:
+                    age_days = (now - datetime.fromisoformat(ts)).days if ts else 365
+                except Exception:
+                    age_days = 365
+                freshness.append(max(0.0, 1.0 - age_days / 365.0))
+            freshness_factor = float(np.mean(freshness)) if freshness else 0.0
+            # Connectivity proxy: documents with metadata links
+            links = sum(1 for d in docs if d.get('metadata', {}).get('data_source_id'))
+            connectivity_factor = min(1.0, links / float(len(docs)))
+            return float(round(0.4 * size_factor + 0.3 * freshness_factor + 0.3 * connectivity_factor, 3))
+        except Exception:
+            return 0.5
 
 # Export the service
 __all__ = ["AdvancedAIService"]

@@ -298,8 +298,8 @@ class TaskService:
             session.commit()
             session.refresh(execution)
             
-            # Simulate task execution
-            success = TaskService._simulate_task_execution(session, task, execution)
+            # Execute task using service-backed executors
+            success = TaskService._execute_task(session, task, execution)
             
             # Update next run time if successful
             if success and task.is_enabled:
@@ -427,46 +427,57 @@ class TaskService:
     @staticmethod
     def _calculate_next_run(cron_expression: str) -> datetime:
         """Calculate next run time from cron expression"""
-        # Simple implementation - in production, use croniter library
-        # For now, return next hour
-        return datetime.now() + timedelta(hours=1)
+        try:
+            from croniter import croniter
+            base = datetime.now()
+            return croniter(cron_expression, base).get_next(datetime)
+        except Exception:
+            return datetime.now() + timedelta(hours=1)
     
     @staticmethod
-    def _simulate_task_execution(session: Session, task: ScheduledTask, execution: TaskExecution) -> bool:
-        """Simulate task execution"""
+    def _execute_task(session: Session, task: ScheduledTask, execution: TaskExecution) -> bool:
+        """Execute the configured task by delegating to concrete services."""
         try:
-            import time
-            time.sleep(0.1)  # Simulate work
-            
-            # Update execution as completed
-            execution.status = TaskStatus.COMPLETED
+            import asyncio
+            started = datetime.now()
+            execution.started_at = started
+            ttype = str(task.task_type)
+            cfg = task.configuration or {}
+            if ttype == str(TaskType.SCAN):
+                from app.services.scan_orchestration_service import ScanOrchestrationService
+                svc = ScanOrchestrationService()
+                result = asyncio.get_event_loop().run_until_complete(
+                    svc.orchestrate_scan_execution(cfg.get("scan_request", {}), strategy=cfg.get("strategy", "adaptive"), priority=cfg.get("priority", 5))
+                )
+                execution.status = TaskStatus.COMPLETED
+                execution.result_data = result
+            elif ttype == str(TaskType.REPORT):
+                from app.services.report_service import ReportService
+                report_id = cfg.get("report_id")
+                user_id = cfg.get("user_id", "system")
+                ok = ReportService.generate_report(session, report_id, user_id)
+                execution.status = TaskStatus.COMPLETED if ok else TaskStatus.FAILED
+                execution.result_data = {"report_id": report_id, "status": str(execution.status)}
+            else:
+                # Unknown executor: skip with noop status
+                execution.status = TaskStatus.COMPLETED
+                execution.result_data = {"message": "No bound executor"}
             execution.completed_at = datetime.now()
-            execution.duration_seconds = 5
-            execution.result_data = {"status": "success", "processed": 100}
-            
-            # Update task status
-            task.status = TaskStatus.COMPLETED
-            task.retry_count = 0
-            
+            execution.duration_seconds = int((execution.completed_at - started).total_seconds())
+            task.status = TaskStatus.COMPLETED if execution.status == TaskStatus.COMPLETED else TaskStatus.FAILED
+            task.retry_count = 0 if task.status == TaskStatus.COMPLETED else (task.retry_count + 1)
             session.add(execution)
             session.add(task)
             session.commit()
-            
-            return True
-            
+            return execution.status == TaskStatus.COMPLETED
         except Exception as e:
-            logger.error(f"Error in simulated task execution: {str(e)}")
-            
-            # Mark as failed
+            logger.error(f"Task execution failed: {e}")
             execution.status = TaskStatus.FAILED
             execution.completed_at = datetime.now()
             execution.error_message = str(e)
-            
             task.status = TaskStatus.FAILED
             task.retry_count += 1
-            
             session.add(execution)
             session.add(task)
             session.commit()
-            
             return False

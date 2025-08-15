@@ -17,7 +17,7 @@ Features:
 """
 
 from sqlmodel import SQLModel, Field, Relationship, Column, JSON, String, Text, ARRAY, Integer, Float, Boolean, DateTime
-from typing import List, Optional, Dict, Any, Union, Set, Tuple, Generic, TypeVar
+from typing import List, Optional, Dict, Any, Union, Set, Tuple, Generic, TypeVar, TYPE_CHECKING
 from datetime import datetime, timedelta
 from enum import Enum
 import uuid
@@ -30,6 +30,10 @@ import networkx as nx
 # AI/ML imports for semantic understanding
 import numpy as np
 from typing_extensions import Annotated
+
+# Forward references for circular imports
+if TYPE_CHECKING:
+    from app.models.racine_models.racine_orchestration_models import RacineOrchestrationMaster
 
 # ===================== ENUMS AND CONSTANTS =====================
 
@@ -159,6 +163,7 @@ class IntelligentDataAsset(SQLModel, table=True):
     
     # Location and Source Information
     data_source_id: int = Field(foreign_key="datasource.id", index=True)
+    racine_orchestrator_id: Optional[str] = Field(default=None, foreign_key="racine_orchestration_master.id", index=True)
     database_name: Optional[str] = Field(max_length=255, index=True)
     schema_name: Optional[str] = Field(max_length=255, index=True)
     table_name: Optional[str] = Field(max_length=255, index=True)
@@ -292,10 +297,17 @@ class IntelligentDataAsset(SQLModel, table=True):
     
     # Relationships
     data_source: Optional["DataSource"] = Relationship()
+    racine_orchestrator: Optional["RacineOrchestrationMaster"] = Relationship(back_populates="managed_catalog_assets")
     parent_asset: Optional["IntelligentDataAsset"] = Relationship(sa_relationship_kwargs={"remote_side": "IntelligentDataAsset.id"})
     child_assets: List["IntelligentDataAsset"] = Relationship()
-    lineage_sources: List["EnterpriseDataLineage"] = Relationship(back_populates="target_asset")
-    lineage_targets: List["EnterpriseDataLineage"] = Relationship(back_populates="source_asset")
+    lineage_sources: List["EnterpriseDataLineage"] = Relationship(
+        back_populates="target_asset",
+        sa_relationship_kwargs={"foreign_keys": "EnterpriseDataLineage.target_asset_id"}
+    )
+    lineage_targets: List["EnterpriseDataLineage"] = Relationship(
+        back_populates="source_asset",
+        sa_relationship_kwargs={"foreign_keys": "EnterpriseDataLineage.source_asset_id"}
+    )
     quality_assessments: List["DataQualityAssessment"] = Relationship(back_populates="asset")
     usage_metrics: List["AssetUsageMetrics"] = Relationship(back_populates="asset")
     profiling_results: List["DataProfilingResult"] = Relationship(back_populates="asset")
@@ -461,9 +473,9 @@ class EnterpriseDataLineage(SQLModel, table=True):
         Index('ix_lineage_type_confidence', 'lineage_type', 'confidence_score'),
         Index('ix_lineage_critical_path', 'critical_path', 'business_impact'),
         Index('ix_lineage_performance', 'success_rate', 'processing_time_avg'),
-        UniqueConstraint('source_asset_id', 'target_asset_id', 'lineage_type', name='uq_lineage_relationship'),
+        UniqueConstraint('source_asset_id', 'target_asset_id', 'lineage_type', name='uq_enterprise_lineage_relationship'),
         CheckConstraint('confidence_score >= 0.0 AND confidence_score <= 1.0'),
-        CheckConstraint('source_asset_id != target_asset_id', name='ck_no_self_reference'),
+        CheckConstraint('source_asset_id != target_asset_id', name='ck_enterprise_no_self_reference'),
     )
 
 
@@ -1009,6 +1021,7 @@ class AssetCreateRequest(BaseModel):
     
     # Location
     data_source_id: int
+    racine_orchestrator_id: Optional[str] = Field(default=None)
     database_name: Optional[str] = Field(max_length=255)
     schema_name: Optional[str] = Field(max_length=255)
     table_name: Optional[str] = Field(max_length=255)
@@ -1222,6 +1235,13 @@ class CatalogAnalytics(BaseModel):
     risk_assessment: Dict[str, Any]
 
 
+# ===================== BACKWARD COMPATIBILITY ALIASES =====================
+
+# Back-compat aliases for services expecting legacy names
+CatalogItem = IntelligentDataAsset
+CatalogMetadata = DataProfilingResult
+
+
 # ===================== MODEL REGISTRATION =====================
 
 __all__ = [
@@ -1233,6 +1253,9 @@ __all__ = [
     "BusinessGlossaryAssociation",
     "AssetUsageMetrics",
     "DataProfilingResult",
+    # Back-compat aliases
+    "CatalogItem",
+    "CatalogMetadata",
     
     # Enums
     "AssetType",

@@ -39,8 +39,11 @@ from ...services.comprehensive_analytics_service import ComprehensiveAnalyticsSe
 from ...services.unified_scan_manager import UnifiedScanManager
 
 # Authentication and authorization
-from ...api.security.rbac import get_current_user, require_permission
-from ...core.rbac import Permission
+from ...api.security.rbac import (
+    get_current_user,
+    require_permission,
+    PERMISSION_ANALYTICS_VIEW as Permission_ANALYTICS_VIEW,
+)
 
 # Logging setup
 logging.basicConfig(level=logging.INFO)

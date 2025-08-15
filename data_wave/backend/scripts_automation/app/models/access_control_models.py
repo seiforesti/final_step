@@ -25,7 +25,7 @@ class DataSourcePermission(SQLModel, table=True):
     __tablename__ = "data_source_permissions"
     
     id: Optional[int] = Field(default=None, primary_key=True)
-    data_source_id: int = Field(foreign_key="data_sources.id", index=True)
+    data_source_id: int = Field(foreign_key="datasource.id", index=True)
     user_id: Optional[str] = Field(index=True)
     role_id: Optional[str] = Field(index=True)
     
@@ -49,7 +49,7 @@ class AccessLog(SQLModel, table=True):
     __tablename__ = "access_logs"
     
     id: Optional[int] = Field(default=None, primary_key=True)
-    data_source_id: int = Field(foreign_key="data_sources.id", index=True)
+    data_source_id: int = Field(foreign_key="datasource.id", index=True)
     user_id: str = Field(index=True)
     
     # Access details

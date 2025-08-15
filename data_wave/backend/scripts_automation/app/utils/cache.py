@@ -24,6 +24,12 @@ import functools
 import weakref
 
 logger = logging.getLogger(__name__)
+try:
+    # Lazy import to avoid circulars during early import stages
+    from app.core.config import settings as _global_settings
+    _DEFAULT_REDIS_URL = _global_settings.redis.url
+except Exception:
+    _DEFAULT_REDIS_URL = "redis://redis:6379/0"
 
 class CacheStrategy(Enum):
     """Cache strategies."""
@@ -94,13 +100,14 @@ class EnterpriseCache:
     
     def __init__(
         self,
-        redis_url: str = "redis://localhost:6379",
+        redis_url: Optional[str] = None,
         default_config: Optional[CacheConfig] = None,
         namespace: str = "enterprise_cache",
         enable_l1_cache: bool = True,
         enable_monitoring: bool = True
     ):
-        self.redis_client = redis.from_url(redis_url, decode_responses=False)
+        resolved_url = redis_url or _DEFAULT_REDIS_URL
+        self.redis_client = redis.from_url(resolved_url, decode_responses=False)
         self.namespace = namespace
         self.default_config = default_config or CacheConfig()
         self.enable_l1_cache = enable_l1_cache
@@ -792,5 +799,12 @@ async def cache_delete(key: str) -> bool:
     cache = get_cache()
     return await cache.delete(key)
 
-# Alias for backward compatibility
+# Aliases for backward compatibility
 cache_result = cached
+
+def cache_response(ttl: int = 60):
+    """
+    Lightweight decorator alias used by routes to cache endpoint responses.
+    Wraps the 'cached' decorator with a TTL and default key function.
+    """
+    return cached(ttl=ttl)

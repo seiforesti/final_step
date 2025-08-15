@@ -317,9 +317,20 @@ class RuleTemplateService:
         # Template validation rules
         self.validation_rules = self._initialize_validation_rules()
         
-        # Start background tasks
-        asyncio.create_task(self._analytics_aggregation_loop())
-        asyncio.create_task(self._template_optimization_loop())
+        # Background tasks - defer until start() method
+        self._background_tasks = [
+            self._analytics_aggregation_loop,
+            self._template_optimization_loop
+        ]
+    
+    async def start(self):
+        """Start background tasks when event loop is available"""
+        try:
+            loop = asyncio.get_running_loop()
+            for task_func in self._background_tasks:
+                loop.create_task(task_func())
+        except RuntimeError:
+            logger.warning("No event loop available, background tasks will start when loop becomes available")
     
     def _initialize_validation_rules(self) -> Dict[str, Any]:
         """Initialize template validation rules"""
@@ -398,7 +409,12 @@ class RuleTemplateService:
             await self._cache_template(template)
             
             # Schedule background analysis
-            asyncio.create_task(self._analyze_template_async(template_id))
+            try:
+                loop = asyncio.get_running_loop()
+                loop.create_task(self._analyze_template_async(template_id))
+            except RuntimeError:
+                # Analysis will be scheduled when loop is available
+                pass
             
             # Update metrics
             self.metrics["templates_created"] += 1
@@ -694,7 +710,12 @@ class RuleTemplateService:
             self.metrics["templates_used"] += 1
             
             # Schedule analytics update
-            asyncio.create_task(self._update_template_analytics_async(template_id))
+            try:
+                loop = asyncio.get_running_loop()
+                loop.create_task(self._update_template_analytics_async(template_id))
+            except RuntimeError:
+                # Analytics update will be scheduled when loop is available
+                pass
             
             return {
                 "success": True,

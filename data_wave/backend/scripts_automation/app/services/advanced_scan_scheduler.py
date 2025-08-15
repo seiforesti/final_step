@@ -44,8 +44,15 @@ from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 
-# Core framework imports
-from ..core.config import settings
+# Core framework imports (robust get_settings wrapper)
+try:
+    from ..core.settings import get_settings as _get_settings
+    def get_settings():
+        return _get_settings()
+except Exception:  # fallback to static settings object
+    from ..core.config import settings as _settings
+    def get_settings():
+        return _settings
 from ..core.cache import RedisCache as CacheManager
 
 # Service imports
@@ -182,15 +189,30 @@ class AdvancedScanScheduler:
         # Threading
         self.executor = ThreadPoolExecutor(max_workers=10)
         
-        # Background tasks
-        asyncio.create_task(self._scheduling_loop())
-        asyncio.create_task(self._optimization_loop())
-        asyncio.create_task(self._dependency_resolution_loop())
-        asyncio.create_task(self._metrics_collection_loop())
-        asyncio.create_task(self._predictive_analytics_loop())
+        # Defer background tasks start until an event loop exists
+        try:
+            loop = asyncio.get_running_loop()
+            loop.create_task(self._scheduling_loop())
+            loop.create_task(self._optimization_loop())
+            loop.create_task(self._dependency_resolution_loop())
+            loop.create_task(self._metrics_collection_loop())
+            loop.create_task(self._predictive_analytics_loop())
+        except RuntimeError:
+            pass
         
         logger.info("Advanced Scan Scheduler initialized successfully")
     
+    def start(self) -> None:
+        """Start background tasks when an event loop is available."""
+        try:
+            loop = asyncio.get_running_loop()
+            loop.create_task(self._scheduling_loop())
+            loop.create_task(self._optimization_loop())
+            loop.create_task(self._dependency_resolution_loop())
+            loop.create_task(self._metrics_collection_loop())
+            loop.create_task(self._predictive_analytics_loop())
+        except RuntimeError:
+            pass
     def _init_ml_models(self):
         """Initialize ML models for scheduling optimization"""
         try:
@@ -1062,7 +1084,7 @@ class AdvancedScanScheduler:
             # Add to execution queue
             self.execution_queue.append(scheduled_scan)
             
-            # Execute the scan (this would integrate with actual scan execution service)
+            # Execute the scan via enterprise orchestrator
             execution_result = await self._perform_scan_execution(scheduled_scan)
             
             # Update status based on result
@@ -1113,48 +1135,18 @@ class AdvancedScanScheduler:
             scheduled_scan.status = ScheduleStatus.FAILED
     
     async def _perform_scan_execution(self, scheduled_scan: ScheduledScan) -> Dict[str, Any]:
-        """Perform the actual scan execution (integration point)"""
+        """Perform the actual scan execution using EnterpriseScanRuleService/Orchestrator."""
         try:
-            # This would integrate with the actual scan orchestration service
-            # For now, simulate execution
-            
+            from .enterprise_scan_rule_service import EnterpriseScanRuleService
+            from .scan_orchestration_service import ScanOrchestrationService
+            orchestrator = ScanOrchestrationService()
             scan_request = scheduled_scan.scan_request
-            estimated_duration = scheduled_scan.estimated_duration or 30
-            
-            # Simulate execution time
-            await asyncio.sleep(min(5, estimated_duration / 10))  # Simulate with reduced time
-            
-            # Simulate success/failure based on scan complexity
-            rule_count = len(scan_request.get("scan_rules", []))
-            success_probability = max(0.7, 1.0 - (rule_count / 100))  # Higher rule count = lower success
-            
-            import random
-            success = random.random() < success_probability
-            
-            if success:
-                return {
-                    "success": True,
-                    "duration": estimated_duration,
-                    "scan_results": {
-                        "rules_executed": rule_count,
-                        "findings": random.randint(0, rule_count),
-                        "data_quality_score": random.uniform(0.7, 1.0)
-                    }
-                }
-            else:
-                return {
-                    "success": False,
-                    "error": "Simulated scan execution failure",
-                    "duration": estimated_duration // 2
-                }
-                
+            # Delegate to orchestrator which ties to rule engine and data source connectors
+            result = await orchestrator.orchestrate_scan_execution(scan_request, strategy=scan_request.get("strategy", "adaptive"), priority=scan_request.get("priority", 5))
+            return {"success": True, "duration": result.get("execution_time_seconds", 0), "scan_results": result}
         except Exception as e:
             logger.error(f"Scan execution failed: {e}")
-            return {
-                "success": False,
-                "error": str(e),
-                "duration": 0
-            }
+            return {"success": False, "error": str(e), "duration": 0}
     
     async def _reschedule_with_delay(self, scheduled_scan: ScheduledScan, delay: timedelta):
         """Reschedule a scan with specified delay"""

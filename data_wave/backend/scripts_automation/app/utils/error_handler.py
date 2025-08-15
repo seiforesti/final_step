@@ -47,6 +47,22 @@ def handle_service_error(
         return wrapper
     return decorator
 
+def handle_route_error(func: Callable) -> Callable:
+    """Decorator for FastAPI route handlers to capture and log exceptions consistently.
+
+    Wraps the route, logs structured traceback, and re-raises to let FastAPI
+    convert to HTTPException handlers configured globally.
+    """
+    @wraps(func)
+    async def _async_wrapper(*args, **kwargs):
+        try:
+            return await func(*args, **kwargs)
+        except Exception as exc:
+            logger.error(f"Route error in {func.__name__}: {exc}")
+            logger.debug(f"Traceback: {traceback.format_exc()}")
+            raise
+    return _async_wrapper
+
 class ServiceError(Exception):
     """Base exception for service errors"""
     pass

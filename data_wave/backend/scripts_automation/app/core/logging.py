@@ -190,3 +190,7 @@ def get_request_context() -> Dict[str, str]:
         "session_id": session_id.get()
     }
 
+
+def get_logger(name: str) -> StructuredLogger:
+    """Factory to obtain a StructuredLogger compatible with existing imports."""
+    return StructuredLogger(name)

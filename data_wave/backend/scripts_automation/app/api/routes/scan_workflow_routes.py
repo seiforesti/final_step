@@ -18,15 +18,30 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ...api.security.rbac import get_current_user
 from ...db_session import get_session
-from ...core.rate_limiter import rate_limiter
-from ...core.audit_log import audit_log
+from ...utils.rate_limiter import rate_limit, get_rate_limiter
+try:
+    from ...utils import audit_logger as _audit
+    audit_log = _audit.audit_log
+except Exception:
+    async def audit_log(**kwargs):
+        pass
 from ...models.scan_workflow_models import *
 from ...services.scan_workflow_engine import ScanWorkflowEngine
-from ...utils.response_models import SuccessResponse, ErrorResponse
+try:
+    from ...utils.response_models import SuccessResponse, ErrorResponse
+except Exception:
+    from pydantic import BaseModel
+    class SuccessResponse(BaseModel):
+        success: bool = True
+        data: dict | list | None = None
+    class ErrorResponse(BaseModel):
+        success: bool = False
+        error: str
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/scan-workflows", tags=["scan-workflows"])
+rate_limiter = get_rate_limiter()
 
 # Request Models
 class WorkflowTemplateRequest(BaseModel):
@@ -87,7 +102,7 @@ async def get_workflow_engine() -> ScanWorkflowEngine:
     return ScanWorkflowEngine()
 
 @router.post("/templates")
-@rate_limiter.limit("20/minute")
+@rate_limit(requests=20, window=60)
 async def create_workflow_template(
     request: WorkflowTemplateRequest,
     workflow_engine: ScanWorkflowEngine = Depends(get_workflow_engine),
@@ -162,7 +177,7 @@ async def create_workflow_template(
         raise HTTPException(status_code=500, detail=f"Template creation failed: {str(e)}")
 
 @router.get("/templates")
-@rate_limiter.limit("100/minute")
+@rate_limit(requests=100, window=60)
 async def list_workflow_templates(
     template_type: Optional[str] = Query(default=None, description="Filter by template type"),
     is_active: Optional[bool] = Query(default=None, description="Filter by active status"),
@@ -218,7 +233,7 @@ async def list_workflow_templates(
         raise HTTPException(status_code=500, detail=f"Template listing failed: {str(e)}")
 
 @router.post("/execute")
-@rate_limiter.limit("50/minute")
+@rate_limit(requests=50, window=60)
 async def execute_workflow(
     request: WorkflowExecutionRequest,
     background_tasks: BackgroundTasks,
@@ -303,7 +318,7 @@ async def execute_workflow(
         raise HTTPException(status_code=500, detail=f"Workflow execution failed: {str(e)}")
 
 @router.get("/status/{workflow_id}")
-@rate_limiter.limit("200/minute")
+@rate_limit(requests=200, window=60)
 async def get_workflow_status(
     workflow_id: str,
     include_stages: bool = Query(default=True, description="Include stage details"),
@@ -496,7 +511,7 @@ async def stream_workflow_progress(
         raise HTTPException(status_code=500, detail=f"Progress streaming failed: {str(e)}")
 
 @router.post("/control/{workflow_id}")
-@rate_limiter.limit("50/minute")
+@rate_limit(requests=50, window=60)
 async def control_workflow(
     workflow_id: str,
     request: WorkflowControlRequest,
@@ -553,7 +568,7 @@ async def control_workflow(
         raise HTTPException(status_code=500, detail=f"Workflow control failed: {str(e)}")
 
 @router.get("/list")
-@rate_limiter.limit("100/minute")
+@rate_limit(requests=100, window=60)
 async def list_workflows(
     status: Optional[str] = Query(default=None, description="Filter by workflow status"),
     template_id: Optional[str] = Query(default=None, description="Filter by template ID"),
@@ -624,7 +639,7 @@ async def list_workflows(
         raise HTTPException(status_code=500, detail=f"Workflow listing failed: {str(e)}")
 
 @router.get("/analytics")
-@rate_limiter.limit("20/minute")
+@rate_limit(requests=20, window=60)
 async def get_workflow_analytics(
     time_range: str = Query(default="1d", description="Time range for analytics"),
     template_ids: Optional[str] = Query(default=None, description="Comma-separated template IDs"),

@@ -33,7 +33,7 @@ class SecurityVulnerability(SQLModel, table=True):
     __tablename__ = "security_vulnerabilities"
     
     id: Optional[int] = Field(default=None, primary_key=True)
-    data_source_id: int = Field(foreign_key="data_sources.id", index=True)
+    data_source_id: int = Field(foreign_key="datasource.id", index=True)
     
     # Vulnerability details
     name: str = Field(index=True)
@@ -72,7 +72,7 @@ class SecurityControl(SQLModel, table=True):
     __tablename__ = "security_controls"
     
     id: Optional[int] = Field(default=None, primary_key=True)
-    data_source_id: int = Field(foreign_key="data_sources.id", index=True)
+    data_source_id: int = Field(foreign_key="datasource.id", index=True)
     
     # Control details
     name: str = Field(index=True)
@@ -107,7 +107,7 @@ class SecurityScan(SQLModel, table=True):
     __tablename__ = "security_scans"
     
     id: Optional[int] = Field(default=None, primary_key=True)
-    data_source_id: int = Field(foreign_key="data_sources.id", index=True)
+    data_source_id: int = Field(foreign_key="datasource.id", index=True)
     
     # Scan details
     scan_type: str  # e.g., "vulnerability", "compliance", "penetration"
@@ -142,7 +142,7 @@ class SecurityIncident(SQLModel, table=True):
     __tablename__ = "security_incidents"
     
     id: Optional[int] = Field(default=None, primary_key=True)
-    data_source_id: int = Field(foreign_key="data_sources.id", index=True)
+    data_source_id: int = Field(foreign_key="datasource.id", index=True)
     
     # Incident details
     title: str

@@ -37,7 +37,7 @@ class Report(SQLModel, table=True):
     __tablename__ = "reports"
     
     id: Optional[int] = Field(default=None, primary_key=True)
-    data_source_id: Optional[int] = Field(foreign_key="data_sources.id", index=True)
+    data_source_id: Optional[int] = Field(foreign_key="datasource.id", index=True)
     
     # Report details
     name: str = Field(index=True)

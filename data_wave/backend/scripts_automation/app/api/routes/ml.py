@@ -4,7 +4,10 @@ import os
 import json
 import pandas as pd
 from app.api.classifiers.hybrid_classifier import HybridClassifier
-from train_hybrid_model import train_and_save  # ✅ Import correct maintenant
+try:
+    from train_hybrid_model import train_and_save  # Optional utility
+except Exception:
+    train_and_save = None
 
 router = APIRouter()
 
@@ -20,6 +23,8 @@ def get_ml_metrics():
 
 @router.post("/ml/retrain")
 def retrain_model():
+    if not train_and_save:
+        raise HTTPException(status_code=503, detail="Retraining utility not available")
     try:
         result = train_and_save()
         return {"message": "✅ Modèle réentraîné avec succès", "details": result}

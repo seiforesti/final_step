@@ -31,6 +31,85 @@ from ..auth_models import User
 from .racine_orchestration_models import RacineOrchestrationMaster
 
 
+# =========================
+# Service-aligned Enumerations
+# =========================
+
+class ConversationType(str, enum.Enum):
+    """Conversation type expected by services (aligned with RacineAIService usage)."""
+    GENERAL = "general"
+    SUPPORT = "support"
+    ANALYSIS = "analysis"
+    OPTIMIZATION = "optimization"
+    DATA_DISCOVERY = "data_discovery"
+    COMPLIANCE = "compliance"
+    PERFORMANCE = "performance"
+    TROUBLESHOOTING = "troubleshooting"
+
+
+class MessageType(str, enum.Enum):
+    """Message type expected by services."""
+    TEXT = "text"
+    FILE = "file"
+    IMAGE = "image"
+    ACTION = "action"
+    SYSTEM = "system"
+
+
+class MessageStatus(str, enum.Enum):
+    """Message delivery/processing status."""
+    SENT = "sent"
+    DELIVERED = "delivered"
+    READ = "read"
+    FAILED = "failed"
+
+
+class RecommendationType(str, enum.Enum):
+    """Recommendation categories aligned with service usage."""
+    PERFORMANCE = "performance"
+    COST = "cost"
+    SECURITY = "security"
+    COMPLIANCE = "compliance"
+    WORKFLOW = "workflow"
+    DATA_QUALITY = "data_quality"
+    RESOURCE = "resource"
+    PROCESS = "process"
+    ANOMALY = "anomaly"
+    BEST_PRACTICE = "best_practice"
+
+
+class InsightType(str, enum.Enum):
+    """Insight categories aligned with service usage."""
+    PERFORMANCE = "performance"
+    SECURITY = "security"
+    COMPLIANCE = "compliance"
+    OPTIMIZATION = "optimization"
+    TREND = "trend"
+    PATTERN = "pattern"
+    ANOMALY = "anomaly"
+    PREDICTIVE = "predictive"
+    CORRELATION = "correlation"
+    USAGE = "usage"
+    RISK = "risk"
+    OPPORTUNITY = "opportunity"
+    CROSS_GROUP = "cross_group"
+
+
+class LearningType(str, enum.Enum):
+    """Learning types aligned with service usage."""
+    USER_FEEDBACK = "user_feedback"
+    USER_INTERACTION = "user_interaction"
+    SYSTEM_BEHAVIOR = "system_behavior"
+    PERFORMANCE_FEEDBACK = "performance_feedback"
+    RECOMMENDATION_OUTCOME = "recommendation_outcome"
+    WORKFLOW_EXECUTION = "workflow_execution"
+    PIPELINE_PERFORMANCE = "pipeline_performance"
+    ERROR_PATTERN = "error_pattern"
+    OPTIMIZATION_RESULT = "optimization_result"
+    USER_PREFERENCE = "user_preference"
+    DOMAIN_KNOWLEDGE = "domain_knowledge"
+
+
 class AIConversationType(enum.Enum):
     """AI conversation type enumeration"""
     GENERAL_QUERY = "general_query"
@@ -99,7 +178,9 @@ class RacineAIConversation(Base):
     
     # Conversation basic information
     conversation_title = Column(String, index=True)
-    conversation_type = Column(SQLEnum(AIConversationType), nullable=False)
+    # Service-aligned fields
+    title = Column(String, index=True)  # Alias used by services
+    conversation_type = Column(SQLEnum(ConversationType), nullable=False)
     status = Column(String, default="active")  # active, archived, resolved
     priority = Column(String, default="normal")  # low, normal, high, urgent
     
@@ -108,6 +189,10 @@ class RacineAIConversation(Base):
     system_context = Column(JSON)  # System context at conversation start
     workspace_context = Column(JSON)  # Current workspace context
     group_context = Column(JSON)  # Involved groups and their states
+    # Service-aligned unified context and metadata
+    context = Column(JSON)
+    conversation_metadata = Column(JSON)
+    workspace_id = Column(String, nullable=True)
     
     # Conversation metadata
     conversation_summary = Column(Text)  # AI-generated conversation summary
@@ -143,6 +228,8 @@ class RacineAIConversation(Base):
     started_at = Column(DateTime, default=datetime.utcnow, index=True)
     last_activity = Column(DateTime, default=datetime.utcnow)
     ended_at = Column(DateTime)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # Relationships
     user = relationship("User")
@@ -161,9 +248,17 @@ class RacineAIMessage(Base):
     # Primary identifier
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     
-    # Message basic information
-    message_type = Column(String, nullable=False)  # user, ai, system, notification
-    message_content = Column(Text, nullable=False)
+    # Message basic information (service-aligned)
+    message_type = Column(SQLEnum(MessageType), nullable=False)
+    content = Column(Text, nullable=False)
+    sender_id = Column(String)
+    sender_type = Column(String)  # user, assistant, system
+    ai_processing_data = Column(JSON)  # Processing telemetry
+    message_metadata = Column(JSON)
+    status = Column(SQLEnum(MessageStatus), default=MessageStatus.SENT)
+
+    # Backward-compatible fields (legacy)
+    message_content = Column(Text)
     message_format = Column(String, default="text")  # text, json, code, markdown
     
     # Message metadata
@@ -203,6 +298,8 @@ class RacineAIMessage(Base):
     
     # Timing
     timestamp = Column(DateTime, default=datetime.utcnow, index=True)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # Relationships
     conversation = relationship("RacineAIConversation", back_populates="messages")
@@ -219,8 +316,10 @@ class RacineAIRecommendation(Base):
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     
     # Recommendation basic information
-    recommendation_title = Column(String, nullable=False, index=True)
-    recommendation_type = Column(SQLEnum(AIRecommendationType), nullable=False)
+    # Service-aligned
+    title = Column(String, index=True)
+    recommendation_title = Column(String, index=True)
+    recommendation_type = Column(SQLEnum(RecommendationType), nullable=False)
     description = Column(Text, nullable=False)
     priority = Column(String, default="medium")  # low, medium, high, critical
     
@@ -265,6 +364,7 @@ class RacineAIRecommendation(Base):
     # Context and source
     generation_context = Column(JSON)  # Context when recommendation was generated
     source_data = Column(JSON)  # Source data used for generation
+    recommendation_data = Column(JSON)  # Raw recommendation data (service)
     triggering_event = Column(JSON)  # Event that triggered recommendation
     related_workflows = Column(JSON)  # Related workflows
     related_pipelines = Column(JSON)  # Related pipelines
@@ -301,13 +401,16 @@ class RacineAIInsight(Base):
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     
     # Insight basic information
+    # Service-aligned
+    title = Column(String, index=True)
     insight_title = Column(String, nullable=False, index=True)
-    insight_type = Column(SQLEnum(AIInsightType), nullable=False)
+    insight_type = Column(SQLEnum(InsightType), nullable=False)
     description = Column(Text, nullable=False)
     significance_level = Column(String, default="medium")  # low, medium, high, critical
     
     # Insight analysis
     detailed_analysis = Column(JSON, nullable=False)  # Comprehensive analysis
+    insight_data = Column(JSON)  # Raw insight data (service)
     key_findings = Column(JSON)  # Key findings and discoveries
     supporting_evidence = Column(JSON)  # Supporting evidence
     statistical_data = Column(JSON)  # Statistical analysis data
@@ -385,7 +488,7 @@ class RacineAILearning(Base):
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     
     # Learning basic information
-    learning_type = Column(SQLEnum(AILearningType), nullable=False)
+    learning_type = Column(SQLEnum(LearningType), nullable=False)
     learning_source = Column(String, nullable=False)  # Source of learning data
     description = Column(Text)
     importance_score = Column(Float, default=0.5)  # Learning importance (0-1)

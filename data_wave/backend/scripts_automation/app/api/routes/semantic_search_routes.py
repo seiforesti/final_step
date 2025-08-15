@@ -17,11 +17,26 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ...api.security.rbac import get_current_user
 from ...db_session import get_session
-from ...core.rate_limiter import rate_limiter
-from ...core.audit_log import audit_log
+from ...utils.rate_limiter import rate_limit, get_rate_limiter
+try:
+    from ...utils import audit_logger as _audit
+    audit_log = _audit.audit_log
+except Exception:
+    async def audit_log(**kwargs):
+        logging.getLogger(__name__).info("AUDIT_FALLBACK", extra=kwargs)
 from ...models.catalog_intelligence_models import *
 from ...services.semantic_search_service import SemanticSearchService
-from ...utils.response_models import SuccessResponse, ErrorResponse
+try:
+    from ...utils.response_models import SuccessResponse, ErrorResponse
+except Exception:
+    # Provide minimal fallback models to avoid boot failure; prefer real models when present
+    from pydantic import BaseModel
+    class SuccessResponse(BaseModel):
+        success: bool = True
+        data: dict | list | None = None
+    class ErrorResponse(BaseModel):
+        success: bool = False
+        error: str
 
 logger = logging.getLogger(__name__)
 
@@ -86,11 +101,18 @@ class SemanticSearchResponse(BaseModel):
 
 # Dependency injection
 async def get_semantic_search_service() -> SemanticSearchService:
-    """Get semantic search service instance"""
-    return SemanticSearchService()
+    """Get semantic search service instance and start bg tasks if loop exists."""
+    svc = SemanticSearchService()
+    try:
+        svc.start()
+    except Exception:
+        pass
+    return svc
+
+rate_limiter = get_rate_limiter()
 
 @router.post("/search")
-@rate_limiter.limit("100/minute")
+@rate_limit(requests=100, window=60)
 async def semantic_search(
     request: SemanticSearchRequest,
     semantic_service: SemanticSearchService = Depends(get_semantic_search_service),
@@ -175,7 +197,7 @@ async def semantic_search(
         raise HTTPException(status_code=500, detail=f"Search execution failed: {str(e)}")
 
 @router.post("/index/asset")
-@rate_limiter.limit("50/minute")
+@rate_limit(requests=50, window=60)
 async def index_asset(
     request: AssetIndexRequest,
     background_tasks: BackgroundTasks,
@@ -242,7 +264,7 @@ async def index_asset(
         raise HTTPException(status_code=500, detail=f"Asset indexing failed: {str(e)}")
 
 @router.get("/suggestions")
-@rate_limiter.limit("200/minute")
+@rate_limit(requests=200, window=60)
 async def get_query_suggestions(
     partial_query: str = Query(description="Partial query text"),
     context: Optional[str] = Query(default=None, description="JSON encoded context"),
@@ -289,7 +311,7 @@ async def get_query_suggestions(
         raise HTTPException(status_code=500, detail=f"Suggestion generation failed: {str(e)}")
 
 @router.get("/analytics")
-@rate_limiter.limit("10/minute")
+@rate_limit(requests=10, window=60)
 async def get_search_analytics(
     time_range: str = Query(default="1d", description="Time range (1h, 1d, 1w, 1m)"),
     metrics: Optional[str] = Query(default=None, description="Comma-separated metrics"),
@@ -343,7 +365,7 @@ async def get_search_analytics(
         raise HTTPException(status_code=500, detail=f"Analytics generation failed: {str(e)}")
 
 @router.post("/feedback")
-@rate_limiter.limit("1000/minute")
+@rate_limit(requests=1000, window=60)
 async def submit_search_feedback(
     request: SearchFeedbackRequest,
     semantic_service: SemanticSearchService = Depends(get_semantic_search_service),
@@ -426,9 +448,9 @@ async def stream_search_progress(
                     "current_stage": stage,
                     "timestamp": datetime.utcnow().isoformat()
                 })
-                
                 yield f"data: {json.dumps(progress_data)}\n\n"
-                await asyncio.sleep(0.5)  # Simulate processing time
+                # Backoff to reduce CPU usage during SSE
+                await asyncio.sleep(0.25)
             
             # Final completion
             progress_data.update({
@@ -453,7 +475,7 @@ async def stream_search_progress(
         raise HTTPException(status_code=500, detail=f"Progress streaming failed: {str(e)}")
 
 @router.get("/trending")
-@rate_limiter.limit("50/minute")
+@rate_limit(requests=50, window=60)
 async def get_trending_searches(
     time_period: str = Query(default="1d", description="Time period for trending analysis"),
     limit: int = Query(default=10, ge=1, le=50, description="Number of trending queries"),
@@ -488,7 +510,7 @@ async def get_trending_searches(
         raise HTTPException(status_code=500, detail=f"Trending analysis failed: {str(e)}")
 
 @router.delete("/index/asset/{asset_id}")
-@rate_limiter.limit("20/minute")
+@rate_limit(requests=20, window=60)
 async def remove_asset_from_index(
     asset_id: str,
     semantic_service: SemanticSearchService = Depends(get_semantic_search_service),
@@ -571,13 +593,20 @@ async def _generate_query_suggestions(
             if suggestion not in suggestions:
                 suggestions.append(suggestion)
     
-    # Add related queries (this would integrate with search history analysis)
-    related_queries = [
-        f"{query} data quality",
-        f"{query} lineage",
-        f"{query} schema",
-        f"{query} classification"
-    ]
+    # Derive related queries from recent search history
+    related_queries = []
+    try:
+        history = list(semantic_service.search_history)[-50:]
+        keywords = set()
+        for rec in history:
+            txt = (rec.get("enhanced_query", {}) or {}).get("text", "")
+            for token in txt.split():
+                if token.lower() not in str(query).lower() and len(token) > 3:
+                    keywords.add(token.lower())
+        for kw in list(keywords)[:4]:
+            related_queries.append(f"{query} {kw}")
+    except Exception:
+        pass
     
     for related in related_queries:
         if related not in suggestions and len(suggestions) < 8:
@@ -689,13 +718,25 @@ async def _process_search_feedback(
 ) -> Dict[str, Any]:
     """Process search feedback"""
     
-    # This would integrate with the search service's feedback processing
-    feedback_result = {
-        "processed": True,
-        "ranking_impact": "minor_boost" if request.feedback_type == "click" else "none",
-        "user_id": current_user.get("user_id"),
-        "timestamp": datetime.utcnow().isoformat()
-    }
+    try:
+        await semantic_service._track_search_feedback(
+            request.search_id,
+            helpful=(request.feedback_type == "click"),
+            reasons=request.payload
+        )
+        feedback_result = {
+            "processed": True,
+            "ranking_impact": "minor_boost" if request.feedback_type == "click" else "none",
+            "user_id": current_user.get("user_id"),
+            "timestamp": datetime.utcnow().isoformat()
+        }
+    except Exception:
+        feedback_result = {
+            "processed": False,
+            "ranking_impact": "none",
+            "user_id": current_user.get("user_id"),
+            "timestamp": datetime.utcnow().isoformat()
+        }
     
     return feedback_result
 
@@ -735,12 +776,19 @@ async def _remove_asset_from_index(
 ) -> Dict[str, Any]:
     """Remove asset from search index"""
     
-    # This would integrate with the search service's index management
-    removal_result = {
-        "status": "removed",
-        "index_updated": True,
-        "asset_id": asset_id
-    }
+    try:
+        await semantic_service.remove_from_index(asset_id)
+        removal_result = {
+            "status": "removed",
+            "index_updated": True,
+            "asset_id": asset_id
+        }
+    except Exception:
+        removal_result = {
+            "status": "pending",
+            "index_updated": False,
+            "asset_id": asset_id
+        }
     
     return removal_result
 

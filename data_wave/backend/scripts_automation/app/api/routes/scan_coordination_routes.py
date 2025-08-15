@@ -39,8 +39,12 @@ from ...services.enterprise_scan_orchestrator import EnterpriseScanOrchestrator
 from ...services.scan_workflow_engine import ScanWorkflowEngine
 
 # Authentication and authorization
-from ...api.security.rbac import get_current_user, require_permission
-from ...core.rbac import Permission
+from ...api.security.rbac import (
+    get_current_user,
+    require_permission,
+    PERMISSION_ANALYTICS_VIEW as Permission_ANALYTICS_VIEW,
+    PERMISSION_WORKFLOW_EXECUTE as Permission_WORKFLOW_EXECUTE,
+)
 
 # Logging setup
 logging.basicConfig(level=logging.INFO)

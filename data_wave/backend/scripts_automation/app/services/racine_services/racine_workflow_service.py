@@ -29,7 +29,7 @@ import json
 # Import existing services for integration
 from ..data_source_service import DataSourceService
 from ..scan_rule_set_service import ScanRuleSetService
-from ..classification_service import EnterpriseClassificationService
+from ..classification_service import ClassificationService as EnterpriseClassificationService
 from ..compliance_rule_service import ComplianceRuleService
 from ..enterprise_catalog_service import EnterpriseIntelligentCatalogService
 from ..unified_scan_orchestrator import UnifiedScanOrchestrator
@@ -47,12 +47,9 @@ from ...models.racine_models.racine_workflow_models import (
     RacineStepExecution,
     RacineWorkflowMetrics,
     RacineWorkflowAudit,
-    WorkflowType,
     WorkflowStatus,
-    ExecutionStatus,
-    StepType,
-    TriggerType,
-    ScheduleStatus
+    WorkflowStepType as StepType,
+    WorkflowTriggerType as TriggerType
 )
 from ...models.auth_models import User
 
@@ -99,7 +96,7 @@ class RacineWorkflowService:
         self,
         name: str,
         description: str,
-        workflow_type: WorkflowType,
+        workflow_type: str,
         created_by: str,
         template_id: Optional[str] = None,
         configuration: Optional[Dict[str, Any]] = None,
@@ -159,7 +156,6 @@ class RacineWorkflowService:
             workflow = RacineJobWorkflow(
                 name=name,
                 description=description,
-                workflow_type=workflow_type,
                 status=WorkflowStatus.DRAFT,
                 configuration=default_config,
                 parameters={},
@@ -185,7 +181,7 @@ class RacineWorkflowService:
             await self._create_audit_entry(
                 workflow.id,
                 "workflow_created",
-                {"workflow_type": workflow_type.value, "template_id": template_id},
+                {"workflow_type": workflow_type, "template_id": template_id},
                 created_by
             )
 
@@ -230,7 +226,7 @@ class RacineWorkflowService:
             execution = RacineJobExecution(
                 workflow_id=workflow_id,
                 execution_name=f"{workflow.name}_execution_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}",
-                status=ExecutionStatus.RUNNING,
+                status=WorkflowStatus.RUNNING,
                 execution_parameters=execution_parameters or {},
                 runtime_configuration={
                     "workspace_id": workspace_id,
@@ -301,7 +297,7 @@ class RacineWorkflowService:
 
     async def list_workflows(
         self,
-        workflow_type: Optional[WorkflowType] = None,
+        workflow_type: Optional[str] = None,
         status: Optional[WorkflowStatus] = None,
         created_by: Optional[str] = None,
         workspace_id: Optional[str] = None,
@@ -360,7 +356,7 @@ class RacineWorkflowService:
     async def get_workflow_executions(
         self,
         workflow_id: str,
-        status: Optional[ExecutionStatus] = None,
+        status: Optional[WorkflowStatus] = None,
         limit: int = 20,
         offset: int = 0
     ) -> Dict[str, Any]:
@@ -622,18 +618,18 @@ class RacineWorkflowService:
             for step in steps:
                 step_execution = await self._execute_workflow_step(step, execution_context)
                 
-                if step_execution.status == ExecutionStatus.FAILED:
-                    execution.status = ExecutionStatus.FAILED
+                if step_execution.status == WorkflowStatus.FAILED:
+                    execution.status = WorkflowStatus.FAILED
                     execution.completed_at = datetime.utcnow()
                     execution.error_message = step_execution.error_message
                     break
 
-            if execution.status == ExecutionStatus.RUNNING:
-                execution.status = ExecutionStatus.COMPLETED
+            if execution.status == WorkflowStatus.RUNNING:
+                execution.status = WorkflowStatus.COMPLETED
                 execution.completed_at = datetime.utcnow()
 
         except Exception as e:
-            execution.status = ExecutionStatus.FAILED
+            execution.status = WorkflowStatus.FAILED
             execution.completed_at = datetime.utcnow()
             execution.error_message = str(e)
             logger.error(f"Error executing workflow steps: {str(e)}")
@@ -648,7 +644,7 @@ class RacineWorkflowService:
             step_execution = RacineStepExecution(
                 execution_id=execution_context["execution_id"],
                 step_id=step.id,
-                status=ExecutionStatus.RUNNING,
+                status=WorkflowStatus.RUNNING,
                 step_input=execution_context.get("parameters", {}),
                 started_at=datetime.utcnow()
             )
@@ -668,14 +664,14 @@ class RacineWorkflowService:
             else:
                 result = await self._execute_generic_step(step, execution_context)
 
-            step_execution.status = ExecutionStatus.COMPLETED
+            step_execution.status = WorkflowStatus.COMPLETED
             step_execution.step_output = result
             step_execution.completed_at = datetime.utcnow()
 
             return step_execution
 
         except Exception as e:
-            step_execution.status = ExecutionStatus.FAILED
+            step_execution.status = WorkflowStatus.FAILED
             step_execution.error_message = str(e)
             step_execution.completed_at = datetime.utcnow()
             logger.error(f"Error executing step {step.id}: {str(e)}")
@@ -824,8 +820,8 @@ class RacineWorkflowService:
                 "execution": execution,
                 "step_executions": step_executions,
                 "step_count": len(step_executions),
-                "completed_steps": len([s for s in step_executions if s.status == ExecutionStatus.COMPLETED]),
-                "failed_steps": len([s for s in step_executions if s.status == ExecutionStatus.FAILED]),
+                "completed_steps": len([s for s in step_executions if s.status == WorkflowStatus.COMPLETED]),
+                "failed_steps": len([s for s in step_executions if s.status == WorkflowStatus.FAILED]),
                 "duration_minutes": None
             }
 
@@ -898,10 +894,10 @@ class RacineWorkflowService:
 
             return {
                 "total_executions": len(executions),
-                "successful_executions": len([e for e in executions if e.status == ExecutionStatus.COMPLETED]),
-                "failed_executions": len([e for e in executions if e.status == ExecutionStatus.FAILED]),
-                "running_executions": len([e for e in executions if e.status == ExecutionStatus.RUNNING]),
-                "success_rate": len([e for e in executions if e.status == ExecutionStatus.COMPLETED]) / len(executions) if executions else 0,
+                "successful_executions": len([e for e in executions if e.status == WorkflowStatus.COMPLETED]),
+                "failed_executions": len([e for e in executions if e.status == WorkflowStatus.FAILED]),
+                "running_executions": len([e for e in executions if e.status == WorkflowStatus.RUNNING]),
+                "success_rate": len([e for e in executions if e.status == WorkflowStatus.COMPLETED]) / len(executions) if executions else 0,
                 "average_duration_minutes": 0  # Calculate based on completed executions
             }
 

@@ -5,8 +5,7 @@ from sqlmodel import Session
 from app.db_session import get_session
 from app.services.security_service import SecurityService
 from app.models.security_models import (
-    SecurityScan, VulnerabilityAssessment, SecurityIncident,
-    ComplianceCheck, SecurityAudit, ThreatDetection
+    SecurityScan, SecurityIncident, SecurityControl, SecurityVulnerability
 )
 from app.api.security import get_current_user, require_permission
 from app.api.security.rbac import (

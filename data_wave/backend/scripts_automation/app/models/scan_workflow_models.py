@@ -49,6 +49,10 @@ class StageType(str, Enum):
     PREPARATION = "preparation"
     VALIDATION = "validation"
     EXECUTION = "execution"
+    # Expanded enterprise stages for compatibility with engine implementations
+    PROCESSING = "processing"  # maps to core execution logic
+    ANALYSIS = "analysis"      # post-execution analytics
+    REPORTING = "reporting"    # results/report generation
     POST_PROCESSING = "post_processing"
     APPROVAL = "approval"
     NOTIFICATION = "notification"
@@ -81,6 +85,15 @@ class TaskType(str, Enum):
     QUALITY_CHECK = "quality_check"
     COMPLIANCE_CHECK = "compliance_check"
     CUSTOM = "custom"
+    # Enterprise synonyms/back-compat for engine handlers
+    SCAN_EXECUTION = "scan_execution"
+    DATA_COLLECTION = "data_collection"
+    QUALITY_ASSESSMENT = "quality_assessment"
+    CLASSIFICATION = "classification"
+    LINEAGE_TRACKING = "lineage_tracking"
+    APPROVAL_REQUEST = "approval_request"
+    DATA_EXPORT = "data_export"
+    CUSTOM_SCRIPT = "custom_script"
 
 class TaskStatus(str, Enum):
     """Task execution status"""
@@ -103,10 +116,16 @@ class ConditionOperator(str, Enum):
     LESS_THAN = "less_than"
     GREATER_EQUAL = "greater_equal"
     LESS_EQUAL = "less_equal"
+    # Enterprise synonyms/back-compat expected by workflow engine
+    GREATER_THAN_OR_EQUAL = "greater_equal"
+    LESS_THAN_OR_EQUAL = "less_equal"
     CONTAINS = "contains"
     NOT_CONTAINS = "not_contains"
+    STARTS_WITH = "starts_with"
+    ENDS_WITH = "ends_with"
     IN = "in"
     NOT_IN = "not_in"
+    IN_LIST = "in"
     REGEX_MATCH = "regex_match"
     IS_NULL = "is_null"
     IS_NOT_NULL = "is_not_null"
@@ -192,7 +211,7 @@ class ScanWorkflowTemplate(SQLModel, table=True):
     parallel_execution: bool = Field(default=False, description="Enable parallel execution")
     
     # Template Metadata
-    tags: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Template tags")
+    tags: Optional[str] = Field(default=None, sa_column=Column(JSONB), description="Template tags")
     is_active: bool = Field(default=True, index=True, description="Template status")
     is_system_template: bool = Field(default=False, description="System template flag")
     
@@ -274,7 +293,7 @@ class WorkflowStage(SQLModel, table=True):
     progress_percentage: float = Field(default=0.0, description="Stage progress")
     
     # Dependencies
-    depends_on: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Dependent stage IDs")
+    depends_on: Optional[str] = Field(default=None, sa_column=Column(JSONB), description="Dependent stage IDs")
     can_run_parallel: bool = Field(default=False, description="Parallel execution allowed")
     
     # Conditions
@@ -424,9 +443,9 @@ class WorkflowApproval(SQLModel, table=True):
     description: str = Field(description="Approval description")
     
     # Approvers
-    required_approvers: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Required approver IDs")
-    approved_by: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Users who approved")
-    rejected_by: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Users who rejected")
+    required_approvers: Optional[str] = Field(default=None, sa_column=Column(JSONB), description="Required approver IDs")
+    approved_by: Optional[str] = Field(default=None, sa_column=Column(JSONB), description="Users who approved")
+    rejected_by: Optional[str] = Field(default=None, sa_column=Column(JSONB), description="Users who rejected")
     
     # Status
     status: ApprovalStatus = Field(default=ApprovalStatus.PENDING, index=True, description="Approval status")

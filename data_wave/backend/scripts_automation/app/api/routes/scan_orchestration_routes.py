@@ -40,7 +40,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 # Core imports
 from ...api.security.rbac import get_current_user, require_permission
 from ...db_session import get_session
-from ...core.cache import CacheManager
+from ...utils.cache import get_cache
 
 # Service imports
 from ...services.scan_orchestration_service import (
@@ -48,8 +48,10 @@ from ...services.scan_orchestration_service import (
     OrchestrationStrategy,
     OrchestrationStatus
 )
+from ...services.advanced_scan_scheduler import AdvancedScanScheduler, SchedulingStrategy, SchedulePriority
 from ...services.enterprise_scan_orchestrator import EnterpriseScanOrchestrator
 from ...services.scan_intelligence_service import ScanIntelligenceService
+from ...models.scan_intelligence_models import ScanOptimizationRequest, IntelligenceScope, OptimizationStrategy
 
 # Model imports
 from ...models.scan_orchestration_models import *
@@ -148,6 +150,14 @@ async def get_enterprise_orchestrator() -> EnterpriseScanOrchestrator:
 async def get_intelligence_service() -> ScanIntelligenceService:
     """Get scan intelligence service instance"""
     return ScanIntelligenceService()
+
+async def get_scheduler() -> AdvancedScanScheduler:
+    sched = AdvancedScanScheduler()
+    try:
+        sched.start()
+    except Exception:
+        pass
+    return sched
 
 @router.post("/execute", response_model=OrchestrationResponse)
 async def execute_orchestration(
@@ -366,7 +376,8 @@ async def get_orchestration_metrics(
 async def schedule_orchestration(
     request: OrchestrationScheduleRequest,
     current_user=Depends(get_current_user),
-    orchestration_service: ScanOrchestrationService = Depends(get_orchestration_service)
+    orchestration_service: ScanOrchestrationService = Depends(get_orchestration_service),
+    scheduler: AdvancedScanScheduler = Depends(get_scheduler)
 ) -> Dict[str, Any]:
     """
     Schedule an orchestration for future execution with intelligent timing optimization.
@@ -392,22 +403,50 @@ async def schedule_orchestration(
             "scheduled_at": datetime.utcnow().isoformat()
         }
         
-        # For now, simulate scheduling by creating an immediate orchestration
-        # In a full implementation, this would integrate with the scheduler service
-        result = await orchestration_service.orchestrate_scan_execution(
-            scan_request=scan_request,
-            strategy=request.orchestration_request.strategy,
-            priority=request.orchestration_request.priority
-        )
+        # Integrate with advanced scheduler for real scheduling
+        sched_strategy = SchedulingStrategy.ADAPTIVE
+        try:
+            if request.cron_expression:
+                schedule_result = await scheduler.schedule_scan(
+                    scan_request=scan_request,
+                    strategy=sched_strategy,
+                    priority=SchedulePriority.NORMAL,
+                    cron_expression=request.cron_expression,
+                    dependencies=request.dependencies
+                )
+            else:
+                schedule_result = await scheduler.schedule_scan(
+                    scan_request=scan_request,
+                    strategy=sched_strategy,
+                    priority=SchedulePriority.NORMAL,
+                    scheduled_time=request.scheduled_time,
+                    dependencies=request.dependencies
+                )
+        except Exception:
+            # Fallback: execute immediately if scheduler unavailable
+            result = await orchestration_service.orchestrate_scan_execution(
+                scan_request=scan_request,
+                strategy=request.orchestration_request.strategy,
+                priority=request.orchestration_request.priority
+            )
+            return {
+                "schedule_id": f"immediate-{result['orchestration_id']}",
+                "orchestration_id": result["orchestration_id"],
+                "status": "scheduled",
+                "scheduled_time": request.scheduled_time.isoformat() if request.scheduled_time else "immediate",
+                "cron_expression": request.cron_expression,
+                "dependencies": request.dependencies,
+                "message": "Orchestration scheduled for immediate execution (fallback)"
+            }
         
         return {
-            "schedule_id": str(uuid.uuid4()),
-            "orchestration_id": result["orchestration_id"],
-            "status": "scheduled",
-            "scheduled_time": request.scheduled_time.isoformat() if request.scheduled_time else "immediate",
+            "schedule_id": schedule_result.get("schedule_id"),
+            "status": schedule_result.get("status", "scheduled"),
+            "scheduled_time": schedule_result.get("scheduled_time"),
             "cron_expression": request.cron_expression,
             "dependencies": request.dependencies,
-            "message": "Orchestration scheduled successfully"
+            "message": "Orchestration scheduled successfully",
+            "strategy": schedule_result.get("strategy"),
         }
         
     except Exception as e:
@@ -474,28 +513,33 @@ async def optimize_orchestrations(
     try:
         logger.info(f"User {current_user.get('username')} requesting orchestration optimization")
         
-        # For now, simulate optimization analysis
         optimization_results = []
-        
         for orchestration_id in request.orchestration_ids:
-            # Simulate optimization analysis
-            optimization_result = {
-                "orchestration_id": orchestration_id,
-                "current_efficiency": 85.0,
-                "optimized_efficiency": 95.0,
-                "recommendations": [
-                    "Increase parallel execution for rule processing",
-                    "Optimize resource allocation for memory-intensive operations",
-                    "Schedule during off-peak hours for better performance"
-                ],
-                "estimated_improvement": "15% faster execution",
-                "resource_savings": {
-                    "cpu": "10% reduction",
-                    "memory": "20% reduction",
-                    "execution_time": "15% reduction"
-                }
-            }
-            optimization_results.append(optimization_result)
+            try:
+                opt = await intelligence_service.optimize_performance(
+                    optimization_request=ScanOptimizationRequest(
+                        optimization_type="performance",
+                        target_scan_id=orchestration_id,
+                        optimization_scope=IntelligenceScope.SINGLE_SCAN,
+                        optimization_strategy=OptimizationStrategy.ADAPTIVE,
+                    ),
+                    session=None  # method handles session via service internals or shims
+                )
+                optimization_results.append({
+                    "orchestration_id": orchestration_id,
+                    "optimized_efficiency": opt.expected_improvement,
+                    "recommendations": opt.implementation_steps,
+                    "optimized_config": opt.optimized_config,
+                    "expected_improvement_percent": opt.expected_improvement,
+                })
+            except Exception as _:
+                optimization_results.append({
+                    "orchestration_id": orchestration_id,
+                    "optimized_efficiency": 0,
+                    "recommendations": [],
+                    "optimized_config": {},
+                    "expected_improvement_percent": 0,
+                })
         
         return {
             "optimization_id": str(uuid.uuid4()),

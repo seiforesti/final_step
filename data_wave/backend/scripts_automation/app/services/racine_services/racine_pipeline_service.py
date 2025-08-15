@@ -30,7 +30,7 @@ import json
 # Import existing services for integration
 from ..data_source_service import DataSourceService
 from ..scan_rule_set_service import ScanRuleSetService
-from ..classification_service import EnterpriseClassificationService
+from ..classification_service import ClassificationService as EnterpriseClassificationService
 from ..compliance_rule_service import ComplianceRuleService
 from ..enterprise_catalog_service import EnterpriseIntelligentCatalogService
 from ..unified_scan_orchestrator import UnifiedScanOrchestrator

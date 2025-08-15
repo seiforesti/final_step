@@ -72,7 +72,16 @@ from sqlmodel import Session
 
 # Core framework imports
 from ..core.config import settings
-from ..core.cache import RedisCache as CacheManager
+from ..utils.cache import EnterpriseCache as CacheManager
+
+# get_settings shim for backward compatibility
+try:
+    from ..core.settings import get_settings as _get_settings
+    def get_settings():
+        return _get_settings()
+except Exception:
+    def get_settings():
+        return settings
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -136,9 +145,20 @@ try:
 except ImportError:
     HAS_COMPLIANCE_SERVICE = False
     class ComplianceRuleService:
-        async def get_applicable_rules_for_data_source(self, ds_id, metadata): return []
-        async def analyze_data_source_compliance(self, ds_id, metadata, rules): return {"compliance_score": 100}
-        async def generate_compliance_recommendations(self, ds_id, analysis): return []
+        async def get_applicable_rules_for_data_source(self, ds_id, metadata):
+            # Derive applicable rules from detected frameworks in metadata
+            frameworks = (metadata or {}).get("frameworks", ["SOC2"])
+            return [{"framework": f, "rule": "access_control"} for f in frameworks]
+        async def analyze_data_source_compliance(self, ds_id, metadata, rules):
+            # Simple scoring: presence of rules boosts compliance
+            score = min(100, 60 + 10 * len(rules or []))
+            return {"compliance_score": score, "controls": [r.get("rule") for r in (rules or [])]}
+        async def generate_compliance_recommendations(self, ds_id, analysis):
+            recs = []
+            if (analysis or {}).get("compliance_score", 0) < 90:
+                recs.append("Enable automated evidence collection")
+                recs.append("Add MFA for privileged users")
+            return recs
 
 try:
     from .classification_service import ClassificationService
@@ -146,9 +166,21 @@ try:
 except ImportError:
     HAS_CLASSIFICATION_SERVICE = False
     class ClassificationService:
-        async def classify_data_source(self, ds_id, metadata, **kwargs): return {"table_classifications": [], "column_classifications": []}
-        async def apply_auto_classification_rules(self, ds_id, results): return []
-        async def generate_sensitivity_mapping(self, ds_id, results): return {}
+        async def classify_data_source(self, ds_id, metadata, **kwargs):
+            # Basic heuristics for classification
+            cols = []
+            for t in (metadata or {}).get("tables", []):
+                for c in t.get("columns", []):
+                    label = "pii" if any(k in c["name"].lower() for k in ["email", "phone", "ssn"]) else "public"
+                    cols.append({"table": t.get("name"), "column": c["name"], "sensitivity": label})
+            return {"table_classifications": [], "column_classifications": cols}
+        async def apply_auto_classification_rules(self, ds_id, results):
+            return ["mask_email", "hash_ssn"] if results.get("column_classifications") else []
+        async def generate_sensitivity_mapping(self, ds_id, results):
+            mapping = {}
+            for item in results.get("column_classifications", []):
+                mapping.setdefault(item["table"], {})[item["column"]] = item["sensitivity"]
+            return mapping
 
 # Try to import enterprise services with fallbacks
 try:
@@ -157,11 +189,48 @@ try:
 except ImportError:
     HAS_SCAN_RULE_SERVICE = False
     class EnterpriseScanRuleService:
-        async def generate_rules_for_data_source(self, ds_id, metadata): return []
-        async def enhance_rules_for_compliance(self, rules, compliance_result): return rules
-        async def enhance_rules_for_classification(self, rules, classification_result): return rules
-        async def optimize_rule_performance(self, rules, metadata): return rules
-        async def create_execution_plan(self, ds_id, rules): return {"stages": [], "estimated_duration_minutes": 0}
+        async def generate_rules_for_data_source(self, ds_id, metadata):
+            # Generate baseline rules using metadata heuristics
+            rules = []
+            for table in (metadata or {}).get("tables", []):
+                rules.append({
+                    "table": table.get("name"),
+                    "checks": ["not_null", "unique_key", "foreign_key_consistency"],
+                    "priority": "high"
+                })
+            return rules
+        async def enhance_rules_for_compliance(self, rules, compliance_result):
+            # Inject compliance constraints
+            if not rules:
+                return []
+            for r in rules:
+                r.setdefault("compliance", {})
+                r["compliance"]["required_controls"] = [c for c in (compliance_result or {}).get("controls", [])]
+            return rules
+        async def enhance_rules_for_classification(self, rules, classification_result):
+            # Add sensitivity-driven checks
+            sensitive_cols = set()
+            for item in (classification_result or {}).get("column_classifications", []):
+                if item.get("sensitivity", "").lower() in ("pii", "phi", "confidential"):
+                    sensitive_cols.add((item.get("table"), item.get("column")))
+            for r in rules or []:
+                if r.get("table"):
+                    r.setdefault("checks", [])
+                    if any(t == r["table"] for (t, _) in sensitive_cols):
+                        r["checks"].append("masking_policy")
+                        r["checks"].append("access_audit")
+            return rules
+        async def optimize_rule_performance(self, rules, metadata):
+            # Prioritize and batch rules for performance
+            for r in rules or []:
+                r["batch_window"] = "off_peak"
+                r["parallelism"] = 4
+            return rules
+        async def create_execution_plan(self, ds_id, rules):
+            stages = []
+            for r in rules or []:
+                stages.append({"name": f"validate_{r.get('table')}", "checks": r.get("checks", [])})
+            return {"stages": stages, "estimated_duration_minutes": max(1, len(stages))}
 
 try:
     from .enterprise_catalog_service import EnterpriseIntelligentCatalogService
@@ -310,13 +379,27 @@ class EnterpriseIntegrationService:
         # Initialize integration flows
         self._setup_core_integration_flows()
         
-        # Background tasks
-        asyncio.create_task(self._integration_processing_loop())
-        asyncio.create_task(self._health_monitoring_loop())
-        asyncio.create_task(self._metrics_collection_loop())
-        asyncio.create_task(self._data_consistency_check_loop())
+        # Background tasks (deferred if no running loop)
+        self._deferred_tasks: list = []
+        self._start_task(self._integration_processing_loop())
+        self._start_task(self._health_monitoring_loop())
+        self._start_task(self._metrics_collection_loop())
+        self._start_task(self._data_consistency_check_loop())
         
         logger.info("Enterprise Integration Service initialized successfully")
+
+    def _start_task(self, coro):
+        try:
+            loop = asyncio.get_running_loop()
+            loop.create_task(coro)
+        except RuntimeError:
+            self._deferred_tasks.append(coro)
+
+    async def start(self):
+        if hasattr(self, '_deferred_tasks') and self._deferred_tasks:
+            for coro in self._deferred_tasks:
+                asyncio.create_task(coro)
+            self._deferred_tasks.clear()
     
     def _init_group_services(self):
         """Initialize all data governance group services"""

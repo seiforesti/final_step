@@ -27,6 +27,9 @@ from sqlalchemy import Index, UniqueConstraint, CheckConstraint, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 import networkx as nx
 
+# Import the DataClassification model
+from app.models.data_classification_models import DataClassification
+
 # ===================== ENUMS AND CONSTANTS =====================
 
 class LineageType(str, Enum):
@@ -93,7 +96,7 @@ class DataLineageNode(SQLModel, table=True):
     asset_name: str = Field(index=True)
     schema_name: Optional[str] = Field(default=None, index=True)
     database_name: Optional[str] = Field(default=None, index=True)
-    data_source_id: Optional[int] = Field(default=None, foreign_key="data_sources.id")
+    data_source_id: Optional[int] = Field(default=None, foreign_key="datasource.id")
     
     # Hierarchical relationships
     parent_node_id: Optional[str] = Field(default=None, index=True)
@@ -107,6 +110,7 @@ class DataLineageNode(SQLModel, table=True):
     
     # Classification and sensitivity
     classification_id: Optional[int] = Field(default=None, foreign_key="data_classifications.id")
+    classification: Optional[DataClassification] = Relationship(back_populates="lineage_nodes")
     sensitivity_level: Optional[str] = Field(default=None)
     
     # Governance metadata
@@ -132,7 +136,7 @@ class DataLineageNode(SQLModel, table=True):
     
     # Additional metadata
     custom_properties: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
-    tags: Optional[List[str]] = Field(default=None, sa_column=Column(ARRAY(String)))
+    tags: Optional[str] = Field(default=None, sa_column=Column(JSON))
     
     # Relationships
     outgoing_edges: List["DataLineageEdge"] = Relationship(
@@ -218,7 +222,7 @@ class DataLineageEdge(SQLModel, table=True):
     
     # Additional metadata
     custom_properties: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
-    tags: Optional[List[str]] = Field(default=None, sa_column=Column(ARRAY(String)))
+    tags: Optional[str] = Field(default=None, sa_column=Column(JSON))
     
     # Relationships
     source_node: Optional[DataLineageNode] = Relationship(
@@ -270,17 +274,17 @@ class LineageImpactAnalysis(SQLModel, table=True):
     
     # Affected assets details
     affected_assets: List[Dict[str, Any]] = Field(default=[], sa_column=Column(JSON))
-    critical_path_assets: List[str] = Field(default=[], sa_column=Column(ARRAY(String)))
+    critical_path_assets: Optional[str] = Field(default=None, sa_column=Column(JSON))
     
     # Recommendations
-    recommended_actions: List[str] = Field(default=[], sa_column=Column(ARRAY(String)))
+    recommended_actions: Optional[str] = Field(default=None, sa_column=Column(JSON))
     mitigation_strategies: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     estimated_effort_hours: Optional[int] = Field(default=None)
     
     # Stakeholder information
-    affected_teams: List[str] = Field(default=[], sa_column=Column(ARRAY(String)))
-    notification_list: List[str] = Field(default=[], sa_column=Column(ARRAY(String)))
-    approvers_required: List[str] = Field(default=[], sa_column=Column(ARRAY(String)))
+    affected_teams: Optional[str] = Field(default=None, sa_column=Column(JSON))
+    notification_list: Optional[str] = Field(default=None, sa_column=Column(JSON))
+    approvers_required: Optional[str] = Field(default=None, sa_column=Column(JSON))
     
     # Analysis metadata
     analysis_date: datetime = Field(default_factory=datetime.utcnow)
@@ -327,7 +331,7 @@ class LineageVisualizationConfig(SQLModel, table=True):
     edge_styling: Dict[str, Any] = Field(default={}, sa_column=Column(JSON))
     
     # Filtering options
-    asset_type_filters: Optional[List[str]] = Field(default=None, sa_column=Column(ARRAY(String)))
+    asset_type_filters: Optional[str] = Field(default=None, sa_column=Column(JSON))
     confidence_threshold: float = Field(default=0.7)
     exclude_system_processes: bool = Field(default=True)
     

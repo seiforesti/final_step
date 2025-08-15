@@ -80,7 +80,7 @@ from ..models.advanced_catalog_models import IntelligentDataAsset, EnterpriseDat
 # Integration service imports
 from .enterprise_scan_rule_service import EnterpriseIntelligentRuleEngine
 from .enterprise_catalog_service import EnterpriseIntelligentCatalogService
-from .classification_service import EnterpriseClassificationService as ClassificationService
+from .classification_service import ClassificationService
 from .compliance_service import ComplianceService
 from .data_source_service import DataSourceService
 
@@ -94,7 +94,7 @@ from ..core.logging import StructuredLogger
 
 # Configure structured logging and dependencies
 logger = StructuredLogger(__name__)
-settings = get_settings()
+# Use imported global settings from app.core.config
 
 
 # ===================== CONFIGURATION AND CONSTANTS =====================
@@ -1234,34 +1234,37 @@ class UnifiedScanOrchestrator:
     async def _start_background_tasks(self) -> None:
         """Start background monitoring and optimization tasks."""
         try:
+            loop = asyncio.get_running_loop()
             # Start orchestration monitoring
-            self.orchestration_monitor_task = asyncio.create_task(
+            self.orchestration_monitor_task = loop.create_task(
                 self._orchestration_monitoring_loop()
             )
             
             # Start resource optimization
-            self.resource_optimizer_task = asyncio.create_task(
+            self.resource_optimizer_task = loop.create_task(
                 self._resource_optimization_loop()
             )
             
             # Start performance monitoring
-            self.performance_monitor_task = asyncio.create_task(
+            self.performance_monitor_task = loop.create_task(
                 self._performance_monitoring_loop()
             )
             
             # Start dependency resolution
-            self.dependency_resolver_task = asyncio.create_task(
+            self.dependency_resolver_task = loop.create_task(
                 self._dependency_resolution_loop()
             )
             
             # Start AI optimization
             if self.config.ai_optimization_interval_minutes > 0:
-                self.ai_optimizer_task = asyncio.create_task(
+                self.ai_optimizer_task = loop.create_task(
                     self._ai_optimization_loop()
                 )
             
             self.logger.info("Background tasks started successfully")
             
+        except RuntimeError:
+            self.logger.warning("No event loop available, background tasks will start when loop becomes available")
         except Exception as e:
             self.logger.error(
                 "Error starting background tasks",

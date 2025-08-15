@@ -12,6 +12,7 @@ PERMISSION_SCAN_VIEW = "scan.view"
 PERMISSION_SCAN_CREATE = "scan.create"
 PERMISSION_SCAN_EDIT = "scan.edit"
 PERMISSION_SCAN_DELETE = "scan.delete"
+PERMISSION_SCAN_MANAGE = "scan.manage"
 PERMISSION_DASHBOARD_VIEW = "dashboard.view"
 PERMISSION_DASHBOARD_EXPORT = "dashboard.export"
 PERMISSION_LINEAGE_VIEW = "lineage.view"
@@ -64,7 +65,7 @@ PERMISSION_AUDIT_MANAGE = "audit.manage"
 # Role to permission mapping (now includes datasource and scan.ruleset permissions)
 ROLE_PERMISSIONS = {
     "admin": [
-        PERMISSION_SCAN_VIEW, PERMISSION_SCAN_CREATE, PERMISSION_SCAN_EDIT, PERMISSION_SCAN_DELETE,
+        PERMISSION_SCAN_VIEW, PERMISSION_SCAN_CREATE, PERMISSION_SCAN_EDIT, PERMISSION_SCAN_DELETE, PERMISSION_SCAN_MANAGE,
         PERMISSION_DASHBOARD_VIEW, PERMISSION_DASHBOARD_EXPORT,
         PERMISSION_LINEAGE_VIEW, PERMISSION_LINEAGE_EXPORT,
         PERMISSION_COMPLIANCE_VIEW, PERMISSION_COMPLIANCE_EXPORT,
@@ -86,7 +87,7 @@ ROLE_PERMISSIONS = {
         PERMISSION_AUDIT_VIEW, PERMISSION_AUDIT_MANAGE
     ],
     "data_steward": [
-        PERMISSION_SCAN_VIEW, PERMISSION_SCAN_CREATE,
+        PERMISSION_SCAN_VIEW, PERMISSION_SCAN_CREATE, PERMISSION_SCAN_MANAGE,
         PERMISSION_DASHBOARD_VIEW, PERMISSION_DASHBOARD_EXPORT,
         PERMISSION_LINEAGE_VIEW, PERMISSION_LINEAGE_EXPORT,
         PERMISSION_COMPLIANCE_VIEW, PERMISSION_COMPLIANCE_EXPORT,
@@ -180,3 +181,44 @@ def require_permission(permission: str):
             )
         return current_user
     return dependency
+
+async def _ensure_permissions(current_user: Dict[str, Any], permissions: List[str]) -> Dict[str, Any]:
+    """Core checker: ensure current_user has ALL permissions."""
+    role = current_user.get("role") if current_user else None
+    if role in ROLE_PERMISSIONS and all(p in ROLE_PERMISSIONS[role] for p in permissions):
+        return current_user
+    with get_session() as db:
+        user_id = current_user.get("id") if current_user else None
+        effective = get_user_effective_permissions_rbac(db, user_id) if user_id else []
+        allowed = {f.get("action") for f in effective if f.get("is_effective")}
+        if all(p in allowed for p in permissions):
+            return current_user
+    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"Not authorized. Required: {permissions}")
+
+def require_permissions(arg1, arg2=None):
+    """Dual-mode API for backward compatibility.
+    - Decorator usage: @require_permissions(["perm1", "perm2"]) wraps a route and checks using 'current_user' kwarg.
+    - Runtime usage: await require_permissions(current_user, ["perm1", "perm2"]) performs the check immediately.
+    """
+    # Decorator factory usage
+    if arg2 is None and isinstance(arg1, (list, tuple, set)):
+        permissions = list(arg1)
+        def decorator(func):
+            async def wrapper(*args, **kwargs):
+                current_user = kwargs.get("current_user")
+                # Fallback: try common names
+                if current_user is None:
+                    for val in kwargs.values():
+                        if isinstance(val, dict) and "role" in val and "id" in val:
+                            current_user = val
+                            break
+                if current_user is None:
+                    raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail="Missing current_user for permission check")
+                await _ensure_permissions(current_user, permissions)
+                return await func(*args, **kwargs)
+            return wrapper
+        return decorator
+    # Runtime usage
+    current_user = arg1
+    permissions = list(arg2) if isinstance(arg2, (list, tuple, set)) else [arg2]
+    return _ensure_permissions(current_user, permissions)

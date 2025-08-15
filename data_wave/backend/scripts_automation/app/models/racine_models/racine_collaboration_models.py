@@ -191,11 +191,12 @@ class RacineCollaborationParticipant(Base):
     access_level = Column(String, default="standard")  # standard, elevated, restricted
     group_access = Column(JSON)  # Access to specific groups
     
-    # Participation tracking
+    # Participation tracking (augmented)
     joined_at = Column(DateTime, default=datetime.utcnow)
     last_active = Column(DateTime, default=datetime.utcnow)
     activity_level = Column(String, default="medium")  # low, medium, high
     contribution_score = Column(Float, default=0.0)
+    connection_status = Column(String, default="disconnected")
     
     # Expertise and specialization
     expertise_areas = Column(JSON)  # Areas of expertise
@@ -212,8 +213,9 @@ class RacineCollaborationParticipant(Base):
     feedback_received = Column(JSON)  # Feedback received
     peer_ratings = Column(JSON)  # Peer ratings
     
-    # Collaboration and user references
+    # Collaboration and user references (augmented)
     collaboration_id = Column(String, ForeignKey('racine_collaborations.id'), nullable=False)
+    session_id = Column(String, index=True)
     user_id = Column(String, ForeignKey('users.id'), nullable=False)
     invited_by = Column(String, ForeignKey('users.id'))
     
@@ -233,9 +235,13 @@ class RacineCollaborationSession(Base):
     # Primary identifier
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     
-    # Session information
+    # Session information (augmented for service compatibility)
     session_name = Column(String, index=True)
+    name = Column(String, index=True)
     session_type = Column(String, nullable=False)  # meeting, workshop, review, brainstorm
+    collaboration_type = Column(String, index=True)
+    scope = Column(String, index=True)
+    status = Column(String, default="active", index=True)
     description = Column(Text)
     
     # Session timing
@@ -307,11 +313,13 @@ class RacineCollaborationMessage(Base):
     # Primary identifier
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     
-    # Message content
+    # Message content (augmented)
     message_type = Column(SQLEnum(MessageType), nullable=False)
     content = Column(Text, nullable=False)
     formatted_content = Column(Text)  # Rich text formatted content
     attachments = Column(JSON)  # Message attachments
+    message_metadata = Column(JSON)
+    status = Column(String, default="sent", index=True)
     
     # Message context
     thread_id = Column(String, index=True)  # Thread ID for threaded discussions
@@ -359,6 +367,7 @@ class RacineCollaborationMessage(Base):
     
     # Timing
     sent_at = Column(DateTime, default=datetime.utcnow, index=True)
+    timestamp = Column(DateTime, default=datetime.utcnow, index=True)
     
     # Relationships
     collaboration = relationship("RacineCollaboration", back_populates="messages")
@@ -366,6 +375,8 @@ class RacineCollaborationMessage(Base):
     editor = relationship("User", foreign_keys=[last_edited_by])
     parent_message = relationship("RacineCollaborationMessage", remote_side=[id])
     replies = relationship("RacineCollaborationMessage", back_populates="parent_message")
+    # Session reference (augmented)
+    session_id = Column(String, index=True)
 
 
 class RacineCollaborationDocument(Base):
@@ -378,11 +389,12 @@ class RacineCollaborationDocument(Base):
     # Primary identifier
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     
-    # Document basic information
+    # Document basic information (augmented)
     name = Column(String, nullable=False, index=True)
     description = Column(Text)
     document_type = Column(String, nullable=False)  # text, spreadsheet, presentation, code, workflow
     file_extension = Column(String)
+    status = Column(String, default="active", index=True)
     
     # Document content and storage
     content = Column(Text)  # Document content
@@ -392,6 +404,7 @@ class RacineCollaborationDocument(Base):
     
     # Version control
     version = Column(String, default="1.0.0")
+    current_version = Column(String, default="1.0.0")
     version_history = Column(JSON)  # Version history
     is_current_version = Column(Boolean, default=True, index=True)
     parent_version_id = Column(String, ForeignKey('racine_collaboration_documents.id'))
@@ -437,8 +450,9 @@ class RacineCollaborationDocument(Base):
     auto_saved_versions = Column(JSON)  # Auto-saved versions
     smart_formatting = Column(Boolean, default=False)
     
-    # Collaboration reference
+    # Collaboration reference (augmented)
     collaboration_id = Column(String, ForeignKey('racine_collaborations.id'), nullable=False)
+    session_id = Column(String, index=True)
     
     # Audit fields
     created_at = Column(DateTime, default=datetime.utcnow, index=True)
@@ -682,8 +696,9 @@ class RacineCollaborationAnalytics(Base):
     coordination_effectiveness = Column(Float)  # Coordination effectiveness
     knowledge_transfer_metrics = Column(JSON)  # Knowledge transfer metrics
     
-    # Collaboration reference
+    # Collaboration reference (augmented)
     collaboration_id = Column(String, ForeignKey('racine_collaborations.id'), nullable=False)
+    session_id = Column(String, index=True)
     
     # Temporal information
     measurement_period_start = Column(DateTime)
@@ -729,3 +744,109 @@ class RacineCollaborationAudit(Base):
     # Relationships
     collaboration = relationship("RacineCollaboration")
     user = relationship("User")
+
+
+# Added models to match service imports
+class RacineCollaborationWorkflow(Base):
+    __tablename__ = 'racine_collaboration_workflows'
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    session_id = Column(String, index=True, nullable=False)
+    workflow_type = Column(String, default="general", index=True)
+    workflow_definition = Column(JSON)
+    collaboration_rules = Column(JSON)
+    approval_workflow = Column(JSON)
+    task_assignments = Column(JSON)
+    status = Column(String, default="active", index=True)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class RacineCollaborationComment(Base):
+    __tablename__ = 'racine_collaboration_comments'
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    session_id = Column(String, index=True, nullable=False)
+    collaboration_id = Column(String, ForeignKey('racine_collaborations.id'))
+    target_type = Column(String, index=True)
+    target_id = Column(String, index=True)
+    author_id = Column(String, ForeignKey('users.id'), nullable=False)
+    content = Column(Text, nullable=False)
+    mentions = Column(JSON)
+    comment_metadata = Column(JSON)
+    status = Column(String, default="active", index=True)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class RacineCollaborationNotification(Base):
+    __tablename__ = 'racine_collaboration_notifications'
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    session_id = Column(String, index=True)
+    collaboration_id = Column(String, ForeignKey('racine_collaborations.id'))
+    target_user_id = Column(String, ForeignKey('users.id'), index=True)
+    event_type = Column(String, index=True)
+    payload = Column(JSON)
+    delivery_channels = Column(JSON)
+    delivery_status = Column(String, default="pending", index=True)
+    error_message = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    delivered_at = Column(DateTime)
+
+
+class RacineCollaborationSpace(Base):
+    __tablename__ = 'racine_collaboration_spaces'
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    collaboration_id = Column(String, ForeignKey('racine_collaborations.id'), nullable=False)
+    name = Column(String, index=True)
+    description = Column(Text)
+    space_type = Column(String, default="channel", index=True)
+    visibility = Column(String, default="private")
+    participant_ids = Column(JSON)
+    settings = Column(JSON)
+    status = Column(String, default="active", index=True)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class RacineExpertNetwork(Base):
+    __tablename__ = 'racine_expert_network'
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    session_id = Column(String, index=True)
+    expert_user_id = Column(String, ForeignKey('users.id'), index=True)
+    expertise_areas = Column(JSON)
+    availability_status = Column(String, default="available", index=True)
+    consultation_history = Column(JSON)
+    rating = Column(Float, default=0.0)
+    specializations = Column(JSON)
+    status = Column(String, default="active", index=True)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+
+
+class RacineKnowledgeBase(Base):
+    __tablename__ = 'racine_knowledge_base'
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    collaboration_id = Column(String, ForeignKey('racine_collaborations.id'), index=True)
+    session_id = Column(String, index=True)
+    entry_type = Column(String, index=True)
+    title = Column(String, index=True)
+    content = Column(Text)
+    knowledge_metadata = Column(JSON)
+    tags = Column(JSON)
+    status = Column(String, default="published", index=True)
+    created_by = Column(String, ForeignKey('users.id'))
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class RacineExternalCollaborator(Base):
+    __tablename__ = 'racine_external_collaborators'
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    collaboration_id = Column(String, ForeignKey('racine_collaborations.id'), index=True)
+    external_id = Column(String, index=True)
+    identity_provider = Column(String, index=True)
+    display_name = Column(String)
+    email = Column(String, index=True)
+    role = Column(String, default="guest", index=True)
+    access_scopes = Column(JSON)
+    invite_status = Column(String, default="pending", index=True)
+    expires_at = Column(DateTime)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)

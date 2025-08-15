@@ -13,7 +13,13 @@ from app.services.data_sensitivity_service import assign_data_sensitivity_label,
 
 regex_classifier = RegexClassifier()
 dictionary_classifier = DictionaryClassifier()
-hybrid_classifier = HybridClassifier(use_ml=True, verbose=False)  # Activer ML ici
+_hybrid_classifier: HybridClassifier = None  # lazy init to avoid heavy startup
+
+def _get_hybrid_classifier() -> HybridClassifier:
+    global _hybrid_classifier
+    if _hybrid_classifier is None:
+        _hybrid_classifier = HybridClassifier(use_ml=True, verbose=False)
+    return _hybrid_classifier
 
 # ✅ Fonction de classification et stockage des 3 résultats
 def classify_and_store_all(
@@ -40,7 +46,7 @@ def classify_and_store_all(
     categories_dict = ", ".join(dict_cats) if dict_cats else "Unclassified [Dictionary]"
 
     # Classify with hybrid
-    hybrid_cats = hybrid_classifier.classify(column_name)
+    hybrid_cats = _get_hybrid_classifier().classify(column_name)
     categories_hybrid = ", ".join(hybrid_cats) if hybrid_cats else "Unclassified [Hybrid]"
 
     logger.info(f"Column {column_name} regex categories: {categories_regex}")
@@ -256,7 +262,7 @@ def classify_and_store_all(
     classifiers = [
         ("Regex", regex_classifier.classify(column_name)),
         ("Dictionary", dictionary_classifier.classify(column_name)),
-        ("Hybrid", hybrid_classifier.classify(column_name)),
+        ("Hybrid", _get_hybrid_classifier().classify(column_name)),
     ]
     for label, cats in classifiers:
         categories = ", ".join(cats) if cats else f"Unclassified [{label}]"

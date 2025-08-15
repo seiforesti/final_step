@@ -46,7 +46,7 @@ from ..models.classification_models import ClassificationFramework, Classificati
 from ..models.performance_models import PerformanceMetric, PerformanceAlert
 
 # REAL ENTERPRISE INTEGRATIONS - No More Mock Data!
-from .classification_service import EnterpriseClassificationService
+from .classification_service import ClassificationService as EnterpriseClassificationService
 from .scan_service import ScanService
 from .performance_service import PerformanceService
 from .data_profiling_service import DataProfilingService

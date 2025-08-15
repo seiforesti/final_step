@@ -501,12 +501,27 @@ class VersionCreateRequest(BaseModel):
     breaking_changes: Optional[List[str]] = []
     tags: Optional[List[str]] = []
 
+class RuleVersionCreate(BaseModel):
+    """Request model for creating new rule versions"""
+    rule_id: str
+    content: str
+    commit_message: str
+    author: str
+    branch_name: Optional[str] = None
+    parent_version_id: Optional[str] = None
+
 class BranchCreateRequest(BaseModel):
     """Request model for creating new branches"""
     rule_id: str
     branch_name: str = Field(min_length=1, max_length=255)
     branch_type: BranchType = BranchType.FEATURE
     parent_branch_id: Optional[str] = None
+    description: Optional[str] = None
+    
+class RuleBranchCreate(BaseModel):
+    """Request model for creating new rule branches"""
+    rule_id: str
+    branch_name: str
     description: Optional[str] = None
     
 class MergeRequestCreateRequest(BaseModel):
@@ -518,8 +533,58 @@ class MergeRequestCreateRequest(BaseModel):
     merge_strategy: MergeStrategy = MergeStrategy.MERGE
     reviewers: Optional[List[str]] = []
 
+class MergeRequestCreate(BaseModel):
+    """Request model for creating merge requests"""
+    title: str
+    description: Optional[str] = None
+    source_branch_id: str
+    target_branch_id: str
+    merge_strategy: MergeStrategy = MergeStrategy.MERGE
+    reviewers: Optional[List[str]] = []
+
+class MergeRequestReviewCreate(BaseModel):
+    """Request model for creating merge request reviews"""
+    merge_request_id: str
+    reviewer_id: str
+    status: ApprovalStatus
+    comments: Optional[str] = None
+    suggested_changes: Optional[Dict[str, Any]] = None
+
+class VersionComparisonRequest(BaseModel):
+    """Request model for version comparison"""
+    version_id_1: str
+    version_id_2: str
+    comparison_type: str = "diff"
+
+class VersionComparisonResponse(BaseModel):
+    """Response model for version comparison"""
+    comparison_id: str
+    version_id_1: str
+    version_id_2: str
+    differences_summary: Dict[str, Any]
+    similarity_score: float
+    change_complexity: float
+    breaking_changes_count: int
+    created_at: datetime
+
 class VersionResponse(BaseModel):
     """Response model for version data"""
+    id: int
+    version_id: str
+    rule_id: str
+    version_number: str
+    version_type: VersionType
+    is_current: bool
+    is_stable: bool
+    change_summary: str
+    created_at: datetime
+    author: str
+    
+    class Config:
+        from_attributes = True
+
+class RuleVersionResponse(BaseModel):
+    """Response model for rule version data"""
     id: int
     version_id: str
     rule_id: str
@@ -549,3 +614,51 @@ class BranchResponse(BaseModel):
     
     class Config:
         from_attributes = True
+
+class RuleBranchResponse(BaseModel):
+    """Response model for rule branch data"""
+    id: int
+    branch_id: str
+    rule_id: str
+    branch_name: str
+    branch_type: BranchType
+    is_active: bool
+    commits_ahead: int
+    commits_behind: int
+    created_at: datetime
+    created_by: str
+    
+    class Config:
+        from_attributes = True
+
+class MergeRequestResponse(BaseModel):
+    """Response model for merge request data"""
+    id: int
+    merge_request_id: str
+    title: str
+    description: Optional[str]
+    source_branch_id: str
+    target_branch_id: str
+    status: str
+    merge_strategy: MergeStrategy
+    created_at: datetime
+    created_by: str
+    
+    class Config:
+        from_attributes = True
+
+class ConflictResolutionRequest(BaseModel):
+    """Request model for conflict resolution"""
+    merge_request_id: str
+    resolution_strategy: ConflictResolutionStrategy
+    manual_resolution: Optional[Dict[str, Any]] = None
+    auto_resolve_conflicts: bool = False
+
+class ConflictResolutionResponse(BaseModel):
+    """Response model for conflict resolution"""
+    resolution_id: str
+    merge_request_id: str
+    resolution_strategy: ConflictResolutionStrategy
+    conflicts_resolved: int
+    resolution_status: str
+    created_at: datetime

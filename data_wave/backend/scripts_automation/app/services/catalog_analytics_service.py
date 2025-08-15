@@ -26,6 +26,10 @@ import networkx as nx
 from ..core.cache_manager import EnterpriseCacheManager as CacheManager
 from ..core.logging_config import get_logger
 from ..core.settings import settings_manager
+try:
+    from ..core.settings import get_settings
+except Exception:
+    from ..core.config import settings as get_settings
 from ..models.catalog_intelligence_models import *
 from ..services.ai_service import EnterpriseAIService as AIService
 
@@ -108,9 +112,22 @@ class CatalogAnalyticsService:
         
         # Background tasks
         if self.config.background_analysis_enabled:
-            asyncio.create_task(self._analytics_refresh_loop())
-            asyncio.create_task(self._trend_analysis_loop())
-            asyncio.create_task(self._recommendation_update_loop())
+            try:
+                loop = asyncio.get_running_loop()
+                loop.create_task(self._analytics_refresh_loop())
+                loop.create_task(self._trend_analysis_loop())
+                loop.create_task(self._recommendation_update_loop())
+            except RuntimeError:
+                pass
+
+    def start(self) -> None:
+        try:
+            loop = asyncio.get_running_loop()
+            loop.create_task(self._analytics_refresh_loop())
+            loop.create_task(self._trend_analysis_loop())
+            loop.create_task(self._recommendation_update_loop())
+        except RuntimeError:
+            pass
     
     def _init_analytics_components(self):
         """Initialize analytics components and models"""
@@ -658,19 +675,38 @@ class CatalogAnalyticsService:
         asset_filter: Optional[Dict[str, Any]]
     ) -> List[Dict[str, Any]]:
         """Gather usage data from various sources"""
-        # This would integrate with actual usage tracking systems
-        # For now, return sample data structure
-        return [
-            {
-                "asset_id": f"asset_{i}",
-                "user_id": f"user_{i % 100}",
-                "action": "view",
-                "timestamp": start_date + timedelta(hours=i),
-                "duration_seconds": 60 + (i % 300),
-                "source": "catalog_ui"
-            }
-            for i in range(1000)
-        ]
+        try:
+            # Prefer real aggregated usage from asset usage metrics
+            from ..models.advanced_catalog_models import AssetUsageMetrics
+            from ..db_session import get_session
+            from sqlalchemy import select
+            with get_session() as s:
+                q = s.exec(
+                    select(AssetUsageMetrics)
+                    .where(AssetUsageMetrics.metric_date >= start_date)
+                    .where(AssetUsageMetrics.metric_date <= end_date)
+                )
+                rows = q.all()
+                records: List[Dict[str, Any]] = []
+                for r in rows:
+                    if asset_filter and r.asset_id not in set(asset_filter.get("asset_ids", [])) and asset_filter.get("asset_ids"):
+                        continue
+                    records.append({
+                        "asset_id": r.asset_id,
+                        "user_id": "aggregated",
+                        "action": "access",
+                        "timestamp": r.metric_date,
+                        "duration_seconds": r.avg_response_time or 0,
+                        "source": "asset_usage_metrics",
+                        "total_accesses": r.total_accesses,
+                        "unique_users": r.unique_users,
+                    })
+                if records:
+                    return records
+        except Exception:
+            pass
+        # Fallback synthetic minimal dataset
+        return []
     
     async def _calculate_usage_statistics(
         self,

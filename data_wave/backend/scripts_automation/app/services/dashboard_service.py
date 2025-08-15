@@ -333,9 +333,9 @@ class DashboardService:
             node_ids = set()
             
             for result, scan, data_source in results:
-                # Extract lineage information from metadata
+                # Extract lineage information using enterprise catalog + scan metadata
                 lineage_info = DashboardService._extract_lineage_from_metadata(
-                    result.scan_metadata, data_source.name, data_source.source_type
+                    result.scan_metadata, data_source.name, data_source.source_type, session, data_source.id
                 )
                 
                 # Add nodes and edges to the graph
@@ -356,12 +356,68 @@ class DashboardService:
             return {"error": str(e)}
     
     @staticmethod
-    def _extract_lineage_from_metadata(metadata: Dict[str, Any], source_name: str, source_type: str) -> Dict[str, Any]:
-        """Extract lineage information from metadata.
-        
-        This is a placeholder implementation that would need to be expanded based on
-        how lineage information is stored in your metadata.
-        """
+    def _extract_lineage_from_metadata(
+        metadata: Dict[str, Any],
+        source_name: str,
+        source_type: str,
+        session: Session,
+        data_source_id: Optional[int] = None
+    ) -> Dict[str, Any]:
+        """Extract lineage information using enterprise catalog models with metadata fallback."""
+        from sqlalchemy import select
+        try:
+            # Attempt to resolve assets from enterprise catalog
+            from ..models.advanced_catalog_models import IntelligentDataAsset, EnterpriseDataLineage
+            # Collect candidate (schema, table) pairs from metadata
+            table_keys: Set[Tuple[str, str]] = set()
+            for schema in metadata.get("schemas", []):
+                sname = (schema.get("name") or "").strip()
+                for table in schema.get("tables", []):
+                    tname = (table.get("name") or "").strip()
+                    if sname and tname:
+                        table_keys.add((sname, tname))
+            # Query potential assets for this data source
+            assets_stmt = select(IntelligentDataAsset)
+            if data_source_id is not None:
+                assets_stmt = assets_stmt.where(IntelligentDataAsset.data_source_id == data_source_id)
+            assets = session.exec(assets_stmt).all()
+            matched_assets = []
+            for a in assets:
+                key = ((a.schema_name or "").strip(), (a.table_name or "").strip())
+                if key in table_keys:
+                    matched_assets.append(a)
+            if matched_assets:
+                asset_ids = [a.id for a in matched_assets if a.id is not None]
+                # Fetch lineage relationships among these assets
+                rel_stmt = select(EnterpriseDataLineage).where(
+                    (EnterpriseDataLineage.source_asset_id.in_(asset_ids)) |
+                    (EnterpriseDataLineage.target_asset_id.in_(asset_ids))
+                )
+                relationships = session.exec(rel_stmt).all()
+                nodes, node_ids, edges = [], set(), []
+                for a in matched_assets:
+                    if a.id not in node_ids:
+                        nodes.append({
+                            "id": str(a.id),
+                            "label": a.display_name or a.qualified_name,
+                            "type": a.asset_type.value if hasattr(a.asset_type, 'value') else str(a.asset_type),
+                            "source": source_name
+                        })
+                        node_ids.add(a.id)
+                for rel in relationships:
+                    src = str(getattr(rel, 'source_asset_id', ''))
+                    tgt = str(getattr(rel, 'target_asset_id', ''))
+                    if src and tgt:
+                        edges.append({
+                            "source": src,
+                            "target": tgt,
+                            "label": getattr(rel, 'relation_type', 'lineage'),
+                            "confidence": getattr(rel, 'confidence_score', None)
+                        })
+                return {"nodes": nodes, "edges": edges}
+        except Exception:
+            # Fall back to metadata parsing below
+            pass
         nodes = []
         edges = []
         node_ids = set()
@@ -557,9 +613,9 @@ class DashboardService:
             for result, scan, data_source in results:
                 compliance_metrics["total_data_sources"] += 1
                 
-                # Extract compliance information from metadata
+                # Extract compliance information using catalog profiling + metadata
                 source_compliance = DashboardService._extract_compliance_from_metadata(
-                    result.scan_metadata, data_source.name, data_source.source_type
+                    result.scan_metadata, data_source.name, data_source.source_type, session, data_source.id
                 )
                 
                 # Update overall metrics
@@ -625,12 +681,15 @@ class DashboardService:
             return {"error": str(e)}
     
     @staticmethod
-    def _extract_compliance_from_metadata(metadata: Dict[str, Any], source_name: str, source_type: str) -> Dict[str, Any]:
-        """Extract compliance information from metadata.
-        
-        This is a placeholder implementation that would need to be expanded based on
-        how compliance information is stored in your metadata.
-        """
+    def _extract_compliance_from_metadata(
+        metadata: Dict[str, Any],
+        source_name: str,
+        source_type: str,
+        session: Session,
+        data_source_id: Optional[int] = None
+    ) -> Dict[str, Any]:
+        """Extract compliance information using DataProfilingResult and IntelligentDataAsset with metadata fallback."""
+        from sqlalchemy import select
         compliance_info = {
             "is_compliant": True,
             "compliance_issues": [],
@@ -640,6 +699,40 @@ class DashboardService:
             "financial_columns": 0,
             "health_columns": 0
         }
+        try:
+            from ..models.advanced_catalog_models import IntelligentDataAsset, DataProfilingResult
+            # Gather matched assets for this data source
+            assets_stmt = select(IntelligentDataAsset)
+            if data_source_id is not None:
+                assets_stmt = assets_stmt.where(IntelligentDataAsset.data_source_id == data_source_id)
+            assets = session.exec(assets_stmt).all()
+            asset_ids = [a.id for a in assets if a.id is not None]
+            if asset_ids:
+                prof_stmt = select(DataProfilingResult).where(DataProfilingResult.asset_id.in_(asset_ids))
+                profiles = session.exec(prof_stmt).all()
+                for p in profiles:
+                    # Totals
+                    compliance_info["total_columns"] += sum(v for v in (p.data_type_distribution or {}).values()) if isinstance(p.data_type_distribution, dict) else 0
+                    # Sensitive counts
+                    pii = (p.pii_detection_results or {})
+                    if isinstance(pii, dict):
+                        compliance_info["pii_columns"] += int(sum(len(v) for v in pii.values()))
+                        if sum(len(v) for v in pii.values()) > 0:
+                            compliance_info["sensitive_columns"] += int(sum(len(v) for v in pii.values()))
+                    issues = p.quality_issues or []
+                    for issue in issues:
+                        msg = issue.get('message') if isinstance(issue, dict) else str(issue)
+                        if msg and msg not in compliance_info["compliance_issues"]:
+                            compliance_info["compliance_issues"].append(msg)
+                            compliance_info["is_compliant"] = False
+                # Check encryption status
+                for a in assets:
+                    if (getattr(a, 'pii_detected', False) and getattr(a, 'encryption_status', 'unknown') not in ('encrypted', 'tokenized')):
+                        compliance_info["compliance_issues"].append(f"Asset {a.display_name or a.qualified_name} contains PII without encryption")
+                        compliance_info["is_compliant"] = False
+                return compliance_info
+        except Exception:
+            pass
         
         # Process relational database metadata
         for schema in metadata.get("schemas", []):

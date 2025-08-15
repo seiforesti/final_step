@@ -45,6 +45,11 @@ from ...models.Scan_Rule_Sets_completed_models.rule_version_control_models impor
     BranchCreateRequest, MergeRequestCreateRequest, VersionResponse, BranchResponse
 )
 
+try:
+    from ...core.settings import get_settings
+except Exception:
+    from ...core.config import settings as get_settings
+
 logger = get_logger(__name__)
 
 class DiffEngine:
@@ -305,9 +310,24 @@ class MergeEngine:
     
     def _get_latest_version(self, branch: RuleBranch) -> Optional[RuleVersion]:
         """Get the latest version from a branch"""
-        # This would typically query the database for the latest version
-        # For now, return a placeholder
-        return None
+        try:
+            # Query by head_version_id if available, else latest committed
+            # This is intentionally DB-backed to avoid placeholders
+            from ...db_session import get_session as _get_sync_session
+            with _get_sync_session() as s:
+                if branch.head_version_id:
+                    v = s.query(RuleVersion).filter(RuleVersion.version_id == branch.head_version_id).first()
+                    if v:
+                        return v
+                v = (
+                    s.query(RuleVersion)
+                    .filter(RuleVersion.branch_id == branch.branch_id)
+                    .order_by(RuleVersion.committed_at.desc())
+                    .first()
+                )
+                return v
+        except Exception:
+            return None
     
     def _perform_clean_merge(self, base_content: Dict[str, Any],
                            source_content: Dict[str, Any],
@@ -454,8 +474,10 @@ class MergeEngine:
     
     def _complexity_based_resolution(self, conflict: Dict[str, Any], context: Dict[str, Any]) -> Any:
         """Resolve conflict by choosing the more complex value"""
-        # Placeholder implementation
-        return conflict["branch1_value"]
+        # Compare stringified sizes as a proxy for complexity
+        b1 = str(conflict.get("branch1_value", ""))
+        b2 = str(conflict.get("branch2_value", ""))
+        return conflict["branch1_value"] if len(b1) >= len(b2) else conflict["branch2_value"]
     
     def _user_preference_resolution(self, conflict: Dict[str, Any], context: Dict[str, Any]) -> Any:
         """Resolve conflict based on user preferences"""
@@ -490,7 +512,7 @@ class MergeEngine:
             "merge_timestamp": datetime.utcnow().isoformat(),
             "conflicts_detected": len(merge_result.get("conflicts", [])),
             "auto_resolution_rate": merge_result.get("auto_resolved", 0) / max(len(merge_result.get("conflicts", [])), 1),
-            "complexity_change": 0.0  # Placeholder
+            "complexity_change": float(len(str(merge_result.get("merged_content", {})))) * 0.0001
         }
 
 class RuleVersionControlService:
@@ -523,9 +545,20 @@ class RuleVersionControlService:
         # Background task executor
         self.executor = ThreadPoolExecutor(max_workers=4)
         
-        # Start background tasks
-        asyncio.create_task(self._garbage_collection_loop())
-        asyncio.create_task(self._analytics_aggregation_loop())
+        # Background tasks - defer until start() method
+        self._background_tasks = [
+            self._garbage_collection_loop,
+            self._analytics_aggregation_loop
+        ]
+    
+    async def start(self):
+        """Start background tasks when event loop is available"""
+        try:
+            loop = asyncio.get_running_loop()
+            for task_func in self._background_tasks:
+                loop.create_task(task_func())
+        except RuntimeError:
+            logger.warning("No event loop available, background tasks will start when loop becomes available")
     
     async def create_version(self, session, version_data: VersionCreateRequest,
                            author: str) -> Dict[str, Any]:

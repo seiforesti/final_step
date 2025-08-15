@@ -38,7 +38,7 @@ from ...models.racine_models.racine_collaboration_models import (
 from ...models.racine_models.racine_workspace_models import RacineWorkspace, RacineWorkspaceMember
 from ...models.auth_models import User, Role
 from ...models.scan_models import Scan, ScanResult
-from ...models.compliance_models import ComplianceRule, ComplianceValidation
+from ...models.compliance_models import ComplianceRequirement as ComplianceRule, ComplianceValidation
 from ...models.classification_models import ClassificationRule
 from ...models.advanced_catalog_models import CatalogItem
 from ...models.workflow_models import Workflow
@@ -46,11 +46,11 @@ from ...models.workflow_models import Workflow
 # Import existing services for integration
 from ..advanced_collaboration_service import AdvancedCollaborationService
 from ..notification_service import NotificationService
-from ..ai_service import AdvancedAIService
+from ..advanced_ai_service import AdvancedAIService
 from ..data_source_service import DataSourceService
 from ..scan_service import ScanService
 from ..compliance_rule_service import ComplianceRuleService
-from ..classification_service import EnterpriseClassificationService
+from ..classification_service import ClassificationService as EnterpriseClassificationService
 from ..enterprise_catalog_service import EnterpriseIntelligentCatalogService
 
 class CollaborationType(Enum):
@@ -539,7 +539,7 @@ class RacineCollaborationService:
                 sender_id=sender_id,
                 content=content,
                 message_type=message_type,
-                metadata=metadata or {},
+                message_metadata=metadata or {},
                 timestamp=datetime.utcnow(),
                 status='sent'
             )
@@ -584,7 +584,7 @@ class RacineCollaborationService:
         """Process message for special features like mentions, AI analysis, etc."""
         
         content = message.content
-        metadata = message.metadata
+        metadata = getattr(message, 'message_metadata', {}) or {}
         
         # Process mentions
         mentions = self._extract_mentions(content)
@@ -615,7 +615,7 @@ class RacineCollaborationService:
                 print(f"AI analysis failed: {str(e)}")
         
         # Update message metadata
-        message.metadata = metadata
+        message.message_metadata = metadata
     
     def _extract_mentions(self, content: str) -> List[str]:
         """Extract user mentions from message content"""

@@ -21,15 +21,15 @@ from datetime import datetime, timedelta
 import uuid
 import io
 
-from app.core.database import get_db_session
-from app.models.Scan-Rule-Sets-completed-models.analytics_reporting_models import (
+from app.db_session import get_db_session
+from app.models.Scan_Rule_Sets_completed_models.analytics_reporting_models import (
     AnalyticsType, TrendDirection, ROICategory,
     AnalyticsSummary, ROIDashboard, ComplianceDashboard
 )
-from app.services.Scan-Rule-Sets-completed-services.advanced_reporting_service import AdvancedReportingService
-from app.services.Scan-Rule-Sets-completed-services.roi_calculation_service import ROICalculationService
-from app.api.security.rbac import current_user, require_permissions
-from app.utils.rate_limiter import check_rate_limit
+from app.services.Scan_Rule_Sets_completed_services.advanced_reporting_service import AdvancedReportingService
+from app.services.Scan_Rule_Sets_completed_services.roi_calculation_service import ROICalculationService
+from ...security.rbac import get_current_user as current_user, require_permissions
+from app.utils.rate_limiter import rate_limit
 from app.core.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -46,7 +46,7 @@ roi_service = ROICalculationService()
     summary="Get Executive Dashboard",
     description="Generate comprehensive executive dashboard with key metrics, insights, and alerts."
 )
-@check_rate_limit("executive_dashboard", max_calls=20, window_seconds=60)
+@rate_limit(requests=20, window=60)
 async def get_executive_dashboard(
     start_date: Optional[datetime] = Query(None, description="Dashboard start date"),
     end_date: Optional[datetime] = Query(None, description="Dashboard end date"),
@@ -170,7 +170,7 @@ async def get_roi_dashboard(
     summary="Generate Analytics Report",
     description="Generate advanced analytics report with customizable parameters and output formats."
 )
-@check_rate_limit("analytics_generate", max_calls=10, window_seconds=60)
+@rate_limit(requests=10, window=60)
 async def generate_analytics_report(
     report_type: str = Body(..., description="Type of analytics report"),
     parameters: Dict[str, Any] = Body({}, description="Report parameters"),
@@ -409,7 +409,7 @@ async def schedule_custom_report(
     summary="Generate Data Visualization",
     description="Generate interactive data visualizations with customizable chart types and styling."
 )
-@check_rate_limit("visualization_generate", max_calls=30, window_seconds=60)
+@rate_limit(requests=30, window=60)
 async def generate_visualization(
     chart_type: str = Body(..., description="Type of chart (bar, line, pie, scatter, heatmap, etc.)"),
     data_query: Dict[str, Any] = Body(..., description="Data query configuration"),
@@ -524,10 +524,10 @@ async def export_report(
 )
 @require_permissions(["report_delivery"])
 async def email_report(
-    report_config: Dict[str, Any] = Body(..., description="Report and email configuration"),
     background_tasks: BackgroundTasks,
     current_user_data: dict = Depends(current_user),
-    db = Depends(get_db_session)
+    db = Depends(get_db_session),
+    report_config: Dict[str, Any] = Body(..., description="Report and email configuration")
 ) -> Dict[str, Any]:
     """
     Send report via email with professional formatting.

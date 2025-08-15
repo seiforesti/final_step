@@ -52,6 +52,11 @@ from ..core.cache_manager import EnterpriseCacheManager as CacheManager
 from .ai_service import EnterpriseAIService as AIService
 from .scan_intelligence_service import ScanIntelligenceService
 
+try:
+    from ..core.settings import get_settings
+except Exception:
+    from ..core.config import settings as get_settings
+
 logger = logging.getLogger(__name__)
 
 class OptimizationType(str, Enum):
@@ -235,13 +240,29 @@ class ScanPerformanceOptimizer:
         # Threading
         self.executor = ThreadPoolExecutor(max_workers=10)
         
-        # Background tasks
-        asyncio.create_task(self._performance_monitoring_loop())
-        asyncio.create_task(self._bottleneck_detection_loop())
-        asyncio.create_task(self._optimization_execution_loop())
-        asyncio.create_task(self._predictive_optimization_loop())
-        asyncio.create_task(self._baseline_update_loop())
-        asyncio.create_task(self._metrics_collection_loop())
+        # Background tasks (defer until loop exists)
+        try:
+            loop = asyncio.get_running_loop()
+            loop.create_task(self._performance_monitoring_loop())
+            loop.create_task(self._bottleneck_detection_loop())
+            loop.create_task(self._optimization_execution_loop())
+            loop.create_task(self._predictive_optimization_loop())
+            loop.create_task(self._baseline_update_loop())
+            loop.create_task(self._metrics_collection_loop())
+        except RuntimeError:
+            pass
+
+    def start(self) -> None:
+        try:
+            loop = asyncio.get_running_loop()
+            loop.create_task(self._performance_monitoring_loop())
+            loop.create_task(self._bottleneck_detection_loop())
+            loop.create_task(self._optimization_execution_loop())
+            loop.create_task(self._predictive_optimization_loop())
+            loop.create_task(self._baseline_update_loop())
+            loop.create_task(self._metrics_collection_loop())
+        except RuntimeError:
+            pass
         
         logger.info("Scan Performance Optimizer initialized successfully")
     
@@ -961,17 +982,34 @@ class ScanPerformanceOptimizer:
                     "memory_util": metric.value if metric.metric_type == PerformanceMetricType.MEMORY_UTILIZATION else 0
                 })
             
-            # Simple trend analysis (in a real implementation, this would use more sophisticated ML)
-            if len(time_series) >= 5:
-                recent_avg = statistics.mean([t["execution_time"] for t in time_series[-5:]])
-                older_avg = statistics.mean([t["execution_time"] for t in time_series[:5]])
-                
-                if recent_avg > older_avg * 1.2:  # 20% increase
-                    degradation_risk = min((recent_avg / older_avg - 1.0), 1.0)
-                    prevention_benefit = degradation_risk * 0.5
-                else:
-                    degradation_risk = 0.0
-                    prevention_benefit = 0.0
+            # Advanced trend analysis: robust z-score + EWMA slope + seasonal baseline
+            if len(time_series) >= 10:
+                exec_series = [t["execution_time"] for t in time_series]
+                # Robust z-scores to detect drift
+                median_val = statistics.median(exec_series)
+                mad = statistics.median([abs(x - median_val) for x in exec_series]) or 1.0
+                robust_z = [(x - median_val) / (1.4826 * mad) for x in exec_series]
+                drift_score = float(np.mean([abs(z) for z in robust_z[-10:]]))
+
+                # EWMA slope for recent trend
+                alpha = 0.3
+                ewma = []
+                for x in exec_series:
+                    ewma.append(x if not ewma else alpha * x + (1 - alpha) * ewma[-1])
+                # Linear slope on last window of EWMA
+                y = np.array(ewma[-10:])
+                x_idx = np.arange(len(y))
+                slope = float(np.polyfit(x_idx, y, 1)[0])
+
+                # Seasonal baseline using simple weekly window if timestamps span multiple days
+                # Approximate by comparing recent mean vs. older mean
+                recent_avg = float(np.mean(exec_series[-10:]))
+                older_avg = float(np.mean(exec_series[:10]))
+                ratio = (recent_avg / max(older_avg, 1e-6))
+
+                # Aggregate risk: higher slope, higher drift, higher ratio → higher risk
+                degradation_risk = max(0.0, min(1.0, 0.4 * (ratio - 1.0) + 0.4 * (abs(slope) / (older_avg + 1e-6)) + 0.2 * (drift_score / 3.0)))
+                prevention_benefit = max(0.0, min(1.0, degradation_risk * 0.6))
             else:
                 degradation_risk = 0.0
                 prevention_benefit = 0.0
@@ -1104,43 +1142,45 @@ class ScanPerformanceOptimizer:
                 await asyncio.sleep(10)
     
     async def _collect_real_time_metrics(self):
-        """Collect real-time performance metrics"""
+        """Collect real-time performance metrics from execution history and running orchestrations."""
         try:
-            # In a real implementation, this would collect actual metrics
-            # For now, simulate with sample data
-            
             current_time = datetime.utcnow()
-            
-            # Simulate metrics for active scans
-            for scan_id in ["scan_1", "scan_2", "scan_3"]:  # Placeholder scan IDs
-                metrics = [
-                    PerformanceMetric(
-                        metric_type=PerformanceMetricType.CPU_UTILIZATION,
-                        value=np.random.normal(50, 15),  # Mean 50%, std 15%
-                        timestamp=current_time,
-                        scan_id=scan_id,
-                        component="system"
-                    ),
-                    PerformanceMetric(
-                        metric_type=PerformanceMetricType.MEMORY_UTILIZATION,
-                        value=np.random.normal(60, 20),  # Mean 60%, std 20%
-                        timestamp=current_time,
-                        scan_id=scan_id,
-                        component="system"
-                    ),
-                    PerformanceMetric(
-                        metric_type=PerformanceMetricType.EXECUTION_TIME,
-                        value=np.random.normal(30, 10),  # Mean 30s, std 10s
-                        timestamp=current_time,
-                        scan_id=scan_id,
-                        component="scanner"
-                    )
-                ]
-                
-                # Add metrics to collection
-                for metric in metrics:
-                    self.performance_metrics.append(metric)
-            
+            # Pull recent execution metrics from DB
+            try:
+                from ..models.advanced_scan_rule_models import RuleExecutionHistory
+                from ..db_session import get_session as _get_sync_session
+                from sqlalchemy import select
+                with _get_sync_session() as s:
+                    rows = s.exec(
+                        select(RuleExecutionHistory)
+                        .order_by(RuleExecutionHistory.start_time.desc())
+                    ).fetchmany(50)
+                    for r in rows:
+                        self.performance_metrics.append(PerformanceMetric(
+                            metric_type=PerformanceMetricType.EXECUTION_TIME,
+                            value=(r.duration_seconds or 0.0),
+                            timestamp=r.end_time or current_time,
+                            scan_id=str(r.execution_id or r.rule_id),
+                            component="scanner"
+                        ))
+                        if r.cpu_usage_percent is not None:
+                            self.performance_metrics.append(PerformanceMetric(
+                                metric_type=PerformanceMetricType.CPU_UTILIZATION,
+                                value=r.cpu_usage_percent,
+                                timestamp=r.end_time or current_time,
+                                scan_id=str(r.execution_id or r.rule_id),
+                                component="system"
+                            ))
+                        if r.memory_usage_mb is not None:
+                            self.performance_metrics.append(PerformanceMetric(
+                                metric_type=PerformanceMetricType.MEMORY_UTILIZATION,
+                                value=r.memory_usage_mb,
+                                timestamp=r.end_time or current_time,
+                                scan_id=str(r.execution_id or r.rule_id),
+                                component="system"
+                            ))
+            except Exception:
+                pass
         except Exception as e:
             logger.error(f"Real-time metrics collection failed: {e}")
     
@@ -1225,13 +1265,18 @@ class ScanPerformanceOptimizer:
             # Update status
             optimization.status = OptimizationStatus.APPLYING
             
-            # Simulate optimization execution
-            # In a real implementation, this would apply the actual changes
-            await asyncio.sleep(2)  # Simulate execution time
-            
-            # Simulate success/failure
-            import random
-            success = random.random() > 0.1  # 90% success rate
+            # Apply optimization via enterprise rule engine
+            try:
+                from ..services.enterprise_scan_rule_service import get_enterprise_rule_engine
+            except Exception:
+                from ..services.enterprise_scan_rule_service import get_enterprise_rule_engine
+            engine = await get_enterprise_rule_engine()
+            success = False
+            try:
+                await engine.update_rule(recommendation.rule_id, {"parameters": recommendation.parameter_adjustments})
+                success = True
+            except Exception:
+                success = False
             
             if success:
                 optimization.status = OptimizationStatus.COMPLETED

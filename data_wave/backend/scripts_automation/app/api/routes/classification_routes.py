@@ -11,7 +11,7 @@ from enum import Enum
 
 # Import existing database session
 from ...db_session import get_session
-from ...services.classification_service import EnterpriseClassificationService
+from ...services.classification_service import ClassificationService as EnterpriseClassificationService
 
 # Import models
 from ...models.classification_models import (
@@ -25,7 +25,7 @@ from ...models.classification_models import (
 # Import existing models for integration
 from ...models.scan_models import DataSource, Scan, ScanResult
 from ...models.catalog_models import CatalogItem
-from ...models.compliance_models import ComplianceRule
+from ...models.compliance_models import ComplianceRequirement as ComplianceRule
 
 router = APIRouter(prefix="/api/classifications", tags=["Enterprise Classifications"])
 

@@ -27,12 +27,10 @@ from ...services.scan_orchestration_service import ScanOrchestrationService
 from ...services.real_time_streaming_service import RealTimeStreamingService, StreamConfiguration
 from ...services.edge_computing_service import EdgeComputingService
 from ...services.intelligent_scan_coordinator import IntelligentScanCoordinator
-from ...models.scan_orchestration_models import (
-    ScanOrchestrationJob, OrchestrationPipeline, StreamProcessingConfig
+from ...models.scan_models import (
+    ScanOrchestrationJob
 )
-from ...models.scan_intelligence_models import (
-    StreamAnalytics, RealTimeEvent, EventCoordination
-)
+# Note: Stream analytics models are produced by services and returned as dicts
 from ...api.security.rbac import get_current_user
 from ...core.monitoring import MetricsCollector
 

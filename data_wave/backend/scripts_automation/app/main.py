@@ -112,6 +112,8 @@ app = FastAPI(
 )
 
 # Initialize database
+# Import organization models to ensure they're registered
+from app.models.organization_models import Organization, OrganizationSetting
 init_db()
 
 # Schedule background tasks
@@ -278,8 +280,13 @@ async def startup_event():
     # Create database tables
     init_db()
     logger.info("Enterprise database tables created")
-    # Start scan scheduler
-    asyncio.create_task(ScanSchedulerService.start_scheduler())
+    # Start scan scheduler (defer if no running loop, but here we are in event loop)
+    try:
+        asyncio.create_task(ScanSchedulerService.start_scheduler())
+    except RuntimeError:
+        # Fallback: schedule via loop when available
+        loop = asyncio.get_event_loop()
+        loop.create_task(ScanSchedulerService.start_scheduler())
     logger.info("Enterprise scan scheduler started")
     logger.info("🚀 Enterprise Data Governance Platform with Racine Main Manager started successfully!")
     logger.info("📊 All 7 core groups integrated: Data Sources, Compliance Rules, Classifications, Scan-Rule-Sets, Data Catalog, Scan Logic")

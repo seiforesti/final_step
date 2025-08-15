@@ -29,7 +29,7 @@ from ...models.advanced_scan_rule_models import (
     RulePerformanceMetric,
     AITuningConfiguration,
 )
-from ...models.scan_intelligence_models import ScanAIModel, ModelPerformanceMetrics
+from ...models.scan_intelligence_models import ScanAIModel
 from ...api.security.rbac import get_current_user
 from ...core.monitoring import MetricsCollector
 
@@ -433,7 +433,7 @@ async def stream_optimization_metrics(
                 await asyncio.sleep(sampling_interval)
                 
         except asyncio.CancelledError:
-            break
+            return
         except Exception as e:
             error_data = {'error': str(e), 'timestamp': datetime.utcnow().isoformat()}
             yield f"data: {json.dumps(error_data)}\n\n"

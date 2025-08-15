@@ -24,7 +24,15 @@ import json
 from ...services.distributed_caching_service import DistributedCachingService, CacheConfiguration, CacheType, EvictionPolicy, ConsistencyLevel
 from ...services.scan_performance_service import ScanPerformanceService
 from ...services.edge_computing_service import EdgeComputingService
-from ...models.scan_performance_models import CacheMetrics, CacheNode, CacheStrategy
+from ...core.cache_manager import CacheMetrics
+try:
+    from ...models.scan_performance_models import CacheNode, CacheStrategy
+except Exception:
+    # Minimal fallbacks to avoid import errors; actual implementations are in services
+    class CacheNode:  # type: ignore
+        pass
+    class CacheStrategy:  # type: ignore
+        pass
 from ...models.scan_orchestration_models import DistributedCache, CachePartition
 from ...api.security.rbac import get_current_user
 from ...core.monitoring import MetricsCollector
@@ -332,7 +340,7 @@ async def stream_cache_metrics(
                 await asyncio.sleep(sampling_interval)
                 
         except asyncio.CancelledError:
-            break
+            return
         except Exception as e:
             error_data = {'error': str(e), 'timestamp': datetime.utcnow().isoformat()}
             yield f"data: {json.dumps(error_data)}\n\n"

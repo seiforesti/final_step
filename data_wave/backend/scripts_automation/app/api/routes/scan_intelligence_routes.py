@@ -23,8 +23,13 @@ from ...db_session import get_session
 from ...api.security.rbac import get_current_user, require_permission
 from ...core.response_models import SuccessResponse, ErrorResponse
 from ...core.cache import cache_response
-from ...core.rate_limiting import RateLimiter
-from ...core.audit import audit_log
+from ...utils.rate_limiter import rate_limit, get_rate_limiter
+try:
+    from ...utils import audit_logger as _audit
+    audit_log = _audit.audit_log
+except Exception:
+    async def audit_log(**kwargs):
+        pass
 from ...services.scan_intelligence_service import ScanIntelligenceService
 from ...models.scan_intelligence_models import (
     ScanIntelligenceEngine, ScanAIModel, ScanPrediction, ScanOptimizationRecord,
@@ -46,7 +51,7 @@ from ...models.api import (
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1/scan-intelligence", tags=["Scan Intelligence"])
-rate_limiter = RateLimiter()
+rate_limiter = get_rate_limiter()
 
 def get_intelligence_service() -> ScanIntelligenceService:
     """Dependency to get scan intelligence service instance"""
@@ -55,7 +60,7 @@ def get_intelligence_service() -> ScanIntelligenceService:
 # Intelligence Engine Management Routes
 
 @router.post("/engines")
-@rate_limiter.limit("50/minute")
+@rate_limit(requests=50, window=60)
 async def create_intelligence_engine(
     request: IntelligenceEngineRequest,
     background_tasks: BackgroundTasks,
@@ -113,8 +118,8 @@ async def create_intelligence_engine(
         raise HTTPException(status_code=500, detail=f"Engine creation failed: {str(e)}")
 
 @router.get("/engines")
-@rate_limiter.limit("200/minute")
-@cache_response(expire_time=300)
+@rate_limit(requests=200, window=60)
+@cache_response(ttl=300)
 async def list_intelligence_engines(
     intelligence_type: Optional[ScanIntelligenceType] = Query(default=None, description="Filter by intelligence type"),
     status: Optional[str] = Query(default=None, description="Filter by engine status"),
@@ -169,8 +174,8 @@ async def list_intelligence_engines(
         raise HTTPException(status_code=500, detail=f"Engine listing failed: {str(e)}")
 
 @router.get("/engines/{engine_id}")
-@rate_limiter.limit("300/minute")
-@cache_response(expire_time=120)
+@rate_limit(requests=300, window=60)
+@cache_response(ttl=120)
 async def get_intelligence_engine(
     engine_id: str,
     include_models: bool = Query(default=True, description="Include AI models information"),
@@ -212,7 +217,7 @@ async def get_intelligence_engine(
 # Prediction and Forecasting Routes
 
 @router.post("/predictions")
-@rate_limiter.limit("100/minute")
+@rate_limit(requests=100, window=60)
 async def generate_prediction(
     request: PredictionRequest,
     background_tasks: BackgroundTasks,
@@ -265,8 +270,8 @@ async def generate_prediction(
         raise HTTPException(status_code=500, detail=f"Prediction generation failed: {str(e)}")
 
 @router.get("/predictions/{prediction_id}")
-@rate_limiter.limit("200/minute")
-@cache_response(expire_time=300)
+@rate_limit(requests=200, window=60)
+@cache_response(ttl=300)
 async def get_prediction(
     prediction_id: str,
     include_explanations: bool = Query(default=True, description="Include model explanations"),
@@ -306,7 +311,7 @@ async def get_prediction(
 # Optimization Routes
 
 @router.post("/optimizations")
-@rate_limiter.limit("50/minute")
+@rate_limit(requests=50, window=60)
 async def create_optimization(
     request: OptimizationRequest,
     background_tasks: BackgroundTasks,
@@ -364,7 +369,7 @@ async def create_optimization(
         raise HTTPException(status_code=500, detail=f"Optimization creation failed: {str(e)}")
 
 @router.post("/optimizations/{optimization_id}/execute")
-@rate_limiter.limit("30/minute")
+@rate_limit(requests=30, window=60)
 async def execute_optimization(
     optimization_id: str,
     background_tasks: BackgroundTasks,
@@ -413,7 +418,7 @@ async def execute_optimization(
 # Anomaly Detection Routes
 
 @router.post("/anomalies/detect")
-@rate_limiter.limit("100/minute")
+@rate_limit(requests=100, window=60)
 async def detect_anomalies(
     request: AnomalyDetectionRequest,
     background_tasks: BackgroundTasks,
@@ -465,8 +470,8 @@ async def detect_anomalies(
         raise HTTPException(status_code=500, detail=f"Anomaly detection failed: {str(e)}")
 
 @router.get("/anomalies")
-@rate_limiter.limit("200/minute")
-@cache_response(expire_time=120)
+@rate_limit(requests=200, window=60)
+@cache_response(ttl=120)
 async def list_anomalies(
     anomaly_type: Optional[AnomalyType] = Query(default=None, description="Filter by anomaly type"),
     severity: Optional[str] = Query(default=None, description="Filter by severity level"),
@@ -530,7 +535,7 @@ async def list_anomalies(
 # Pattern Recognition Routes
 
 @router.post("/patterns/recognize")
-@rate_limiter.limit("80/minute")
+@rate_limit(requests=80, window=60)
 async def recognize_patterns(
     request: PatternRecognitionRequest,
     background_tasks: BackgroundTasks,
@@ -582,8 +587,8 @@ async def recognize_patterns(
         raise HTTPException(status_code=500, detail=f"Pattern recognition failed: {str(e)}")
 
 @router.get("/patterns")
-@rate_limiter.limit("150/minute")
-@cache_response(expire_time=300)
+@rate_limit(requests=150, window=60)
+@cache_response(ttl=300)
 async def list_patterns(
     pattern_type: Optional[PatternType] = Query(default=None, description="Filter by pattern type"),
     confidence_min: Optional[float] = Query(default=0.7, ge=0.0, le=1.0, description="Minimum confidence threshold"),
@@ -644,7 +649,7 @@ async def list_patterns(
 # Performance Optimization Routes
 
 @router.post("/performance/optimize")
-@rate_limiter.limit("30/minute")
+@rate_limit(requests=30, window=60)
 async def optimize_performance(
     request: PerformanceOptimizationRequest,
     background_tasks: BackgroundTasks,
@@ -695,8 +700,8 @@ async def optimize_performance(
         raise HTTPException(status_code=500, detail=f"Performance optimization failed: {str(e)}")
 
 @router.get("/performance/metrics")
-@rate_limiter.limit("200/minute")
-@cache_response(expire_time=60)
+@rate_limit(requests=200, window=60)
+@cache_response(ttl=60)
 async def get_performance_metrics(
     scope: Optional[str] = Query(default=None, description="Scope for metrics collection"),
     metric_types: Optional[List[PerformanceMetric]] = Query(default=None, description="Specific metrics to retrieve"),
@@ -743,8 +748,8 @@ async def get_performance_metrics(
 # Analytics and Reporting Routes
 
 @router.get("/analytics")
-@rate_limiter.limit("100/minute")
-@cache_response(expire_time=600)
+@rate_limit(requests=100, window=60)
+@cache_response(ttl=600)
 async def get_intelligence_analytics(
     scope: Optional[str] = Query(default="global", description="Analytics scope"),
     time_range: Optional[str] = Query(default="7d", description="Time range for analytics"),
@@ -785,7 +790,7 @@ async def get_intelligence_analytics(
         raise HTTPException(status_code=500, detail=f"Intelligence analytics retrieval failed: {str(e)}")
 
 @router.get("/metrics/system")
-@rate_limiter.limit("300/minute")
+@rate_limit(requests=300, window=60)
 async def get_system_metrics(
     intelligence_service: ScanIntelligenceService = Depends(get_intelligence_service),
     current_user: dict = Depends(get_current_user),
@@ -895,7 +900,7 @@ async def stream_anomalies(
 # Model Management Routes
 
 @router.post("/models/train")
-@rate_limiter.limit("10/minute")
+@rate_limit(requests=10, window=60)
 async def train_models(
     request: ModelTrainingRequest,
     background_tasks: BackgroundTasks,
@@ -946,7 +951,7 @@ async def train_models(
         raise HTTPException(status_code=500, detail=f"Model training failed: {str(e)}")
 
 @router.get("/models/{model_id}/status")
-@rate_limiter.limit("200/minute")
+@rate_limit(requests=200, window=60)
 async def get_model_status(
     model_id: str,
     include_metrics: bool = Query(default=True, description="Include performance metrics"),

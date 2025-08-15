@@ -38,7 +38,7 @@ from ..models.compliance_rule_models import ComplianceRule
 logger = logging.getLogger(__name__)
 
 
-class EnterpriseClassificationService:
+class ClassificationService:
     """
     Advanced enterprise classification service with deep integration 
     into the data governance ecosystem
@@ -46,7 +46,7 @@ class EnterpriseClassificationService:
     
     def __init__(self):
         self.scan_service = ScanService()
-        self.catalog_service = CatalogService()
+        self.catalog_service = EnhancedCatalogService()
         self.compliance_service = ComplianceRuleService()
         self.data_source_service = DataSourceService()
         self.notification_service = NotificationService()
@@ -63,6 +63,48 @@ class EnterpriseClassificationService:
             'cache_hits': 0,
             'cache_misses': 0
         }
+
+# --- Public facade for legacy route usage ---
+
+def classify_and_assign_sensitivity(session: Session, column: Dict[str, Any]) -> Dict[str, Any]:
+    """Synchronous helper used by legacy classify.py route.
+    Delegates to ClassificationService pipeline to classify a single column and persist sensitivity.
+    """
+    service = ClassificationService()
+    entity_type = 'column'
+    entity_id = str(column.get('id') or column.get('qualified_name') or column.get('name'))
+    user = column.get('updated_by') or 'system'
+
+    async def _run():
+        # Build minimal entity compatible with internal methods
+        rules = await service._get_applicable_rules(session, data_source_id=column.get('data_source_id', 0), framework_id=None)
+        entity_data = type('Col', (), column) if isinstance(column, dict) else column
+        results = await service._apply_rules_to_entity(
+            session=session,
+            entity_type=entity_type,
+            entity_id=entity_id,
+            entity_data=entity_data,
+            rules=rules,
+            user=user,
+        )
+        sensitivity = None
+        if results:
+            try:
+                from ..models.classification_models import SensitivityLevel
+                sensitivity = max((r.sensitivity_level for r in results), key=lambda s: s.value if hasattr(s, 'value') else str(s))
+            except Exception:
+                sensitivity = 'confidential'
+        return {
+            'column': entity_id,
+            'matches': [getattr(r, 'rule_id', None) for r in results],
+            'sensitivity': getattr(sensitivity, 'value', sensitivity),
+        }
+
+    try:
+        loop = asyncio.get_running_loop()
+        return loop.run_until_complete(_run())
+    except RuntimeError:
+        return asyncio.run(_run())
     
     # ==================== FRAMEWORK MANAGEMENT ====================
     
@@ -215,7 +257,7 @@ class EnterpriseClassificationService:
             session.rollback()
             logger.error(f"Error creating classification rule: {str(e)}")
             raise
-    
+
     async def apply_rules_to_scan_results(
         self, 
         session: Session, 
@@ -296,7 +338,7 @@ class EnterpriseClassificationService:
             session.rollback()
             logger.error(f"Error applying rules to scan results: {str(e)}")
             raise
-    
+
     async def apply_rules_to_catalog_items(
         self, 
         session: Session, 
@@ -367,7 +409,7 @@ class EnterpriseClassificationService:
             session.rollback()
             logger.error(f"Error applying rules to catalog items: {str(e)}")
             raise
-    
+
     # ==================== BULK OPERATIONS ====================
     
     async def bulk_upload_classification_files(
@@ -468,7 +510,7 @@ class EnterpriseClassificationService:
             session.rollback()
             logger.error(f"Error in bulk upload: {str(e)}")
             raise
-    
+
     # ==================== ADVANCED PATTERN MATCHING ====================
     
     async def _apply_rules_to_entity(

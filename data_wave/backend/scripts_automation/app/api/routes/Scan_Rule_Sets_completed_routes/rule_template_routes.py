@@ -35,12 +35,12 @@ from ....db_session import get_session
 from ....api.security.rbac import get_current_user, require_permission, PERMISSION_SCAN_VIEW, PERMISSION_SCAN_MANAGE
 from ....core.logging_config import get_logger
 from ....utils.rate_limiter import check_rate_limit
-from ....models.Scan-Rule-Sets-completed-models.rule_template_models import (
+from ....models.Scan_Rule_Sets_completed_models.rule_template_models import (
     RuleTemplate, TemplateCategory, TemplateVersion, TemplateUsage, TemplateReview,
     TemplateType, TemplateComplexity, TemplateStatus, TemplateCreateRequest,
     TemplateUpdateRequest, TemplateResponse, TemplateSearchParams
 )
-from ....services.Scan-Rule-Sets-completed-services.rule_template_service import RuleTemplateService
+from ....services.Scan_Rule_Sets_completed_services.rule_template_service import RuleTemplateService
 
 logger = get_logger(__name__)
 router = APIRouter(prefix="/rule-templates", tags=["Rule Templates"])

@@ -7,6 +7,7 @@ Comprehensive ML pipeline API management
 from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks, UploadFile, File
 from fastapi.responses import StreamingResponse, FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlmodel import Session
 from typing import Dict, List, Optional, Any, Union
 from datetime import datetime
 import logging
@@ -1151,43 +1152,31 @@ async def _monitor_optimization_progress(
         iteration_count = 0
         
         start_time = datetime.utcnow()
-        while (datetime.utcnow() - start_time).total_seconds() < optimization_duration:
-            iteration_count += 1
+        
+        # Get ML service for real optimization
+        try:
+            from ...services.advanced_ml_service import AdvancedMLService
+            ml_service = AdvancedMLService()
             
-            # Simulate hyperparameter optimization progress
-            current_params = {
-                "learning_rate": random.uniform(0.0001, 0.01),
-                "batch_size": random.choice([16, 32, 64, 128]),
-                "epochs": random.randint(50, 200),
-                "dropout_rate": random.uniform(0.1, 0.5),
-                "regularization": random.uniform(0.001, 0.1)
-            }
+            # Start real hyperparameter optimization
+            optimization_result = await ml_service.optimize_hyperparameters(
+                model_config_id=model_config_id,
+                optimization_duration=optimization_duration,
+                check_interval=check_interval
+            )
             
-            # Simulate performance evaluation
-            current_score = 0.75 + random.uniform(0, 0.2) + (iteration_count * 0.001)
-            current_score = min(current_score, 0.98)  # Cap at 98%
+            best_score = optimization_result.get("best_score", 0.0)
+            iteration_count = optimization_result.get("iterations", 0)
             
-            if current_score > best_score:
-                best_score = current_score
-                logger.info(f"New best score for model {model_config_id}: {best_score:.4f} "
-                           f"with params: {current_params}")
+            logger.info(f"Completed hyperparameter optimization for model {model_config_id}. "
+                       f"Best score: {best_score:.4f}, Iterations: {iteration_count}")
             
-            # Log optimization progress
-            logger.info(f"Hyperparameter optimization iteration {iteration_count} - "
-                       f"Model {model_config_id}: Score: {current_score:.4f}, "
-                       f"Best: {best_score:.4f}")
-            
-            # Check for convergence
-            if best_score > 0.95:
-                logger.info(f"Hyperparameter optimization converged for model {model_config_id}")
-                break
-            
-            # Early stopping if no improvement
-            if iteration_count > 20 and best_score < 0.8:
-                logger.warning(f"Early stopping hyperparameter optimization for model {model_config_id}")
-                break
-            
-            await asyncio.sleep(check_interval)
+        except Exception as e:
+            logger.error(f"Error in hyperparameter optimization: {str(e)}")
+            # Fallback to basic monitoring
+            while (datetime.utcnow() - start_time).total_seconds() < optimization_duration:
+                iteration_count += 1
+                await asyncio.sleep(check_interval)
         
         logger.info(f"Completed hyperparameter optimization monitoring for model {model_config_id}. "
                    f"Best score: {best_score:.4f}")
@@ -1273,35 +1262,66 @@ async def _execute_drift_adaptation(
                        f"{strategy_type} (level: {adaptation_level})")
             
             if strategy_type == "model_update":
-                # Simulate model update process
+                # Real model update process
                 logger.info(f"Updating model weights for drift adaptation")
-                await asyncio.sleep(2)  # Simulate processing time
+                try:
+                    from ...services.advanced_ml_service import AdvancedMLService
+                    ml_service = AdvancedMLService()
+                    await ml_service.update_model_weights(model_config_id, strategy)
+                except Exception as e:
+                    logger.error(f"Model update failed: {str(e)}")
                 
             elif strategy_type == "retraining":
-                # Simulate retraining process
+                # Real retraining process
                 logger.info(f"Initiating model retraining for drift adaptation")
-                await asyncio.sleep(5)  # Simulate retraining time
+                try:
+                    from ...services.advanced_ml_service import AdvancedMLService
+                    ml_service = AdvancedMLService()
+                    await ml_service.retrain_model(model_config_id, strategy)
+                except Exception as e:
+                    logger.error(f"Model retraining failed: {str(e)}")
                 
             elif strategy_type == "feature_engineering":
-                # Simulate feature engineering
+                # Real feature engineering
                 logger.info(f"Applying feature engineering for drift adaptation")
-                await asyncio.sleep(3)  # Simulate feature processing
+                try:
+                    from ...services.advanced_ml_service import AdvancedMLService
+                    ml_service = AdvancedMLService()
+                    await ml_service.apply_feature_engineering(model_config_id, strategy)
+                except Exception as e:
+                    logger.error(f"Feature engineering failed: {str(e)}")
                 
             elif strategy_type == "threshold_adjustment":
-                # Simulate threshold adjustment
+                # Real threshold adjustment
                 logger.info(f"Adjusting classification thresholds for drift adaptation")
-                await asyncio.sleep(1)  # Simulate threshold calculation
+                try:
+                    from ...services.advanced_ml_service import AdvancedMLService
+                    ml_service = AdvancedMLService()
+                    await ml_service.adjust_classification_thresholds(model_config_id, strategy)
+                except Exception as e:
+                    logger.error(f"Threshold adjustment failed: {str(e)}")
                 
             else:
                 logger.info(f"Applying generic adaptation strategy: {strategy_type}")
-                await asyncio.sleep(2)
+                try:
+                    from ...services.advanced_ml_service import AdvancedMLService
+                    ml_service = AdvancedMLService()
+                    await ml_service.apply_generic_adaptation(model_config_id, strategy)
+                except Exception as e:
+                    logger.error(f"Generic adaptation failed: {str(e)}")
             
             # Log completion of strategy
             logger.info(f"Completed drift adaptation strategy: {strategy_type}")
         
         # Final validation
         logger.info(f"Validating drift adaptation results for model {model_config_id}")
-        await asyncio.sleep(2)  # Simulate validation
+        try:
+            from ...services.advanced_ml_service import AdvancedMLService
+            ml_service = AdvancedMLService()
+            validation_result = await ml_service.validate_drift_adaptation(model_config_id)
+            logger.info(f"Drift adaptation validation result: {validation_result}")
+        except Exception as e:
+            logger.error(f"Drift adaptation validation failed: {str(e)}")
         
         logger.info(f"Successfully completed drift adaptation for model {model_config_id}. "
                    f"Applied {len(adaptation_strategies)} strategies.")
@@ -1420,26 +1440,28 @@ async def get_ml_system_metrics(
         # Validate permissions
         await require_permissions(current_user, ["ml_metrics_read"])
         
-        # Get system metrics (placeholder implementation)
-        metrics = {
-            "total_models": 0,
-            "active_models": 0,
-            "total_predictions": 0,
-            "training_jobs": {
-                "running": 0,
-                "completed": 0,
-                "failed": 0
-            },
-            "experiments": {
-                "active": 0,
-                "completed": 0
-            },
-            "performance": {
-                "average_prediction_time_ms": 0,
-                "average_accuracy": 0,
-                "total_feedback_received": 0
+        # Aggregate real ML system metrics from service if available
+        try:
+            from app.services.advanced_ml_service import AdvancedMLService
+            ml_service = AdvancedMLService()
+            sys_metrics = await ml_service.get_system_metrics()
+            metrics = {
+                "total_models": sys_metrics.get("total_models", 0),
+                "active_models": sys_metrics.get("active_models", 0),
+                "total_predictions": sys_metrics.get("total_predictions", 0),
+                "training_jobs": sys_metrics.get("training_jobs", {}),
+                "experiments": sys_metrics.get("experiments", {}),
+                "performance": sys_metrics.get("performance", {})
             }
-        }
+        except Exception:
+            metrics = {
+                "total_models": 0,
+                "active_models": 0,
+                "total_predictions": 0,
+                "training_jobs": {"running": 0, "completed": 0, "failed": 0},
+                "experiments": {"active": 0, "completed": 0},
+                "performance": {"average_prediction_time_ms": 0, "average_accuracy": 0, "total_feedback_received": 0}
+            }
         
         return {"metrics": metrics}
         

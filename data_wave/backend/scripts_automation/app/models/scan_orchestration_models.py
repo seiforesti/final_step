@@ -10,7 +10,8 @@ from typing import Any, Dict, List, Optional, Union
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field, validator
-from sqlmodel import Column, Field, Relationship, SQLModel, ARRAY, JSON as JSONB
+from sqlmodel import Column, Field, Relationship, SQLModel, ARRAY, JSON as JSONB, String
+from sqlalchemy import Index
 
 # ============================================================================
 # ENUMS
@@ -118,6 +119,34 @@ class OptimizationGoal(str, Enum):
     COST = "cost"
     QUALITY = "quality"
     BALANCED = "balanced"
+# ============================================================================
+# ORCHESTRATION EXECUTION METRICS
+# ============================================================================
+
+class OrchestrationExecution(SQLModel, table=True):
+    """Persisted orchestration execution metrics for performance dashboards."""
+    __tablename__ = "orchestration_executions"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    orchestration_id: str = Field(index=True)
+    scan_request_id: Optional[str] = Field(default=None, index=True)
+    user_id: Optional[str] = Field(default=None, index=True)
+    data_source_id: Optional[int] = Field(default=None, index=True)
+    started_at: datetime = Field(default_factory=datetime.utcnow, index=True)
+    completed_at: Optional[datetime] = Field(default=None, index=True)
+    status: str = Field(default="completed", index=True)
+    duration_seconds: Optional[float] = Field(default=None)
+    rules_executed: Optional[int] = Field(default=None)
+    findings_count: Optional[int] = Field(default=None)
+    data_quality_score: Optional[float] = Field(default=None)
+    cpu_usage_percent: Optional[float] = Field(default=None)
+    memory_usage_mb: Optional[float] = Field(default=None)
+    error_message: Optional[str] = Field(default=None)
+    extra_metrics: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB))
+
+    __table_args__ = (
+        Index('ix_orch_exec_time', 'started_at', 'completed_at'),
+    )
 
 # ============================================================================
 # CACHE NODE MODELS
@@ -152,6 +181,7 @@ class CacheNode(SQLModel, table=True):
     
     # Relationships
     distributed_cache_id: Optional[UUID] = Field(default=None, foreign_key="distributed_caches.id", description="Parent distributed cache")
+    distributed_cache: Optional["DistributedCache"] = Relationship(back_populates="nodes")
     partitions: List["CachePartition"] = Relationship(back_populates="node")
     synchronizations: List["CacheSynchronization"] = Relationship(back_populates="source_node")
     
@@ -254,7 +284,7 @@ class CacheSynchronization(SQLModel, table=True):
     # Synchronization details
     sync_mode: SynchronizationMode = Field(..., description="Synchronization mode")
     sync_type: str = Field(..., description="Type of synchronization (full, incremental, selective)")
-    keys_synced: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Keys that were synchronized")
+    keys_synced: Optional[str] = Field(default=None, sa_column=Column(JSONB), description="Keys that were synchronized")
     
     # Performance metrics
     sync_duration_ms: Optional[float] = Field(default=None, description="Synchronization duration in milliseconds")
@@ -291,7 +321,7 @@ class EdgeNode(SQLModel, table=True):
     network_bandwidth: float = Field(..., description="Network bandwidth in Mbps")
     geographical_location: str = Field(..., description="Geographical location of the node")
     security_level: str = Field(default="standard", description="Security level of the node")
-    specialized_capabilities: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Specialized capabilities")
+    specialized_capabilities: Optional[str] = Field(default=None, sa_column=Column(JSONB), description="Specialized capabilities")
     
     # Status and health
     is_active: bool = Field(default=True, description="Whether the node is currently active")
@@ -401,7 +431,7 @@ class EdgeSynchronization(SQLModel, table=True):
     # Synchronization details
     sync_mode: str = Field(..., description="Synchronization mode (real_time, periodic, event_driven, on_demand)")
     sync_type: str = Field(..., description="Type of synchronization (full, incremental, selective)")
-    data_synced: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Data items that were synchronized")
+    data_synced: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)), description="Data items that were synchronized")
     
     # Performance metrics
     sync_duration_ms: Optional[float] = Field(default=None, description="Synchronization duration in milliseconds")
@@ -436,7 +466,7 @@ class OrchestrationPipeline(SQLModel, table=True):
     
     # Pipeline configuration
     pipeline_config: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Complete pipeline configuration")
-    workflow_steps: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Ordered list of workflow step identifiers")
+    workflow_steps: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)), description="Ordered list of workflow step identifiers")
     dependencies: Dict[str, List[str]] = Field(default_factory=dict, sa_column=Column(JSONB), description="Step dependencies mapping")
     
     # Execution settings
@@ -470,7 +500,7 @@ class OrchestrationPipeline(SQLModel, table=True):
     
     # Security and compliance
     security_level: str = Field(default="standard", description="Security level (standard, enhanced, enterprise)")
-    compliance_requirements: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Compliance requirements")
+    compliance_requirements: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)), description="Compliance requirements")
     access_control: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Access control configuration")
     
     # Timestamps
@@ -507,7 +537,7 @@ class StreamProcessingConfig(SQLModel, table=True):
     # Data transformation
     transformation_rules: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSONB), description="Data transformation rules")
     schema_validation: bool = Field(default=True, description="Whether to validate data schema")
-    data_quality_checks: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Data quality check types")
+    data_quality_checks: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)), description="Data quality check types")
     
     # Error handling
     error_handling_strategy: str = Field(default="dead_letter_queue", description="Error handling strategy")
@@ -533,7 +563,7 @@ class StreamProcessingConfig(SQLModel, table=True):
     
     # Integration settings
     external_system_config: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="External system configuration")
-    webhook_endpoints: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Webhook endpoints for notifications")
+    webhook_endpoints: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)), description="Webhook endpoints for notifications")
     
     # Status and lifecycle
     is_active: bool = Field(default=True, description="Whether the configuration is currently active")
@@ -564,7 +594,7 @@ class ScanOrchestration(SQLModel, table=True):
     orchestration_type: str = Field(..., max_length=100)
     status: str = Field(default="draft", max_length=50)
     priority_level: int = Field(default=5, ge=1, le=10)
-    target_data_sources: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)))
+    target_data_sources: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)))
     orchestration_config: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB))
     created_by: str = Field(..., max_length=255)
     created_at: datetime = Field(default_factory=datetime.utcnow)
@@ -621,9 +651,9 @@ class ScanOrchestrationMaster(SQLModel, table=True):
     complexity_score: Optional[float] = Field(default=None, ge=0.0, le=10.0, description="Complexity assessment")
     
     # Scope and targets
-    target_data_sources: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Target data source identifiers")
-    target_rule_sets: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Target rule set identifiers")
-    target_environments: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Target environments")
+    target_data_sources: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)), description="Target data source identifiers")
+    target_rule_sets: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)), description="Target rule set identifiers")
+    target_environments: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)), description="Target environments")
     scope_definition: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Detailed scope definition")
     
     # Advanced orchestration features
@@ -639,13 +669,13 @@ class ScanOrchestrationMaster(SQLModel, table=True):
     timeout_configuration: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Timeout configuration")
     
     # Dependencies and relationships
-    dependencies: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Dependency identifiers")
-    prerequisite_orchestrations: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Prerequisite orchestration IDs")
-    dependent_orchestrations: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Dependent orchestration IDs")
+    dependencies: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)), description="Dependency identifiers")
+    prerequisite_orchestrations: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)), description="Prerequisite orchestration IDs")
+    dependent_orchestrations: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)), description="Dependent orchestration IDs")
     
     # Compliance and governance
-    compliance_frameworks: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Compliance frameworks")
-    regulatory_requirements: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Regulatory requirements")
+    compliance_frameworks: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)), description="Compliance frameworks")
+    regulatory_requirements: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)), description="Regulatory requirements")
     audit_trail_required: bool = Field(default=True, description="Whether audit trail is required")
     data_retention_policy: Optional[str] = Field(max_length=255, description="Data retention policy")
     
@@ -673,11 +703,11 @@ class ScanOrchestrationMaster(SQLModel, table=True):
     escalation_config: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Escalation configuration")
     
     # Metadata and tracking
-    tags: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Classification tags")
+    tags: Optional[str] = Field(default=None, sa_column=Column(JSONB), description="Classification tags")
     master_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Additional metadata")
-    created_by: str = Field(..., max_length=255, description="Creator identifier")
+    created_by: str = Field(default="system", max_length=255, description="Creator identifier")
     created_at: datetime = Field(default_factory=datetime.utcnow, description="Creation timestamp")
-    updated_by: Optional[str] = Field(max_length=255, description="Last updater identifier")
+    updated_by: Optional[str] = Field(default=None, max_length=255, description="Last updater identifier")
     updated_at: Optional[datetime] = Field(default=None, description="Last update timestamp")
     
     class Config:
@@ -710,13 +740,13 @@ class OrchestrationStageExecution(SQLModel, table=True):
     # Stage configuration and logic
     stage_configuration: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Stage configuration")
     execution_logic: str = Field(..., description="Execution logic or script")
-    validation_rules: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Validation rules")
+    validation_rules: Optional[str] = Field(default=None, sa_column=Column(JSONB), description="Validation rules")
     error_handling: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Error handling configuration")
     
     # Dependencies and relationships
-    dependencies: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Stage dependencies")
-    prerequisite_stages: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Prerequisite stage IDs")
-    dependent_stages: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Dependent stage IDs")
+    dependencies: Optional[str] = Field(default=None, sa_column=Column(JSONB), description="Stage dependencies")
+    prerequisite_stages: Optional[str] = Field(default=None, sa_column=Column(JSONB), description="Prerequisite stage IDs")
+    dependent_stages: Optional[str] = Field(default=None, sa_column=Column(JSONB), description="Dependent stage IDs")
     
     # Advanced stage features
     conditional_execution: bool = Field(default=False, description="Whether execution is conditional")
@@ -750,15 +780,15 @@ class OrchestrationStageExecution(SQLModel, table=True):
     # Input and output
     input_schema: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSONB), description="Input data schema")
     output_schema: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSONB), description="Output data schema")
-    data_transformations: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Data transformations")
+    data_transformations: Optional[str] = Field(default=None, sa_column=Column(JSONB), description="Data transformations")
     
     # Monitoring and alerting
     monitoring_enabled: bool = Field(default=True, description="Whether monitoring is enabled")
     alert_thresholds: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Alert thresholds")
-    notification_triggers: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Notification triggers")
+    notification_triggers: Optional[str] = Field(default=None, sa_column=Column(JSONB), description="Notification triggers")
     
     # Metadata and tracking
-    tags: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Classification tags")
+    tags: Optional[str] = Field(default=None, sa_column=Column(JSONB), description="Classification tags")
     stage_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Additional metadata")
     created_by: str = Field(..., max_length=255, description="Creator identifier")
     created_at: datetime = Field(default_factory=datetime.utcnow, description="Creation timestamp")
@@ -794,8 +824,8 @@ class OrchestrationDependency(SQLModel, table=True):
     
     # Dependency configuration
     dependency_config: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Dependency configuration")
-    dependency_rules: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Dependency rules")
-    validation_conditions: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Validation conditions")
+    dependency_rules: Optional[str] = Field(default=None, sa_column=Column(JSONB), description="Dependency rules")
+    validation_conditions: Optional[str] = Field(default=None, sa_column=Column(JSONB), description="Validation conditions")
     
     # Dependency strength and priority
     dependency_strength: str = Field(..., max_length=50, description="Dependency strength (strong, weak, optional)")
@@ -823,7 +853,7 @@ class OrchestrationDependency(SQLModel, table=True):
     violation_count: int = Field(default=0, description="Total violation count")
     
     # Metadata and tracking
-    tags: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Classification tags")
+    tags: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)), description="Classification tags")
     dependency_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Additional metadata")
     created_by: str = Field(..., max_length=255, description="Creator identifier")
     created_at: datetime = Field(default_factory=datetime.utcnow, description="Creation timestamp")

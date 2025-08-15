@@ -5,8 +5,7 @@ from sqlmodel import Session
 from app.db_session import get_session
 from app.services.performance_service import PerformanceService
 from app.models.performance_models import (
-    PerformanceMetric, PerformanceAlert, PerformanceThreshold,
-    SystemHealthMetric, ResourceUtilization
+    PerformanceMetric, PerformanceAlert,
 )
 from app.api.security import get_current_user, require_permission
 from app.api.security.rbac import (

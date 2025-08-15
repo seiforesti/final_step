@@ -28,7 +28,7 @@ class ScheduledTask(SQLModel, table=True):
     __tablename__ = "scheduled_tasks"
     
     id: Optional[int] = Field(default=None, primary_key=True)
-    data_source_id: int = Field(foreign_key="data_sources.id", index=True)
+    data_source_id: int = Field(foreign_key="datasource.id", index=True)
     
     # Task details
     task_name: str

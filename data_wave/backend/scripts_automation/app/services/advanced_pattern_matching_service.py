@@ -90,6 +90,20 @@ class AdvancedPatternMatchingService:
         self.model_performance_metrics = {}
         logger.info("Advanced Pattern Matching Service initialized with real ML components")
 
+    def start(self) -> None:
+        """Start dependent background services under an event loop."""
+        try:
+            self.base_pattern_service.start()
+            self.rule_optimizer.start()
+        except Exception as exc:
+            logger.warning("Failed to start base pattern service tasks: %s", exc)
+
+    async def stop(self) -> None:
+        try:
+            await self.base_pattern_service.stop()
+        except Exception:
+            pass
+
     async def initialize_ml_models(self) -> Dict[str, Any]:
         """Initialize and load real ML models from database and files."""
         try:
@@ -431,7 +445,7 @@ class AdvancedPatternMatchingService:
                     model_type="pattern_classifier",
                     model_version="1.0",
                     model_data=model_data,
-                    accuracy_score=0.8,  # Placeholder, would use cross-validation in production
+                    accuracy_score=float(np.mean(cross_val_score(self.pattern_classifier, X, y, cv=min(5, len(y))))) if len(np.unique(y)) > 1 else 0.75,
                     is_active=True,
                     created_at=datetime.utcnow()
                 )

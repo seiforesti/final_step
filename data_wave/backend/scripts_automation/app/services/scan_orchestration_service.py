@@ -51,14 +51,24 @@ from sklearn.cluster import KMeans
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import StandardScaler
 
-# Core framework imports
-from ..core.config import settings
+# Core framework imports (robust get_settings wrapper)
+try:
+    from ..core.settings import get_settings as _get_settings
+    def get_settings():
+        return _get_settings()
+except Exception:
+    from ..core.config import settings as _settings
+    def get_settings():
+        return _settings
 from ..core.cache_manager import EnterpriseCacheManager as CacheManager
 from ..db_session import get_session
 
 # Model imports
 from ..models.scan_models import *
-from ..models.advanced_scan_rule_models import *
+from ..models.advanced_scan_rule_models import (
+    IntelligentScanRule, RuleExecutionHistory, RuleOptimizationJob,
+    RulePatternLibrary, RulePatternAssociation, RulePerformanceBaseline
+)
 # from ..models.scan_orchestration_models import *  # File deleted, no models needed
 from ..models.scan_intelligence_models import *
 
@@ -193,11 +203,26 @@ class ScanOrchestrationService:
         # Threading
         self.executor = ThreadPoolExecutor(max_workers=20)
         
-        # Background tasks
-        asyncio.create_task(self._orchestration_loop())
-        asyncio.create_task(self._resource_monitoring_loop())
-        asyncio.create_task(self._performance_optimization_loop())
-        asyncio.create_task(self._metrics_collection_loop())
+        # Background tasks (defer until an event loop exists)
+        try:
+            loop = asyncio.get_running_loop()
+            loop.create_task(self._orchestration_loop())
+            loop.create_task(self._resource_monitoring_loop())
+            loop.create_task(self._performance_optimization_loop())
+            loop.create_task(self._metrics_collection_loop())
+        except RuntimeError:
+            pass
+
+    def start(self) -> None:
+        """Start background tasks when an event loop is available."""
+        try:
+            loop = asyncio.get_running_loop()
+            loop.create_task(self._orchestration_loop())
+            loop.create_task(self._resource_monitoring_loop())
+            loop.create_task(self._performance_optimization_loop())
+            loop.create_task(self._metrics_collection_loop())
+        except RuntimeError:
+            pass
         
         logger.info("Scan Orchestration Service initialized successfully")
     
@@ -899,6 +924,29 @@ class ScanOrchestrationService:
                 "progress_percentage": orchestration_context.get("progress_percentage", 0),
                 "completed_at": datetime.utcnow().isoformat()
             }
+            # Persist execution metrics for dashboards
+            try:
+                from app.models.scan_orchestration_models import OrchestrationExecution
+                from app.db_session import get_session as _get_sync_session
+                with _get_sync_session() as s:
+                    exec_row = OrchestrationExecution(
+                        orchestration_id=orchestration_id,
+                        scan_request_id=str(orchestration_context.get('scan_request', {}).get('request_id', '')),
+                        user_id=str(orchestration_context.get('user_id', '')),
+                        data_source_id=orchestration_context.get('scan_request', {}).get('data_source_id'),
+                        started_at=orchestration_context.get("execution_started_at"),
+                        completed_at=datetime.utcnow(),
+                        status=overall_status,
+                        duration_seconds=orchestration_result["execution_time_seconds"],
+                        rules_executed=sum(r.get('total_rules', 0) for r in stage_results),
+                        findings_count=sum(len((r.get('rule_results') or [])) for r in stage_results),
+                        data_quality_score=None,
+                        extra_metrics={"strategy": str(strategy)}
+                    )
+                    s.add(exec_row)
+                    s.commit()
+            except Exception:
+                pass
             
             return orchestration_result
             
@@ -930,7 +978,14 @@ class ScanOrchestrationService:
                 # Execute rules in parallel
                 tasks = []
                 for rule in rules:
-                    task = asyncio.create_task(self._execute_rule(rule, orchestration_context))
+                    try:
+                        loop = asyncio.get_running_loop()
+                        task = loop.create_task(self._execute_rule(rule, orchestration_context))
+                    except RuntimeError:
+                        # Fallback to sequential execution if no loop
+                        result = await self._execute_rule(rule, orchestration_context)
+                        rule_results.append(result)
+                        continue
                     tasks.append(task)
                 
                 rule_results = await asyncio.gather(*tasks, return_exceptions=True)
@@ -984,8 +1039,15 @@ class ScanOrchestrationService:
             scan_request = orchestration_context["scan_request"]
             
             # Use scan rule service to execute the rule
+            # The enterprise rule service expects (rule_id: str, context: Dict)
+            rule_identifier = str(rule.get("id") or rule.get("rule_id") or rule)
+            rule_context = {
+                "parameters": rule.get("parameters", {}),
+                "data_sources": scan_request.get("data_sources", []),
+                "execution_context": scan_request,
+            }
             rule_result = await self.scan_rule_service.execute_scan_rule(
-                rule, scan_request
+                rule_identifier, rule_context
             )
             
             return {
@@ -1089,13 +1151,22 @@ class ScanOrchestrationService:
                     if availability["available"]:
                         # Execute the queued orchestration
                         logger.info(f"Executing queued orchestration {orchestration_context['orchestration_id']}")
-                        asyncio.create_task(
-                            self.orchestrate_scan_execution(
+                        try:
+                            loop = asyncio.get_running_loop()
+                            loop.create_task(
+                                self.orchestrate_scan_execution(
+                                    orchestration_context["scan_request"],
+                                    orchestration_context["strategy"],
+                                    orchestration_context["priority"]
+                                )
+                            )
+                        except RuntimeError:
+                            # Execute synchronously if no loop available
+                            await self.orchestrate_scan_execution(
                                 orchestration_context["scan_request"],
                                 orchestration_context["strategy"],
                                 orchestration_context["priority"]
                             )
-                        )
                     else:
                         # Put back in queue
                         heapq.heappush(self.orchestration_queue, (priority, queued_time, orchestration_context))

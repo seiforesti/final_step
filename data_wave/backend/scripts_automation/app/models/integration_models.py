@@ -48,7 +48,7 @@ class Integration(SQLModel, table=True):
     success_rate: float = Field(default=0.0)
     
     # Relationships
-    data_source_id: int = Field(foreign_key="data_sources.id")
+    data_source_id: int = Field(foreign_key="datasource.id")
     data_source: Optional["DataSource"] = Relationship(back_populates="integrations")
     
     # Audit fields

@@ -31,6 +31,118 @@ from ..auth_models import User
 from .racine_orchestration_models import RacineOrchestrationMaster
 
 
+# Backward-compatibility enterprise models expected by services
+class RacineCrossGroupIntegration(Base):
+    __tablename__ = 'racine_cross_group_integrations'
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    integration_name = Column(String, nullable=False, index=True)
+    description = Column(Text)
+    status = Column(String, default="active", index=True)
+    coordination_policy = Column(JSON)
+    routing_strategy = Column(JSON)
+    data_flow_policies = Column(JSON)
+    monitoring_config = Column(JSON)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class RacineExternalIntegration(Base):
+    __tablename__ = 'racine_external_integrations'
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    provider_name = Column(String, index=True)
+    integration_type = Column(String, index=True)
+    connection_config = Column(JSON)
+    auth_config = Column(JSON)
+    status = Column(String, default="configured", index=True)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+
+
+class RacineEventStream(Base):
+    __tablename__ = 'racine_event_streams'
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    stream_name = Column(String, index=True)
+    broker_type = Column(String)  # kafka, rabbitmq, pulsar
+    topic = Column(String, index=True)
+    partitions = Column(Integer, default=3)
+    replication_factor = Column(Integer, default=1)
+    retention_policy = Column(JSON)
+    status = Column(String, default="active", index=True)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+
+
+class RacineServiceRegistry(Base):
+    __tablename__ = 'racine_service_registry'
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    service_name = Column(String, index=True)
+    group = Column(String, index=True)
+    version = Column(String)
+    endpoint_url = Column(String)
+    health_status = Column(String, default="unknown", index=True)
+    metadata_json = Column(JSON)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+
+
+class RacineIntegrationHealth(Base):
+    __tablename__ = 'racine_integration_health'
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    integration_id = Column(String, index=True)
+    status = Column(String, default="healthy", index=True)
+    metrics = Column(JSON)
+    last_checked = Column(DateTime, default=datetime.utcnow, index=True)
+
+
+class RacineDataSync(Base):
+    __tablename__ = 'racine_data_syncs'
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    source = Column(String, index=True)
+    targets = Column(JSON)
+    sync_schedule = Column(String)
+    last_run = Column(DateTime)
+    next_run = Column(DateTime)
+    sync_config = Column(JSON)
+    status = Column(String, default="scheduled", index=True)
+
+
+class RacineWebhookSubscription(Base):
+    __tablename__ = 'racine_webhook_subscriptions'
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    subscriber = Column(String, index=True)
+    callback_url = Column(String)
+    secret = Column(String)
+    event_filters = Column(JSON)
+    status = Column(String, default="active", index=True)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+
+
+class RacineIntegrationTest(Base):
+    __tablename__ = 'racine_integration_tests'
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    integration_id = Column(String, index=True)
+    test_name = Column(String, index=True)
+    test_config = Column(JSON)
+    last_result = Column(String)
+    last_run_at = Column(DateTime)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+
+
+class RacinePerformanceMetrics(Base):
+    __tablename__ = 'racine_performance_metrics'
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    entity_type = Column(String, index=True)
+    entity_id = Column(String, index=True)
+    metrics = Column(JSON)
+    recorded_at = Column(DateTime, default=datetime.utcnow, index=True)
+
+
 class IntegrationType(enum.Enum):
     """Integration type enumeration"""
     API_INTEGRATION = "api_integration"

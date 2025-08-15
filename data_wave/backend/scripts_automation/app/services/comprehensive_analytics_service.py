@@ -41,6 +41,11 @@ from ..models.analytics_models import (
     AnalyticsAlert, AnalyticsExperiment, AnalyticsQuery, AnalyticsResult
 )
 
+try:
+    from ..core.settings import get_settings
+except Exception:
+    from ..core.config import settings as get_settings
+
 logger = logging.getLogger(__name__)
 
 class AnalyticsConfig:
@@ -103,11 +108,28 @@ class ComprehensiveAnalyticsService:
         # Threading
         self.executor = ThreadPoolExecutor(max_workers=12)
         
-        # Background tasks
-        asyncio.create_task(self._analytics_processing_loop())
-        asyncio.create_task(self._model_training_loop())
-        asyncio.create_task(self._insight_generation_loop())
-        asyncio.create_task(self._performance_monitoring_loop())
+        # Background tasks - defer until start() method
+        self._background_tasks = [
+            self._analytics_processing_loop,
+            self._model_training_loop,
+            self._insight_generation_loop,
+            self._performance_monitoring_loop
+        ]
+        self._pending_dashboard_streams = []
+    
+    async def start(self):
+        """Start background tasks when event loop is available"""
+        try:
+            loop = asyncio.get_running_loop()
+            # Start background tasks
+            for task_func in self._background_tasks:
+                loop.create_task(task_func())
+            # Start pending dashboard streams
+            for dashboard_id in self._pending_dashboard_streams:
+                loop.create_task(self._stream_dashboard_data(dashboard_id))
+            self._pending_dashboard_streams.clear()
+        except RuntimeError:
+            logger.warning("No event loop available, background tasks will start when loop becomes available")
     
     def _init_analytics_components(self):
         """Initialize analytics components and models"""
@@ -705,7 +727,12 @@ class ComprehensiveAnalyticsService:
             self.dashboard_configs[dashboard_id] = dashboard
             
             # Start real-time data streaming for dashboard
-            asyncio.create_task(self._stream_dashboard_data(dashboard_id))
+            try:
+                loop = asyncio.get_running_loop()
+                loop.create_task(self._stream_dashboard_data(dashboard_id))
+            except RuntimeError:
+                # Start streaming when loop is available
+                self._pending_dashboard_streams.append(dashboard_id)
             
             return dashboard
             

@@ -30,6 +30,15 @@ from ..core.settings import settings_manager
 from ..models.catalog_quality_models import *
 from ..services.ai_service import EnterpriseAIService as AIService
 
+try:
+    from ..core.settings import get_settings as _get_settings
+    def get_settings():
+        return _get_settings()
+except Exception:
+    from ..core.config import settings
+    def get_settings():
+        return settings
+
 logger = get_logger(__name__)
 
 class QualityAssessmentConfig:
@@ -109,9 +118,23 @@ class CatalogQualityService:
         # Threading
         self.executor = ThreadPoolExecutor(max_workers=10)
         
-        # Start background tasks
-        asyncio.create_task(self._monitoring_loop())
-        asyncio.create_task(self._cleanup_loop())
+        # Start background tasks only when an event loop is running; defer otherwise
+        try:
+            loop = asyncio.get_running_loop()
+            loop.create_task(self._monitoring_loop())
+            loop.create_task(self._cleanup_loop())
+        except RuntimeError:
+            # Will be started by router startup or external orchestrator
+            pass
+
+    def start(self) -> None:
+        """Start background monitoring tasks when an event loop exists."""
+        try:
+            loop = asyncio.get_running_loop()
+            loop.create_task(self._monitoring_loop())
+            loop.create_task(self._cleanup_loop())
+        except RuntimeError:
+            pass
     
     async def assess_asset_quality(
         self,
@@ -899,36 +922,336 @@ class CatalogQualityService:
             logger.error(f"Statistical outlier rule failed: {e}")
             return {"passed": False, "error": str(e)}
     
-    # Placeholder implementations for other rule types
+    # Advanced implementations for other rule types
     async def _referential_integrity_rule(self, asset_id, rule, asset_metadata, options):
-        """Check referential integrity constraints"""
-        return {"passed": True, "score": 100.0, "total_records": 0}
-    
+        """Check referential integrity constraints using provided parameters and samples.
+
+        Expected rule.parameters:
+        - column: str -> the local FK column to check on this asset
+        - reference_values: List[Any] (optional) -> explicit allowed values for FK
+        - allow_nulls: bool (default True)
+        - max_missing_rate: float (default 0.01) -> tolerance for missing/invalid refs
+        """
+        try:
+            params = rule.parameters or {}
+            column = params.get("column")
+            allow_nulls = params.get("allow_nulls", True)
+            threshold = rule.thresholds.get("max_missing_rate", 0.01) if hasattr(rule, "thresholds") else 0.01
+            if not column:
+                return {"passed": False, "error": "Missing 'column' parameter"}
+
+            data_sample = await self._get_asset_data_sample(asset_id, params)
+            if not data_sample:
+                return {"passed": False, "error": "No data available"}
+
+            reference_values = set(params.get("reference_values", []))
+
+            total_records = len(data_sample)
+            violations = 0
+            nulls = 0
+            checked = 0
+
+            for record in data_sample:
+                value = record.get(column)
+                if value is None:
+                    nulls += 1
+                    if not allow_nulls:
+                        violations += 1
+                    continue
+                checked += 1
+                if reference_values and value not in reference_values:
+                    violations += 1
+
+            missing_rate = violations / max(1, total_records)
+            passed = missing_rate <= threshold
+            score = max(0.0, (1.0 - missing_rate) * 100.0)
+
+            return {
+                "passed": passed,
+                "score": score,
+                "total_records": total_records,
+                "passed_records": total_records - violations,
+                "failed_records": violations,
+                "details": {
+                    "checked": checked,
+                    "nulls": nulls,
+                    "missing_rate": missing_rate,
+                    "threshold": threshold,
+                    "reference_mode": "explicit_values" if reference_values else "not_provided"
+                },
+                "recommendations": [] if passed else [
+                    "Populate missing foreign key values",
+                    "Ensure referential set is synchronized and configured in rule.parameters.reference_values"
+                ]
+            }
+        except Exception as e:
+            logger.error(f"Referential integrity rule failed: {e}")
+            return {"passed": False, "error": str(e)}
+
     async def _custom_sql_rule(self, asset_id, rule, asset_metadata, options):
-        """Execute custom SQL validation"""
-        return {"passed": True, "score": 100.0, "total_records": 0}
-    
+        """Execute a custom assertion against the sampled data using a safe evaluator.
+
+        Expected rule.parameters:
+        - assertion: str -> Python-like boolean expression evaluated per record or over aggregates
+          Examples:
+            "sum(col('amount') for _ in records) >= 0"
+            "all((r['age'] is None) or (r['age'] >= 18) for r in records)"
+        - failure_message: str (optional)
+        """
+        try:
+            params = rule.parameters or {}
+            assertion = params.get("assertion")
+            if not assertion:
+                return {"passed": False, "error": "Missing 'assertion' parameter"}
+
+            data_sample = await self._get_asset_data_sample(asset_id, params)
+            if not data_sample:
+                return {"passed": False, "error": "No data available"}
+
+            # Safe evaluation context
+            records = data_sample
+            safe_globals = {
+                "__builtins__": {},
+                "sum": sum,
+                "min": min,
+                "max": max,
+                "len": len,
+                "all": all,
+                "any": any,
+            }
+            def col(name: str):
+                return [r.get(name) for r in records]
+            safe_locals = {"records": records, "col": col}
+
+            try:
+                result = bool(eval(assertion, safe_globals, safe_locals))
+            except Exception as eval_err:
+                return {"passed": False, "error": f"Assertion evaluation error: {eval_err}"}
+
+            score = 100.0 if result else 0.0
+            return {
+                "passed": result,
+                "score": score,
+                "total_records": len(records),
+                "details": {"assertion": assertion},
+                "recommendations": [] if result else [params.get("failure_message") or "Review the custom assertion and underlying data"]
+            }
+        except Exception as e:
+            logger.error(f"Custom SQL rule failed: {e}")
+            return {"passed": False, "error": str(e)}
+
     async def _pattern_match_rule(self, asset_id, rule, asset_metadata, options):
-        """Pattern matching validation"""
-        return {"passed": True, "score": 100.0, "total_records": 0}
-    
+        """Pattern matching validation across one or more columns using regex.
+
+        Expected rule.parameters:
+        - columns: List[str] -> columns to validate
+        - pattern: str -> regex pattern
+        - case_insensitive: bool (default True)
+        - fullmatch: bool (default False) -> use fullmatch instead of search
+        - min_compliance_rate: float in thresholds (default 0.95)
+        """
+        try:
+            import re as _re
+            params = rule.parameters or {}
+            columns = params.get("columns")
+            pattern = params.get("pattern")
+            if not columns or not pattern:
+                return {"passed": False, "error": "Missing 'columns' or 'pattern' parameter"}
+            flags = _re.IGNORECASE if params.get("case_insensitive", True) else 0
+            try:
+                regex = _re.compile(pattern, flags)
+            except _re.error as re_err:
+                return {"passed": False, "error": f"Invalid regex: {re_err}"}
+
+            data_sample = await self._get_asset_data_sample(asset_id, params)
+            if not data_sample:
+                return {"passed": False, "error": "No data available"}
+
+            total_records = len(data_sample)
+            violations = 0
+            invalid_values = []
+            use_full = params.get("fullmatch", False)
+
+            for i, record in enumerate(data_sample):
+                for col in columns:
+                    value = record.get(col)
+                    if value is None:
+                        continue
+                    value_str = str(value)
+                    matched = bool(regex.fullmatch(value_str)) if use_full else bool(regex.search(value_str))
+                    if not matched:
+                        violations += 1
+                        if len(invalid_values) < 25:
+                            invalid_values.append({"index": i, "column": col, "value": value_str})
+
+            # Compute compliance over evaluated cells
+            evaluated = max(1, total_records * len(columns))
+            compliance_rate = (evaluated - violations) / evaluated
+            threshold = rule.thresholds.get("min_compliance_rate", 0.95) if hasattr(rule, "thresholds") else 0.95
+            passed = compliance_rate >= threshold
+            score = max(0.0, compliance_rate * 100.0)
+
+            return {
+                "passed": passed,
+                "score": score,
+                "total_records": total_records,
+                "passed_records": int(evaluated - violations),
+                "failed_records": int(violations),
+                "details": {
+                    "columns": columns,
+                    "pattern": pattern,
+                    "compliance_rate": compliance_rate,
+                    "threshold": threshold,
+                    "checked_cells": evaluated,
+                    "invalid_examples": invalid_values
+                },
+                "recommendations": [] if passed else [
+                    "Standardize input formats and update upstream validations",
+                    "Consider refining regex pattern or adjusting acceptable formats"
+                ]
+            }
+        except Exception as e:
+            logger.error(f"Pattern match rule failed: {e}")
+            return {"passed": False, "error": str(e)}
+
     async def _business_rule(self, asset_id, rule, asset_metadata, options):
-        """Business logic validation"""
-        return {"passed": True, "score": 100.0, "total_records": 0}
-    
+        """Business logic validation by evaluating a boolean expression per record.
+
+        Expected rule.parameters:
+        - expression: str -> Python-like predicate over a record 'r', e.g., "(r['age'] is None) or (r['age'] >= 18)"
+        - min_pass_rate: float (default 0.99)
+        """
+        try:
+            params = rule.parameters or {}
+            expression = params.get("expression")
+            if not expression:
+                return {"passed": False, "error": "Missing 'expression' parameter"}
+
+            data_sample = await self._get_asset_data_sample(asset_id, params)
+            if not data_sample:
+                return {"passed": False, "error": "No data available"}
+
+            safe_globals = {"__builtins__": {}}
+            passed_count = 0
+            errors = 0
+            for r in data_sample:
+                try:
+                    if bool(eval(expression, safe_globals, {"r": r})):
+                        passed_count += 1
+                except Exception:
+                    errors += 1
+
+            total = len(data_sample)
+            pass_rate = passed_count / max(1, total - errors)
+            threshold = params.get("min_pass_rate", 0.99)
+            passed = pass_rate >= threshold and errors == 0
+            score = max(0.0, pass_rate * 100.0)
+
+            return {
+                "passed": passed,
+                "score": score,
+                "total_records": total,
+                "passed_records": passed_count,
+                "failed_records": max(0, total - passed_count - errors),
+                "details": {
+                    "pass_rate": pass_rate,
+                    "threshold": threshold,
+                    "evaluation_errors": errors,
+                    "expression": expression
+                },
+                "recommendations": [] if passed else [
+                    "Review the business rule and data anomalies",
+                    "Tighten data entry validations or adjust the rule threshold appropriately"
+                ]
+            }
+        except Exception as e:
+            logger.error(f"Business rule validation failed: {e}")
+            return {"passed": False, "error": str(e)}
+
     async def _cross_reference_rule(self, asset_id, rule, asset_metadata, options):
-        """Cross-reference validation"""
-        return {"passed": True, "score": 100.0, "total_records": 0}
+        """Cross-reference validation using in-sample comparisons and provided references.
+
+        Expected rule.parameters:
+        - source_column: str
+        - target_column: str (optional) -> compare that source implies target non-null/value set
+        - reference_set: List[Any] (optional) -> allowed set for source_column
+        - max_violation_rate: float (default 0.01)
+        """
+        try:
+            params = rule.parameters or {}
+            source_column = params.get("source_column")
+            target_column = params.get("target_column")
+            reference_set = set(params.get("reference_set", []))
+            if not source_column and not target_column and not reference_set:
+                return {"passed": False, "error": "Specify 'source_column' and at least one of 'target_column' or 'reference_set'"}
+
+            data_sample = await self._get_asset_data_sample(asset_id, params)
+            if not data_sample:
+                return {"passed": False, "error": "No data available"}
+
+            total = len(data_sample)
+            violations = 0
+            examples = []
+            for i, r in enumerate(data_sample):
+                src = r.get(source_column) if source_column else None
+                if reference_set and src is not None and src not in reference_set:
+                    violations += 1
+                    if len(examples) < 25:
+                        examples.append({"index": i, "value": src})
+                if source_column and target_column and src:
+                    trg = r.get(target_column)
+                    if trg in (None, ""):
+                        violations += 1
+                        if len(examples) < 25:
+                            examples.append({"index": i, "source": src, "target": trg})
+
+            violation_rate = violations / max(1, total)
+            threshold = params.get("max_violation_rate", 0.01)
+            passed = violation_rate <= threshold
+            score = max(0.0, (1.0 - violation_rate) * 100.0)
+
+            return {
+                "passed": passed,
+                "score": score,
+                "total_records": total,
+                "passed_records": total - violations,
+                "failed_records": violations,
+                "details": {
+                    "violation_rate": violation_rate,
+                    "threshold": threshold,
+                    "reference_mode": "set" if reference_set else "column_implication",
+                    "examples": examples
+                },
+                "recommendations": [] if passed else [
+                    "Align cross-reference mappings and ensure target fields are populated",
+                    "Update reference set or cleanse source values to meet governance rules"
+                ]
+            }
+        except Exception as e:
+            logger.error(f"Cross-reference rule failed: {e}")
+            return {"passed": False, "error": str(e)}
     
     # Utility methods
     async def _get_asset_metadata(self, asset_id: str, session: AsyncSession) -> Dict[str, Any]:
-        """Get asset metadata for context"""
-        # This would integrate with the catalog service
-        return {
-            "asset_id": asset_id,
-            "asset_type": "table",
-            "schema": "default"
-        }
+        """Get asset metadata for context using the enterprise catalog when available."""
+        try:
+            from .enterprise_catalog_service import EnterpriseIntelligentCatalogService
+            # Try to load the asset via ORM to obtain real metadata
+            from ..models.advanced_catalog_models import IntelligentDataAsset
+            res = await session.execute(select(IntelligentDataAsset).where(IntelligentDataAsset.id == int(asset_id)))
+            asset = res.scalars().first()
+            if asset:
+                return {
+                    "asset_id": asset.id,
+                    "asset_type": asset.asset_type.value if hasattr(asset.asset_type, 'value') else str(asset.asset_type),
+                    "schema": asset.schema_name or asset.database_name,
+                    "qualified_name": asset.qualified_name,
+                    "data_source_id": asset.data_source_id,
+                    "business_domain": asset.business_domain,
+                }
+        except Exception:
+            pass
+        return {"asset_id": asset_id, "asset_type": "table", "schema": "default"}
     
     async def _get_asset_data_sample(
         self, 

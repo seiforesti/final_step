@@ -117,7 +117,13 @@ class Workflow(SQLModel, table=True):
     # Relationships
     steps: List["WorkflowStep"] = Relationship(back_populates="workflow")
     executions: List["WorkflowExecution"] = Relationship(back_populates="workflow")
-    dependencies: List["WorkflowDependency"] = Relationship(back_populates="workflow")
+    dependencies: List["WorkflowDependency"] = Relationship(
+        back_populates="workflow",
+        sa_relationship_kwargs={"foreign_keys": "WorkflowDependency.workflow_id"}
+    )
+    depended_on_by: List["WorkflowDependency"] = Relationship(
+        sa_relationship_kwargs={"foreign_keys": "WorkflowDependency.depends_on_workflow_id"}
+    )
 
 class WorkflowStep(SQLModel, table=True):
     """Individual steps in a workflow"""
@@ -295,7 +301,13 @@ class WorkflowDependency(SQLModel, table=True):
     created_at: datetime = Field(default_factory=datetime.now)
     
     # Relationships
-    workflow: Optional["Workflow"] = Relationship(back_populates="dependencies")
+    workflow: Optional["Workflow"] = Relationship(
+        back_populates="dependencies",
+        sa_relationship_kwargs={"foreign_keys": "WorkflowDependency.workflow_id"}
+    )
+    depends_on_workflow: Optional["Workflow"] = Relationship(
+        sa_relationship_kwargs={"foreign_keys": "WorkflowDependency.depends_on_workflow_id"}
+    )
 
 class WorkflowTemplate(SQLModel, table=True):
     """Reusable workflow templates and blueprints"""

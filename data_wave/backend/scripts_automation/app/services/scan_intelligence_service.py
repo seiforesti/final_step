@@ -59,9 +59,19 @@ from sqlmodel import Session
 # Internal imports
 from ..models.scan_intelligence_models import *
 from ..models.scan_models import *
-from ..models.advanced_scan_rule_models import *
+from ..models.advanced_scan_rule_models import (
+    IntelligentScanRule, RuleExecutionHistory, RuleOptimizationJob,
+    RulePatternLibrary, RulePatternAssociation, RulePerformanceBaseline
+)
 from ..db_session import get_session
-from ..core.config import settings
+try:
+    from ..core.settings import get_settings as _get_settings
+    def get_settings():
+        return _get_settings()
+except Exception:
+    from ..core.config import settings as _settings
+    def get_settings():
+        return _settings
 from ..services.ai_service import EnterpriseAIService as AIService
 from ..utils.performance_monitor import monitor_performance
 from ..utils.cache_manager import CacheManager
@@ -172,13 +182,9 @@ class ScanIntelligenceService:
                 self.nlp = None
             
             # Initialize transformers for text processing
-            try:
-                self.sentiment_analyzer = pipeline("sentiment-analysis")
-                self.text_classifier = pipeline("text-classification")
-            except Exception as e:
-                logger.warning(f"Failed to initialize transformers: {e}")
-                self.sentiment_analyzer = None
-                self.text_classifier = None
+            # Defer transformer pipelines to on-demand to reduce startup memory
+            self.sentiment_analyzer = None
+            self.text_classifier = None
             
             # Initialize standard ML models
             self.scaler = StandardScaler()

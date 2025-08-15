@@ -50,6 +50,7 @@ from ...services.enterprise_integration_service import (
 )
 from ...api.security.rbac import get_current_user
 from ...db_session import get_session
+# Use settings directly; service uses a shim for get_settings
 from ...core.config import settings
 
 logger = logging.getLogger(__name__)
@@ -471,7 +472,7 @@ async def get_integration_metrics(
         logger.error(f"Failed to get integration metrics: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to retrieve metrics: {str(e)}")
 
-@router.get("/metrics/real-time", response_model=StreamingResponse)
+@router.get("/metrics/real-time", response_model=None)
 async def stream_real_time_metrics(
     current_user: dict = Depends(get_current_user)
 ):

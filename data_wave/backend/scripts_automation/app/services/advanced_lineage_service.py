@@ -62,7 +62,14 @@ from ..models.advanced_catalog_models import *
 from ..models.catalog_intelligence_models import *
 from ..models.scan_models import *
 from ..db_session import get_session
-from ..core.config import settings
+try:
+    from ..core.settings import get_settings as _get_settings
+    def get_settings():
+        return _get_settings()
+except Exception:
+    from ..core.config import settings
+    def get_settings():
+        return settings
 from ..services.ai_service import EnterpriseAIService as AIService
 from ..services.data_source_connection_service import DataSourceConnectionService
 from ..utils.performance_monitor import monitor_performance

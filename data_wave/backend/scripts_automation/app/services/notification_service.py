@@ -5,6 +5,7 @@ from email.mime.text import MIMEText
 from typing import List, Dict, Any, Optional
 from datetime import datetime
 import logging
+import asyncio
 
 SLACK_WEBHOOK_URL = os.environ.get("SLACK_WEBHOOK_URL")
 
@@ -64,6 +65,26 @@ class NotificationService:
                 except Exception as e:
                     results["errors"].append(f"Slack error: {str(e)}")
                     logger.error(f"Slack notification failed: {str(e)}")
+
+            # Broadcast via WebSocket service if available
+            try:
+                from app.services.websocket_service import WebSocketService
+                ws = WebSocketService()
+                payload = {
+                    "type": f"notification:{notification_type}",
+                    "priority": priority,
+                    "message": message,
+                    "metadata": metadata or {},
+                    "timestamp": datetime.utcnow().isoformat()
+                }
+                # Non-blocking send
+                try:
+                    asyncio.create_task(ws.broadcast_json(payload))
+                except RuntimeError:
+                    # No running loop: ignore
+                    pass
+            except Exception:
+                pass
             
             results["success"] = results["email"] or results["slack"]
             return results

@@ -5,8 +5,8 @@ from sqlmodel import Session
 from app.db_session import get_session
 from app.services.advanced_workflow_service import AdvancedWorkflowService
 from app.models.workflow_models import (
-    WorkflowDefinition, WorkflowExecution, WorkflowStep,
-    ApprovalWorkflow, BulkOperation, WorkflowTemplate
+    Workflow, WorkflowExecution, WorkflowStep,
+    WorkflowTemplate
 )
 from app.api.security import get_current_user, require_permission
 from app.api.security.rbac import (

@@ -1,6 +1,9 @@
 from sqlalchemy.orm import Session
 from app.models.auth_models import User, Role, Group, UserRole, GroupRole, RoleInheritance, Permission, RolePermission
-from typing import List, Dict, Any, Set
+from typing import List, Dict, Any, Set, Optional
+import logging
+
+logger = logging.getLogger(__name__)
 
 def get_user_effective_permissions_rbac(db: Session, user_id: int) -> List[Dict[str, Any]]:
     """
@@ -91,3 +94,48 @@ def get_user_effective_permissions_rbac(db: Session, user_id: int) -> List[Dict[
             "note": note if not is_effective else None
         })
     return result
+
+
+class RBACService:
+    """Enterprise RBAC service facade used across Racine orchestration and routes."""
+
+    def __init__(self, db_session: Session):
+        self.db = db_session
+
+    def get_user_effective_permissions(self, user_id: int) -> List[Dict[str, Any]]:
+        return get_user_effective_permissions_rbac(self.db, user_id)
+
+    def check_permission(self, user_id: int, action: str, resource: str) -> Dict[str, Any]:
+        try:
+            permissions = self.get_user_effective_permissions(user_id)
+            for perm in permissions:
+                if perm["action"] == action and perm["resource"] == resource and perm["is_effective"]:
+                    return {"allowed": True, "permission": perm}
+            return {"allowed": False, "reason": "No matching effective permission"}
+        except Exception as e:
+            logger.error(f"RBAC permission check error: {e}")
+            return {"allowed": False, "error": str(e)}
+
+    def assign_role(self, user_id: int, role_id: int) -> bool:
+        try:
+            # Create UserRole record if does not exist
+            existing = self.db.query(UserRole).filter(UserRole.user_id == user_id, UserRole.role_id == role_id).first()
+            if existing:
+                return True
+            new_ur = UserRole(user_id=user_id, role_id=role_id)
+            self.db.add(new_ur)
+            self.db.commit()
+            return True
+        except Exception as e:
+            self.db.rollback()
+            logger.error(f"RBAC assign_role failed: {e}")
+            return False
+
+    def get_health_status(self) -> Dict[str, Any]:
+        try:
+            users = self.db.query(User).count()
+            roles = self.db.query(Role).count()
+            permissions = self.db.query(Permission).count()
+            return {"status": "healthy", "users": users, "roles": roles, "permissions": permissions}
+        except Exception as e:
+            return {"status": "error", "error": str(e)}

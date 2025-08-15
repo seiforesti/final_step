@@ -29,7 +29,7 @@ class PerformanceMetric(SQLModel, table=True):
     __tablename__ = "performance_metrics"
     
     id: Optional[int] = Field(default=None, primary_key=True)
-    data_source_id: int = Field(foreign_key="data_sources.id", index=True)
+    data_source_id: int = Field(foreign_key="datasource.id", index=True)
     metric_type: MetricType
     
     # Metric values
@@ -60,7 +60,7 @@ class PerformanceAlert(SQLModel, table=True):
     __tablename__ = "performance_alerts"
     
     id: Optional[int] = Field(default=None, primary_key=True)
-    data_source_id: int = Field(foreign_key="data_sources.id", index=True)
+    data_source_id: int = Field(foreign_key="datasource.id", index=True)
     metric_id: int = Field(foreign_key="performance_metrics.id")
     
     # Alert details
@@ -85,7 +85,7 @@ class PerformanceBaseline(SQLModel, table=True):
     __tablename__ = "performance_baselines"
     
     id: Optional[int] = Field(default=None, primary_key=True)
-    data_source_id: int = Field(foreign_key="data_sources.id", index=True)
+    data_source_id: int = Field(foreign_key="datasource.id", index=True)
     metric_type: MetricType
     
     # Baseline values

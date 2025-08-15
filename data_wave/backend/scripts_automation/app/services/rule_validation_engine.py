@@ -23,7 +23,10 @@ from sqlalchemy import text
 from ..core.cache_manager import EnterpriseCacheManager as CacheManager
 from ..core.logging_config import get_logger
 from ..core.settings import get_settings_manager
-from ..models.advanced_scan_rule_models import *
+from ..models.advanced_scan_rule_models import (
+    IntelligentScanRule, RuleExecutionHistory, RuleOptimizationJob,
+    RulePatternLibrary, RulePatternAssociation, RulePerformanceBaseline
+)
 from ..services.ai_service import EnterpriseAIService as AIService
 
 logger = get_logger(__name__)
@@ -101,9 +104,21 @@ class RuleValidationEngine:
         # Threading
         self.executor = ThreadPoolExecutor(max_workers=8)
         
-        # Background tasks
-        asyncio.create_task(self._validation_cache_cleanup_loop())
-        asyncio.create_task(self._performance_baseline_update_loop())
+        # Background tasks (defer until loop exists)
+        try:
+            loop = asyncio.get_running_loop()
+            loop.create_task(self._validation_cache_cleanup_loop())
+            loop.create_task(self._performance_baseline_update_loop())
+        except RuntimeError:
+            pass
+
+    def start(self) -> None:
+        try:
+            loop = asyncio.get_running_loop()
+            loop.create_task(self._validation_cache_cleanup_loop())
+            loop.create_task(self._performance_baseline_update_loop())
+        except RuntimeError:
+            pass
     
     def _init_validation_components(self):
         """Initialize validation components and patterns"""

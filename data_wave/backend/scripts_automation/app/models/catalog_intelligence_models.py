@@ -102,7 +102,7 @@ class SemanticEmbedding(SQLModel, table=True):
     # Embedding details
     embedding_model: str = Field(index=True)  # model used to generate embedding
     embedding_version: str = Field(default="1.0")
-    embedding_vector: Optional[List[float]] = Field(default=None, sa_column=Column(ARRAY(Float)))
+    embedding_vector: Optional[str] = Field(default=None, sa_column=Column(JSON))
     vector_dimensions: int = Field(default=768)
     
     # Context information
@@ -276,7 +276,7 @@ class AssetRecommendation(SQLModel, table=True):
     rank_position: int = Field(default=0)
     
     # Reasoning and explanation
-    reasoning_factors: List[str] = Field(default=[], sa_column=Column(ARRAY(String)))
+    reasoning_factors: Optional[str] = Field(default=None, sa_column=Column(JSON))
     explanation_text: Optional[str] = Field(default=None, sa_column=Column(Text))
     supporting_evidence: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
@@ -360,7 +360,7 @@ class AssetUsagePattern(SQLModel, table=True):
     # Business insights
     business_value_score: Optional[float] = Field(default=None)
     criticality_score: Optional[float] = Field(default=None)
-    optimization_opportunities: Optional[List[str]] = Field(default=None, sa_column=Column(ARRAY(String)))
+    optimization_opportunities: Optional[str] = Field(default=None, sa_column=Column(JSON))
     
     # Predictive analysis
     predicted_future_usage: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
@@ -403,7 +403,7 @@ class IntelligenceInsight(SQLModel, table=True):
     severity_level: str = Field(index=True)  # critical, high, medium, low, info
     
     # Scope and context
-    asset_ids: List[str] = Field(default=[], sa_column=Column(ARRAY(String)))
+    asset_ids: Optional[str] = Field(default=None, sa_column=Column(JSON))
     scope: str = Field(index=True)  # asset, schema, database, organization
     context_description: Optional[str] = Field(default=None, sa_column=Column(Text))
     
@@ -418,7 +418,7 @@ class IntelligenceInsight(SQLModel, table=True):
     statistical_significance: Optional[float] = Field(default=None)
     
     # Recommendations and actions
-    recommended_actions: List[str] = Field(default=[], sa_column=Column(ARRAY(String)))
+    recommended_actions: Optional[str] = Field(default=None, sa_column=Column(JSON))
     action_priority: Optional[str] = Field(default=None)  # immediate, short_term, long_term
     estimated_impact: Optional[str] = Field(default=None)  # high, medium, low
     estimated_effort: Optional[str] = Field(default=None)  # hours, days, weeks
@@ -447,7 +447,7 @@ class IntelligenceInsight(SQLModel, table=True):
     
     # Additional metadata
     custom_properties: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
-    tags: Optional[List[str]] = Field(default=None, sa_column=Column(ARRAY(String)))
+    tags: Optional[str] = Field(default=None, sa_column=Column(JSON))
     
     class Config:
         arbitrary_types_allowed = True
@@ -475,9 +475,9 @@ class CollaborationInsight(SQLModel, table=True):
     collaboration_type: str = Field(index=True)  # shared_usage, expert_connection, knowledge_gap
     
     # Participants
-    primary_users: List[str] = Field(default=[], sa_column=Column(ARRAY(String)))
-    expert_users: List[str] = Field(default=[], sa_column=Column(ARRAY(String)))
-    novice_users: List[str] = Field(default=[], sa_column=Column(ARRAY(String)))
+    primary_users: Optional[str] = Field(default=None, sa_column=Column(JSON))
+    expert_users: Optional[str] = Field(default=None, sa_column=Column(JSON))
+    novice_users: Optional[str] = Field(default=None, sa_column=Column(JSON))
     
     # Collaboration metrics
     collaboration_strength: float = Field(default=0.0)
@@ -486,7 +486,7 @@ class CollaborationInsight(SQLModel, table=True):
     
     # Recommendations
     suggested_connections: List[Dict[str, Any]] = Field(default=[], sa_column=Column(JSON))
-    knowledge_sharing_opportunities: List[str] = Field(default=[], sa_column=Column(ARRAY(String)))
+    knowledge_sharing_opportunities: Optional[str] = Field(default=None, sa_column=Column(JSON))
     training_recommendations: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Analysis metadata
@@ -500,6 +500,57 @@ class CollaborationInsight(SQLModel, table=True):
     
     class Config:
         arbitrary_types_allowed = True
+
+# ===================== IMPACT ANALYSIS MODELS =====================
+
+class ImpactAnalysisSnapshot(SQLModel, table=True):
+    """
+    Persistent storage for impact analysis results across data lineage changes.
+    Enables historical tracking, trend analysis, and audit trails for governance.
+    """
+    __tablename__ = "impact_analysis_snapshots"
+    
+    id: Optional[int] = Field(default=None, primary_key=True)
+    snapshot_id: str = Field(index=True, unique=True)
+    
+    # Analysis context
+    user_id: str = Field(index=True)
+    change_type: str = Field(index=True)  # schema_change, data_change, deprecation, etc.
+    analysis_data: Dict[str, Any] = Field(sa_column=Column(JSONB))
+    
+    # Impact metrics
+    affected_assets: int = Field(index=True)
+    total_impact_score: float = Field(default=0.0)
+    quality_impact: float = Field(default=0.0)
+    sensitivity_impact: float = Field(default=0.0)
+    usage_signal: float = Field(default=0.0)
+    
+    # Business context
+    business_terms: Optional[str] = Field(default=None, sa_column=Column(JSON))
+    critical_path_assets: Optional[str] = Field(default=None, sa_column=Column(JSON))
+    risk_level: str = Field(default="low", index=True)  # low, medium, high, critical
+    
+    # Analysis metadata
+    analysis_depth: int = Field(default=5)  # Lineage traversal depth
+    confidence_score: float = Field(default=0.0)
+    analysis_duration_ms: int = Field(default=0)
+    
+    # Timestamps
+    created_at: datetime = Field(default_factory=datetime.utcnow, index=True)
+    expires_at: Optional[datetime] = Field(default=None, index=True)
+    
+    # Additional metadata
+    tags: Optional[str] = Field(default=None, sa_column=Column(JSON))
+    custom_properties: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    
+    class Config:
+        arbitrary_types_allowed = True
+    
+    __table_args__ = (
+        Index('idx_impact_snapshot_user_change', 'user_id', 'change_type'),
+        Index('idx_impact_snapshot_score_risk', 'total_impact_score', 'risk_level'),
+        Index('idx_impact_snapshot_created_expires', 'created_at', 'expires_at'),
+    )
 
 # ===================== PYDANTIC MODELS FOR API =====================
 

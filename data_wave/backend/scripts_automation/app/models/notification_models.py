@@ -34,7 +34,7 @@ class Notification(SQLModel, table=True):
     __tablename__ = "notifications"
     
     id: Optional[int] = Field(default=None, primary_key=True)
-    data_source_id: Optional[int] = Field(foreign_key="data_sources.id", index=True)
+    data_source_id: Optional[int] = Field(foreign_key="datasource.id", index=True)
     user_id: str = Field(index=True)
     
     # Notification details

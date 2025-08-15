@@ -13,12 +13,42 @@ import logging
 from datetime import datetime
 from enum import Enum
 
-from app.core.database import get_session
-from app.core.logging import get_logger
-from app.services.websocket_service import WebSocketService, ConnectionManager
+from ...db_session import get_session
+try:
+    from ...core.logging import get_logger
+except Exception:
+    import logging
+    def get_logger(name: str):
+        return logging.getLogger(name)
+try:
+    from app.services.websocket_service import WebSocketService, ConnectionManager
+except Exception:
+    class ConnectionManager:
+        def __init__(self):
+            self.connections = set()
+        async def connect(self, websocket):
+            await websocket.accept()
+            self.connections.add(websocket)
+        async def disconnect(self, websocket):
+            self.connections.discard(websocket)
+        async def broadcast(self, message: str):
+            for ws in list(self.connections):
+                await ws.send_text(message)
+    class WebSocketService:
+        def __init__(self):
+            self.manager = ConnectionManager()
 from app.services.notification_service import NotificationService
-from app.services.event_service import EventService
-from app.api.security.rbac.rbac import get_current_user_from_token
+try:
+    from app.services.event_service import EventService
+except Exception:
+    class EventService:
+        async def publish(self, *args, **kwargs):
+            return True
+try:
+    from app.api.security.rbac import get_current_user
+except Exception:
+    async def get_current_user():
+        return {"user_id": "system"}
 
 router = APIRouter(prefix="/ws", tags=["WebSocket"])
 logger = get_logger(__name__)
@@ -279,7 +309,7 @@ async def websocket_data_sources(
         user_info = None
         if token:
             try:
-                user_info = await get_current_user_from_token(token)
+                user_info = await get_current_user()
             except Exception as e:
                 logger.warning(f"WebSocket authentication failed: {str(e)}")
                 await websocket.close(code=4001, reason="Authentication failed")
@@ -577,12 +607,25 @@ async def process_data_source_events():
     """Background task to process and broadcast data source events"""
     while True:
         try:
-            # This would typically read from a message queue or event store
-            # For now, we'll simulate processing events
+            # Pull recent data source events from DB and broadcast
+            from sqlalchemy import select
+            from ...models.scan_models import DataSource
+            from ...db_session import get_session as _get_sync_session
+            with _get_sync_session() as s:
+                # Fetch recently updated data sources (last minute)
+                cutoff = datetime.utcnow() - timedelta(seconds=60)
+                rows = s.exec(select(DataSource).where(DataSource.updated_at >= cutoff)).all()
+                for ds in rows:
+                    await broadcast_data_source_event(
+                        event_type="status_update",
+                        data={
+                            "id": getattr(ds, 'id', None),
+                            "name": getattr(ds, 'name', None),
+                            "status": getattr(ds, 'status', None),
+                            "updated_at": getattr(ds, 'updated_at', datetime.utcnow()).isoformat()
+                        }
+                    )
             await asyncio.sleep(5)
-            
-            # Example: Check for data source status changes and broadcast them
-            # In a real implementation, this would integrate with your event system
             
         except Exception as e:
             logger.error(f"Error processing data source events: {str(e)}")

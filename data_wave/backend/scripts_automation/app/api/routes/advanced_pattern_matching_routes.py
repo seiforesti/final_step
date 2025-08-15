@@ -20,6 +20,7 @@ from typing import Dict, List, Optional, Any
 from datetime import datetime, timedelta
 import asyncio
 import json
+import logging
 
 from ...services.advanced_pattern_matching_service import AdvancedPatternMatchingService, AdvancedPatternConfig
 from ...services.intelligent_pattern_service import IntelligentPatternService
@@ -38,6 +39,12 @@ intelligent_pattern_service = IntelligentPatternService()
 rule_optimization_service = RuleOptimizationService()
 scan_intelligence_service = ScanIntelligenceService()
 metrics_collector = MetricsCollector()
+logger = logging.getLogger(__name__)
+
+@router.on_event("startup")
+async def _startup_pattern_matching():
+    # Ensure background loops start when an event loop exists
+    pattern_matching_service.start()
 
 @router.post("/initialize")
 async def initialize_pattern_matching(
@@ -469,7 +476,8 @@ async def stream_pattern_analysis(
                 await asyncio.sleep(analysis_interval)
                 
         except asyncio.CancelledError:
-            break
+            # Gracefully end the SSE generator on client disconnect/cancellation
+            return
         except Exception as e:
             error_data = {'error': str(e), 'timestamp': datetime.utcnow().isoformat()}
             yield f"data: {json.dumps(error_data)}\n\n"

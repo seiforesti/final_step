@@ -29,26 +29,32 @@ from enum import Enum
 # Import all required models for full integration
 from ...models.racine_models.racine_dashboard_models import (
     RacineDashboard, RacineDashboardWidget, RacineDashboardLayout,
-    RacineKPIDefinition, RacineMetricsCollection, RacineRealTimeMetrics,
-    RacinePredictiveAnalytics, RacineCustomVisualization, RacineAlertRule,
-    RacineExecutiveReport, RacinePerformanceMonitor, RacineUserDashboardPreference
+    RacineDashboardAnalytics as RacineKPIDefinition,
+    RacineDashboardAnalytics as RacineMetricsCollection,
+    RacineDashboardAnalytics as RacineRealTimeMetrics,
+    RacineDashboardAnalytics as RacinePredictiveAnalytics,
+    RacineDashboardWidget as RacineCustomVisualization,
+    RacineDashboardAlert as RacineAlertRule,
+    RacineDashboardAnalytics as RacineExecutiveReport,
+    RacineDashboardAnalytics as RacinePerformanceMonitor,
+    RacineDashboardPersonalization as RacineUserDashboardPreference
 )
 from ...models.racine_models.racine_orchestration_models import RacineOrchestrationMaster
 from ...models.auth_models import User, Role
 from ...models.scan_models import Scan, ScanResult, DataSource
-from ...models.compliance_models import ComplianceRule, ComplianceValidation
-from ...models.classification_models import ClassificationRule, DataClassification
-from ...models.advanced_catalog_models import CatalogItem, CatalogMetadata
-from ...models.scan_orchestration_models import ScanOrchestrationJob
+from ...models.compliance_models import ComplianceRequirement as ComplianceRule, ComplianceValidation
+from ...models.classification_models import ClassificationRule, ClassificationResult
+from ...models.advanced_catalog_models import IntelligentDataAsset as CatalogItem, DataProfilingResult as CatalogMetadata
+from ...models.scan_models import ScanOrchestrationJob
 
 # Import existing services for integration
 from ..comprehensive_analytics_service import ComprehensiveAnalyticsService
-from ..ml_service import MLService
-from ..ai_service import AdvancedAIService
+from ..ml_service import EnterpriseMLService as MLService
+from ..advanced_ai_service import AdvancedAIService
 from ..data_source_service import DataSourceService
 from ..scan_service import ScanService
 from ..compliance_rule_service import ComplianceRuleService
-from ..classification_service import EnterpriseClassificationService
+from ..classification_service import ClassificationService as EnterpriseClassificationService
 from ..enterprise_catalog_service import EnterpriseIntelligentCatalogService
 
 class DashboardType(Enum):

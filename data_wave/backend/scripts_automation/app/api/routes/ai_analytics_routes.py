@@ -9,7 +9,7 @@ from sqlmodel import Session
 import logging
 from datetime import datetime, timedelta
 
-from app.core.database import get_session
+from ...db_session import get_session
 from app.api.security.rbac.rbac import require_permission
 from app.core.logging import get_logger
 from app.services.ai_analytics_service import AIAnalyticsService

@@ -62,8 +62,12 @@ datasets>=2.10.0,<3.0.0  # Dataset management
 spacy>=3.4.0,<4.0.0  # NLP processing
 faiss-cpu>=1.7.4,<2.0.0  # Vector similarity search (CPU wheels)
 # Torch CPU-only wheels are provided by the extra index above
-torch>=2.0.0,<3.0.0  # PyTorch deep learning
-sentence-transformers>=2.2.0,<3.0.0  # Sentence embeddings
+torch==2.1.2+cpu  # CPU-only PyTorch (already installed), smaller wheel
+torchvision==0.16.2+cpu  # Match torch 2.1.2 CPU
+torchaudio==2.1.2+cpu
+sentence-transformers==2.2.2  # Sentence embeddings (CPU-friendly)
+transformers==4.31.0  # Compatible with tokenizers 0.13.x and Python 3.11
+datasets==2.14.6  # Stable with pandas 2.1.x and pyarrow 21.x
 openai<2.0.0,>=1.0.0  # OpenAI API integration
 optuna<4.0.0,>=3.0.0  # Hyperparameter optimization
 
@@ -117,7 +121,12 @@ apscheduler>=3.10.0,<4.0.0  # Task scheduling
 croniter>=1.4.1,<2.0.0  # Cron expression parsing
 cron-descriptor>=1.2.0,<2.0.0  # Cron expression description
 alembic>=1.11.0,<2.0.0  # Database migrations
-
+aiosmtplib
+python-igraph
+aiokafka
+pyotp==2.8.0
+PyJWT==2.8.0
+networkx
 # Cloud Services and Integrations
 boto3>=1.34.0,<2.0.0  # AWS services
 azure-identity>=1.15.0,<2.0.0  # Azure managed identity
@@ -187,3 +196,13 @@ memory-profiler>=0.61.0,<1.0.0  # Memory usage profiling
 
 # Current recommendation: Use Option 1 for immediate deployment
 # Migrate to Option 2 in future iterations for enhanced performance
+
+# Runtime additions installed in-container (to avoid rebuild) and pinned here for consistency
+APScheduler==3.10.4
+firebase-admin==6.5.0
+redis==5.0.1
+cron-descriptor==1.4.3
+faiss-cpu==1.7.4
+spacy==3.7.4
+en-core-web-md@ https://github.com/explosion/spacy-models/releases/download/en_core_web_md-3.7.1/en_core_web_md-3.7.1-py3-none-any.whl
+en-core-web-sm@ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl

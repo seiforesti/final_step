@@ -1,11 +1,19 @@
 from sqlmodel import SQLModel, Field, Relationship, Column, JSON, String, Text, Integer, Float, Boolean, DateTime
-from typing import List, Optional, Dict, Any, Union, Set, Tuple
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy import ARRAY, Index, UniqueConstraint, CheckConstraint
+from typing import List, Optional, Dict, Any, Union, Set, Tuple, TYPE_CHECKING
 from datetime import datetime, timedelta
 from enum import Enum
 import uuid
 import json
 from pydantic import BaseModel, validator
-from sqlalchemy import Index, UniqueConstraint, CheckConstraint
+
+# Forward references to avoid circular imports
+if TYPE_CHECKING:
+    from .advanced_scan_rule_models import EnhancedScanRuleSet
+    from .catalog_models import CatalogItem
+    from .integration_models import Integration
+    from .racine_models.racine_orchestration_models import RacineOrchestrationMaster
 
 # Import advanced scan rule models for interconnection
 from .advanced_scan_rule_models import IntelligentScanRule, RuleExecutionHistory
@@ -171,9 +179,12 @@ class DataSource(SQLModel, table=True):
     environment: Optional[Environment] = None
     criticality: Optional[Criticality] = Field(default=Criticality.MEDIUM)
     data_classification: Optional[DataClassification] = Field(default=DataClassification.INTERNAL)
-    tags: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
+    tags: Optional[List[str]] = Field(default=None, sa_column=Column(JSONB))
     owner: Optional[str] = None
     team: Optional[str] = None
+    
+    # Racine Orchestrator linkage
+    racine_orchestrator_id: Optional[str] = Field(default=None, foreign_key="racine_orchestration_master.id", index=True)
     
     # Operational fields
     backup_enabled: bool = Field(default=False)
@@ -213,8 +224,18 @@ class DataSource(SQLModel, table=True):
     
     # **INTERCONNECTED: Compliance Relationships**
     compliance_rules: List["ComplianceRule"] = Relationship(
-        back_populates="data_sources"
+        back_populates="data_sources",
+        sa_relationship_kwargs={"secondary": "compliance_rule_data_source_link"}
     )
+    
+    # **INTERCONNECTED: Catalog Integration**
+    catalog_items: List["CatalogItem"] = Relationship(back_populates="data_source")
+    
+    # **INTERCONNECTED: Integration Management**
+    integrations: List["Integration"] = Relationship(back_populates="data_source")
+    
+    # **INTERCONNECTED: Racine Orchestrator**
+    racine_orchestrator: Optional["RacineOrchestrationMaster"] = Relationship(back_populates="managed_data_sources")
 
     def get_connection_uri(self) -> str:
         """Generate connection URI based on source type and location."""
@@ -277,18 +298,18 @@ class DiscoveryHistory(SQLModel, table=True):
 
 class ScanRuleSet(SQLModel, table=True):
     """Model for scan rule sets that define what to include/exclude during scans."""
-    __tablename__ = "scan_rule_sets"
+    __tablename__ = "scanruleset"
     
     id: Optional[int] = Field(default=None, primary_key=True)
     name: str = Field(index=True)
     description: Optional[str] = None
     data_source_id: Optional[int] = Field(default=None, foreign_key="datasource.id")
-    include_schemas: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
-    exclude_schemas: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
-    include_tables: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
-    exclude_tables: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
-    include_columns: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
-    exclude_columns: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
+    include_schemas: Optional[List[str]] = Field(default=None, sa_column=Column(ARRAY(String)))
+    exclude_schemas: Optional[List[str]] = Field(default=None, sa_column=Column(ARRAY(String)))
+    include_tables: Optional[List[str]] = Field(default=None, sa_column=Column(ARRAY(String)))
+    exclude_tables: Optional[List[str]] = Field(default=None, sa_column=Column(ARRAY(String)))
+    include_columns: Optional[List[str]] = Field(default=None, sa_column=Column(ARRAY(String)))
+    exclude_columns: Optional[List[str]] = Field(default=None, sa_column=Column(ARRAY(String)))
     sample_data: bool = Field(default=False)  # Whether to sample actual data or just metadata
     sample_size: Optional[int] = Field(default=100)  # Number of rows to sample if sample_data is True
     created_at: datetime = Field(default_factory=datetime.utcnow)
@@ -300,6 +321,9 @@ class ScanRuleSet(SQLModel, table=True):
     
     # **INTERCONNECTED: Compliance Relationships**
     compliance_rules: List["ComplianceRule"] = Relationship(back_populates="scan_rule_set")
+    
+    # **INTERCONNECTED: Advanced Features Integration**
+    enhanced_extensions: List["EnhancedScanRuleSet"] = Relationship(back_populates="primary_rule_set")
 
 
 class Scan(SQLModel, table=True):
@@ -332,7 +356,7 @@ class ScanResult(SQLModel, table=True):
     table_name: str
     column_name: Optional[str] = None
     object_type: str = Field(default="table")  # table, view, stored_procedure
-    classification_labels: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
+    classification_labels: Optional[List[str]] = Field(default=None, sa_column=Column(ARRAY(String)))
     sensitivity_level: Optional[str] = None
     compliance_issues: Optional[List[Dict[str, Any]]] = Field(default=None, sa_column=Column(JSON))
     created_at: datetime = Field(default_factory=datetime.utcnow)
@@ -342,7 +366,7 @@ class ScanResult(SQLModel, table=True):
     scan_metadata: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
 
     # Relationships
-    scan: Scan = Relationship(back_populates="results")
+    scan: Scan = Relationship(back_populates="scan_results")
 
 
 class CustomScanRuleBase(SQLModel):
@@ -351,7 +375,7 @@ class CustomScanRuleBase(SQLModel):
     description: Optional[str] = None
     expression: str  # The rule logic/expression
     is_active: bool = Field(default=True)
-    tags: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
+    tags: Optional[List[str]] = Field(default=None, sa_column=Column(JSONB))
     created_at: Optional[datetime] = Field(default_factory=datetime.utcnow)
     updated_at: Optional[datetime] = Field(default_factory=datetime.utcnow)
 
@@ -393,7 +417,7 @@ class DataSourceHealthResponse(SQLModel, table=True):
     last_checked: datetime
     latency_ms: Optional[int] = None
     error_message: Optional[str] = None
-    recommendations: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
+    recommendations: Optional[List[str]] = Field(default=None, sa_column=Column(ARRAY(String)))
     issues: Optional[List[Dict[str, Any]]] = Field(default=None, sa_column=Column(JSON))
 
 class DataSourceStatsResponse(SQLModel, table=True):
@@ -522,12 +546,15 @@ class EnhancedScanRuleSet(SQLModel, table=True):
     Extends the basic ScanRuleSet model with advanced features for 
     coordinated multi-system scanning operations.
     """
-    __tablename__ = "enhanced_scan_rule_sets"
+    __tablename__ = "enhancedscanruleset"
     
     # Primary identification
     id: Optional[int] = Field(default=None, primary_key=True)
-    base_rule_set_id: Optional[int] = Field(foreign_key="scan_rule_sets.id", index=True)
+    primary_rule_set_id: Optional[int] = Field(foreign_key="scanruleset.id", index=True)
     rule_set_uuid: str = Field(index=True, unique=True, description="Unique identifier for rule set")
+    
+    # **INTERCONNECTED: Intelligent Rules Integration**
+    intelligent_rule_ids: List[int] = Field(default_factory=list, sa_column=Column(JSON))
     name: str = Field(index=True, max_length=255)
     display_name: Optional[str] = Field(max_length=255)
     description: Optional[str] = Field(sa_column=Column(Text))
@@ -548,7 +575,7 @@ class EnhancedScanRuleSet(SQLModel, table=True):
     # Advanced Rule Logic
     advanced_conditions: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
     pattern_matching_config: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    ml_model_references: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    ml_model_references: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)))
     semantic_analysis_config: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
     
     # Quality and Validation
@@ -558,7 +585,7 @@ class EnhancedScanRuleSet(SQLModel, table=True):
     
     # Business Context
     business_criticality: str = Field(default="medium", max_length=20)
-    compliance_requirements: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    compliance_requirements: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)))
     cost_constraints: Dict[str, float] = Field(default_factory=dict, sa_column=Column(JSON))
     sla_requirements: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
     
@@ -593,9 +620,9 @@ class EnhancedScanRuleSet(SQLModel, table=True):
     updated_by: Optional[str] = Field(max_length=255)
     
     # Relationships
-    base_rule_set: Optional[ScanRuleSet] = Relationship()
+    primary_rule_set: Optional[ScanRuleSet] = Relationship(back_populates="enhanced_extensions")
     orchestration_jobs: List["ScanOrchestrationJob"] = Relationship(back_populates="enhanced_rule_set")
-    intelligent_rules: List[IntelligentScanRule] = Relationship()
+    intelligent_rules: List["IntelligentScanRule"] = Relationship(back_populates="enhanced_rule_set")
     
     # Table Constraints
     __table_args__ = (
@@ -626,13 +653,16 @@ class ScanOrchestrationJob(SQLModel, table=True):
     priority: ScanPriority = Field(default=ScanPriority.NORMAL, index=True)
     
     # Enhanced Rule Set Association
-    enhanced_rule_set_id: Optional[int] = Field(foreign_key="enhanced_scan_rule_sets.id", index=True)
+    enhanced_rule_set_id: Optional[int] = Field(foreign_key="enhancedscanruleset.id", index=True)
+    
+    # **INTERCONNECTED: Racine Orchestrator Integration**
+    racine_orchestrator_id: Optional[str] = Field(default=None, foreign_key="racine_orchestration_master.id", index=True)
     
     # Target Configuration
     target_data_sources: List[int] = Field(default_factory=list, sa_column=Column(JSON))
-    target_schemas: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    target_tables: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    exclusion_patterns: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    target_schemas: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)))
+    target_tables: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)))
+    exclusion_patterns: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)))
     
     # Execution Configuration
     max_concurrent_scans: int = Field(default=5, ge=1, le=50)
@@ -717,7 +747,7 @@ class ScanOrchestrationJob(SQLModel, table=True):
     created_by: str = Field(max_length=255, index=True)
     modified_by: Optional[str] = Field(max_length=255)
     execution_context: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    tags: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    tags: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)))
     
     # Temporal Management
     created_at: datetime = Field(default_factory=datetime.utcnow, index=True)
@@ -725,6 +755,7 @@ class ScanOrchestrationJob(SQLModel, table=True):
     
     # Relationships
     enhanced_rule_set: Optional[EnhancedScanRuleSet] = Relationship(back_populates="orchestration_jobs")
+    racine_orchestrator: Optional["RacineOrchestrationMaster"] = Relationship(back_populates="managed_scan_jobs")
     workflow_executions: List["ScanWorkflowExecution"] = Relationship(back_populates="orchestration_job")
     resource_allocations: List["ScanResourceAllocation"] = Relationship(back_populates="orchestration_job")
     
@@ -759,7 +790,7 @@ class ScanWorkflowExecution(SQLModel, table=True):
     # Execution Configuration
     step_config: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
     input_parameters: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    expected_outputs: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    expected_outputs: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)))
     
     # Status and Progress
     status: ScanWorkflowStatus = Field(default=ScanWorkflowStatus.QUEUED, index=True)
@@ -782,7 +813,7 @@ class ScanWorkflowExecution(SQLModel, table=True):
     # Execution Results
     exit_code: Optional[int] = None
     output_data: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    generated_artifacts: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    generated_artifacts: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)))
     performance_metrics: Dict[str, float] = Field(default_factory=dict, sa_column=Column(JSON))
     
     # Quality and Validation
@@ -793,11 +824,11 @@ class ScanWorkflowExecution(SQLModel, table=True):
     # Error Handling
     error_message: Optional[str] = Field(max_length=2000)
     error_details: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    warning_messages: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    recovery_actions_taken: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    warning_messages: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)))
+    recovery_actions_taken: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)))
     
     # Dependencies and Conditions
-    dependency_requirements: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    dependency_requirements: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)))
     execution_conditions: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
     conditional_skip_reason: Optional[str] = Field(max_length=500)
     
@@ -1156,6 +1187,7 @@ class ScanRule(SQLModel, table=True):
     This model represents a comprehensive scan rule that can be applied
     across multiple data sources and orchestration strategies.
     """
+    __tablename__ = "scanrule"
     id: Optional[int] = Field(default=None, primary_key=True)
     rule_id: str = Field(unique=True, index=True, default_factory=lambda: str(uuid.uuid4()))
     name: str = Field(index=True, max_length=255)
@@ -1186,8 +1218,8 @@ class ScanRule(SQLModel, table=True):
     timeout_seconds: Optional[int] = Field(default=None)
     
     # Compliance and governance
-    compliance_frameworks: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
-    regulatory_requirements: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
+    compliance_frameworks: Optional[List[str]] = Field(default=None, sa_column=Column(JSONB))
+    regulatory_requirements: Optional[List[str]] = Field(default=None, sa_column=Column(JSONB))
     audit_trail_required: bool = Field(default=True)
     data_retention_policy: Optional[str] = Field(max_length=255)
     
@@ -1204,8 +1236,8 @@ class ScanRule(SQLModel, table=True):
     approval_status: str = Field(default="pending", max_length=50)  # pending, approved, rejected
     
     # Metadata and tracking
-    tags: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
-    rule_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    tags: Optional[List[str]] = Field(default=None, sa_column=Column(JSONB))
+    rule_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB))
     created_by: str = Field(index=True, max_length=255)
     created_at: datetime = Field(default_factory=datetime.utcnow, index=True)
     updated_by: Optional[str] = Field(max_length=255)
@@ -1241,7 +1273,7 @@ class ScanExecution(SQLModel, table=True):
     scan_id: Optional[str] = Field(index=True, max_length=255)
     rule_id: int = Field(foreign_key="scanrule.id", index=True)
     rule_set_id: Optional[int] = Field(foreign_key="enhancedscanruleset.id", index=True)
-    orchestration_job_id: Optional[int] = Field(foreign_key="scanorchestrationjob.id", index=True)
+    orchestration_job_id: Optional[int] = Field(foreign_key="scan_orchestration_jobs.id", index=True)
     
     # Execution context
     data_source_id: Optional[int] = Field(foreign_key="datasource.id", index=True)
@@ -1285,31 +1317,31 @@ class ScanExecution(SQLModel, table=True):
     
     # Quality and validation
     quality_score: Optional[float] = Field(default=None, ge=0.0, le=1.0)
-    validation_results: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    validation_results: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSONB))
     compliance_status: Optional[str] = Field(max_length=50)
     sla_compliance: Optional[bool] = Field(default=None)
     
     # Monitoring and alerting
-    alerts_triggered: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
+    alerts_triggered: Optional[List[str]] = Field(default=None, sa_column=Column(JSONB))
     notification_sent: bool = Field(default=False)
     escalation_level: Optional[str] = Field(max_length=50)
     
     # Audit and compliance
-    audit_trail: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
-    compliance_frameworks: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
-    regulatory_requirements: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
+    audit_trail: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSONB))
+    compliance_frameworks: Optional[List[str]] = Field(default=None, sa_column=Column(JSONB))
+    regulatory_requirements: Optional[List[str]] = Field(default=None, sa_column=Column(JSONB))
     
     # Metadata and tracking
-    tags: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
-    execution_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    tags: Optional[List[str]] = Field(default=None, sa_column=Column(JSONB))
+    execution_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB))
     created_by: str = Field(index=True, max_length=255)
     created_at: datetime = Field(default_factory=datetime.utcnow, index=True)
     updated_at: Optional[datetime] = Field(default=None)
     
     # Performance analytics
-    performance_metrics: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
-    bottleneck_analysis: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
-    optimization_recommendations: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
+    performance_metrics: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSONB))
+    bottleneck_analysis: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSONB))
+    optimization_recommendations: Optional[List[str]] = Field(default=None, sa_column=Column(JSONB))
     
     class Config:
         arbitrary_types_allowed = True

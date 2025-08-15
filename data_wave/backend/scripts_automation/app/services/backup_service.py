@@ -125,9 +125,15 @@ class BackupService:
             # Trigger actual backup process in background
             try:
                 # Start background backup task
-                backup_task = asyncio.create_task(
-                    BackupService._execute_backup_process(backup.id, data_source_id, session)
-                )
+                try:
+                    loop = asyncio.get_running_loop()
+                    backup_task = loop.create_task(
+                        BackupService._execute_backup_process(backup.id, data_source_id, session)
+                    )
+                except RuntimeError:
+                    # Execute backup synchronously if no loop available
+                    await BackupService._execute_backup_process(backup.id, data_source_id, session)
+                    backup_task = None
                 
                 # Store task reference for monitoring
                 backup.background_task_id = str(backup_task.get_name()) if hasattr(backup_task, 'get_name') else str(id(backup_task))

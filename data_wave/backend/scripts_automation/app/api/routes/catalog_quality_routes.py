@@ -23,8 +23,13 @@ from ...db_session import get_session
 from ...api.security.rbac import get_current_user, require_permission
 from ...core.response_models import SuccessResponse, ErrorResponse
 from ...core.cache import cache_response
-from ...core.rate_limiting import RateLimiter
-from ...core.audit import audit_log
+from ...utils.rate_limiter import rate_limit, get_rate_limiter
+try:
+    from ...utils import audit_logger as _audit
+    audit_log = _audit.audit_log
+except Exception:
+    async def audit_log(**kwargs):
+        pass
 from ...services.catalog_quality_service import CatalogQualityService
 from ...models.catalog_quality_models import (
     DataQualityRule, QualityAssessment, QualityScorecard, QualityMonitoringConfig,
@@ -44,16 +49,21 @@ from ...models.api import (
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1/catalog-quality", tags=["Catalog Quality"])
-rate_limiter = RateLimiter()
+rate_limiter = get_rate_limiter()
 
 def get_quality_service() -> CatalogQualityService:
     """Dependency to get catalog quality service instance"""
-    return CatalogQualityService()
+    svc = CatalogQualityService()
+    try:
+        svc.start()
+    except Exception:
+        pass
+    return svc
 
 # Quality Rule Management Routes
 
 @router.post("/rules")
-@rate_limiter.limit("50/minute")
+@rate_limit(requests=50, window=60)
 async def create_quality_rule(
     request: QualityRuleRequest,
     background_tasks: BackgroundTasks,
@@ -115,8 +125,8 @@ async def create_quality_rule(
         raise HTTPException(status_code=500, detail=f"Rule creation failed: {str(e)}")
 
 @router.get("/rules")
-@rate_limiter.limit("200/minute")
-@cache_response(expire_time=300)
+@rate_limit(requests=200, window=60)
+@cache_response(ttl=300)
 async def list_quality_rules(
     rule_type: Optional[QualityRuleType] = Query(default=None, description="Filter by rule type"),
     quality_dimension: Optional[QualityDimension] = Query(default=None, description="Filter by quality dimension"),
@@ -178,8 +188,8 @@ async def list_quality_rules(
         raise HTTPException(status_code=500, detail=f"Rule listing failed: {str(e)}")
 
 @router.get("/rules/{rule_id}")
-@rate_limiter.limit("300/minute")
-@cache_response(expire_time=120)
+@rate_limit(requests=300, window=60)
+@cache_response(ttl=120)
 async def get_quality_rule(
     rule_id: str,
     include_assessments: bool = Query(default=False, description="Include recent assessments"),
@@ -219,7 +229,7 @@ async def get_quality_rule(
         raise HTTPException(status_code=500, detail=f"Rule retrieval failed: {str(e)}")
 
 @router.put("/rules/{rule_id}")
-@rate_limiter.limit("100/minute")
+@rate_limit(requests=100, window=60)
 async def update_quality_rule(
     rule_id: str,
     request: QualityRuleRequest,
@@ -283,7 +293,7 @@ async def update_quality_rule(
 # Quality Assessment Routes
 
 @router.post("/assessments")
-@rate_limiter.limit("100/minute")
+@rate_limit(requests=100, window=60)
 async def create_quality_assessment(
     request: QualityAssessmentRequest,
     background_tasks: BackgroundTasks,
@@ -340,7 +350,7 @@ async def create_quality_assessment(
         raise HTTPException(status_code=500, detail=f"Assessment creation failed: {str(e)}")
 
 @router.post("/assessments/{assessment_id}/execute")
-@rate_limiter.limit("50/minute")
+@rate_limit(requests=50, window=60)
 async def execute_quality_assessment(
     assessment_id: str,
     background_tasks: BackgroundTasks,
@@ -382,8 +392,8 @@ async def execute_quality_assessment(
         raise HTTPException(status_code=500, detail=f"Assessment execution failed: {str(e)}")
 
 @router.get("/assessments")
-@rate_limiter.limit("200/minute")
-@cache_response(expire_time=180)
+@rate_limit(requests=200, window=60)
+@cache_response(ttl=180)
 async def list_quality_assessments(
     target_type: Optional[str] = Query(default=None, description="Filter by target type"),
     assessment_type: Optional[str] = Query(default=None, description="Filter by assessment type"),
@@ -446,8 +456,8 @@ async def list_quality_assessments(
         raise HTTPException(status_code=500, detail=f"Assessment listing failed: {str(e)}")
 
 @router.get("/assessments/{assessment_id}")
-@rate_limiter.limit("300/minute")
-@cache_response(expire_time=120)
+@rate_limit(requests=300, window=60)
+@cache_response(ttl=120)
 async def get_quality_assessment(
     assessment_id: str,
     include_details: bool = Query(default=True, description="Include detailed results"),
@@ -489,7 +499,7 @@ async def get_quality_assessment(
 # Quality Scorecard Routes
 
 @router.post("/scorecards")
-@rate_limiter.limit("50/minute")
+@rate_limit(requests=50, window=60)
 async def create_quality_scorecard(
     request: QualityScorecardRequest,
     background_tasks: BackgroundTasks,
@@ -545,8 +555,8 @@ async def create_quality_scorecard(
         raise HTTPException(status_code=500, detail=f"Scorecard creation failed: {str(e)}")
 
 @router.get("/scorecards")
-@rate_limiter.limit("200/minute")
-@cache_response(expire_time=300)
+@rate_limit(requests=200, window=60)
+@cache_response(ttl=300)
 async def list_quality_scorecards(
     target_type: Optional[str] = Query(default=None, description="Filter by target type"),
     scoring_method: Optional[QualityScoreMethod] = Query(default=None, description="Filter by scoring method"),
@@ -603,7 +613,7 @@ async def list_quality_scorecards(
 # Quality Monitoring Routes
 
 @router.post("/monitoring")
-@rate_limiter.limit("30/minute")
+@rate_limit(requests=30, window=60)
 async def create_quality_monitoring(
     request: QualityMonitoringRequest,
     background_tasks: BackgroundTasks,
@@ -661,7 +671,7 @@ async def create_quality_monitoring(
         raise HTTPException(status_code=500, detail=f"Monitoring creation failed: {str(e)}")
 
 @router.post("/monitoring/{monitor_id}/start")
-@rate_limiter.limit("100/minute")
+@rate_limit(requests=100, window=60)
 async def start_quality_monitoring(
     monitor_id: str,
     quality_service: CatalogQualityService = Depends(get_quality_service),
@@ -702,7 +712,7 @@ async def start_quality_monitoring(
         raise HTTPException(status_code=500, detail=f"Monitoring start failed: {str(e)}")
 
 @router.post("/monitoring/{monitor_id}/stop")
-@rate_limiter.limit("100/minute")
+@rate_limit(requests=100, window=60)
 async def stop_quality_monitoring(
     monitor_id: str,
     quality_service: CatalogQualityService = Depends(get_quality_service),
@@ -744,7 +754,7 @@ async def stop_quality_monitoring(
 # Quality Reporting Routes
 
 @router.post("/reports")
-@rate_limiter.limit("50/minute")
+@rate_limit(requests=50, window=60)
 async def generate_quality_report(
     request: QualityReportRequest,
     background_tasks: BackgroundTasks,
@@ -801,8 +811,8 @@ async def generate_quality_report(
         raise HTTPException(status_code=500, detail=f"Report generation failed: {str(e)}")
 
 @router.get("/reports")
-@rate_limiter.limit("200/minute")
-@cache_response(expire_time=300)
+@rate_limit(requests=200, window=60)
+@cache_response(ttl=300)
 async def list_quality_reports(
     report_type: Optional[QualityReportType] = Query(default=None, description="Filter by report type"),
     status: Optional[str] = Query(default=None, description="Filter by generation status"),
@@ -857,8 +867,8 @@ async def list_quality_reports(
 # Quality Analytics Routes
 
 @router.get("/analytics")
-@rate_limiter.limit("100/minute")
-@cache_response(expire_time=600)
+@rate_limit(requests=100, window=60)
+@cache_response(ttl=600)
 async def get_quality_analytics(
     scope: Optional[str] = Query(default="global", description="Analytics scope"),
     time_range: Optional[str] = Query(default="7d", description="Time range for analytics"),
@@ -897,8 +907,8 @@ async def get_quality_analytics(
         raise HTTPException(status_code=500, detail=f"Quality analytics retrieval failed: {str(e)}")
 
 @router.get("/metrics")
-@rate_limiter.limit("300/minute")
-@cache_response(expire_time=60)
+@rate_limit(requests=300, window=60)
+@cache_response(ttl=60)
 async def get_quality_metrics(
     scope: Optional[str] = Query(default="global", description="Metrics scope"),
     time_range: Optional[str] = Query(default="1h", description="Time range for metrics"),

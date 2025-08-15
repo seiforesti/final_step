@@ -20,15 +20,15 @@ from typing import List, Dict, Any, Optional
 from datetime import datetime
 import uuid
 
-from app.core.database import get_db_session
-from app.models.Scan-Rule-Sets-completed-models.enhanced_collaboration_models import (
+from app.db_session import get_db_session
+from app.models.Scan_Rule_Sets_completed_models.enhanced_collaboration_models import (
     KnowledgeType, ConsultationStatus, ExpertiseLevel,
     KnowledgeBaseRequest, KnowledgeBaseResponse,
     ExpertConsultationRequest, ExpertConsultationResponse
 )
-from app.services.Scan-Rule-Sets-completed-services.knowledge_management_service import KnowledgeManagementService
-from app.api.security.rbac import current_user, require_permissions
-from app.utils.rate_limiter import check_rate_limit
+from app.services.Scan_Rule_Sets_completed_services.knowledge_management_service import KnowledgeManagementService
+from ...security.rbac import get_current_user as current_user, require_permissions
+from app.utils.rate_limiter import rate_limit
 from app.core.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -45,7 +45,7 @@ knowledge_service = KnowledgeManagementService()
     summary="Create Knowledge Item",
     description="Create a new knowledge base item with AI-powered enhancement and categorization."
 )
-@check_rate_limit("knowledge_create", max_calls=20, window_seconds=60)
+@rate_limit(requests=20, window=60)
 async def create_knowledge_item(
     knowledge_request: KnowledgeBaseRequest = Body(..., description="Knowledge item creation request"),
     current_user_data: dict = Depends(current_user),
@@ -153,7 +153,7 @@ async def search_knowledge(
     description="Get personalized knowledge recommendations based on user activity and context."
 )
 async def get_knowledge_recommendations(
-    context: Optional[Dict[str, Any]] = Query(None, description="Context information for recommendations"),
+    context: Optional[Dict[str, Any]] = Body(None, description="Context information for recommendations"),
     limit: int = Query(10, ge=1, le=50, description="Maximum number of recommendations"),
     current_user_data: dict = Depends(current_user),
     db = Depends(get_db_session)
@@ -189,7 +189,7 @@ async def get_knowledge_recommendations(
     summary="Update Knowledge Item",
     description="Update a knowledge base item with versioning and change tracking."
 )
-@check_rate_limit("knowledge_update", max_calls=30, window_seconds=60)
+@rate_limit(requests=30, window=60)
 async def update_knowledge_item(
     item_id: uuid.UUID = Path(..., description="Knowledge item ID"),
     update_data: Dict[str, Any] = Body(..., description="Update data"),
@@ -224,7 +224,7 @@ async def update_knowledge_item(
     summary="Request Expert Consultation",
     description="Request expert consultation with automatic expert matching and scheduling."
 )
-@check_rate_limit("consultation_request", max_calls=5, window_seconds=60)
+@rate_limit(requests=5, window=60)
 async def request_expert_consultation(
     consultation_request: ExpertConsultationRequest = Body(..., description="Consultation request"),
     current_user_data: dict = Depends(current_user),
@@ -428,7 +428,7 @@ async def identify_knowledge_gaps(
     summary="Vote on Knowledge Item",
     description="Vote on the usefulness of a knowledge base item."
 )
-@check_rate_limit("knowledge_vote", max_calls=50, window_seconds=60)
+@rate_limit(requests=50, window=60)
 async def vote_on_knowledge_item(
     item_id: uuid.UUID = Path(..., description="Knowledge item ID"),
     vote_type: str = Body(..., description="Vote type (useful, not_useful)"),
@@ -459,7 +459,7 @@ async def vote_on_knowledge_item(
     summary="Bookmark Knowledge Item",
     description="Bookmark a knowledge item for quick access."
 )
-@check_rate_limit("knowledge_bookmark", max_calls=100, window_seconds=60)
+@rate_limit(requests=100, window=60)
 async def bookmark_knowledge_item(
     item_id: uuid.UUID = Path(..., description="Knowledge item ID"),
     current_user_data: dict = Depends(current_user),
@@ -513,7 +513,7 @@ async def get_knowledge_categories(
     summary="Share Knowledge Item",
     description="Share a knowledge item with specific users or teams."
 )
-@check_rate_limit("knowledge_share", max_calls=20, window_seconds=60)
+@rate_limit(requests=20, window=60)
 async def share_knowledge_item(
     item_id: uuid.UUID = Path(..., description="Knowledge item ID"),
     share_data: Dict[str, Any] = Body(..., description="Share configuration"),

@@ -1035,60 +1035,6 @@ async def get_performance_metrics(
             "data_source_id": data_source_id,
             "time_range": time_range
         }
-                "threshold": 1.0,
-                "status": "good"
-            },
-            "uptime": {
-                "value": 99.8,
-                "unit": "%",
-                "trend": "stable",
-                "threshold": 99.5,
-                "status": "good"
-            },
-            "cpu_usage": {
-                "value": 75,
-                "unit": "%",
-                "trend": "increasing",
-                "threshold": 80,
-                "status": "warning"
-            },
-            "memory_usage": {
-                "value": 68,
-                "unit": "%",
-                "trend": "stable",
-                "threshold": 85,
-                "status": "warning"
-            },
-            "disk_usage": {
-                "value": 45,
-                "unit": "%",
-                "trend": "stable",
-                "threshold": 90,
-                "status": "good"
-            },
-            "network_latency": {
-                "value": 12,
-                "unit": "ms",
-                "trend": "stable",
-                "threshold": 50,
-                "status": "good"
-            },
-            "active_connections": {
-                "value": 156,
-                "unit": "connections",
-                "trend": "stable",
-                "threshold": 500,
-                "status": "good"
-            },
-            "historical_data": []
-        }
-        
-        return {
-            "success": True,
-            "data": metrics,
-            "data_source_id": data_source_id,
-            "time_range": time_range
-        }
     except Exception as e:
         logger.error(f"Error getting performance metrics: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to get performance metrics")
@@ -1186,27 +1132,6 @@ async def get_security_audit(
             ],
             "recommendations": security_audit.recommendations,
             "compliance_frameworks": security_audit.compliance_frameworks
-                }
-            ],
-            "incidents": [
-                {
-                    "id": "incident-001",
-                    "title": "Unauthorized Access Attempt",
-                    "description": "Multiple failed login attempts detected",
-                    "severity": "medium",
-                    "status": "resolved",
-                    "discovered_at": (datetime.now() - timedelta(hours=1)).isoformat(),
-                    "resolved_at": (datetime.now() - timedelta(minutes=30)).isoformat(),
-                    "affected_data": ["user_profiles", "access_logs"],
-                    "remediation": "Account locked and IP blocked"
-                }
-            ],
-            "threat_intelligence": {
-                "recent_threats": 12,
-                "blocked_attacks": 156,
-                "suspicious_activities": 8,
-                "last_updated": datetime.now().isoformat()
-            }
         }
         
         return {

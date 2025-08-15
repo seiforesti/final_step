@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import Optional, Dict, Any
 import secrets
 import string
 import pyotp
@@ -157,3 +157,41 @@ def has_role(user, role_name):
     if hasattr(user, 'roles') and role_name in [r.name for r in getattr(user, 'roles', [])]:
         return True
     return False
+
+
+class AuthService:
+    """Service facade for authentication operations used by orchestration and routes."""
+
+    def __init__(self, db_session: Session):
+        self.db = db_session
+
+    def create_user(self, email: str, password: Optional[str] = None, role: str = "user", **kwargs) -> User:
+        return create_user(self.db, email=email, password=password, role=role, **kwargs)
+
+    def authenticate(self, email: str, password: str) -> Optional[Dict[str, Any]]:
+        user = get_user_by_email(self.db, email)
+        if not user or not user.hashed_password:
+            return None
+        if verify_password(password, user.hashed_password):
+            session = create_session(self.db, user)
+            return {"user_id": user.id, "session_token": session.session_token}
+        return None
+
+    def logout(self, session_token: str) -> bool:
+        session = get_session_by_token(self.db, session_token)
+        if session:
+            delete_session(self.db, session)
+            return True
+        return False
+
+    def enable_mfa(self, user_id: int) -> Optional[str]:
+        user = self.db.query(User).filter(User.id == user_id).first()
+        if not user:
+            return None
+        return enable_mfa_for_user(self.db, user)
+
+    def verify_mfa(self, user_id: int, code: str) -> bool:
+        user = self.db.query(User).filter(User.id == user_id).first()
+        if not user:
+            return False
+        return verify_mfa_code(user, code)

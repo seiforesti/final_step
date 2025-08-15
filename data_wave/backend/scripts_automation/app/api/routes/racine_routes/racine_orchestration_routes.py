@@ -45,9 +45,9 @@ from pydantic import BaseModel, Field, validator
 from sqlmodel import Session
 
 # Core imports
-from ....core.auth import get_current_user, require_permissions
+from ...security.rbac import get_current_user, require_permissions
 from ....db_session import get_session
-from ....core.cache import CacheManager
+from ....utils.cache import EnterpriseCache
 
 # Service imports - CRITICAL: Import the master orchestration service
 from ....services.racine_services.racine_orchestration_service import RacineOrchestrationService

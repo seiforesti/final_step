@@ -1,5 +1,5 @@
 from sqlmodel import SQLModel, Field, Relationship, Column, JSON, String, Text
-from typing import List, Optional, Dict, Any, ForwardRef
+from typing import List, Optional, Dict, Any, ForwardRef, TYPE_CHECKING
 from datetime import datetime
 from enum import Enum
 import uuid
@@ -203,6 +203,9 @@ class ClassificationRule(SQLModel, table=True):
     applies_to_catalog_items: bool = Field(default=True)
     compliance_requirement_id: Optional[int] = Field(default=None, foreign_key="compliance_requirements.id")
     
+    # **INTERCONNECTED: Racine Orchestrator Integration**
+    racine_orchestrator_id: Optional[str] = Field(default=None, foreign_key="racine_orchestration_master.id", index=True)
+    
     # Performance and monitoring
     execution_count: int = Field(default=0)
     success_count: int = Field(default=0)
@@ -225,10 +228,16 @@ class ClassificationRule(SQLModel, table=True):
     # Relationships
     framework: Optional[ClassificationFramework] = Relationship(back_populates="classification_rules")
     compliance_requirement: Optional["ComplianceRequirement"] = Relationship()
-    parent_rule: Optional["ClassificationRule"] = Relationship(back_populates="child_rules")
+    parent_rule: Optional["ClassificationRule"] = Relationship(
+        back_populates="child_rules",
+        sa_relationship_kwargs={"remote_side": "ClassificationRule.id"}
+    )
     child_rules: List["ClassificationRule"] = Relationship(back_populates="parent_rule")
     classification_results: List["ClassificationResult"] = Relationship(back_populates="rule")
     rule_dictionaries: List["ClassificationRuleDictionary"] = Relationship(back_populates="rule")
+    
+    # **INTERCONNECTED: Racine Orchestrator Integration**
+    racine_orchestrator: Optional["RacineOrchestrationMaster"] = Relationship(back_populates="managed_classifications")
 
 
 class ClassificationDictionary(SQLModel, table=True):
@@ -278,7 +287,10 @@ class ClassificationDictionary(SQLModel, table=True):
     updated_by: Optional[str] = None
     
     # Relationships
-    parent_dictionary: Optional["ClassificationDictionary"] = Relationship(back_populates="child_dictionaries")
+    parent_dictionary: Optional["ClassificationDictionary"] = Relationship(
+        back_populates="child_dictionaries",
+        sa_relationship_kwargs={"remote_side": "ClassificationDictionary.id"}
+    )
     child_dictionaries: List["ClassificationDictionary"] = Relationship(back_populates="parent_dictionary")
     rule_dictionaries: List["ClassificationRuleDictionary"] = Relationship(back_populates="dictionary")
 
@@ -325,9 +337,9 @@ class ClassificationResult(SQLModel, table=True):
     confidence_level: ClassificationConfidenceLevel
     
     # Integration with existing systems
-    data_source_id: Optional[int] = Field(default=None, foreign_key="data_sources.id")
-    scan_id: Optional[int] = Field(default=None, foreign_key="scans.id")
-    scan_result_id: Optional[int] = Field(default=None, foreign_key="scan_results.id")
+    data_source_id: Optional[int] = Field(default=None, foreign_key="datasource.id")
+    scan_id: Optional[int] = Field(default=None, foreign_key="scan.id")
+    scan_result_id: Optional[int] = Field(default=None, foreign_key="scanresult.id")
     catalog_item_id: Optional[int] = Field(default=None, foreign_key="catalog_items.id")
     
     # Classification context
@@ -389,7 +401,10 @@ class ClassificationResult(SQLModel, table=True):
     scan: Optional[Scan] = Relationship()
     scan_result: Optional[ScanResult] = Relationship()
     catalog_item: Optional[CatalogItem] = Relationship()
-    inherited_from: Optional["ClassificationResult"] = Relationship(back_populates="child_results")
+    inherited_from: Optional["ClassificationResult"] = Relationship(
+        back_populates="child_results",
+        sa_relationship_kwargs={"remote_side": "ClassificationResult.id"}
+    )
     child_results: List["ClassificationResult"] = Relationship(back_populates="inherited_from")
     audit_logs: List["ClassificationAuditLog"] = Relationship(back_populates="classification_result")
     tags: List["ClassificationTag"] = Relationship(back_populates="classification_result")
@@ -556,7 +571,7 @@ class DataSourceClassificationSetting(SQLModel, table=True):
     __tablename__ = "data_source_classification_settings"
     
     id: Optional[int] = Field(default=None, primary_key=True)
-    data_source_id: int = Field(foreign_key="data_sources.id", unique=True)
+    data_source_id: int = Field(foreign_key="datasource.id", unique=True)
     
     # Classification configuration
     auto_classify: bool = Field(default=True)
@@ -592,7 +607,7 @@ class ScanResultClassification(SQLModel, table=True):
     __tablename__ = "scan_result_classifications"
     
     id: Optional[int] = Field(default=None, primary_key=True)
-    scan_result_id: int = Field(foreign_key="scan_results.id")
+    scan_result_id: int = Field(foreign_key="scanresult.id")
     classification_result_id: int = Field(foreign_key="classification_results.id")
     
     # Classification context from scan
@@ -645,3 +660,7 @@ class CatalogItemClassification(SQLModel, table=True):
 
 # Update foreign key references to use proper table names
 # Note: model_rebuild() is not available in Pydantic V1
+
+# Forward references to avoid circular imports
+if TYPE_CHECKING:
+    from .racine_models.racine_orchestration_models import RacineOrchestrationMaster

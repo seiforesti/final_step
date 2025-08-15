@@ -56,10 +56,20 @@ from sqlmodel import Session
 
 # Internal imports
 from ..models.scan_models import *
-from ..models.advanced_scan_rule_models import *
+from ..models.advanced_scan_rule_models import (
+    IntelligentScanRule, RuleExecutionHistory, RuleOptimizationJob,
+    RulePatternLibrary, RulePatternAssociation, RulePerformanceBaseline
+)
 from ..models.scan_intelligence_models import *
 from ..db_session import get_session
-from ..core.config import settings
+try:
+    from ..core.settings import get_settings as _get_settings
+    def get_settings():
+        return _get_settings()
+except Exception:
+    from ..core.config import settings as _settings
+    def get_settings():
+        return _settings
 from ..services.ai_service import EnterpriseAIService as AIService
 from ..services.data_source_connection_service import DataSourceConnectionService
 from ..services.enterprise_scan_rule_service import EnterpriseScanRuleService
@@ -545,11 +555,19 @@ class EnterpriseScanOrchestrator:
         except Exception:
             pass
         
-        # Adjust based on user role/permissions
-        # This would integrate with user management system
+        # Adjust based on user role/permissions via RBAC
         if scan_request.user_id:
-            # Add user-based priority adjustments
-            pass
+            try:
+                from ..services.rbac_service import RBACService
+                rbac = RBACService()
+                roles = await rbac.get_user_roles(scan_request.user_id) if hasattr(rbac, 'get_user_roles') else []
+                if roles:
+                    if any(r.get('level') == 'admin' for r in roles if isinstance(r, dict)):
+                        base_score += 100
+                    if any(r.get('name') in ('compliance_officer', 'security_officer') for r in roles if isinstance(r, dict)):
+                        base_score += 50
+            except Exception:
+                pass
         
         # Age-based priority boost (prevent starvation)
         age_minutes = (datetime.utcnow() - scan_request.created_at).total_seconds() / 60
@@ -567,13 +585,19 @@ class EnterpriseScanOrchestrator:
             initial_workers = min(self.worker_config['min_workers'], self.max_concurrent_scans)
             
             for i in range(initial_workers):
-                worker_task = asyncio.create_task(
-                    self._worker_loop(f"worker-{i}")
-                )
-                self.worker_pool.append(worker_task)
+                try:
+                    loop = asyncio.get_running_loop()
+                    worker_task = loop.create_task(self._worker_loop(f"worker-{i}"))
+                    self.worker_pool.append(worker_task)
+                except RuntimeError:
+                    break
             
             # Start worker management task
-            management_task = asyncio.create_task(self._manage_worker_pool())
+            try:
+                loop = asyncio.get_running_loop()
+                management_task = loop.create_task(self._manage_worker_pool())
+            except RuntimeError:
+                return
             self.worker_pool.append(management_task)
             
             logger.info(f"Started {initial_workers} workers")

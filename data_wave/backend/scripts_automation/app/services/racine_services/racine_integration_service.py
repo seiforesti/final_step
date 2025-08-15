@@ -50,7 +50,7 @@ from contextlib import asynccontextmanager
 # Import all existing services for integration
 from ..data_source_service import DataSourceService
 from ..enterprise_scan_rule_service import EnterpriseScanRuleService
-from ..classification_service import EnterpriseClassificationService
+from ..classification_service import ClassificationService as EnterpriseClassificationService
 from ..compliance_rule_service import ComplianceRuleService
 from ..enterprise_catalog_service import EnterpriseIntelligentCatalogService
 from ..unified_scan_orchestrator import UnifiedScanOrchestrator
@@ -73,12 +73,11 @@ from ...models.racine_models.racine_integration_models import (
 )
 
 # Import existing models for cross-group integration
-from ...models.scan_models import DataSource, Scan, ScanResult
-from ...models.advanced_scan_rule_models import ScanRuleSet, EnhancedScanRuleSet
-from ...models.classification_models import ClassificationRule, DataClassification
-from ...models.compliance_rule_models import ComplianceRule, ComplianceValidation
-from ...models.advanced_catalog_models import CatalogItem, CatalogMetadata
-from ...models.scan_orchestration_models import ScanOrchestrationJob, ScanWorkflowExecution
+from ...models.scan_models import DataSource, Scan, ScanResult, ScanRuleSet, EnhancedScanRuleSet
+from ...models.classification_models import ClassificationRule, ClassificationResult
+from ...models.compliance_models import ComplianceRequirement as ComplianceRule, ComplianceValidation
+from ...models.advanced_catalog_models import IntelligentDataAsset as CatalogItem, DataProfilingResult as CatalogMetadata
+from ...models.scan_models import ScanOrchestrationJob, ScanWorkflowExecution
 from ...models.auth_models import User, Role, Permission
 
 # Logger setup

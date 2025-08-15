@@ -31,6 +31,33 @@ from ..auth_models import User
 from .racine_orchestration_models import RacineOrchestrationMaster
 
 
+# =========================
+# Service-aligned Enumerations
+# =========================
+
+class PipelineType(str, enum.Enum):
+    """High-level pipeline categories used by services."""
+    DATA_INTEGRATION = "data_integration"
+    TRANSFORMATION = "transformation"
+    VALIDATION = "validation"
+    GOVERNANCE = "governance"
+    DISCOVERY = "discovery"
+    ANALYTICS = "analytics"
+    STREAMING = "streaming"
+    CUSTOM = "custom"
+
+
+class ExecutionStatus(str, enum.Enum):
+    """Execution status for pipelines and stages (service expects this)."""
+    PENDING = "pending"
+    RUNNING = "running"
+    COMPLETED = "completed"
+    COMPLETED_WITH_WARNINGS = "completed_with_warnings"
+    FAILED = "failed"
+    CANCELED = "canceled"
+    PAUSED = "paused"
+
+
 class PipelineStatus(enum.Enum):
     """Pipeline execution status enumeration"""
     DRAFT = "draft"
@@ -71,6 +98,10 @@ class PipelineOptimizationType(enum.Enum):
     LATENCY = "latency"
     QUALITY = "quality"
 
+# Aliases to match service imports (StageType, OptimizationType)
+StageType = PipelineStageType
+OptimizationType = PipelineOptimizationType
+
 
 class RacinePipeline(Base):
     """
@@ -87,9 +118,13 @@ class RacinePipeline(Base):
     description = Column(Text)
     version = Column(String, default="1.0.0")
     status = Column(SQLEnum(PipelineStatus), default=PipelineStatus.DRAFT, index=True)
+    pipeline_type = Column(SQLEnum(PipelineType), default=PipelineType.CUSTOM, index=True)
     
     # Pipeline configuration
-    pipeline_definition = Column(JSON, nullable=False)  # Complete pipeline DAG definition
+    configuration = Column(JSON)  # Unified configuration blob used by services
+    data_flow_definition = Column(JSON)  # Data flow definition used by services
+    pipeline_metadata = Column(JSON)  # Arbitrary metadata used by services
+    pipeline_definition = Column(JSON, nullable=True)  # Complete pipeline DAG definition (legacy)
     stage_configurations = Column(JSON)  # Individual stage configurations
     data_flow_mapping = Column(JSON)  # Data flow between stages
     dependency_graph = Column(JSON)  # Stage dependency graph
@@ -150,6 +185,8 @@ class RacinePipeline(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     created_by = Column(String, ForeignKey('users.id'), nullable=False)
     updated_by = Column(String, ForeignKey('users.id'))
+    last_executed_at = Column(DateTime)
+    total_executions = Column(Integer, default=0)
     
     # Relationships
     creator = relationship("User", foreign_keys=[created_by])
@@ -178,14 +215,15 @@ class RacinePipelineExecution(Base):
     
     # Execution basic information
     execution_name = Column(String, index=True)
-    status = Column(SQLEnum(PipelineStatus), default=PipelineStatus.RUNNING, index=True)
+    status = Column(SQLEnum(ExecutionStatus), default=ExecutionStatus.RUNNING, index=True)
     trigger_type = Column(String)  # manual, scheduled, event_driven, api
     
     # Execution context
     triggered_by = Column(String, ForeignKey('users.id'))
     trigger_data = Column(JSON)  # Data that triggered the execution
     execution_context = Column(JSON)  # Execution environment context
-    input_parameters = Column(JSON)  # Input parameters for this execution
+    execution_parameters = Column(JSON)  # Input parameters for this execution (service)
+    input_parameters = Column(JSON)  # Legacy
     input_data_sources = Column(JSON)  # Input data sources
     
     # Timing information
@@ -210,10 +248,13 @@ class RacinePipelineExecution(Base):
     throughput_rate = Column(Float)  # Records per second
     
     # Resource utilization
+    runtime_configuration = Column(JSON)  # Runtime configuration (service)
     resource_usage = Column(JSON)  # Resource consumption data
     cost_metrics = Column(JSON)  # Cost tracking
     performance_metrics = Column(JSON)  # Detailed performance metrics
     optimization_applied = Column(JSON)  # Applied optimizations
+    data_lineage = Column(JSON)  # Overall execution lineage
+    error_message = Column(Text)  # Execution error message
     
     # Error handling and debugging
     error_details = Column(JSON)  # Detailed error information
@@ -259,7 +300,7 @@ class RacinePipelineStage(Base):
     
     # Stage basic information
     stage_name = Column(String, nullable=False, index=True)
-    stage_type = Column(SQLEnum(PipelineStageType), nullable=False)
+    stage_type = Column(SQLEnum(StageType), nullable=False)
     stage_order = Column(Integer, nullable=False)
     description = Column(Text)
     
@@ -327,12 +368,21 @@ class RacineStageExecution(Base):
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     
     # Execution information
-    status = Column(SQLEnum(PipelineStatus), default=PipelineStatus.RUNNING, index=True)
+    status = Column(SQLEnum(ExecutionStatus), default=ExecutionStatus.RUNNING, index=True)
     started_at = Column(DateTime, default=datetime.utcnow, index=True)
     completed_at = Column(DateTime)
     duration_seconds = Column(Integer)
     
     # Data processing
+    # Service-aligned
+    stage_input = Column(JSON)  # Input at stage start
+    stage_output = Column(JSON)  # Output at stage completion
+    optimization_applied = Column(JSON)  # Applied optimizations for stage
+    performance_metrics = Column(JSON)  # Detailed performance metrics
+    data_lineage = Column(JSON)  # Stage-specific lineage
+    error_message = Column(Text)
+
+    # Legacy/backward-compatibility
     input_data = Column(JSON)  # Actual input data for this execution
     output_data = Column(JSON)  # Output data from this execution
     records_processed = Column(Integer, default=0)
@@ -341,7 +391,6 @@ class RacineStageExecution(Base):
     
     # Performance tracking
     resource_usage = Column(JSON)  # Resource consumption
-    performance_metrics = Column(JSON)  # Performance metrics
     throughput_metrics = Column(JSON)  # Throughput measurements
     bottlenecks_detected = Column(JSON)  # Performance bottlenecks
     
@@ -358,7 +407,6 @@ class RacineStageExecution(Base):
     recovery_actions = Column(JSON)
     
     # AI optimization tracking
-    optimization_applied = Column(JSON)  # Applied optimizations
     performance_improvement = Column(Float)  # Performance improvement
     ai_recommendations_generated = Column(JSON)  # AI recommendations generated
     
@@ -388,8 +436,13 @@ class RacinePipelineTemplate(Base):
     template_version = Column(String, default="1.0.0")
     complexity_level = Column(String, default="intermediate")  # beginner, intermediate, advanced
     
-    # Template configuration
-    template_definition = Column(JSON, nullable=False)  # Complete template definition
+    # Service-aligned
+    default_configuration = Column(JSON)  # Default configuration used by services
+    stage_templates = Column(JSON)  # Stage templates used by services
+    template_metadata = Column(JSON)
+
+    # Template configuration (legacy/full)
+    template_definition = Column(JSON, nullable=True)  # Complete template definition
     parameter_schema = Column(JSON)  # Schema for template parameters
     default_parameters = Column(JSON)  # Default parameter values
     validation_rules = Column(JSON)  # Parameter validation rules

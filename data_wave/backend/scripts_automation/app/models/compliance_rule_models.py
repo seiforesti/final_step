@@ -6,7 +6,12 @@ from enum import Enum
 import uuid
 
 # **INTERCONNECTED: Import existing models for proper relationships**
-from app.models.scan_models import DataSource, ScanRuleSet
+# Use forward references to avoid circular imports
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.models.scan_models import DataSource, ScanRuleSet
+    from app.models.racine_models.racine_orchestration_models import RacineOrchestrationMaster
 
 # Link table for many-to-many relationship between ComplianceRule and DataSource
 compliance_rule_data_source_link = Table(
@@ -91,8 +96,11 @@ class ComplianceRule(SQLModel, table=True):
     entity_types: List[str] = Field(default_factory=list, sa_column=Column(JSON))
     
     # **INTERCONNECTED: Direct relationships to existing backend models**
-    scan_rule_set_id: Optional[int] = Field(default=None, foreign_key="scan_rule_sets.id")
+    scan_rule_set_id: Optional[int] = Field(default=None, foreign_key="scanruleset.id")
     custom_scan_rule_ids: List[int] = Field(default_factory=list, sa_column=Column(JSON))
+    
+    # **INTERCONNECTED: Racine Orchestrator Integration**
+    racine_orchestrator_id: Optional[str] = Field(default=None, foreign_key="racine_orchestration_master.id", index=True)
     
     # Rule Definition
     condition: str  # JSON or expression string representing the condition
@@ -163,6 +171,9 @@ class ComplianceRule(SQLModel, table=True):
     evaluations: List["ComplianceRuleEvaluation"] = Relationship(back_populates="rule")
     issues: List["ComplianceIssue"] = Relationship(back_populates="rule")
     workflows: List["ComplianceWorkflow"] = Relationship(back_populates="rule")  # Defined in compliance_extended_models.py
+    
+    # **INTERCONNECTED: Racine Orchestrator Integration**
+    racine_orchestrator: Optional["RacineOrchestrationMaster"] = Relationship(back_populates="managed_compliance_rules")
 
 
 # **INTERCONNECTED: Models that integrate with existing compliance_models.py**

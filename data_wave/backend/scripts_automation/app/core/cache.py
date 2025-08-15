@@ -124,3 +124,17 @@ class RedisCache:
             logger.error(f"Cache stats error: {str(e)}")
             return {"error": str(e)}
 
+
+def cache_response(ttl: int = 60):
+    """Route-level response cache decorator shim (no-op core wrapper).
+
+    The real caching decorator lives in utils.cache as 'cache_response'. This provides
+    compatibility for routes importing from app.core.cache.
+    """
+    try:
+        from ..utils.cache import cache_response as _cr  # type: ignore
+        return _cr(ttl=ttl)
+    except Exception:
+        def _noop(func):
+            return func
+        return _noop

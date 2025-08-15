@@ -10,7 +10,8 @@ import time
 import redis
 import hashlib
 import json
-from typing import Dict, Optional, List, Tuple, Any
+from typing import Dict, Optional, List, Tuple, Any, Callable
+import functools
 from dataclasses import dataclass
 from enum import Enum
 import logging
@@ -529,6 +530,43 @@ class EnterpriseRateLimiter:
         except Exception as e:
             logger.error(f"Failed to clear rate limit: {e}")
 
+    # Backward-compatibility: support @rate_limiter.limit("100/minute") usage
+    def limit(self, spec: str):
+        """Return a decorator based on string spec like '100/minute', '10/second', '1000/hour'."""
+        try:
+            value, unit = spec.split("/")
+            requests = int(value.strip())
+            unit = unit.strip().lower()
+            if unit in ("minute", "min", "per_minute"):
+                window = 60
+            elif unit in ("second", "sec", "per_second"):
+                window = 1
+            elif unit in ("hour", "per_hour"):
+                window = 3600
+            else:
+                # Default to minute if unknown
+                window = 60
+            # Register rule name deterministically
+            rule_name = f"api_custom_{requests}_{window}"
+            try:
+                self.add_rule(rule_name, RateLimitRule(max_requests=requests, window_seconds=window))
+            except Exception:
+                pass
+            from functools import wraps
+            def _decorator(func):
+                @wraps(func)
+                async def _wrapper(*args, **kwargs):
+                    # Reuse standalone decorator implementation
+                    from .rate_limiter import rate_limit as _rate_limit  # type: ignore
+                    return await _rate_limit(requests=requests, window=window)(func)(*args, **kwargs)
+                return _wrapper
+            return _decorator
+        except Exception:
+            # Fallback to pass-through
+            def _noop(func):
+                return func
+            return _noop
+
 # Global rate limiter instance
 _rate_limiter_instance = None
 
@@ -553,3 +591,53 @@ def clear_rate_limit(identifier: str, rule_name: str = None):
     """Convenience function to clear rate limit."""
     limiter = get_rate_limiter()
     limiter.clear_rate_limit(identifier, rule_name)
+
+
+def rate_limit(requests: int = 60, window: int = 60, rule_name: Optional[str] = None) -> Callable:
+    """
+    FastAPI-compatible decorator to rate-limit endpoints.
+    Usage:
+        @router.get("/path")
+        @rate_limit(requests=10, window=60)
+        async def handler(current_user: dict = Depends(get_current_user)):
+            ...
+    """
+    custom_rule_name = rule_name or f"api_custom_{requests}_{window}"
+    limiter = get_rate_limiter()
+    try:
+        limiter.add_rule(custom_rule_name, RateLimitRule(max_requests=requests, window_seconds=window))
+    except Exception:
+        pass
+
+    def decorator(func: Callable) -> Callable:
+        @functools.wraps(func)
+        async def async_wrapper(*args, **kwargs):
+            # Try to identify the caller
+            identifier = "anonymous"
+            # Common name used across routes
+            cu = kwargs.get("current_user")
+            if isinstance(cu, dict):
+                identifier = cu.get("id") or cu.get("user_id") or identifier
+            # Fallback: scan kwargs for dict-like with id
+            if identifier == "anonymous":
+                for v in kwargs.values():
+                    if isinstance(v, dict) and ("id" in v or "user_id" in v):
+                        identifier = v.get("id") or v.get("user_id") or identifier
+                        break
+            result = await check_rate_limit(identifier=str(identifier), rule_name=custom_rule_name)
+            if not result.allowed:
+                from fastapi import HTTPException
+                raise HTTPException(status_code=429, detail="Rate limit exceeded", headers={"Retry-After": str(result.retry_after or 1)})
+            return await func(*args, **kwargs)
+
+        # Support sync endpoints too
+        @functools.wraps(func)
+        def sync_wrapper(*args, **kwargs):
+            loop = asyncio.new_event_loop()
+            try:
+                asyncio.set_event_loop(loop)
+                return loop.run_until_complete(async_wrapper(*args, **kwargs))
+            finally:
+                loop.close()
+        return async_wrapper if asyncio.iscoroutinefunction(func) else sync_wrapper
+    return decorator

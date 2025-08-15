@@ -20,15 +20,14 @@ from typing import List, Dict, Any, Optional
 from datetime import datetime
 import uuid
 
-from app.core.database import get_db_session
-from app.models.Scan-Rule-Sets-completed-models.enhanced_collaboration_models import (
+from app.db_session import get_db_session
+from app.models.Scan_Rule_Sets_completed_models.enhanced_collaboration_models import (
     ReviewStatus, ReviewType, Priority,
-    RuleReviewRequest, RuleReviewResponse,
-    RuleCommentRequest, RuleCommentResponse
+    RuleReviewRequest, RuleCommentRequest, RuleReviewResponse, RuleCommentResponse
 )
-from app.services.Scan-Rule-Sets-completed-services.rule_review_service import RuleReviewService
-from app.api.security.rbac import current_user, require_permissions
-from app.utils.rate_limiter import check_rate_limit
+from app.services.Scan_Rule_Sets_completed_services.rule_review_service import RuleReviewService
+from ...security.rbac import get_current_user as current_user, require_permissions
+from app.utils.rate_limiter import rate_limit
 from app.core.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -45,7 +44,7 @@ rule_review_service = RuleReviewService()
     summary="Create Rule Review",
     description="Create a new rule review with comprehensive workflow setup and automatic reviewer assignment."
 )
-@check_rate_limit("rule_review_create", max_calls=10, window_seconds=60)
+@rate_limit(requests=10, window=60)
 async def create_review(
     review_request: RuleReviewRequest = Body(..., description="Rule review creation request"),
     current_user_data: dict = Depends(current_user),
@@ -110,7 +109,7 @@ async def get_review(
     summary="Update Review Status",
     description="Update review status with comprehensive validation, notifications, and workflow progression."
 )
-@check_rate_limit("review_status_update", max_calls=20, window_seconds=60)
+@rate_limit(requests=20, window=60)
 async def update_review_status(
     review_id: uuid.UUID = Path(..., description="Review ID"),
     new_status: ReviewStatus = Body(..., description="New review status"),
@@ -200,7 +199,7 @@ async def list_reviews(
     summary="Add Review Comment",
     description="Add a comment to a review with comprehensive threading, mentions, and notification support."
 )
-@check_rate_limit("add_comment", max_calls=30, window_seconds=60)
+@rate_limit(requests=30, window=60)
 async def add_comment(
     review_id: uuid.UUID = Path(..., description="Review ID"),
     comment_request: RuleCommentRequest = Body(..., description="Comment creation request"),
@@ -273,7 +272,7 @@ async def get_review_comments(
     summary="Resolve Comment",
     description="Mark a comment as resolved with optional resolution notes and tracking."
 )
-@check_rate_limit("resolve_comment", max_calls=20, window_seconds=60)
+@rate_limit(requests=20, window=60)
 async def resolve_comment(
     comment_id: uuid.UUID = Path(..., description="Comment ID"),
     resolution_notes: Optional[str] = Body(None, description="Resolution notes"),

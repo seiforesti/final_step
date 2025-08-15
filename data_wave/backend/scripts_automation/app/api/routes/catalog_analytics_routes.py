@@ -28,19 +28,33 @@ from pydantic import BaseModel, Field, validator
 
 # Core dependencies
 from ...db_session import get_session
-from ...models.catalog_models import CatalogAsset, AssetUsage, AssetTag
+from ...models.catalog_models import CatalogItem as CatalogAsset, CatalogUsageLog as AssetUsage, CatalogTag as AssetTag
 from ...models.catalog_quality_models import QualityAssessment, QualityScorecard
-from ...models.catalog_intelligence_models import CatalogIntelligenceModel, UsagePatternAnalysis
+try:
+    from ...models.catalog_intelligence_models import CatalogIntelligenceModel, UsagePatternAnalysis
+except Exception:
+    from pydantic import BaseModel
+    class CatalogIntelligenceModel(BaseModel):
+        model_id: str
+        description: str | None = None
+        version: str | None = None
+    class UsagePatternAnalysis(BaseModel):
+        asset_id: int
+        patterns: list = []
+        generated_at: datetime | None = None
 
 # Service dependencies
 from ...services.catalog_analytics_service import CatalogAnalyticsService
 from ...services.catalog_recommendation_service import CatalogRecommendationService
 from ...services.catalog_quality_service import CatalogQualityService
-from ...services.enterprise_catalog_service import EnterpriseCatalogService
+from ...services.enterprise_catalog_service import EnterpriseIntelligentCatalogService as EnterpriseCatalogService
 
 # Authentication and authorization
-from ...api.security.rbac import get_current_user, require_permission
-from ...core.rbac import Permission
+from ...api.security.rbac import (
+    get_current_user,
+    require_permission,
+    PERMISSION_ANALYTICS_VIEW as Permission_ANALYTICS_VIEW,
+)
 
 # Logging setup
 logging.basicConfig(level=logging.INFO)

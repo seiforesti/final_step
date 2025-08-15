@@ -34,6 +34,7 @@ from . import (
     compliance_models,
     classification_models,
     catalog_models,
+    data_classification_models,
     # scan_orchestration_models,  # Models moved to scan_models.py
     
     # Advanced Models
@@ -69,6 +70,7 @@ from . import (
     collaboration_models,
     backup_models,
     access_control_models,
+    organization_models,
     
     # Racine Models
     racine_models,
@@ -80,9 +82,10 @@ from .scan_models import Scan, ScanResult, DataSource
 from .compliance_rule_models import ComplianceRule
 from .compliance_models import ComplianceValidation
 from .classification_models import ClassificationRule
-from .scan_models import DataClassification
+from .data_classification_models import DataClassification
 from .catalog_models import CatalogItem
 from .scan_models import ScanOrchestrationJob, ScanWorkflowExecution
+from .organization_models import Organization, OrganizationSetting
 
 # Import Racine models
 from .racine_models import (
@@ -105,6 +108,7 @@ __all__ = [
     "ClassificationRule", "DataClassification",
     "CatalogItem",
     "ScanOrchestrationJob", "ScanWorkflowExecution",
+    "Organization", "OrganizationSetting",
     
     # Racine Models
     "RacineOrchestrationMaster",

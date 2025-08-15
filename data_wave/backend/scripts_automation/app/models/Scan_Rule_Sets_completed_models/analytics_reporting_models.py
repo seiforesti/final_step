@@ -28,7 +28,7 @@ from datetime import datetime, timedelta
 from enum import Enum
 import uuid
 
-from sqlmodel import SQLModel, Field, Relationship, Column, JSON, Text, ARRAY
+from sqlmodel import SQLModel, Field, Relationship, Column, JSON, Text, ARRAY, String
 from sqlalchemy import Index, UniqueConstraint, CheckConstraint, DECIMAL
 from pydantic import BaseModel, validator
 
@@ -119,9 +119,9 @@ class UsageAnalytics(SQLModel, table=True):
     entity_name: Optional[str] = Field(default=None, description="Name of the tracked entity")
     
     # User and context information
-    user_id: Optional[uuid.UUID] = Field(default=None, foreign_key="users.id")
+    user_id: Optional[int] = Field(default=None, foreign_key="users.id")
     session_id: Optional[str] = Field(default=None, description="User session identifier")
-    organization_id: Optional[uuid.UUID] = Field(default=None, description="Organization context")
+    organization_id: Optional[int] = Field(default=None, foreign_key="organizations.id", description="Organization context")
     
     # Temporal tracking
     timestamp: datetime = Field(default_factory=datetime.utcnow, description="Event timestamp")
@@ -152,7 +152,7 @@ class UsageAnalytics(SQLModel, table=True):
     # Detailed metrics and metadata
     metrics_data: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
     analytics_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    tags: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)))
+    tags: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)))
     
     # System context
     environment: Optional[str] = Field(default=None, description="Environment context (prod, dev, test)")
@@ -186,7 +186,7 @@ class TrendAnalysis(SQLModel, table=True):
     
     # Analysis scope
     entity_type: str = Field(description="Type of entity being analyzed")
-    entity_ids: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)))
+    entity_ids: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)))
     scope_filter: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
     
     # Temporal scope
@@ -237,9 +237,9 @@ class TrendAnalysis(SQLModel, table=True):
     opportunities: List[str] = Field(default_factory=list, sa_column=Column(JSON))
     
     # Metadata and context
-    created_by: Optional[uuid.UUID] = Field(default=None, foreign_key="users.id")
-    organization_id: Optional[uuid.UUID] = Field(default=None)
-    tags: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)))
+    created_by: Optional[int] = Field(default=None, foreign_key="users.id")
+    organization_id: Optional[int] = Field(default=None, foreign_key="organizations.id")
+    tags: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)))
     trend_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
     
     # Timestamps
@@ -323,18 +323,16 @@ class ROIMetrics(SQLModel, table=True):
     peer_comparison: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
     
     # Metadata and context
-    created_by: Optional[uuid.UUID] = Field(default=None, foreign_key="users.id")
-    organization_id: Optional[uuid.UUID] = Field(default=None)
-    currency: str = Field(default="USD", description="Currency for financial calculations")
-    discount_rate: Optional[float] = Field(default=None, description="Discount rate for NPV calculations")
-    
-    # Validation and approval
-    validated: bool = Field(default=False, description="Whether metrics have been validated")
-    validated_by: Optional[uuid.UUID] = Field(default=None, foreign_key="users.id")
+    created_by: Optional[int] = Field(default=None, foreign_key="users.id")
+    organization_id: Optional[int] = Field(default=None, foreign_key="organizations.id")
+    currency: str = Field(max_length=10, default="USD")
+    discount_rate: Optional[float] = None
+    validated: bool = Field(default=False)
+    validated_by: Optional[int] = Field(default=None, foreign_key="users.id")
     validated_at: Optional[datetime] = Field(default=None)
     
     # Tags and metadata
-    tags: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)))
+    tags: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)))
     roi_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
     
     # Timestamps
@@ -424,8 +422,8 @@ class ComplianceIntegration(SQLModel, table=True):
     escalation_rules: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
     
     # Metadata and context
-    created_by: Optional[uuid.UUID] = Field(default=None, foreign_key="users.id")
-    organization_id: Optional[uuid.UUID] = Field(default=None)
+    created_by: Optional[int] = Field(default=None, foreign_key="users.id")
+    organization_id: Optional[int] = Field(default=None, foreign_key="organizations.id")
     business_unit: Optional[str] = Field(default=None, description="Business unit or department")
     geography: Optional[str] = Field(default=None, description="Geographic scope")
     
@@ -434,7 +432,7 @@ class ComplianceIntegration(SQLModel, table=True):
     change_log: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
     
     # Tags and metadata
-    tags: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)))
+    tags: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)))
     compliance_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
     
     # Timestamps
@@ -459,7 +457,7 @@ class UsageAnalyticsCreate(BaseModel):
     entity_type: str
     entity_id: Optional[str] = None
     entity_name: Optional[str] = None
-    user_id: Optional[uuid.UUID] = None
+    user_id: Optional[int] = None
     session_id: Optional[str] = None
     duration_seconds: Optional[float] = None
     usage_count: int = 1
@@ -611,7 +609,7 @@ class MarketplaceAnalytics(SQLModel, table=True):
     # Primary identification
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     marketplace_id: str = Field(unique=True, index=True, description="Marketplace identifier")
-    organization_id: Optional[uuid.UUID] = Field(default=None, foreign_key="organizations.id")
+    organization_id: Optional[int] = Field(default=None, foreign_key="organizations.id")
     
     # Marketplace performance metrics
     total_rules_published: int = Field(default=0, description="Total rules published")
@@ -627,8 +625,8 @@ class MarketplaceAnalytics(SQLModel, table=True):
     average_session_duration: float = Field(default=0.0, description="Average session duration in minutes")
     
     # Rule performance metrics
-    top_downloaded_rules: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)))
-    top_rated_rules: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)))
+    top_downloaded_rules: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)))
+    top_rated_rules: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)))
     average_rule_rating: float = Field(default=0.0, ge=0, le=5, description="Average rule rating")
     rule_quality_score: float = Field(default=0.0, ge=0, le=100, description="Overall rule quality score")
     
@@ -679,8 +677,8 @@ class UsageMetrics(SQLModel, table=True):
     # Primary identification
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     rule_id: str = Field(index=True, description="Rule identifier")
-    user_id: Optional[uuid.UUID] = Field(default=None, foreign_key="users.id", index=True)
-    organization_id: Optional[uuid.UUID] = Field(default=None, foreign_key="organizations.id", index=True)
+    user_id: Optional[int] = Field(default=None, foreign_key="users.id", index=True)
+    organization_id: Optional[int] = Field(default=None, foreign_key="organizations.id", index=True)
     
     # Usage tracking
     usage_count: int = Field(default=1, description="Number of times used")
@@ -698,7 +696,7 @@ class UsageMetrics(SQLModel, table=True):
     execution_time_avg: float = Field(default=0.0, description="Average execution time")
     success_rate: float = Field(default=1.0, ge=0, le=1, description="Success rate percentage")
     error_count: int = Field(default=0, description="Total error count")
-    error_types: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)))
+    error_types: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)))
     
     # Business impact metrics
     time_saved_hours: float = Field(default=0.0, description="Time saved in hours")
@@ -714,15 +712,15 @@ class UsageMetrics(SQLModel, table=True):
     
     # Advanced analytics
     usage_trends: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    peak_usage_times: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)))
+    peak_usage_times: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)))
     seasonal_patterns: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    user_segments: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)))
+    user_segments: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)))
     
     # Quality and feedback
     bug_reports: int = Field(default=0, description="Number of bug reports")
     feature_requests: int = Field(default=0, description="Number of feature requests")
     user_feedback: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    improvement_suggestions: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)))
+    improvement_suggestions: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)))
     
     # Timestamps
     created_at: datetime = Field(default_factory=datetime.utcnow)

@@ -109,6 +109,50 @@ class NotificationPriority(str, Enum):
     URGENT = "urgent"
     CRITICAL = "critical"
 
+# Additional enums needed by rule_reviews_routes.py
+class ReviewStatus(str, Enum):
+    """Review status values"""
+    DRAFT = "draft"
+    SUBMITTED = "submitted"
+    IN_REVIEW = "in_review"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+    NEEDS_CHANGES = "needs_changes"
+    COMPLETED = "completed"
+    CANCELLED = "cancelled"
+
+class Priority(str, Enum):
+    """Priority levels"""
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    CRITICAL = "critical"
+
+# Additional enums needed by knowledge_base_routes.py
+class KnowledgeType(str, Enum):
+    """Knowledge item types"""
+    BEST_PRACTICE = "best_practice"
+    TUTORIAL = "tutorial"
+    GUIDE = "guide"
+    TEMPLATE = "template"
+    EXAMPLE = "example"
+    CASE_STUDY = "case_study"
+    TROUBLESHOOTING = "troubleshooting"
+    FAQ = "faq"
+    REFERENCE = "reference"
+    PATTERN = "pattern"
+    WHITEPAPER = "whitepaper"
+    RESEARCH = "research"
+
+class ConsultationStatus(str, Enum):
+    """Expert consultation status values"""
+    REQUESTED = "requested"
+    SCHEDULED = "scheduled"
+    IN_PROGRESS = "in_progress"
+    COMPLETED = "completed"
+    CANCELLED = "cancelled"
+    EXPIRED = "expired"
+
 # ===================== CORE COLLABORATION MODELS =====================
 
 class TeamCollaborationHub(SQLModel, table=True):
@@ -351,7 +395,7 @@ class EnhancedRuleReview(SQLModel, table=True):
     
     # User tracking
     requested_by: str = Field(max_length=255, index=True, description="Review requester")
-    reviewer_id: str = Field(foreign_key="team_members.member_id", index=True)
+    reviewer_id: str = Field(foreign_key="rule_team_members.member_id", index=True)
     approved_by: Optional[str] = Field(max_length=255)
     
     # Relationships
@@ -658,3 +702,280 @@ class KnowledgeItemCreateRequest(BaseModel):
     category: str = Field(min_length=1, max_length=100)
     tags: Optional[List[str]] = []
     difficulty_level: ExpertiseLevel = ExpertiseLevel.INTERMEDIATE
+    knowledge_type: Optional[str] = None
+    related_rules: Optional[List[str]] = []
+    attachments: Optional[List[str]] = []
+    visibility: Optional[str] = "team"
+
+# Additional missing create request models
+class TeamMemberCreate(BaseModel):
+    """Request model for adding team members"""
+    user_id: str
+    role: RoleType
+    permissions: List[str] = []
+    join_date: Optional[datetime] = None
+
+class RuleReviewCreate(BaseModel):
+    """Request model for creating rule reviews"""
+    rule_id: str
+    title: str = Field(min_length=1, max_length=255)
+    description: Optional[str] = None
+    review_type: ReviewType
+    priority: str = "normal"
+    assigned_reviewers: List[str] = []
+    deadline: Optional[datetime] = None
+
+class CommentCreate(BaseModel):
+    """Request model for creating comments"""
+    target_type: str
+    target_id: str
+    content: str = Field(min_length=1)
+    comment_type: CommentType = CommentType.GENERAL
+    parent_comment_id: Optional[str] = None
+    mentions: List[str] = []
+    attachments: List[str] = []
+    annotations: Dict[str, Any] = {}
+
+class DiscussionCreate(BaseModel):
+    """Request model for creating discussions"""
+    title: str = Field(min_length=1, max_length=255)
+    description: Optional[str] = None
+    topic: str
+    purpose: str
+    discussion_type: str
+    priority: str = "normal"
+    urgency: str = "normal"
+    scope: str
+    requires_decision: bool = False
+    decision_deadline: Optional[datetime] = None
+    content: Optional[str] = None
+    category: Optional[str] = None
+    tags: Optional[List[str]] = []
+    related_entities: Optional[List[str]] = []
+    is_pinned: Optional[bool] = False
+
+# ===================== RESPONSE MODELS =====================
+
+class TeamHubResponse(BaseModel):
+    """Response model for team collaboration hub"""
+    id: int
+    hub_id: str
+    name: str
+    display_name: Optional[str]
+    description: Optional[str]
+    space_type: str
+    is_public: bool
+    is_active: bool
+    member_count: int
+    created_at: datetime
+    owner: str
+    collaboration_score: float
+    
+    class Config:
+        from_attributes = True
+
+class RuleReviewResponse(BaseModel):
+    """Response model for rule review"""
+    id: int
+    review_id: str
+    title: str
+    description: Optional[str]
+    review_type: str
+    status: str
+    priority: str
+    created_at: datetime
+    assigned_reviewers: List[str]
+    
+    class Config:
+        from_attributes = True
+
+class CommentResponse(BaseModel):
+    """Response model for comments"""
+    id: int
+    content: str
+    comment_type: str
+    author: str
+    created_at: datetime
+    parent_comment_id: Optional[str]
+    
+    class Config:
+        from_attributes = True
+
+class KnowledgeItemResponse(BaseModel):
+    """Response model for knowledge items"""
+    id: int
+    title: str
+    content: str
+    item_type: str
+    category: str
+    tags: List[str]
+    difficulty_level: str
+    created_at: datetime
+    author: str
+    knowledge_type: Optional[str] = None
+    author_id: Optional[str] = None
+    author_name: Optional[str] = None
+    related_rules: Optional[List[str]] = []
+    attachments: Optional[List[str]] = []
+    visibility: Optional[str] = None
+    views_count: Optional[int] = 0
+    likes_count: Optional[int] = 0
+    is_featured: Optional[bool] = False
+    last_updated: Optional[datetime] = None
+    relevance_score: Optional[float] = 0.0
+    
+    class Config:
+        from_attributes = True
+
+class DiscussionResponse(BaseModel):
+    """Response model for discussions"""
+    id: int
+    title: str
+    description: Optional[str]
+    topic: str
+    status: str
+    participant_count: int
+    message_count: int
+    created_at: datetime
+    initiated_by: str
+    content: Optional[str] = None
+    category: Optional[str] = None
+    discussion_type: Optional[str] = None
+    author_id: Optional[str] = None
+    author_name: Optional[str] = None
+    tags: Optional[List[str]] = []
+    related_entities: Optional[List[str]] = []
+    is_pinned: Optional[bool] = False
+    is_locked: Optional[bool] = False
+    views_count: Optional[int] = 0
+    replies_count: Optional[int] = 0
+    last_reply_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+    
+    class Config:
+        from_attributes = True
+
+class CollaborationAnalyticsResponse(BaseModel):
+    """Response model for collaboration analytics"""
+    team_id: int
+    collaboration_score: float
+    productivity_score: float
+    engagement_score: float
+    member_count: int
+    active_members: int
+    total_reviews: int
+    total_comments: int
+    total_knowledge_items: int
+    recent_activity: List[Dict[str, Any]]
+    
+    class Config:
+        from_attributes = True
+
+# Additional models needed by rule_reviews_routes.py
+class RuleReviewRequest(BaseModel):
+    """Request model for creating rule reviews"""
+    rule_id: str
+    title: str = Field(min_length=1, max_length=255)
+    description: Optional[str] = None
+    review_type: ReviewType
+    priority: Priority = Priority.MEDIUM
+    assigned_reviewers: List[str] = []
+    deadline: Optional[datetime] = None
+    tags: List[str] = []
+    metadata: Dict[str, Any] = {}
+
+class RuleCommentRequest(BaseModel):
+    """Request model for rule review comments"""
+    content: str = Field(min_length=1)
+    comment_type: CommentType = CommentType.GENERAL
+    parent_comment_id: Optional[str] = None
+    mentions: List[str] = []
+    attachments: List[str] = []
+    is_resolved: bool = False
+
+class RuleCommentResponse(BaseModel):
+    """Response model for rule review comments"""
+    id: str
+    content: str
+    comment_type: str
+    author_id: str
+    author_name: str
+    created_at: datetime
+    parent_comment_id: Optional[str] = None
+    mentions: List[str] = []
+    attachments: List[str] = []
+    is_resolved: bool = False
+    resolved_at: Optional[datetime] = None
+    resolved_by: Optional[str] = None
+    
+    class Config:
+        from_attributes = True
+
+# Additional models needed by knowledge_base_routes.py
+class KnowledgeBaseRequest(BaseModel):
+    """Request model for creating knowledge base items"""
+    title: str = Field(min_length=1, max_length=255)
+    content: str = Field(min_length=1)
+    knowledge_type: KnowledgeType
+    category: str = Field(min_length=1, max_length=100)
+    tags: List[str] = []
+    difficulty_level: ExpertiseLevel = ExpertiseLevel.INTERMEDIATE
+    related_rules: List[str] = []
+    attachments: List[str] = []
+    visibility: str = "team"
+    metadata: Dict[str, Any] = {}
+
+class KnowledgeBaseResponse(BaseModel):
+    """Response model for knowledge base items"""
+    id: str
+    title: str
+    content: str
+    knowledge_type: str
+    category: str
+    tags: List[str]
+    difficulty_level: str
+    author_id: str
+    author_name: str
+    created_at: datetime
+    updated_at: datetime
+    views_count: int = 0
+    likes_count: int = 0
+    is_featured: bool = False
+    related_rules: List[str] = []
+    attachments: List[str] = []
+    visibility: str
+    metadata: Dict[str, Any] = {}
+    
+    class Config:
+        from_attributes = True
+
+class ExpertConsultationRequest(BaseModel):
+    """Request model for expert consultation"""
+    knowledge_item_id: str
+    consultation_type: str
+    description: str
+    urgency: str = "normal"
+    preferred_experts: List[str] = []
+    scheduled_time: Optional[datetime] = None
+    duration_minutes: int = 60
+    additional_context: Dict[str, Any] = {}
+
+class ExpertConsultationResponse(BaseModel):
+    """Response model for expert consultation"""
+    id: str
+    knowledge_item_id: str
+    consultation_type: str
+    description: str
+    status: ConsultationStatus
+    requester_id: str
+    requester_name: str
+    assigned_expert_id: Optional[str] = None
+    assigned_expert_name: Optional[str] = None
+    scheduled_time: Optional[datetime] = None
+    duration_minutes: int
+    created_at: datetime
+    updated_at: datetime
+    additional_context: Dict[str, Any] = {}
+    
+    class Config:
+        from_attributes = True

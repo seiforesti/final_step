@@ -336,13 +336,13 @@ class RacineOrchestrationMaster(SQLModel, table=True):
         index=True,
         description="Last update timestamp"
     )
-    created_by: str = Field(
+    created_by: int = Field(
         ...,
         foreign_key="users.id",
         index=True,
         description="User who created this orchestration master"
     )
-    last_modified_by: Optional[str] = Field(
+    last_modified_by: Optional[int] = Field(
         default=None,
         foreign_key="users.id",
         description="User who last modified this orchestration master"
@@ -369,7 +369,7 @@ class RacineOrchestrationMaster(SQLModel, table=True):
     )
     
     # Compliance relationships
-    managed_compliance_rules: List["EnterpriseComplianceRule"] = Relationship(
+    managed_compliance_rules: List["ComplianceRule"] = Relationship(
         back_populates="racine_orchestrator",
         sa_relationship_kwargs={"lazy": "select"}
     )

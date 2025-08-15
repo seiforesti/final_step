@@ -30,7 +30,7 @@ from pydantic import BaseModel, validator
 
 # ===================== ENUMS AND TYPES =====================
 
-class TemplateCategory(str, Enum):
+class TemplateCategoryType(str, Enum):
     """Template category classifications"""
     DATA_QUALITY = "data_quality"
     COMPLIANCE = "compliance"
@@ -96,7 +96,8 @@ class RuleTemplate(SQLModel, table=True):
     description: Optional[str] = Field(sa_column=Column(Text), description="Detailed template description")
     
     # Template classification
-    category: TemplateCategory = Field(index=True, description="Template category")
+    category: TemplateCategoryType = Field(index=True, description="Template category")
+    template_category_id: Optional[int] = Field(default=None, foreign_key="template_categories.id", index=True, description="Reference to template category")
     template_type: TemplateType = Field(index=True, description="Template type")
     complexity_level: TemplateComplexity = Field(index=True, description="Complexity level")
     usage_scope: TemplateUsageScope = Field(index=True, description="Usage scope")
@@ -478,7 +479,7 @@ class TemplateCreateRequest(BaseModel):
     name: str = Field(min_length=1, max_length=255)
     display_name: Optional[str] = Field(max_length=255)
     description: Optional[str] = None
-    category: TemplateCategory
+    category: TemplateCategoryType
     template_type: TemplateType = TemplateType.BASIC
     complexity_level: TemplateComplexity = TemplateComplexity.INTERMEDIATE
     template_content: Dict[str, Any]
@@ -502,7 +503,7 @@ class TemplateResponse(BaseModel):
     template_id: str
     name: str
     display_name: Optional[str]
-    category: TemplateCategory
+    category: TemplateCategoryType
     template_type: TemplateType
     complexity_level: TemplateComplexity
     status: TemplateStatus
@@ -519,7 +520,7 @@ class TemplateResponse(BaseModel):
 class TemplateSearchParams(BaseModel):
     """Search parameters for templates"""
     query: Optional[str] = None
-    categories: Optional[List[TemplateCategory]] = None
+    categories: Optional[List[TemplateCategoryType]] = None
     template_types: Optional[List[TemplateType]] = None
     complexity_levels: Optional[List[TemplateComplexity]] = None
     statuses: Optional[List[TemplateStatus]] = None

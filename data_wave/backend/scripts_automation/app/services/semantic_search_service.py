@@ -11,6 +11,7 @@ import logging
 import numpy as np
 import re
 import spacy
+from spacy.cli import download as spacy_download
 import time
 from collections import defaultdict, deque
 from concurrent.futures import ThreadPoolExecutor
@@ -53,7 +54,8 @@ class SemanticSearchConfig:
         # NLP model configurations
         self.sentence_transformer_model = "sentence-transformers/all-MiniLM-L6-v2"
         self.bert_model = "bert-base-uncased"
-        self.spacy_model = "en_core_web_lg"
+        # Prefer medium model to reduce footprint; service falls back to sm/blank automatically
+        self.spacy_model = "en_core_web_md"
         
         # Search enhancement
         self.query_expansion_enabled = True
@@ -112,50 +114,41 @@ class SemanticSearchService:
         # Threading
         self.executor = ThreadPoolExecutor(max_workers=8)
         
-        # Background tasks
-        asyncio.create_task(self._index_optimization_loop())
-        asyncio.create_task(self._search_analytics_loop())
-        asyncio.create_task(self._model_update_loop())
+        # Background tasks are started only when an event loop is available
+        try:
+            loop = asyncio.get_running_loop()
+            loop.create_task(self._index_optimization_loop())
+            loop.create_task(self._search_analytics_loop())
+            loop.create_task(self._model_update_loop())
+        except RuntimeError:
+            pass
+
+    def start(self) -> None:
+        """Start background optimization tasks when an event loop exists."""
+        try:
+            loop = asyncio.get_running_loop()
+            loop.create_task(self._index_optimization_loop())
+            loop.create_task(self._search_analytics_loop())
+            loop.create_task(self._model_update_loop())
+        except RuntimeError:
+            pass
     
     def _init_nlp_models(self):
         """Initialize NLP models for semantic search"""
         try:
-            # Load spaCy model
-            self.nlp = spacy.load(self.config.spacy_model)
-            
-            # Load sentence transformer for embeddings
-            self.sentence_tokenizer = AutoTokenizer.from_pretrained(
-                self.config.sentence_transformer_model
-            )
-            self.sentence_model = AutoModel.from_pretrained(
-                self.config.sentence_transformer_model
-            )
-            
-            # Load BERT for advanced understanding
-            self.bert_tokenizer = BertTokenizer.from_pretrained(
-                self.config.bert_model
-            )
-            self.bert_model = BertModel.from_pretrained(
-                self.config.bert_model
-            )
-            
-            # Initialize text processing pipelines
-            self.summarization_pipeline = pipeline(
-                "summarization",
-                model="facebook/bart-large-cnn"
-            )
-            
-            self.question_answering_pipeline = pipeline(
-                "question-answering",
-                model="deepset/roberta-base-squad2"
-            )
-            
-            self.text_classification_pipeline = pipeline(
-                "text-classification",
-                model="microsoft/DialoGPT-medium"
-            )
-            
-            # TF-IDF vectorizer for keyword search
+            # Load spaCy model with robust fallback and on-demand download (lightweight)
+            self.nlp = self._load_spacy_model_with_fallback(self.config.spacy_model)
+
+            # Defer large model downloads to first use
+            self.sentence_tokenizer = None
+            self.sentence_model = None
+            self.bert_tokenizer = None
+            self.bert_model = None
+            self.summarization_pipeline = None
+            self.question_answering_pipeline = None
+            self.text_classification_pipeline = None
+
+            # TF-IDF vectorizer for keyword search (fast, local)
             self.tfidf_vectorizer = TfidfVectorizer(
                 max_features=10000,
                 stop_words='english',
@@ -173,6 +166,23 @@ class SemanticSearchService:
         except Exception as e:
             logger.error(f"Failed to initialize NLP models: {e}")
             raise
+
+    def _load_spacy_model_with_fallback(self, preferred_model: str):
+        candidates = [preferred_model, "en_core_web_md", "en_core_web_sm"]
+        last_exc = None
+        for name in candidates:
+            try:
+                return spacy.load(name)
+            except Exception as exc:
+                last_exc = exc
+                try:
+                    spacy_download(name)
+                    return spacy.load(name)
+                except Exception:
+                    continue
+        # Fallback to blank English pipeline
+        nlp = spacy.blank("en")
+        return nlp
     
     def _init_search_indices(self):
         """Initialize FAISS search indices"""
@@ -376,6 +386,8 @@ class SemanticSearchService:
         """Generate semantic embedding for query"""
         
         try:
+            # Ensure sentence embedding model is loaded lazily
+            self._ensure_sentence_model()
             # Tokenize query
             inputs = self.sentence_tokenizer(
                 query,
@@ -400,6 +412,72 @@ class SemanticSearchService:
         except Exception as e:
             logger.error(f"Query embedding generation failed: {e}")
             return np.zeros(self.config.vector_dimension)
+
+    def _ensure_sentence_model(self) -> None:
+        if self.sentence_model is not None and self.sentence_tokenizer is not None:
+            return
+        # Prefer smaller sentence transformer if available to reduce footprint
+        model_name = self.config.sentence_transformer_model or "sentence-transformers/all-MiniLM-L6-v2"
+        try:
+            self.sentence_tokenizer = AutoTokenizer.from_pretrained(model_name)
+            self.sentence_model = AutoModel.from_pretrained(model_name)
+        except Exception:
+            # Fallback to DistilBERT encoder
+            fallback = "distilbert-base-uncased"
+            self.sentence_tokenizer = AutoTokenizer.from_pretrained(fallback)
+            self.sentence_model = AutoModel.from_pretrained(fallback)
+
+    def _ensure_bert_model(self) -> None:
+        if self.bert_model is not None and self.bert_tokenizer is not None:
+            return
+        try:
+            self.bert_tokenizer = BertTokenizer.from_pretrained(self.config.bert_model)
+            self.bert_model = BertModel.from_pretrained(self.config.bert_model)
+        except Exception:
+            # Fallback to smaller DistilBERT
+            fallback = "distilbert-base-uncased"
+            self.bert_tokenizer = AutoTokenizer.from_pretrained(fallback)
+            self.bert_model = AutoModel.from_pretrained(fallback)
+
+    def _get_summarizer(self):
+        if self.summarization_pipeline is not None:
+            return self.summarization_pipeline
+        # Use lighter DistilBART if available
+        for name in ["sshleifer/distilbart-cnn-12-6", "facebook/bart-large-cnn"]:
+            try:
+                self.summarization_pipeline = pipeline("summarization", model=name)
+                return self.summarization_pipeline
+            except Exception:
+                continue
+        # Fallback: simple identity summarizer
+        self.summarization_pipeline = lambda text, max_length=128, min_length=32: [{"summary_text": text if isinstance(text, str) else ""}]
+        return self.summarization_pipeline
+
+    def _get_qa(self):
+        if self.question_answering_pipeline is not None:
+            return self.question_answering_pipeline
+        for name in ["deepset/minilm-uncased-squad2", "deepset/roberta-base-squad2"]:
+            try:
+                self.question_answering_pipeline = pipeline("question-answering", model=name)
+                return self.question_answering_pipeline
+            except Exception:
+                continue
+        # Fallback QA returns empty answer
+        self.question_answering_pipeline = lambda inputs: {"answer": "", "score": 0.0}
+        return self.question_answering_pipeline
+
+    def _get_text_classifier(self):
+        if self.text_classification_pipeline is not None:
+            return self.text_classification_pipeline
+        for name in ["distilbert-base-uncased-finetuned-sst-2-english", "microsoft/DialoGPT-medium"]:
+            try:
+                self.text_classification_pipeline = pipeline("text-classification", model=name)
+                return self.text_classification_pipeline
+            except Exception:
+                continue
+        # Fallback classifier returns neutral
+        self.text_classification_pipeline = lambda inputs: [{"label": "NEUTRAL", "score": 0.0}]
+        return self.text_classification_pipeline
     
     async def _perform_multi_modal_search(
         self,

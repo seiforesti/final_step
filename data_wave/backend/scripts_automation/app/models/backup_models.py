@@ -35,7 +35,7 @@ class BackupOperation(SQLModel, table=True):
     __tablename__ = "backup_operations"
     
     id: Optional[int] = Field(default=None, primary_key=True)
-    data_source_id: int = Field(foreign_key="data_sources.id", index=True)
+    data_source_id: int = Field(foreign_key="datasource.id", index=True)
     
     # Backup details
     backup_type: BackupType
@@ -67,7 +67,7 @@ class RestoreOperation(SQLModel, table=True):
     __tablename__ = "restore_operations"
     
     id: Optional[int] = Field(default=None, primary_key=True)
-    data_source_id: int = Field(foreign_key="data_sources.id", index=True)
+    data_source_id: int = Field(foreign_key="datasource.id", index=True)
     backup_id: int = Field(foreign_key="backup_operations.id")
     
     # Restore details
@@ -98,7 +98,7 @@ class BackupSchedule(SQLModel, table=True):
     __tablename__ = "backup_schedules"
     
     id: Optional[int] = Field(default=None, primary_key=True)
-    data_source_id: int = Field(foreign_key="data_sources.id", index=True)
+    data_source_id: int = Field(foreign_key="datasource.id", index=True)
     
     # Schedule details
     schedule_name: str

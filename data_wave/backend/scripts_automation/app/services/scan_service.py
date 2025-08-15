@@ -138,7 +138,7 @@ class ScanService:
         return True
     
     @staticmethod
-    def execute_scan(session: Session, scan_id: int) -> Dict[str, Any]:
+    async def execute_scan(session: Session, scan_id: int) -> Dict[str, Any]:
         """Execute a scan."""
         scan = session.get(Scan, scan_id)
         if not scan:
@@ -162,7 +162,12 @@ class ScanService:
                 scan_rule_set = session.get(ScanRuleSet, scan.scan_rule_set_id)
             
             # Execute scan asynchronously
-            asyncio.create_task(ScanService._execute_scan_async(scan, data_source, scan_rule_set))
+            try:
+                loop = asyncio.get_running_loop()
+                loop.create_task(ScanService._execute_scan_async(scan, data_source, scan_rule_set))
+            except RuntimeError:
+                # Execute scan synchronously if no loop available
+                await ScanService._execute_scan_async(scan, data_source, scan_rule_set)
             
             return {"success": True, "message": f"Scan {scan.name} started successfully", "scan_id": scan.id}
         except Exception as e:

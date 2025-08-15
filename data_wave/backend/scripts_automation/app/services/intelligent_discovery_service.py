@@ -65,10 +65,18 @@ from ..models.data_lineage_models import *
 from ..models.catalog_intelligence_models import *
 from ..models.scan_models import *
 from ..db_session import get_session
+try:
+    from ..core.settings import get_settings as _get_settings
+    def get_settings():
+        return _get_settings()
+except Exception:
+    from ..core.config import settings as _settings
+    def get_settings():
+        return _settings
 from ..core.config import settings
 from ..services.ai_service import EnterpriseAIService as AIService
 from ..services.data_source_connection_service import DataSourceConnectionService
-from ..services.classification_service import EnterpriseClassificationService as ClassificationService
+from ..services.classification_service import ClassificationService
 from ..utils.performance_monitor import performance_monitor, monitor_performance
 from ..utils.cache_manager import CacheManager
 from ..utils.error_handler import handle_service_error
@@ -191,9 +199,9 @@ class IntelligentDiscoveryService:
             else:
                 self.device = torch.device("cpu")
             
-            # Initialize text embeddings
-            self.embedding_model = AutoModel.from_pretrained("sentence-transformers/all-MiniLM-L6-v2")
-            self.tokenizer = AutoTokenizer.from_pretrained("sentence-transformers/all-MiniLM-L6-v2")
+            # Defer heavy text embeddings to first use to avoid startup OOM
+            self.embedding_model = None
+            self.tokenizer = None
             
             # Initialize clustering models
             self.dbscan_model = DBSCAN(eps=0.3, min_samples=2)

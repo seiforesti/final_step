@@ -41,11 +41,12 @@ from pathlib import Path
 
 # FastAPI and HTTP imports
 from fastapi import (
-    APIRouter, Depends, HTTPException, BackgroundTasks, Query, 
-    StreamingResponse, JSONResponse, WebSocket, Path as FastAPIPath, 
+    APIRouter, Depends, HTTPException, BackgroundTasks, Query,
+    WebSocket, Path as FastAPIPath,
     Body, status, Response, Request, WebSocketDisconnect, File, UploadFile
 )
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, JSONResponse
+from pydantic import BaseModel, Field
 from fastapi.security import HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update, delete, and_, or_, func, text, desc, asc
@@ -72,9 +73,33 @@ from ...api.security.rbac import get_current_user, check_permission
 from ...core.monitoring import MetricsCollector, AlertManager
 from ...core.logging import StructuredLogger
 from ...core.cache import RedisCache
-from ...core.pagination import PaginationParams, PaginatedResponse
-from ...core.rate_limiting import RateLimiter
-from ...core.background_tasks import BackgroundTaskManager
+# Fallback simple pagination if core.pagination is not present
+try:
+    from ...core.pagination import PaginationParams, PaginatedResponse
+except Exception:
+    from typing import Generic, List, TypeVar
+    try:
+        from pydantic.generics import GenericModel
+    except Exception:
+        # Fallback shim if pydantic.generics not available
+        from pydantic import BaseModel as GenericModel
+        Generic = lambda *args, **kwargs: object  # type: ignore
+        TypeVar = lambda *args, **kwargs: object  # type: ignore
+        List = list  # type: ignore
+    T = TypeVar('T')
+    class PaginationParams(BaseModel):
+        limit: int = 50
+        offset: int = 0
+    class PaginatedResponse(GenericModel, Generic[T]):
+        total: int
+        items: List[T]
+from ...utils.rate_limiter import get_rate_limiter as _get_rate_limiter, rate_limit
+try:
+    from ...core.background_tasks import BackgroundTaskManager
+except Exception:
+    class BackgroundTaskManager:
+        async def add_task(self, *args, **kwargs):
+            return None
 
 # Configure structured logging and dependencies
 logger = StructuredLogger(__name__)
@@ -99,9 +124,9 @@ async def get_cache() -> RedisCache:
     return RedisCache()
 
 
-async def get_rate_limiter() -> RateLimiter:
-    """Get rate limiter instance."""
-    return RateLimiter()
+def get_rate_limiter():
+    """Get enterprise rate limiter instance (utils-managed singleton)."""
+    return _get_rate_limiter()
 
 
 # ===================== REQUEST/RESPONSE MODELS =====================
@@ -572,7 +597,7 @@ async def update_intelligent_asset(
 
 # ===================== ADVANCED SEMANTIC SEARCH ENDPOINTS =====================
 
-@router.post("/search", response_model=PaginatedResponse[IntelligentAssetResponse])
+@router.post("/search")
 async def semantic_search_assets(
     search_request: AssetSearchRequest,
     enable_ai_ranking: bool = Query(True, description="Enable AI-powered result ranking"),
@@ -582,7 +607,7 @@ async def semantic_search_assets(
     current_user: dict = Depends(get_current_user),
     catalog_service: EnterpriseIntelligentCatalogService = Depends(get_catalog_service),
     metrics: MetricsCollector = Depends(get_metrics_collector),
-    rate_limiter: RateLimiter = Depends(get_rate_limiter)
+    rate_limiter = Depends(get_rate_limiter)
 ):
     """
     Perform advanced semantic search across data assets with AI-powered ranking,
@@ -956,12 +981,13 @@ async def get_impact_analysis(
             user_id=current_user["user_id"]
         )
         
-        # Perform impact simulation
-        impact_analysis = await _simulate_impact_analysis(
-            lineage_graph,
-            change_type,
-            include_business_impact,
-            session
+        # Perform impact analysis using lineage graph (DB/service-backed)
+        impact_analysis = await catalog_service.perform_impact_analysis(
+            lineage_graph=lineage_graph,
+            change_type=change_type,
+            include_business_impact=include_business_impact,
+            session=session,
+            user_id=current_user["user_id"]
         )
         
         # Cache analysis results

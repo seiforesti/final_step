@@ -27,10 +27,11 @@ from ...services.real_time_streaming_service import RealTimeStreamingService
 from ...services.edge_computing_service import EdgeComputingService
 from ...services.scan_intelligence_service import ScanIntelligenceService
 from ...models.scan_performance_models import (
-    PerformanceMetric, PerformanceAlert, MonitoringDashboard
+    PerformanceMetric, PerformanceAlert
 )
-from ...models.scan_intelligence_models import (
-    MonitoringEvent, AlertConfiguration, ObservabilityConfig
+# These configs live under performance models in this codebase
+from ...models.scan_performance_models import (
+    PerformanceMetricType as MonitoringMetricType,
 )
 from ...api.security.rbac import get_current_user
 from ...core.monitoring import MetricsCollector
@@ -295,7 +296,7 @@ async def stream_real_time_metrics(
                 await asyncio.sleep(sampling_interval)
                 
         except asyncio.CancelledError:
-            break
+            return
         except Exception as e:
             error_data = {'error': str(e), 'timestamp': datetime.utcnow().isoformat()}
             yield f"data: {json.dumps(error_data)}\n\n"

@@ -81,7 +81,7 @@ class DataSourceTag(SQLModel, table=True):
     __tablename__ = "data_source_tags"
     
     id: Optional[int] = Field(default=None, primary_key=True)
-    data_source_id: int = Field(foreign_key="data_sources.id", index=True)
+    data_source_id: int = Field(foreign_key="datasource.id", index=True)
     tag_id: int = Field(foreign_key="tags.id", index=True)
     
     # Assignment details

@@ -66,11 +66,14 @@ class CatalogItem(SQLModel, table=True):
     
     # Lineage and relationships
     parent_id: Optional[int] = Field(foreign_key="catalog_items.id")
-    parent: Optional["CatalogItem"] = Relationship(back_populates="children")
+    parent: Optional["CatalogItem"] = Relationship(
+        back_populates="children",
+        sa_relationship_kwargs={"remote_side": "CatalogItem.id"}
+    )
     children: List["CatalogItem"] = Relationship(back_populates="parent")
     
     # Data source relationship
-    data_source_id: int = Field(foreign_key="data_sources.id")
+    data_source_id: int = Field(foreign_key="datasource.id")
     data_source: Optional["DataSource"] = Relationship(back_populates="catalog_items")
     
     # Audit fields
@@ -122,8 +125,12 @@ class DataLineage(SQLModel, table=True):
     confidence_score: float = Field(default=1.0)
     
     # Relationships
-    source_item: Optional[CatalogItem] = Relationship()
-    target_item: Optional[CatalogItem] = Relationship()
+    source_item: Optional[CatalogItem] = Relationship(
+        sa_relationship_kwargs={"foreign_keys": "DataLineage.source_item_id"}
+    )
+    target_item: Optional[CatalogItem] = Relationship(
+        sa_relationship_kwargs={"foreign_keys": "DataLineage.target_item_id"}
+    )
     
     # Audit fields
     created_at: datetime = Field(default_factory=datetime.utcnow)

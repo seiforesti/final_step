@@ -40,7 +40,12 @@ from ..services.scan_workflow_engine import ScanWorkflowEngine
 from ..services.comprehensive_analytics_service import ComprehensiveAnalyticsService
 from ..services.data_source_connection_service import DataSourceConnectionService
 from ..services.compliance_rule_service import ComplianceRuleService
-from ..services.classification_service import EnterpriseClassificationService as ClassificationService
+from ..services.classification_service import ClassificationService
+
+try:
+    from ..core.settings import get_settings
+except Exception:
+    from ..core.config import settings as get_settings
 
 logger = logging.getLogger(__name__)
 
@@ -152,13 +157,29 @@ class UnifiedGovernanceCoordinator:
         # Threading
         self.executor = ThreadPoolExecutor(max_workers=20)
         
-        # Start background coordination tasks
-        asyncio.create_task(self._health_monitoring_loop())
-        asyncio.create_task(self._cross_system_sync_loop())
-        asyncio.create_task(self._workflow_execution_loop())
-        asyncio.create_task(self._metrics_collection_loop())
-        asyncio.create_task(self._system_optimization_loop())
-        asyncio.create_task(self._predictive_maintenance_loop())
+        # Start background coordination tasks when an event loop exists
+        try:
+            loop = asyncio.get_running_loop()
+            loop.create_task(self._health_monitoring_loop())
+            loop.create_task(self._cross_system_sync_loop())
+            loop.create_task(self._workflow_execution_loop())
+            loop.create_task(self._metrics_collection_loop())
+            loop.create_task(self._system_optimization_loop())
+            loop.create_task(self._predictive_maintenance_loop())
+        except RuntimeError:
+            pass
+
+    def start(self) -> None:
+        try:
+            loop = asyncio.get_running_loop()
+            loop.create_task(self._health_monitoring_loop())
+            loop.create_task(self._cross_system_sync_loop())
+            loop.create_task(self._workflow_execution_loop())
+            loop.create_task(self._metrics_collection_loop())
+            loop.create_task(self._system_optimization_loop())
+            loop.create_task(self._predictive_maintenance_loop())
+        except RuntimeError:
+            pass
         
         logger.info("Unified Governance Coordinator initialized successfully")
     

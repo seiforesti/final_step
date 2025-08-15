@@ -22,19 +22,19 @@ from sqlmodel import Session, select
 from typing import Dict, List, Optional, Any, Union
 from datetime import datetime, timedelta
 
-from app.core.database import get_session
-from app.api.security.rbac import require_permission, get_current_user
-from app.utils.rate_limiter import check_rate_limit
-from app.core.logging_config import get_logger
-from app.models.Scan-Rule-Sets-completed-models.enhanced_collaboration_models import (
-    TeamCollaborationHub, TeamMember, RuleReview, Comment, KnowledgeItem,
-    Discussion, TeamCollaborationHubCreate, TeamMemberCreate, RuleReviewCreate,
-    CommentCreate, KnowledgeItemCreate, DiscussionCreate, TeamHubResponse,
-    TeamMemberResponse, RuleReviewResponse, CommentResponse, KnowledgeItemResponse,
-    DiscussionResponse, CollaborationAnalyticsResponse
+from ....db_session import get_session
+from ....api.security.rbac import require_permission, get_current_user
+from ....utils.rate_limiter import check_rate_limit
+from ....core.logging_config import get_logger
+from ....models.Scan_Rule_Sets_completed_models.enhanced_collaboration_models import (
+    TeamCollaborationHub, RuleTeamMember, EnhancedRuleReview, EnhancedRuleComment, KnowledgeItem,
+    RuleDiscussion, TeamHubCreateRequest, ReviewCreateRequest, RuleCommentCreateRequest,
+    KnowledgeItemCreateRequest, TeamMemberCreate, RuleReviewCreate, CommentCreate, DiscussionCreate,
+    TeamHubResponse, RuleReviewResponse, CommentResponse, 
+    KnowledgeItemResponse, DiscussionResponse, CollaborationAnalyticsResponse
 )
-from app.services.Scan-Rule-Sets-completed-services.enhanced_collaboration_service import EnhancedCollaborationService
-from app.models.response_models import StandardResponse
+from ....services.Scan_Rule_Sets_completed_services.enhanced_collaboration_service import EnhancedCollaborationService
+from ....core.response_models import StandardResponse
 
 # Initialize router and logger
 router = APIRouter(prefix="/enhanced-collaboration", tags=["Enhanced Collaboration"])
@@ -58,7 +58,7 @@ PERMISSION_KNOWLEDGE_MODERATE = "knowledge:moderate"
 
 @router.post("/teams", response_model=StandardResponse)
 async def create_team_collaboration_hub(
-    team_data: TeamCollaborationHubCreate,
+    team_data: TeamHubCreateRequest,
     session: Session = Depends(get_session),
     current_user: Dict[str, Any] = Depends(require_permission(PERMISSION_TEAM_MANAGE))
 ):
@@ -352,10 +352,10 @@ async def get_rule_review(
 async def update_review_status(
     review_id: int,
     new_status: str,
-    review_comment: Optional[str] = None,
     background_tasks: BackgroundTasks,
     session: Session = Depends(get_session),
-    current_user: Dict[str, Any] = Depends(require_permission(PERMISSION_REVIEW_APPROVE))
+    current_user: Dict[str, Any] = Depends(require_permission(PERMISSION_REVIEW_APPROVE)),
+    review_comment: Optional[str] = None
 ):
     """
     Update the status of a rule review (approve, reject, request changes)
@@ -550,7 +550,7 @@ async def resolve_comment(
 
 @router.post("/knowledge", response_model=StandardResponse)
 async def create_knowledge_item(
-    knowledge_data: KnowledgeItemCreate,
+    knowledge_data: KnowledgeItemCreateRequest,
     background_tasks: BackgroundTasks,
     session: Session = Depends(get_session),
     current_user: Dict[str, Any] = Depends(require_permission(PERMISSION_KNOWLEDGE_CONTRIBUTE))

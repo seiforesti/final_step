@@ -476,7 +476,7 @@ class ExpertConsultation(SQLModel, table=True):
     lessons_learned: List[str] = Field(default_factory=list, sa_column=Column(JSON))
     
     # Knowledge Capture
-    knowledge_article_id: Optional[str] = Field(default=None, foreign_key="knowledge_base.article_id")
+    knowledge_article_id: Optional[str] = Field(default=None, foreign_key="advanced_knowledge_base.article_id")
     reusable_patterns: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
     templates_created: List[str] = Field(default_factory=list, sa_column=Column(JSON))
     documentation_updates: List[str] = Field(default_factory=list, sa_column=Column(JSON))

@@ -97,6 +97,40 @@ class ModelStatus(str, Enum):
     FAILED = "failed"
     ARCHIVED = "archived"
 
+# Additional enums for advanced filtering and type safety across routes/services
+class AnomalyType(str, Enum):
+    DATA_QUALITY = "data_quality"
+    PERFORMANCE = "performance"
+    SECURITY = "security"
+    AVAILABILITY = "availability"
+    INTEGRITY = "integrity"
+    COMPLIANCE = "compliance"
+    LATENCY_SPIKE = "latency_spike"
+    THROUGHPUT_DROP = "throughput_drop"
+    ERROR_RATE_SPIKE = "error_rate_spike"
+    SCHEMA_DRIFT = "schema_drift"
+    DATA_DRIFT = "data_drift"
+    OUTLIERS = "outliers"
+
+class PatternType(str, Enum):
+    TEMPORAL = "temporal"
+    BEHAVIORAL = "behavioral"
+    STRUCTURAL = "structural"
+    PERFORMANCE = "performance"
+    CORRELATION = "correlation"
+    PERIODIC = "periodic"
+    BURSTY = "bursty"
+    TRENDING = "trending"
+
+class PerformanceMetric(str, Enum):
+    LATENCY_MS = "latency_ms"
+    THROUGHPUT = "throughput"
+    CPU_USAGE = "cpu_usage"
+    MEMORY_USAGE = "memory_usage"
+    IO_WAIT = "io_wait"
+    ERROR_RATE = "error_rate"
+    QUEUE_DEPTH = "queue_depth"
+
 # ===================== CORE INTELLIGENCE MODELS =====================
 
 class ScanIntelligenceEngine(SQLModel, table=True):
@@ -215,8 +249,8 @@ class ScanPrediction(SQLModel, table=True):
     
     # Input features
     input_features: Dict[str, Any] = Field(sa_column=Column(JSONB), description="Input features for prediction")
-    feature_vector: Optional[List[float]] = Field(default=None, sa_column=Column(ARRAY(Float)), description="Numerical feature vector")
-    embedding_vector: Optional[List[float]] = Field(default=None, sa_column=Column(ARRAY(Float)), description="Embedding vector")
+    feature_vector: Optional[str] = Field(default=None, sa_column=Column(JSON), description="Numerical feature vector")
+    embedding_vector: Optional[str] = Field(default=None, sa_column=Column(JSON), description="Embedding vector")
     
     # Prediction output
     prediction_value: Union[str, float, int, bool, Dict[str, Any]] = Field(sa_column=Column(JSONB), description="Predicted value")
@@ -329,23 +363,23 @@ class ScanAnomalyDetection(SQLModel, table=True):
     deviation_analysis: Dict[str, float] = Field(sa_column=Column(JSONB), description="Deviation analysis results")
     
     # Root cause analysis
-    potential_causes: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)), description="Potential root causes")
+    potential_causes: Optional[str] = Field(default=None, sa_column=Column(JSON), description="Potential root causes")
     contributing_factors: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Contributing factors")
     correlation_analysis: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSONB), description="Correlation analysis")
     
     # Impact assessment
     impact_level: str = Field(description="Impact level: minimal, moderate, significant, severe")
-    affected_operations: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)), description="Affected operations")
+    affected_operations: Optional[str] = Field(default=None, sa_column=Column(JSON), description="Affected operations")
     business_impact: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSONB), description="Business impact assessment")
     
     # Resolution
     status: str = Field(default="open", index=True, description="Anomaly status: open, investigating, resolved, false_positive")
-    resolution_actions: Optional[List[str]] = Field(default=None, sa_column=Column(ARRAY(String)), description="Resolution actions taken")
+    resolution_actions: Optional[List[str]] = Field(default=None, sa_column=Column(JSON), description="Resolution actions taken")
     resolution_timestamp: Optional[datetime] = Field(default=None, description="Resolution timestamp")
     
     # Alert and notification
     alert_sent: bool = Field(default=False, description="Whether alert was sent")
-    notification_channels: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)), description="Notification channels used")
+    notification_channels: Optional[str] = Field(default=None, sa_column=Column(JSON), description="Notification channels used")
     assigned_to: Optional[str] = Field(default=None, description="User assigned to handle anomaly")
     
     # Audit fields
@@ -366,8 +400,8 @@ class ScanPatternRecognition(SQLModel, table=True):
     
     # Pattern context
     pattern_scope: IntelligenceScope = Field(description="Scope of pattern")
-    affected_scans: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)), description="Affected scan identifiers")
-    affected_data_sources: List[int] = Field(default_factory=list, sa_column=Column(ARRAY(Integer)), description="Affected data source IDs")
+    affected_scans: Optional[str] = Field(default=None, sa_column=Column(JSON), description="Affected scan identifiers")
+    affected_data_sources: Optional[str] = Field(default=None, sa_column=Column(JSON), description="Affected data source IDs")
     
     # Pattern details
     pattern_type: str = Field(index=True, description="Type of pattern: temporal, behavioral, structural, performance")
@@ -388,7 +422,7 @@ class ScanPatternRecognition(SQLModel, table=True):
     
     # Business value
     business_relevance: str = Field(description="Business relevance: high, medium, low")
-    actionable_insights: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)), description="Actionable insights from pattern")
+    actionable_insights: Optional[str] = Field(default=None, sa_column=Column(JSON), description="Actionable insights from pattern")
     optimization_potential: Optional[float] = Field(default=None, description="Optimization potential score")
     
     # Pattern evolution
@@ -424,7 +458,7 @@ class ScanPerformanceOptimization(SQLModel, table=True):
     
     # Current performance baseline
     baseline_metrics: Dict[str, float] = Field(sa_column=Column(JSONB), description="Baseline performance metrics")
-    performance_bottlenecks: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)), description="Identified bottlenecks")
+    performance_bottlenecks: Optional[str] = Field(default=None, sa_column=Column(JSON), description="Identified bottlenecks")
     resource_constraints: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Resource constraints")
     
     # Optimization recommendations
@@ -441,7 +475,7 @@ class ScanPerformanceOptimization(SQLModel, table=True):
     # Implementation details
     implementation_steps: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSONB), description="Implementation steps")
     rollback_plan: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSONB), description="Rollback plan")
-    testing_requirements: Optional[List[str]] = Field(default=None, sa_column=Column(ARRAY(String)), description="Testing requirements")
+    testing_requirements: Optional[List[str]] = Field(default=None, sa_column=Column(JSON), description="Testing requirements")
     
     # Risk assessment
     implementation_risks: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSONB), description="Implementation risks")
@@ -554,9 +588,9 @@ class RealTimeEvent(SQLModel, table=True):
     priority_score: Optional[float] = Field(default=None, description="Priority calculation score")
     
     # Correlation and relationships
-    correlated_event_ids: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)), description="IDs of correlated events")
+    correlated_event_ids: Optional[str] = Field(default=None, sa_column=Column(JSON), description="IDs of correlated events")
     parent_event_id: Optional[str] = Field(default=None, description="Parent event identifier")
-    child_event_ids: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)), description="Child event identifiers")
+    child_event_ids: Optional[str] = Field(default=None, sa_column=Column(JSON), description="Child event identifiers")
     
     # Processing status
     processing_status: str = Field(default="pending", description="Event processing status")
@@ -566,8 +600,8 @@ class RealTimeEvent(SQLModel, table=True):
     
     # Business context
     business_impact: str = Field(default="low", description="Business impact assessment")
-    compliance_relevance: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)), description="Compliance relevance indicators")
-    data_governance_tags: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)), description="Data governance classification tags")
+    compliance_relevance: Optional[str] = Field(default=None, sa_column=Column(JSON), description="Compliance relevance indicators")
+    data_governance_tags: Optional[str] = Field(default=None, sa_column=Column(JSON), description="Data governance classification tags")
     
     # Performance metrics
     processing_latency_ms: Optional[float] = Field(default=None, description="Event processing latency in milliseconds")
@@ -596,7 +630,7 @@ class StreamAnalytics(SQLModel, table=True):
     # Analytics configuration
     analytics_config: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Analytics configuration parameters")
     processing_rules: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSONB), description="Processing rules and logic")
-    aggregation_functions: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)), description="Applied aggregation functions")
+    aggregation_functions: Optional[str] = Field(default=None, sa_column=Column(JSON), description="Applied aggregation functions")
     
     # Data processing
     input_data_schema: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Input data schema definition")
@@ -632,8 +666,8 @@ class StreamAnalytics(SQLModel, table=True):
     alert_triggers: List[Dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSONB), description="Alert trigger conditions")
     
     # Integration and output
-    output_destinations: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)), description="Output destination systems")
-    webhook_endpoints: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)), description="Webhook endpoints for notifications")
+    output_destinations: Optional[str] = Field(default=None, sa_column=Column(JSONB), description="Output destination systems")
+    webhook_endpoints: Optional[str] = Field(default=None, sa_column=Column(JSONB), description="Webhook endpoints for notifications")
     external_system_integrations: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="External system integration configs")
     
     # Status and lifecycle
@@ -706,6 +740,10 @@ __all__ = [
     "IntelligenceScope",
     "LearningMode",
     "ModelStatus",
+    # Additional enums
+    "AnomalyType",
+    "PatternType",
+    "PerformanceMetric",
     
     # Core models
     "ScanIntelligenceEngine",

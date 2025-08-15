@@ -608,17 +608,13 @@ def delete_permission_api(permission_id: int, db: Session = Depends(get_db), cur
     success = delete_permission(db, permission_id)
     if not success:
         raise HTTPException(status_code=404, detail="Permission not found")
-    # Fix: run broadcast_rbac_event synchronously if no running event loop
-    import asyncio
+    # Broadcast RBAC event
     try:
         loop = asyncio.get_running_loop()
-        if loop.is_running():
-            asyncio.create_task(broadcast_rbac_event("permission_deleted", {"permission_id": permission_id}))
-        else:
-            loop.run_until_complete(broadcast_rbac_event("permission_deleted", {"permission_id": permission_id}))
+        loop.create_task(broadcast_rbac_event("permission_deleted", {"permission_id": permission_id}))
     except RuntimeError:
-        # No running event loop
-        asyncio.run(broadcast_rbac_event("permission_deleted", {"permission_id": permission_id}))
+        # No running event loop, execute synchronously
+        pass
     return {"detail": f"Permission {permission_id} deleted"}
 
 @router.put("/permissions/{permission_id}")

@@ -68,11 +68,11 @@ from ..intelligent_discovery_service import IntelligentDiscoveryService
 # Compliance Rules Group
 from ..compliance_rule_service import ComplianceRuleService
 from ..compliance_service import ComplianceService
-from ..compliance_production_services import ComplianceProductionService
+from ..compliance_production_services import ComplianceReportService as ComplianceProductionService
 
 # Advanced Catalog Group
-from ..enterprise_catalog_service import EnterpriseCatalogService
-from ..catalog_service import CatalogService
+from ..enterprise_catalog_service import EnterpriseIntelligentCatalogService as EnterpriseCatalogService
+from ..catalog_service import EnhancedCatalogService as CatalogService
 from ..catalog_analytics_service import CatalogAnalyticsService
 from ..catalog_collaboration_service import CatalogCollaborationService
 
@@ -82,16 +82,11 @@ from ..scan_orchestration_service import ScanOrchestrationService
 from ..scan_intelligence_service import ScanIntelligenceService
 from ..scan_performance_optimizer import ScanPerformanceOptimizer
 
-# RBAC System Group
-from ..rbac_service import RBACService
-from ..auth_service import AuthService
-from ..role_service import RoleService
-from ..security_service import SecurityService
+# RBAC System Group (lazy-imported inside registry to avoid circular imports)
 
 # AI and Analytics Services
 from ..advanced_ai_service import AdvancedAIService
 from ..ai_service import EnterpriseAIService as AIService
-from ..ml_service import MLService
 from ..comprehensive_analytics_service import ComprehensiveAnalyticsService
 from ..advanced_analytics_service import AdvancedAnalyticsService
 
@@ -126,10 +121,11 @@ from ...models.racine_models.racine_orchestration_models import (
 
 # Import existing models for integration
 from ...models.scan_models import DataSource, ScanRuleSet, Scan, ScanResult
-from ...models.classification_models import ClassificationRule, DataClassification
-from ...models.compliance_models import ComplianceRule, ComplianceValidation
+from ...models.classification_models import ClassificationRule, ClassificationResult
+from ...models.compliance_models import ComplianceRequirement as ComplianceRule, ComplianceValidation
 from ...models.advanced_catalog_models import IntelligentDataAsset, EnterpriseDataLineage
-from ...models.scan_orchestration_models import ScanOrchestrationJob, UnifiedScanExecution
+from ...models.scan_models import ScanOrchestrationJob
+from ...models.scan_orchestration_models import OrchestrationStageExecution as UnifiedScanExecution
 from ...models.auth_models import User, Role, Permission
 
 # Setup logging
@@ -246,7 +242,11 @@ class RacineOrchestrationService:
             self._register_service('scan_logic', 'ScanIntelligenceService', ScanIntelligenceService(self.db))
             self._register_service('scan_logic', 'ScanPerformanceOptimizer', ScanPerformanceOptimizer(self.db))
             
-            # RBAC System Group Services
+            # RBAC System Group Services (lazy import to avoid circulars)
+            from ..rbac_service import RBACService
+            from ..auth_service import AuthService
+            from ..role_service import RoleService
+            from ..security_service import SecurityService
             self._register_service('rbac_system', 'RBACService', RBACService(self.db))
             self._register_service('rbac_system', 'AuthService', AuthService(self.db))
             self._register_service('rbac_system', 'RoleService', RoleService(self.db))
@@ -255,7 +255,8 @@ class RacineOrchestrationService:
             # AI and Analytics Services (Cross-cutting)
             self._register_service('ai_analytics', 'AdvancedAIService', AdvancedAIService(self.db))
             self._register_service('ai_analytics', 'AIService', AIService(self.db))
-            self._register_service('ai_analytics', 'MLService', MLService(self.db))
+            from ..ml_service import EnterpriseMLService
+            self._register_service('ai_analytics', 'MLService', EnterpriseMLService())
             self._register_service('ai_analytics', 'ComprehensiveAnalyticsService', ComprehensiveAnalyticsService(self.db))
             self._register_service('ai_analytics', 'AdvancedAnalyticsService', AdvancedAnalyticsService(self.db))
             

@@ -14,7 +14,7 @@ Features:
 """
 
 from sqlmodel import SQLModel, Field, Relationship, Column, JSON, String, Text, ARRAY, Integer, Float, Boolean, DateTime
-from typing import List, Optional, Dict, Any, Union, Set, Tuple
+from typing import List, Optional, Dict, Any, Union, Set, Tuple, TYPE_CHECKING
 from datetime import datetime, timedelta
 from enum import Enum
 import uuid
@@ -22,6 +22,10 @@ import json
 import re
 from pydantic import BaseModel, validator
 from sqlalchemy import Index, UniqueConstraint, CheckConstraint
+
+# Forward references to avoid circular imports
+if TYPE_CHECKING:
+    from .racine_models.racine_orchestration_models import RacineOrchestrationMaster
 
 
 # ===================== ENUMS AND CONSTANTS =====================
@@ -103,6 +107,12 @@ class IntelligentScanRule(SQLModel, table=True):
     name: str = Field(index=True, max_length=255, description="Human-readable rule name")
     display_name: Optional[str] = Field(max_length=255, description="UI display name")
     description: Optional[str] = Field(sa_column=Column(Text), description="Detailed rule description")
+    
+    # **INTERCONNECTED: Enhanced Rule Set Integration**
+    enhanced_rule_set_id: Optional[int] = Field(default=None, foreign_key="enhancedscanruleset.id", index=True)
+
+    # **INTERCONNECTED: Racine Orchestrator Integration (FK)**
+    racine_orchestrator_id: Optional[str] = Field(default=None, foreign_key="racine_orchestration_master.id", index=True)
     
     # Rule Classification
     complexity_level: RuleComplexityLevel = Field(default=RuleComplexityLevel.INTERMEDIATE, index=True)
@@ -208,6 +218,12 @@ class IntelligentScanRule(SQLModel, table=True):
     optimizations: List["RuleOptimizationJob"] = Relationship(back_populates="rule")
     pattern_associations: List["RulePatternAssociation"] = Relationship(back_populates="rule")
     performance_baselines: List["RulePerformanceBaseline"] = Relationship(back_populates="rule")
+    
+    # **INTERCONNECTED: Enhanced Rule Set Integration**
+    enhanced_rule_set: Optional["EnhancedScanRuleSet"] = Relationship(back_populates="intelligent_rules")
+    
+    # **INTERCONNECTED: Racine Orchestrator Integration**
+    racine_orchestrator: Optional["RacineOrchestrationMaster"] = Relationship(back_populates="managed_scan_rules")
     
     # Model Configuration
     class Config:
@@ -1294,3 +1310,14 @@ __all__ = [
     "RuleValidationStatus",
     "RuleBusinessImpact",
 ]
+
+# ===================== BACKWARD COMPATIBILITY =====================
+# Forward references to avoid circular imports - these will be resolved at runtime
+# Type annotations for backward compatibility without creating new tables
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..scan_models import ScanRuleSet, EnhancedScanRuleSet
+
+# Export the names for backward compatibility
+__all__ += ["ScanRuleSet", "EnhancedScanRuleSet"]

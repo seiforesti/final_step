@@ -18,6 +18,7 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 from uuid import uuid4
 
+import os
 import spacy
 from sklearn.cluster import DBSCAN, KMeans
 from sklearn.ensemble import IsolationForest, RandomForestClassifier
@@ -30,7 +31,11 @@ from transformers import pipeline, AutoModel, AutoTokenizer
 from ..core.cache_manager import EnterpriseCacheManager as CacheManager
 from ..core.logging_config import get_logger
 from ..core.config import settings
-from ..models.advanced_scan_rule_models import *
+from ..models.advanced_scan_rule_models import (
+    IntelligentScanRule, RuleExecutionHistory, RuleOptimizationJob,
+    RulePatternLibrary, RulePatternAssociation, RulePerformanceBaseline,
+    PatternRecognitionType
+)
 from ..services.ai_service import EnterpriseAIService as AIService
 
 logger = get_logger(__name__)
@@ -93,13 +98,34 @@ class IntelligentPatternService:
         # Threading
         self.executor = ThreadPoolExecutor(max_workers=8)
         
-        # Start background tasks
-        asyncio.create_task(self._pattern_learning_loop())
-        asyncio.create_task(self._model_update_loop())
+        # Background tasks (deferred until an event loop is running)
+        self._background_tasks = []
+
+    def start(self) -> None:
+        """Start background tasks when an event loop is running."""
+        if self._background_tasks:
+            return
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            # No running loop at import time; caller should invoke start() from FastAPI startup
+            return
+        self._background_tasks.append(loop.create_task(self._pattern_learning_loop()))
+        self._background_tasks.append(loop.create_task(self._model_update_loop()))
+
+    async def stop(self) -> None:
+        """Cancel background tasks gracefully."""
+        tasks, self._background_tasks = self._background_tasks, []
+        for t in tasks:
+            try:
+                t.cancel()
+            except Exception:
+                pass
     
     def _init_ml_components(self):
         """Initialize machine learning components"""
         try:
+            lightweight = os.environ.get("LIGHTWEIGHT_STARTUP", "1") == "1"
             # Load spaCy model for NLP
             self.nlp = spacy.load("en_core_web_sm")
             
@@ -128,19 +154,10 @@ class IntelligentPatternService:
                 random_state=42
             )
             
-            # Initialize transformers for semantic analysis
-            self.semantic_model = AutoModel.from_pretrained(
-                "sentence-transformers/all-MiniLM-L6-v2"
-            )
-            self.tokenizer = AutoTokenizer.from_pretrained(
-                "sentence-transformers/all-MiniLM-L6-v2"
-            )
-            
-            # Sentiment analysis pipeline
-            self.sentiment_analyzer = pipeline(
-                "sentiment-analysis",
-                model="cardiffnlp/twitter-roberta-base-sentiment-latest"
-            )
+            # Defer heavy transformers to first use; keep None on startup
+            self.semantic_model = None
+            self.tokenizer = None
+            self.sentiment_analyzer = None
             
             logger.info("ML components initialized successfully")
             

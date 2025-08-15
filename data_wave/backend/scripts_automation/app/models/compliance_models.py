@@ -39,7 +39,7 @@ class ComplianceRequirement(SQLModel, table=True):
     __tablename__ = "compliance_requirements"
     
     id: Optional[int] = Field(default=None, primary_key=True)
-    data_source_id: int = Field(foreign_key="data_sources.id", index=True)
+    data_source_id: int = Field(foreign_key="datasource.id", index=True)
     
     # Requirement details
     framework: ComplianceFramework
@@ -84,7 +84,7 @@ class ComplianceAssessment(SQLModel, table=True):
     __tablename__ = "compliance_assessments"
     
     id: Optional[int] = Field(default=None, primary_key=True)
-    data_source_id: int = Field(foreign_key="data_sources.id", index=True)
+    data_source_id: int = Field(foreign_key="datasource.id", index=True)
     
     # Assessment details
     framework: ComplianceFramework
@@ -129,7 +129,7 @@ class ComplianceGap(SQLModel, table=True):
     __tablename__ = "compliance_gaps"
     
     id: Optional[int] = Field(default=None, primary_key=True)
-    data_source_id: int = Field(foreign_key="data_sources.id", index=True)
+    data_source_id: int = Field(foreign_key="datasource.id", index=True)
     requirement_id: int = Field(foreign_key="compliance_requirements.id")
     
     # Gap details
@@ -167,7 +167,7 @@ class ComplianceEvidence(SQLModel, table=True):
     __tablename__ = "compliance_evidence"
     
     id: Optional[int] = Field(default=None, primary_key=True)
-    data_source_id: int = Field(foreign_key="data_sources.id", index=True)
+    data_source_id: int = Field(foreign_key="datasource.id", index=True)
     requirement_id: int = Field(foreign_key="compliance_requirements.id")
     
     # Evidence details
@@ -320,7 +320,7 @@ class ComplianceValidation(SQLModel, table=True):
     __tablename__ = "compliance_validations"
     
     id: Optional[int] = Field(default=None, primary_key=True)
-    data_source_id: int = Field(foreign_key="data_sources.id", index=True)
+    data_source_id: int = Field(foreign_key="datasource.id", index=True)
     requirement_id: int = Field(foreign_key="compliance_requirements.id")
     
     # Validation details

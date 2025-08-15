@@ -22,11 +22,11 @@ import asyncio
 import json
 
 from ...services.rule_marketplace_service import RuleMarketplaceService, MarketplaceVisibility, LicenseType, RuleQualityTier
-from ...services.rule_template_service import RuleTemplateService
-from ...services.enhanced_collaboration_service import EnhancedCollaborationService
-from ...services.usage_analytics_service import UsageAnalyticsService
+from ...services.Scan_Rule_Sets_completed_services.rule_template_service import RuleTemplateService
+from ...services.Scan_Rule_Sets_completed_services.enhanced_collaboration_service import EnhancedCollaborationService
+from ...services.Scan_Rule_Sets_completed_services.usage_analytics_service import UsageAnalyticsService
 from ...models.advanced_scan_rule_models import ScanRuleTemplate, RuleMarketplaceListing, RuleCollaboration
-from ...models.rule_template_models import RuleTemplate, TemplateCategory
+from ...models.Scan_Rule_Sets_completed_models.rule_template_models import RuleTemplate, TemplateCategoryType
 from ...api.security.rbac import get_current_user
 from ...core.monitoring import MetricsCollector
 
@@ -423,7 +423,7 @@ async def stream_marketplace_activity(
                 await asyncio.sleep(30)
                 
         except asyncio.CancelledError:
-            break
+            return
         except Exception as e:
             error_data = {'error': str(e), 'timestamp': datetime.utcnow().isoformat()}
             yield f"data: {json.dumps(error_data)}\n\n"

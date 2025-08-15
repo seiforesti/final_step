@@ -20,19 +20,19 @@ from sqlmodel import Session, select
 from typing import Dict, List, Optional, Any
 from datetime import datetime
 
-from app.core.database import get_session
-from app.api.security.rbac import require_permission, get_current_user
-from app.utils.rate_limiter import check_rate_limit
-from app.core.logging_config import get_logger
-from app.models.Scan-Rule-Sets-completed-models.rule_version_control_models import (
+from ....db_session import get_session
+from ....api.security.rbac import require_permission, get_current_user
+from ....utils.rate_limiter import check_rate_limit
+from ....core.logging_config import get_logger
+from ....models.Scan_Rule_Sets_completed_models.rule_version_control_models import (
     RuleVersion, RuleBranch, RuleChange, MergeRequest, MergeRequestReview,
     VersionComparison, RuleVersionCreate, RuleBranchCreate, MergeRequestCreate,
     MergeRequestReviewCreate, VersionComparisonRequest, VersionComparisonResponse,
     RuleVersionResponse, RuleBranchResponse, MergeRequestResponse,
     ConflictResolutionRequest, ConflictResolutionResponse
 )
-from app.services.Scan-Rule-Sets-completed-services.rule_version_control_service import RuleVersionControlService
-from app.models.response_models import StandardResponse
+from ....services.Scan_Rule_Sets_completed_services.rule_version_control_service import RuleVersionControlService
+from ....core.response_models import StandardResponse
 
 # Initialize router and logger
 router = APIRouter(prefix="/rule-version-control", tags=["Rule Version Control"])
@@ -564,8 +564,8 @@ async def submit_merge_request_review(
 @router.post("/merge-requests/{merge_request_id}/merge", response_model=StandardResponse)
 async def merge_request(
     merge_request_id: int,
-    merge_strategy: str = Query(default="merge", description="Merge strategy"),
     background_tasks: BackgroundTasks,
+    merge_strategy: str = Query(default="merge", description="Merge strategy"),
     session: Session = Depends(get_session),
     current_user: Dict[str, Any] = Depends(require_permission(PERMISSION_MERGE_REQUEST_MERGE))
 ):

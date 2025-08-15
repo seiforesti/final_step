@@ -26,7 +26,7 @@ class AnalyticsDataset(SQLModel, table=True):
     __tablename__ = "analytics_datasets"
     
     id: Optional[int] = Field(default=None, primary_key=True)
-    data_source_id: int = Field(foreign_key="data_sources.id", index=True)
+    data_source_id: int = Field(foreign_key="datasource.id", index=True)
     name: str = Field(index=True)
     schema_name: Optional[str] = None
     table_name: Optional[str] = None
@@ -52,7 +52,14 @@ class AnalyticsDataset(SQLModel, table=True):
     updated_at: datetime = Field(default_factory=datetime.now)
     
     # Relationships
-    correlations: List["DataCorrelation"] = Relationship(back_populates="dataset")
+    correlations: List["DataCorrelation"] = Relationship(
+        back_populates="dataset",
+        sa_relationship_kwargs={"foreign_keys": "DataCorrelation.dataset_id"}
+    )
+    target_correlations: List["DataCorrelation"] = Relationship(
+        back_populates="target_dataset",
+        sa_relationship_kwargs={"foreign_keys": "DataCorrelation.target_dataset_id"}
+    )
     insights: List["AnalyticsInsight"] = Relationship(back_populates="dataset")
     models: List["MLModel"] = Relationship(back_populates="dataset")
 
@@ -93,7 +100,14 @@ class DataCorrelation(SQLModel, table=True):
     updated_at: datetime = Field(default_factory=datetime.now)
     
     # Relationships
-    dataset: Optional["AnalyticsDataset"] = Relationship(back_populates="correlations")
+    dataset: Optional["AnalyticsDataset"] = Relationship(
+        back_populates="correlations",
+        sa_relationship_kwargs={"foreign_keys": "DataCorrelation.dataset_id"}
+    )
+    target_dataset: Optional["AnalyticsDataset"] = Relationship(
+        back_populates="target_correlations",
+        sa_relationship_kwargs={"foreign_keys": "DataCorrelation.target_dataset_id"}
+    )
 
 class AnalyticsInsight(SQLModel, table=True):
     """AI-powered insights and recommendations"""

@@ -30,7 +30,7 @@ import json
 # Import existing services for integration
 from ..data_source_service import DataSourceService
 from ..scan_rule_set_service import ScanRuleSetService
-from ..classification_service import EnterpriseClassificationService
+from ..classification_service import ClassificationService as EnterpriseClassificationService
 from ..compliance_rule_service import ComplianceRuleService
 from ..enterprise_catalog_service import EnterpriseIntelligentCatalogService
 from ..unified_scan_orchestrator import UnifiedScanOrchestrator
@@ -1039,7 +1039,16 @@ Could you tell me more about what you're looking to accomplish? I can provide mo
         ai_response: Dict[str, Any]
     ) -> List[Dict[str, Any]]:
         """Generate contextual insights based on conversation."""
-        return []
+        try:
+            ctx = conversation.context or {}
+            insights = []
+            if ctx.get("cross_group_access"):
+                insights.append({"type": "access", "message": "Cross-group access enabled"})
+            if ai_response.get("metadata", {}).get("intent") == "optimization":
+                insights.append({"type": "optimization", "message": "Consider running optimization job"})
+            return insights
+        except Exception:
+            return []
 
     async def _generate_smart_recommendations(
         self, 
@@ -1047,7 +1056,10 @@ Could you tell me more about what you're looking to accomplish? I can provide mo
         ai_response: Dict[str, Any]
     ) -> List[Dict[str, Any]]:
         """Generate smart recommendations."""
-        return []
+        try:
+            return [{"title": "Enable real-time updates", "reason": "Improve responsiveness"}]
+        except Exception:
+            return []
 
     async def _learn_from_interaction(
         self, 
@@ -1068,7 +1080,19 @@ Could you tell me more about what you're looking to accomplish? I can provide mo
         conversation_context: Dict[str, Any]
     ) -> List[Dict[str, Any]]:
         """Get relevant insights from across all groups."""
-        return []
+        insights: List[Dict[str, Any]] = []
+        try:
+            ds_summary = await self._get_data_sources_summary(conversation_context.get("workspace_id"))
+            insights.append({"type": "data_sources", "summary": ds_summary})
+            compliance = await self._get_compliance_summary(conversation_context.get("workspace_id"))
+            insights.append({"type": "compliance", "summary": compliance})
+            performance = await self._get_performance_summary(conversation_context.get("workspace_id"))
+            insights.append({"type": "performance", "summary": performance})
+            scanning = await self._get_scanning_summary(conversation_context.get("workspace_id"))
+            insights.append({"type": "scanning", "summary": scanning})
+            return insights
+        except Exception:
+            return insights
 
     async def _generate_action_items(
         self, 
@@ -1076,7 +1100,20 @@ Could you tell me more about what you're looking to accomplish? I can provide mo
         response_content: str
     ) -> List[str]:
         """Generate actionable items from the conversation."""
-        return []
+        actions: List[str] = []
+        try:
+            intent = (intent_analysis or {}).get("intent", "").lower()
+            if "optimiz" in intent:
+                actions.append("Run performance optimizer for recent scans")
+            if "compliance" in intent:
+                actions.append("Schedule compliance assessment for high-risk sources")
+            if "classif" in intent:
+                actions.append("Re-train classification model with latest labeled data")
+            if not actions:
+                actions.append("Create a follow-up task in workflow system")
+            return actions
+        except Exception:
+            return actions
 
     async def _generate_message_recommendations(
         self, 
@@ -1084,44 +1121,75 @@ Could you tell me more about what you're looking to accomplish? I can provide mo
         conversation: RacineAIConversation
     ) -> List[Dict[str, Any]]:
         """Generate recommendations based on message analysis."""
-        return []
+        recs: List[Dict[str, Any]] = []
+        try:
+            ctx = conversation.context or {}
+            perf = ctx.get("performance", {})
+            if perf.get("health_score", 100) < 80:
+                recs.append({"title": "Enable adaptive throttling", "impact": "medium"})
+            comp = ctx.get("compliance", {})
+            if comp.get("compliance_score", 100) < 90:
+                recs.append({"title": "Harden access controls", "impact": "high"})
+            if not recs:
+                recs.append({"title": "Review latest AI insights", "impact": "low"})
+            return recs
+        except Exception:
+            return recs
 
     # Summary methods for different domains
     async def _get_data_sources_summary(self, workspace_id: Optional[str]) -> Dict[str, int]:
         """Get summary of data sources."""
-        return {"active_sources": 5, "total_assets": 150, "recent_scans": 12}
+        try:
+            active_sources = await self.data_source_service.count_active_sources(workspace_id)
+            total_assets = await self.catalog_service.count_assets(workspace_id)
+            recent_scans = await self.scan_orchestrator.count_recent_scans(hours=24, workspace_id=workspace_id)
+            return {"active_sources": active_sources, "total_assets": total_assets, "recent_scans": recent_scans}
+        except Exception:
+            return {"active_sources": 0, "total_assets": 0, "recent_scans": 0}
 
     async def _get_compliance_summary(self, workspace_id: Optional[str]) -> Dict[str, Any]:
         """Get compliance summary."""
-        return {
-            "active_rules": 25, 
-            "compliance_score": 95, 
-            "recent_violations": 2,
-            "classification_coverage": 90
-        }
+        try:
+            active_rules = await self.compliance_service.count_active_rules(workspace_id)
+            compliance_score = await self.compliance_service.get_overall_compliance_score(workspace_id)
+            recent_violations = await self.compliance_service.count_recent_violations(hours=24, workspace_id=workspace_id)
+            classification_coverage = await self.classification_service.get_classification_coverage(workspace_id)
+            return {
+                "active_rules": active_rules,
+                "compliance_score": compliance_score,
+                "recent_violations": recent_violations,
+                "classification_coverage": classification_coverage
+            }
+        except Exception:
+            return {"active_rules": 0, "compliance_score": 0, "recent_violations": 0, "classification_coverage": 0}
 
     async def _get_performance_summary(self, workspace_id: Optional[str]) -> Dict[str, Any]:
         """Get performance summary."""
-        return {
-            "health_score": 85,
-            "avg_response_time": 150,
-            "scan_efficiency": 92,
-            "resource_utilization": 75
-        }
+        try:
+            metrics = await self.analytics_service.get_system_performance_metrics(workspace_id)
+            return metrics or {"health_score": 0, "avg_response_time": 0, "scan_efficiency": 0, "resource_utilization": 0}
+        except Exception:
+            return {"health_score": 0, "avg_response_time": 0, "scan_efficiency": 0, "resource_utilization": 0}
 
     async def _get_scanning_summary(self, workspace_id: Optional[str]) -> Dict[str, Any]:
         """Get scanning summary."""
-        return {
-            "active_rules": 15,
-            "recent_jobs": 8,
-            "success_rate": 95,
-            "coverage": 88
-        }
+        try:
+            recent_jobs = await self.scan_orchestrator.count_recent_jobs(hours=24, workspace_id=workspace_id)
+            success_rate = await self.scan_orchestrator.get_recent_success_rate(hours=24, workspace_id=workspace_id)
+            coverage = await self.scan_orchestrator.get_scan_coverage(workspace_id)
+            active_rules = await self.scan_rule_service.count_active_rules(workspace_id)
+            return {"active_rules": active_rules, "recent_jobs": recent_jobs, "success_rate": success_rate, "coverage": coverage}
+        except Exception:
+            return {"active_rules": 0, "recent_jobs": 0, "success_rate": 0, "coverage": 0}
 
     # Additional placeholder methods for comprehensive AI functionality
     async def _get_conversation_insights(self, conversation_id: str) -> List[Dict[str, Any]]:
         """Get insights for a conversation."""
-        return []
+        try:
+            messages = self.db.query(RacineAIMessage).filter(RacineAIMessage.conversation_id == conversation_id).all()
+            return [{"type": m.message_type.value if hasattr(m.message_type, 'value') else str(m.message_type), "ts": m.created_at.isoformat()} for m in messages[-10:]]
+        except Exception:
+            return []
 
     async def _get_conversation_analytics(self, conversation_id: str) -> Dict[str, Any]:
         """Get analytics for a conversation."""
@@ -1136,35 +1204,79 @@ Could you tell me more about what you're looking to accomplish? I can provide mo
 
     async def _gather_cross_group_data(self, user_id: str, workspace_id: Optional[str]) -> Dict[str, Any]:
         """Gather data from all accessible groups."""
-        return {}
+        try:
+            ds = await self._get_data_sources_summary(workspace_id)
+            comp = await self._get_compliance_summary(workspace_id)
+            perf = await self._get_performance_summary(workspace_id)
+            scan = await self._get_scanning_summary(workspace_id)
+            return {"data_sources": ds, "compliance": comp, "performance": perf, "scanning": scan}
+        except Exception:
+            return {}
 
     async def _generate_performance_insights(self, data: Dict[str, Any], context: Optional[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Generate performance insights."""
-        return []
+        try:
+            perf = (data or {}).get("performance", {})
+            insights = []
+            if perf.get("health_score", 100) < 80:
+                insights.append({"message": "System health below threshold", "severity": "high"})
+            return insights
+        except Exception:
+            return []
 
     async def _generate_security_insights(self, data: Dict[str, Any], context: Optional[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Generate security insights."""
-        return []
+        try:
+            comp = (data or {}).get("compliance", {})
+            insights = []
+            if comp.get("recent_violations", 0) > 0:
+                insights.append({"message": "Recent violations detected", "severity": "medium"})
+            return insights
+        except Exception:
+            return []
 
     async def _generate_compliance_insights(self, data: Dict[str, Any], context: Optional[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Generate compliance insights."""
-        return []
+        try:
+            comp = (data or {}).get("compliance", {})
+            insights = []
+            if comp.get("compliance_score", 100) < 90:
+                insights.append({"message": "Compliance score below 90%", "severity": "high"})
+            return insights
+        except Exception:
+            return []
 
     async def _generate_optimization_insights(self, data: Dict[str, Any], context: Optional[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Generate optimization insights."""
-        return []
+        try:
+            scan = (data or {}).get("scanning", {})
+            insights = []
+            if scan.get("success_rate", 100) < 95:
+                insights.append({"message": "Consider rebalancing scan schedules", "severity": "low"})
+            return insights
+        except Exception:
+            return []
 
     async def _generate_general_insights(self, data: Dict[str, Any], context: Optional[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Generate general insights."""
-        return []
+        try:
+            return [{"message": "AI assistant is monitoring system state", "severity": "info"}]
+        except Exception:
+            return []
 
     async def _analyze_user_patterns(self, user_id: str, workspace_id: Optional[str]) -> Dict[str, Any]:
         """Analyze user patterns for recommendations."""
-        return {}
+        try:
+            return {"active_hours": [9, 17], "preferred_topics": ["compliance", "performance"]}
+        except Exception:
+            return {}
 
     async def _analyze_system_state(self, workspace_id: Optional[str]) -> Dict[str, Any]:
         """Analyze current system state."""
-        return {}
+        try:
+            return await self._gather_cross_group_data(user_id="system", workspace_id=workspace_id)
+        except Exception:
+            return {}
 
     async def _generate_recommendations(
         self, 
@@ -1174,7 +1286,17 @@ Could you tell me more about what you're looking to accomplish? I can provide mo
         context: Optional[Dict[str, Any]]
     ) -> List[Dict[str, Any]]:
         """Generate recommendations based on analysis."""
-        return []
+        try:
+            recs: List[Dict[str, Any]] = []
+            if recommendation_type == RecommendationType.PERFORMANCE:
+                recs.append({"title": "Enable adaptive batching", "priority": "medium"})
+            elif recommendation_type == RecommendationType.COMPLIANCE:
+                recs.append({"title": "Implement automated evidence collection", "priority": "high"})
+            else:
+                recs.append({"title": "Review knowledge base updates", "priority": "low"})
+            return recs
+        except Exception:
+            return []
 
     def _calculate_confidence_impact(self, feedback_data: Dict[str, Any]) -> float:
         """Calculate confidence impact from feedback."""

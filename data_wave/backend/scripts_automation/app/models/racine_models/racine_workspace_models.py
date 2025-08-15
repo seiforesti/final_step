@@ -45,10 +45,10 @@ from ..advanced_scan_rule_models import IntelligentScanRule, RuleExecutionHistor
 
 # Classifications Group  
 from ..classification_models import ClassificationRule, ClassificationResult
-from ..scan_models import DataClassification
+from ..classification_models import ClassificationResult as DataClassification
 
 # Compliance Rules Group
-from ..compliance_rule_models import ComplianceRule
+from ..compliance_models import ComplianceRequirement as ComplianceRule
 # Note: ComplianceValidation is not defined
 # Note: EnterpriseComplianceRule is not defined
 # Note: ComplianceAuditTrail is not defined
@@ -191,7 +191,7 @@ class RacineWorkspace(SQLModel, table=True):
     )
     
     # Ownership and access control
-    owner_id: str = Field(
+    owner_id: int = Field(
         ...,
         foreign_key="users.id",
         index=True,
@@ -454,7 +454,7 @@ class RacineWorkspaceMember(SQLModel, table=True):
         index=True,
         description="Reference to workspace"
     )
-    user_id: str = Field(
+    user_id: int = Field(
         foreign_key="users.id",
         index=True,
         description="Reference to user"
@@ -860,7 +860,7 @@ class RacineWorkspaceTemplate(SQLModel, table=True):
     # Template management
     version: str = Field(default="1.0.0")
     is_verified: bool = Field(default=False, index=True)
-    created_by: str = Field(..., foreign_key="users.id", index=True)
+    created_by: int = Field(..., foreign_key="users.id", index=True)
     
     created_at: datetime = Field(default_factory=datetime.utcnow, index=True)
     updated_at: datetime = Field(default_factory=datetime.utcnow, index=True)

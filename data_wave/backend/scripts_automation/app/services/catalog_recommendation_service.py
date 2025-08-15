@@ -55,6 +55,12 @@ from .ai_service import EnterpriseAIService as AIService
 from .catalog_analytics_service import CatalogAnalyticsService
 from .intelligent_discovery_service import IntelligentDiscoveryService
 
+try:
+    from ..core.settings import get_settings
+except Exception:
+    from ..core.config import settings as get_settings
+from sqlalchemy import select
+
 logger = logging.getLogger(__name__)
 
 class RecommendationType(str, Enum):
@@ -205,14 +211,99 @@ class CatalogRecommendationService:
         else:
             self.relationship_graph = nx.Graph()
         
-        # Background tasks
-        asyncio.create_task(self._model_training_loop())
-        asyncio.create_task(self._metrics_collection_loop())
-        asyncio.create_task(self._cache_optimization_loop())
-        asyncio.create_task(self._trending_analysis_loop())
+        # Background tasks (defer until loop exists)
+        try:
+            loop = asyncio.get_running_loop()
+            loop.create_task(self._model_training_loop())
+            loop.create_task(self._metrics_collection_loop())
+            loop.create_task(self._cache_optimization_loop())
+            loop.create_task(self._trending_analysis_loop())
+        except RuntimeError:
+            pass
+
+    def start(self) -> None:
+        try:
+            loop = asyncio.get_running_loop()
+            loop.create_task(self._model_training_loop())
+            loop.create_task(self._metrics_collection_loop())
+            loop.create_task(self._cache_optimization_loop())
+            loop.create_task(self._trending_analysis_loop())
+        except RuntimeError:
+            pass
         
         logger.info("Catalog Recommendation Service initialized successfully")
     
+    async def _find_semantically_similar_assets(self, asset_id: str, business_domain: Optional[str], limit: int) -> List[Tuple[str, float]]:
+        """Find semantically similar assets using AI service embeddings and relationship graph."""
+        try:
+            if hasattr(self.ai_service, '_create_semantic_embeddings'):
+                candidates = [asset_id]
+                if HAS_NETWORKX and hasattr(self, 'relationship_graph') and self.relationship_graph.has_node(asset_id):
+                    neighbors = list(self.relationship_graph.neighbors(asset_id))
+                    candidates.extend(neighbors[:min(50, len(neighbors))])
+                docs = []
+                for aid in candidates:
+                    desc = f"Asset {aid} in domain {business_domain or 'general'}"
+                    docs.append({'document_id': aid, 'content': desc})
+                emb = await self.ai_service._create_semantic_embeddings(docs, None)  # type: ignore
+                vectors = emb.get('documents', {})
+                if asset_id not in vectors:
+                    return []
+                base_vec = np.array(vectors[asset_id]['embedding'])
+                pairs: List[Tuple[str, float]] = []
+                for did, info in vectors.items():
+                    if did == asset_id:
+                        continue
+                    vec = np.array(info['embedding'])
+                    if np.linalg.norm(base_vec) == 0 or np.linalg.norm(vec) == 0:
+                        continue
+                    sim = float(np.dot(base_vec, vec) / (np.linalg.norm(base_vec) * np.linalg.norm(vec)))
+                    pairs.append((did, sim))
+                pairs.sort(key=lambda x: x[1], reverse=True)
+                return pairs[:limit]
+            return []
+        except Exception as e:
+            logger.error(f"Semantic similarity computation failed: {e}")
+            return []
+
+    async def _get_trending_assets(self, days: int, limit: int) -> List[Tuple[str, float]]:
+        """Compute trending assets from recent interactions with recency weighting."""
+        try:
+            cutoff = datetime.utcnow() - timedelta(days=days)
+            scores: Dict[str, float] = defaultdict(float)
+            for inter in list(self.user_interactions)[-50000:]:
+                if inter.timestamp >= cutoff:
+                    weight = {
+                        'view': 1.0,
+                        'click': 1.2,
+                        'download': 2.0,
+                        'favorite': 2.5,
+                        'share': 2.0,
+                        'rating': 1.5,
+                    }.get(inter.interaction_type, 1.0)
+                    recency = max(0.1, 1.0 - (datetime.utcnow() - inter.timestamp).days / float(days + 1))
+                    scores[inter.asset_id] += weight * recency
+            ranked = sorted(scores.items(), key=lambda x: x[1], reverse=True)
+            return ranked[:limit]
+        except Exception as e:
+            logger.error(f"Trending assets calculation failed: {e}")
+            return []
+
+    async def _get_popular_assets_by_criteria(self, business_domains: List[str], asset_types: List[str], limit: int) -> List[Tuple[str, float]]:
+        """Select popular assets filtered by business domain and asset type using interaction stats."""
+        try:
+            scores: Dict[str, float] = defaultdict(float)
+            for inter in list(self.user_interactions)[-50000:]:
+                bd = inter.metadata.get('business_domain')
+                at = inter.metadata.get('asset_type')
+                if (not business_domains or bd in business_domains) and (not asset_types or at in asset_types):
+                    scores[inter.asset_id] += 1.0
+            ranked = sorted(scores.items(), key=lambda x: x[1], reverse=True)
+            return ranked[:limit]
+        except Exception as e:
+            logger.error(f"Popular assets retrieval failed: {e}")
+            return []
+
     async def get_recommendations(
         self,
         user_id: str,
@@ -434,11 +525,25 @@ class CatalogRecommendationService:
                 if business_domain not in preferred_domains:
                     preferred_domains.append(business_domain)
             
-            # Update personalization vector (simplified)
-            if hasattr(profile.get("personalization_vector"), "shape"):
-                # In a real implementation, this would use more sophisticated ML
-                vector_update = np.random.normal(0, 0.1, 50)
-                profile["personalization_vector"] += vector_update * 0.1
+            # Update personalization vector using AI service if available
+            try:
+                from .ai_service import EnterpriseAIService
+                ai = EnterpriseAIService()
+                # Provide minimal interaction context for update
+                updated = ai._update_user_preference_vector if hasattr(ai, '_update_user_preference_vector') else None
+                if callable(updated):
+                    profile["personalization_vector"] = updated(
+                        user_id=user_id,
+                        interaction={
+                            "asset_id": interaction.asset_id,
+                            "interaction_type": interaction.interaction_type,
+                            "metadata": interaction.metadata or {}
+                        },
+                        current_vector=profile.get("personalization_vector")
+                    )
+            except Exception:
+                # Fallback: keep vector stable to avoid randomness in production
+                pass
             
         except Exception as e:
             logger.error(f"Failed to update user profile: {e}")
@@ -499,8 +604,7 @@ class CatalogRecommendationService:
             if not current_asset_id or self.content_similarity_matrix is None:
                 return recommendations
             
-            # Find similar assets based on content
-            # This would use actual asset content in a real implementation
+            # Find similar assets based on content using vectorizer/SVD when available
             similar_assets = await self._find_similar_assets_by_content(
                 current_asset_id, max_results * 2
             )
@@ -512,10 +616,24 @@ class CatalogRecommendationService:
                         f"Content similarity score: {similarity_score:.2f}"
                     ]
                     
+                    # Resolve real asset name/type via enterprise catalog if available
+                    try:
+                        from ..services.enterprise_catalog_service import EnterpriseIntelligentCatalogService
+                        from ..db_session import get_session as _get_sync_session
+                        with _get_sync_session() as s:
+                            svc = EnterpriseIntelligentCatalogService()
+                            # Best-effort load; if not found, keep defaults
+                            # Accessing models directly to avoid heavy service init
+                            from ..models.advanced_catalog_models import IntelligentDataAsset
+                            a = s.exec(select(IntelligentDataAsset).where(IntelligentDataAsset.asset_uuid == asset_id)).first()
+                            resolved_name = a.display_name if a else f"Asset {asset_id}"
+                            resolved_type = a.asset_type.value if (a and hasattr(a.asset_type, 'value')) else (str(a.asset_type) if a else "dataset")
+                    except Exception:
+                        resolved_name, resolved_type = f"Asset {asset_id}", "dataset"
                     recommendation = RecommendationItem(
                         asset_id=asset_id,
-                        asset_name=f"Asset {asset_id}",  # Would fetch real name
-                        asset_type="dataset",  # Would fetch real type
+                        asset_name=resolved_name,
+                        asset_type=resolved_type,
                         score=similarity_score * self.config.content_weight,
                         reasoning=reasoning,
                         recommendation_type=RecommendationType.CONTENT_BASED,
@@ -564,10 +682,19 @@ class CatalogRecommendationService:
                 if len(recommendations) >= max_results:
                     break
                 
+                try:
+                    from ..models.advanced_catalog_models import IntelligentDataAsset
+                    from ..db_session import get_session as _get_sync_session
+                    with _get_sync_session() as s:
+                        a = s.exec(select(IntelligentDataAsset).where(IntelligentDataAsset.asset_uuid == asset_id)).first()
+                        resolved_name = a.display_name if a else f"Asset {asset_id}"
+                        resolved_type = a.asset_type.value if (a and hasattr(a.asset_type, 'value')) else (str(a.asset_type) if a else "dataset")
+                except Exception:
+                    resolved_name, resolved_type = f"Asset {asset_id}", "dataset"
                 recommendation = RecommendationItem(
                     asset_id=asset_id,
-                    asset_name=f"Asset {asset_id}",  # Would fetch real name
-                    asset_type="dataset",  # Would fetch real type
+                    asset_name=resolved_name,
+                    asset_type=resolved_type,
                     score=score * self.config.collaborative_weight,
                     reasoning=asset_reasons[asset_id][:3],  # Top 3 reasons
                     recommendation_type=RecommendationType.COLLABORATIVE,
@@ -679,10 +806,19 @@ class CatalogRecommendationService:
                     "Frequently accessed by similar users"
                 ]
                 
+                try:
+                    from ..models.advanced_catalog_models import IntelligentDataAsset
+                    from ..db_session import get_session as _get_sync_session
+                    with _get_sync_session() as s:
+                        a = s.exec(select(IntelligentDataAsset).where(IntelligentDataAsset.asset_uuid == asset_id)).first()
+                        resolved_name = a.display_name if a else f"Asset {asset_id}"
+                        resolved_type = a.asset_type.value if (a and hasattr(a.asset_type, 'value')) else (str(a.asset_type) if a else "dataset")
+                except Exception:
+                    resolved_name, resolved_type = f"Asset {asset_id}", "dataset"
                 recommendation = RecommendationItem(
                     asset_id=asset_id,
-                    asset_name=f"Asset {asset_id}",  # Would fetch real name
-                    asset_type="dataset",  # Would fetch real type
+                    asset_name=resolved_name,
+                    asset_type=resolved_type,
                     score=usage_score * self.config.usage_weight,
                     reasoning=reasoning,
                     recommendation_type=RecommendationType.USAGE_BASED,
@@ -727,10 +863,19 @@ class CatalogRecommendationService:
                         "Similar business context and meaning"
                     ]
                     
+                    try:
+                        from ..models.advanced_catalog_models import IntelligentDataAsset
+                        from ..db_session import get_session as _get_sync_session
+                        with _get_sync_session() as s:
+                            a = s.exec(select(IntelligentDataAsset).where(IntelligentDataAsset.asset_uuid == asset_id)).first()
+                            resolved_name = a.display_name if a else f"Asset {asset_id}"
+                            resolved_type = a.asset_type.value if (a and hasattr(a.asset_type, 'value')) else (str(a.asset_type) if a else "dataset")
+                    except Exception:
+                        resolved_name, resolved_type = f"Asset {asset_id}", "dataset"
                     recommendation = RecommendationItem(
                         asset_id=asset_id,
-                        asset_name=f"Asset {asset_id}",  # Would fetch real name
-                        asset_type="dataset",  # Would fetch real type
+                        asset_name=resolved_name,
+                        asset_type=resolved_type,
                         score=semantic_score * 0.8,  # Weight for semantic recommendations
                         reasoning=reasoning,
                         recommendation_type=RecommendationType.SEMANTIC,
@@ -807,10 +952,19 @@ class CatalogRecommendationService:
                     "Popular among recent users"
                 ]
                 
+                try:
+                    from ..models.advanced_catalog_models import IntelligentDataAsset
+                    from ..db_session import get_session as _get_sync_session
+                    with _get_sync_session() as s:
+                        a = s.exec(select(IntelligentDataAsset).where(IntelligentDataAsset.asset_uuid == asset_id)).first()
+                        resolved_name = a.display_name if a else f"Asset {asset_id}"
+                        resolved_type = a.asset_type.value if (a and hasattr(a.asset_type, 'value')) else (str(a.asset_type) if a else "dataset")
+                except Exception:
+                    resolved_name, resolved_type = f"Asset {asset_id}", "dataset"
                 recommendation = RecommendationItem(
                     asset_id=asset_id,
-                    asset_name=f"Asset {asset_id}",  # Would fetch real name
-                    asset_type="dataset",  # Would fetch real type
+                    asset_name=resolved_name,
+                    asset_type=resolved_type,
                     score=trend_score * 0.7,  # Weight for trending recommendations
                     reasoning=reasoning,
                     recommendation_type=RecommendationType.TRENDING,
@@ -868,10 +1022,19 @@ class CatalogRecommendationService:
                     top_type = interaction_patterns["preferred_asset_types"][0]
                     reasoning.append(f"Matches your preference for {top_type}")
                 
+                try:
+                    from ..models.advanced_catalog_models import IntelligentDataAsset
+                    from ..db_session import get_session as _get_sync_session
+                    with _get_sync_session() as s:
+                        a = s.exec(select(IntelligentDataAsset).where(IntelligentDataAsset.asset_uuid == asset_id)).first()
+                        resolved_name = a.display_name if a else f"Asset {asset_id}"
+                        resolved_type = a.asset_type.value if (a and hasattr(a.asset_type, 'value')) else (str(a.asset_type) if a else "dataset")
+                except Exception:
+                    resolved_name, resolved_type = f"Asset {asset_id}", "dataset"
                 recommendation = RecommendationItem(
                     asset_id=asset_id,
-                    asset_name=f"Asset {asset_id}",  # Would fetch real name
-                    asset_type="dataset",  # Would fetch real type
+                    asset_name=resolved_name,
+                    asset_type=resolved_type,
                     score=personalized_score,
                     reasoning=reasoning,
                     recommendation_type=RecommendationType.PERSONALIZED,
@@ -890,16 +1053,37 @@ class CatalogRecommendationService:
     async def _find_similar_assets_by_content(self, asset_id: str, limit: int) -> List[Tuple[str, float]]:
         """Find assets similar to the given asset based on content"""
         try:
-            # In a real implementation, this would use actual content similarity
-            # For now, simulate with random similar assets
-            similar_assets = []
-            
-            for i in range(min(limit, 10)):
-                similar_asset_id = f"asset_{hash(asset_id + str(i)) % 1000}"
-                similarity_score = max(0.1, 1.0 - (i * 0.1))
-                similar_assets.append((similar_asset_id, similarity_score))
-            
-            return similar_assets
+            # If we have a precomputed similarity matrix and mapping, use it
+            if self.content_similarity_matrix is not None and hasattr(self, "asset_index"):
+                idx = self.asset_index.get(asset_id)
+                if idx is not None and 0 <= idx < self.content_similarity_matrix.shape[0]:
+                    sims = self.content_similarity_matrix[idx]
+                    ranked = sorted(
+                        [(aid, float(sims[j])) for aid, j in self.asset_index.items() if aid != asset_id],
+                        key=lambda x: x[1], reverse=True
+                    )
+                    return ranked[:limit]
+            # Otherwise derive similarity on the fly from asset profiles and names using TF-IDF
+            corpus = []
+            ids = []
+            for aid, prof in list(self.asset_profiles.items())[:5000]:
+                text = f"{aid} {prof.get('asset_type','dataset')} {prof.get('interaction_types',{})}"
+                corpus.append(text)
+                ids.append(aid)
+            if asset_id not in ids:
+                ids.append(asset_id)
+                corpus.append(f"{asset_id}")
+            if len(ids) < 2:
+                return []
+            X = self.content_vectorizer.fit_transform(corpus)
+            U = self.svd_model.fit_transform(X)
+            sims = cosine_similarity(U)
+            base = ids.index(asset_id)
+            ranked = sorted(
+                [(ids[j], float(sims[base, j])) for j in range(len(ids)) if j != base],
+                key=lambda x: x[1], reverse=True
+            )
+            return ranked[:limit]
             
         except Exception as e:
             logger.error(f"Failed to find similar assets: {e}")

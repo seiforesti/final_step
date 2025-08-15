@@ -28,7 +28,7 @@ from enum import Enum
 
 # Database and dependencies
 from ....core.database import get_db
-from ....core.auth import get_current_user, require_permissions
+from ...security.rbac import get_current_user, require_permissions
 from ....models.auth_models import User
 
 # Import racine services

@@ -439,10 +439,23 @@ class UsageAnalyticsService:
         self.event_buffer = deque(maxlen=1000)
         self.processing_executor = ThreadPoolExecutor(max_workers=4)
         
-        # Start background tasks
-        asyncio.create_task(self._real_time_processing_loop())
-        asyncio.create_task(self._analytics_aggregation_loop())
-        asyncio.create_task(self._alert_monitoring_loop())
+        # Start background tasks (defer until loop exists)
+        try:
+            loop = asyncio.get_running_loop()
+            loop.create_task(self._real_time_processing_loop())
+            loop.create_task(self._analytics_aggregation_loop())
+            loop.create_task(self._alert_monitoring_loop())
+        except RuntimeError:
+            pass
+
+    def start(self) -> None:
+        try:
+            loop = asyncio.get_running_loop()
+            loop.create_task(self._real_time_processing_loop())
+            loop.create_task(self._analytics_aggregation_loop())
+            loop.create_task(self._alert_monitoring_loop())
+        except RuntimeError:
+            pass
     
     async def track_usage_event(self, session, event_data: Dict[str, Any]) -> Dict[str, Any]:
         """Track a real-time usage event with immediate processing"""
@@ -458,7 +471,11 @@ class UsageAnalyticsService:
             
             # Process for real-time analytics if buffer is full
             if len(self.event_buffer) >= self.real_time_batch_size:
-                asyncio.create_task(self._process_event_batch())
+                try:
+                    loop = asyncio.get_running_loop()
+                    loop.create_task(self._process_event_batch())
+                except RuntimeError:
+                    pass
             
             return {
                 "success": True,
@@ -701,14 +718,40 @@ class UsageAnalyticsService:
         }
     
     def _generate_collaboration_analytics(self, usage_data: List[Dict[str, Any]]) -> Dict[str, Any]:
-        """Generate collaboration-focused analytics"""
-        # This would analyze team collaboration patterns
-        # Placeholder implementation
-        return {
-            "team_activity": {"placeholder": "collaboration analytics"},
-            "sharing_patterns": {"placeholder": "sharing analytics"},
-            "communication_metrics": {"placeholder": "communication analytics"}
-        }
+        """Generate collaboration-focused analytics from activity and tag events."""
+        try:
+            from ...models.collaboration_models import CollaborationEvent  # if exists
+            from ...db_session import get_session
+            team_activity = defaultdict(int)
+            sharing_patterns = defaultdict(int)
+            communication_metrics = defaultdict(int)
+            with get_session() as s:
+                # Aggregate last 30 days collaboration events if table exists
+                # fallback to usage_data-based aggregation
+                try:
+                    thirty = datetime.utcnow() - timedelta(days=30)
+                    events = s.exec(select(CollaborationEvent).where(CollaborationEvent.created_at >= thirty)).all()
+                    for ev in events:
+                        team_activity[getattr(ev, 'team_id', 'unknown')] += 1
+                        if getattr(ev, 'event_type', '') in ('share', 'comment', 'mention'):
+                            sharing_patterns[ev.event_type] += 1
+                        if getattr(ev, 'event_type', '') in ('comment', 'discussion'):
+                            communication_metrics[ev.event_type] += 1
+                except Exception:
+                    # usage_data fallback
+                    for rec in usage_data:
+                        team_activity[str(rec.get('team_id', 'unknown'))] += 1
+                        if rec.get('action') in ('share', 'comment', 'mention'):
+                            sharing_patterns[rec['action']] += 1
+                        if rec.get('action') in ('comment', 'discussion'):
+                            communication_metrics[rec['action']] += 1
+            return {
+                "team_activity": dict(sorted(team_activity.items(), key=lambda x: x[1], reverse=True)[:10]),
+                "sharing_patterns": dict(sharing_patterns),
+                "communication_metrics": dict(communication_metrics)
+            }
+        except Exception:
+            return {"team_activity": {}, "sharing_patterns": {}, "communication_metrics": {}}
     
     def _generate_general_analytics(self, usage_data: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Generate general analytics for other types"""

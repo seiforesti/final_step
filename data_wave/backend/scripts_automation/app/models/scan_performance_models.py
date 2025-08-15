@@ -11,7 +11,7 @@ from typing import Any, Dict, List, Optional, Union
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field, validator
-from sqlmodel import Column, Field, Relationship, SQLModel, ARRAY, JSON as JSONB
+from sqlmodel import Column, Field, Relationship, SQLModel, ARRAY, JSON as JSONB, String
 
 # ============================================================================
 # ENUMS
@@ -31,6 +31,11 @@ class PerformanceMetricType(str, Enum):
     CONCURRENCY = "concurrency"
     SUCCESS_RATE = "success_rate"
     RESOURCE_EFFICIENCY = "resource_efficiency"
+    # Backward-compatible aliases used by services
+    DISK_IO = "disk_usage"
+    NETWORK_IO = "network_usage"
+    QUEUE_LENGTH = "queue_size"
+    EXECUTION_TIME = "response_time"
 
 class PerformanceStatus(str, Enum):
     """Performance status levels"""
@@ -73,6 +78,7 @@ class OptimizationType(str, Enum):
 
 class MonitoringScope(str, Enum):
     """Monitoring scope levels"""
+    GLOBAL = "global"
     SYSTEM = "system"
     SERVICE = "service"
     WORKFLOW = "workflow"
@@ -89,6 +95,11 @@ class AlertSeverity(str, Enum):
     ERROR = "error"
     CRITICAL = "critical"
     EMERGENCY = "emergency"
+    # Backward-compatible aliases used in routes
+    LOW = "warning"
+    MEDIUM = "error"
+    HIGH = "critical"
+    SEVERE = "emergency"
 
 class ResourceType(str, Enum):
     """Types of system resources"""
@@ -160,7 +171,7 @@ class ScanPerformanceMetric(SQLModel, table=True):
     # Metadata
     unit: str = Field(description="Metric unit (e.g., %, MB/s, ms)")
     description: Optional[str] = Field(default=None, description="Metric description")
-    tags: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Metric tags")
+    tags: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)), description="Metric tags")
     
     # Timing
     measured_at: datetime = Field(default_factory=datetime.utcnow, index=True, description="Measurement timestamp")
@@ -221,12 +232,12 @@ class PerformanceBottleneck(SQLModel, table=True):
     
     # Impact Analysis
     performance_impact: float = Field(description="Performance impact percentage")
-    affected_operations: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Affected operations")
+    affected_operations: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)), description="Affected operations")
     downstream_impact: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Downstream impact analysis")
     
     # Root Cause
     root_cause: str = Field(description="Root cause description")
-    contributing_factors: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Contributing factors")
+    contributing_factors: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)), description="Contributing factors")
     evidence: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Detection evidence")
     
     # Resolution
@@ -236,12 +247,12 @@ class PerformanceBottleneck(SQLModel, table=True):
     resolution_notes: Optional[str] = Field(default=None, description="Resolution notes")
     
     # Recommendations
-    recommended_actions: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Recommended actions")
+    recommended_actions: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)), description="Recommended actions")
     priority: int = Field(default=5, description="Resolution priority (1-10)")
     estimated_effort: Optional[str] = Field(default=None, description="Estimated resolution effort")
     
     # Metadata
-    tags: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Bottleneck tags")
+    tags: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)), description="Bottleneck tags")
     custom_properties: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSONB), description="Custom properties")
     
     # Relationships
@@ -281,7 +292,7 @@ class PerformanceOptimization(SQLModel, table=True):
     actual_improvement: Optional[float] = Field(default=None, description="Actual improvement achieved %")
     before_metrics: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSONB), description="Metrics before optimization")
     after_metrics: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSONB), description="Metrics after optimization")
-    side_effects: Optional[List[str]] = Field(default=None, sa_column=Column(ARRAY(str)), description="Observed side effects")
+    side_effects: Optional[List[str]] = Field(default=None, sa_column=Column(ARRAY(String)), description="Observed side effects")
     
     # Validation
     validation_period_days: int = Field(default=7, description="Validation period in days")
@@ -291,7 +302,7 @@ class PerformanceOptimization(SQLModel, table=True):
     # Metadata
     priority: int = Field(default=5, description="Implementation priority (1-10)")
     estimated_effort: Optional[str] = Field(default=None, description="Estimated implementation effort")
-    tags: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Optimization tags")
+    tags: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)), description="Optimization tags")
     
     # Timing
     created_at: datetime = Field(default_factory=datetime.utcnow, description="Creation timestamp")
@@ -308,7 +319,7 @@ class ScanPerformanceAlert(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     alert_id: str = Field(unique=True, index=True, description="Unique alert identifier")
     alert_name: str = Field(index=True, description="Alert name")
-    metric_id: str = Field(foreign_key="scan_performance_metrics.metric_id", index=True, description="Associated metric")
+    metric_id: int = Field(foreign_key="scan_performance_metrics.id", index=True, description="Associated metric")
     
     # Alert Details
     severity: AlertSeverity = Field(index=True, description="Alert severity")
@@ -336,7 +347,7 @@ class ScanPerformanceAlert(SQLModel, table=True):
     
     # Impact
     impact_assessment: Optional[str] = Field(default=None, description="Impact assessment")
-    affected_services: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Affected services")
+    affected_services: Optional[str] = Field(default=None, sa_column=Column(JSONB), description="Affected services")
     business_impact: Optional[str] = Field(default=None, description="Business impact description")
     
     # Escalation
@@ -350,7 +361,7 @@ class ScanPerformanceAlert(SQLModel, table=True):
     last_updated_at: Optional[datetime] = Field(default=None, description="Last update timestamp")
     
     # Metadata
-    tags: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Alert tags")
+    tags: Optional[str] = Field(default=None, sa_column=Column(JSONB), description="Alert tags")
     custom_properties: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSONB), description="Custom properties")
     
     # Relationships
@@ -405,7 +416,7 @@ class PerformanceBenchmark(SQLModel, table=True):
     valid_until: Optional[datetime] = Field(default=None, description="Validity end date")
     
     # Tags
-    tags: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Benchmark tags")
+    tags: Optional[str] = Field(default=None, sa_column=Column(JSONB), description="Benchmark tags")
 
 class ResourceUtilization(SQLModel, table=True):
     """Real-time resource utilization tracking"""
@@ -455,7 +466,7 @@ class ResourceUtilization(SQLModel, table=True):
     # Metadata
     unit: str = Field(description="Measurement unit")
     measurement_method: str = Field(description="How measurement was taken")
-    tags: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Utilization tags")
+    tags: Optional[str] = Field(default=None, sa_column=Column(JSONB), description="Utilization tags")
 
 class PerformanceReport(SQLModel, table=True):
     """Performance analysis reports"""
@@ -468,12 +479,12 @@ class PerformanceReport(SQLModel, table=True):
     
     # Report Scope
     scope: MonitoringScope = Field(description="Report scope")
-    components: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Components covered")
+    components: Optional[str] = Field(default=None, sa_column=Column(JSONB), description="Components covered")
     date_range: Dict[str, str] = Field(default_factory=dict, sa_column=Column(JSONB), description="Report date range")
     
     # Report Data
     executive_summary: str = Field(description="Executive summary")
-    key_findings: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Key findings")
+    key_findings: Optional[str] = Field(default=None, sa_column=Column(JSONB), description="Key findings")
     performance_overview: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Performance overview")
     detailed_analysis: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Detailed analysis")
     
@@ -494,7 +505,7 @@ class PerformanceReport(SQLModel, table=True):
     data_quality_score: float = Field(description="Data quality score for report")
     
     # Distribution
-    recipients: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(str)), description="Report recipients")
+    recipients: Optional[str] = Field(default=None, sa_column=Column(JSONB), description="Report recipients")
     delivery_status: str = Field(default="pending", description="Delivery status")
     access_permissions: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB), description="Access permissions")
     
@@ -600,3 +611,8 @@ class PerformanceDashboard(BaseModel):
     resource_utilization: Dict[str, Any]
     trend_summary: Dict[str, Any]
     generated_at: datetime
+
+# Backward-compatible alias expected by services/routes
+# Many modules import `PerformanceMetric` while the concrete ORM class is `ScanPerformanceMetric`
+PerformanceMetric = ScanPerformanceMetric
+PerformanceAlert = ScanPerformanceAlert

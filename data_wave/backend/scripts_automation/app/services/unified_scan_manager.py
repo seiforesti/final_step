@@ -185,7 +185,12 @@ class UnifiedScanManager:
             await self._load_performance_models()
             
             # Start background monitoring
-            asyncio.create_task(self._background_monitor())
+            try:
+                loop = asyncio.get_running_loop()
+                loop.create_task(self._background_monitor())
+            except RuntimeError:
+                # Background monitoring will start when loop is available
+                pass
             
             self.status = ScanManagerStatus.ACTIVE
             logger.info("Scan Manager initialization completed")
@@ -544,7 +549,12 @@ class UnifiedScanManager:
             self.active_sessions[scan_session.id] = scan_session
             
             # Start execution in background
-            asyncio.create_task(self._execute_scan_session(scan_session, session))
+            try:
+                loop = asyncio.get_running_loop()
+                loop.create_task(self._execute_scan_session(scan_session, session))
+            except RuntimeError:
+                # Execute synchronously if no loop available
+                await self._execute_scan_session(scan_session, session)
             
             return {
                 "session_id": scan_session.id,

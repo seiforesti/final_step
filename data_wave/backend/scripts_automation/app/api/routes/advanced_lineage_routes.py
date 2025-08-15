@@ -50,10 +50,25 @@ from ...services.advanced_lineage_service import AdvancedLineageService
 from ...services.intelligent_discovery_service import IntelligentDiscoveryService
 from ...db_session import get_session
 from ...api.security.rbac import get_current_user, require_permission
-from ...utils.response_models import *
+try:
+    from ...utils.response_models import *  # noqa: F401,F403
+except Exception:
+    from pydantic import BaseModel
+    class SuccessResponse(BaseModel):
+        success: bool = True
+        data: dict | list | None = None
+    class ErrorResponse(BaseModel):
+        success: bool = False
+        error: str
 from ...utils.error_handler import handle_route_error
-from ...utils.rate_limiter import check_rate_limit
-from ...utils.audit_logger import audit_log
+from ...utils.rate_limiter import check_rate_limit, get_rate_limiter, rate_limit
+try:
+    # Prefer dedicated audit module if present
+    from ...utils.audit_logger import audit_log  # type: ignore
+except Exception:
+    # Fallback to utils package shim
+    from ...utils import audit_logger as _audit
+    audit_log = _audit.audit_log
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -61,7 +76,7 @@ logger = logging.getLogger(__name__)
 # Initialize router
 router = APIRouter(prefix="/api/v1/lineage", tags=["Advanced Lineage"])
 security = HTTPBearer()
-rate_limiter = RateLimiter()
+rate_limiter = get_rate_limiter()
 
 # ===================== REQUEST/RESPONSE MODELS =====================
 
@@ -108,6 +123,13 @@ class LineageMetricsRequest(BaseModel):
     include_predictions: bool = Field(default=True, description="Include predictive metrics")
     asset_filter: Optional[List[str]] = Field(None, description="Filter by specific assets")
 
+class ImpactAnalysisResult(BaseModel):
+    """Result model for impact analysis responses."""
+    analysis_id: str
+    affected_assets: List[str] = []
+    impact_score: float = 0.0
+    recommendations: List[str] = []
+
 class LineageSearchRequest(BaseModel):
     """Model for lineage search requests"""
     search_query: str = Field(..., description="Search query for lineage assets")
@@ -128,7 +150,7 @@ async def get_discovery_service() -> IntelligentDiscoveryService:
 # ===================== LINEAGE QUERY ENDPOINTS =====================
 
 @router.post("/query")
-@rate_limiter.limit("200/minute")
+@rate_limit(requests=200, window=60)
 async def query_lineage(
     request: LineageQueryRequest,
     use_cache: bool = Query(default=True, description="Use cached results if available"),
@@ -295,7 +317,7 @@ async def get_asset_dependencies(
 # ===================== IMPACT ANALYSIS ENDPOINTS =====================
 
 @router.post("/impact-analysis")
-@rate_limiter.limit("50/minute")
+@rate_limit(requests=50, window=60)
 async def analyze_impact(
     request: ImpactAnalysisRequest,
     background_tasks: BackgroundTasks,
@@ -394,12 +416,12 @@ async def get_impact_analysis(
         raise HTTPException(status_code=500, detail=f"Analysis retrieval failed: {str(e)}")
 
 @router.post("/impact-analysis/batch")
-@rate_limiter.limit("10/minute")
+@rate_limit(requests=10, window=60)
 async def batch_impact_analysis(
+    background_tasks: BackgroundTasks,
     asset_ids: List[str] = Body(..., description="List of asset IDs for batch analysis"),
     change_type: str = Body(..., description="Type of change for all assets"),
     analysis_config: Dict[str, Any] = Body(default_factory=dict, description="Batch analysis configuration"),
-    background_tasks: BackgroundTasks,
     lineage_service: AdvancedLineageService = Depends(get_lineage_service),
     current_user: dict = Depends(get_current_user)
 ):
@@ -448,7 +470,7 @@ async def batch_impact_analysis(
 # ===================== LINEAGE MANAGEMENT ENDPOINTS =====================
 
 @router.post("/update")
-@rate_limiter.limit("1000/minute")
+@rate_limit(requests=1000, window=60)
 async def update_lineage(
     request: LineageUpdateRequest,
     validate_update: bool = Query(default=True, description="Validate update before applying"),
@@ -768,7 +790,7 @@ async def get_lineage_performance_analytics(
 # ===================== LINEAGE SEARCH ENDPOINTS =====================
 
 @router.post("/search")
-@rate_limiter.limit("300/minute")
+@rate_limit(requests=300, window=60)
 async def search_lineage(
     request: LineageSearchRequest,
     lineage_service: AdvancedLineageService = Depends(get_lineage_service),
@@ -837,11 +859,11 @@ async def get_search_suggestions(
 # ===================== LINEAGE DISCOVERY ENDPOINTS =====================
 
 @router.post("/discover")
-@rate_limiter.limit("50/minute")
+@rate_limit(requests=50, window=60)
 async def discover_lineage(
+    background_tasks: BackgroundTasks,
     data_source_ids: List[int] = Body(..., description="Data source IDs for lineage discovery"),
     discovery_config: Dict[str, Any] = Body(default_factory=dict, description="Discovery configuration"),
-    background_tasks: BackgroundTasks,
     discovery_service: IntelligentDiscoveryService = Depends(get_discovery_service),
     lineage_service: AdvancedLineageService = Depends(get_lineage_service),
     current_user: dict = Depends(get_current_user)
