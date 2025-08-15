@@ -1,8 +1,36 @@
+"""
+Compatibility shim for Python ≥3.12: the signature of ``typing.ForwardRef._evaluate``
+gained a required ``recursive_guard`` kw-only argument. Pydantic <2 (used by
+SQLModel) still calls the older two-parameter signature which will raise a
+TypeError.  The following monkey-patch keeps the implementation compatible with
+both call styles.
+"""
+
+import typing
+
+
+def _forward_ref_evaluate_shim(self, globalns, localns, *args, **kwargs):  # noqa: D401,E501
+    if 'recursive_guard' in self.__orig_eval.__code__.co_varnames:
+        # Modern signature – ensure keyword is supplied if not already via *args or **kwargs
+        if 'recursive_guard' not in kwargs:
+            kwargs['recursive_guard'] = set()
+        return self.__orig_eval(globalns, localns, *args, **kwargs)  # type: ignore[arg-type]
+    # Legacy signature (Python <3.12) – just forward
+    return self.__orig_eval(globalns, localns, *args, **kwargs)  # type: ignore[arg-type]
+
+
+_fr = getattr(typing, "ForwardRef", None)
+if _fr is not None and not hasattr(_fr, "__orig_eval"):
+    _fr.__orig_eval = _fr._evaluate  # type: ignore[attr-defined]
+    _fr._evaluate = _forward_ref_evaluate_shim  # type: ignore[assignment]
+
 import sys
 import os
 
 import uvicorn
 
+sys.path.append(os.path.abspath(os.path.dirname(__file__)))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 from fastapi import FastAPI
@@ -96,6 +124,48 @@ from app.services.scan_scheduler_service import ScanSchedulerService
 from fastapi import Request
 import logging
 import asyncio
+
+# ---------------------------------------------------------------------------
+# Compatibility Patch: Python 3.12+ changes ForwardRef._evaluate signature
+# Pydantic v1 (used by SQLModel at the time of writing) still expects the
+# older two-parameter signature. On Python ≥3.12 the call site inside
+# pydantic will therefore raise:
+#   TypeError: ForwardRef._evaluate() missing 1 required keyword-only argument
+# This runtime shim wraps the newer implementation so it remains compatible
+# with the previous call convention while *also* supporting the new
+# recursive_guard parameter supplied by the stdlib.
+# ---------------------------------------------------------------------------
+import typing
+
+
+def _forward_ref_evaluate_shim(self, globalns, localns, *args, **kwargs):  # noqa: D401,E501
+    """Shim that proxies to the real implementation regardless of signature.
+
+    The newer stdlib adds a required ``recursive_guard`` kw-only parameter.
+    Pydantic <2 still calls the function with only *globalns* and *localns*.
+    By accepting *args / **kwargs we satisfy both call styles and simply
+    delegate to the original function which now lives at
+    ``self.__orig_eval`` injected below.
+    """
+    if 'recursive_guard' in self.__orig_eval.__code__.co_varnames:
+        # Modern signature – ensure keyword is supplied if not already via *args or **kwargs
+        if 'recursive_guard' not in kwargs:
+            kwargs['recursive_guard'] = set()
+        return self.__orig_eval(globalns, localns, *args, **kwargs)  # type: ignore[arg-type]
+    # Legacy signature (Python <3.12) – just forward
+    return self.__orig_eval(globalns, localns, *args, **kwargs)  # type: ignore[arg-type]
+
+
+# Patch only once and only when needed (Python >= 3.12 and pydantic v1 code
+# path will trigger).
+_fr = getattr(typing, "ForwardRef", None)
+if _fr is not None and not hasattr(_fr, "__orig_eval"):
+    # Preserve original implementation
+    _fr.__orig_eval = _fr._evaluate  # type: ignore[attr-defined]
+    # Replace with shim maintaining backward compatibility
+    _fr._evaluate = _forward_ref_evaluate_shim  # type: ignore[assignment]
+
+# ---------------------------------------------------------------------------
 
 # Configure logging
 logging.basicConfig(
