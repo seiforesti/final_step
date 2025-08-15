@@ -1164,3 +1164,85 @@ class ComprehensiveAnalyticsService:
     
     async def _generate_prediction_insights(self) -> List[Dict[str, Any]]:
         return [{"type": "prediction", "message": "Proactive scaling recommended", "priority": "warning"}]
+
+def aggregate_analytics_data():
+    """
+    Aggregate analytics data across all data governance components for reporting and dashboards.
+    This function is called by the enterprise scheduler for regular analytics aggregation.
+    """
+    try:
+        logger.info("Starting analytics data aggregation process...")
+        
+        # Initialize services
+        from app.db_session import get_session
+        from app.models.analytics_models import AnalyticsMetric, DataUsageMetric
+        
+        aggregation_results = []
+        total_metrics_processed = 0
+        
+        with get_session() as session:
+            # Aggregate scan metrics
+            scan_metrics = aggregate_scan_analytics(session)
+            aggregation_results.append({
+                "category": "scan_analytics",
+                "metrics_count": len(scan_metrics),
+                "status": "completed"
+            })
+            total_metrics_processed += len(scan_metrics)
+            
+            # Aggregate compliance metrics
+            compliance_metrics = aggregate_compliance_analytics(session)
+            aggregation_results.append({
+                "category": "compliance_analytics", 
+                "metrics_count": len(compliance_metrics),
+                "status": "completed"
+            })
+            total_metrics_processed += len(compliance_metrics)
+            
+            # Aggregate catalog metrics
+            catalog_metrics = aggregate_catalog_analytics(session)
+            aggregation_results.append({
+                "category": "catalog_analytics",
+                "metrics_count": len(catalog_metrics),
+                "status": "completed"
+            })
+            total_metrics_processed += len(catalog_metrics)
+            
+            # Aggregate data quality metrics
+            quality_metrics = aggregate_quality_analytics(session)
+            aggregation_results.append({
+                "category": "quality_analytics",
+                "metrics_count": len(quality_metrics),
+                "status": "completed"
+            })
+            total_metrics_processed += len(quality_metrics)
+            
+            # Aggregate user activity metrics
+            user_metrics = aggregate_user_analytics(session)
+            aggregation_results.append({
+                "category": "user_analytics",
+                "metrics_count": len(user_metrics),
+                "status": "completed"
+            })
+            total_metrics_processed += len(user_metrics)
+            
+        logger.info(f"Analytics aggregation completed. Processed {total_metrics_processed} metrics across {len(aggregation_results)} categories")
+        
+        return {
+            "status": "completed",
+            "total_categories": len(aggregation_results),
+            "total_metrics_processed": total_metrics_processed,
+            "aggregation_timestamp": datetime.utcnow().isoformat(),
+            "category_results": aggregation_results
+        }
+        
+    except Exception as e:
+        logger.error(f"Analytics aggregation process failed: {e}")
+        return {
+            "status": "failed",
+            "error": str(e),
+            "total_categories": 0,
+            "total_metrics_processed": 0,
+            "aggregation_timestamp": datetime.utcnow().isoformat(),
+            "category_results": []
+        }

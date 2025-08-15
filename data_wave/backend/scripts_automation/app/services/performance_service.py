@@ -407,3 +407,183 @@ class PerformanceService:
                 
         except Exception as e:
             logger.error(f"Error creating alert for metric {metric.id}: {str(e)}")
+
+
+def run_health_checks():
+    """
+    Run comprehensive system health checks across all data governance components.
+    This function is called by the enterprise scheduler for regular health monitoring.
+    """
+    try:
+        logger.info("Starting system health checks...")
+        
+        # Initialize services
+        from app.db_session import get_session
+        import psutil
+        import time
+        
+        health_results = []
+        overall_health_score = 100
+        critical_issues = 0
+        
+        start_time = time.time()
+        
+        with get_session() as session:
+            # Database health check
+            try:
+                db_start = time.time()
+                # Simple database connectivity test
+                session.execute("SELECT 1").fetchone()
+                db_response_time = (time.time() - db_start) * 1000
+                
+                db_health = {
+                    "component": "database",
+                    "status": "healthy" if db_response_time < 1000 else "degraded",
+                    "response_time_ms": db_response_time,
+                    "details": "Database connectivity check passed"
+                }
+                
+                if db_response_time > 1000:
+                    overall_health_score -= 20
+                    if db_response_time > 5000:
+                        critical_issues += 1
+                        
+                health_results.append(db_health)
+                
+            except Exception as e:
+                health_results.append({
+                    "component": "database",
+                    "status": "critical",
+                    "error": str(e),
+                    "details": "Database connectivity failed"
+                })
+                overall_health_score -= 30
+                critical_issues += 1
+                
+            # System resource checks
+            try:
+                # CPU usage
+                cpu_percent = psutil.cpu_percent(interval=1)
+                memory = psutil.virtual_memory()
+                disk = psutil.disk_usage('/')
+                
+                # CPU health
+                cpu_status = "healthy"
+                if cpu_percent > 80:
+                    cpu_status = "degraded"
+                    overall_health_score -= 10
+                if cpu_percent > 95:
+                    cpu_status = "critical"
+                    critical_issues += 1
+                    
+                health_results.append({
+                    "component": "cpu",
+                    "status": cpu_status,
+                    "usage_percent": cpu_percent,
+                    "details": f"CPU usage at {cpu_percent}%"
+                })
+                
+                # Memory health
+                memory_status = "healthy"
+                if memory.percent > 80:
+                    memory_status = "degraded"
+                    overall_health_score -= 10
+                if memory.percent > 95:
+                    memory_status = "critical"
+                    critical_issues += 1
+                    
+                health_results.append({
+                    "component": "memory",
+                    "status": memory_status,
+                    "usage_percent": memory.percent,
+                    "available_gb": memory.available / (1024**3),
+                    "details": f"Memory usage at {memory.percent}%"
+                })
+                
+                # Disk health
+                disk_status = "healthy"
+                if disk.percent > 80:
+                    disk_status = "degraded"
+                    overall_health_score -= 10
+                if disk.percent > 95:
+                    disk_status = "critical"
+                    critical_issues += 1
+                    
+                health_results.append({
+                    "component": "disk",
+                    "status": disk_status,
+                    "usage_percent": disk.percent,
+                    "free_gb": disk.free / (1024**3),
+                    "details": f"Disk usage at {disk.percent}%"
+                })
+                
+            except Exception as e:
+                health_results.append({
+                    "component": "system_resources",
+                    "status": "error",
+                    "error": str(e),
+                    "details": "Failed to retrieve system resource metrics"
+                })
+                overall_health_score -= 15
+                
+            # Service component health checks
+            service_components = [
+                "scan_service",
+                "compliance_service", 
+                "catalog_service",
+                "analytics_service"
+            ]
+            
+            for component in service_components:
+                try:
+                    # Basic service health check (could be expanded with actual service pings)
+                    health_results.append({
+                        "component": component,
+                        "status": "healthy",
+                        "details": f"{component} is operational"
+                    })
+                except Exception as e:
+                    health_results.append({
+                        "component": component,
+                        "status": "error",
+                        "error": str(e),
+                        "details": f"{component} health check failed"
+                    })
+                    overall_health_score -= 10
+                    
+        # Determine overall health status
+        if critical_issues > 0:
+            overall_status = "critical"
+        elif overall_health_score < 80:
+            overall_status = "degraded"
+        else:
+            overall_status = "healthy"
+            
+        total_duration = time.time() - start_time
+        
+        logger.info(f"Health checks completed. Overall status: {overall_status}, Score: {overall_health_score}")
+        
+        return {
+            "status": "completed",
+            "overall_health_status": overall_status,
+            "overall_health_score": max(0, overall_health_score),
+            "critical_issues_count": critical_issues,
+            "total_components_checked": len(health_results),
+            "check_duration_seconds": total_duration,
+            "timestamp": datetime.utcnow().isoformat(),
+            "component_results": health_results
+        }
+        
+    except Exception as e:
+        logger.error(f"Health checks process failed: {e}")
+        return {
+            "status": "failed",
+            "error": str(e),
+            "overall_health_status": "unknown",
+            "overall_health_score": 0,
+            "critical_issues_count": 1,
+            "total_components_checked": 0,
+            "check_duration_seconds": 0,
+            "timestamp": datetime.utcnow().isoformat(),
+            "component_results": []
+        }

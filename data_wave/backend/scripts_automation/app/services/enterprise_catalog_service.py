@@ -1759,3 +1759,95 @@ __all__ = [
     "DiscoveryTrigger",
     "get_enterprise_catalog_service"
 ]
+
+def sync_metadata():
+    """
+    Synchronize metadata across all integrated systems and external catalogs.
+    This function is called by the enterprise scheduler for regular metadata synchronization.
+    """
+    try:
+        logger.info("Starting metadata synchronization process...")
+        
+        # Initialize services
+        from app.db_session import get_session
+        from app.models.advanced_catalog_models import CatalogEntry, MetadataSource
+        
+        sync_results = []
+        total_synced = 0
+        total_errors = 0
+        
+        with get_session() as session:
+            # Get all active metadata sources
+            metadata_sources = session.query(MetadataSource).filter(
+                MetadataSource.is_active == True
+            ).all()
+            
+            logger.info(f"Found {len(metadata_sources)} active metadata sources for synchronization")
+            
+            for source in metadata_sources:
+                try:
+                    logger.info(f"Synchronizing metadata from source: {source.name}")
+                    
+                    # Perform metadata synchronization using existing functionality
+                    sync_result = synchronize_metadata_source(
+                        session=session,
+                        source_id=source.id,
+                        full_sync=False,  # Incremental sync for scheduled runs
+                        update_existing=True
+                    )
+                    
+                    synced_count = sync_result.get("synchronized_entries", 0)
+                    error_count = sync_result.get("failed_entries", 0)
+                    
+                    total_synced += synced_count
+                    total_errors += error_count
+                    
+                    sync_results.append({
+                        "source_id": source.id,
+                        "source_name": source.name,
+                        "status": "completed",
+                        "synchronized_entries": synced_count,
+                        "failed_entries": error_count,
+                        "sync_duration": sync_result.get("duration_seconds", 0),
+                        "last_sync": datetime.utcnow().isoformat()
+                    })
+                    
+                    logger.info(f"Completed metadata sync for source: {source.name} ({synced_count} entries)")
+                    
+                except Exception as e:
+                    logger.error(f"Failed to sync metadata from source {source.name}: {e}")
+                    total_errors += 1
+                    sync_results.append({
+                        "source_id": source.id,
+                        "source_name": source.name,
+                        "status": "failed",
+                        "synchronized_entries": 0,
+                        "failed_entries": 1,
+                        "error": str(e),
+                        "last_sync": datetime.utcnow().isoformat()
+                    })
+                    
+        logger.info(f"Metadata synchronization process completed. Synced {total_synced} entries with {total_errors} errors")
+        
+        return {
+            "status": "completed",
+            "total_sources": len(sync_results),
+            "successful_syncs": len([r for r in sync_results if r["status"] == "completed"]),
+            "failed_syncs": len([r for r in sync_results if r["status"] == "failed"]),
+            "total_synchronized_entries": total_synced,
+            "total_errors": total_errors,
+            "sync_results": sync_results
+        }
+        
+    except Exception as e:
+        logger.error(f"Metadata synchronization process failed: {e}")
+        return {
+            "status": "failed",
+            "error": str(e),
+            "total_sources": 0,
+            "successful_syncs": 0,
+            "failed_syncs": 0,
+            "total_synchronized_entries": 0,
+            "total_errors": 0,
+            "sync_results": []
+        }

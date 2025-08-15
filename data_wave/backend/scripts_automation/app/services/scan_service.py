@@ -467,3 +467,78 @@ class ScanService:
                 "error_message": discovery.error_message if discovery else None
             } if discovery else None
         }
+
+def run_automated_scans():
+    """
+    Run automated data scans across all configured data sources.
+    This function is called by the enterprise scheduler to perform regular scans.
+    """
+    try:
+        logger.info("Starting automated scan process...")
+        
+        # Initialize services
+        from app.db_session import get_session
+        from app.models.advanced_scan_rule_models import DataSource
+        
+        scan_results = []
+        
+        with get_session() as session:
+            # Get all active data sources
+            data_sources = session.query(DataSource).filter(
+                DataSource.is_active == True
+            ).all()
+            
+            logger.info(f"Found {len(data_sources)} active data sources for scanning")
+            
+            for data_source in data_sources:
+                try:
+                    logger.info(f"Starting scan for data source: {data_source.name}")
+                    
+                    # Perform the scan using existing functionality
+                    scan_result = perform_scan(
+                        session=session,
+                        data_source_id=data_source.id,
+                        scan_type="automated_scheduled",
+                        user_id=None  # System automated scan
+                    )
+                    
+                    scan_results.append({
+                        "data_source_id": data_source.id,
+                        "data_source_name": data_source.name,
+                        "scan_id": scan_result.get("scan_id"),
+                        "status": "completed",
+                        "message": f"Automated scan completed successfully"
+                    })
+                    
+                    logger.info(f"Completed scan for data source: {data_source.name}")
+                    
+                except Exception as e:
+                    logger.error(f"Failed to scan data source {data_source.name}: {e}")
+                    scan_results.append({
+                        "data_source_id": data_source.id,
+                        "data_source_name": data_source.name,
+                        "scan_id": None,
+                        "status": "failed",
+                        "message": f"Scan failed: {str(e)}"
+                    })
+                    
+        logger.info(f"Automated scan process completed. Processed {len(scan_results)} data sources")
+        
+        return {
+            "status": "completed",
+            "total_sources": len(scan_results),
+            "successful_scans": len([r for r in scan_results if r["status"] == "completed"]),
+            "failed_scans": len([r for r in scan_results if r["status"] == "failed"]),
+            "scan_results": scan_results
+        }
+        
+    except Exception as e:
+        logger.error(f"Automated scan process failed: {e}")
+        return {
+            "status": "failed",
+            "error": str(e),
+            "total_sources": 0,
+            "successful_scans": 0,
+            "failed_scans": 0,
+            "scan_results": []
+        }

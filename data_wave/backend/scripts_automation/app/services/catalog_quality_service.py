@@ -1538,3 +1538,92 @@ class CatalogQualityService:
                 }
             }
         }
+
+def run_quality_assessment():
+    """
+    Run comprehensive data quality assessment across all catalog entries.
+    This function is called by the enterprise scheduler to perform regular quality checks.
+    """
+    try:
+        logger.info("Starting data quality assessment process...")
+        
+        # Initialize services
+        from app.db_session import get_session
+        from app.models.advanced_catalog_models import CatalogEntry, DataQualityMetric
+        
+        assessment_results = []
+        quality_issues_found = 0
+        
+        with get_session() as session:
+            # Get all active catalog entries
+            catalog_entries = session.query(CatalogEntry).filter(
+                CatalogEntry.is_active == True
+            ).all()
+            
+            logger.info(f"Found {len(catalog_entries)} active catalog entries for quality assessment")
+            
+            for entry in catalog_entries:
+                try:
+                    logger.info(f"Assessing quality for catalog entry: {entry.name}")
+                    
+                    # Perform quality assessment using existing functionality
+                    quality_result = assess_entry_quality(
+                        session=session,
+                        entry_id=entry.id,
+                        include_profiling=True,
+                        include_schema_validation=True
+                    )
+                    
+                    # Count quality issues
+                    issues_count = len(quality_result.get("quality_issues", []))
+                    quality_issues_found += issues_count
+                    
+                    if issues_count > 0:
+                        logger.warning(f"Quality issues found for entry {entry.name}: {issues_count} issues")
+                        
+                    assessment_results.append({
+                        "entry_id": entry.id,
+                        "entry_name": entry.name,
+                        "status": "completed",
+                        "quality_score": quality_result.get("overall_score", 0),
+                        "issues_count": issues_count,
+                        "assessment_details": quality_result
+                    })
+                    
+                    logger.info(f"Completed quality assessment for entry: {entry.name}")
+                    
+                except Exception as e:
+                    logger.error(f"Failed to assess quality for entry {entry.name}: {e}")
+                    assessment_results.append({
+                        "entry_id": entry.id,
+                        "entry_name": entry.name,
+                        "status": "failed",
+                        "quality_score": 0,
+                        "issues_count": 0,
+                        "error": str(e)
+                    })
+                    
+        logger.info(f"Data quality assessment process completed. Processed {len(assessment_results)} entries, found {quality_issues_found} issues")
+        
+        return {
+            "status": "completed",
+            "total_entries": len(assessment_results),
+            "successful_assessments": len([r for r in assessment_results if r["status"] == "completed"]),
+            "failed_assessments": len([r for r in assessment_results if r["status"] == "failed"]),
+            "total_quality_issues": quality_issues_found,
+            "average_quality_score": sum([r.get("quality_score", 0) for r in assessment_results if r["status"] == "completed"]) / max(len([r for r in assessment_results if r["status"] == "completed"]), 1),
+            "assessment_results": assessment_results
+        }
+        
+    except Exception as e:
+        logger.error(f"Data quality assessment process failed: {e}")
+        return {
+            "status": "failed",
+            "error": str(e),
+            "total_entries": 0,
+            "successful_assessments": 0,
+            "failed_assessments": 0,
+            "total_quality_issues": 0,
+            "average_quality_score": 0,
+            "assessment_results": []
+        }

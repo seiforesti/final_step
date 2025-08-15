@@ -1386,3 +1386,101 @@ class ComplianceRuleService:
         except Exception as e:
             logger.error(f"Error getting evaluation history for rule {rule_id}: {str(e)}")
             raise
+
+def monitor_compliance_rules():
+    """
+    Monitor compliance rules and generate alerts for violations.
+    This function is called by the enterprise scheduler to perform regular compliance monitoring.
+    """
+    try:
+        logger.info("Starting compliance monitoring process...")
+        
+        # Initialize services
+        from app.db_session import get_session
+        from app.models.compliance_rule_models import ComplianceRule
+        
+        monitoring_results = []
+        alerts_generated = 0
+        
+        with get_session() as session:
+            # Get all active compliance rules
+            compliance_rules = session.query(ComplianceRule).filter(
+                ComplianceRule.is_active == True
+            ).all()
+            
+            logger.info(f"Found {len(compliance_rules)} active compliance rules for monitoring")
+            
+            for rule in compliance_rules:
+                try:
+                    logger.info(f"Monitoring compliance rule: {rule.name}")
+                    
+                    # Evaluate the compliance rule using existing functionality
+                    evaluation_result = ComplianceRuleService.evaluate_rule_with_data_sources(
+                        session=session,
+                        rule_id=rule.id,
+                        run_scans=False, # Set run_scans to False for monitoring
+                        include_performance_check=False,
+                        include_security_check=False
+                    )
+                    
+                    # Check if violations were found
+                    violations_count = len(evaluation_result.issues_found)
+                    
+                    if violations_count > 0:
+                        logger.warning(f"Compliance violations found for rule {rule.name}: {violations_count} violations")
+                        alerts_generated += 1
+                        
+                        # Generate alert/notification (would integrate with notification service)
+                        alert_data = {
+                            "rule_id": rule.id,
+                            "rule_name": rule.name,
+                            "violations_count": violations_count,
+                            "severity": evaluation_result.severity.value if evaluation_result.severity else "medium",
+                            "timestamp": datetime.utcnow().isoformat()
+                        }
+                        
+                        # Here you would call notification service
+                        # notification_service.send_compliance_alert(alert_data)
+                        
+                    monitoring_results.append({
+                        "rule_id": rule.id,
+                        "rule_name": rule.name,
+                        "status": "completed",
+                        "violations_count": violations_count,
+                        "evaluation_result": evaluation_result.dict() # Convert to dict for JSON serialization
+                    })
+                    
+                    logger.info(f"Completed monitoring for compliance rule: {rule.name}")
+                    
+                except Exception as e:
+                    logger.error(f"Failed to monitor compliance rule {rule.name}: {e}")
+                    monitoring_results.append({
+                        "rule_id": rule.id,
+                        "rule_name": rule.name,
+                        "status": "failed",
+                        "violations_count": 0,
+                        "error": str(e)
+                    })
+                    
+        logger.info(f"Compliance monitoring process completed. Processed {len(monitoring_results)} rules, generated {alerts_generated} alerts")
+        
+        return {
+            "status": "completed",
+            "total_rules": len(monitoring_results),
+            "successful_evaluations": len([r for r in monitoring_results if r["status"] == "completed"]),
+            "failed_evaluations": len([r for r in monitoring_results if r["status"] == "failed"]),
+            "alerts_generated": alerts_generated,
+            "monitoring_results": monitoring_results
+        }
+        
+    except Exception as e:
+        logger.error(f"Compliance monitoring process failed: {e}")
+        return {
+            "status": "failed",
+            "error": str(e),
+            "total_rules": 0,
+            "successful_evaluations": 0,
+            "failed_evaluations": 0,
+            "alerts_generated": 0,
+            "monitoring_results": []
+        }
