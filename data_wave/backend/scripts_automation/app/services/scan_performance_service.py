@@ -1992,38 +1992,45 @@ class ScanPerformanceService:
         strategy: Dict[str, Any]
     ) -> Dict[str, Any]:
         """
-        Validate the AI-generated optimization strategy.
+        Validate the AI-generated optimization strategy with comprehensive checks.
         """
         try:
-            # Basic checks for required fields
-            if not strategy.get("strategy_applied"):
-                return {"valid": False, "error": "No strategy applied in the strategy data."}
-            
-            # Check if baseline_metrics and target_improvements are present
-            if not strategy.get("baseline_metrics") or not strategy.get("target_improvements"):
-                return {"valid": False, "error": "Missing baseline_metrics or target_improvements in strategy data."}
-            
-            # Check if confidence_score is a valid number
-            if not isinstance(strategy.get("confidence_score"), (int, float)) or strategy["confidence_score"] < 0 or strategy["confidence_score"] > 1:
-                return {"valid": False, "error": "Invalid confidence_score in strategy data."}
-            
-            # Check if application_details is a dictionary with 'status' and 'message'
-            if not isinstance(strategy.get("application_details"), dict) or "status" not in strategy["application_details"] or "message" not in strategy["application_details"]:
-                return {"valid": False, "error": "Invalid application_details format in strategy data."}
-            
-            # Check if insights is a list of strings
-            if not isinstance(strategy.get("insights"), list) or not all(isinstance(i, str) for i in strategy["insights"]):
-                return {"valid": False, "error": "Invalid insights format in strategy data."}
-            
-            # Example: Check if target_improvements are achievable (e.g., not negative)
-            # This is a simplified check. A real AI service would provide more detailed validation.
-            target_improvements = strategy.get("target_improvements", {})
-            for metric_name, improvement in target_improvements.items():
-                if isinstance(improvement, dict) and "value" in improvement:
-                    if improvement["value"] < 0: # Assuming negative values indicate a reduction, which is not a typical improvement
-                        return {"valid": False, "error": f"Target improvement for {metric_name} is negative: {improvement['value']}"}
-            
-            return {"valid": True, "target_improvements": target_improvements}
+            # Required fields
+            required_fields = ["strategy_applied", "baseline_metrics", "target_improvements", "confidence_score", "application_details", "insights"]
+            for f in required_fields:
+                if f not in strategy:
+                    return {"valid": False, "error": f"Missing required field: {f}"}
+
+            # Types and ranges
+            if not isinstance(strategy["baseline_metrics"], dict) or not isinstance(strategy["target_improvements"], dict):
+                return {"valid": False, "error": "baseline_metrics and target_improvements must be objects"}
+            if not isinstance(strategy["confidence_score"], (int, float)) or not (0.0 <= float(strategy["confidence_score"]) <= 1.0):
+                return {"valid": False, "error": "confidence_score must be between 0 and 1"}
+            ad = strategy.get("application_details", {})
+            if not isinstance(ad, dict) or "status" not in ad or "message" not in ad:
+                return {"valid": False, "error": "application_details must include status and message"}
+            if not isinstance(strategy.get("insights"), list):
+                return {"valid": False, "error": "insights must be a list"}
+
+            # Semantic checks
+            bm = strategy["baseline_metrics"]
+            ti = strategy["target_improvements"]
+            allowed_metrics = {"cpu_usage", "memory_usage", "disk_io", "network_io", "latency_ms", "throughput"}
+            for m, v in ti.items():
+                if m not in allowed_metrics:
+                    return {"valid": False, "error": f"Unsupported target metric: {m}"}
+                if isinstance(v, dict):
+                    if "value" not in v or not isinstance(v["value"], (int, float)):
+                        return {"valid": False, "error": f"Invalid improvement spec for {m}"}
+                    # If baseline exists, ensure improvement direction makes sense
+                    if m in bm and isinstance(bm[m], (int, float)):
+                        # For utilization/latency lower is better, throughput higher is better
+                        if m in {"cpu_usage", "memory_usage", "disk_io", "network_io", "latency_ms"} and v["value"] > bm[m]:
+                            return {"valid": False, "error": f"Target for {m} should be <= baseline {bm[m]}"}
+                        if m in {"throughput"} and v["value"] < bm[m]:
+                            return {"valid": False, "error": f"Target for {m} should be >= baseline {bm[m]}"}
+
+            return {"valid": True, "target_improvements": ti}
             
         except Exception as e:
             logger.error(f"Error validating optimization strategy for {resource_id}: {e}")

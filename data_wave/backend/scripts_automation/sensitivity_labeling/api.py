@@ -860,11 +860,43 @@ def bulk_import_labels(
 # --- Events & Explainability (additions from api_old2.txt, only if missing) ---
 @router.get("/events/stream")
 def events_stream():
+    """Production-grade SSE endpoint backed by Redis Pub/Sub with heartbeat.
+    Subscribes to the 'sensitivity_events' channel and streams JSON payloads.
+    """
+    import redis
+    import json as _json
+    from app.core.config import settings as _settings
+
     def event_generator():
-        # Dummy event stream, replace with real logic as needed
-        for i in range(5):
-            yield f"data: Event {i}\n\n"
-            time.sleep(1)
+        try:
+            client = redis.from_url(_settings.redis.url, decode_responses=True)
+            pubsub = client.pubsub()
+            pubsub.subscribe("sensitivity_events")
+            last_heartbeat = time.time()
+            # Initial retry advice for clients
+            yield "retry: 5000\n\n"
+            while True:
+                message = pubsub.get_message(ignore_subscribe_messages=True, timeout=1.0)
+                now = time.time()
+                if message and message.get("type") == "message":
+                    payload = message.get("data")
+                    if not isinstance(payload, str):
+                        try:
+                            payload = _json.dumps(payload, default=str)
+                        except Exception:
+                            payload = str(payload)
+                    yield f"data: {payload}\n\n"
+                    last_heartbeat = now
+                # Heartbeat every 15s to keep connection alive
+                if now - last_heartbeat > 15:
+                    yield "event: heartbeat\ndata: {\"status\": \"ok\"}\n\n"
+                    last_heartbeat = now
+        except Exception:
+            # If Redis is unavailable, degrade gracefully with heartbeat-only stream
+            while True:
+                yield "event: heartbeat\ndata: {\"status\": \"degraded\"}\n\n"
+                time.sleep(5)
+
     return StreamingResponse(event_generator(), media_type="text/event-stream")
 
 @router.get("/explainability")

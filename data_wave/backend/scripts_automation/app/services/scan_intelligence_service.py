@@ -709,9 +709,31 @@ class ScanIntelligenceService:
         try:
             features = []
             
-            # Basic text statistics
-            features.append(len(text) / 1000.0)  # Normalized length
-            features.append(len(text.split()) / 100.0)  # Word count
+            # Enterprise text statistics
+            tokens = text.split()
+            length = len(text)
+            word_count = len(tokens)
+            features.append(length / 1000.0)  # Normalized length
+            features.append(word_count / 100.0)  # Word count
+            # Lexical richness and average word length
+            if word_count > 0:
+                unique_ratio = len(set(tokens)) / float(word_count)
+                avg_word_len = sum(len(w) for w in tokens) / float(word_count)
+            else:
+                unique_ratio = 0.0
+                avg_word_len = 0.0
+            features.append(unique_ratio)
+            features.append(min(1.0, avg_word_len / 10.0))
+            # Character entropy approximation
+            try:
+                from collections import Counter
+                import math
+                counts = Counter(text)
+                total = float(sum(counts.values())) or 1.0
+                entropy = -sum((c/total) * math.log2(c/total) for c in counts.values())
+                features.append(min(1.0, entropy / 8.0))
+            except Exception:
+                features.append(0.5)
             
             # Advanced NLP features
             try:
