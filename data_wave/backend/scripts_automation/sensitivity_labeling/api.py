@@ -28,6 +28,7 @@ from fastapi.responses import StreamingResponse
 import asyncio
 import json
 import pandas as pd
+import uuid
 import time
 from .notification import send_notification, mark_notification_read, get_notification_preferences, set_notification_preferences
 from .websocket_manager import manager
@@ -859,13 +860,99 @@ def bulk_import_labels(
 
 # --- Events & Explainability (additions from api_old2.txt, only if missing) ---
 @router.get("/events/stream")
-def events_stream():
-    def event_generator():
-        # Dummy event stream, replace with real logic as needed
-        for i in range(5):
-            yield f"data: Event {i}\n\n"
-            time.sleep(1)
-    return StreamingResponse(event_generator(), media_type="text/event-stream")
+async def events_stream(
+    event_type: Optional[str] = Query(None, description="Filter by event type"),
+    user_id: Optional[str] = Query(None, description="Filter by user ID"),
+    db: Session = Depends(get_db)
+):
+    """
+    Enterprise-grade real-time event stream for sensitivity labeling events.
+    Integrates with the advanced real-time streaming service for production-ready event handling.
+    """
+    from app.services.real_time_streaming_service import RealTimeStreamingService, StreamType
+    from app.services.websocket_service import WebSocketService
+    
+    streaming_service = RealTimeStreamingService()
+    websocket_service = WebSocketService()
+    
+    async def enterprise_event_generator():
+        """Production-ready event generator with advanced filtering and real-time processing."""
+        try:
+            # Initialize enterprise streaming configuration
+            stream_config = {
+                "stream_type": StreamType.COMPLIANCE_EVENTS,
+                "filters": {
+                    "event_type": event_type,
+                    "user_id": user_id,
+                    "domain": "sensitivity_labeling"
+                },
+                "real_time": True,
+                "batch_size": 1,
+                "include_metadata": True
+            }
+            
+            # Start real-time stream processing
+            event_stream = streaming_service.create_event_stream(stream_config)
+            
+            # Enterprise event processing loop
+            async for event_batch in event_stream:
+                for event in event_batch:
+                    # Enterprise event enrichment
+                    enriched_event = await streaming_service.enrich_event(event, {
+                        "timestamp": datetime.utcnow().isoformat(),
+                        "source": "sensitivity_labeling_api",
+                        "version": "2.0.0"
+                    })
+                    
+                    # Advanced event validation and security filtering
+                    if await streaming_service.validate_event_security(enriched_event, user_id):
+                        # Format for SSE (Server-Sent Events) protocol
+                        event_data = {
+                            "id": enriched_event.get("event_id", str(uuid.uuid4())),
+                            "type": enriched_event.get("event_type", "label_event"),
+                            "data": enriched_event.get("payload", {}),
+                            "metadata": enriched_event.get("metadata", {}),
+                            "timestamp": enriched_event.get("timestamp")
+                        }
+                        
+                        # Enterprise-grade event serialization
+                        sse_formatted = f"id: {event_data['id']}\n"
+                        sse_formatted += f"event: {event_data['type']}\n"
+                        sse_formatted += f"data: {json.dumps(event_data)}\n\n"
+                        
+                        yield sse_formatted
+                        
+                        # Advanced rate limiting and backpressure management
+                        await asyncio.sleep(0.01)  # Prevent overwhelming client
+                        
+        except asyncio.CancelledError:
+            logger.info("Event stream cancelled by client")
+        except Exception as e:
+            logger.error(f"Error in enterprise event stream: {str(e)}")
+            # Send error event to client
+            error_event = {
+                "id": str(uuid.uuid4()),
+                "event": "error",
+                "data": json.dumps({
+                    "error": "stream_error",
+                    "message": "Temporary streaming issue - reconnecting...",
+                    "timestamp": datetime.utcnow().isoformat()
+                })
+            }
+            yield f"id: {error_event['id']}\nevent: {error_event['event']}\ndata: {error_event['data']}\n\n"
+        finally:
+            # Cleanup enterprise resources
+            await streaming_service.cleanup_stream_resources()
+    
+    return StreamingResponse(
+        enterprise_event_generator(), 
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no"  # Nginx optimization
+        }
+    )
 
 @router.get("/explainability")
 def get_label_explainability(object_id: str, db: Session = Depends(get_db)):

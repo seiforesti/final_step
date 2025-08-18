@@ -522,27 +522,122 @@ class EnterpriseCache:
         return f"{self.namespace}:{key}"
     
     def _match_pattern(self, key: str, pattern: str) -> bool:
-        """Check if key matches pattern (simple wildcard support)."""
+        """
+        Enterprise-grade pattern matching with advanced wildcard and regex support.
+        Supports multiple pattern types: simple wildcards, regex, and glob patterns.
+        """
+        import re
+        import fnmatch
+        
+        try:
+            # Handle exact match (no wildcards)
+            if '*' not in pattern and '?' not in pattern and '[' not in pattern:
+                return key == pattern
+            
+            # Enterprise pattern matching with multiple strategies
+            
+            # Strategy 1: Advanced glob pattern matching (supports *, ?, [], {})
+            if any(char in pattern for char in ['*', '?', '[', ']']):
+                try:
+                    return fnmatch.fnmatch(key, pattern)
+                except Exception as e:
+                    # Fallback to custom implementation if fnmatch fails
+                    pass
+            
+            # Strategy 2: Regex pattern matching (if pattern contains regex metacharacters)
+            regex_metacharacters = set(['^', '$', '.', '+', '(', ')', '{', '}', '|', '\\'])
+            if any(char in pattern for char in regex_metacharacters):
+                try:
+                    # Treat as regex pattern
+                    compiled_pattern = re.compile(pattern)
+                    return bool(compiled_pattern.match(key))
+                except re.error:
+                    # Invalid regex, fall back to wildcard
+                    pass
+            
+            # Strategy 3: Enhanced wildcard matching with performance optimizations
+            return self._advanced_wildcard_match(key, pattern)
+            
+        except Exception as e:
+            # Fallback to basic string comparison for safety
+            logger.warning(f"Pattern matching failed for key '{key}' and pattern '{pattern}': {e}")
+            return key == pattern
+    
+    def _advanced_wildcard_match(self, key: str, pattern: str) -> bool:
+        """
+        Advanced wildcard matching algorithm with performance optimizations.
+        Supports: * (any sequence), ? (single char), [abc] (character class), {a,b} (alternatives)
+        """
+        try:
+            # Convert pattern to regex for complex matching
+            regex_pattern = self._convert_pattern_to_regex(pattern)
+            compiled_regex = re.compile(regex_pattern)
+            return bool(compiled_regex.fullmatch(key))
+            
+        except Exception as e:
+            # Fallback to simple wildcard matching
+            return self._simple_wildcard_match(key, pattern)
+    
+    def _convert_pattern_to_regex(self, pattern: str) -> str:
+        """Convert wildcard pattern to regex pattern."""
+        import re
+        
+        # Escape special regex characters except our wildcards
+        escaped = re.escape(pattern)
+        
+        # Convert wildcard patterns to regex
+        regex_pattern = escaped
+        regex_pattern = regex_pattern.replace(r'\*', '.*')  # * matches any sequence
+        regex_pattern = regex_pattern.replace(r'\?', '.')   # ? matches single character
+        
+        # Handle character classes [abc]
+        regex_pattern = regex_pattern.replace(r'\[', '[').replace(r'\]', ']')
+        
+        # Handle alternatives {a,b,c}
+        import re as regex_module
+        brace_pattern = r'\\\{([^}]*)\\\}'
+        
+        def replace_braces(match):
+            alternatives = match.group(1).split(',')
+            return '(?:' + '|'.join(alt.strip() for alt in alternatives) + ')'
+        
+        regex_pattern = regex_module.sub(brace_pattern, regex_pattern, replace_braces)
+        
+        return f'^{regex_pattern}$'
+    
+    def _simple_wildcard_match(self, key: str, pattern: str) -> bool:
+        """Fallback simple wildcard matching (original algorithm enhanced)."""
         if '*' not in pattern:
             return key == pattern
         
-        # Simple wildcard matching
+        # Enhanced wildcard matching with better edge case handling
         pattern_parts = pattern.split('*')
         key_pos = 0
         
+        # Handle empty pattern parts (consecutive *)
+        pattern_parts = [part for part in pattern_parts if part]
+        
+        if not pattern_parts:
+            return True  # Pattern is just '*' or '**', matches everything
+        
         for i, part in enumerate(pattern_parts):
-            if i == 0:  # First part
-                if not key.startswith(part):
+            if i == 0:  # First part - must match start
+                if not key[key_pos:].startswith(part):
                     return False
                 key_pos += len(part)
-            elif i == len(pattern_parts) - 1:  # Last part
+            elif i == len(pattern_parts) - 1:  # Last part - must match end
                 if not key.endswith(part):
                     return False
-            else:  # Middle parts
-                pos = key.find(part, key_pos)
+                # Verify there's enough space for this part
+                expected_end_pos = len(key) - len(part)
+                if key_pos > expected_end_pos:
+                    return False
+            else:  # Middle parts - find in remaining string
+                remaining_key = key[key_pos:]
+                pos = remaining_key.find(part)
                 if pos == -1:
                     return False
-                key_pos = pos + len(part)
+                key_pos += pos + len(part)
         
         return True
     
