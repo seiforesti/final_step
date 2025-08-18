@@ -1,0 +1,21 @@
+2025-08-16 15:53:17,315 - __main__ - INFO - Starting Enterprise Database Health Check...
+2025-08-16 15:53:17,316 - __main__ - INFO - Starting comprehensive database health check...
+2025-08-16 15:53:21,577 - app.db_session - WARNING - ⚠️ asyncpg not available, async database features disabled
+2025-08-16 15:53:21,578 - __main__ - ERROR - Health check failed: cannot import name 'SQLModel' from 'app.models' (C:\Users\seifa\OneDrive\Desktop\final_correction\data_wave\backend\scripts_automation\app\models\__init__.py)
+2025-08-16 15:53:21,579 - __main__ - ERROR - Database health check failed!
+2025-08-16 15:53:52,017 - __main__ - INFO - Starting Enterprise Database Health Check...
+2025-08-16 15:53:52,018 - __main__ - INFO - Starting comprehensive database health check...
+2025-08-16 15:53:56,978 - app.db_session - WARNING - ⚠️ asyncpg not available, async database features disabled
+2025-08-16 15:54:04,213 - __main__ - ERROR - Health check failed: (psycopg2.OperationalError) could not translate host name "metadata-db" to address: Name or service not known
+
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-08-16 15:54:04,213 - __main__ - ERROR - Database health check failed!
+2025-08-16 15:55:15,896 - __main__ - INFO - Starting Enterprise Database Health Check...
+2025-08-16 15:55:15,897 - __main__ - INFO - Starting comprehensive database health check...
+2025-08-16 15:55:20,143 - app.db_session - WARNING - ⚠️ asyncpg not available, async database features disabled
+2025-08-16 15:55:27,371 - __main__ - ERROR - Database connectivity test failed: (psycopg2.OperationalError) could not translate host name "metadata-db" to address: Name or service not known
+
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-08-16 15:55:27,371 - __main__ - INFO - This script can only run when connected to the database
+2025-08-16 15:55:27,371 - __main__ - INFO - Please run this script from inside the Docker container or ensure database is accessible
+2025-08-16 15:55:27,371 - __main__ - ERROR - Database health check failed!
