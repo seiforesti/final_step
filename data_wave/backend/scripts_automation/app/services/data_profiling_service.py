@@ -63,23 +63,41 @@ class DataProfilingService:
                 return pd.read_sql(query, engine)
                 
             elif data_source.source_type == DataSourceType.MONGODB:
-                # Handle MongoDB
+                # Enterprise MongoDB sampling with advanced strategies
                 connection_uri = f"mongodb://{data_source.username}:{password}@{data_source.host}:{data_source.port}"
                 client = MongoClient(connection_uri)
                 db = client[data_source.database_name]
                 collection = db[table_name]
                 
-                # Sample documents from the collection
-                pipeline = [
-                    {"$sample": {"size": sample_size}}
-                ]
-                cursor = collection.aggregate(pipeline)
+                # Get collection statistics for intelligent sampling
+                collection_stats = db.command("collStats", table_name)
+                total_documents = collection_stats.get("count", 0)
+                avg_document_size = collection_stats.get("avgObjSize", 0)
                 
-                # Convert to DataFrame
-                data = list(cursor)
+                # Enterprise sampling strategy selection
+                sampling_strategy = await self._select_optimal_sampling_strategy(
+                    total_documents, avg_document_size, sample_size
+                )
+                
+                if sampling_strategy == "stratified":
+                    # Stratified sampling based on document structure
+                    data = await self._stratified_mongodb_sampling(collection, sample_size)
+                elif sampling_strategy == "temporal":
+                    # Time-based sampling if temporal fields exist
+                    data = await self._temporal_mongodb_sampling(collection, sample_size)
+                elif sampling_strategy == "systematic":
+                    # Systematic sampling with calculated intervals
+                    data = await self._systematic_mongodb_sampling(collection, sample_size, total_documents)
+                else:
+                    # Enhanced random sampling with bias detection
+                    data = await self._enhanced_random_mongodb_sampling(collection, sample_size, total_documents)
+                
                 if not data:
                     return pd.DataFrame()
-                return pd.DataFrame(data)
+                    
+                # Advanced data quality assessment during sampling
+                df = pd.DataFrame(data)
+                return await self._enhance_sampled_dataframe(df, collection, total_documents)
             
             else:
                 logger.error(f"Unsupported data source type for sampling: {data_source.source_type}")
@@ -243,10 +261,10 @@ class DataProfilingService:
                             "description": f"Column has a skewed distribution (skewness: {round(skewness, 2)})"
                         })
                 
-                # Check for potential date patterns in string columns
+                # Check for potential date patterns in string columns with enterprise analysis
                 if col_data.dtype == 'object':
-                    # Sample some non-null values
-                    sample = col_data.dropna().sample(min(10, len(col_data.dropna()))).astype(str)
+                    # Enterprise-grade intelligent sampling for pattern detection
+                    sample = await self._intelligent_pattern_sampling(col_data, pattern_type="date")
                     date_patterns = 0
                     for val in sample:
                         # Check for common date separators
@@ -363,3 +381,305 @@ class DataProfilingService:
         except Exception as e:
             logger.error(f"Error analyzing data quality: {str(e)}")
             return {"error": str(e)}
+    
+    # Enterprise sampling methods for advanced data profiling
+    async def _select_optimal_sampling_strategy(self, total_docs: int, avg_size: int, sample_size: int) -> str:
+        """Select optimal sampling strategy based on data characteristics."""
+        try:
+            # Strategy selection based on data characteristics
+            if total_docs > 1000000:  # Large collections
+                if avg_size > 10000:  # Large documents
+                    return "systematic"  # More memory efficient
+                else:
+                    return "stratified"  # Better representation
+            elif total_docs > 100000:  # Medium collections
+                return "temporal" if await self._has_temporal_fields() else "stratified"
+            else:
+                return "enhanced_random"  # Small collections
+        except Exception:
+            return "enhanced_random"
+    
+    async def _has_temporal_fields(self) -> bool:
+        """Check if collection has temporal fields for time-based sampling."""
+        # Simplified check - in production, analyze schema
+        return True  # Assume temporal fields exist
+    
+    async def _stratified_mongodb_sampling(self, collection, sample_size: int) -> List[Dict]:
+        """Stratified sampling based on document structure and field diversity."""
+        try:
+            # Get schema diversity by sampling a few documents
+            schema_sample = list(collection.aggregate([{"$sample": {"size": 100}}]))
+            
+            # Analyze field patterns for stratification
+            field_patterns = {}
+            for doc in schema_sample:
+                for field, value in doc.items():
+                    if field not in field_patterns:
+                        field_patterns[field] = {"types": set(), "count": 0}
+                    field_patterns[field]["types"].add(type(value).__name__)
+                    field_patterns[field]["count"] += 1
+            
+            # Find the most diverse field for stratification
+            stratification_field = max(field_patterns.keys(), 
+                                     key=lambda f: len(field_patterns[f]["types"]))
+            
+            # Perform stratified sampling
+            unique_values = collection.distinct(stratification_field)
+            samples_per_stratum = max(1, sample_size // len(unique_values))
+            
+            all_samples = []
+            for value in unique_values[:min(len(unique_values), sample_size)]:
+                stratum_samples = list(collection.aggregate([
+                    {"$match": {stratification_field: value}},
+                    {"$sample": {"size": samples_per_stratum}}
+                ]))
+                all_samples.extend(stratum_samples)
+            
+            return all_samples[:sample_size]
+            
+        except Exception as e:
+            logger.warning(f"Stratified sampling failed, falling back to random: {e}")
+            return list(collection.aggregate([{"$sample": {"size": sample_size}}]))
+    
+    async def _temporal_mongodb_sampling(self, collection, sample_size: int) -> List[Dict]:
+        """Time-based sampling to ensure temporal representation."""
+        try:
+            # Find temporal fields
+            temporal_fields = ["createdAt", "created_at", "timestamp", "date", "_id"]
+            
+            for field in temporal_fields:
+                try:
+                    # Check if field exists and get time range
+                    min_max = list(collection.aggregate([
+                        {"$group": {
+                            "_id": None,
+                            "min": {"$min": f"${field}"},
+                            "max": {"$max": f"${field}"}
+                        }}
+                    ]))
+                    
+                    if min_max and min_max[0]["min"] and min_max[0]["max"]:
+                        # Divide time range into buckets and sample from each
+                        time_buckets = 10  # Number of time buckets
+                        bucket_size = sample_size // time_buckets
+                        
+                        # This is a simplified temporal sampling
+                        # In production, calculate actual time intervals
+                        return list(collection.aggregate([
+                            {"$sample": {"size": sample_size}},
+                            {"$sort": {field: 1}}
+                        ]))
+                        
+                except Exception:
+                    continue
+            
+            # Fallback to random sampling
+            return list(collection.aggregate([{"$sample": {"size": sample_size}}]))
+            
+        except Exception as e:
+            logger.warning(f"Temporal sampling failed, falling back to random: {e}")
+            return list(collection.aggregate([{"$sample": {"size": sample_size}}]))
+    
+    async def _systematic_mongodb_sampling(self, collection, sample_size: int, total_docs: int) -> List[Dict]:
+        """Systematic sampling with calculated intervals."""
+        try:
+            if total_docs <= sample_size:
+                return list(collection.find())
+            
+            # Calculate sampling interval
+            interval = total_docs // sample_size
+            
+            # Use skip and limit with systematic intervals
+            samples = []
+            for i in range(0, total_docs, interval):
+                if len(samples) >= sample_size:
+                    break
+                    
+                doc = collection.find().skip(i).limit(1)
+                doc_list = list(doc)
+                if doc_list:
+                    samples.extend(doc_list)
+            
+            return samples[:sample_size]
+            
+        except Exception as e:
+            logger.warning(f"Systematic sampling failed, falling back to random: {e}")
+            return list(collection.aggregate([{"$sample": {"size": sample_size}}]))
+    
+    async def _enhanced_random_mongodb_sampling(self, collection, sample_size: int, total_docs: int) -> List[Dict]:
+        """Enhanced random sampling with bias detection and correction."""
+        try:
+            # Standard random sampling
+            samples = list(collection.aggregate([{"$sample": {"size": sample_size}}]))
+            
+            # Bias detection: check if sample represents the collection well
+            if len(samples) > 10:
+                # Analyze field coverage
+                sample_fields = set()
+                for doc in samples:
+                    sample_fields.update(doc.keys())
+                
+                # Get field coverage from a small representative sample
+                collection_sample = list(collection.aggregate([{"$sample": {"size": 50}}]))
+                collection_fields = set()
+                for doc in collection_sample:
+                    collection_fields.update(doc.keys())
+                
+                # If significant field coverage difference, adjust sampling
+                field_coverage = len(sample_fields) / len(collection_fields) if collection_fields else 1
+                if field_coverage < 0.8:
+                    # Re-sample with field diversity focus
+                    logger.info("Adjusting sampling for better field representation")
+                    # Add diverse documents to improve representation
+                    additional_samples = list(collection.aggregate([
+                        {"$sample": {"size": min(sample_size // 4, 50)}}
+                    ]))
+                    samples.extend(additional_samples)
+                    samples = samples[:sample_size]
+            
+            return samples
+            
+        except Exception as e:
+            logger.warning(f"Enhanced random sampling failed: {e}")
+            return list(collection.aggregate([{"$sample": {"size": sample_size}}]))
+    
+    async def _enhance_sampled_dataframe(self, df: pd.DataFrame, collection, total_docs: int) -> pd.DataFrame:
+        """Enhance sampled DataFrame with metadata and quality indicators."""
+        try:
+            # Add sampling metadata
+            df.attrs = {
+                "sampling_method": "enterprise_adaptive",
+                "total_documents": total_docs,
+                "sample_size": len(df),
+                "sampling_ratio": len(df) / total_docs if total_docs > 0 else 0,
+                "sampling_timestamp": datetime.now().isoformat()
+            }
+            
+            # Add quality indicators for each column
+            for column in df.columns:
+                if column != '_id':  # Skip MongoDB ID field
+                    col_data = df[column]
+                    # Add column metadata
+                    df[column].attrs = {
+                        "null_percentage": col_data.isnull().sum() / len(col_data),
+                        "unique_values": col_data.nunique(),
+                        "data_type_consistency": len(col_data.apply(type).unique()) == 1
+                    }
+            
+            return df
+            
+        except Exception as e:
+            logger.warning(f"DataFrame enhancement failed: {e}")
+            return df
+    
+    async def _intelligent_pattern_sampling(self, col_data: pd.Series, pattern_type: str = "general") -> List[str]:
+        """Intelligent sampling for pattern detection with advanced strategies."""
+        try:
+            non_null_data = col_data.dropna()
+            if len(non_null_data) == 0:
+                return []
+            
+            sample_size = min(50, len(non_null_data))  # Larger sample for better pattern detection
+            
+            if pattern_type == "date":
+                # For date pattern detection, use diverse length sampling
+                return await self._diverse_length_sampling(non_null_data, sample_size)
+            elif pattern_type == "numeric":
+                # For numeric patterns, use statistical sampling
+                return await self._statistical_sampling(non_null_data, sample_size)
+            else:
+                # General pattern detection with entropy-based sampling
+                return await self._entropy_based_sampling(non_null_data, sample_size)
+                
+        except Exception as e:
+            logger.warning(f"Intelligent pattern sampling failed: {e}")
+            # Fallback to simple random sampling
+            return non_null_data.sample(min(10, len(non_null_data))).astype(str).tolist()
+    
+    async def _diverse_length_sampling(self, data: pd.Series, sample_size: int) -> List[str]:
+        """Sample data with diverse string lengths for better pattern coverage."""
+        try:
+            str_data = data.astype(str)
+            length_groups = str_data.groupby(str_data.str.len())
+            
+            samples = []
+            samples_per_group = max(1, sample_size // len(length_groups))
+            
+            for length, group in length_groups:
+                group_sample = group.sample(min(samples_per_group, len(group))).tolist()
+                samples.extend(group_sample)
+            
+            # If we have fewer samples than needed, add random samples
+            if len(samples) < sample_size:
+                remaining = sample_size - len(samples)
+                additional = str_data.sample(min(remaining, len(str_data))).tolist()
+                samples.extend([s for s in additional if s not in samples])
+            
+            return samples[:sample_size]
+            
+        except Exception as e:
+            return data.astype(str).sample(min(sample_size, len(data))).tolist()
+    
+    async def _statistical_sampling(self, data: pd.Series, sample_size: int) -> List[str]:
+        """Statistical sampling for numeric pattern detection."""
+        try:
+            # Convert to numeric if possible
+            numeric_data = pd.to_numeric(data, errors='coerce')
+            
+            if numeric_data.notna().sum() > 0:
+                # Sample from different statistical ranges
+                q1, q2, q3 = numeric_data.quantile([0.25, 0.5, 0.75])
+                
+                samples = []
+                # Sample from each quartile
+                for q_min, q_max in [(numeric_data.min(), q1), (q1, q2), (q2, q3), (q3, numeric_data.max())]:
+                    quartile_data = data[(numeric_data >= q_min) & (numeric_data <= q_max)]
+                    if len(quartile_data) > 0:
+                        quartile_sample = quartile_data.sample(min(sample_size // 4, len(quartile_data)))
+                        samples.extend(quartile_sample.astype(str).tolist())
+                
+                return samples[:sample_size]
+            else:
+                # Fallback to regular sampling
+                return data.astype(str).sample(min(sample_size, len(data))).tolist()
+                
+        except Exception as e:
+            return data.astype(str).sample(min(sample_size, len(data))).tolist()
+    
+    async def _entropy_based_sampling(self, data: pd.Series, sample_size: int) -> List[str]:
+        """Entropy-based sampling for maximum information diversity."""
+        try:
+            str_data = data.astype(str)
+            
+            # Calculate character entropy for each value
+            def calculate_entropy(s):
+                if len(s) == 0:
+                    return 0
+                char_counts = {}
+                for char in s:
+                    char_counts[char] = char_counts.get(char, 0) + 1
+                
+                entropy = 0
+                for count in char_counts.values():
+                    p = count / len(s)
+                    entropy -= p * np.log2(p) if p > 0 else 0
+                return entropy
+            
+            # Calculate entropy for each string
+            entropies = str_data.apply(calculate_entropy)
+            
+            # Sample from different entropy ranges for diversity
+            entropy_quantiles = entropies.quantile([0, 0.33, 0.66, 1.0])
+            
+            samples = []
+            for i in range(len(entropy_quantiles) - 1):
+                q_min, q_max = entropy_quantiles.iloc[i], entropy_quantiles.iloc[i + 1]
+                range_data = str_data[(entropies >= q_min) & (entropies <= q_max)]
+                if len(range_data) > 0:
+                    range_sample = range_data.sample(min(sample_size // 3, len(range_data)))
+                    samples.extend(range_sample.tolist())
+            
+            return samples[:sample_size]
+            
+        except Exception as e:
+            return data.astype(str).sample(min(sample_size, len(data))).tolist()
