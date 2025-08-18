@@ -224,14 +224,46 @@ def delete_condition_template(template_id: int, db: Session = Depends(get_db), c
 # --- Condition Validation Endpoint ---
 from fastapi import HTTPException
 @router.post("/validate-condition")
-def validate_condition(condition: dict = Body(...)):
+def validate_condition(
+    condition: dict = Body(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Validate a condition template with real user/context and schema checks."""
     import json
     try:
-        # Dummy user/context for validation
-        dummy_user = type("User", (), {"id": 1, "department": "IT", "region": "EU"})()
-        _ = json.dumps(condition)  # Check serializable
-        # Optionally, run through ABAC logic with dummy values (future)
-        return {"valid": True}
+        # Ensure JSON serializable
+        _ = json.dumps(condition)
+
+        # Structural validation of known ABAC fields
+        allowed_top_keys = {"department", "region", "user_id", "time_based", "resource"}
+        if not isinstance(condition, dict):
+            raise ValueError("Condition must be an object")
+        unknown = [k for k in condition.keys() if k not in allowed_top_keys]
+        if unknown:
+            raise ValueError(f"Unknown condition keys: {unknown}")
+
+        # Time-based schema validation
+        if "time_based" in condition:
+            tb = condition["time_based"]
+            if not isinstance(tb, dict):
+                raise ValueError("time_based must be an object")
+            for req in ["days", "start_hour", "end_hour"]:
+                if req not in tb:
+                    raise ValueError(f"time_based missing '{req}'")
+            if not isinstance(tb["days"], list) or not all(isinstance(d, str) for d in tb["days"]):
+                raise ValueError("time_based.days must be a list of strings")
+
+        # Evaluate condition against current_user context as a sanity check
+        # Convert ':current_user_id' to actual user id when present
+        eval_condition = dict(condition)
+        if eval_condition.get("user_id") == ":current_user_id":
+            eval_condition["user_id"] = getattr(current_user, "id", None)
+
+        # Use role_service user_has_permission evaluator with a dummy resource/action
+        from app.services.role_service import user_has_permission
+        ok = user_has_permission(db, current_user, action="validate", resource="rbac_condition", conditions=eval_condition)
+        return {"valid": bool(ok)}
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Invalid condition: {str(e)}")
 @router.get("/role-assignments")

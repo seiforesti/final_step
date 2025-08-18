@@ -56,10 +56,10 @@ from .scan_intelligence_service import ScanIntelligenceService
 from .scan_performance_optimizer import ScanPerformanceOptimizer
 from .advanced_scan_scheduler import AdvancedScanScheduler
 from .scan_workflow_engine import ScanWorkflowEngine
+from app.core.logging_config import get_logger
 
-# Logging setup
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# Logging
+logger = get_logger(__name__)
 
 class ScanManagerStatus(str, Enum):
     """Scan manager operation status"""
@@ -476,29 +476,104 @@ class UnifiedScanManager:
             logger.warning(f"Could not auto-detect resources, using defaults: {str(e)}")
 
     async def _validate_scan_request(self, request: ScanRequest, session: AsyncSession) -> Dict[str, Any]:
-        """Validate scan request parameters"""
+        """Validate scan request parameters with enterprise-grade checks."""
         try:
-            # Basic validation
-            if not request.source_id and request.scope != ScanScope.SYSTEM_WIDE:
-                return {"valid": False, "error": "Source ID required for non-system-wide scans"}
-            
-            if not request.rule_ids and request.scope != ScanScope.CUSTOM:
-                return {"valid": False, "error": "Rule IDs required for non-custom scans"}
-            
-            # Check for circular dependencies
-            if await self._has_circular_dependencies(request.dependencies, session):
-                return {"valid": False, "error": "Circular dependencies detected"}
-            
-            # Validate rule accessibility
-            if request.rule_ids:
-                invalid_rules = await self._validate_rule_access(request.rule_ids, session)
+            # Scope and identity validation
+            if request.scope != ScanScope.SYSTEM_WIDE and not request.source_id:
+                return {"valid": False, "error": "source_id is required unless scope is system_wide"}
+
+            # Data source existence check
+            if request.source_id:
+                from ..models.scan_models import DataSource
+                result = await session.execute(select(DataSource).where(DataSource.id == request.source_id))
+                ds = result.scalars().first()
+                if ds is None:
+                    return {"valid": False, "error": f"Unknown data source id: {request.source_id}"}
+
+            # Rule validation via enterprise rule service
+            if request.rule_ids and request.scope != ScanScope.CUSTOM:
+                invalid_rules = await self._validate_rule_access(request.rule_ids)
                 if invalid_rules:
-                    return {"valid": False, "error": f"Invalid rule IDs: {invalid_rules}"}
-            
+                    return {"valid": False, "error": f"Invalid rule ids: {invalid_rules}"}
+
+            # Dependency sanity checks
+            if request.dependencies:
+                has_cycle, dep_error = await self._has_circular_dependencies(request.dependencies)
+                if has_cycle:
+                    return {"valid": False, "error": dep_error or "Circular dependencies detected"}
+
+            # Optional rate limiting by requester (if provided)
+            requester = request.parameters.get("requested_by") if isinstance(request.parameters, dict) else None
+            if requester:
+                try:
+                    from app.utils.rate_limiter import get_rate_limiter
+                    limiter = get_rate_limiter()
+                    rl = await limiter.check_rate_limit(identifier=str(requester), rule_name="scan_operations", context={"source_id": request.source_id})
+                    if not rl.allowed:
+                        return {"valid": False, "error": "Rate limit exceeded", "retry_after": rl.retry_after}
+                except Exception:
+                    # Fail open on rate limiter errors
+                    pass
+
             return {"valid": True}
-            
+
         except Exception as e:
+            logger.error(f"Scan request validation error: {e}")
             return {"valid": False, "error": f"Validation error: {str(e)}"}
+
+    async def _validate_rule_access(self, rule_ids: List[str]) -> List[str]:
+        """Validate that provided rule ids exist and are accessible."""
+        try:
+            from .enterprise_scan_rule_service import EnterpriseScanRuleService
+            svc = EnterpriseScanRuleService()
+            result = await svc.validate_scan_rules(rule_ids)
+            if not result.get("valid", False):
+                # Extract unknown ids from error message if present
+                return result.get("errors", ["unknown_rules"])
+            return []
+        except Exception as e:
+            logger.warning(f"Rule validation failed: {e}")
+            return []
+
+    async def _has_circular_dependencies(self, dependencies: List[str]) -> Tuple[bool, Optional[str]]:
+        """Detect cycles in dependency list when present as edge spec 'A->B'."""
+        try:
+            if not dependencies:
+                return False, None
+            edges: List[Tuple[str, str]] = []
+            for item in dependencies:
+                if isinstance(item, str) and "->" in item:
+                    a, b = [p.strip() for p in item.split("->", 1)]
+                    edges.append((a, b))
+            if not edges:
+                # No edge semantics provided; cannot infer cycles
+                return False, None
+            graph: Dict[str, List[str]] = {}
+            for a, b in edges:
+                graph.setdefault(a, []).append(b)
+            visiting: set = set()
+            visited: set = set()
+
+            def dfs(node: str) -> bool:
+                if node in visiting:
+                    return True
+                if node in visited:
+                    return False
+                visiting.add(node)
+                for nbr in graph.get(node, []):
+                    if dfs(nbr):
+                        return True
+                visiting.remove(node)
+                visited.add(node)
+                return False
+
+            for n in list(graph.keys()):
+                if dfs(n):
+                    return True, "Circular dependency detected"
+            return False, None
+        except Exception as e:
+            logger.warning(f"Dependency analysis failed: {e}")
+            return False, None
 
     async def _optimize_scan_request(self, request: ScanRequest, session: AsyncSession) -> ScanRequest:
         """Optimize scan request parameters using ML"""

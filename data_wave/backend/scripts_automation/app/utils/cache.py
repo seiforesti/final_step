@@ -522,29 +522,13 @@ class EnterpriseCache:
         return f"{self.namespace}:{key}"
     
     def _match_pattern(self, key: str, pattern: str) -> bool:
-        """Check if key matches pattern (simple wildcard support)."""
-        if '*' not in pattern:
+        """Enterprise-grade wildcard matching using fnmatch (supports *, ?, and [] sets)."""
+        try:
+            import fnmatch
+            return fnmatch.fnmatchcase(key, pattern)
+        except Exception:
+            # Safe fallback to strict equality
             return key == pattern
-        
-        # Simple wildcard matching
-        pattern_parts = pattern.split('*')
-        key_pos = 0
-        
-        for i, part in enumerate(pattern_parts):
-            if i == 0:  # First part
-                if not key.startswith(part):
-                    return False
-                key_pos += len(part)
-            elif i == len(pattern_parts) - 1:  # Last part
-                if not key.endswith(part):
-                    return False
-            else:  # Middle parts
-                pos = key.find(part, key_pos)
-                if pos == -1:
-                    return False
-                key_pos = pos + len(part)
-        
-        return True
     
     async def _try_warming(self, key: str, config: CacheConfig) -> Any:
         """Try to warm cache using registered warming functions."""
