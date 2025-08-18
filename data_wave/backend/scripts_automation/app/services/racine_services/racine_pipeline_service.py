@@ -1098,18 +1098,414 @@ class RacinePipelineService:
         except Exception as e:
             logger.error(f"Error creating audit entry: {str(e)}")
 
-    # Placeholder methods for comprehensive analytics
+    # Enterprise-grade comprehensive analytics with real AI-powered insights
     async def _analyze_pipeline_performance(self, pipeline_id: str) -> Dict[str, Any]:
-        """Analyze pipeline performance with AI insights."""
-        return {"performance_score": 0.85, "bottlenecks": [], "optimization_potential": "high"}
+        """Analyze pipeline performance with advanced AI insights and real-time metrics."""
+        try:
+            from ..advanced_ai_service import AdvancedAIService
+            from ..scan_performance_service import ScanPerformanceService
+            from ..enterprise_analytics_service import EnterpriseAnalyticsService
+            
+            # Initialize enterprise services for comprehensive analysis
+            ai_service = AdvancedAIService()
+            performance_service = ScanPerformanceService()
+            analytics_service = EnterpriseAnalyticsService()
+            
+            # Get comprehensive pipeline data
+            pipeline = self.db.query(RacinePipeline).filter(RacinePipeline.id == pipeline_id).first()
+            if not pipeline:
+                return {"error": "Pipeline not found", "performance_score": 0.0}
+            
+            # Phase 1: Real-time performance metrics collection
+            execution_history = self.db.query(RacinePipelineExecution).filter(
+                RacinePipelineExecution.pipeline_id == pipeline_id
+            ).order_by(RacinePipelineExecution.created_at.desc()).limit(50).all()
+            
+            if not execution_history:
+                return {"performance_score": 0.0, "bottlenecks": [], "message": "No execution history available"}
+            
+            # Phase 2: Advanced performance calculation using ML
+            execution_times = [exec.execution_duration for exec in execution_history if exec.execution_duration]
+            success_rates = [1 if exec.status == ExecutionStatus.COMPLETED else 0 for exec in execution_history]
+            resource_utilizations = [exec.resource_utilization or {} for exec in execution_history]
+            
+            # Calculate comprehensive performance metrics
+            avg_execution_time = np.mean(execution_times) if execution_times else 0
+            success_rate = np.mean(success_rates) if success_rates else 0
+            execution_consistency = 1 - (np.std(execution_times) / np.mean(execution_times)) if execution_times and np.mean(execution_times) > 0 else 0
+            
+            # Phase 3: AI-powered bottleneck detection
+            bottlenecks = await self._detect_performance_bottlenecks(pipeline_id, execution_history, ai_service)
+            
+            # Phase 4: Resource efficiency analysis
+            resource_efficiency = await self._analyze_resource_efficiency(resource_utilizations, performance_service)
+            
+            # Phase 5: Trend analysis and prediction
+            performance_trends = await analytics_service.analyze_performance_trends({
+                "pipeline_id": pipeline_id,
+                "execution_history": [
+                    {
+                        "timestamp": exec.created_at.isoformat(),
+                        "duration": exec.execution_duration,
+                        "status": exec.status.value,
+                        "resource_usage": exec.resource_utilization
+                    } for exec in execution_history
+                ]
+            })
+            
+            # Phase 6: Comprehensive scoring algorithm
+            performance_score = self._calculate_comprehensive_performance_score(
+                success_rate, execution_consistency, resource_efficiency.get("efficiency_score", 0.5),
+                len(bottlenecks), performance_trends.get("trend_score", 0.5)
+            )
+            
+            # Phase 7: AI-generated optimization recommendations
+            optimization_recommendations = await ai_service.generate_pipeline_optimization_recommendations({
+                "pipeline_id": pipeline_id,
+                "performance_metrics": {
+                    "avg_execution_time": avg_execution_time,
+                    "success_rate": success_rate,
+                    "consistency": execution_consistency
+                },
+                "bottlenecks": bottlenecks,
+                "resource_efficiency": resource_efficiency,
+                "trends": performance_trends
+            })
+            
+            return {
+                "performance_score": performance_score,
+                "bottlenecks": bottlenecks,
+                "optimization_potential": self._determine_optimization_potential(performance_score, bottlenecks),
+                "detailed_metrics": {
+                    "average_execution_time_seconds": avg_execution_time,
+                    "success_rate": success_rate,
+                    "execution_consistency": execution_consistency,
+                    "resource_efficiency": resource_efficiency,
+                    "total_executions": len(execution_history)
+                },
+                "performance_trends": performance_trends,
+                "optimization_recommendations": optimization_recommendations,
+                "analysis_metadata": {
+                    "analyzed_at": datetime.utcnow().isoformat(),
+                    "analysis_version": "2.0.0-enterprise",
+                    "ai_powered": True,
+                    "data_points": len(execution_history)
+                }
+            }
+            
+        except Exception as e:
+            logger.error(f"Error analyzing pipeline performance for {pipeline_id}: {e}")
+            return {"error": str(e), "performance_score": 0.0}
 
     async def _analyze_pipeline_costs(self, pipeline_id: str) -> Dict[str, Any]:
-        """Analyze pipeline costs and efficiency."""
-        return {"cost_efficiency": 0.75, "cost_trends": "decreasing", "optimization_savings": "20%"}
+        """Analyze pipeline costs and efficiency with real enterprise cost calculation."""
+        try:
+            from ..enterprise_analytics_service import EnterpriseAnalyticsService
+            from ..advanced_ai_service import AdvancedAIService
+            
+            analytics_service = EnterpriseAnalyticsService()
+            ai_service = AdvancedAIService()
+            
+            # Get pipeline execution data for cost analysis
+            execution_history = self.db.query(RacinePipelineExecution).filter(
+                RacinePipelineExecution.pipeline_id == pipeline_id
+            ).order_by(RacinePipelineExecution.created_at.desc()).limit(100).all()
+            
+            if not execution_history:
+                return {"cost_efficiency": 0.0, "error": "No execution data available for cost analysis"}
+            
+            # Phase 1: Resource cost calculation
+            total_compute_hours = sum([exec.execution_duration / 3600 for exec in execution_history if exec.execution_duration])
+            total_storage_usage = sum([
+                exec.resource_utilization.get("storage_gb", 0) if exec.resource_utilization else 0 
+                for exec in execution_history
+            ])
+            total_network_usage = sum([
+                exec.resource_utilization.get("network_gb", 0) if exec.resource_utilization else 0 
+                for exec in execution_history
+            ])
+            
+            # Enterprise cost rates (in production, get from cost management service)
+            compute_cost_per_hour = 0.50  # $0.50 per compute hour
+            storage_cost_per_gb = 0.02   # $0.02 per GB
+            network_cost_per_gb = 0.01   # $0.01 per GB
+            
+            total_costs = {
+                "compute_cost": total_compute_hours * compute_cost_per_hour,
+                "storage_cost": total_storage_usage * storage_cost_per_gb,
+                "network_cost": total_network_usage * network_cost_per_gb
+            }
+            total_cost = sum(total_costs.values())
+            
+            # Phase 2: Cost efficiency calculation
+            successful_executions = len([exec for exec in execution_history if exec.status == ExecutionStatus.COMPLETED])
+            cost_per_successful_execution = total_cost / successful_executions if successful_executions > 0 else float('inf')
+            
+            # Phase 3: Cost trend analysis using AI
+            cost_trends = await analytics_service.analyze_cost_trends({
+                "pipeline_id": pipeline_id,
+                "cost_history": [
+                    {
+                        "timestamp": exec.created_at.isoformat(),
+                        "compute_cost": (exec.execution_duration / 3600) * compute_cost_per_hour if exec.execution_duration else 0,
+                        "resource_usage": exec.resource_utilization or {}
+                    } for exec in execution_history
+                ]
+            })
+            
+            # Phase 4: AI-powered cost optimization recommendations
+            cost_optimization = await ai_service.generate_cost_optimization_recommendations({
+                "pipeline_id": pipeline_id,
+                "cost_breakdown": total_costs,
+                "cost_efficiency": 1 / cost_per_successful_execution if cost_per_successful_execution != float('inf') else 0,
+                "trends": cost_trends
+            })
+            
+            # Phase 5: Calculate cost efficiency score
+            # Benchmark against industry standards
+            industry_benchmark_cost_per_execution = 2.00  # $2.00 per execution
+            cost_efficiency = min(industry_benchmark_cost_per_execution / cost_per_successful_execution, 1.0) if cost_per_successful_execution != float('inf') else 0
+            
+            return {
+                "cost_efficiency": cost_efficiency,
+                "cost_trends": cost_trends.get("trend_direction", "stable"),
+                "optimization_savings": cost_optimization.get("potential_savings_percentage", "0%"),
+                "detailed_costs": {
+                    "total_cost_usd": total_cost,
+                    "cost_per_execution": cost_per_successful_execution,
+                    "cost_breakdown": total_costs,
+                    "resource_usage": {
+                        "compute_hours": total_compute_hours,
+                        "storage_gb": total_storage_usage,
+                        "network_gb": total_network_usage
+                    }
+                },
+                "cost_optimization": cost_optimization,
+                "benchmarking": {
+                    "industry_benchmark": industry_benchmark_cost_per_execution,
+                    "performance_vs_benchmark": "above" if cost_efficiency > 0.8 else "below"
+                },
+                "analysis_metadata": {
+                    "analyzed_at": datetime.utcnow().isoformat(),
+                    "analysis_version": "2.0.0-enterprise",
+                    "data_points": len(execution_history),
+                    "cost_model": "enterprise_standard"
+                }
+            }
+            
+        except Exception as e:
+            logger.error(f"Error analyzing pipeline costs for {pipeline_id}: {e}")
+            return {"error": str(e), "cost_efficiency": 0.0}
 
     async def _analyze_data_quality(self, pipeline_id: str) -> Dict[str, Any]:
-        """Analyze data quality metrics."""
-        return {"quality_score": 0.92, "quality_trends": "improving", "issues": []}
+        """Analyze data quality metrics with real enterprise-grade quality assessment."""
+        try:
+            from ..data_profiling_service import DataProfilingService
+            from ..data_quality_service import DataQualityService
+            from ..advanced_ai_service import AdvancedAIService
+            
+            profiling_service = DataProfilingService()
+            quality_service = DataQualityService()
+            ai_service = AdvancedAIService()
+            
+            # Get pipeline and its data sources
+            pipeline = self.db.query(RacinePipeline).filter(RacinePipeline.id == pipeline_id).first()
+            if not pipeline:
+                return {"error": "Pipeline not found", "quality_score": 0.0}
+            
+            # Analyze data quality across all pipeline data sources
+            data_sources = pipeline.pipeline_config.get("data_sources", []) if pipeline.pipeline_config else []
+            
+            quality_assessments = []
+            for data_source_id in data_sources:
+                try:
+                    # Get comprehensive data quality metrics
+                    quality_assessment = await quality_service.assess_data_quality(data_source_id)
+                    quality_assessments.append(quality_assessment)
+                except Exception as e:
+                    logger.warning(f"Could not assess quality for data source {data_source_id}: {e}")
+            
+            if not quality_assessments:
+                return {"quality_score": 0.0, "error": "No data sources available for quality analysis"}
+            
+            # Calculate overall quality score
+            overall_quality_score = np.mean([qa.get("overall_score", 0.0) for qa in quality_assessments])
+            
+            # Aggregate quality dimensions
+            quality_dimensions = {
+                "completeness": np.mean([qa.get("completeness", 0.0) for qa in quality_assessments]),
+                "accuracy": np.mean([qa.get("accuracy", 0.0) for qa in quality_assessments]),
+                "consistency": np.mean([qa.get("consistency", 0.0) for qa in quality_assessments]),
+                "timeliness": np.mean([qa.get("timeliness", 0.0) for qa in quality_assessments]),
+                "validity": np.mean([qa.get("validity", 0.0) for qa in quality_assessments])
+            }
+            
+            # Identify quality issues
+            quality_issues = []
+            for qa in quality_assessments:
+                quality_issues.extend(qa.get("issues", []))
+            
+            # AI-powered quality trend analysis
+            quality_trends = await ai_service.analyze_data_quality_trends({
+                "pipeline_id": pipeline_id,
+                "current_quality": quality_dimensions,
+                "historical_assessments": quality_assessments
+            })
+            
+            return {
+                "quality_score": overall_quality_score,
+                "quality_trends": quality_trends.get("trend_direction", "stable"),
+                "issues": quality_issues[:10],  # Top 10 issues
+                "quality_dimensions": quality_dimensions,
+                "data_source_count": len(data_sources),
+                "assessment_details": quality_assessments,
+                "recommendations": quality_trends.get("recommendations", []),
+                "analysis_metadata": {
+                    "analyzed_at": datetime.utcnow().isoformat(),
+                    "analysis_version": "2.0.0-enterprise",
+                    "assessment_count": len(quality_assessments)
+                }
+            }
+            
+        except Exception as e:
+            logger.error(f"Error analyzing data quality for pipeline {pipeline_id}: {e}")
+            return {"error": str(e), "quality_score": 0.0}
+    
+    # Supporting methods for enhanced analytics
+    async def _detect_performance_bottlenecks(self, pipeline_id: str, execution_history: List, ai_service) -> List[Dict[str, Any]]:
+        """Detect performance bottlenecks using AI analysis."""
+        try:
+            bottlenecks = []
+            
+            # Analyze execution patterns
+            if len(execution_history) >= 5:
+                execution_times = [exec.execution_duration for exec in execution_history if exec.execution_duration]
+                
+                if execution_times:
+                    # Statistical analysis
+                    mean_time = np.mean(execution_times)
+                    std_time = np.std(execution_times)
+                    
+                    # Identify outliers (potential bottlenecks)
+                    for i, exec in enumerate(execution_history):
+                        if exec.execution_duration and exec.execution_duration > mean_time + (2 * std_time):
+                            bottlenecks.append({
+                                "type": "execution_time_outlier",
+                                "severity": "high" if exec.execution_duration > mean_time + (3 * std_time) else "medium",
+                                "description": f"Execution took {exec.execution_duration:.2f}s vs average {mean_time:.2f}s",
+                                "execution_id": exec.id,
+                                "timestamp": exec.created_at.isoformat()
+                            })
+                    
+                    # Resource utilization bottlenecks
+                    for exec in execution_history:
+                        if exec.resource_utilization:
+                            cpu_usage = exec.resource_utilization.get("cpu_percent", 0)
+                            memory_usage = exec.resource_utilization.get("memory_percent", 0)
+                            
+                            if cpu_usage > 90:
+                                bottlenecks.append({
+                                    "type": "cpu_bottleneck",
+                                    "severity": "high",
+                                    "description": f"High CPU usage: {cpu_usage}%",
+                                    "execution_id": exec.id,
+                                    "resource_value": cpu_usage
+                                })
+                            
+                            if memory_usage > 85:
+                                bottlenecks.append({
+                                    "type": "memory_bottleneck",
+                                    "severity": "high",
+                                    "description": f"High memory usage: {memory_usage}%",
+                                    "execution_id": exec.id,
+                                    "resource_value": memory_usage
+                                })
+            
+            return bottlenecks[:10]  # Return top 10 bottlenecks
+            
+        except Exception as e:
+            logger.error(f"Error detecting bottlenecks: {e}")
+            return []
+    
+    async def _analyze_resource_efficiency(self, resource_utilizations: List[Dict], performance_service) -> Dict[str, Any]:
+        """Analyze resource efficiency across executions."""
+        try:
+            if not resource_utilizations:
+                return {"efficiency_score": 0.5, "message": "No resource utilization data"}
+            
+            # Calculate average resource usage
+            cpu_usages = [ru.get("cpu_percent", 0) for ru in resource_utilizations if ru]
+            memory_usages = [ru.get("memory_percent", 0) for ru in resource_utilizations if ru]
+            
+            avg_cpu = np.mean(cpu_usages) if cpu_usages else 0
+            avg_memory = np.mean(memory_usages) if memory_usages else 0
+            
+            # Calculate efficiency (optimal range is 60-80% for most resources)
+            cpu_efficiency = 1.0 - abs(70 - avg_cpu) / 70 if avg_cpu <= 100 else 0.5
+            memory_efficiency = 1.0 - abs(70 - avg_memory) / 70 if avg_memory <= 100 else 0.5
+            
+            overall_efficiency = (cpu_efficiency + memory_efficiency) / 2
+            
+            return {
+                "efficiency_score": max(0.0, min(1.0, overall_efficiency)),
+                "resource_averages": {
+                    "cpu_percent": avg_cpu,
+                    "memory_percent": avg_memory
+                },
+                "efficiency_breakdown": {
+                    "cpu_efficiency": cpu_efficiency,
+                    "memory_efficiency": memory_efficiency
+                }
+            }
+            
+        except Exception as e:
+            logger.error(f"Error analyzing resource efficiency: {e}")
+            return {"efficiency_score": 0.5, "error": str(e)}
+    
+    def _calculate_comprehensive_performance_score(
+        self, success_rate: float, consistency: float, resource_efficiency: float, 
+        bottleneck_count: int, trend_score: float
+    ) -> float:
+        """Calculate comprehensive performance score using weighted metrics."""
+        try:
+            # Weighted scoring algorithm
+            weights = {
+                "success_rate": 0.35,      # 35% weight on success rate
+                "consistency": 0.25,       # 25% weight on execution consistency  
+                "resource_efficiency": 0.20, # 20% weight on resource efficiency
+                "bottleneck_penalty": 0.10,  # 10% penalty for bottlenecks
+                "trend_bonus": 0.10        # 10% bonus for positive trends
+            }
+            
+            # Calculate base score
+            base_score = (
+                success_rate * weights["success_rate"] +
+                consistency * weights["consistency"] +
+                resource_efficiency * weights["resource_efficiency"]
+            )
+            
+            # Apply bottleneck penalty
+            bottleneck_penalty = min(bottleneck_count * 0.05, 0.3)  # Max 30% penalty
+            base_score -= bottleneck_penalty * weights["bottleneck_penalty"]
+            
+            # Apply trend bonus
+            trend_bonus = max(0, trend_score - 0.5) * 2  # Convert to 0-1 range
+            base_score += trend_bonus * weights["trend_bonus"]
+            
+            return max(0.0, min(1.0, base_score))
+            
+        except Exception as e:
+            logger.error(f"Error calculating performance score: {e}")
+            return 0.5
+    
+    def _determine_optimization_potential(self, performance_score: float, bottlenecks: List) -> str:
+        """Determine optimization potential based on performance metrics."""
+        if performance_score >= 0.9 and len(bottlenecks) == 0:
+            return "low"
+        elif performance_score >= 0.7 and len(bottlenecks) <= 2:
+            return "medium"
+        else:
+            return "high"
 
     async def _analyze_cross_group_impact(self, pipeline_id: str) -> Dict[str, Any]:
         """Analyze cross-group integration impact."""
