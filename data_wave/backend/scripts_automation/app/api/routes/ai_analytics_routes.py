@@ -4,7 +4,7 @@ Provides AI-powered analytics, recommendations, and insights for data sources
 """
 
 from typing import Dict, List, Any, Optional
-from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks, StreamingResponse
 from sqlmodel import Session
 import logging
 from datetime import datetime, timedelta
@@ -509,11 +509,39 @@ async def stream_realtime_analytics(
     session: Session = Depends(get_session),
     current_user: Dict[str, Any] = Depends(require_permission(PERMISSION_AI_ANALYTICS_VIEW))
 ):
-    """Stream real-time analytics events (WebSocket endpoint placeholder)"""
+    """Stream real-time analytics events using WebSocket or Server-Sent Events"""
     try:
-        # This would typically be a WebSocket endpoint
-        # For now, return current real-time data
-        realtime_data = await AIAnalyticsService.get_realtime_data(
+        from app.services.ai_analytics_service import AIAnalyticsService
+        from app.services.realtime_analytics_service import RealtimeAnalyticsService
+        
+        # Initialize real-time analytics service
+        realtime_service = RealtimeAnalyticsService()
+        
+        # Get real-time data stream
+        realtime_data = await realtime_service.get_realtime_stream(
+            session,
+            {
+                "data_source_id": data_source_id,
+                "event_types": event_types.split(",") if event_types else None,
+                "user_id": current_user.get("user_id"),
+                "stream_type": "websocket"  # or "sse" for Server-Sent Events
+            }
+        )
+        
+        # If WebSocket connection is available, return streaming response
+        if realtime_data.get("stream_available"):
+            return StreamingResponse(
+                realtime_data.get("stream_generator", []),
+                media_type="text/event-stream",
+                headers={
+                    "Cache-Control": "no-cache",
+                    "Connection": "keep-alive",
+                    "Access-Control-Allow-Origin": "*"
+                }
+            )
+        
+        # Fallback to snapshot data
+        snapshot_data = await AIAnalyticsService.get_realtime_data(
             session,
             {
                 "data_source_id": data_source_id,
@@ -524,9 +552,10 @@ async def stream_realtime_analytics(
         
         return {
             "success": True,
-            "data": realtime_data,
+            "data": snapshot_data,
             "message": "Real-time data snapshot (WebSocket streaming available)",
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.utcnow().isoformat(),
+            "stream_url": f"/api/ai-analytics/realtime/websocket?data_source_id={data_source_id}&event_types={event_types or ''}"
         }
     except Exception as e:
         logger.error(f"Error getting real-time analytics: {str(e)}")

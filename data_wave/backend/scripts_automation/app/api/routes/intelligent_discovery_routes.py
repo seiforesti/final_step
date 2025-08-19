@@ -208,25 +208,55 @@ async def discover_assets(
         raise HTTPException(status_code=500, detail=f"Discovery failed: {str(e)}")
 
 @router.get("/discover/{discovery_id}/status")
-@cache_response(ttl=30)
 async def get_discovery_status(
     discovery_id: str = Path(..., description="Discovery operation ID"),
     current_user: dict = Depends(get_current_user)
 ):
-    """Get the status of a discovery operation."""
+    """Get the status of a discovery operation using real discovery service."""
     try:
-        # This would retrieve status from a tracking system
-        # For now, return a mock response
-        return {
-            "discovery_id": discovery_id,
-            "status": "running",
-            "progress": 0.65,
-            "current_step": "Analyzing relationships",
-            "assets_discovered": 1250,
-            "elapsed_time_seconds": 180,
-            "estimated_remaining_seconds": 120
-        }
+        from app.services.intelligent_discovery_service import IntelligentDiscoveryService
+        from app.services.discovery_tracking_service import DiscoveryTrackingService
         
+        # Initialize discovery services
+        discovery_service = IntelligentDiscoveryService()
+        tracking_service = DiscoveryTrackingService()
+        
+        # Get real discovery status from tracking service
+        status_data = await tracking_service.get_discovery_status(discovery_id, current_user.get("user_id"))
+        
+        if status_data:
+            return {
+                "discovery_id": discovery_id,
+                "status": status_data.get("status", "unknown"),
+                "progress": status_data.get("progress", 0.0),
+                "current_step": status_data.get("current_step", "Unknown"),
+                "assets_discovered": status_data.get("assets_discovered", 0),
+                "elapsed_time_seconds": status_data.get("elapsed_time_seconds", 0),
+                "estimated_remaining_seconds": status_data.get("estimated_remaining_seconds", 0),
+                "last_updated": status_data.get("last_updated", datetime.utcnow().isoformat()),
+                "error_message": status_data.get("error_message"),
+                "completion_percentage": status_data.get("completion_percentage", 0.0)
+            }
+        
+        # Fallback: check if discovery exists in service
+        discovery_info = await discovery_service.get_discovery_info(discovery_id)
+        if discovery_info:
+            return {
+                "discovery_id": discovery_id,
+                "status": discovery_info.get("status", "completed"),
+                "progress": 1.0,
+                "current_step": "Discovery completed",
+                "assets_discovered": discovery_info.get("total_assets", 0),
+                "elapsed_time_seconds": 0,
+                "estimated_remaining_seconds": 0,
+                "last_updated": discovery_info.get("completed_at", datetime.utcnow().isoformat())
+            }
+        
+        # Discovery not found
+        raise HTTPException(status_code=404, detail=f"Discovery operation {discovery_id} not found")
+        
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Failed to get discovery status: {e}")
         raise HTTPException(status_code=500, detail=f"Status retrieval failed: {str(e)}")
@@ -269,39 +299,68 @@ async def search_assets(
     try:
         logger.info(f"Searching assets with query: {request.query}")
         
-        # Implementation would use the discovery service's search capabilities
-        # For now, return a mock response
+        from app.services.intelligent_discovery_service import IntelligentDiscoveryService
+        from app.services.semantic_search_service import SemanticSearchService
+        from app.services.catalog_service import CatalogService
         
-        search_results = {
+        # Initialize search services
+        discovery_service = IntelligentDiscoveryService()
+        semantic_service = SemanticSearchService()
+        catalog_service = CatalogService()
+        
+        # Perform intelligent asset search
+        search_results = await discovery_service.search_assets(
+            query=request.query,
+            filters=request.filters or {},
+            user_id=current_user.get("user_id"),
+            session=session
+        )
+        
+        # Enhance with semantic search if enabled
+        if request.semantic_search:
+            semantic_results = await semantic_service.search_assets_semantic(
+                query=request.query,
+                filters=request.filters or {},
+                user_id=current_user.get("user_id")
+            )
+            
+            # Merge and rank results
+            search_results = await discovery_service.merge_search_results(
+                discovery_results=search_results,
+                semantic_results=semantic_results
+            )
+        
+        # Get asset details and metadata
+        enhanced_results = []
+        for result in search_results.get("results", []):
+            asset_details = await catalog_service.get_asset_details(
+                asset_id=result.get("asset_id"),
+                include_metadata=True,
+                include_relationships=request.include_relationships
+            )
+            
+            enhanced_result = {
+                **result,
+                "metadata": asset_details.get("metadata", {}),
+                "relationships": asset_details.get("relationships", []),
+                "quality_metrics": asset_details.get("quality_metrics", {}),
+                "compliance_status": asset_details.get("compliance_status", {})
+            }
+            enhanced_results.append(enhanced_result)
+        
+        return {
             "query": request.query,
-            "total_results": 42,
-            "execution_time_ms": 150,
-            "results": [
-                {
-                    "asset_id": "customer_data_table",
-                    "asset_name": "customer_data",
-                    "asset_type": "table",
-                    "source_name": "Production Database",
-                    "relevance_score": 0.95,
-                    "match_reasons": ["Name similarity", "Semantic match"],
-                    "metadata": {
-                        "schema": "sales",
-                        "row_count": 1500000,
-                        "last_updated": "2024-01-15T10:30:00Z"
-                    }
-                }
-            ],
-            "facets": {
-                "asset_types": {"table": 25, "view": 12, "column": 5},
-                "sources": {"Production Database": 30, "Data Warehouse": 12}
-            },
-            "suggestions": [
-                "Try searching for 'customer information'",
-                "Include 'user' in your search terms"
-            ]
+            "total_results": search_results.get("total_results", 0),
+            "execution_time_ms": search_results.get("execution_time_ms", 0),
+            "results": enhanced_results,
+            "facets": search_results.get("facets", {}),
+            "suggestions": search_results.get("suggestions", []),
+            "search_metadata": {
+                "semantic_search_used": request.semantic_search,
+                "filters_applied": request.filters or {},
+                "search_algorithm": search_results.get("algorithm", "hybrid")
+            }
         }
-        
-        return search_results
         
     except Exception as e:
         logger.error(f"Asset search failed: {e}")

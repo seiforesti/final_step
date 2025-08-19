@@ -101,15 +101,41 @@ async def send_notification_push(to_user_token, message):
     except Exception as e:
         logger.warning("Failed to send push notification: %s", e)
 
-# --- User Preferences Stub ---
+# --- User Preferences Service Integration ---
 def get_user_notification_channels(user_email):
-    # Fetch from DB/user preferences. For now, return all channels for demo.
-    from app.db_session import get_session
-    db = get_session()
-    pref = db.query(NotificationPreference).filter(NotificationPreference.user_email == user_email).first()
-    if pref and 'channels' in pref.preferences:
-        return pref.preferences['channels']
-    return ["email", "push"]
+    """Get user notification channels from real user preference service"""
+    try:
+        from app.services.user_preference_service import UserPreferenceService
+        from app.services.notification_service import NotificationService
+        
+        # Initialize preference and notification services
+        preference_service = UserPreferenceService()
+        notification_service = NotificationService()
+        
+        # Get user preferences from service
+        user_preferences = preference_service.get_user_preferences(user_email)
+        
+        if user_preferences and 'notification_channels' in user_preferences:
+            return user_preferences['notification_channels']
+        
+        # Fallback: get from notification service
+        notification_preferences = notification_service.get_user_notification_preferences(user_email)
+        if notification_preferences and 'channels' in notification_preferences:
+            return notification_preferences['channels']
+        
+        # Final fallback: database query
+        from app.db_session import get_session
+        db = get_session()
+        pref = db.query(NotificationPreference).filter(NotificationPreference.user_email == user_email).first()
+        if pref and 'channels' in pref.preferences:
+            return pref.preferences['channels']
+        
+        # Default channels if no preferences found
+        return ["email", "push"]
+        
+    except Exception as e:
+        logger.warning(f"Error getting user notification channels: {e}")
+        return ["email", "push"]
 
 async def send_notification(user_email, subject, message, notif_type=None):
     # Fetch all users who have subscribed to this notification type

@@ -676,7 +676,7 @@ class ScanIntelligenceService:
             except ImportError:
                 # Fallback features when spacy is not available
                 # Real enterprise NLP features with advanced text analysis
-            nlp_features = await self._extract_nlp_features(text)
+                nlp_features = await self._extract_nlp_features(text)
             features.extend(nlp_features)
             
             # Domain-specific features
@@ -792,13 +792,27 @@ class ScanIntelligenceService:
                 features.append((email_count + url_count) / 5.0)
                 
             except ImportError:
-                # Fallback to basic text analysis
-                features.extend([
-                    len(text) / 1000.0,  # Length
-                    len(text.split()) / 100.0,  # Word count
-                    len(set(text.split())) / len(text.split()) if text.split() else 0,  # Vocabulary diversity
-                    0.5  # Default sentiment
-                ])
+                # Robust fallback text analysis
+                tokens = text.split()
+                length_scaled = len(text) / 1000.0
+                word_count_scaled = len(tokens) / 100.0 if tokens else 0.0
+                vocab_diversity = (len(set(tokens)) / len(tokens)) if tokens else 0.0
+                # Sentiment with TextBlob if available, else lexicon heuristic
+                sentiment = 0.5
+                try:
+                    from textblob import TextBlob
+                    tb = TextBlob(text[:2000])
+                    # Map polarity [-1,1] to [0,1]
+                    sentiment = float((tb.sentiment.polarity + 1.0) / 2.0)
+                except Exception:
+                    pos_words = {"good","great","success","fast","improve","optimal","secure"}
+                    neg_words = {"bad","fail","error","slow","risk","issue","bug"}
+                    lower = text.lower()
+                    pos_hits = sum(1 for w in pos_words if w in lower)
+                    neg_hits = sum(1 for w in neg_words if w in lower)
+                    total = pos_hits + neg_hits
+                    sentiment = 0.5 if total == 0 else max(0.0, min(1.0, 0.5 + (pos_hits - neg_hits) / (2.0 * total)))
+                features.extend([length_scaled, word_count_scaled, vocab_diversity, sentiment])
             
             # Ensure we return exactly 4 features
             while len(features) < 4:
@@ -1784,7 +1798,7 @@ class ScanIntelligenceService:
                 patterns.append(daily_pattern)
             
             # Seasonal pattern detection
-            seasonal_pattern = self._detect_seasonal_pattern(timestamps, durations)
+            seasonal_pattern = await self._detect_seasonal_pattern(timestamps, durations)
             if seasonal_pattern:
                 patterns.append(seasonal_pattern)
             
@@ -1897,7 +1911,7 @@ class ScanIntelligenceService:
         
         return None
     
-    def _detect_seasonal_pattern(
+    async def _detect_seasonal_pattern(
         self,
         timestamps: List[datetime],
         durations: List[float]

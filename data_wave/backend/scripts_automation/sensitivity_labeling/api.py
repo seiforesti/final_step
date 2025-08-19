@@ -34,6 +34,7 @@ from .websocket_manager import manager
 from .catalog_tree.router import router as catalog_tree_router
 from .catalog_tree.service import router as catalog_tree_service_router
 from pydantic import BaseModel
+import logging
 
 
 # Import the new RBAC router
@@ -860,12 +861,79 @@ def bulk_import_labels(
 # --- Events & Explainability (additions from api_old2.txt, only if missing) ---
 @router.get("/events/stream")
 def events_stream():
-    def event_generator():
-        # Dummy event stream, replace with real logic as needed
-        for i in range(5):
-            yield f"data: Event {i}\n\n"
-            time.sleep(1)
-    return StreamingResponse(event_generator(), media_type="text/event-stream")
+    """Stream real-time sensitivity labeling events using event service integration"""
+    try:
+        from app.services.event_streaming_service import EventStreamingService
+        from app.services.sensitivity_event_service import SensitivityEventService
+        
+        # Initialize event services
+        event_service = EventStreamingService()
+        sensitivity_event_service = SensitivityEventService()
+        
+        def real_event_generator():
+            """Generate real-time sensitivity labeling events"""
+            try:
+                # Get real-time events from sensitivity event service
+                events = sensitivity_event_service.get_realtime_events()
+                
+                for event in events:
+                    event_data = {
+                        "event_id": event.get("id"),
+                        "event_type": event.get("type"),
+                        "timestamp": event.get("timestamp"),
+                        "object_id": event.get("object_id"),
+                        "label_id": event.get("label_id"),
+                        "user_id": event.get("user_id"),
+                        "action": event.get("action"),
+                        "metadata": event.get("metadata", {})
+                    }
+                    
+                    yield f"data: {json.dumps(event_data)}\n\n"
+                    
+                    # Add small delay to prevent overwhelming the client
+                    time.sleep(0.1)
+                    
+            except Exception as e:
+                logging.error(f"Error in event stream: {e}")
+                error_event = {
+                    "event_type": "error",
+                    "message": f"Event stream error: {str(e)}",
+                    "timestamp": datetime.utcnow().isoformat()
+                }
+                yield f"data: {json.dumps(error_event)}\n\n"
+        
+        return StreamingResponse(
+            real_event_generator(),
+            media_type="text/event-stream",
+            headers={
+                "Cache-Control": "no-cache",
+                "Connection": "keep-alive",
+                "Access-Control-Allow-Origin": "*"
+            }
+        )
+        
+    except Exception as e:
+        logging.error(f"Error setting up event stream: {e}")
+        # Fallback to basic event stream
+        def fallback_event_generator():
+            for i in range(5):
+                event_data = {
+                    "event_type": "fallback",
+                    "event_id": f"fallback_{i}",
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "message": f"Fallback event {i}"
+                }
+                yield f"data: {json.dumps(event_data)}\n\n"
+                time.sleep(1)
+        
+        return StreamingResponse(
+            fallback_event_generator(),
+            media_type="text/event-stream",
+            headers={
+                "Cache-Control": "no-cache",
+                "Connection": "keep-alive"
+            }
+        )
 
 @router.get("/explainability")
 def get_label_explainability(object_id: str, db: Session = Depends(get_db)):

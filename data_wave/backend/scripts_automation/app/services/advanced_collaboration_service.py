@@ -1,9 +1,10 @@
 from sqlmodel import Session, select
 from typing import Dict, Any, List, Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import json
 import logging
 import asyncio
+import uuid
 from collections import defaultdict
 
 from app.models.collaboration_models import (
@@ -122,7 +123,7 @@ class AdvancedCollaborationService:
             if not workspace:
                 raise ValueError(f"Workspace {workspace_id} not found")
             
-            since_date = datetime.now() - timedelta(days=time_range_days)
+            since_date = datetime.now(timezone.utc) - timedelta(days=time_range_days)
             
             # Get members analytics
             members = session.exec(select(WorkspaceMember).where(
@@ -285,7 +286,7 @@ class AdvancedCollaborationService:
             raise
 
     @staticmethod
-    def update_document_with_ai_suggestions(
+    async def update_document_with_ai_suggestions(
         session: Session,
         document_id: int,
         user_id: str,
@@ -305,7 +306,7 @@ class AdvancedCollaborationService:
             old_content = document.content.copy()
             document.content.update(content_updates)
             document.last_edited_by = user_id
-            document.updated_at = datetime.now()
+            document.updated_at = datetime.now(timezone.utc)
             
             # Generate AI suggestions if enabled
             suggestions = []
@@ -323,7 +324,7 @@ class AdvancedCollaborationService:
             
             # Track changes
             if document.change_tracking:
-                changes = AdvancedCollaborationService._calculate_content_changes(
+                changes = await AdvancedCollaborationService._calculate_content_changes(
                     old_content, document.content
                 )
                 
@@ -391,7 +392,7 @@ class AdvancedCollaborationService:
             cursors = document.real_time_cursors or {}
             cursors[user_id] = {
                 "position": cursor_position or {"line": 0, "column": 0},
-                "timestamp": datetime.now().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "user_id": user_id
             }
             document.real_time_cursors = cursors
@@ -406,7 +407,7 @@ class AdvancedCollaborationService:
             )
             
             return {
-                "session_id": f"{document_id}_{user_id}_{int(datetime.now().timestamp())}",
+                "session_id": f"{document_id}_{user_id}_{int(datetime.now(timezone.utc).timestamp())}",
                 "document_id": document.id,
                 "active_editors": current_editors,
                 "user_cursors": cursors,
@@ -520,7 +521,7 @@ class AdvancedCollaborationService:
                 kb_item = session.get(KnowledgeBase, item['id'])
                 if kb_item:
                     kb_item.usage_frequency += 1
-                    kb_item.last_accessed = datetime.now()
+                    kb_item.last_accessed = datetime.now(timezone.utc)
             
             session.commit()
             
@@ -549,7 +550,7 @@ class AdvancedCollaborationService:
     ) -> Dict[str, Any]:
         """Generate collaboration insights and recommendations"""
         try:
-            since_date = datetime.now() - timedelta(days=analysis_period_days)
+            since_date = datetime.now(timezone.utc) - timedelta(days=analysis_period_days)
             
             # Get workspace data
             workspace = session.exec(select(Workspace).where(
@@ -585,7 +586,7 @@ class AdvancedCollaborationService:
                 "analysis_period": analysis_period_days,
                 "insights": insights,
                 "recommendations": AdvancedCollaborationService._generate_collaboration_recommendations(insights),
-                "generated_at": datetime.now().isoformat()
+                "generated_at": datetime.now(timezone.utc).isoformat()
             }
             
         except Exception as e:
@@ -714,7 +715,7 @@ class AdvancedCollaborationService:
                 "readability_score": 0.7,
                 "completeness_score": 0.6,
                 "suggestions_count": 0,
-                "last_analysis": datetime.now().isoformat()
+                "last_analysis": datetime.now(timezone.utc).isoformat()
             }
             
             # Document type specific insights
@@ -728,7 +729,7 @@ class AdvancedCollaborationService:
             return {}
 
     @staticmethod
-    def _calculate_content_changes(
+    async def _calculate_content_changes(
         old_content: Dict[str, Any],
         new_content: Dict[str, Any]
     ) -> List[Dict[str, Any]]:
@@ -819,7 +820,7 @@ class AdvancedCollaborationService:
             
             # Add metadata to each change
             for change in changes:
-                change['timestamp'] = datetime.now().isoformat()
+                change['timestamp'] = datetime.now(timezone.utc).isoformat()
                 change['change_id'] = str(uuid.uuid4())
                 change['severity'] = change.get('severity', 'medium')
                 change['confidence'] = change.get('confidence', 0.8)
@@ -853,7 +854,7 @@ class AdvancedCollaborationService:
                             "field": k,
                             "old": f_old.get(k),
                             "new": f_new.get(k),
-                            "timestamp": datetime.now().isoformat(),
+                            "timestamp": datetime.now(timezone.utc).isoformat(),
                             "severity": "medium",
                             "confidence": 0.6
                         })
@@ -862,7 +863,7 @@ class AdvancedCollaborationService:
                 changes.append({
                     "type": "content_modified",
                     "description": "Content was modified",
-                    "timestamp": datetime.now().isoformat(),
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
                     "severity": "medium",
                     "confidence": 0.5
                 })
@@ -1020,18 +1021,18 @@ class AdvancedCollaborationService:
             }
             
             # Collaboration effectiveness
-            active_members = len([m for m in members if m.last_active >= datetime.now() - timedelta(days=analysis_period_days)])
+            active_members = len([m for m in members if m.last_active >= datetime.now(timezone.utc) - timedelta(days=analysis_period_days)])
             insights["collaboration_effectiveness"] = {
                 "active_member_ratio": active_members / len(members) if members else 0,
                 "avg_activities_per_member": len(events) / len(members) if members else 0,
-                "document_creation_rate": len([d for d in documents if d.created_at >= datetime.now() - timedelta(days=analysis_period_days)]) / analysis_period_days
+                "document_creation_rate": len([d for d in documents if d.created_at >= datetime.now(timezone.utc) - timedelta(days=analysis_period_days)]) / analysis_period_days
             }
             
             # Content insights
             insights["content_insights"] = {
                 "total_documents": len(documents),
                 "document_types": {doc.document_type.value: 1 for doc in documents},
-                "avg_document_age_days": sum([(datetime.now() - doc.created_at).days for doc in documents]) / len(documents) if documents else 0
+                "avg_document_age_days": sum([(datetime.now(timezone.utc) - doc.created_at).days for doc in documents]) / len(documents) if documents else 0
             }
             
             return insights

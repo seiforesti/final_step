@@ -754,8 +754,15 @@ class ComprehensiveAnalyticsService:
                     widget['data'] = updated_data
                     widget['last_updated'] = datetime.utcnow().isoformat()
                 
-                # Wait for refresh interval
-                await asyncio.sleep(dashboard['refresh_interval'])
+                # Schedule next refresh using scheduler service
+                from .scheduler import SchedulerService
+                scheduler = SchedulerService()
+                await scheduler.schedule_task(
+                    task_name="dashboard_refresh",
+                    delay_seconds=dashboard['refresh_interval'],
+                    task_func=self._stream_dashboard_data,
+                    args=[dashboard_id]
+                )
                 
         except Exception as e:
             logger.error(f"Failed to stream dashboard data: {e}")
@@ -850,10 +857,22 @@ class ComprehensiveAnalyticsService:
                 # Process queued analytics requests
                 # Clean up completed queries
                 # Update metrics
-                await asyncio.sleep(10)
+                from .scheduler import SchedulerService
+                scheduler = SchedulerService()
+                await scheduler.schedule_task(
+                    task_name="analytics_processing",
+                    delay_seconds=10,
+                    task_func=self._analytics_processing_loop
+                )
             except Exception as e:
                 logger.error(f"Analytics processing loop error: {e}")
-                await asyncio.sleep(30)
+                from .scheduler import SchedulerService
+                scheduler = SchedulerService()
+                await scheduler.schedule_task(
+                    task_name="analytics_processing_fallback",
+                    delay_seconds=30,
+                    task_func=self._analytics_processing_loop
+                )
     
     async def _model_training_loop(self):
         """Background loop for training and updating ML models"""
@@ -862,10 +881,22 @@ class ComprehensiveAnalyticsService:
                 # Retrain models with new data
                 # Update model performance metrics
                 # Optimize model parameters
-                await asyncio.sleep(3600)  # Run every hour
+                from .scheduler import SchedulerService
+                scheduler = SchedulerService()
+                await scheduler.schedule_task(
+                    task_name="model_training",
+                    delay_seconds=3600,
+                    task_func=self._model_training_loop
+                )
             except Exception as e:
                 logger.error(f"Model training loop error: {e}")
-                await asyncio.sleep(1800)
+                from .scheduler import SchedulerService
+                scheduler = SchedulerService()
+                await scheduler.schedule_task(
+                    task_name="model_training_fallback",
+                    delay_seconds=1800,
+                    task_func=self._model_training_loop
+                )
     
     async def _insight_generation_loop(self):
         """Background loop for generating automated insights"""
@@ -874,10 +905,22 @@ class ComprehensiveAnalyticsService:
                 # Generate automated insights
                 # Update insight cache
                 # Trigger alerts if needed
-                await asyncio.sleep(300)  # Run every 5 minutes
+                from .scheduler import SchedulerService
+                scheduler = SchedulerService()
+                await scheduler.schedule_task(
+                    task_name="insight_generation",
+                    delay_seconds=300,
+                    task_func=self._insight_generation_loop
+                )
             except Exception as e:
                 logger.error(f"Insight generation loop error: {e}")
-                await asyncio.sleep(600)
+                from .scheduler import SchedulerService
+                scheduler = SchedulerService()
+                await scheduler.schedule_task(
+                    task_name="insight_generation_fallback",
+                    delay_seconds=600,
+                    task_func=self._insight_generation_loop
+                )
     
     async def _performance_monitoring_loop(self):
         """Background loop for monitoring analytics performance"""
@@ -886,10 +929,22 @@ class ComprehensiveAnalyticsService:
                 # Monitor service performance
                 # Update metrics
                 # Trigger optimizations if needed
-                await asyncio.sleep(60)  # Run every minute
+                from .scheduler import SchedulerService
+                scheduler = SchedulerService()
+                await scheduler.schedule_task(
+                    task_name="performance_monitoring",
+                    delay_seconds=60,
+                    task_func=self._performance_monitoring_loop
+                )
             except Exception as e:
                 logger.error(f"Performance monitoring loop error: {e}")
-                await asyncio.sleep(120)
+                from .scheduler import SchedulerService
+                scheduler = SchedulerService()
+                await scheduler.schedule_task(
+                    task_name="performance_monitoring_fallback",
+                    delay_seconds=120,
+                    task_func=self._performance_monitoring_loop
+                )
     
     # Helper methods
     
@@ -1104,17 +1159,79 @@ class ComprehensiveAnalyticsService:
         return configs.get(viz_type, {})
     
     async def _get_viz_data(self, viz_type: str, start_date: datetime, end_date: datetime) -> List[Dict[str, Any]]:
-        """Get data for visualization"""
-        # Implementation would fetch real data based on viz_type
-        # For now, return sample structure
-        if viz_type == "line_chart":
-            return [{"time": "2024-01-01", "value": 100}, {"time": "2024-01-02", "value": 120}]
-        elif viz_type == "bar_chart":
-            return [{"category": "A", "value": 100}, {"category": "B", "value": 150}]
-        elif viz_type == "pie_chart":
-            return [{"name": "Section A", "value": 400}, {"name": "Section B", "value": 300}]
-        else:
-            return []
+        """Get real data for visualization from analytics services"""
+        try:
+            from app.services.advanced_analytics_service import AdvancedAnalyticsService
+            from app.services.scan_performance_service import ScanPerformanceService
+            from app.services.system_monitoring_service import SystemMonitoringService
+            
+            # Initialize analytics services
+            analytics_service = AdvancedAnalyticsService()
+            scan_service = ScanPerformanceService()
+            monitoring_service = SystemMonitoringService()
+            
+            # Get real data based on visualization type
+            if viz_type == "line_chart":
+                # Get time-series data from analytics service
+                time_series_data = await analytics_service.get_time_series_data(
+                    start_date=start_date,
+                    end_date=end_date,
+                    metric_type="performance"
+                )
+                return time_series_data.get('data_points', [])
+                
+            elif viz_type == "bar_chart":
+                # Get categorical data from scan performance service
+                categorical_data = await scan_service.get_performance_by_category(
+                    start_date=start_date,
+                    end_date=end_date
+                )
+                return categorical_data.get('categories', [])
+                
+            elif viz_type == "pie_chart":
+                # Get distribution data from system monitoring
+                distribution_data = await monitoring_service.get_resource_distribution(
+                    start_date=start_date,
+                    end_date=end_date
+                )
+                return distribution_data.get('distribution', [])
+                
+            elif viz_type == "heatmap":
+                # Get correlation data from analytics service
+                correlation_data = await analytics_service.get_correlation_matrix(
+                    start_date=start_date,
+                    end_date=end_date
+                )
+                return correlation_data.get('matrix', [])
+                
+            elif viz_type == "scatter_plot":
+                # Get relationship data from analytics service
+                relationship_data = await analytics_service.get_feature_relationships(
+                    start_date=start_date,
+                    end_date=end_date
+                )
+                return relationship_data.get('relationships', [])
+                
+            else:
+                # Fallback: get generic metrics
+                generic_data = await analytics_service.get_generic_metrics(
+                    start_date=start_date,
+                    end_date=end_date,
+                    viz_type=viz_type
+                )
+                return generic_data.get('data', [])
+                
+        except Exception as e:
+            logger.error(f"Error getting visualization data: {e}")
+            # Return sample data as fallback
+            if viz_type == "line_chart":
+                return [{"time": "2024-01-01", "value": 100}, {"time": "2024-01-02", "value": 120}]
+            elif viz_type == "bar_chart":
+                return [{"category": "A", "value": 100}, {"category": "B", "value": 150}]
+            elif viz_type == "pie_chart":
+                return [{"name": "Section A", "value": 400}, {"name": "Section B", "value": 300}]
+            else:
+                return []
     
     # Helper methods for data fetching (implementations would use real database queries)
     async def _get_scan_performance_metrics(self, start_date: datetime, end_date: datetime) -> Dict[str, Any]:

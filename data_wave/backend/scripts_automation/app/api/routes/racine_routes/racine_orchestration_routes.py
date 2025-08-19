@@ -130,6 +130,9 @@ class BulkOperationRequest(BaseModel):
     operations: List[Dict[str, Any]] = Field(..., min_items=1, description="List of operations to execute")
     execution_mode: str = Field(default="parallel", description="parallel or sequential")
     continue_on_error: bool = Field(default=False, description="Continue if individual operations fail")
+    parallel_limit: Optional[int] = Field(default=1, ge=1, le=10, description="Maximum parallel operations")
+    timeout: Optional[int] = Field(default=300, ge=1, description="Workflow timeout in seconds")
+    retry_config: Optional[Dict[str, Any]] = Field(default_factory=dict, description="Retry configuration")
 
 class OrchestrationResponse(BaseModel):
     """Response model for orchestration operations."""
@@ -658,53 +661,47 @@ async def execute_bulk_operations(
     try:
         logger.info(f"Executing bulk operations by user {current_user.id}")
         
-        # Create a temporary workflow for bulk operations
-        workflow_definition = {
-            "name": f"Bulk Operations - {datetime.utcnow().isoformat()}",
-            "description": "Bulk operations across multiple groups",
-            "steps": []
+        # Execute as workflow using real orchestration service
+        from app.services.workflow_engine_service import WorkflowEngineService
+        from app.services.operation_execution_service import OperationExecutionService
+        
+        # Initialize workflow and execution services
+        workflow_service = WorkflowEngineService()
+        execution_service = OperationExecutionService()
+        
+        # Create workflow for bulk operations
+        workflow_config = {
+            'execution_mode': request.execution_mode,
+            'continue_on_error': request.continue_on_error,
+            'parallel_limit': request.parallel_limit if request.execution_mode == 'parallel' else 1,
+            'timeout': request.timeout,
+            'retry_config': request.retry_config
         }
         
-        # Convert operations to workflow steps
-        for i, operation in enumerate(request.operations):
-            step = {
-                "id": f"bulk_step_{i}",
-                "name": operation.get("name", f"Operation {i + 1}"),
-                "group_id": operation.get("group_id"),
-                "operation": operation.get("operation"),
-                "parameters": operation.get("parameters", {}),
-                "continue_on_error": request.continue_on_error
-            }
-            workflow_definition["steps"].append(step)
+        # Execute operations through workflow engine
+        workflow_result = await workflow_service.execute_bulk_operations(
+            operations=request.operations,
+            workflow_config=workflow_config,
+            user_id=current_user.id
+        )
         
-        # Execute as workflow (this will handle parallel/sequential execution)
-        # For now, we'll execute sequentially - parallel execution would require
-        # more sophisticated workflow engine modifications
-        
+        # Process results from workflow execution
         results = []
-        for i, operation in enumerate(request.operations):
-            try:
-                # This would be implemented based on the specific operation requirements
-                result = {
-                    "operation_id": i,
-                    "group_id": operation.get("group_id"),
-                    "operation": operation.get("operation"),
-                    "status": "success",
-                    "message": "Operation completed successfully"
-                }
-                results.append(result)
-            except Exception as e:
-                result = {
-                    "operation_id": i,
-                    "group_id": operation.get("group_id"),
-                    "operation": operation.get("operation"),
-                    "status": "failed",
-                    "error": str(e)
-                }
-                results.append(result)
-                
-                if not request.continue_on_error:
-                    break
+        for operation_result in workflow_result.get('operation_results', []):
+            result = {
+                "operation_id": operation_result.get('operation_id'),
+                "group_id": operation_result.get('group_id'),
+                "operation": operation_result.get('operation'),
+                "status": operation_result.get('status', 'unknown'),
+                "message": operation_result.get('message', ''),
+                "execution_time": operation_result.get('execution_time', 0),
+                "error": operation_result.get('error'),
+                "output": operation_result.get('output', {})
+            }
+            results.append(result)
+        
+        # Get execution summary
+        execution_summary = workflow_result.get('execution_summary', {})
         
         return JSONResponse(
             status_code=status.HTTP_200_OK,
@@ -712,8 +709,11 @@ async def execute_bulk_operations(
                 "message": "Bulk operations completed",
                 "execution_mode": request.execution_mode,
                 "total_operations": len(request.operations),
-                "successful_operations": len([r for r in results if r["status"] == "success"]),
-                "failed_operations": len([r for r in results if r["status"] == "failed"]),
+                "successful_operations": execution_summary.get('successful_count', 0),
+                "failed_operations": execution_summary.get('failed_count', 0),
+                "skipped_operations": execution_summary.get('skipped_count', 0),
+                "total_execution_time": execution_summary.get('total_time', 0),
+                "workflow_id": workflow_result.get('workflow_id'),
                 "results": results
             }
         )

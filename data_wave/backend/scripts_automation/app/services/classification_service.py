@@ -1431,17 +1431,84 @@ def classify_and_assign_sensitivity(session: Session, column: Dict[str, Any]) ->
             raise
     
     async def preprocess_data_async(self, config: Dict[str, Any], task_id: str, session: Session):
-        """Asynchronous data preprocessing for large datasets"""
+        """Asynchronous data preprocessing for large datasets with real task management"""
         try:
-            # This would be implemented with proper async task handling
-            result = await self.preprocess_data(config, session)
+            from app.services.task_management_service import TaskManagementService
+            from app.services.background_processing_service import BackgroundProcessingService
+            
+            # Initialize task management services
+            task_service = TaskManagementService()
+            background_service = BackgroundProcessingService()
+            
+            # Update task status to processing
+            await task_service.update_task_status(
+                task_id=task_id,
+                status="processing",
+                progress=0.0,
+                message="Starting data preprocessing"
+            )
+            
+            # Start background preprocessing task
+            preprocessing_task = await background_service.start_preprocessing_task(
+                config=config,
+                task_id=task_id,
+                session=session
+            )
+            
+            # Monitor task progress
+            async def monitor_progress():
+                while True:
+                    task_status = await task_service.get_task_status(task_id)
+                    if task_status.get("status") in ["completed", "failed", "cancelled"]:
+                        break
+                    
+                    # Update progress based on preprocessing stages
+                    progress = await background_service.get_preprocessing_progress(task_id)
+                    await task_service.update_task_status(
+                        task_id=task_id,
+                        progress=progress,
+                        message=f"Preprocessing data: {progress:.1f}% complete"
+                    )
+                    
+                    from .scheduler import SchedulerService
+                    scheduler = SchedulerService()
+                    await scheduler.schedule_task(
+                        task_name="progress_monitor",
+                        delay_seconds=5,
+                        task_func=monitor_progress
+                    )
+            
+            # Start progress monitoring
+            asyncio.create_task(monitor_progress())
+            
+            # Execute preprocessing in background
+            result = await background_service.execute_preprocessing(
+                preprocessing_task=preprocessing_task,
+                config=config,
+                session=session
+            )
             
             # Store result for retrieval
             await self._store_preprocessing_result(task_id, result, session)
             
+            # Update task status to completed
+            await task_service.update_task_status(
+                task_id=task_id,
+                status="completed",
+                progress=100.0,
+                message="Data preprocessing completed successfully"
+            )
+            
         except Exception as e:
             logger.error(f"Error in async preprocessing: {str(e)}")
             await self._store_preprocessing_error(task_id, str(e), session)
+            
+            # Update task status to failed
+            await task_service.update_task_status(
+                task_id=task_id,
+                status="failed",
+                message=f"Preprocessing failed: {str(e)}"
+            )
     
     async def assess_data_quality(self, data: Any, session: Session) -> Dict[str, Any]:
         """Comprehensive data quality assessment"""
@@ -1526,7 +1593,18 @@ def classify_and_assign_sensitivity(session: Session, column: Dict[str, Any]) ->
                 step = len(data) // sample_size
                 sampled_data = [data[i] for i in range(0, len(data), step)][:sample_size]
             else:
-                sampled_data = data[:sample_size]  # Simple truncation
+                # Deterministic reservoir sampling fallback to avoid bias
+                import random
+                rnd = random.Random(42)
+                reservoir = []
+                for i, item in enumerate(data):
+                    if i < sample_size:
+                        reservoir.append(item)
+                    else:
+                        j = rnd.randint(0, i)
+                        if j < sample_size:
+                            reservoir[j] = item
+                sampled_data = reservoir
             
             return sampled_data
             

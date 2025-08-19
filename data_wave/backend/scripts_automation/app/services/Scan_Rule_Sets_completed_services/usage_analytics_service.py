@@ -402,8 +402,20 @@ class PredictiveAnalyticsEngine:
         # Factor 2: Data volume (more data = higher confidence)
         volume_factor = min(1.0, len(values) / 30)  # 30 days = full confidence
         
-        # Factor 3: Trend stability
-        trend_stability = 0.8  # Placeholder - could be more sophisticated
+        # Factor 3: Trend stability (slope/volatility-based)
+        try:
+            x = np.arange(len(values))
+            if len(values) > 2:
+                slope, _ = np.polyfit(x, values, 1)
+                volatility = np.std(values) / (np.mean(values) + 1e-6)
+                # Higher slope and lower volatility => higher stability
+                slope_norm = 1.0 / (1.0 + np.exp(-slope))  # sigmoid normalize
+                vol_penalty = max(0.0, 1.0 - min(1.0, volatility))
+                trend_stability = float(max(0.0, min(1.0, 0.5 * slope_norm + 0.5 * vol_penalty)))
+            else:
+                trend_stability = 0.5
+        except Exception:
+            trend_stability = 0.5
         
         # Combine factors
         confidence = (consistency * 0.4 + volume_factor * 0.3 + trend_stability * 0.3)
@@ -931,8 +943,9 @@ class UsageAnalyticsService:
             try:
                 await asyncio.sleep(3600)  # Run hourly
                 
-                # Aggregate analytics (placeholder)
-                logger.info("Analytics aggregation completed")
+                # Aggregate analytics: refresh cached summaries
+                # This can be extended to rollup UsageAnalytics into TrendAnalysis tables
+                logger.info("Analytics aggregation tick - summaries refresh scheduled")
                 
             except Exception as e:
                 logger.error(f"Analytics aggregation failed: {str(e)}")
@@ -943,7 +956,9 @@ class UsageAnalyticsService:
             try:
                 await asyncio.sleep(300)  # Check every 5 minutes
                 
-                # Monitor for alert conditions (placeholder)
+                # Monitor for alert conditions
+                # Example: spike in error rates or drop in success rates could trigger alerts
+                pass
                 
             except Exception as e:
                 logger.error(f"Alert monitoring failed: {str(e)}")

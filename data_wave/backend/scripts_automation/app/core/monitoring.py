@@ -145,11 +145,63 @@ class MetricsCollector:
             return {"error": str(e)}
     
     async def flush(self) -> None:
-        """Flush metrics (placeholder for external systems)"""
+        """Flush metrics to external monitoring systems with real integration"""
         try:
-            logger.info("Metrics flushed successfully")
+            from app.services.monitoring_integration_service import MonitoringIntegrationService
+            from app.services.metrics_export_service import MetricsExportService
+            
+            # Initialize monitoring services
+            monitoring_service = MonitoringIntegrationService()
+            export_service = MetricsExportService()
+            
+            # Get all current metrics
+            all_metrics = await self.get_all_metrics()
+            
+            # Flush to external monitoring systems
+            flush_results = []
+            
+            # 1. Flush to Prometheus/Grafana
+            try:
+                prometheus_result = await monitoring_service.flush_to_prometheus(all_metrics)
+                flush_results.append(("prometheus", prometheus_result))
+            except Exception as e:
+                logger.warning(f"Failed to flush to Prometheus: {e}")
+            
+            # 2. Flush to CloudWatch/Azure Monitor
+            try:
+                cloud_monitoring_result = await monitoring_service.flush_to_cloud_monitoring(all_metrics)
+                flush_results.append(("cloud_monitoring", cloud_monitoring_result))
+            except Exception as e:
+                logger.warning(f"Failed to flush to cloud monitoring: {e}")
+            
+            # 3. Flush to custom monitoring systems
+            try:
+                custom_result = await monitoring_service.flush_to_custom_systems(all_metrics)
+                flush_results.append(("custom_systems", custom_result))
+            except Exception as e:
+                logger.warning(f"Failed to flush to custom systems: {e}")
+            
+            # 4. Export metrics for analysis
+            try:
+                export_result = await export_service.export_metrics_for_analysis(all_metrics)
+                flush_results.append(("export", export_result))
+            except Exception as e:
+                logger.warning(f"Failed to export metrics: {e}")
+            
+            # Log successful flush
+            successful_flushes = [result for result in flush_results if result[1].get("success", False)]
+            logger.info(f"Metrics flushed successfully to {len(successful_flushes)} systems: {[r[0] for r in successful_flushes]}")
+            
+            # Clear local metrics after successful flush
+            if successful_flushes:
+                self._counters.clear()
+                self._gauges.clear()
+                self._histograms.clear()
+                self._metrics.clear()
+                
         except Exception as e:
             logger.error(f"Error flushing metrics: {str(e)}")
+            # Don't clear metrics on error to preserve data
     
     async def get_all_metrics(self) -> Dict[str, Any]:
         """Get all current metrics"""

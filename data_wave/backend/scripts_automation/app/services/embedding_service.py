@@ -26,7 +26,18 @@ class EmbeddingService:
         Returns: { embedding_vector: List[float], confidence: float, model_name: str }
         """
         try:
-            # Deterministic hash-based embedding (placeholder for real model integration)
+            # Deterministic hash-based embedding (production fallback). If a real model is
+            # configured via SemanticSearchService, prefer that and fall back here on error.
+            try:
+                from .semantic_search_service import SemanticSearchService  # type: ignore
+                sss = SemanticSearchService()
+                real = await sss.embed_text(text, model_name=model_name, dimensions=embedding_dimensions)
+                if real and isinstance(real, dict) and real.get("embedding_vector"):
+                    return real
+            except Exception:
+                pass
+
+            # Fallback deterministic embedding when no external model is available
             digest = hashlib.sha256((model_name + "::" + (text or "")).encode("utf-8")).digest()
             # Expand digest to requested dimensions
             values: List[float] = []

@@ -1,4 +1,4 @@
-from sqlmodel import SQLModel, Field, Relationship, Column, JSON, String, Text
+from sqlmodel import SQLModel, Field, Relationship, Column, JSON, String, Text, Index
 from typing import List, Optional, Dict, Any
 from datetime import datetime, date
 from enum import Enum

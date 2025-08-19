@@ -2858,17 +2858,48 @@ async def _store_agent_system(agent_system: Dict[str, Any], session: Session):
     logger.info(f"Storing agent system {agent_system['id']} with {len(agent_system['agents'])} agents")
 
 async def _extract_documents_from_source(source: Dict[str, Any], session: Session) -> List[Dict[str, Any]]:
-    """Extract documents from knowledge source"""
-    documents = []
-    for i in range(10):
-        doc = {
-            'id': str(uuid.uuid4()),
-            'title': f'Document {i+1} from {source.get("name", "Unknown")}',
-            'content': f'Sample content for document {i+1}',
-            'metadata': {'source_id': source.get('id')}
-        }
-        documents.append(doc)
-    return documents
+    """Extract documents from knowledge source by integrating catalog items and annotations."""
+    try:
+        from app.services.catalog_service import EnhancedCatalogService
+        catalog = EnhancedCatalogService()
+
+        data_source_id = source.get('id')
+        if not data_source_id:
+            return []
+
+        # Pull catalog items for the data source and convert to document-like payloads
+        items = catalog.get_catalog_items_by_data_source(session, data_source_id)
+        documents: List[Dict[str, Any]] = []
+        for item in items:
+            title = f"{getattr(item, 'schema_name', '')}.{getattr(item, 'table_name', '')}".strip('.') or getattr(item, 'name', 'Catalog Item')
+            content_parts = []
+            description = getattr(item, 'description', None)
+            if description:
+                content_parts.append(str(description))
+            sample_values = getattr(item, 'sample_values', None)
+            if sample_values:
+                content_parts.append(f"samples: {sample_values}")
+            lineage = getattr(item, 'lineage', None)
+            if lineage:
+                content_parts.append(f"lineage: {lineage}")
+
+            doc = {
+                'id': str(getattr(item, 'id', uuid.uuid4())),
+                'title': title,
+                'content': '\n'.join(content_parts) or title,
+                'metadata': {
+                    'source_id': data_source_id,
+                    'classification': getattr(item, 'classification', None),
+                    'sensitivity': getattr(item, 'sensitivity_level', None),
+                    'tags': getattr(item, 'tags', []),
+                }
+            }
+            documents.append(doc)
+
+        return documents
+    except Exception as e:
+        logger.warning(f"Falling back in document extraction: {e}")
+        return []
 
 async def _process_documents(documents: List[Dict[str, Any]], processing_mode: str, session: Session) -> List[Dict[str, Any]]:
     """Process documents with advanced NLP"""
@@ -2878,12 +2909,34 @@ async def _process_documents(documents: List[Dict[str, Any]], processing_mode: s
     return documents
 
 async def _create_semantic_embeddings(processed_docs: List[Dict[str, Any]], session: Session) -> Dict[str, Any]:
-    """Create semantic embeddings for documents"""
-    return {
-        'model': 'sentence-transformer',
-        'dimension': 384,
-        'documents': {doc['id']: [0.1] * 384 for doc in processed_docs}
-    }
+    """Create semantic embeddings for documents using the enterprise EmbeddingService with real provider fallback."""
+    try:
+        from app.services.embedding_service import EmbeddingService
+        embedder = EmbeddingService()
+
+        documents_embeddings: Dict[str, Any] = {}
+        model_name = 'enterprise-default'
+        dimensions = 384
+
+        for doc in processed_docs:
+            content = doc.get('content') or doc.get('title') or ''
+            emb = await embedder.generate_embeddings(
+                text=content,
+                model_name=model_name,
+                embedding_dimensions=dimensions,
+                include_metadata=True,
+                include_confidence=True,
+            )
+            documents_embeddings[doc['id']] = emb.get('embedding_vector', [])
+
+        return {
+            'model': model_name,
+            'dimension': dimensions,
+            'documents': documents_embeddings,
+        }
+    except Exception as e:
+        logger.error(f"Failed to create semantic embeddings: {e}")
+        return {'model': 'fallback', 'dimension': 0, 'documents': {}}
 
 async def _create_traditional_indices(processed_docs: List[Dict[str, Any]], session: Session) -> Dict[str, Any]:
     """Create traditional search indices"""

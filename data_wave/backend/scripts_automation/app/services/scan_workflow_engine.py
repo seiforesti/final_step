@@ -24,6 +24,8 @@ from ..core.cache_manager import EnterpriseCacheManager as CacheManager
 from ..core.logging_config import get_logger
 from ..core.config import settings
 from ..models.scan_workflow_models import *
+from ..models.auth_models import User, Role, UserRole
+from ..models.organization_models import Organization, OrganizationSetting
 from ..services.ai_service import EnterpriseAIService as AIService
 from ..services.enterprise_scan_orchestrator import EnterpriseScanOrchestrator
 from ..services.scan_intelligence_service import ScanIntelligenceService

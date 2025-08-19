@@ -509,6 +509,73 @@ class RacineCollaborationService:
                 for wf in workflows
             ]
         }
+
+    async def list_session_messages(
+        self,
+        session_id: str,
+        limit: int = 50,
+        offset: int = 0,
+        message_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """List messages for a collaboration session with pagination and optional type filter."""
+        try:
+            query = self.db.query(RacineCollaborationMessage).filter(
+                RacineCollaborationMessage.session_id == session_id
+            )
+            if message_type:
+                query = query.filter(RacineCollaborationMessage.message_type == message_type)
+
+            total_count = query.count()
+            rows = (
+                query.order_by(desc(RacineCollaborationMessage.timestamp))
+                .offset(offset)
+                .limit(limit)
+                .all()
+            )
+
+            messages = [
+                {
+                    'id': m.id,
+                    'sender_id': m.sender_id,
+                    'content': m.content,
+                    'type': m.message_type,
+                    'timestamp': m.timestamp.isoformat(),
+                    'metadata': getattr(m, 'message_metadata', {}) or {}
+                }
+                for m in rows
+            ]
+
+            return {
+                'session_id': session_id,
+                'messages': messages,
+                'total_count': total_count,
+                'has_more': (offset + len(rows)) < total_count,
+            }
+
+        except Exception as e:
+            raise Exception(f"Failed to list session messages: {str(e)}")
+
+    async def list_session_participants(self, session_id: str) -> List[Dict[str, Any]]:
+        """Return all active participants for the given session."""
+        try:
+            rows = self.db.query(RacineCollaborationParticipant).filter(
+                RacineCollaborationParticipant.session_id == session_id,
+                RacineCollaborationParticipant.status == 'active'
+            ).order_by(asc(RacineCollaborationParticipant.joined_at)).all()
+
+            return [
+                {
+                    'id': p.id,
+                    'user_id': p.user_id,
+                    'role': p.role,
+                    'permissions': p.permissions,
+                    'joined_at': p.joined_at.isoformat() if getattr(p, 'joined_at', None) else None,
+                    'connection_status': getattr(p, 'connection_status', 'unknown')
+                }
+                for p in rows
+            ]
+        except Exception as e:
+            raise Exception(f"Failed to list participants: {str(e)}")
     
     async def send_collaboration_message(
         self, 
@@ -1314,9 +1381,29 @@ class RacineCollaborationService:
     ):
         """Track collaboration event for analytics"""
         
-        # This would typically store events in a time-series database
-        # For now, we'll just log the event
-        print(f"Collaboration Event: {session_id}, {user_id}, {event_type}, {event_data}")
+        # Store events via audit/event services for analytics ingestion
+        try:
+            from ...services.event_service import EventBus
+            from ...services.audit_service import AuditService
+            await AuditService.create_audit_log(
+                session=self.db,
+                audit_data={
+                    'entity_type': 'collaboration_session',
+                    'entity_id': session_id,
+                    'action': f'event:{event_type}',
+                    'details': event_data,
+                },
+                user_id=user_id,
+            )
+            EventBus.publish('collaboration.event', {
+                'session_id': session_id,
+                'user_id': user_id,
+                'event_type': event_type,
+                'event_data': event_data,
+            })
+        except Exception:
+            logger.debug("Falling back to console event logging")
+            print(f"Collaboration Event: {session_id}, {user_id}, {event_type}, {event_data}")
     
     async def _track_session_event(
         self, 

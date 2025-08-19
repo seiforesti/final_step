@@ -436,17 +436,22 @@ async def get_available_metric_groups(
 # Widget Management Endpoints
 # =====================================================================================
 
-@router.post("/widgets/create", response_model=WidgetResponse)
-async def create_dashboard_widget(
+@router.post("/widgets/", response_model=WidgetResponse)
+async def create_widget(
     request: WidgetCreateRequest,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """Create a new dashboard widget with cross-group data integration"""
+    """Create a new dashboard widget with cross-group data integration using real dashboard service"""
     try:
-        dashboard_service = RacineDashboardService(db)
+        from app.services.racine_services.racine_dashboard_service import RacineDashboardService
+        from app.services.widget_creation_service import WidgetCreationService
         
-        # Create widget (this would be implemented in the service)
+        # Initialize dashboard and widget services
+        dashboard_service = RacineDashboardService(db)
+        widget_service = WidgetCreationService()
+        
+        # Create widget configuration with cross-group data integration
         widget_config = {
             'type': request.widget_type,
             'title': request.title,
@@ -457,14 +462,30 @@ async def create_dashboard_widget(
             'filters': request.filters,
             'position': request.position,
             'size': request.size,
-            'refresh_interval': request.refresh_interval
+            'refresh_interval': request.refresh_interval,
+            'cross_group_integration': True,
+            'user_id': current_user.id
         }
         
-        # This would create the widget through the dashboard service
-        widget_id = str(uuid.uuid4())
+        # Create widget through the dashboard service with real implementation
+        widget_data = await dashboard_service.create_widget(
+            dashboard_id=request.dashboard_id,
+            widget_config=widget_config,
+            user_id=current_user.id
+        )
+        
+        # Validate widget creation
+        if not widget_data or 'widget_id' not in widget_data:
+            raise HTTPException(status_code=400, detail="Failed to create widget")
+        
+        # Get created widget details
+        widget_details = await widget_service.get_widget_details(
+            widget_id=widget_data['widget_id'],
+            include_data=True
+        )
         
         return WidgetResponse(
-            id=widget_id,
+            id=widget_data['widget_id'],
             dashboard_id=request.dashboard_id,
             widget_type=request.widget_type,
             title=request.title,
@@ -475,10 +496,13 @@ async def create_dashboard_widget(
             width=request.size.get('width', 4),
             height=request.size.get('height', 3),
             refresh_interval=request.refresh_interval,
-            status='active'
+            status='active',
+            data_source=widget_details.get('data_source'),
+            last_updated=widget_details.get('last_updated', datetime.utcnow().isoformat())
         )
         
     except Exception as e:
+        logger.error(f"Error creating widget: {str(e)}")
         raise HTTPException(status_code=400, detail=str(e))
 
 # =====================================================================================

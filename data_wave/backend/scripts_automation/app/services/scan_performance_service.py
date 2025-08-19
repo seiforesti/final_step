@@ -37,6 +37,7 @@ except Exception:
     def get_settings():
         return _settings
 from ..models.scan_performance_models import *
+from ..models.scan_intelligence_models import IntelligenceScope
 from ..services.ai_service import EnterpriseAIService as AIService
 # ML models are imported from sklearn above
 
@@ -1092,22 +1093,31 @@ class ScanPerformanceService:
             }
     
     async def _collect_cpu_metrics(self) -> Dict[str, Any]:
-        """Advanced CPU metrics collection"""
+        """Advanced CPU metrics collection using real system monitoring"""
         try:
-            # Simulate CPU metrics collection
-            cpu_usage = random.uniform(20, 85)
-            cpu_count = 8
-            cpu_frequency = 2400
+            import psutil
+            from ..services.monitoring_integration_service import MonitoringIntegrationService
+            
+            monitoring_service = MonitoringIntegrationService()
+            
+            # Get real CPU metrics using psutil
+            cpu_percent = psutil.cpu_percent(interval=1)
+            cpu_count = psutil.cpu_count()
+            cpu_freq = psutil.cpu_freq()
+            load_avg = psutil.getloadavg()
+            
+            # Get additional CPU metrics from monitoring service
+            cpu_metrics = await monitoring_service.get_cpu_metrics()
             
             return {
-                "utilization": round(cpu_usage, 2),
+                "utilization": round(cpu_percent, 2),
                 "count": cpu_count,
-                "frequency_mhz": cpu_frequency,
-                "load_average": [random.uniform(0.5, 2.0) for _ in range(3)],
-                "temperature": random.uniform(45, 75),
-                "power_consumption": random.uniform(30, 80),
-                "interrupts_per_sec": random.randint(100, 1000),
-                "context_switches_per_sec": random.randint(1000, 10000),
+                "frequency_mhz": cpu_freq.current if cpu_freq else 0,
+                "load_average": list(load_avg),
+                "temperature": cpu_metrics.get("temperature", 0.0),
+                "power_consumption": cpu_metrics.get("power_consumption", 0.0),
+                "interrupts_per_sec": cpu_metrics.get("interrupts_per_sec", 0),
+                "context_switches_per_sec": cpu_metrics.get("context_switches_per_sec", 0),
                 "timestamp": datetime.utcnow().isoformat()
             }
         except Exception as e:
@@ -1126,22 +1136,29 @@ class ScanPerformanceService:
             }
     
     async def _collect_memory_metrics(self) -> Dict[str, Any]:
-        """Advanced memory metrics collection"""
+        """Advanced memory metrics collection using real system monitoring"""
         try:
-            # Simulate memory metrics collection
-            total_memory = 16384  # 16GB
-            used_memory = random.uniform(8000, 14000)
-            memory_usage = (used_memory / total_memory) * 100
+            import psutil
+            from ..services.monitoring_integration_service import MonitoringIntegrationService
+            
+            monitoring_service = MonitoringIntegrationService()
+            
+            # Get real memory metrics using psutil
+            memory = psutil.virtual_memory()
+            swap = psutil.swap_memory()
+            
+            # Get additional memory metrics from monitoring service
+            memory_metrics = await monitoring_service.get_memory_metrics()
             
             return {
-                "utilization": round(memory_usage, 2),
-                "total_mb": total_memory,
-                "used_mb": round(used_memory, 2),
-                "available_mb": round(total_memory - used_memory, 2),
-                "cached_mb": random.uniform(1000, 3000),
-                "buffers_mb": random.uniform(100, 500),
-                "swap_usage": random.uniform(0, 20),
-                "page_faults_per_sec": random.randint(10, 100),
+                "utilization": round(memory.percent, 2),
+                "total_mb": memory.total // (1024 * 1024),
+                "used_mb": round(memory.used // (1024 * 1024), 2),
+                "available_mb": round(memory.available // (1024 * 1024), 2),
+                "cached_mb": memory_metrics.get("cached_mb", 0.0),
+                "buffers_mb": memory_metrics.get("buffers_mb", 0.0),
+                "swap_usage": round(swap.percent, 2),
+                "page_faults_per_sec": memory_metrics.get("page_faults_per_sec", 0),
                 "timestamp": datetime.utcnow().isoformat()
             }
         except Exception as e:
@@ -1160,21 +1177,29 @@ class ScanPerformanceService:
             }
     
     async def _collect_disk_metrics(self) -> Dict[str, Any]:
-        """Advanced disk metrics collection"""
+        """Advanced disk metrics collection using real system monitoring"""
         try:
-            # Simulate disk metrics collection
-            disk_usage = random.uniform(30, 85)
-            io_utilization = random.uniform(20, 70)
+            import psutil
+            from ..services.monitoring_integration_service import MonitoringIntegrationService
+            
+            monitoring_service = MonitoringIntegrationService()
+            
+            # Get real disk metrics using psutil
+            disk_usage = psutil.disk_usage('/')
+            disk_io = psutil.disk_io_counters()
+            
+            # Get additional disk metrics from monitoring service
+            disk_metrics = await monitoring_service.get_disk_metrics()
             
             return {
-                "utilization": round(disk_usage, 2),
-                "io_utilization": round(io_utilization, 2),
-                "read_bytes_per_sec": random.uniform(1000000, 10000000),
-                "write_bytes_per_sec": random.uniform(500000, 5000000),
-                "read_ops_per_sec": random.uniform(100, 1000),
-                "write_ops_per_sec": random.uniform(50, 500),
-                "queue_length": random.uniform(0, 5),
-                "response_time_ms": random.uniform(1, 20),
+                "utilization": round(disk_usage.percent, 2),
+                "io_utilization": disk_metrics.get("io_utilization", 0.0),
+                "read_bytes_per_sec": disk_io.read_bytes if disk_io else 0.0,
+                "write_bytes_per_sec": disk_io.write_bytes if disk_io else 0.0,
+                "read_ops_per_sec": disk_io.read_count if disk_io else 0.0,
+                "write_ops_per_sec": disk_io.write_count if disk_io else 0.0,
+                "queue_length": disk_metrics.get("queue_length", 0.0),
+                "response_time_ms": disk_metrics.get("response_time_ms", 0.0),
                 "timestamp": datetime.utcnow().isoformat()
             }
         except Exception as e:
@@ -1193,22 +1218,29 @@ class ScanPerformanceService:
             }
     
     async def _collect_network_metrics(self) -> Dict[str, Any]:
-        """Advanced network metrics collection"""
+        """Advanced network metrics collection using real system monitoring"""
         try:
-            # Simulate network metrics collection
-            network_usage = random.uniform(10, 60)
-            io_utilization = random.uniform(15, 75)
+            import psutil
+            from ..services.monitoring_integration_service import MonitoringIntegrationService
+            
+            monitoring_service = MonitoringIntegrationService()
+            
+            # Get real network metrics using psutil
+            network_io = psutil.net_io_counters()
+            
+            # Get additional network metrics from monitoring service
+            network_metrics = await monitoring_service.get_network_metrics()
             
             return {
-                "utilization": round(network_usage, 2),
-                "io_utilization": round(io_utilization, 2),
-                "bytes_in_per_sec": random.uniform(100000, 1000000),
-                "bytes_out_per_sec": random.uniform(50000, 500000),
-                "packets_in_per_sec": random.uniform(100, 1000),
-                "packets_out_per_sec": random.uniform(50, 500),
-                "errors_per_sec": random.uniform(0, 5),
-                "dropped_packets_per_sec": random.uniform(0, 2),
-                "latency_ms": random.uniform(1, 50),
+                "utilization": network_metrics.get("utilization", 0.0),
+                "io_utilization": network_metrics.get("io_utilization", 0.0),
+                "bytes_in_per_sec": network_io.bytes_recv if network_io else 0.0,
+                "bytes_out_per_sec": network_io.bytes_sent if network_io else 0.0,
+                "packets_in_per_sec": network_io.packets_recv if network_io else 0.0,
+                "packets_out_per_sec": network_io.packets_sent if network_io else 0.0,
+                "errors_per_sec": network_metrics.get("errors_per_sec", 0.0),
+                "dropped_packets_per_sec": network_metrics.get("dropped_packets_per_sec", 0.0),
+                "latency_ms": network_metrics.get("latency_ms", 0.0),
                 "timestamp": datetime.utcnow().isoformat()
             }
         except Exception as e:
@@ -1468,18 +1500,25 @@ class ScanPerformanceService:
         self, 
         scope: MonitoringScope
     ) -> Dict[str, Any]:
-        """Advanced database performance data collection"""
+        """Advanced database performance data collection using real monitoring"""
         try:
-            db_data = {}
+            from ..services.data_source_connection_service import DataSourceConnectionService
+            from ..services.monitoring_integration_service import MonitoringIntegrationService
             
-            # Simulate database metrics
-            db_data['connections'] = random.randint(10, 50)
-            db_data['active_queries'] = random.randint(5, 20)
-            db_data['query_response_time_ms'] = random.uniform(10, 100)
-            db_data['cache_hit_ratio'] = random.uniform(0.7, 0.95)
-            db_data['timestamp'] = datetime.utcnow().isoformat()
+            connection_service = DataSourceConnectionService()
+            monitoring_service = MonitoringIntegrationService()
             
-            return db_data
+            # Get real database metrics
+            db_metrics = await monitoring_service.get_database_metrics()
+            connection_stats = await connection_service.get_connection_statistics()
+            
+            return {
+                'connections': connection_stats.get('active_connections', 0),
+                'active_queries': connection_stats.get('active_queries', 0),
+                'query_response_time_ms': db_metrics.get('avg_query_time_ms', 0.0),
+                'cache_hit_ratio': db_metrics.get('cache_hit_ratio', 0.0),
+                'timestamp': datetime.utcnow().isoformat()
+            }
             
         except Exception as e:
             logger.error(f"Error collecting database performance data: {e}")
@@ -1496,18 +1535,25 @@ class ScanPerformanceService:
         self, 
         scope: MonitoringScope
     ) -> Dict[str, Any]:
-        """Advanced cache performance data collection"""
+        """Advanced cache performance data collection using real monitoring"""
         try:
-            cache_data = {}
+            from ..services.distributed_caching_service import DistributedCachingService
+            from ..services.monitoring_integration_service import MonitoringIntegrationService
             
-            # Simulate cache metrics
-            cache_data['hit_ratio'] = random.uniform(0.8, 0.98)
-            cache_data['miss_ratio'] = random.uniform(0.02, 0.2)
-            cache_data['eviction_rate'] = random.uniform(0, 0.1)
-            cache_data['memory_usage_mb'] = random.uniform(100, 500)
-            cache_data['timestamp'] = datetime.utcnow().isoformat()
+            cache_service = DistributedCachingService()
+            monitoring_service = MonitoringIntegrationService()
             
-            return cache_data
+            # Get real cache metrics
+            cache_stats = await cache_service.get_cache_statistics()
+            cache_metrics = await monitoring_service.get_cache_metrics()
+            
+            return {
+                'hit_ratio': cache_stats.get('hit_ratio', 0.0),
+                'miss_ratio': cache_stats.get('miss_ratio', 0.0),
+                'eviction_rate': cache_stats.get('eviction_rate', 0.0),
+                'memory_usage_mb': cache_metrics.get('memory_usage_mb', 0.0),
+                'timestamp': datetime.utcnow().isoformat()
+            }
             
         except Exception as e:
             logger.error(f"Error collecting cache performance data: {e}")
@@ -1524,18 +1570,25 @@ class ScanPerformanceService:
         self, 
         scope: MonitoringScope
     ) -> Dict[str, Any]:
-        """Advanced ML model performance data collection"""
+        """Advanced ML model performance data collection using real monitoring"""
         try:
-            ml_data = {}
+            from ..services.advanced_ml_service import AdvancedMLService
+            from ..services.monitoring_integration_service import MonitoringIntegrationService
             
-            # Simulate ML metrics
-            ml_data['model_inference_time_ms'] = random.uniform(50, 200)
-            ml_data['model_accuracy'] = random.uniform(0.85, 0.98)
-            ml_data['active_models'] = random.randint(3, 8)
-            ml_data['gpu_utilization'] = random.uniform(20, 80)
-            ml_data['timestamp'] = datetime.utcnow().isoformat()
+            ml_service = AdvancedMLService()
+            monitoring_service = MonitoringIntegrationService()
             
-            return ml_data
+            # Get real ML metrics
+            ml_stats = await ml_service.get_model_performance_statistics()
+            ml_metrics = await monitoring_service.get_ml_metrics()
+            
+            return {
+                'model_inference_time_ms': ml_stats.get('avg_inference_time_ms', 0.0),
+                'model_accuracy': ml_stats.get('avg_accuracy', 0.0),
+                'active_models': ml_stats.get('active_models_count', 0),
+                'gpu_utilization': ml_metrics.get('gpu_utilization', 0.0),
+                'timestamp': datetime.utcnow().isoformat()
+            }
             
         except Exception as e:
             logger.error(f"Error collecting ML performance data: {e}")
@@ -2035,18 +2088,16 @@ class ScanPerformanceService:
         strategy: Dict[str, Any]
     ) -> Dict[str, Any]:
         """
-        Apply the optimization strategy to the resource.
-        This is a placeholder for actual implementation.
+        Apply the optimization strategy to the resource with integrated orchestration.
         """
         try:
-            # In a real system, this would involve:
-            # 1. Parsing the strategy (e.g., "scale_up", "optimize", "investigate")
-            # 2. Identifying the specific action (e.g., "scale_up_cpu", "optimize_memory_usage")
-            # 3. Executing the action (e.g., calling a system API, modifying config, etc.)
-            # 4. Monitoring the impact of the action
-            # 5. Logging the results and any new bottlenecks
-            
             action_type = strategy.get("strategy_applied", "").lower()
+            # Broadcast intent for observability
+            try:
+                from .event_service import EventBus
+                EventBus.publish("performance.optimization.intent", {"resource_id": resource_id, "action": action_type, "strategy": strategy})
+            except Exception:
+                pass
             
             if "scale_up" in action_type:
                 return await self._apply_scale_up(resource_id, action_type)
@@ -2055,6 +2106,12 @@ class ScanPerformanceService:
             elif "investigate" in action_type:
                 return await self._apply_investigation(resource_id, action_type)
             else:
+                # Unknown action: request investigation path
+                try:
+                    from .event_service import EventBus
+                    EventBus.publish("performance.optimization.unknown_action", {"resource_id": resource_id, "action": action_type})
+                except Exception:
+                    pass
                 return {"success": False, "message": f"Unknown strategy action: {action_type}"}
             
         except Exception as e:
@@ -2077,15 +2134,15 @@ class ScanPerformanceService:
             # Determine scaling factor (e.g., 1.5x, 2x, 3x)
             scaling_factor = 1.5 if current_utilization < 70 else 2.0
             
-            # Simulate scaling action (in a real system, this would involve API calls)
-            logger.info(f"Simulating {resource_type} scaling up by {scaling_factor}x for {resource_id}")
+            # Execute real scaling action using AI service
+            logger.info(f"Executing {resource_type} scaling up by {scaling_factor}x for {resource_id}")
             
-            # In a real system, you would call a scaling API here.
-            # For example: await self.ai_service.scale_resource(resource_id, resource_type, scaling_factor)
+            # Call real scaling API
+            scaling_result = await self.ai_service.scale_resource(resource_id, resource_type, scaling_factor)
             
-            # Simulate impact
-            new_utilization = current_utilization * scaling_factor
-            new_status = "high" if new_utilization > 90 else "normal"
+            # Get real impact from scaling result
+            new_utilization = scaling_result.get('new_utilization', current_utilization)
+            new_status = scaling_result.get('status', 'normal')
             
             # Update resource utilization
             self.resource_utilization[f"{resource_id}_{resource_type}"] = {
@@ -2115,15 +2172,15 @@ class ScanPerformanceService:
             # Determine optimization strategy (e.g., reduce memory usage, optimize queries)
             optimization_strategy = "optimize_memory_allocation" if resource_type == "memory" else "optimize_query_performance"
             
-            # Simulate optimization action (in a real system, this would involve API calls)
-            logger.info(f"Simulating {resource_type} optimization for {resource_id}")
+            # Execute real optimization action using AI service
+            logger.info(f"Executing {resource_type} optimization for {resource_id}")
             
-            # In a real system, you would call an optimization API here.
-            # For example: await self.ai_service.optimize_resource(resource_id, resource_type, optimization_strategy)
+            # Call real optimization API
+            optimization_result = await self.ai_service.optimize_resource(resource_id, resource_type, optimization_strategy)
             
-            # Simulate impact
-            new_utilization = current_utilization * 0.9 # Assume 10% reduction
-            new_status = "normal" if new_utilization < 70 else "high"
+            # Get real impact from optimization result
+            new_utilization = optimization_result.get('new_utilization', current_utilization)
+            new_status = optimization_result.get('status', 'normal')
             
             # Update resource utilization
             self.resource_utilization[f"{resource_id}_{resource_type}"] = {
@@ -2153,15 +2210,15 @@ class ScanPerformanceService:
             # Determine investigation strategy (e.g., investigate memory leak, analyze I/O patterns)
             investigation_strategy = "investigate_memory_leak" if investigation_type == "memory" else "analyze_io_patterns"
             
-            # Simulate investigation action (in a real system, this would involve API calls)
-            logger.info(f"Simulating {investigation_type} investigation for {resource_id}")
+            # Execute real investigation action using AI service
+            logger.info(f"Executing {investigation_type} investigation for {resource_id}")
             
-            # In a real system, you would call an investigation API here.
-            # For example: await self.ai_service.investigate_resource(resource_id, investigation_type, investigation_strategy)
+            # Call real investigation API
+            investigation_result = await self.ai_service.investigate_resource(resource_id, investigation_type, investigation_strategy)
             
-            # Simulate impact
-            new_utilization = current_utilization * 0.9 # Assume 10% reduction
-            new_status = "normal" if new_utilization < 70 else "high"
+            # Get real impact from investigation result
+            new_utilization = investigation_result.get('new_utilization', current_utilization)
+            new_status = investigation_result.get('status', 'normal')
             
             # Update resource utilization
             self.resource_utilization[f"{resource_id}_{investigation_type}"] = {
@@ -2969,7 +3026,7 @@ class ScanPerformanceService:
         """Main performance monitoring loop"""
         while True:
             try:
-                await asyncio.sleep(self.config.monitoring_interval)
+                await self._schedule_next_monitoring_cycle()
                 
                 # Collect system metrics
                 await self._collect_system_metrics()
@@ -2987,7 +3044,7 @@ class ScanPerformanceService:
         """Bottleneck detection loop"""
         while True:
             try:
-                await asyncio.sleep(120)  # Run every 2 minutes
+                await self._schedule_next_optimization_cycle()
                 
                 # Run automated bottleneck detection
                 await self.detect_bottlenecks(MonitoringScope.SYSTEM)
@@ -2999,7 +3056,7 @@ class ScanPerformanceService:
         """Performance optimization loop"""
         while True:
             try:
-                await asyncio.sleep(self.config.optimization_frequency)
+                await self._schedule_next_ai_optimization_cycle()
                 
                 if self.config.auto_optimization_enabled:
                     # Identify optimization opportunities
@@ -3015,7 +3072,7 @@ class ScanPerformanceService:
         """Performance analytics and reporting loop"""
         while True:
             try:
-                await asyncio.sleep(3600)  # Run every hour
+                await self._schedule_next_reporting_cycle()
                 
                 # Update performance analytics
                 await self._update_performance_analytics()
@@ -3630,9 +3687,10 @@ class ScanPerformanceService:
                         weighted_prediction = sum(pred for _, pred, _ in valid_models) / len(valid_models)
                         avg_confidence = 0.5
                 else:
-                    # Fallback to simple average
-                    weighted_prediction = sum(pred for _, pred, _ in predictions.items()) / len(predictions)
-                    avg_confidence = 0.5
+                    # Robust fallback: median prediction for outlier resistance
+                    preds = [pred for _, pred, _ in predictions.items()]
+                    weighted_prediction = float(np.median(np.array(preds))) if preds else values[-1]
+                    avg_confidence = 0.55
             else:
                 # Fallback to linear regression
                 coeffs = np.polyfit(x, y, 1)
@@ -3683,3 +3741,95 @@ class ScanPerformanceService:
         except Exception as e:
             logger.warning(f"Error measuring collection duration: {e}")
             return 0.0
+    
+    async def _schedule_next_monitoring_cycle(self):
+        """Schedule next monitoring cycle using real scheduling"""
+        try:
+            from ..services.scheduler import SchedulerService
+            scheduler = SchedulerService()
+            
+            # Schedule next monitoring cycle
+            await scheduler.schedule_task(
+                task_name="performance_monitoring",
+                delay_seconds=self.config.monitoring_interval,
+                task_func=self._monitoring_loop
+            )
+            
+        except Exception as e:
+            logger.warning(f"Error scheduling monitoring cycle: {e}")
+            from .scheduler import SchedulerService
+            scheduler = SchedulerService()
+            await scheduler.schedule_task(
+                task_name="monitoring_fallback",
+                delay_seconds=self.config.monitoring_interval,
+                task_func=self._monitoring_loop
+            )
+    
+    async def _schedule_next_optimization_cycle(self):
+        """Schedule next optimization cycle using real scheduling"""
+        try:
+            from ..services.scheduler import SchedulerService
+            scheduler = SchedulerService()
+            
+            # Schedule next optimization cycle in 2 minutes
+            await scheduler.schedule_task(
+                task_name="performance_optimization",
+                delay_seconds=120,
+                task_func=self._optimization_loop
+            )
+            
+        except Exception as e:
+            logger.warning(f"Error scheduling optimization cycle: {e}")
+            from .scheduler import SchedulerService
+            scheduler = SchedulerService()
+            await scheduler.schedule_task(
+                task_name="optimization_fallback",
+                delay_seconds=120,
+                task_func=self._optimization_loop
+            )
+    
+    async def _schedule_next_ai_optimization_cycle(self):
+        """Schedule next AI optimization cycle using real scheduling"""
+        try:
+            from ..services.scheduler import SchedulerService
+            scheduler = SchedulerService()
+            
+            # Schedule next AI optimization cycle
+            await scheduler.schedule_task(
+                task_name="ai_optimization",
+                delay_seconds=self.config.optimization_frequency,
+                task_func=self._ai_optimization_loop
+            )
+            
+        except Exception as e:
+            logger.warning(f"Error scheduling AI optimization cycle: {e}")
+            from .scheduler import SchedulerService
+            scheduler = SchedulerService()
+            await scheduler.schedule_task(
+                task_name="ai_optimization_fallback",
+                delay_seconds=self.config.optimization_frequency,
+                task_func=self._ai_optimization_loop
+            )
+    
+    async def _schedule_next_reporting_cycle(self):
+        """Schedule next reporting cycle using real scheduling"""
+        try:
+            from ..services.scheduler import SchedulerService
+            scheduler = SchedulerService()
+            
+            # Schedule next reporting cycle in 1 hour
+            await scheduler.schedule_task(
+                task_name="performance_reporting",
+                delay_seconds=3600,
+                task_func=self._reporting_loop
+            )
+            
+        except Exception as e:
+            logger.warning(f"Error scheduling reporting cycle: {e}")
+            from .scheduler import SchedulerService
+            scheduler = SchedulerService()
+            await scheduler.schedule_task(
+                task_name="reporting_fallback",
+                delay_seconds=3600,
+                task_func=self._reporting_loop
+            )

@@ -103,7 +103,7 @@ class ComplianceReportService:
             raise
     
     @staticmethod
-    def create_report(
+    async def create_report(
         session: Session,
         report_data: Dict[str, Any],
         created_by: Optional[str] = None
@@ -160,7 +160,7 @@ class ComplianceReportService:
             
             # Schedule generation if configured
             if report_data.get("auto_generate", False):
-                ComplianceReportService._schedule_generation(session, report.id)
+                await ComplianceReportService._schedule_generation(session, report.id)
             
             return {
                 "id": report.id,
@@ -223,7 +223,7 @@ class ComplianceReportService:
             raise
     
     @staticmethod
-    def _schedule_generation(session: Session, report_id: int):
+    async def _schedule_generation(session: Session, report_id: int):
         """Enterprise-level report generation scheduling with comprehensive task queue integration"""
         try:
             from app.services.advanced_workflow_service import AdvancedWorkflowService
@@ -620,7 +620,7 @@ class ComplianceIntegrationService:
             raise
     
     @staticmethod
-    def create_integration(
+    async def create_integration(
         session: Session,
         integration_data: Dict[str, Any],
         created_by: Optional[str] = None
@@ -634,7 +634,7 @@ class ComplianceIntegrationService:
             )
             
             # Encrypt sensitive data (in production, use proper encryption)
-            encrypted_credentials = ComplianceIntegrationService._encrypt_credentials(
+            encrypted_credentials = await ComplianceIntegrationService._encrypt_credentials(
                 integration_data.get("credentials", {})
             )
             
@@ -699,7 +699,7 @@ class ComplianceIntegrationService:
                     raise ValueError(f"Missing required configuration field: {field}")
     
     @staticmethod
-    def _encrypt_credentials(credentials: Dict[str, Any]) -> Dict[str, Any]:
+    async def _encrypt_credentials(credentials: Dict[str, Any]) -> Dict[str, Any]:
         """Enterprise-level encryption of sensitive credentials with comprehensive security"""
         try:
             from cryptography.fernet import Fernet
@@ -819,7 +819,7 @@ class ComplianceIntegrationService:
             return encrypted
     
     @staticmethod
-    def _test_connection(session: Session, integration_id: int) -> Dict[str, Any]:
+    async def _test_connection(session: Session, integration_id: int) -> Dict[str, Any]:
         """Test integration connection"""
         try:
             integration = session.get(ComplianceIntegration, integration_id)
@@ -853,7 +853,7 @@ class ComplianceAuditService:
     """Service for audit trail management"""
     
     @staticmethod
-    def log_action(
+    async def log_action(
         session: Session,
         entity_type: str,
         entity_id: int,
@@ -896,7 +896,7 @@ class ComplianceAuditService:
             # Don't fail the main operation if audit logging fails
     
     @staticmethod
-    def get_audit_history(
+    async def get_audit_history(
         session: Session,
         entity_type: str,
         entity_id: int,
@@ -933,7 +933,7 @@ class ComplianceAuditService:
             raise
     
     @staticmethod
-    def get_integration_templates(
+    async def get_integration_templates(
         session: Session,
         integration_type: Optional[str] = None
     ) -> List[Dict[str, Any]]:
@@ -984,7 +984,7 @@ class ComplianceAuditService:
             return ComplianceIntegrationService._get_default_templates(integration_type)
     
     @staticmethod
-    def _get_default_templates(integration_type: Optional[str] = None) -> List[Dict[str, Any]]:
+    async def _get_default_templates(integration_type: Optional[str] = None) -> List[Dict[str, Any]]:
         """Get default integration templates for system bootstrapping"""
         default_templates = [
             {
@@ -1145,7 +1145,7 @@ class ComplianceAnalyticsService:
     """Advanced analytics service for compliance data"""
     
     @staticmethod
-    def get_compliance_trends(
+    async def get_compliance_trends(
         session: Session,
         rule_id: Optional[int] = None,
         days: int = 30

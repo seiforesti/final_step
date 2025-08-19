@@ -1043,11 +1043,23 @@ class AdvancedScanScheduler:
                 # Process recurring schedules
                 await self._process_recurring_schedules()
                 
-                await asyncio.sleep(30)  # Check every 30 seconds
+                from .scheduler import SchedulerService
+                scheduler = SchedulerService()
+                await scheduler.schedule_task(
+                    task_name="scan_scheduling",
+                    delay_seconds=30,
+                    task_func=self._scheduling_loop
+                )
                 
             except Exception as e:
                 logger.error(f"Error in scheduling loop: {e}")
-                await asyncio.sleep(60)
+                from .scheduler import SchedulerService
+                scheduler = SchedulerService()
+                await scheduler.schedule_task(
+                    task_name="scan_scheduling_fallback",
+                    delay_seconds=60,
+                    task_func=self._scheduling_loop
+                )
     
     async def _check_dependencies_ready(self, scheduled_scan: ScheduledScan) -> bool:
         """Check if all dependencies are satisfied"""

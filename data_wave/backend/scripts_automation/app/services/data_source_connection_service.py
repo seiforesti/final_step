@@ -669,7 +669,7 @@ class MySQLConnector(BaseConnector):
             engine = create_engine(connection_string)
             
             with engine.connect() as conn:
-                # Get basic statistics
+                # Get comprehensive statistics
                 stats = conn.execute(text(f"""
                     SELECT 
                         COUNT(*) as total_rows,
@@ -679,6 +679,19 @@ class MySQLConnector(BaseConnector):
                         MAX(`{column_name}`) as max_value
                     FROM `{schema_name}`.`{table_name}`
                 """)).mappings().first()
+                # Numeric distribution and moments
+                numeric_moments = {}
+                try:
+                    numeric_moments = conn.execute(text(f"""
+                        SELECT
+                            AVG(CAST(`{column_name}` AS DECIMAL(20,6))) AS mean,
+                            STDDEV_POP(CAST(`{column_name}` AS DECIMAL(20,6))) AS stddev,
+                            VAR_POP(CAST(`{column_name}` AS DECIMAL(20,6))) AS variance
+                        FROM `{schema_name}`.`{table_name}`
+                        WHERE `{column_name}` IS NOT NULL
+                    """)).mappings().first() or {}
+                except Exception:
+                    pass
                 
                 # Get value distribution (top 10 most common values)
                 distribution = conn.execute(text(f"""
@@ -690,8 +703,11 @@ class MySQLConnector(BaseConnector):
                     LIMIT 10
                 """)).mappings().all()
                 
+                base_stats = row_to_dict(stats)
+                if numeric_moments:
+                    base_stats.update({k: v for k, v in row_to_dict(numeric_moments).items() if v is not None})
                 return {
-                    "statistics": row_to_dict(stats),
+                    "statistics": base_stats,
                     "value_distribution": [row_to_dict(row) for row in distribution],
                     "profile_date": datetime.now().isoformat()
                 }
@@ -1191,7 +1207,7 @@ class SnowflakeConnector(BaseConnector):
             )
             
             with conn.cursor() as cursor:
-                # Get basic statistics
+                # Get comprehensive statistics
                 stats = {}
                 try:
                     cursor.execute(f"""
@@ -1221,9 +1237,24 @@ class SnowflakeConnector(BaseConnector):
                     distribution = cursor.fetchall()
                 except Exception as e:
                     logger.warning(f"Could not get distribution for column {column_name}: {e}")
+
+                # Numeric moments when possible
+                numeric_moments = {}
+                try:
+                    cursor.execute(f"""
+                        SELECT
+                            AVG(TRY_TO_DECIMAL("{column_name}")) AS mean,
+                            STDDEV_SAMP(TRY_TO_DECIMAL("{column_name}")) AS stddev,
+                            VAR_SAMP(TRY_TO_DECIMAL("{column_name}")) AS variance
+                        FROM {db_name}.{schema_name}.{table_name}
+                        WHERE "{column_name}" IS NOT NULL
+                    """)
+                    numeric_moments = cursor.fetchone()
+                except Exception as e:
+                    logger.debug(f"Numeric moments unavailable for {column_name}: {e}")
                 
                 return {
-                    "statistics": row_to_dict(stats),
+                    "statistics": {**row_to_dict(stats), **row_to_dict(numeric_moments)},
                     "value_distribution": [row_to_dict(row) for row in distribution],
                     "profile_date": datetime.now().isoformat()
                 }

@@ -227,10 +227,46 @@ from fastapi import HTTPException
 def validate_condition(condition: dict = Body(...)):
     import json
     try:
-        # Dummy user/context for validation
-        dummy_user = type("User", (), {"id": 1, "department": "IT", "region": "EU"})()
-        _ = json.dumps(condition)  # Check serializable
-        # Optionally, run through ABAC logic with dummy values (future)
+        # 1) Validate serializability
+        json.dumps(condition)
+
+        # 2) Validate allowed keys and placeholders
+        allowed_keys = {
+            "user_id", "department", "region", "role_level", "time_based",
+            "resource_ownership", "ml_risk_score", "max_risk_score"
+        }
+        invalid_keys = [k for k in condition.keys() if k not in allowed_keys]
+        if invalid_keys:
+            raise ValueError(f"Unsupported keys: {invalid_keys}")
+
+        # 3) Validate placeholders values shape
+        if condition.get("user_id") not in (None, ":current_user_id") and not isinstance(condition.get("user_id"), int):
+            raise ValueError("user_id must be an integer or ':current_user_id'")
+        if condition.get("department") not in (None, ":user_department") and not isinstance(condition.get("department"), str):
+            raise ValueError("department must be a string or ':user_department'")
+        if condition.get("region") not in (None, ":user_region") and not isinstance(condition.get("region"), str):
+            raise ValueError("region must be a string or ':user_region'")
+
+        if "role_level" in condition:
+            if not isinstance(condition["role_level"], int):
+                raise ValueError("role_level must be an integer")
+
+        if "time_based" in condition:
+            tb = condition["time_based"]
+            if not isinstance(tb, dict):
+                raise ValueError("time_based must be an object with start_time/end_time/days_of_week")
+            if "start_time" in tb and not isinstance(tb["start_time"], str):
+                raise ValueError("time_based.start_time must be a string 'HH:MM'")
+            if "end_time" in tb and not isinstance(tb["end_time"], str):
+                raise ValueError("time_based.end_time must be a string 'HH:MM'")
+            if "days_of_week" in tb and not all(isinstance(d, int) and 0 <= d <= 6 for d in tb["days_of_week"]):
+                raise ValueError("time_based.days_of_week must be integers 0-6")
+
+        if "ml_risk_score" in condition and not isinstance(condition["ml_risk_score"], bool):
+            raise ValueError("ml_risk_score must be boolean if provided")
+        if "max_risk_score" in condition and not isinstance(condition["max_risk_score"], (int, float)):
+            raise ValueError("max_risk_score must be numeric if provided")
+
         return {"valid": True}
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Invalid condition: {str(e)}")
@@ -446,18 +482,12 @@ def list_users_api(db: Session = Depends(get_db), current_user: User = Depends(g
         for r in all_user_roles:
             for eff_r in collect_all_roles(r):
                 effective_roles[eff_r.id] = eff_r
-        # Add the primary role string if present and not already in list
-        if hasattr(u, "role") and isinstance(u.role, str):
-            found = False
-            for r in effective_roles.values():
-                if hasattr(r, 'name') and r.name == u.role:
-                    found = True
-                    break
-            if not found:
-                # Dummy role object with name only
-                effective_roles[-1] = type('Role', (), {'id': -1, 'name': u.role, 'description': None})()
         # Return roles as array of unique role names (as expected by frontend)
-        role_names = sorted(list({r.name for r in effective_roles.values() if hasattr(r, 'name') and isinstance(r.name, str)}))
+        role_names = {r.name for r in effective_roles.values() if hasattr(r, 'name') and isinstance(r.name, str)}
+        # Merge primary string role (if any) without fabricating a role object
+        if hasattr(u, "role") and isinstance(u.role, str):
+            role_names.add(u.role)
+        role_names = sorted(list(role_names))
         # Build effective_roles array for frontend (id, name, description)
         effective_roles_list = []
         for r in effective_roles.values():

@@ -396,8 +396,8 @@ class ExpressionParser:
                 return ExpressionParser.apply_operator_with_validation(next_operator, result, rest_value), index
             
             try:
-            result, _ = parse_expression(tokens)
-            return result
+                result, _ = parse_expression(tokens)
+                return result
             except Exception as e:
                 logger.error(f"Expression evaluation error: {e}")
                 return False  # Default to False on error
