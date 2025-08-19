@@ -346,8 +346,24 @@ class ComplianceDataSeeder:
             # This would typically be done through the regular API, but we can seed some examples
             # In production, this would be managed through the integration management interface
             
-            # For now, we'll just log that the catalog is available via the API
-            logger.info("Integration catalog is available via the /compliance/integrations/available endpoint")
+            # Ensure a minimal set of integrations are present
+            from app.models.compliance_models import ComplianceIntegration
+            existing = {i.name for i in session.query(ComplianceIntegration).all()}
+            defaults = [
+                {"name": "Slack", "type": "notification", "config": {"webhook": ""}},
+                {"name": "Jira", "type": "ticketing", "config": {"project": ""}},
+                {"name": "ServiceNow", "type": "it_sm", "config": {}},
+            ]
+            created = 0
+            for d in defaults:
+                if d["name"] not in existing:
+                    session.add(ComplianceIntegration(name=d["name"], integration_type=d["type"], config=d["config"]))
+                    created += 1
+            if created:
+                session.commit()
+                logger.info(f"Seeded {created} compliance integrations (Slack/Jira/ServiceNow)")
+            else:
+                logger.info("Compliance integrations already present; no seeding required")
             
         except Exception as e:
             logger.error(f"Error seeding integration catalog: {str(e)}")

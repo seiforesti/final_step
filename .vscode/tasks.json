@@ -1,0 +1,13 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "npm",
+			"script": "dev",
+			"path": "data_wave/v15_enhanced_1",
+			"problemMatcher": [],
+			"label": "npm: dev - data_wave/v15_enhanced_1",
+			"detail": "next dev"
+		}
+	]
+}

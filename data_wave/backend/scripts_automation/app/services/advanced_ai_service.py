@@ -965,7 +965,7 @@ class AdvancedAIService:
             if not docs:
                 return 0.0
             size_factor = min(1.0, len(docs) / 100.0)
-            now = datetime.utcnow()
+            now = datetime.now(timezone.utc)
             freshness = []
             for d in docs:
                 ts = d.get('extraction_timestamp')
@@ -981,6 +981,276 @@ class AdvancedAIService:
             return float(round(0.4 * size_factor + 0.3 * freshness_factor + 0.3 * connectivity_factor, 3))
         except Exception:
             return 0.5
+
+    async def analyze_semantic_changes(self, old_content: Dict[str, Any], new_content: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """Analyze semantic changes between old and new content using advanced NLP and AI techniques."""
+        try:
+            changes = []
+            
+            # Extract text content for analysis
+            old_text = self._extract_text_content(old_content)
+            new_text = self._extract_text_content(new_content)
+            
+            # Perform semantic similarity analysis
+            similarity_score = await self._calculate_semantic_similarity(old_text, new_text)
+            
+            # Detect key concept changes
+            concept_changes = await self._detect_concept_changes(old_text, new_text)
+            
+            # Analyze sentiment changes
+            sentiment_changes = await self._analyze_sentiment_changes(old_text, new_text)
+            
+            # Detect structural changes
+            structural_changes = await self._detect_structural_changes(old_content, new_content)
+            
+            # Compile comprehensive change analysis
+            if similarity_score < 0.8:
+                changes.append({
+                    'type': 'semantic_change',
+                    'severity': 'high' if similarity_score < 0.6 else 'medium',
+                    'description': f'Semantic similarity decreased from {similarity_score:.2f}',
+                    'confidence': 0.85,
+                    'details': {
+                        'similarity_score': similarity_score,
+                        'concept_changes': concept_changes,
+                        'sentiment_changes': sentiment_changes,
+                        'structural_changes': structural_changes
+                    }
+                })
+            
+            # Add concept-specific changes
+            for concept in concept_changes:
+                changes.append({
+                    'type': 'concept_change',
+                    'severity': 'medium',
+                    'description': f'Concept "{concept["name"]}" {concept["change_type"]}',
+                    'confidence': concept.get('confidence', 0.8),
+                    'details': concept
+                })
+            
+            return changes
+            
+        except Exception as e:
+            logger.error(f"Error analyzing semantic changes: {e}")
+            return [{
+                'type': 'analysis_error',
+                'severity': 'low',
+                'description': 'Failed to analyze semantic changes',
+                'confidence': 0.5,
+                'details': {'error': str(e)}
+            }]
+
+    def _extract_text_content(self, content: Dict[str, Any]) -> str:
+        """Extract text content from various content formats."""
+        try:
+            if isinstance(content, str):
+                return content
+            elif isinstance(content, dict):
+                # Extract text from common fields
+                text_fields = ['text', 'content', 'description', 'summary', 'body']
+                for field in text_fields:
+                    if field in content and content[field]:
+                        return str(content[field])
+                
+                # Recursively extract from nested structures
+                text_parts = []
+                for value in content.values():
+                    if isinstance(value, str):
+                        text_parts.append(value)
+                    elif isinstance(value, dict):
+                        text_parts.append(self._extract_text_content(value))
+                    elif isinstance(value, list):
+                        for item in value:
+                            if isinstance(item, (str, dict)):
+                                text_parts.append(self._extract_text_content(item))
+                
+                return ' '.join(filter(None, text_parts))
+            elif isinstance(content, list):
+                return ' '.join([self._extract_text_content(item) for item in content])
+            else:
+                return str(content)
+        except Exception:
+            return str(content)
+
+    async def _calculate_semantic_similarity(self, text1: str, text2: str) -> float:
+        """Calculate semantic similarity between two text segments."""
+        try:
+            if not text1 or not text2:
+                return 0.0
+            
+            # Simple text similarity using TF-IDF and cosine similarity
+            if NLP_AVAILABLE:
+                from sklearn.feature_extraction.text import TfidfVectorizer
+                from sklearn.metrics.pairwise import cosine_similarity
+                
+                vectorizer = TfidfVectorizer(max_features=1000, stop_words='english')
+                try:
+                    vectors = vectorizer.fit_transform([text1, text2])
+                    similarity = cosine_similarity(vectors[0:1], vectors[1:2])[0][0]
+                    return float(similarity)
+                except Exception:
+                    pass
+            
+            # Fallback to simple word overlap
+            words1 = set(text1.lower().split())
+            words2 = set(text2.lower().split())
+            
+            if not words1 or not words2:
+                return 0.0
+            
+            intersection = len(words1.intersection(words2))
+            union = len(words1.union(words2))
+            
+            return intersection / union if union > 0 else 0.0
+            
+        except Exception as e:
+            logger.error(f"Error calculating semantic similarity: {e}")
+            return 0.5
+
+    async def _detect_concept_changes(self, old_text: str, new_text: str) -> List[Dict[str, Any]]:
+        """Detect changes in key concepts between old and new text."""
+        try:
+            changes = []
+            
+            # Extract key concepts using NLP
+            old_concepts = await self._extract_key_concepts(old_text)
+            new_concepts = await self._extract_key_concepts(new_text)
+            
+            # Find added concepts
+            for concept in new_concepts:
+                if concept not in old_concepts:
+                    changes.append({
+                        'name': concept,
+                        'change_type': 'added',
+                        'confidence': 0.8
+                    })
+            
+            # Find removed concepts
+            for concept in old_concepts:
+                if concept not in new_concepts:
+                    changes.append({
+                        'name': concept,
+                        'change_type': 'removed',
+                        'confidence': 0.8
+                    })
+            
+            return changes
+            
+        except Exception as e:
+            logger.error(f"Error detecting concept changes: {e}")
+            return []
+
+    async def _extract_key_concepts(self, text: str) -> List[str]:
+        """Extract key concepts from text using NLP techniques."""
+        try:
+            if not text:
+                return []
+            
+            # Simple concept extraction using noun phrases and key terms
+            words = text.lower().split()
+            concepts = []
+            
+            # Extract potential concepts (words starting with capital letters, technical terms)
+            for word in words:
+                if len(word) > 3 and word[0].isupper():
+                    concepts.append(word)
+                elif len(word) > 5:  # Longer words are often technical terms
+                    concepts.append(word)
+            
+            # Remove duplicates and common words
+            common_words = {'the', 'and', 'for', 'with', 'this', 'that', 'have', 'will', 'from'}
+            concepts = [c for c in concepts if c.lower() not in common_words]
+            
+            return list(set(concepts))[:20]  # Limit to top 20 concepts
+            
+        except Exception as e:
+            logger.error(f"Error extracting key concepts: {e}")
+            return []
+
+    async def _analyze_sentiment_changes(self, old_text: str, new_text: str) -> Dict[str, Any]:
+        """Analyze sentiment changes between old and new text."""
+        try:
+            # Simple sentiment analysis using word-based approach
+            positive_words = {'good', 'great', 'excellent', 'positive', 'beneficial', 'improved', 'better'}
+            negative_words = {'bad', 'poor', 'negative', 'harmful', 'worse', 'problem', 'issue'}
+            
+            old_sentiment = self._calculate_simple_sentiment(old_text, positive_words, negative_words)
+            new_sentiment = self._calculate_simple_sentiment(new_text, positive_words, negative_words)
+            
+            return {
+                'old_sentiment': old_sentiment,
+                'new_sentiment': new_sentiment,
+                'change': new_sentiment - old_sentiment,
+                'change_type': 'positive' if new_sentiment > old_sentiment else 'negative' if new_sentiment < old_sentiment else 'neutral'
+            }
+            
+        except Exception as e:
+            logger.error(f"Error analyzing sentiment changes: {e}")
+            return {'old_sentiment': 0, 'new_sentiment': 0, 'change': 0, 'change_type': 'neutral'}
+
+    def _calculate_simple_sentiment(self, text: str, positive_words: set, negative_words: set) -> float:
+        """Calculate simple sentiment score for text."""
+        try:
+            if not text:
+                return 0.0
+            
+            words = text.lower().split()
+            positive_count = sum(1 for word in words if word in positive_words)
+            negative_count = sum(1 for word in words if word in negative_words)
+            
+            total_words = len(words)
+            if total_words == 0:
+                return 0.0
+            
+            return (positive_count - negative_count) / total_words
+            
+        except Exception:
+            return 0.0
+
+    async def _detect_structural_changes(self, old_content: Dict[str, Any], new_content: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """Detect structural changes in content organization."""
+        try:
+            changes = []
+            
+            # Compare keys
+            old_keys = set(old_content.keys()) if isinstance(old_content, dict) else set()
+            new_keys = set(new_content.keys()) if isinstance(new_content, dict) else set()
+            
+            # Added keys
+            for key in new_keys - old_keys:
+                changes.append({
+                    'type': 'structure_change',
+                    'severity': 'medium',
+                    'description': f'New field "{key}" added',
+                    'confidence': 0.9
+                })
+            
+            # Removed keys
+            for key in old_keys - new_keys:
+                changes.append({
+                    'type': 'structure_change',
+                    'severity': 'medium',
+                    'description': f'Field "{key}" removed',
+                    'confidence': 0.9
+                })
+            
+            # Type changes
+            for key in old_keys & new_keys:
+                old_type = type(old_content[key])
+                new_type = type(new_content[key])
+                if old_type != new_type:
+                    changes.append({
+                        'type': 'structure_change',
+                        'severity': 'low',
+                        'description': f'Field "{key}" type changed from {old_type.__name__} to {new_type.__name__}',
+                        'confidence': 0.8
+                    })
+            
+            return changes
+            
+        except Exception as e:
+            logger.error(f"Error detecting structural changes: {e}")
+            return []
 
 # Export the service
 __all__ = ["AdvancedAIService"]

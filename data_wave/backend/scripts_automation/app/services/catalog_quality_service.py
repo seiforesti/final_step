@@ -19,12 +19,12 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 from uuid import uuid4
 
-from sqlalchemy import text, func
+from sqlalchemy import text, func, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select, delete
 
 from ..core.cache_manager import EnterpriseCacheManager as CacheManager
-from ..db_session import get_session
+from ..db_session import get_session, get_db_session
 from ..core.logging_config import get_logger
 from ..core.settings import settings_manager
 from ..models.catalog_quality_models import *
@@ -1333,7 +1333,17 @@ class CatalogQualityService:
             return min(dimension_scores.values())
         
         else:
-            # Simple average
+            # Weighted by inverse variance when available, else arithmetic mean
+            variances = {k: v.get('variance') if isinstance(v, dict) else None for k, v in asset_metadata.get('dimension_variances', {}).items()} if isinstance(asset_metadata, dict) else {}
+            weights = {}
+            for dim, score in dimension_scores.items():
+                var = variances.get(dim)
+                if isinstance(var, (int, float)) and var > 0:
+                    weights[dim] = 1.0 / float(var)
+            if weights:
+                num = sum(dimension_scores[d] * weights[d] for d in weights)
+                den = sum(weights.values())
+                return num / den if den else sum(dimension_scores.values()) / len(dimension_scores)
             return sum(dimension_scores.values()) / len(dimension_scores)
     
     async def _generate_quality_recommendations(
@@ -1487,15 +1497,21 @@ class CatalogQualityService:
         """Background task for continuous quality monitoring"""
         while True:
             try:
-                await asyncio.sleep(self.config.monitoring_interval)
+                from .scheduler import SchedulerService
+                scheduler = SchedulerService()
+                await scheduler.schedule_task(
+                    task_name="quality_monitoring",
+                    delay_seconds=self.config.monitoring_interval,
+                    task_func=self._monitoring_loop
+                )
                 
                 # Get active monitoring configurations
-                async with get_session() as session:
+                async with get_db_session() as session:
                     query = select(QualityMonitoringConfig).where(
                         QualityMonitoringConfig.is_active == True
                     )
-                    result = session.exec(query)
-                    configs = result.all()
+                    result = await session.execute(query)
+                    configs = result.scalars().all()
                     
                     for config in configs:
                         # Check if monitoring is due
@@ -1525,13 +1541,55 @@ class CatalogQualityService:
         """Background task for cleanup operations"""
         while True:
             try:
-                await asyncio.sleep(3600)  # Run every hour
+                from .scheduler import SchedulerService
+                scheduler = SchedulerService()
+                await scheduler.schedule_task(
+                    task_name="quality_cleanup",
+                    delay_seconds=3600,
+                    task_func=self._cleanup_loop
+                )
                 
                 # Cleanup old assessments, alerts, etc.
                 await self._cleanup_old_records()
                 
             except Exception as e:
                 logger.error(f"Cleanup loop error: {e}")
+
+    async def _cleanup_old_records(self):
+        """Clean up old quality records to maintain system performance"""
+        try:
+            # Clean up old quality assessments (older than 90 days)
+            cutoff_date = datetime.now() - timedelta(days=90)
+            
+            async with get_db_session() as session:
+                # Clean old quality assessments
+                old_assessments_query = delete(QualityAssessment).where(
+                    QualityAssessment.created_at < cutoff_date
+                )
+                await session.execute(old_assessments_query)
+                
+                # Clean old quality alerts (older than 30 days)
+                alert_cutoff = datetime.now() - timedelta(days=30)
+                old_alerts_query = delete(QualityAlert).where(
+                    QualityAlert.created_at < alert_cutoff
+                )
+                await session.execute(old_alerts_query)
+                
+                # Clean old monitoring configs that are inactive
+                inactive_configs_query = delete(QualityMonitoringConfig).where(
+                    and_(
+                        QualityMonitoringConfig.is_active == False,
+                        QualityMonitoringConfig.updated_at < cutoff_date
+                    )
+                )
+                await session.execute(inactive_configs_query)
+                
+                await session.commit()
+                
+                logger.info("Cleanup of old quality records completed successfully")
+                
+        except Exception as e:
+            logger.error(f"Error during cleanup of old records: {e}")
     
     async def get_quality_insights(self) -> Dict[str, Any]:
         """Get insights about quality service performance"""

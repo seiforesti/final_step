@@ -38,7 +38,7 @@ from ..unified_scan_orchestrator import UnifiedScanOrchestrator
 from ..rbac_service import RBACService
 from ..advanced_ai_service import AdvancedAIService
 from ..comprehensive_analytics_service import ComprehensiveAnalyticsService
-from ..models.racine_models.racine_ai_models import (
+from ...models.racine_models.racine_ai_models import (
     RacineAIConversation,
     RacineAIMessage,
     RacineAIRecommendation,
@@ -53,10 +53,9 @@ from ..models.racine_models.racine_ai_models import (
     InsightType,
     LearningType
 )
-from ..models.racine_models.racine_orchestration_models import RacineOrchestrationMaster
-from ..models.auth_models import User
-from ..models.racine_models.racine_ai_models import RacineAIUserPreference, RacineAIConversationTracking
-from ..db_session import get_db_session
+from ...models.racine_models.racine_orchestration_models import RacineOrchestrationMaster
+from ...models.auth_models import User
+from ...db_session import get_db_session
 
 logger = logging.getLogger(__name__)
 

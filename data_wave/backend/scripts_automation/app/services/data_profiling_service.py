@@ -353,10 +353,29 @@ class DataProfilingService:
                 
                 quality["columns"][column] = col_quality
             
-            # Calculate overall quality score (simple average of column completeness)
+            # Calculate overall quality score using completeness and issue penalties
             if quality["columns"]:
-                avg_completeness = sum(col["completeness"] for col in quality["columns"].values()) / len(quality["columns"])
-                quality["overall"]["quality_score"] = round(avg_completeness, 2)
+                def _severity_penalty(issues):
+                    penalty = 0.0
+                    for iss in issues:
+                        sev = (iss or {}).get("severity", "medium")
+                        if sev == "critical":
+                            penalty += 0.2
+                        elif sev == "high":
+                            penalty += 0.1
+                        elif sev == "medium":
+                            penalty += 0.05
+                        elif sev == "low":
+                            penalty += 0.02
+                    return penalty
+                scores = []
+                for col_name, col in quality["columns"].items():
+                    completeness = float(col.get("completeness", 0.0))
+                    penalty = _severity_penalty(col.get("issues", []))
+                    score = max(0.0, min(1.0, completeness - penalty))
+                    scores.append(score)
+                overall = sum(scores) / len(scores)
+                quality["overall"]["quality_score"] = round(overall, 2)
             
             return quality
             

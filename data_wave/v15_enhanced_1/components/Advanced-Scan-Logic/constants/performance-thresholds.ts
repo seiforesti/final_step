@@ -1,0 +1,497 @@
+/**
+ * 📊 Performance Thresholds - Advanced Scan Logic
+ * ===============================================
+ * 
+ * Enterprise-grade performance threshold definitions for monitoring,
+ * alerting, and optimization of scan logic operations
+ * 
+ * Features:
+ * - System performance benchmarks
+ * - Alerting threshold configurations
+ * - Resource utilization limits
+ * - Performance scoring criteria
+ * - SLA compliance metrics
+ * - Auto-scaling triggers
+ * 
+ * @author Enterprise Data Governance Team
+ * @version 1.0.0 - Production Ready
+ */
+
+/**
+ * Performance Severity Levels
+ */
+export const PERFORMANCE_SEVERITY = {
+  EXCELLENT: 'excellent',
+  GOOD: 'good',
+  WARNING: 'warning',
+  CRITICAL: 'critical',
+  EMERGENCY: 'emergency'
+} as const;
+
+/**
+ * Metric Categories
+ */
+export const METRIC_CATEGORIES = {
+  THROUGHPUT: 'throughput',
+  LATENCY: 'latency',
+  RESOURCE_UTILIZATION: 'resource_utilization',
+  ERROR_RATE: 'error_rate',
+  AVAILABILITY: 'availability',
+  EFFICIENCY: 'efficiency'
+} as const;
+
+/**
+ * Throughput Thresholds (operations per second)
+ */
+export const THROUGHPUT_THRESHOLDS = {
+  SCAN_OPERATIONS: {
+    [PERFORMANCE_SEVERITY.EXCELLENT]: 1000,
+    [PERFORMANCE_SEVERITY.GOOD]: 750,
+    [PERFORMANCE_SEVERITY.WARNING]: 500,
+    [PERFORMANCE_SEVERITY.CRITICAL]: 250,
+    [PERFORMANCE_SEVERITY.EMERGENCY]: 100
+  },
+  DATA_PROCESSING: {
+    [PERFORMANCE_SEVERITY.EXCELLENT]: 5000,
+    [PERFORMANCE_SEVERITY.GOOD]: 3500,
+    [PERFORMANCE_SEVERITY.WARNING]: 2000,
+    [PERFORMANCE_SEVERITY.CRITICAL]: 1000,
+    [PERFORMANCE_SEVERITY.EMERGENCY]: 500
+  },
+  API_REQUESTS: {
+    [PERFORMANCE_SEVERITY.EXCELLENT]: 2000,
+    [PERFORMANCE_SEVERITY.GOOD]: 1500,
+    [PERFORMANCE_SEVERITY.WARNING]: 1000,
+    [PERFORMANCE_SEVERITY.CRITICAL]: 500,
+    [PERFORMANCE_SEVERITY.EMERGENCY]: 200
+  },
+  DATABASE_QUERIES: {
+    [PERFORMANCE_SEVERITY.EXCELLENT]: 800,
+    [PERFORMANCE_SEVERITY.GOOD]: 600,
+    [PERFORMANCE_SEVERITY.WARNING]: 400,
+    [PERFORMANCE_SEVERITY.CRITICAL]: 200,
+    [PERFORMANCE_SEVERITY.EMERGENCY]: 100
+  },
+  CACHE_OPERATIONS: {
+    [PERFORMANCE_SEVERITY.EXCELLENT]: 10000,
+    [PERFORMANCE_SEVERITY.GOOD]: 7500,
+    [PERFORMANCE_SEVERITY.WARNING]: 5000,
+    [PERFORMANCE_SEVERITY.CRITICAL]: 2500,
+    [PERFORMANCE_SEVERITY.EMERGENCY]: 1000
+  }
+} as const;
+
+/**
+ * Latency Thresholds (milliseconds)
+ */
+export const LATENCY_THRESHOLDS = {
+  API_RESPONSE: {
+    [PERFORMANCE_SEVERITY.EXCELLENT]: 50,
+    [PERFORMANCE_SEVERITY.GOOD]: 100,
+    [PERFORMANCE_SEVERITY.WARNING]: 250,
+    [PERFORMANCE_SEVERITY.CRITICAL]: 500,
+    [PERFORMANCE_SEVERITY.EMERGENCY]: 1000
+  },
+  DATABASE_QUERY: {
+    [PERFORMANCE_SEVERITY.EXCELLENT]: 25,
+    [PERFORMANCE_SEVERITY.GOOD]: 50,
+    [PERFORMANCE_SEVERITY.WARNING]: 100,
+    [PERFORMANCE_SEVERITY.CRITICAL]: 250,
+    [PERFORMANCE_SEVERITY.EMERGENCY]: 500
+  },
+  SCAN_EXECUTION: {
+    [PERFORMANCE_SEVERITY.EXCELLENT]: 1000,
+    [PERFORMANCE_SEVERITY.GOOD]: 2000,
+    [PERFORMANCE_SEVERITY.WARNING]: 5000,
+    [PERFORMANCE_SEVERITY.CRITICAL]: 10000,
+    [PERFORMANCE_SEVERITY.EMERGENCY]: 20000
+  },
+  CACHE_ACCESS: {
+    [PERFORMANCE_SEVERITY.EXCELLENT]: 1,
+    [PERFORMANCE_SEVERITY.GOOD]: 5,
+    [PERFORMANCE_SEVERITY.WARNING]: 10,
+    [PERFORMANCE_SEVERITY.CRITICAL]: 25,
+    [PERFORMANCE_SEVERITY.EMERGENCY]: 50
+  },
+  NETWORK_REQUEST: {
+    [PERFORMANCE_SEVERITY.EXCELLENT]: 100,
+    [PERFORMANCE_SEVERITY.GOOD]: 200,
+    [PERFORMANCE_SEVERITY.WARNING]: 500,
+    [PERFORMANCE_SEVERITY.CRITICAL]: 1000,
+    [PERFORMANCE_SEVERITY.EMERGENCY]: 2000
+  },
+  FILE_IO: {
+    [PERFORMANCE_SEVERITY.EXCELLENT]: 50,
+    [PERFORMANCE_SEVERITY.GOOD]: 100,
+    [PERFORMANCE_SEVERITY.WARNING]: 250,
+    [PERFORMANCE_SEVERITY.CRITICAL]: 500,
+    [PERFORMANCE_SEVERITY.EMERGENCY]: 1000
+  }
+} as const;
+
+/**
+ * Resource Utilization Thresholds (percentage)
+ */
+export const RESOURCE_UTILIZATION_THRESHOLDS = {
+  CPU: {
+    [PERFORMANCE_SEVERITY.EXCELLENT]: 30,
+    [PERFORMANCE_SEVERITY.GOOD]: 50,
+    [PERFORMANCE_SEVERITY.WARNING]: 70,
+    [PERFORMANCE_SEVERITY.CRITICAL]: 85,
+    [PERFORMANCE_SEVERITY.EMERGENCY]: 95
+  },
+  MEMORY: {
+    [PERFORMANCE_SEVERITY.EXCELLENT]: 40,
+    [PERFORMANCE_SEVERITY.GOOD]: 60,
+    [PERFORMANCE_SEVERITY.WARNING]: 75,
+    [PERFORMANCE_SEVERITY.CRITICAL]: 90,
+    [PERFORMANCE_SEVERITY.EMERGENCY]: 98
+  },
+  DISK_SPACE: {
+    [PERFORMANCE_SEVERITY.EXCELLENT]: 50,
+    [PERFORMANCE_SEVERITY.GOOD]: 70,
+    [PERFORMANCE_SEVERITY.WARNING]: 80,
+    [PERFORMANCE_SEVERITY.CRITICAL]: 90,
+    [PERFORMANCE_SEVERITY.EMERGENCY]: 95
+  },
+  DISK_IO: {
+    [PERFORMANCE_SEVERITY.EXCELLENT]: 40,
+    [PERFORMANCE_SEVERITY.GOOD]: 60,
+    [PERFORMANCE_SEVERITY.WARNING]: 75,
+    [PERFORMANCE_SEVERITY.CRITICAL]: 85,
+    [PERFORMANCE_SEVERITY.EMERGENCY]: 95
+  },
+  NETWORK_BANDWIDTH: {
+    [PERFORMANCE_SEVERITY.EXCELLENT]: 30,
+    [PERFORMANCE_SEVERITY.GOOD]: 50,
+    [PERFORMANCE_SEVERITY.WARNING]: 70,
+    [PERFORMANCE_SEVERITY.CRITICAL]: 85,
+    [PERFORMANCE_SEVERITY.EMERGENCY]: 95
+  },
+  CONNECTION_POOL: {
+    [PERFORMANCE_SEVERITY.EXCELLENT]: 40,
+    [PERFORMANCE_SEVERITY.GOOD]: 60,
+    [PERFORMANCE_SEVERITY.WARNING]: 75,
+    [PERFORMANCE_SEVERITY.CRITICAL]: 85,
+    [PERFORMANCE_SEVERITY.EMERGENCY]: 95
+  }
+} as const;
+
+/**
+ * Error Rate Thresholds (percentage)
+ */
+export const ERROR_RATE_THRESHOLDS = {
+  SYSTEM_ERRORS: {
+    [PERFORMANCE_SEVERITY.EXCELLENT]: 0.1,
+    [PERFORMANCE_SEVERITY.GOOD]: 0.5,
+    [PERFORMANCE_SEVERITY.WARNING]: 1.0,
+    [PERFORMANCE_SEVERITY.CRITICAL]: 2.5,
+    [PERFORMANCE_SEVERITY.EMERGENCY]: 5.0
+  },
+  API_ERRORS: {
+    [PERFORMANCE_SEVERITY.EXCELLENT]: 0.05,
+    [PERFORMANCE_SEVERITY.GOOD]: 0.25,
+    [PERFORMANCE_SEVERITY.WARNING]: 0.5,
+    [PERFORMANCE_SEVERITY.CRITICAL]: 1.0,
+    [PERFORMANCE_SEVERITY.EMERGENCY]: 2.0
+  },
+  SCAN_FAILURES: {
+    [PERFORMANCE_SEVERITY.EXCELLENT]: 0.1,
+    [PERFORMANCE_SEVERITY.GOOD]: 0.5,
+    [PERFORMANCE_SEVERITY.WARNING]: 1.0,
+    [PERFORMANCE_SEVERITY.CRITICAL]: 2.0,
+    [PERFORMANCE_SEVERITY.EMERGENCY]: 5.0
+  },
+  DATABASE_ERRORS: {
+    [PERFORMANCE_SEVERITY.EXCELLENT]: 0.05,
+    [PERFORMANCE_SEVERITY.GOOD]: 0.1,
+    [PERFORMANCE_SEVERITY.WARNING]: 0.25,
+    [PERFORMANCE_SEVERITY.CRITICAL]: 0.5,
+    [PERFORMANCE_SEVERITY.EMERGENCY]: 1.0
+  },
+  CACHE_MISSES: {
+    [PERFORMANCE_SEVERITY.EXCELLENT]: 5,
+    [PERFORMANCE_SEVERITY.GOOD]: 10,
+    [PERFORMANCE_SEVERITY.WARNING]: 20,
+    [PERFORMANCE_SEVERITY.CRITICAL]: 35,
+    [PERFORMANCE_SEVERITY.EMERGENCY]: 50
+  }
+} as const;
+
+/**
+ * Availability Thresholds (percentage uptime)
+ */
+export const AVAILABILITY_THRESHOLDS = {
+  SYSTEM_UPTIME: {
+    [PERFORMANCE_SEVERITY.EXCELLENT]: 99.99,
+    [PERFORMANCE_SEVERITY.GOOD]: 99.95,
+    [PERFORMANCE_SEVERITY.WARNING]: 99.9,
+    [PERFORMANCE_SEVERITY.CRITICAL]: 99.5,
+    [PERFORMANCE_SEVERITY.EMERGENCY]: 99.0
+  },
+  SERVICE_AVAILABILITY: {
+    [PERFORMANCE_SEVERITY.EXCELLENT]: 99.95,
+    [PERFORMANCE_SEVERITY.GOOD]: 99.9,
+    [PERFORMANCE_SEVERITY.WARNING]: 99.5,
+    [PERFORMANCE_SEVERITY.CRITICAL]: 99.0,
+    [PERFORMANCE_SEVERITY.EMERGENCY]: 98.0
+  },
+  DATABASE_AVAILABILITY: {
+    [PERFORMANCE_SEVERITY.EXCELLENT]: 99.99,
+    [PERFORMANCE_SEVERITY.GOOD]: 99.95,
+    [PERFORMANCE_SEVERITY.WARNING]: 99.9,
+    [PERFORMANCE_SEVERITY.CRITICAL]: 99.5,
+    [PERFORMANCE_SEVERITY.EMERGENCY]: 99.0
+  }
+} as const;
+
+/**
+ * Efficiency Score Thresholds (0-100 scale)
+ */
+export const EFFICIENCY_THRESHOLDS = {
+  OVERALL_EFFICIENCY: {
+    [PERFORMANCE_SEVERITY.EXCELLENT]: 90,
+    [PERFORMANCE_SEVERITY.GOOD]: 80,
+    [PERFORMANCE_SEVERITY.WARNING]: 70,
+    [PERFORMANCE_SEVERITY.CRITICAL]: 60,
+    [PERFORMANCE_SEVERITY.EMERGENCY]: 50
+  },
+  RESOURCE_EFFICIENCY: {
+    [PERFORMANCE_SEVERITY.EXCELLENT]: 85,
+    [PERFORMANCE_SEVERITY.GOOD]: 75,
+    [PERFORMANCE_SEVERITY.WARNING]: 65,
+    [PERFORMANCE_SEVERITY.CRITICAL]: 55,
+    [PERFORMANCE_SEVERITY.EMERGENCY]: 45
+  },
+  COST_EFFICIENCY: {
+    [PERFORMANCE_SEVERITY.EXCELLENT]: 90,
+    [PERFORMANCE_SEVERITY.GOOD]: 80,
+    [PERFORMANCE_SEVERITY.WARNING]: 70,
+    [PERFORMANCE_SEVERITY.CRITICAL]: 60,
+    [PERFORMANCE_SEVERITY.EMERGENCY]: 50
+  }
+} as const;
+
+/**
+ * Alert Configuration
+ */
+export const ALERT_CONFIGURATION = {
+  ESCALATION_DELAYS: {
+    [PERFORMANCE_SEVERITY.WARNING]: 300000, // 5 minutes
+    [PERFORMANCE_SEVERITY.CRITICAL]: 120000, // 2 minutes
+    [PERFORMANCE_SEVERITY.EMERGENCY]: 60000  // 1 minute
+  },
+  NOTIFICATION_CHANNELS: {
+    [PERFORMANCE_SEVERITY.WARNING]: ['email', 'dashboard'],
+    [PERFORMANCE_SEVERITY.CRITICAL]: ['email', 'sms', 'dashboard', 'slack'],
+    [PERFORMANCE_SEVERITY.EMERGENCY]: ['email', 'sms', 'dashboard', 'slack', 'phone']
+  },
+  RETRY_INTERVALS: {
+    [PERFORMANCE_SEVERITY.WARNING]: 900000,  // 15 minutes
+    [PERFORMANCE_SEVERITY.CRITICAL]: 300000, // 5 minutes
+    [PERFORMANCE_SEVERITY.EMERGENCY]: 120000 // 2 minutes
+  },
+  AUTO_RESOLUTION_TIMEOUT: {
+    [PERFORMANCE_SEVERITY.WARNING]: 1800000, // 30 minutes
+    [PERFORMANCE_SEVERITY.CRITICAL]: 900000,  // 15 minutes
+    [PERFORMANCE_SEVERITY.EMERGENCY]: 300000  // 5 minutes
+  }
+} as const;
+
+/**
+ * Auto-scaling Triggers
+ */
+export const AUTO_SCALING_TRIGGERS = {
+  SCALE_UP: {
+    CPU_THRESHOLD: 70,
+    MEMORY_THRESHOLD: 75,
+    THROUGHPUT_THRESHOLD: 80, // percentage of capacity
+    LATENCY_THRESHOLD: 250,   // milliseconds
+    ERROR_RATE_THRESHOLD: 1.0, // percentage
+    SUSTAINED_DURATION: 300000 // 5 minutes
+  },
+  SCALE_DOWN: {
+    CPU_THRESHOLD: 30,
+    MEMORY_THRESHOLD: 40,
+    THROUGHPUT_THRESHOLD: 40, // percentage of capacity
+    LATENCY_THRESHOLD: 100,   // milliseconds
+    ERROR_RATE_THRESHOLD: 0.1, // percentage
+    SUSTAINED_DURATION: 900000 // 15 minutes
+  },
+  SCALING_POLICIES: {
+    MIN_INSTANCES: 2,
+    MAX_INSTANCES: 50,
+    SCALE_UP_FACTOR: 1.5,
+    SCALE_DOWN_FACTOR: 0.7,
+    COOLDOWN_PERIOD: 300000 // 5 minutes
+  }
+} as const;
+
+/**
+ * SLA Compliance Metrics
+ */
+export const SLA_COMPLIANCE = {
+  RESPONSE_TIME_SLA: {
+    P50: 100,  // 50th percentile < 100ms
+    P95: 250,  // 95th percentile < 250ms
+    P99: 500   // 99th percentile < 500ms
+  },
+  AVAILABILITY_SLA: {
+    MONTHLY: 99.9,   // 99.9% monthly uptime
+    QUARTERLY: 99.95, // 99.95% quarterly uptime
+    YEARLY: 99.9     // 99.9% yearly uptime
+  },
+  THROUGHPUT_SLA: {
+    MINIMUM: 500,    // minimum 500 ops/sec
+    AVERAGE: 1000,   // average 1000 ops/sec
+    PEAK: 2000       // peak 2000 ops/sec
+  },
+  ERROR_RATE_SLA: {
+    MAXIMUM: 0.5,    // maximum 0.5% error rate
+    AVERAGE: 0.1,    // average 0.1% error rate
+    BURST: 1.0       // burst 1.0% error rate (short duration)
+  }
+} as const;
+
+/**
+ * Performance Monitoring Windows
+ */
+export const MONITORING_WINDOWS = {
+  REAL_TIME: 60000,      // 1 minute
+  SHORT_TERM: 300000,    // 5 minutes
+  MEDIUM_TERM: 1800000,  // 30 minutes
+  LONG_TERM: 3600000,    // 1 hour
+  DAILY: 86400000,       // 24 hours
+  WEEKLY: 604800000,     // 7 days
+  MONTHLY: 2592000000    // 30 days
+} as const;
+
+/**
+ * Benchmark Baselines
+ */
+export const BENCHMARK_BASELINES = {
+  SCAN_OPERATIONS: {
+    SIMPLE_SCAN: {
+      THROUGHPUT: 1000,  // ops/sec
+      LATENCY: 100,      // ms
+      CPU_USAGE: 30,     // %
+      MEMORY_USAGE: 40   // %
+    },
+    COMPLEX_SCAN: {
+      THROUGHPUT: 500,   // ops/sec
+      LATENCY: 500,      // ms
+      CPU_USAGE: 60,     // %
+      MEMORY_USAGE: 70   // %
+    },
+    ML_ENHANCED_SCAN: {
+      THROUGHPUT: 300,   // ops/sec
+      LATENCY: 1000,     // ms
+      CPU_USAGE: 80,     // %
+      MEMORY_USAGE: 85   // %
+    }
+  },
+  SYSTEM_OPERATIONS: {
+    DATABASE_QUERY: {
+      THROUGHPUT: 800,   // queries/sec
+      LATENCY: 50,       // ms
+      CONNECTION_POOL: 60 // % utilization
+    },
+    CACHE_OPERATION: {
+      THROUGHPUT: 10000, // ops/sec
+      LATENCY: 1,        // ms
+      HIT_RATE: 95       // %
+    },
+    API_REQUEST: {
+      THROUGHPUT: 2000,  // requests/sec
+      LATENCY: 100,      // ms
+      ERROR_RATE: 0.1    // %
+    }
+  }
+} as const;
+
+/**
+ * Performance Optimization Targets
+ */
+export const OPTIMIZATION_TARGETS = {
+  THROUGHPUT_IMPROVEMENT: {
+    MINIMUM: 10,    // 10% improvement
+    TARGET: 25,     // 25% improvement
+    STRETCH: 50     // 50% improvement
+  },
+  LATENCY_REDUCTION: {
+    MINIMUM: 15,    // 15% reduction
+    TARGET: 30,     // 30% reduction
+    STRETCH: 50     // 50% reduction
+  },
+  RESOURCE_EFFICIENCY: {
+    MINIMUM: 10,    // 10% better efficiency
+    TARGET: 20,     // 20% better efficiency
+    STRETCH: 35     // 35% better efficiency
+  },
+  ERROR_RATE_REDUCTION: {
+    MINIMUM: 25,    // 25% fewer errors
+    TARGET: 50,     // 50% fewer errors
+    STRETCH: 75     // 75% fewer errors
+  }
+} as const;
+
+/**
+ * Health Check Thresholds
+ */
+export const HEALTH_CHECK_THRESHOLDS = {
+  RESPONSE_TIME: 5000,     // 5 seconds
+  RETRY_ATTEMPTS: 3,
+  RETRY_INTERVAL: 10000,   // 10 seconds
+  FAILURE_THRESHOLD: 3,    // consecutive failures
+  SUCCESS_THRESHOLD: 2,    // consecutive successes to recover
+  TIMEOUT: 30000,          // 30 seconds
+  DEGRADED_THRESHOLD: 2    // failures to mark as degraded
+} as const;
+
+/**
+ * Performance Categories
+ */
+export const PERFORMANCE_CATEGORIES = {
+  SYSTEM_PERFORMANCE: {
+    CPU: 'cpu_performance',
+    MEMORY: 'memory_performance',
+    DISK: 'disk_performance',
+    NETWORK: 'network_performance'
+  },
+  APPLICATION_PERFORMANCE: {
+    THROUGHPUT: 'application_throughput',
+    LATENCY: 'application_latency',
+    ERROR_RATE: 'application_errors',
+    AVAILABILITY: 'application_availability'
+  },
+  BUSINESS_PERFORMANCE: {
+    SCAN_SUCCESS_RATE: 'scan_success_rate',
+    DATA_QUALITY: 'data_quality_score',
+    COMPLIANCE: 'compliance_score',
+    USER_SATISFACTION: 'user_satisfaction'
+  }
+} as const;
+
+/**
+ * Export all performance thresholds
+ */
+export const PERFORMANCE_THRESHOLDS = {
+  PERFORMANCE_SEVERITY,
+  METRIC_CATEGORIES,
+  THROUGHPUT_THRESHOLDS,
+  LATENCY_THRESHOLDS,
+  RESOURCE_UTILIZATION_THRESHOLDS,
+  ERROR_RATE_THRESHOLDS,
+  AVAILABILITY_THRESHOLDS,
+  EFFICIENCY_THRESHOLDS,
+  ALERT_CONFIGURATION,
+  AUTO_SCALING_TRIGGERS,
+  SLA_COMPLIANCE,
+  MONITORING_WINDOWS,
+  BENCHMARK_BASELINES,
+  OPTIMIZATION_TARGETS,
+  HEALTH_CHECK_THRESHOLDS,
+  PERFORMANCE_CATEGORIES
+} as const;
+
+export default PERFORMANCE_THRESHOLDS;

@@ -634,11 +634,41 @@ class AdvancedAITuningService:
                     params['confidence_threshold'] = trial.suggest_float('confidence_threshold', 0.1, 0.99)
                     params['timeout_seconds'] = trial.suggest_int('timeout_seconds', 1, 300)
                     
-                    # Simulate rule execution with these parameters (in real implementation,
-                    # this would actually execute the rule with these parameters)
-                    score = np.random.random() * 0.8 + 0.2  # Placeholder
-                    
-                    return score
+                    # Real rule execution with these parameters
+                    try:
+                        from app.services.scan_rule_set_service import ScanRuleSetService
+                        from app.services.rule_evaluation_service import RuleEvaluationService
+                        
+                        # Initialize services
+                        rule_service = ScanRuleSetService()
+                        evaluation_service = RuleEvaluationService()
+                        
+                        # Execute rule with suggested parameters
+                        execution_result = await rule_service.execute_rule_with_parameters(
+                            rule_id=rule_id,
+                            parameters=params,
+                            session=session
+                        )
+                        
+                        # Evaluate rule performance
+                        evaluation_metrics = await evaluation_service.evaluate_rule_performance(
+                            rule_id=rule_id,
+                            execution_result=execution_result,
+                            objectives=objectives
+                        )
+                        
+                        # Calculate composite score based on objectives
+                        score = evaluation_service.calculate_composite_score(
+                            metrics=evaluation_metrics,
+                            objectives=objectives
+                        )
+                        
+                        return float(score)
+                        
+                    except Exception as e:
+                        logger.warning(f"Rule execution failed in trial: {e}")
+                        # Return a low score for failed executions
+                        return 0.1
                 
                 # Run optimization
                 optimizer.optimize(objective, n_trials=min(config.max_trials, 50))

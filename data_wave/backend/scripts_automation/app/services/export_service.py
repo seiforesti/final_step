@@ -1,19 +1,42 @@
 from typing import List, Dict, Any
 from io import StringIO
 import csv
+import logging
 
 from .enterprise_catalog_service import EnterpriseIntelligentCatalogService, get_enterprise_catalog_service
-from ..db_session import get_session
 from sqlalchemy.ext.asyncio import AsyncSession
 
-async def export_schema_to_csv(data_source_id: int, session: AsyncSession) -> str:
+logger = logging.getLogger(__name__)
+
+
+class ExportService:
+    """High-level export service."""
+
+    async def export_data(self, data_source_id: int, export_format: str = "csv", export_options: Dict[str, Any] | None = None, filters: Dict[str, Any] | None = None) -> Dict[str, Any]:
+        try:
+            export_options = export_options or {}
+            filters = filters or {}
+            if export_format.lower() != "csv":
+                return {"success": False, "error": f"Unsupported export format: {export_format}"}
+            csv_text = await export_schema_to_csv(data_source_id)
+            return {
+                "success": True,
+                "records_exported": csv_text.count("\n") - 1 if csv_text else 0,
+                "file_size_mb": round(len(csv_text.encode("utf-8")) / (1024 * 1024), 4),
+                "details": {"format": export_format, "filters": filters, "options": export_options},
+                "content": csv_text,
+            }
+        except Exception as e:
+            logger.error(f"Export failed: {e}")
+            return {"success": False, "error": str(e)}
+
+
+async def export_schema_to_csv(data_source_id: int) -> str:
     service: EnterpriseIntelligentCatalogService = await get_enterprise_catalog_service()
-    # Load discovered assets for the data source; fallback to simple query via service internals if needed
-    # For robustness, we export minimal schema fields available from the service
     discovery = await service.discover_assets_intelligent(
         data_source_id=data_source_id,
         discovery_config={"mode": "schema_export", "limit": 1000},
-        session=session,
+        session=None,
         user_id="system"
     )
     assets: List[Dict[str, Any]] = discovery.get("discovered_assets", [])

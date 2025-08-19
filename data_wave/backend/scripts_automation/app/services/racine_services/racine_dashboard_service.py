@@ -644,17 +644,22 @@ class RacineDashboardService:
         
         trends = {}
         
-        # This would typically involve time-series analysis
-        # For now, we'll provide a simplified trend calculation
+        # Enterprise trend calculation using short-window slope and volatility
+        import numpy as np
         for group, group_metrics in metrics_data.items():
             group_trends = {}
-            for metric, value in group_metrics.items():
-                if isinstance(value, (int, float)):
-                    # Simplified trend calculation (would use historical data in production)
+            for metric, series in group_metrics.items():
+                if isinstance(series, (list, tuple)) and len(series) >= 3:
+                    y = np.array(series[-10:], dtype=float)
+                    x = np.arange(len(y))
+                    slope, intercept = np.polyfit(x, y, 1)
+                    pct = float((y[-1] - y[0]) / (abs(y[0]) + 1e-6)) * 100.0
+                    direction = 'up' if slope > 0.0 else ('down' if slope < 0.0 else 'stable')
+                    velocity = float(slope)
                     group_trends[metric] = {
-                        'direction': 'stable',  # 'up', 'down', 'stable'
-                        'change_percentage': 0.0,
-                        'velocity': 0.0
+                        'direction': direction,
+                        'change_percentage': pct,
+                        'velocity': velocity
                     }
             trends[group] = group_trends
             

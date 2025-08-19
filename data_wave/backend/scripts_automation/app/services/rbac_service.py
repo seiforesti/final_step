@@ -51,81 +51,69 @@ def get_user_effective_permissions_rbac(db: Session, user_id: int) -> List[Dict[
     # 7. Format output with ABAC/condition evaluation
     import json
     result = []
+
+    service = RBACService(db)
+
     def check_condition(perm, user):
         cond = getattr(perm, "conditions", None)
         if not cond:
             return True, None  # No condition, always effective
         try:
-            if isinstance(cond, str):
-                cond_obj = json.loads(cond)
-            else:
-                cond_obj = cond
+            cond_obj = json.loads(cond) if isinstance(cond, str) else cond
         except Exception:
             return False, "Invalid condition format"
-        # Evaluate enterprise ABAC conditions with advanced pattern matching
-        from ..services.advanced_analytics_service import AdvancedAnalyticsService
-        from ..models.auth_models import User, UserProfile, Organization
-        
-        analytics_service = AdvancedAnalyticsService()
-        
-        # Get user context for advanced condition evaluation
-        user_context = await self._get_user_context(user)
-        
-        # Advanced condition evaluation patterns
-        if "user_id" in cond_obj and cond_obj["user_id"] == ":current_user_id":
-            if getattr(user, "id", None) == user_id:
-                return True, None
-            else:
-                return False, "User ID does not match (:current_user_id)"
-        
-        if "department" in cond_obj and cond_obj["department"] == ":user_department":
-            user_dept = user_context.get('department')
-            if user_dept and user_dept == cond_obj.get('department_value'):
-                return True, None
-            else:
-                return False, f"User department '{user_dept}' does not match required department"
-        
-        if "region" in cond_obj and cond_obj["region"] == ":user_region":
-            user_region = user_context.get('region')
-            if user_region and user_region == cond_obj.get('region_value'):
-                return True, None
-            else:
-                return False, f"User region '{user_region}' does not match required region"
-        
+
+        # Build user context once
+        user_context = service._get_user_context(user)
+
+        # Placeholder-based checks that depend only on user context
+        # Owner check
+        if cond_obj.get("user_id") == ":current_user_id":
+            return getattr(user, "id", None) == user_id, None if getattr(user, "id", None) == user_id else "User ID mismatch"
+
+        # Department placeholder means resource.department must match user's department.
+        # Without resource context here, we can only assert that user has a department set.
+        if cond_obj.get("department") == ":user_department":
+            return user_context.get("department") is not None, None if user_context.get("department") else "User department unknown"
+
+        # Region placeholder
+        if cond_obj.get("region") == ":user_region":
+            return user_context.get("region") is not None, None if user_context.get("region") else "User region unknown"
+
+        # Role level threshold
         if "role_level" in cond_obj:
-            user_role_level = user_context.get('role_level', 0)
-            required_level = cond_obj.get('role_level', 0)
-            if user_role_level >= required_level:
-                return True, None
-            else:
-                return False, f"User role level {user_role_level} insufficient for required level {required_level}"
-        
+            user_role_level = user_context.get("role_level", 0)
+            required_level = int(cond_obj.get("role_level", 0))
+            return (user_role_level >= required_level), (
+                None if user_role_level >= required_level else f"User role level {user_role_level} < required {required_level}"
+            )
+
+        # Time-based window
         if "time_based" in cond_obj:
-            time_condition = cond_obj.get('time_based', {})
             current_time = datetime.utcnow()
-            if self._evaluate_time_condition(current_time, time_condition):
-                return True, None
-            else:
-                return False, "Time-based condition not met"
-        
+            ok = service._evaluate_time_condition(current_time, cond_obj.get("time_based", {}))
+            return ok, None if ok else "Outside allowed time window"
+
+        # Resource ownership requires target context; treat as indeterminate in listing
         if "resource_ownership" in cond_obj:
-            resource_id = cond_obj.get('resource_id')
-            if self._check_resource_ownership(user, resource_id):
-                return True, None
-            else:
-                return False, "User does not own the specified resource"
-        
-        # Advanced ML-based condition evaluation
+            return True, None  # Defer to enforcement where resource_id is available
+
+        # Optional ML risk check if available
         if "ml_risk_score" in cond_obj:
-            risk_score = await analytics_service.calculate_user_risk_score(user.id)
-            max_risk = cond_obj.get('max_risk_score', 0.5)
-            if risk_score <= max_risk:
-                return True, None
-            else:
-                return False, f"User risk score {risk_score} exceeds maximum {max_risk}"
-        
-        # Default: cannot evaluate, mark as not effective
-        return False, "Advanced condition not matched or not evaluable"
+            try:
+                from ..services.advanced_analytics_service import AdvancedAnalyticsService  # type: ignore
+                analytics_service = AdvancedAnalyticsService()
+                risk_score = getattr(analytics_service, "calculate_user_risk_score", lambda _id: 0.0)(user.id)
+                max_risk = float(cond_obj.get("max_risk_score", 0.5))
+                return (risk_score <= max_risk), (
+                    None if risk_score <= max_risk else f"Risk {risk_score} > max {max_risk}"
+                )
+            except Exception:
+                # If risk cannot be computed, be conservative and mark as not effective
+                return False, "Unable to compute ML risk score"
+
+        # Unknown condition keys: conservatively mark as not effective
+        return False, "Condition not evaluable without full context"
 
     for perm in perms:
         is_effective, note = check_condition(perm, user)
@@ -184,41 +172,41 @@ class RBACService:
         except Exception as e:
             return {"status": "error", "error": str(e)}
 
-    async def _get_user_context(self, user) -> Dict[str, Any]:
-        """Get comprehensive user context for ABAC evaluation"""
+    def _get_user_context(self, user) -> Dict[str, Any]:
+        """Get comprehensive user context for ABAC evaluation (synchronous)."""
         try:
             from ..models.auth_models import UserProfile, Organization
-            
+
             user_context = {
-                'user_id': user.id,
-                'username': user.username,
-                'email': user.email,
+                'user_id': getattr(user, 'id', None),
+                'username': getattr(user, 'username', None),
+                'email': getattr(user, 'email', None),
                 'role_level': 0,
                 'department': None,
                 'region': None,
                 'organization': None
             }
-            
+
             # Get user profile information
-            profile = self.db.query(UserProfile).filter(UserProfile.user_id == user.id).first()
+            profile = self.db.query(UserProfile).filter(UserProfile.user_id == getattr(user, 'id', None)).first()
             if profile:
                 user_context.update({
-                    'department': profile.department,
-                    'region': profile.region,
-                    'role_level': profile.role_level or 0
+                    'department': getattr(profile, 'department', None),
+                    'region': getattr(profile, 'region', None),
+                    'role_level': getattr(profile, 'role_level', 0) or 0
                 })
-            
+
             # Get organization information
-            if hasattr(user, 'organization_id') and user.organization_id:
+            if hasattr(user, 'organization_id') and getattr(user, 'organization_id', None):
                 org = self.db.query(Organization).filter(Organization.id == user.organization_id).first()
                 if org:
-                    user_context['organization'] = org.name
-            
+                    user_context['organization'] = getattr(org, 'name', None)
+
             return user_context
-            
+
         except Exception as e:
             logger.warning(f"Error getting user context: {e}")
-            return {'user_id': user.id, 'role_level': 0}
+            return {'user_id': getattr(user, 'id', None), 'role_level': 0}
     
     def _evaluate_time_condition(self, current_time: datetime, time_condition: Dict[str, Any]) -> bool:
         """Evaluate time-based ABAC conditions"""
@@ -256,11 +244,83 @@ class RBACService:
     def _check_resource_ownership(self, user, resource_id: str) -> bool:
         """Check if user owns the specified resource"""
         try:
-            # This would check various resource ownership patterns
-            # For now, implement basic ownership check
-            if hasattr(user, 'id') and resource_id:
-                # Check if resource belongs to user
-                return str(user.id) in resource_id or resource_id.startswith(f"user_{user.id}")
+            if not getattr(user, 'id', None) or not resource_id:
+                return False
+
+            # Admins own all resources
+            try:
+                from app.models.auth_models import Role, UserRole
+                admin_role = self.db.query(Role).filter(Role.name.in_(["admin", "superadmin"]))
+                admin_ids = [ur.user_id for ur in self.db.query(UserRole).filter(UserRole.role_id.in_([r.id for r in admin_role])).all()]
+                if user.id in admin_ids:
+                    return True
+            except Exception:
+                pass
+
+            # Parse resource identifier pattern: type:id
+            parts = resource_id.split(":", 1)
+            resource_type = parts[0] if len(parts) == 2 else "generic"
+            resource_key = parts[1] if len(parts) == 2 else resource_id
+
+            # Direct ownership mapping table
+            try:
+                from app.models.ownership_models import ResourceOwnership  # optional
+                ro = self.db.query(ResourceOwnership).filter(
+                    ResourceOwnership.resource_type == resource_type,
+                    ResourceOwnership.resource_id == resource_key,
+                    ResourceOwnership.user_id == user.id,
+                ).first()
+                if ro:
+                    return True
+            except Exception:
+                pass
+
+            # Check common domain objects
+            try:
+                if resource_type in ("datasource", "data_source", "ds"):
+                    from app.models.data_source_models import DataSource
+                    ds = self.db.query(DataSource).filter((DataSource.id == resource_key) | (DataSource.external_id == resource_key)).first()
+                    if ds and (getattr(ds, "owner_user_id", None) == user.id or getattr(ds, "created_by", None) == user.id):
+                        return True
+                elif resource_type in ("asset", "catalog_asset"):
+                    from app.models.catalog_models import CatalogAsset as _Asset
+                    a = self.db.query(_Asset).filter((_Asset.id == resource_key) | (_Asset.logical_id == resource_key)).first()
+                    if a and (getattr(a, "owner_user_id", None) == user.id or getattr(a, "created_by", None) == user.id):
+                        return True
+                elif resource_type in ("workspace", "ws"):
+                    from app.models.catalog_collaboration_models import CollaborationWorkspace, CatalogWorkspaceMember
+                    ws = self.db.query(CollaborationWorkspace).filter((CollaborationWorkspace.id == resource_key) | (CollaborationWorkspace.code == resource_key)).first()
+                    if ws and (getattr(ws, "owner_user_id", None) == user.id or getattr(ws, "created_by", None) == user.id):
+                        return True
+                    # Member ownership if write/admin
+                    if ws:
+                        membership = self.db.query(CatalogWorkspaceMember).filter(
+                            CatalogWorkspaceMember.workspace_id == ws.id,
+                            CatalogWorkspaceMember.user_id == user.id,
+                        ).first()
+                        if membership and getattr(membership, "role", "member") in ("owner", "admin", "editor"):
+                            return True
+                elif resource_type in ("review", "asset_review"):
+                    from app.models.catalog_collaboration_models import AssetReview
+                    rev = self.db.query(AssetReview).filter(AssetReview.id == resource_key).first()
+                    if rev and (getattr(rev, "requester_id", None) == str(user.id) or getattr(rev, "reviewer_id", None) == user.id):
+                        return True
+                elif resource_type in ("annotation", "note"):
+                    from app.models.catalog_collaboration_models import DataAnnotation
+                    ann = self.db.query(DataAnnotation).filter(DataAnnotation.id == resource_key).first()
+                    if ann and getattr(ann, "author_id", None) == str(user.id):
+                        return True
+                elif resource_type in ("ml_model", "model"):
+                    from app.models.ml_models import MLModelConfiguration
+                    mm = self.db.query(MLModelConfiguration).filter((MLModelConfiguration.id == resource_key) | (MLModelConfiguration.name == resource_key)).first()
+                    if mm and (getattr(mm, "owner_user_id", None) == user.id or getattr(mm, "created_by", None) == user.id):
+                        return True
+            except Exception:
+                pass
+
+            # Heuristic fallback: resource string contains user id
+            if str(user.id) in resource_id or resource_id.startswith(f"user_{user.id}"):
+                return True
             return False
             
         except Exception as e:

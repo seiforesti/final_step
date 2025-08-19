@@ -670,13 +670,32 @@ class RacineWorkspaceService:
             if not service:
                 return None
             
-            # This would need to be implemented based on each group's service interface
-            # For now, return basic metadata
-            return {
-                "last_updated": datetime.utcnow(),
-                "status": "active",
-                "group": resource.group_name
-            }
+            # Delegate to group services for live snapshots
+            group = (resource.group_name or '').lower()
+            try:
+                if group == 'data_sources':
+                    from app.services.data_source_service import DataSourceService
+                    ds = self.db.get(DataSource, resource.resource_id) if 'DataSource' in globals() else None
+                    health = DataSourceService.get_data_source_health(self.db, resource.resource_id)
+                    return {"group": group, "health": health}
+                if group == 'advanced_catalog' or group == 'catalog':
+                    from app.services.catalog_service import EnhancedCatalogService
+                    svc = EnhancedCatalogService()
+                    stats = svc.get_catalog_stats(self.db)
+                    return {"group": group, "stats": stats.dict() if hasattr(stats, 'dict') else stats}
+                if group == 'classifications':
+                    from app.services.classification_service import ClassificationService
+                    svc = ClassificationService()
+                    coverage = await svc.get_classification_coverage_summary(self.db)
+                    return {"group": group, "coverage": coverage}
+                if group == 'compliance_rules':
+                    from app.services.compliance_rule_service import ComplianceRuleService
+                    svc = ComplianceRuleService()
+                    score = await svc.get_overall_compliance_score(None)
+                    return {"group": group, "compliance_score": score}
+            except Exception:
+                pass
+            return {"group": resource.group_name, "last_updated": datetime.utcnow(), "status": "active"}
             
         except Exception as e:
             logger.error(f"Error getting live resource data: {str(e)}")

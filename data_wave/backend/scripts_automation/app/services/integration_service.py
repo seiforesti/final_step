@@ -150,8 +150,34 @@ class IntegrationService:
             
             session.commit()
             
-            # TODO: Implement actual sync logic here
-            logger.info(f"Triggered sync for integration {integration_id}")
+            # Actual sync logic: delegate to provider-specific adapter via registry
+            try:
+                from app.services.integration_providers import IntegrationProviderRegistry  # type: ignore
+                provider = IntegrationProviderRegistry.get(integration.provider)
+                if not provider:
+                    raise RuntimeError(f"No provider registered for {integration.provider}")
+
+                started_at = datetime.utcnow()
+                records = provider.sync(integration.config)
+                duration_ms = int((datetime.utcnow() - started_at).total_seconds() * 1000)
+
+                IntegrationService.update_integration_metrics(
+                    session=session,
+                    integration_id=integration_id,
+                    success=True,
+                    duration_ms=duration_ms,
+                    records_processed=len(records) if isinstance(records, list) else int(records or 0),
+                )
+                logger.info(f"Sync completed for integration {integration_id} in {duration_ms} ms")
+            except Exception as sync_err:
+                IntegrationService.update_integration_metrics(
+                    session=session,
+                    integration_id=integration_id,
+                    success=False,
+                    duration_ms=0,
+                    records_processed=0,
+                )
+                logger.error(f"Integration sync failed for {integration_id}: {sync_err}")
             return True
         except Exception as e:
             session.rollback()

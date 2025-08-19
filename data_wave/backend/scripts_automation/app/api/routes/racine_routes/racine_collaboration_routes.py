@@ -290,14 +290,13 @@ async def get_session_messages(
 ):
     """Get messages from a collaboration session"""
     try:
-        # This would be implemented in the service
-        # For now, return a placeholder
-        return {
-            "session_id": session_id,
-            "messages": [],
-            "total_count": 0,
-            "has_more": False
-        }
+        collaboration_service = RacineCollaborationService(db)
+        return await collaboration_service.list_session_messages(
+            session_id=session_id,
+            limit=limit,
+            offset=offset,
+            message_type=message_type,
+        )
         
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -498,9 +497,8 @@ async def get_session_participants(
 ):
     """Get all participants in a collaboration session"""
     try:
-        # This would be implemented in the service
-        # For now, return placeholder data
-        return []
+        collaboration_service = RacineCollaborationService(db)
+        return await collaboration_service.list_session_participants(session_id)
         
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

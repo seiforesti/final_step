@@ -1,0 +1,114 @@
+
+
+-----------------paths of files created in project corresponds on the above request and on the readme.md both backend and frontend------
+
+d:\purview scripts\backend\scripts_automation\app\README.md
+d:\purview scripts\backend\scripts_automation\app\models\scan_models.py
+d:\purview scripts\backend\scripts_automation\app\services\data_source_service.py
+d:\purview scripts\backend\scripts_automation\app\services\scan_rule_set_service.py
+d:\purview scripts\backend\scripts_automation\app\services\scan_service.py
+d:\purview scripts\backend\scripts_automation\app\services\scan_scheduler_service.py
+d:\purview scripts\backend\scripts_automation\app\db_session.py
+d:\purview scripts\backend\scripts_automation\app\api\routes\scan_routes.py
+d:\purview scripts\backend\scripts_automation\requirements.txt
+d:\purview scripts\backend\scripts_automation\app\main.py
+d:\purview scripts\backend\scripts_automation\app\Dockerfile
+d:\purview scripts\backend\scripts_automation\app\services\secret_manager.py
+d:\purview scripts\backend\scripts_automation\app\services\data_profiling_service.py
+d:\purview scripts\backend\scripts_automation\app\services\custom_scan_rule_service.py
+d:\purview scripts\backend\scripts_automation\app\services\incremental_scan_service.py
+d:\purview scripts\backend\scripts_automation\app\services\dashboard_service.py
+d:\purview scripts\backend\scripts_automation\app\services\lineage_service.py
+d:\purview scripts\backend\scripts_automation\app\services\compliance_service.py
+d:\purview scripts\backend\scripts_automation\app\services\pattern_validation_service.py
+d:\purview scripts\backend\scripts_automation\app\api\routes\dashboard.py
+d:\purview scripts\backend\scripts_automation\app\api\routes\custom_scan_rules.py
+d:\purview scripts\backend\scripts_automation\app\api\routes\data_profiling.py
+d:\purview scripts\backend\scripts_automation\app\api\routes\incremental_scan.py
+d:\purview scripts\backend\scripts_automation\app\api\routes\scan_rule_set_validation.py
+d:\purview scripts\backend\scripts_automation\app\api\security\rbac.py
+d:\purview scripts\backend\scripts_automation\app\docker-compose.yml
+
+d:\purview scripts\pursight_frontend\src\README.md
+d:\purview scripts\pursight_frontend\src\hooks\useRBACPermissions.ts
+d:\purview scripts\pursight_frontend\src\hooks\useMLSuggestions.ts
+d:\purview scripts\pursight_frontend\src\hooks\useSensitivityLabels.ts
+d:\purview scripts\pursight_frontend\src\hooks\useDataLineage.ts
+d:\purview scripts\pursight_frontend\src\hooks\useDashboardAnalytics.ts
+d:\purview scripts\pursight_frontend\src\hooks\useComplianceManagement.ts
+d:\purview scripts\pursight_frontend\src\hooks\useDataSources.ts
+d:\purview scripts\pursight_frontend\src\hooks\useScanRules.ts
+d:\purview scripts\pursight_frontend\src\hooks\useScanRuleSets.ts
+
+d:\purview scripts\pursight_frontend\src\models\User.ts
+d:\purview scripts\pursight_frontend\src\models\MLSuggestion.ts
+d:\purview scripts\pursight_frontend\src\models\SensitivityLabel.ts
+d:\purview scripts\pursight_frontend\src\models\LineageNode.ts
+d:\purview scripts\pursight_frontend\src\models\ComplianceRule.ts
+d:\purview scripts\pursight_frontend\src\models\ComplianceIssue.ts
+d:\purview scripts\pursight_frontend\src\models\ScanSummaryStats.ts
+d:\purview scripts\pursight_frontend\src\models\DataSourceStats.ts
+d:\purview scripts\pursight_frontend\src\models\DashboardSummary.ts
+d:\purview scripts\pursight_frontend\src\models\ComplianceReport.ts
+d:\purview scripts\pursight_frontend\src\models\MetadataStats.ts
+d:\purview scripts\pursight_frontend\src\models\ComplianceStats.ts
+d:\purview scripts\pursight_frontend\src\models\TimeSeriesData.ts
+d:\purview scripts\pursight_frontend\src\models\LabelAssignment.ts
+d:\purview scripts\pursight_frontend\src\models\LabelHistory.ts
+
+----------------new djustments on frontend------------------
+
+d:\purview scripts\backend\scripts_automation\app\api\routes\custom_scan_rules.py
+
+
+d:\purview scripts\pursight_frontend\src\components\catalog\EntityCreateEditModal.tsx
+d:\purview scripts\pursight_frontend\src\components\catalog\EntityDetails.tsx
+d:\purview scripts\pursight_frontend\src\components\catalog\EntityLineageView.tsx
+d:\purview scripts\pursight_frontend\src\components\catalog\EntityList.tsx
+
+d:\purview scripts\pursight_frontend\src\components\compliance\ComplianceDashboard.tsx
+d:\purview scripts\pursight_frontend\src\components\compliance\ComplianceRuleCreateModal.tsx
+d:\purview scripts\pursight_frontend\src\components\compliance\ComplianceRuleDetails.tsx
+d:\purview scripts\pursight_frontend\src\components\compliance\ComplianceRuleEditModal.tsx
+d:\purview scripts\pursight_frontend\src\components\compliance\ComplianceRuleList.tsx
+
+d:\purview scripts\pursight_frontend\src\components\dataSource\DataSourceConnectionTestModal.tsx
+d:\purview scripts\pursight_frontend\src\components\dataSource\DataSourceCreateModal.tsx
+d:\purview scripts\pursight_frontend\src\components\dataSource\DataSourceDetails.tsx
+d:\purview scripts\pursight_frontend\src\components\dataSource\DataSourceEditModal.tsx
+d:\purview scripts\pursight_frontend\src\components\dataSource\DataSourceList.tsx
+
+d:\purview scripts\pursight_frontend\src\components\dashboard\ScanMetricsOverview.tsx
+
+d:\purview scripts\pursight_frontend\src\components\scan\ScanCreateModal.tsx
+d:\purview scripts\pursight_frontend\src\components\scan\ScanDetails.tsx
+d:\purview scripts\pursight_frontend\src\components\scan\ScanEntitiesView.tsx
+d:\purview scripts\pursight_frontend\src\components\scan\ScanList.tsx
+d:\purview scripts\pursight_frontend\src\components\scan\ScanResultsView.tsx
+d:\purview scripts\pursight_frontend\src\components\scan\ScanScheduleModal.tsx
+
+d:\purview scripts\pursight_frontend\src\components\scanRuleSet\ScanRuleSetCreateEditModal.tsx
+d:\purview scripts\pursight_frontend\src\components\scanRuleSet\ScanRuleSetCreateModal.tsx
+d:\purview scripts\pursight_frontend\src\components\scanRuleSet\ScanRuleSetDetails.tsx
+d:\purview scripts\pursight_frontend\src\components\scanRuleSet\ScanRuleSetEditModal.tsx
+d:\purview scripts\pursight_frontend\src\components\scanRuleSet\ScanRuleSetList.tsx
+d:\purview scripts\pursight_frontend\src\components\scanRuleSet\ScanRuleVisualizer.tsx
+
+d:\purview scripts\pursight_frontend\src\components\sensitivity\SensitivityLabelCreateEditModal.tsx
+d:\purview scripts\pursight_frontend\src\components\sensitivity\SensitivityLabelList.tsx
+d:\purview scripts\pursight_frontend\src\components\sensitivity\EntitySensitivityLabelAssignModal.tsx
+
+
+
+----------------------------------------------providers
+d:\purview scripts\pursight_frontend\src\providers\AppThemeProvider.tsx
+d:\purview scripts\pursight_frontend\src\pages\rbac_system\styles\AzureTheme.tsx
+d:\purview scripts\pursight_frontend\src\pages\rbac_system\styles\AzureDarkTheme.tsx
+d:\purview scripts\pursight_frontend\src\pages\index.ts
+d:\purview scripts\pursight_frontend\src\pages\datasource\DataSourceConnectPage.tsx
+d:\purview scripts\pursight_frontend\src\pages\datamap\DataMapListPage.tsx
+d:\purview scripts\pursight_frontend\src\pages\datamap\DataMapDesignerPage.tsx
+d:\purview scripts\pursight_frontend\src\examples\PurviewIntegrationExample.tsx
+d:\purview scripts\pursight_frontend\src\examples\PurviewDemo.tsx
+d:\purview scripts\pursight_frontend\src\components\ThemeToggle.tsx
+d:\purview scripts\pursight_frontend\README.md

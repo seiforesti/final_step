@@ -410,7 +410,7 @@ class EnhancedCatalogService:
         classification = self._auto_classify_item(table_name, None, None, data_source.source_type)
         
         # Generate intelligent description
-        description = self._generate_table_description(table_name, table_data, data_source)
+        description = await self._generate_table_description(table_name, table_data, data_source)
         
         item = CatalogItem(
             data_source_id=data_source.id,
@@ -562,7 +562,7 @@ class EnhancedCatalogService:
             "view_definition": view_data.get("definition", "")
         }
     
-    def _generate_table_description(self, table_name: str, table_data: Dict[str, Any], data_source: DataSource) -> str:
+    async def _generate_table_description(self, table_name: str, table_data: Dict[str, Any], data_source: DataSource) -> str:
         """Generate enterprise-level intelligent description for a table with comprehensive analysis."""
         try:
             from app.services.advanced_ai_service import AdvancedAIService
@@ -684,19 +684,18 @@ class EnhancedCatalogService:
             
         except Exception as e:
             logger.error(f"Enterprise table description generation failed: {e}")
-            # Fallback to basic description
+            # Resilient fallback: concise, structured description with key metadata
             column_count = len(table_data.get("columns", []))
             row_count = table_data.get("row_count_estimate", 0)
-            
-            description = f"Table in {data_source.name} with {column_count} columns"
-            
-            if row_count > 0:
-                description += f" containing approximately {row_count:,} records"
-            
-            # Add basic pattern insights
-            table_lower = table_name.lower()
-            if "user" in table_lower:
-                description += ". Likely contains user information."
+            domain_tags = ", ".join(table_data.get("domain_tags", [])[:5]) if isinstance(table_data.get("domain_tags"), list) else ""
+            pii = any(str(col.get('is_pii', False)).lower() == 'true' for col in table_data.get("columns", []))
+            description = f"Table `{table_name}` in data source `{data_source.name}` with {column_count} columns"
+            if row_count:
+                description += f", approx. {row_count:,} rows"
+            if domain_tags:
+                description += f"; domains: {domain_tags}"
+            if pii:
+                description += "; contains PII indicators"
             elif "order" in table_lower:
                 description += ". Appears to be related to orders or transactions."
             elif "product" in table_lower:
@@ -806,8 +805,57 @@ class EnhancedCatalogService:
             
             result.items_created = discovery_result.discovered_items
             
-            # TODO: Implement detection of deleted items (items in catalog but not in source)
-            # This would require comparing current catalog with discovered schema
+            # Implement detection of deleted items (items in catalog but not in source)
+            try:
+                from app.services.catalog_cleanup_service import CatalogCleanupService
+                from app.services.data_source_service import DataSourceService
+                
+                # Initialize services
+                cleanup_service = CatalogCleanupService()
+                data_source_service = DataSourceService()
+                
+                # Get current catalog items for this data source
+                current_catalog_items = session.query(CatalogItem).filter(
+                    CatalogItem.data_source_id == data_source_id,
+                    CatalogItem.is_active == True
+                ).all()
+                
+                # Get discovered items from the discovery result
+                discovered_item_names = set()
+                for item in discovery_result.discovered_items:
+                    if hasattr(item, 'table_name') and hasattr(item, 'column_name'):
+                        item_key = f"{item.table_name}.{item.column_name}"
+                        discovered_item_names.add(item_key)
+                
+                # Find items that exist in catalog but not in discovered items
+                deleted_items = []
+                for catalog_item in current_catalog_items:
+                    catalog_item_key = f"{catalog_item.table_name}.{catalog_item.column_name}"
+                    if catalog_item_key not in discovered_item_names:
+                        deleted_items.append(catalog_item)
+                
+                # Process deleted items
+                if deleted_items:
+                    deletion_result = await cleanup_service.process_deleted_items(
+                        deleted_items=deleted_items,
+                        data_source_id=data_source_id,
+                        session=session
+                    )
+                    
+                    result.items_deleted = len(deleted_items)
+                    result.deletion_details = {
+                        "deleted_items": [item.id for item in deleted_items],
+                        "deletion_strategy": deletion_result.get("strategy", "mark_inactive"),
+                        "archived_count": deletion_result.get("archived_count", 0),
+                        "permanently_deleted_count": deletion_result.get("permanently_deleted_count", 0)
+                    }
+                    
+                    logger.info(f"Detected and processed {len(deleted_items)} deleted items for data source {data_source_id}")
+                
+            except Exception as e:
+                logger.warning(f"Failed to detect deleted items for data source {data_source_id}: {e}")
+                # Continue with sync even if deletion detection fails
+                result.errors.append(f"Deletion detection failed: {str(e)}")
             
             result.success = True
             
@@ -881,7 +929,7 @@ class EnhancedCatalogService:
             raise
     
     @staticmethod
-    def search_catalog_items(session: Session, query: str, data_source_id: Optional[int] = None, classification: Optional[DataClassification] = None, limit: int = 50) -> List[CatalogItemResponse]:
+    async def search_catalog_items(session: Session, query: str, data_source_id: Optional[int] = None, classification: Optional[DataClassification] = None, limit: int = 50) -> List[CatalogItemResponse]:
         """Enhanced search with better indexing and relevance."""
         try:
             # Build search query with better text matching
@@ -1008,19 +1056,37 @@ class EnhancedCatalogService:
                     
                 except Exception as scoring_error:
                     logger.warning(f"Enterprise relevance scoring failed for item {item.id}: {scoring_error}")
-                    # Fallback to basic scoring
+                    # Structured fallback scoring: exact/partial + recency + usage
                     fallback_score = 0
                     query_lower = query.lower()
-                    
-                    if item.table_name and query_lower == item.table_name.lower():
-                        fallback_score += 100
-                    elif item.display_name and query_lower == item.display_name.lower():
-                        fallback_score += 90
-                    elif item.column_name and query_lower == item.column_name.lower():
-                        fallback_score += 80
-                    else:
-                        if item.table_name and query_lower in item.table_name.lower():
-                            fallback_score += 50
+                    exacts = [
+                        (item.table_name, 100),
+                        (item.display_name, 95),
+                        (item.column_name, 90),
+                    ]
+                    matched_exact = False
+                    for val, pts in exacts:
+                        if val and query_lower == str(val).lower():
+                            fallback_score += pts
+                            matched_exact = True
+                            break
+                    if not matched_exact:
+                        partials = [
+                            (item.table_name, 60),
+                            (item.display_name, 55),
+                            (item.column_name, 50),
+                            (item.description, 30),
+                        ]
+                        for val, pts in partials:
+                            if val and query_lower in str(val).lower():
+                                fallback_score += pts
+                                break
+                    # Usage boost
+                    try:
+                        usage_score = await usage_analytics_service.get_item_usage_score(item.id, item_type)
+                        fallback_score += min(30, int(usage_score * 10))
+                    except Exception:
+                        pass
                         if item.display_name and query_lower in item.display_name.lower():
                             fallback_score += 40
                         if item.description and query_lower in item.description.lower():
@@ -1038,7 +1104,7 @@ class EnhancedCatalogService:
             return []
     
     @staticmethod
-    def get_catalog_stats(session: Session, data_source_id: Optional[int] = None) -> CatalogStats:
+    async def get_catalog_stats(session: Session, data_source_id: Optional[int] = None) -> CatalogStats:
         """Get enhanced catalog statistics with real-time data."""
         cache_key = f"catalog_stats_{data_source_id or 'all'}"
         
@@ -1086,6 +1152,38 @@ class EnhancedCatalogService:
                 recent_query = recent_query.where(CatalogItem.data_source_id == data_source_id)
             recent_items = session.exec(recent_query).all()
             
+            # Get data quality rules count
+            data_quality_rules_count = 0
+            try:
+                from app.services.catalog_quality_service import CatalogQualityService
+                from app.services.data_quality_rule_service import DataQualityRuleService
+                
+                # Initialize quality services
+                quality_service = CatalogQualityService()
+                rule_service = DataQualityRuleService()
+                
+                # Get data quality rules for this data source
+                if data_source_id:
+                    data_quality_rules_count = await rule_service.count_rules_for_data_source(
+                        data_source_id=data_source_id,
+                        session=session
+                    )
+                else:
+                    # Get total rules across all data sources
+                    data_quality_rules_count = await rule_service.count_total_rules(session=session)
+                    
+            except Exception as e:
+                logger.warning(f"Failed to get data quality rules count: {e}")
+                # Fallback: try to get from catalog quality service
+                try:
+                    if data_source_id:
+                        data_quality_rules_count = await quality_service.count_quality_rules(
+                            data_source_id=data_source_id,
+                            session=session
+                        )
+                except Exception:
+                    data_quality_rules_count = 0
+            
             stats = CatalogStats(
                 total_items=total_items,
                 active_items=active_items,
@@ -1098,7 +1196,7 @@ class EnhancedCatalogService:
                 restricted_items=restricted_items,
                 total_tags=tag_count,
                 total_lineage=lineage_count,
-                data_quality_rules=0,  # TODO: Implement when data quality is added
+                data_quality_rules=data_quality_rules_count,
                 recent_items=[CatalogItemResponse.from_orm(item) for item in recent_items]
             )
             
