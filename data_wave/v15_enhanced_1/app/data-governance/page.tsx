@@ -64,12 +64,12 @@ import { ThemeToggle } from "@/components/ui/theme-toggle"
 import EntityDetails from "@/components/data-catalog/entity-details"
 import EntityLineageView from "@/components/data-catalog/entity-lineage-view"
 import EntityManagementContent from "@/components/data-catalog/entity-management-content"
-import { DataSourcesApp } from "@/components/data-sources/data-sources-app"
-import { ScanSystemApp } from "@/components/scan-logic/scan-system-app"
-import { ScanRuleSetApp } from "@/components/Scan-Rule-Sets/ScanRuleSetApp"
-import { LoadingSpinner } from "@/components/Scan-Rule-Sets/components/LoadingSpinner"
-import { ErrorBoundary } from "@/components/Scan-Rule-Sets/components/ErrorBoundary"
-import { ComplianceRuleApp } from "@/components/Compliance-Rule/ComplianceRuleApp"
+import { EnhancedDataSourcesApp } from "@/components/data-sources/enhanced-data-sources-app" 
+import { ScanSystemApp } from "@/components/scan-system/ScanSystemSPA"
+import { ScanRuleSetsSPA } from "@/components/Advanced-Scan-Rule-Sets/spa/ScanRuleSetsSPA"
+import { LoadingSpinner } from "@/components/shared/LoadingSpinner"
+import { ErrorBoundary } from "@/components/shared/ErrorBoundary"
+import ComplianceRuleAppWithProvider from "@/components/Compliance-Rule/enhanced-compliance-rule-app"
 
 // Enhanced Types
 interface SidebarItem {
@@ -984,7 +984,7 @@ export default function DataGovernancePage() {
         case "scan-rules":
           return (
             <ErrorBoundary>
-              <ScanRuleSetApp embedded={true} />
+              <ScanRuleSetsSPA embedded={true} />
             </ErrorBoundary>
           )
         case "data-lineage":

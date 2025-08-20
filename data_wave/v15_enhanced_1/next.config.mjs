@@ -28,6 +28,51 @@ const nextConfig = {
         destination: `${backendBase}/racine/orchestration/:path*`,
       },
       {
+        // Fix pluralization mismatch for workflow routes
+        source: '/api/racine/workflows/:path*',
+        destination: `${backendBase}/api/racine/workflow/:path*`,
+      },
+      {
+        // Workspace pluralization bridge
+        source: '/api/racine/workspaces/:path*',
+        destination: `${backendBase}/api/racine/workspace/:path*`,
+      },
+      {
+        // Racine analytics bridge to enterprise analytics service
+        source: '/api/racine/analytics/:path*',
+        destination: `${backendBase}/analytics/:path*`,
+      },
+      {
+        // Security service bridge
+        source: '/api/racine/security/:path*',
+        destination: `${backendBase}/security/:path*`,
+      },
+      {
+        // Lineage service bridge
+        source: '/api/racine/lineage/:path*',
+        destination: `${backendBase}/api/v1/lineage/:path*`,
+      },
+      {
+        // Monitoring service bridge
+        source: '/api/racine/monitoring/:path*',
+        destination: `${backendBase}/api/v1/monitoring/:path*`,
+      },
+      {
+        // Integration service bridge
+        source: '/api/racine/integration/:path*',
+        destination: `${backendBase}/api/v1/integration/:path*`,
+      },
+      {
+        // Streaming orchestration bridge
+        source: '/api/racine/streaming/:path*',
+        destination: `${backendBase}/api/v1/streaming-orchestration/:path*`,
+      },
+      {
+        // Semantic search bridge
+        source: '/api/racine/search/:path*',
+        destination: `${backendBase}/semantic-search/:path*`,
+      },
+      {
         source: '/health',
         destination: `${backendBase}/health`,
       },
