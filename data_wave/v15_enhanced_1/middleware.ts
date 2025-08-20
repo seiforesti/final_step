@@ -89,11 +89,14 @@ export async function middleware(request: NextRequest) {
   const authToken = request.cookies.get('racine_auth_token')?.value;
   const sessionToken = request.cookies.get('racine_session')?.value;
   
-  // If no authentication tokens, redirect to login
+  // If no authentication tokens, allow app-level auth for non-admin routes
   if (!authToken && !sessionToken) {
-    const loginUrl = new URL('/login', request.url);
-    loginUrl.searchParams.set('redirect', pathname);
-    return NextResponse.redirect(loginUrl);
+    if (ADMIN_ONLY_ROUTES.includes(pathname)) {
+      const loginUrl = new URL('/login', request.url);
+      loginUrl.searchParams.set('redirect', pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+    return NextResponse.next();
   }
 
   // Check if route requires specific permissions

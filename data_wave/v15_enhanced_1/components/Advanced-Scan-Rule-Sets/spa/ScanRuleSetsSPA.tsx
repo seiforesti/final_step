@@ -1340,6 +1340,7 @@ interface ScanRuleSetsSPAProps {
   features?: string[]
   integrations?: string[]
   customConfig?: any
+  embedded?: boolean
   onViewChange?: (view: string) => void
   onStateChange?: (state: Partial<SPAState>) => void
   onError?: (error: Error) => void
@@ -1362,6 +1363,7 @@ export const ScanRuleSetsSPA: React.FC<ScanRuleSetsSPAProps> = ({
   features = [],
   integrations = [],
   customConfig = {},
+  embedded = false,
   onViewChange,
   onStateChange,
   onError,
@@ -1602,7 +1604,7 @@ export const ScanRuleSetsSPA: React.FC<ScanRuleSetsSPAProps> = ({
   });
 
   // Integration Validation
-  const { validationReport, isValidating, runValidation, getComponentStatus } = useIntegrationValidation();
+  const { validationReport, isValidating, runIntegrationValidation: runValidation, getComponentStatus } = useIntegrationValidation();
 
   // Custom hooks for data management
   const {
@@ -1658,7 +1660,7 @@ export const ScanRuleSetsSPA: React.FC<ScanRuleSetsSPAProps> = ({
     impactAnalysis,
     anomalies,
     predictions,
-    analyzePatterns,
+    analyzePatterns: analyzeIntelligencePatterns,
     performSemanticAnalysis,
     assessImpact,
     detectAnomalies,
@@ -1707,7 +1709,7 @@ export const ScanRuleSetsSPA: React.FC<ScanRuleSetsSPAProps> = ({
     validationHistory,
     validateRule,
     createValidationRule,
-    runValidation,
+    runValidation: runRuleValidation,
     getValidationInsights,
     isValidationLoading,
     validationError
@@ -1719,7 +1721,7 @@ export const ScanRuleSetsSPA: React.FC<ScanRuleSetsSPAProps> = ({
     patternAssociations,
     createPattern,
     updatePattern,
-    analyzePatterns,
+    analyzePatterns: analyzeLibraryPatterns,
     suggestPatterns,
     getPatternInsights,
     isPatternLibraryLoading,
@@ -2169,7 +2171,7 @@ export const ScanRuleSetsSPA: React.FC<ScanRuleSetsSPAProps> = ({
     }
 
     return (
-      <Suspense fallback={<LoadingFallback message={`Loading ${currentComponent?.label}...`} />}>
+      <Suspense fallback={<ScanRuleLoadingFallback message={`Loading ${currentComponent?.label}...`} />}>
         <ErrorBoundary
           FallbackComponent={ErrorFallback}
           onError={(error) => {
@@ -3026,7 +3028,7 @@ class ErrorBoundary extends React.Component<
 }
 
 // Error Fallback Component
-const ErrorFallback: React.FC<{ error: Error | null }> = ({ error }) => (
+const ScanRuleErrorFallback: React.FC<{ error: Error | null }> = ({ error }) => (
   <div className="flex flex-col items-center justify-center h-full p-8 text-center">
     <AlertTriangle className="h-16 w-16 text-destructive mb-4" />
     <h2 className="text-2xl font-bold mb-2">Something went wrong</h2>
@@ -3047,7 +3049,7 @@ const ErrorFallback: React.FC<{ error: Error | null }> = ({ error }) => (
 )
 
 // Loading Fallback Component
-const LoadingFallback: React.FC<{ message?: string }> = ({ message = 'Loading...' }) => (
+const ScanRuleLoadingFallback: React.FC<{ message?: string }> = ({ message = 'Loading...' }) => (
   <div className="flex flex-col items-center justify-center h-full p-8">
     <div className="relative">
       <div className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin mb-4" />
@@ -3058,4 +3060,4 @@ const LoadingFallback: React.FC<{ message?: string }> = ({ message = 'Loading...
 )
 
 export default ScanRuleSetsSPA
-export { ErrorBoundary, ErrorFallback, LoadingFallback }
+export { ErrorBoundary, ScanRuleErrorFallback as ErrorFallback, ScanRuleLoadingFallback as LoadingFallback }

@@ -400,18 +400,4 @@ export default function MainApp() {
   );
 }
 
-// ============================================================================
-// APP METADATA
-// ============================================================================
-
-export const metadata = {
-  title: 'Enterprise Data Governance Platform',
-  description: 'Advanced data governance platform with AI-powered insights and enterprise security',
-  keywords: 'data governance, enterprise, AI, security, compliance, analytics',
-  authors: [{ name: 'Data Governance Team' }],
-  openGraph: {
-    title: 'Enterprise Data Governance Platform',
-    description: 'Advanced data governance platform with AI-powered insights',
-    type: 'website'
-  }
-};
+// End of file
