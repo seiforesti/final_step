@@ -15,20 +15,10 @@ const nextConfig = {
   experimental: {
     // Enable server actions for form handling
     serverActions: true,
-    // Enable optimized font loading
-    optimizeFonts: true,
-    // Enable modern image optimization
-    images: {
-      allowFutureImage: true,
-    },
     // Enable incremental static regeneration
     isrMemoryCacheSize: 0,
     // Optimize page loading
     optimizeCss: true,
-    // Enable React Server Components
-    serverComponents: true,
-    // Enable concurrent features
-    concurrentFeatures: true,
   },
   // Configure module/dependency optimization
   webpack: (config, { dev, isServer }) => {
@@ -108,10 +98,11 @@ const nextConfig = {
   },
   // Configure rewrites for API proxying
   async rewrites() {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
     return [
       {
         source: '/api/:path*',
-        destination: `${process.env.NEXT_PUBLIC_API_URL}/:path*`,
+        destination: `${apiUrl}/:path*`,
       },
     ]
   },
