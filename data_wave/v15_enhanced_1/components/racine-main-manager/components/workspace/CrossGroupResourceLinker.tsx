@@ -952,55 +952,58 @@ export const CrossGroupResourceLinker: React.FC = () => {
         include_ai_recommendations: true
       });
 
-      return response.resources.map(resource => ({
-        id: resource.id,
-        name: resource.name,
-        description: resource.description,
-        type: resource.resource_type,
-        sourceGroup: resource.source_group,
-        targetGroups: resource.target_groups,
-        resourceId: resource.resource_id,
-        resourceType: resource.resource_type,
-        resourceMetadata: resource.metadata,
-        linkStatus: resource.link_status,
-        linkType: resource.link_type,
-        linkStrength: resource.link_strength,
-        linkQuality: resource.link_quality,
-        dependencies: resource.dependencies || [],
-        dependents: resource.dependents || [],
-        circularDependencies: resource.has_circular_dependencies,
-        configuration: resource.configuration,
-        syncSettings: resource.sync_settings,
-        accessSettings: resource.access_settings,
-        usageCount: resource.analytics?.usage_count || 0,
-        performanceScore: resource.analytics?.performance_score || 0,
-        errorRate: resource.analytics?.error_rate || 0,
-        lastSyncTime: resource.last_sync_time,
-        avgResponseTime: resource.analytics?.avg_response_time || 0,
-        conflicts: resource.conflicts || [],
-        resolutionHistory: resource.resolution_history || [],
-        createdAt: resource.created_at,
-        updatedAt: resource.updated_at,
-        lastAccessedAt: resource.last_accessed_at,
-        createdBy: resource.created_by,
-        tags: resource.tags || [],
-        category: resource.category,
-        priority: resource.priority,
-        aiRecommendations: resource.ai_recommendations || [],
-        optimizationSuggestions: resource.optimization_suggestions || [],
-        riskAssessment: resource.risk_assessment || {
-          overallRisk: 'low',
-          securityRisk: 0,
-          performanceRisk: 0,
-          complianceRisk: 0,
-          operationalRisk: 0,
-          risks: [],
-          mitigations: []
-        }
-      }));
+      // If backend returns data, use it; otherwise, use sample data for demonstration
+      if (response.resources && response.resources.length > 0) {
+        return response.resources.map(resource => ({
+          id: resource.id,
+          name: resource.name,
+          description: resource.description,
+          type: resource.resource_type,
+          sourceGroup: resource.source_group,
+          targetGroups: resource.target_groups,
+          resourceId: resource.resource_id,
+          resourceType: resource.resource_type,
+          resourceMetadata: resource.metadata,
+          linkStatus: resource.link_status,
+          linkType: resource.link_type,
+          linkStrength: resource.link_strength,
+          linkQuality: resource.link_quality,
+          dependencies: resource.dependencies || [],
+          dependents: resource.dependents || [],
+          circularDependencies: resource.has_circular_dependencies,
+          configuration: resource.configuration,
+          syncSettings: resource.sync_settings,
+          accessSettings: resource.access_settings,
+          usageCount: resource.analytics?.usage_count || 0,
+          performanceScore: resource.analytics?.performance_score || 0,
+          errorRate: resource.analytics?.error_rate || 0,
+          lastSyncTime: resource.last_sync_time,
+          avgResponseTime: resource.analytics?.avg_response_time || 0,
+          conflicts: resource.conflicts || [],
+          resolutionHistory: resource.resolution_history || [],
+          createdAt: resource.created_at,
+          updatedAt: resource.updated_at,
+          lastAccessedAt: resource.last_accessed_at,
+          createdBy: resource.created_by,
+          tags: resource.tags || [],
+          category: resource.category,
+          priority: resource.priority,
+          aiRecommendations: resource.ai_recommendations || [],
+          optimizationSuggestions: resource.optimization_suggestions || [],
+          riskAssessment: resource.risk_assessment || {
+            overallRisk: 'low',
+            securityRisk: 0,
+            performanceRisk: 0,
+            complianceRisk: 0,
+            operationalRisk: 0,
+            risks: [],
+            mitigations: []
+          }
+        }));
+      }
 
-      // Sample resource links for demonstration
-      const sampleResourceLinks: CrossGroupResourceLink[] = [
+      // Sample resource links for demonstration when backend has no data
+      const sampleResourceLinks: EnhancedCrossGroupResource[] = [
         {
           id: 'link-1' as UUID,
           name: 'Customer PII Classification Rule',
@@ -1249,6 +1252,7 @@ export const CrossGroupResourceLinker: React.FC = () => {
             }
           ]
         }
+      }
       ];
 
       return sampleResourceLinks;
