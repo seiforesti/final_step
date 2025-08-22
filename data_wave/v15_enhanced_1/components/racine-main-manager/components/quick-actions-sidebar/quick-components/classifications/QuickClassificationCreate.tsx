@@ -62,12 +62,12 @@ import type {
   DataSensitivity,
   ComplianceStandard,
   ClassificationTemplate
-} from '../../../types/racine-core.types';
+} from '../../../../types/racine-core.types';
 
-import { useClassifications } from '../../../hooks/useClassifications';
-import { useWorkspaceManagement } from '../../../hooks/useWorkspaceManagement';
-import { useUserManagement } from '../../../hooks/useUserManagement';
-import { useAIAssistant } from '../../../hooks/useAIAssistant';
+import { useClassifications } from '../../../../hooks/useClassifications';
+import { useWorkspaceManagement } from '../../../../hooks/useWorkspaceManagement';
+import { useUserManagement } from '../../../../hooks/useUserManagement';
+import { useAIAssistant } from '../../../../hooks/useAIAssistant';
 
 interface QuickClassificationCreateProps {
   isVisible?: boolean;

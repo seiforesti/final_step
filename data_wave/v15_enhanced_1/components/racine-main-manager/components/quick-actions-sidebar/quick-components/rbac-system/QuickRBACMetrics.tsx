@@ -36,12 +36,12 @@ import {
   Minus, Edit, Trash, Copy, Share, ExternalLink, MoreHorizontal
 } from 'lucide-react';
 
-import { useRBAC } from '../../../hooks/useRBAC';
-import { useWorkspaceManagement } from '../../../hooks/useWorkspaceManagement';
-import { useUserManagement } from '../../../hooks/useUserManagement';
-import { useAIAssistant } from '../../../hooks/useAIAssistant';
-import { useCrossGroupIntegration } from '../../../hooks/useCrossGroupIntegration';
-import { useActivityTracking } from '../../../hooks/useActivityTracking';
+import { useRBACSystem as useRBAC } from '../../../../hooks/useRBACSystem';
+import { useWorkspaceManagement } from '../../../../hooks/useWorkspaceManagement';
+import { useUserManagement } from '../../../../hooks/useUserManagement';
+import { useAIAssistant } from '../../../../hooks/useAIAssistant';
+import { useCrossGroupIntegration } from '../../../../hooks/useCrossGroupIntegration';
+import { useActivityTracking } from '../../../../hooks/useActivityTracking';
 
 interface RBACMetrics {
   totalUsers: number;

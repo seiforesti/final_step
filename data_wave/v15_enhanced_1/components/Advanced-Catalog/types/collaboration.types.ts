@@ -842,3 +842,74 @@ export enum ContentFormat {
   HTML = 'HTML',
   RICH_TEXT = 'RICH_TEXT'
 }
+
+// ============================================================================
+// MISSING TYPES - ADDED FOR COMPATIBILITY
+// ============================================================================
+
+export interface CrowdsourcingCampaign {
+  id: string;
+  name: string;
+  description: string;
+  type: string;
+  status: string;
+  participants: string[];
+  contributions: any[];
+  startDate: Date;
+  endDate: Date;
+  goals: string[];
+  rewards: any[];
+  metrics: any;
+}
+
+export interface CollaborationComment {
+  id: string;
+  content: string;
+  authorId: string;
+  authorName: string;
+  timestamp: Date;
+  replies: CollaborationComment[];
+  likes: number;
+  dislikes: number;
+  isEdited: boolean;
+  isDeleted: boolean;
+}
+
+export interface ApprovalWorkflow {
+  id: string;
+  name: string;
+  description: string;
+  type: string;
+  status: string;
+  steps: WorkflowStep[];
+  currentStep: number;
+  approvers: string[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface WorkflowStep {
+  id: string;
+  name: string;
+  type: string;
+  status: string;
+  approvers: string[];
+  order: number;
+  isCompleted: boolean;
+  completedAt?: Date;
+}
+
+export interface ApprovalRequest {
+  id: string;
+  title: string;
+  description: string;
+  type: string;
+  status: string;
+  requesterId: string;
+  approvers: string[];
+  workflowId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  dueDate?: Date;
+  priority: 'low' | 'medium' | 'high' | 'critical';
+}

@@ -1547,7 +1547,6 @@ export const useThemePersonalization = () => {
 // =============================================================================
 
 export default LayoutPersonalization;
-export { PersonalizationContext, usePersonalizationContext };
 export type {
   LayoutPersonalizationProps,
   PersonalizationState,

@@ -26,11 +26,11 @@ import { Calendar } from '@/components/ui/calendar';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
-  BarChart3, PieChart, TrendingUp, TrendingDown, Activity, Target, Gauge,
+  BarChart3, TrendingUp, TrendingDown, Activity, Target, Gauge,
   Search, Filter, SortAsc, SortDesc, RefreshCw, Download, Upload, Settings,
   Zap, Star, Award, Crown, Sparkles, Brain, Eye, Lightbulb, AlertTriangle,
   CheckCircle, XCircle, Info, Clock, Timer, Stopwatch, History, Calendar as CalendarIcon,
-  Users, User, Hash, Database, Table, Layers, Grid3X3, FolderOpen, FileText,
+  Users, User, Hash, Database, Layers, Grid3X3, FolderOpen, FileText,
   Image, Video, Link, Globe, Map, MapPin, Navigation, Building, Flag,
   ThumbsUp, ThumbsDown, Heart, Share2, Bookmark, Copy, ExternalLink,
   MoreHorizontal, Edit3, Trash2, Plus, Minus, ChevronUp, ChevronDown,

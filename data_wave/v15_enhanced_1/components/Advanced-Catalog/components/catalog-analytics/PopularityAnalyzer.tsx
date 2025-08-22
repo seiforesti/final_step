@@ -101,7 +101,7 @@ import {
   ArrowDown,
   Minus,
   Zap,
-  Fire,
+  Flame as Fire,
   Award,
   Crown,
   Sparkles,

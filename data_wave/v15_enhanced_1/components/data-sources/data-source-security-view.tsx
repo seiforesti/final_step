@@ -168,9 +168,6 @@ import {
   ArrowLeftSquare,
   ArrowRightSquare,
   ChevronLeft,
-  ChevronUp,
-  ChevronDown,
-  ChevronRight,
   ChevronUpDown,
   ChevronLeftRight,
   ChevronUpLeft,
@@ -551,8 +548,9 @@ export function DataSourceSecurityView({
       blockedAttacks: 156,
       suspiciousActivities: 8,
       lastUpdated: new Date().toISOString(),
-    },
-  }), [dataSource.id])
+    }
+    }
+  }, [dataSource.id])
 
   const data = securityData || realSecurityData
 

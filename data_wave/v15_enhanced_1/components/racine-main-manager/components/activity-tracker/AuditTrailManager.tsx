@@ -35,7 +35,7 @@ import {
   Upload, 
   Search, 
   Filter, 
-  Calendar, 
+  Calendar as CalendarIcon,
   Clock, 
   AlertTriangle, 
   CheckCircle, 
@@ -97,7 +97,7 @@ import {
   MapPin, 
   Clock3, 
   Timer, 
-  Calendar as CalendarIcon, 
+  Calendar as CalendarIcon2,
   Bookmark, 
   Star, 
   Flag, 
@@ -129,7 +129,7 @@ import {
   Folder, 
   Grid3X3, 
   List, 
-  Table, 
+  Table as TableIcon,
   Columns, 
   Rows,
   Binary,
@@ -232,7 +232,7 @@ import {
   TableHeader, 
   TableRow 
 } from '@/components/ui/table';
-import { Calendar } from '@/components/ui/calendar';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { 
   Command,
   CommandEmpty,

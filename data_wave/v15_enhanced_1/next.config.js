@@ -1,43 +1,46 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  swcMinify: true,
   // Optimize production performance
   compiler: {
-    // Enable React Server Components
-    relay: {
-      // Enable aggressive dead code elimination
-      eagerEsm: true,
-    },
     // Remove console logs in production
-    removeConsole: process.env.NODE_ENV === 'production',
+    removeConsole: process.env.NODE_ENV === "production",
   },
   experimental: {
     // Enable server actions for form handling
-    serverActions: true,
-    // Enable optimized font loading
-    optimizeFonts: true,
-    // Enable modern image optimization
-    images: {
-      allowFutureImage: true,
+    serverActions: {
+      allowedOrigins: ["localhost:3000", "localhost:3002"],
     },
-    // Enable incremental static regeneration
-    isrMemoryCacheSize: 0,
-    // Optimize page loading
+    // Enable optimized CSS
     optimizeCss: true,
-    // Enable React Server Components
-    serverComponents: true,
-    // Enable concurrent features
-    concurrentFeatures: true,
   },
-  // Configure module/dependency optimization
+  // Enable Turbopack for faster development
+  turbopack: {
+    rules: {
+      '*.svg': {
+        loaders: ['@svgr/webpack'],
+        as: '*.js',
+      },
+    },
+  },
+  // Set output configuration
+  output: "standalone",
+  outputFileTracingRoot: process.cwd(),
+  // Configure image optimization
+  images: {
+    domains: ["localhost"],
+    formats: ["image/avif", "image/webp"],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+  },
+  // Webpack configuration for production optimization
   webpack: (config, { dev, isServer }) => {
-    // Optimize CSS
-    if (!dev && !isServer) {
+    // Only apply optimizations in production
+    if (!dev) {
       config.optimization = {
         ...config.optimization,
         splitChunks: {
-          chunks: 'all',
+          chunks: "all",
           minSize: 20000,
           maxSize: 244000,
           minChunks: 1,
@@ -48,73 +51,39 @@ const nextConfig = {
             vendors: false,
             commons: {
               test: /[\\/]node_modules[\\/]/,
-              name: 'vendors',
-              chunks: 'all',
-              reuseExistingChunk: true,
-            },
-            lib: {
-              test: /[\\/]lib[\\/]/,
-              name: 'lib',
-              chunks: 'all',
+              name: "vendors",
+              chunks: "all",
               reuseExistingChunk: true,
             },
           },
         },
-      }
+      };
     }
-    return config
-  },
-  // Configure headers for security
-  async headers() {
-    return [
-      {
-        source: '/:path*',
-        headers: [
-          {
-            key: 'X-DNS-Prefetch-Control',
-            value: 'on',
-          },
-          {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block',
-          },
-          {
-            key: 'X-Frame-Options',
-            value: 'SAMEORIGIN',
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin',
-          },
-          {
-            key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
-          },
-        ],
-      },
-    ]
+
+    // Add SVG support
+    config.module.rules.push({
+      test: /\.svg$/,
+      use: ["@svgr/webpack"],
+    });
+
+    return config;
   },
   // Environment configuration
   env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
-  },
-  // Configure redirects for SEO
-  async redirects() {
-    return []
+    NEXT_PUBLIC_API_URL:
+      process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000",
   },
   // Configure rewrites for API proxying
   async rewrites() {
     return [
       {
-        source: '/api/:path*',
-        destination: `${process.env.NEXT_PUBLIC_API_URL}/:path*`,
+        source: "/api/:path*",
+        destination: `${
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
+        }/:path*`,
       },
-    ]
+    ];
   },
-}
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;

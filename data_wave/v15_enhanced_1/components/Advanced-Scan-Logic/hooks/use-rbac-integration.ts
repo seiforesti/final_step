@@ -3,7 +3,7 @@
 // Advanced RBAC utility integration for enterprise-grade scan operations
 // ============================================================================
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import axios from 'axios'
 
@@ -367,20 +367,10 @@ export function useScanLogicRBAC() {
   }, [currentUser, logActionMutation])
 
   // Permission-based component renderer
-  const PermissionGuard = useCallback(({ 
-    permission, 
-    fallback = null, 
-    children 
-  }: { 
-    permission: string
-    fallback?: React.ReactNode
-    children: React.ReactNode 
-  }) => {
-    if (rbacState.loading) {
-      return <div className="animate-pulse bg-gray-200 h-4 rounded"></div>
-    }
-    
-    return hasPermission(permission) ? <>{children}</> : <>{fallback}</>
+  // Avoid JSX in .ts files: expose boolean predicate instead
+  const canRender = useCallback((permission: string) => {
+    if (rbacState.loading) return false;
+    return hasPermission(permission);
   }, [hasPermission, rbacState.loading])
 
   // Scan Logic specific permission helpers
@@ -501,7 +491,7 @@ export function useScanLogicRBAC() {
     logUserAction,
     
     // Components
-    PermissionGuard,
+    canRender,
     
     // Actions
     refreshUser,
@@ -519,10 +509,10 @@ const ScanLogicRBACContext = createContext<ReturnType<typeof useScanLogicRBAC> |
 export function ScanLogicRBACProvider({ children }: { children: React.ReactNode }) {
   const rbacData = useScanLogicRBAC()
   
-  return (
-    <ScanLogicRBACContext.Provider value={rbacData}>
-      {children}
-    </ScanLogicRBACContext.Provider>
+  return React.createElement(
+    ScanLogicRBACContext.Provider,
+    { value: rbacData },
+    children
   )
 }
 
@@ -533,9 +523,6 @@ export function useScanRBAC() {
   }
   return context
 }
-
-// Export individual permission constants for convenience
-export { SCAN_LOGIC_PERMISSIONS }
 
 // Export types
 export type { User, Role, Permission, Group, Session, RBACState, PermissionCheckOptions }

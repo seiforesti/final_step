@@ -69,7 +69,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
-  AlertTriangle,
   Activity,
   BarChart3,
   Bell,
@@ -85,7 +84,7 @@ import {
   FileText,
   Filter,
   GitBranch,
-  LineChart,
+  LineChart as LucideLineChart,
   Loader2,
   MoreHorizontal,
   Pause,
@@ -117,7 +116,7 @@ import {
   Slack,
   AlertCircle,
   Info,
-  Warning,
+  AlertTriangle,
   ShieldAlert,
   Rocket,
   Lightbulb,
@@ -143,7 +142,7 @@ import {
   TrendingDown as TrendDown,
 } from 'lucide-react';
 import {
-  LineChart,
+  LineChart as RechartsLineChart,
   Line,
   AreaChart,
   Area,
@@ -162,7 +161,6 @@ import {
   ReferenceLine,
   Tooltip as RechartsTooltip,
   Legend,
-  Heatmap,
   RadarChart,
   PolarGrid,
   PolarAngleAxis,

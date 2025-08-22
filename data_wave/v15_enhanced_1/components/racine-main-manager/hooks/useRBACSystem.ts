@@ -5,8 +5,8 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 // Import existing RBAC services
-import { userManagementApis } from '../services/user-management-apis';
-import { racineOrchestrationApis } from '../services/racine-orchestration-apis';
+import { userManagementAPI } from '../services/user-management-apis';
+import { racineOrchestrationAPI } from '../services/racine-orchestration-apis';
 
 // Import types
 import type {
@@ -224,7 +224,7 @@ export function useRBACSystem(options: UseRBACSystemOptions = {}): UseRBACSystem
     refetch: refetchUser
   } = useQuery({
     queryKey: ['rbac', 'currentUser'],
-    queryFn: () => userManagementApis.getCurrentUser(),
+    queryFn: () => userManagementAPI.getCurrentUser(),
     enabled: true
   });
 
@@ -235,7 +235,7 @@ export function useRBACSystem(options: UseRBACSystemOptions = {}): UseRBACSystem
     refetch: refetchUsers
   } = useQuery({
     queryKey: ['rbac', 'users', workspaceId],
-    queryFn: () => userManagementApis.getUsers(workspaceId),
+    queryFn: () => userManagementAPI.getUsers(workspaceId),
     refetchInterval: autoRefresh ? refreshInterval : false,
     enabled: true
   });
@@ -247,7 +247,7 @@ export function useRBACSystem(options: UseRBACSystemOptions = {}): UseRBACSystem
     refetch: refetchRoles
   } = useQuery({
     queryKey: ['rbac', 'roles', workspaceId],
-    queryFn: () => userManagementApis.getRoles(workspaceId),
+    queryFn: () => userManagementAPI.getRoles(workspaceId),
     refetchInterval: autoRefresh ? refreshInterval : false,
     enabled: true
   });
@@ -259,7 +259,7 @@ export function useRBACSystem(options: UseRBACSystemOptions = {}): UseRBACSystem
     refetch: refetchPermissions
   } = useQuery({
     queryKey: ['rbac', 'permissions', workspaceId],
-    queryFn: () => userManagementApis.getPermissions(workspaceId),
+    queryFn: () => userManagementAPI.getPermissions(workspaceId),
     refetchInterval: autoRefresh ? refreshInterval : false,
     enabled: true
   });
@@ -271,7 +271,7 @@ export function useRBACSystem(options: UseRBACSystemOptions = {}): UseRBACSystem
     refetch: refetchGroups
   } = useQuery({
     queryKey: ['rbac', 'groups', workspaceId],
-    queryFn: () => userManagementApis.getGroups(workspaceId),
+    queryFn: () => userManagementAPI.getGroups(workspaceId),
     refetchInterval: autoRefresh ? refreshInterval : false,
     enabled: true
   });
@@ -283,7 +283,7 @@ export function useRBACSystem(options: UseRBACSystemOptions = {}): UseRBACSystem
     refetch: refetchResources
   } = useQuery({
     queryKey: ['rbac', 'resources', workspaceId],
-    queryFn: () => userManagementApis.getResources(workspaceId),
+    queryFn: () => userManagementAPI.getResources(workspaceId),
     enabled: true
   });
 
@@ -294,7 +294,7 @@ export function useRBACSystem(options: UseRBACSystemOptions = {}): UseRBACSystem
     refetch: refetchPolicies
   } = useQuery({
     queryKey: ['rbac', 'policies', workspaceId],
-    queryFn: () => userManagementApis.getPolicies(workspaceId),
+    queryFn: () => userManagementAPI.getPolicies(workspaceId),
     refetchInterval: autoRefresh ? refreshInterval : false,
     enabled: true
   });
@@ -306,7 +306,7 @@ export function useRBACSystem(options: UseRBACSystemOptions = {}): UseRBACSystem
     refetch: refetchRequests
   } = useQuery({
     queryKey: ['rbac', 'accessRequests', workspaceId],
-    queryFn: () => userManagementApis.getAccessRequests(workspaceId),
+    queryFn: () => userManagementAPI.getAccessRequests(workspaceId),
     refetchInterval: autoRefresh ? 10000 : false,
     enabled: true
   });
@@ -317,7 +317,7 @@ export function useRBACSystem(options: UseRBACSystemOptions = {}): UseRBACSystem
     refetch: refetchAuditLogs
   } = useQuery({
     queryKey: ['rbac', 'auditLogs', workspaceId],
-    queryFn: () => userManagementApis.getAuditLogs(workspaceId),
+    queryFn: () => userManagementAPI.getAuditLogs(workspaceId),
     enabled: enableAudit
   });
 
@@ -327,7 +327,7 @@ export function useRBACSystem(options: UseRBACSystemOptions = {}): UseRBACSystem
     refetch: refetchMetrics
   } = useQuery({
     queryKey: ['rbac', 'metrics', workspaceId],
-    queryFn: () => userManagementApis.getRBACMetrics(workspaceId),
+    queryFn: () => userManagementAPI.getRBACMetrics(workspaceId),
     enabled: enableAnalytics,
     refetchInterval: autoRefresh ? refreshInterval * 2 : false
   });
@@ -338,14 +338,14 @@ export function useRBACSystem(options: UseRBACSystemOptions = {}): UseRBACSystem
     refetch: refetchCoordination
   } = useQuery({
     queryKey: ['rbac', 'crossGroup', workspaceId],
-    queryFn: () => racineOrchestrationApis.getCrossGroupRBACPolicies(workspaceId),
+    queryFn: () => racineOrchestrationAPI.getCrossGroupRBACPolicies(workspaceId),
     enabled: enableCoordination,
     refetchInterval: autoRefresh ? refreshInterval : false
   });
 
   // User management mutations
   const createUserMutation = useMutation({
-    mutationFn: (user: Partial<RBACUser>) => userManagementApis.createUser(user, workspaceId),
+    mutationFn: (user: Partial<RBACUser>) => userManagementAPI.createUser(user, workspaceId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rbac', 'users'] });
     },
@@ -354,7 +354,7 @@ export function useRBACSystem(options: UseRBACSystemOptions = {}): UseRBACSystem
 
   const updateUserMutation = useMutation({
     mutationFn: ({ id, updates }: { id: string; updates: Partial<RBACUser> }) =>
-      userManagementApis.updateUser(id, updates),
+      userManagementAPI.updateUser(id, updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rbac', 'users'] });
     },
@@ -362,7 +362,7 @@ export function useRBACSystem(options: UseRBACSystemOptions = {}): UseRBACSystem
   });
 
   const deleteUserMutation = useMutation({
-    mutationFn: (id: string) => userManagementApis.deleteUser(id),
+    mutationFn: (id: string) => userManagementAPI.deleteUser(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rbac', 'users'] });
     },
@@ -371,7 +371,7 @@ export function useRBACSystem(options: UseRBACSystemOptions = {}): UseRBACSystem
 
   // Role management mutations
   const createRoleMutation = useMutation({
-    mutationFn: (role: Partial<RBACRole>) => userManagementApis.createRole(role, workspaceId),
+    mutationFn: (role: Partial<RBACRole>) => userManagementAPI.createRole(role, workspaceId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rbac', 'roles'] });
     }
@@ -379,7 +379,7 @@ export function useRBACSystem(options: UseRBACSystemOptions = {}): UseRBACSystem
 
   const assignRoleMutation = useMutation({
     mutationFn: ({ userId, roleId }: { userId: string; roleId: string }) =>
-      userManagementApis.assignRoleToUser(userId, roleId),
+      userManagementAPI.assignRoleToUser(userId, roleId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rbac', 'users'] });
       queryClient.invalidateQueries({ queryKey: ['rbac', 'roles'] });
@@ -389,7 +389,7 @@ export function useRBACSystem(options: UseRBACSystemOptions = {}): UseRBACSystem
   // Permission management mutations
   const createPermissionMutation = useMutation({
     mutationFn: (permission: Partial<RBACPermission>) =>
-      userManagementApis.createPermission(permission, workspaceId),
+      userManagementAPI.createPermission(permission, workspaceId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rbac', 'permissions'] });
     }
@@ -398,14 +398,14 @@ export function useRBACSystem(options: UseRBACSystemOptions = {}): UseRBACSystem
   // Access request mutations
   const requestAccessMutation = useMutation({
     mutationFn: (request: Partial<RBACAccessRequest>) =>
-      userManagementApis.requestAccess(request),
+      userManagementAPI.requestAccess(request),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rbac', 'accessRequests'] });
     }
   });
 
   const approveAccessMutation = useMutation({
-    mutationFn: (requestId: string) => userManagementApis.approveAccessRequest(requestId),
+    mutationFn: (requestId: string) => userManagementAPI.approveAccessRequest(requestId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rbac', 'accessRequests'] });
     }
@@ -414,7 +414,7 @@ export function useRBACSystem(options: UseRBACSystemOptions = {}): UseRBACSystem
   // Cross-group coordination mutation
   const coordinateCrossGroupMutation = useMutation({
     mutationFn: (coordination: RBACCoordination) =>
-      racineOrchestrationApis.coordinateCrossGroupRBAC(coordination),
+      racineOrchestrationAPI.coordinateCrossGroupRBAC(coordination),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rbac', 'crossGroup'] });
     }
@@ -425,7 +425,7 @@ export function useRBACSystem(options: UseRBACSystemOptions = {}): UseRBACSystem
     const initializeRBACSystem = async () => {
       try {
         // Initialize integration with existing RBAC SPA
-        await racineOrchestrationApis.initializeRBACIntegration(workspaceId);
+        await racineOrchestrationAPI.initializeRBACIntegration(workspaceId);
         
         // Set up cross-group coordination if enabled
         if (enableCoordination) {
@@ -448,7 +448,7 @@ export function useRBACSystem(options: UseRBACSystemOptions = {}): UseRBACSystem
     const setupRealTimeUpdates = async () => {
       try {
         // Subscribe to RBAC updates
-        const rbacUpdatesSubscription = await userManagementApis.subscribeToRBACUpdates(
+        const rbacUpdatesSubscription = await userManagementAPI.subscribeToRBACUpdates(
           workspaceId,
           (update) => {
             // Handle real-time updates based on type
@@ -520,7 +520,7 @@ export function useRBACSystem(options: UseRBACSystemOptions = {}): UseRBACSystem
   }, [deleteUserMutation]);
 
   const getUserById = useCallback(async (id: string) => {
-    return await userManagementApis.getUserById(id);
+    return await userManagementAPI.getUserById(id);
   }, []);
 
   const createRole = useCallback(async (role: Partial<RBACRole>) => {
@@ -529,11 +529,11 @@ export function useRBACSystem(options: UseRBACSystemOptions = {}): UseRBACSystem
   }, [createRoleMutation]);
 
   const updateRole = useCallback(async (id: string, updates: Partial<RBACRole>) => {
-    return await userManagementApis.updateRole(id, updates);
+    return await userManagementAPI.updateRole(id, updates);
   }, []);
 
   const deleteRole = useCallback(async (id: string) => {
-    await userManagementApis.deleteRole(id);
+    await userManagementAPI.deleteRole(id);
     await refetchRoles();
   }, [refetchRoles]);
 
@@ -542,7 +542,7 @@ export function useRBACSystem(options: UseRBACSystemOptions = {}): UseRBACSystem
   }, [assignRoleMutation]);
 
   const revokeRoleFromUser = useCallback(async (userId: string, roleId: string) => {
-    await userManagementApis.revokeRoleFromUser(userId, roleId);
+    await userManagementAPI.revokeRoleFromUser(userId, roleId);
     await refetchUsers();
   }, [refetchUsers]);
 
@@ -552,61 +552,61 @@ export function useRBACSystem(options: UseRBACSystemOptions = {}): UseRBACSystem
   }, [createPermissionMutation]);
 
   const updatePermission = useCallback(async (id: string, updates: Partial<RBACPermission>) => {
-    return await userManagementApis.updatePermission(id, updates);
+    return await userManagementAPI.updatePermission(id, updates);
   }, []);
 
   const deletePermission = useCallback(async (id: string) => {
-    await userManagementApis.deletePermission(id);
+    await userManagementAPI.deletePermission(id);
     await refetchPermissions();
   }, [refetchPermissions]);
 
   const assignPermissionToRole = useCallback(async (roleId: string, permissionId: string) => {
-    await userManagementApis.assignPermissionToRole(roleId, permissionId);
+    await userManagementAPI.assignPermissionToRole(roleId, permissionId);
     await refetchRoles();
   }, [refetchRoles]);
 
   const createGroup = useCallback(async (group: Partial<RBACGroup>) => {
-    return await userManagementApis.createGroup(group, workspaceId);
+    return await userManagementAPI.createGroup(group, workspaceId);
   }, [workspaceId]);
 
   const updateGroup = useCallback(async (id: string, updates: Partial<RBACGroup>) => {
-    return await userManagementApis.updateGroup(id, updates);
+    return await userManagementAPI.updateGroup(id, updates);
   }, []);
 
   const deleteGroup = useCallback(async (id: string) => {
-    await userManagementApis.deleteGroup(id);
+    await userManagementAPI.deleteGroup(id);
     await refetchGroups();
   }, [refetchGroups]);
 
   const addUserToGroup = useCallback(async (groupId: string, userId: string) => {
-    await userManagementApis.addUserToGroup(groupId, userId);
+    await userManagementAPI.addUserToGroup(groupId, userId);
     await refetchGroups();
   }, [refetchGroups]);
 
   const removeUserFromGroup = useCallback(async (groupId: string, userId: string) => {
-    await userManagementApis.removeUserFromGroup(groupId, userId);
+    await userManagementAPI.removeUserFromGroup(groupId, userId);
     await refetchGroups();
   }, [refetchGroups]);
 
   const createPolicy = useCallback(async (policy: Partial<RBACPolicy>) => {
-    return await userManagementApis.createPolicy(policy, workspaceId);
+    return await userManagementAPI.createPolicy(policy, workspaceId);
   }, [workspaceId]);
 
   const updatePolicy = useCallback(async (id: string, updates: Partial<RBACPolicy>) => {
-    return await userManagementApis.updatePolicy(id, updates);
+    return await userManagementAPI.updatePolicy(id, updates);
   }, []);
 
   const deletePolicy = useCallback(async (id: string) => {
-    await userManagementApis.deletePolicy(id);
+    await userManagementAPI.deletePolicy(id);
     await refetchPolicies();
   }, [refetchPolicies]);
 
   const evaluatePolicy = useCallback(async (policyId: string, context: any) => {
-    return await userManagementApis.evaluatePolicy(policyId, context);
+    return await userManagementAPI.evaluatePolicy(policyId, context);
   }, []);
 
   const checkPermission = useCallback(async (userId: string, resource: string, action: string) => {
-    return await userManagementApis.checkPermission(userId, resource, action);
+    return await userManagementAPI.checkPermission(userId, resource, action);
   }, []);
 
   const requestAccess = useCallback(async (request: Partial<RBACAccessRequest>) => {
@@ -619,7 +619,7 @@ export function useRBACSystem(options: UseRBACSystemOptions = {}): UseRBACSystem
   }, [approveAccessMutation]);
 
   const denyAccessRequest = useCallback(async (requestId: string, reason: string) => {
-    await userManagementApis.denyAccessRequest(requestId, reason);
+    await userManagementAPI.denyAccessRequest(requestId, reason);
     await refetchRequests();
   }, [refetchRequests]);
 
@@ -628,35 +628,35 @@ export function useRBACSystem(options: UseRBACSystemOptions = {}): UseRBACSystem
   }, [coordinateCrossGroupMutation]);
 
   const getWorkspaceAccessControl = useCallback(async (workspaceId: string) => {
-    return await userManagementApis.getWorkspaceAccessControl(workspaceId);
+    return await userManagementAPI.getWorkspaceAccessControl(workspaceId);
   }, []);
 
   const updateWorkspaceAccessControl = useCallback(async (workspaceId: string, config: RBACConfiguration) => {
-    await userManagementApis.updateWorkspaceAccessControl(workspaceId, config);
+    await userManagementAPI.updateWorkspaceAccessControl(workspaceId, config);
   }, []);
 
   const getAuditLogs = useCallback(async (filters?: any) => {
-    return await userManagementApis.getAuditLogs(workspaceId, filters);
+    return await userManagementAPI.getAuditLogs(workspaceId, filters);
   }, [workspaceId]);
 
   const generateComplianceReport = useCallback(async (options?: any) => {
-    return await userManagementApis.generateComplianceReport(workspaceId, options);
+    return await userManagementAPI.generateComplianceReport(workspaceId, options);
   }, [workspaceId]);
 
   const validateCompliance = useCallback(async () => {
-    return await userManagementApis.validateCompliance(workspaceId);
+    return await userManagementAPI.validateCompliance(workspaceId);
   }, [workspaceId]);
 
   const getRBACAnalytics = useCallback(async (period?: string) => {
-    return await userManagementApis.getRBACAnalytics(workspaceId, period);
+    return await userManagementAPI.getRBACAnalytics(workspaceId, period);
   }, [workspaceId]);
 
   const getUserAccessPatterns = useCallback(async (userId: string) => {
-    return await userManagementApis.getUserAccessPatterns(userId);
+    return await userManagementAPI.getUserAccessPatterns(userId);
   }, []);
 
   const getPermissionUsageAnalytics = useCallback(async () => {
-    return await userManagementApis.getPermissionUsageAnalytics(workspaceId);
+    return await userManagementAPI.getPermissionUsageAnalytics(workspaceId);
   }, [workspaceId]);
 
   const refreshRBACSystem = useCallback(async () => {
@@ -674,11 +674,11 @@ export function useRBACSystem(options: UseRBACSystemOptions = {}): UseRBACSystem
   }, [refetchUser, refetchUsers, refetchRoles, refetchPermissions, refetchGroups, refetchPolicies, refetchRequests, refetchAuditLogs, refetchMetrics]);
 
   const exportRBACConfiguration = useCallback(async () => {
-    return await userManagementApis.exportRBACConfiguration(workspaceId);
+    return await userManagementAPI.exportRBACConfiguration(workspaceId);
   }, [workspaceId]);
 
   const importRBACConfiguration = useCallback(async (config: any) => {
-    await userManagementApis.importRBACConfiguration(workspaceId, config);
+    await userManagementAPI.importRBACConfiguration(workspaceId, config);
     await refreshRBACSystem();
   }, [workspaceId, refreshRBACSystem]);
 

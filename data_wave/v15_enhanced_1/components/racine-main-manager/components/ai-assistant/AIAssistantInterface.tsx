@@ -75,7 +75,7 @@ import {
   Grid,
   List,
   Table,
-  Card,
+  Card as CardIcon,
   Layout,
   Sidebar,
   Monitor,

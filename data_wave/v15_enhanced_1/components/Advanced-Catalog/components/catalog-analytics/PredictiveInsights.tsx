@@ -186,7 +186,7 @@ import {
   Network,
   Workflow,
   Sparkles,
-  ChartLine,
+  TrendingUp as ChartLine,
   GitBranch,
   Users,
   Timer,

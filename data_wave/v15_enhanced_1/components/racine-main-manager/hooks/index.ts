@@ -104,6 +104,12 @@ export { useSecurityManager } from './useSecurityManager';
 
 // Notification management hooks
 export { useNotificationManager } from './useNotificationManager';
+export { useNotifications } from './useNotifications';
+export type {
+  NotificationState,
+  NotificationMethods,
+  UseNotificationsReturn
+} from './useNotifications';
 
 // Scan rule set management hooks
 export { useScanRuleSets } from './useScanRuleSets';

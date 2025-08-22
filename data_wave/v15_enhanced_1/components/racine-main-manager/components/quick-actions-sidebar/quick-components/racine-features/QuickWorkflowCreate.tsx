@@ -30,7 +30,6 @@ import { Separator } from '@/components/ui/separator';
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import {
@@ -191,21 +190,21 @@ import {
   Walk,
 } from 'lucide-react';
 
-// Import hooks and services
-import { useJobWorkflow } from '../../../hooks/useJobWorkflow';
-import { useWorkspaceManagement } from '../../../hooks/useWorkspaceManagement';
-import { useUserManagement } from '../../../hooks/useUserManagement';
-import { useAIAssistant } from '../../../hooks/useAIAssistant';
-import { useCrossGroupIntegration } from '../../../hooks/useCrossGroupIntegration';
-import { useActivityTracking } from '../../../hooks/useActivityTracking';
-import { usePipelineManager } from '../../../hooks/usePipelineManager';
-import { useAdvancedCatalog } from '../../../hooks/useAdvancedCatalog';
-import { useDataSources } from '../../../hooks/useDataSources';
-import { useScanRuleSets } from '../../../hooks/useScanRuleSets';
-import { useClassifications } from '../../../hooks/useClassifications';
-import { useComplianceRule } from '../../../hooks/useComplianceRule';
-import { useScanLogic } from '../../../hooks/useScanLogic';
-import { useRBAC } from '../../../hooks/useRBAC';
+// Import hooks and services (wired via Racine orchestrator hooks)
+import { useJobWorkflow } from '../../../../hooks/useJobWorkflow';
+import { useWorkspaceManagement } from '../../../../hooks/useWorkspaceManagement';
+import { useUserManagement } from '../../../../hooks/useUserManagement';
+import { useAIAssistant } from '../../../../hooks/useAIAssistant';
+import { useCrossGroupIntegration } from '../../../../hooks/useCrossGroupIntegration';
+import { useActivityTracking } from '../../../../hooks/useActivityTracking';
+import { usePipelineManager } from '../../../../hooks/usePipelineManager';
+import { useAdvancedCatalog } from '../../../../hooks/useAdvancedCatalog';
+import { useDataSources } from '../../../../hooks/useDataSources';
+import { useScanRuleSets } from '../../../../hooks/useScanRuleSets';
+import { useClassifications } from '../../../../hooks/useClassifications';
+import { useComplianceRules as useComplianceRule } from '../../../../hooks/useComplianceRules';
+import { useScanLogic } from '../../../../hooks/useScanLogic';
+import { useRBACSystem as useRBAC } from '../../../../hooks/useRBACSystem';
 
 // Types
 interface WorkflowStep {
@@ -1202,7 +1201,7 @@ const QuickWorkflowCreate: React.FC<QuickWorkflowCreateProps> = ({
   if (!isVisible) return null;
 
   return (
-    <TooltipProvider>
+    <>
       <motion.div
         variants={containerVariants}
         initial="hidden"
@@ -1379,7 +1378,7 @@ const QuickWorkflowCreate: React.FC<QuickWorkflowCreateProps> = ({
           {renderAISuggestions()}
         </div>
       </motion.div>
-    </TooltipProvider>
+    </>
   );
 };
 

@@ -7,7 +7,7 @@ import {
   ChevronLeft,
   X,
   Pin,
-  Unpin,
+  PinOff as Unpin,
   Settings,
   Search,
   Filter,
@@ -298,7 +298,7 @@ import {
   Cloth,
   Thread,
   Needle,
-  Pin,
+
   Safety,
   Bandage,
   Pill,

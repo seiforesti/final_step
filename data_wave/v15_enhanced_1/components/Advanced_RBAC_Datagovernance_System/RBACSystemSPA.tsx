@@ -75,7 +75,7 @@ import {
   Target,
   Layers,
   GitBranch,
-  Command,
+  Command as CommandIcon,
   Terminal,
   Code,
   Bug,

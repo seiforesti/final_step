@@ -164,12 +164,12 @@ import {
 } from 'lucide-react';
 
 // Import hooks and services
-import { useComplianceRule } from '../../../hooks/useComplianceRule';
-import { useWorkspaceManagement } from '../../../hooks/useWorkspaceManagement';
-import { useUserManagement } from '../../../hooks/useUserManagement';
-import { useAIAssistant } from '../../../hooks/useAIAssistant';
-import { useCrossGroupIntegration } from '../../../hooks/useCrossGroupIntegration';
-import { useActivityTracking } from '../../../hooks/useActivityTracking';
+import { useComplianceRules as useComplianceRule } from '../../../../hooks/useComplianceRules';
+import { useWorkspaceManagement } from '../../../../hooks/useWorkspaceManagement';
+import { useUserManagement } from '../../../../hooks/useUserManagement';
+import { useAIAssistant } from '../../../../hooks/useAIAssistant';
+import { useCrossGroupIntegration } from '../../../../hooks/useCrossGroupIntegration';
+import { useActivityTracking } from '../../../../hooks/useActivityTracking';
 
 // Import types
 import {
@@ -183,7 +183,7 @@ import {
   ComplianceStatus,
   ComplianceViolation,
   ComplianceRecommendation,
-} from '../../../types/racine-core.types';
+} from '../../../../types/racine-core.types';
 
 interface QuickComplianceCheckProps {
   isVisible: boolean;

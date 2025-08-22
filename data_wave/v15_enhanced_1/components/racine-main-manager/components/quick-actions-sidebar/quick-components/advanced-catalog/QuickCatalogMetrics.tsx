@@ -19,8 +19,8 @@ import {
   RefreshCw, Download, X, Database, Eye, Search, Users, Heart
 } from 'lucide-react';
 
-import { useAdvancedCatalog } from '../../../hooks/useAdvancedCatalog';
-import { useWorkspaceManagement } from '../../../hooks/useWorkspaceManagement';
+import { useAdvancedCatalog } from '../../../../hooks/useAdvancedCatalog';
+import { useWorkspaceManagement } from '../../../../hooks/useWorkspaceManagement';
 
 interface QuickCatalogMetricsProps {
   isVisible: boolean;
@@ -649,80 +649,7 @@ const QuickCatalogMetrics: React.FC<QuickCatalogMetricsProps> = ({
       </div>
     </div>
   );
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <Target className="h-5 w-5 text-blue-600" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-blue-900">Catalog Health</h3>
-              <p className="text-sm text-blue-600">Overall catalog performance</p>
-            </div>
-          </div>
-          <div className="text-right">
-            <div className="text-3xl font-bold text-blue-900">94%</div>
-            <div className="flex items-center space-x-1 text-sm text-blue-600">
-              <TrendingUp className="h-4 w-4" />
-              <span>Excellent</span>
-            </div>
-          </div>
-        </div>
-        <Progress value={94} className="h-3" />
-      </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        {[
-          { name: 'Total Assets', value: '2,847', trend: '+12%', icon: Database },
-          { name: 'Active Users', value: '156', trend: '+8%', icon: Users },
-          { name: 'Searches/Day', value: '1,234', trend: '+15%', icon: Search },
-          { name: 'Favorites', value: '789', trend: '+5%', icon: Heart },
-        ].map((metric, index) => (
-          <Card key={index} className="p-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <metric.icon className="h-4 w-4 text-gray-500" />
-                <div>
-                  <div className="font-bold text-lg">{metric.value}</div>
-                  <div className="text-xs text-gray-500">{metric.name}</div>
-                </div>
-              </div>
-              <div className="text-right">
-                <div className="text-xs text-green-600 font-medium">{metric.trend}</div>
-                <TrendingUp className="h-3 w-3 text-green-500" />
-              </div>
-            </div>
-          </Card>
-        ))}
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-sm">Asset Distribution</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {[
-              { type: 'Tables', count: 1245, percentage: 44 },
-              { type: 'Dashboards', count: 789, percentage: 28 },
-              { type: 'Reports', count: 456, percentage: 16 },
-              { type: 'Views', count: 357, percentage: 12 },
-            ].map((item, index) => (
-              <div key={index} className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-blue-500 rounded" style={{ backgroundColor: `hsl(${index * 60}, 70%, 50%)` }} />
-                  <span className="text-sm">{item.type}</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className="text-sm font-medium">{item.count}</span>
-                  <div className="w-16">
-                    <Progress value={item.percentage} className="h-2" />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
 
   const renderUsageTab = () => (
     <div className="space-y-4">

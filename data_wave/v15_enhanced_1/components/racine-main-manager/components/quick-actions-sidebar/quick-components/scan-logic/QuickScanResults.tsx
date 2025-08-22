@@ -36,11 +36,11 @@ import {
   Grid, List, SortAsc, SortDesc, Maximize, Minimize
 } from 'lucide-react';
 
-import { useScanLogic } from '../../../hooks/useScanLogic';
-import { useWorkspaceManagement } from '../../../hooks/useWorkspaceManagement';
-import { useUserManagement } from '../../../hooks/useUserManagement';
-import { useAIAssistant } from '../../../hooks/useAIAssistant';
-import { useActivityTracking } from '../../../hooks/useActivityTracking';
+import { useScanLogic } from '../../../../hooks/useScanLogic';
+import { useWorkspaceManagement } from '../../../../hooks/useWorkspaceManagement';
+import { useUserManagement } from '../../../../hooks/useUserManagement';
+import { useAIAssistant } from '../../../../hooks/useAIAssistant';
+import { useActivityTracking } from '../../../../hooks/useActivityTracking';
 
 interface ScanResult {
   id: string;

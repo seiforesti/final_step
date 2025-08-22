@@ -54,7 +54,7 @@ import {
   PolarGrid,
   PolarAngleAxis,
   PolarRadiusAxis,
-  Radar,
+  Radar as RechartsRadar,
   Sankey,
   TreeMap,
   ScatterChart,
@@ -135,7 +135,7 @@ import {
   ExternalLink,
   Compass,
   Route,
-  Radar,
+  Radar as LucideRadar,
 } from 'lucide-react';
 import { useClassificationState } from '../core/hooks/useClassificationState';
 import { useAIIntelligence } from '../core/hooks/useAIIntelligence';

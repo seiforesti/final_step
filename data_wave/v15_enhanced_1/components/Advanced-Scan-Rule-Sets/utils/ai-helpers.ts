@@ -1111,16 +1111,8 @@ export class AIHelpers {
   }
 }
 
-// Export singleton instance
+// Export singleton instance and avoid duplicate named exports
 export const aiHelpers = new AIHelpers();
+export default aiHelpers;
 
-// Export individual engines for specialized use
-export {
-  AIPatternRecognitionEngine,
-  AIOptimizationEngine,
-  PredictiveAnalyticsEngine,
-  SemanticAnalysisEngine,
-  IntelligentAssistantEngine,
-  MLModelManager,
-  BehavioralAnalysisEngine
-};
+// Named classes are already exported above via `export class ...`

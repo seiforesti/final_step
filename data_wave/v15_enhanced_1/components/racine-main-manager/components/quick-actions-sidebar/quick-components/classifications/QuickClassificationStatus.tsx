@@ -45,10 +45,10 @@ import type {
   ClassificationStatus,
   ClassificationCoverage,
   ClassificationInsight
-} from '../../../types/racine-core.types';
+} from '../../../../types/racine-core.types';
 
-import { useClassifications } from '../../../hooks/useClassifications';
-import { useWorkspaceManagement } from '../../../hooks/useWorkspaceManagement';
+import { useClassifications } from '../../../../hooks/useClassifications';
+import { useWorkspaceManagement } from '../../../../hooks/useWorkspaceManagement';
 
 interface QuickClassificationStatusProps {
   isVisible?: boolean;

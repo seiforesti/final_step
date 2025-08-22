@@ -33,7 +33,7 @@ import {
   CheckCircle, XCircle, AlertTriangle, Info, ChevronDown, ChevronUp,
   ArrowRight, ArrowLeft, Copy, Share2, Flag, Bookmark, Star, Heart,
   ThumbsUp, ThumbsDown, MoreHorizontal, Edit3, Trash2, Plus, Filter,
-  Database, Table, Layers, Grid3X3, List, FolderOpen, Globe, Map,
+  Database, Table as TableIcon, Layers, Grid3X3, List, FolderOpen, Globe, Map,
   Users, UserCheck, Building, MapPin, Navigation, Compass, Route,
   Timer, Stopwatch, History, Award, Crown, Shield, Lock, Unlock,
   Key, Code, Terminal, Command, Cpu, HardDrive, Server, Cloud,

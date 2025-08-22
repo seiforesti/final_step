@@ -6,8 +6,8 @@ import { useMutation, useQuery, useQueryClient, useInfiniteQuery } from '@tansta
 import axios, { AxiosResponse } from 'axios'
 import { z } from 'zod'
 
-// Import all existing APIs
-export * from './apis'
+// Import specific APIs to avoid conflicts
+// export * from './apis'  // Commented out to prevent duplicate exports
 
 // Import types from backend models
 import {
@@ -290,10 +290,7 @@ export const createPerformanceMetric = async (metric: Omit<PerformanceMetric, 'i
   return data
 }
 
-export const acknowledgePerformanceAlert = async (alert_id: number, user_id: string): Promise<PerformanceAlert> => {
-  const { data } = await enterpriseApi.post(`/performance/alerts/${alert_id}/acknowledge`, { user_id })
-  return data
-}
+// Removed duplicate function - see enhanced version below
 
 // ============================================================================
 // BACKUP & RESTORE APIs
@@ -976,15 +973,7 @@ export const useVersionHistoryQuery = (data_source_id?: number, options = {}) =>
   })
 }
 
-export const useCreateVersionMutation = () => {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: createVersion,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['version-history'] })
-    },
-  })
-}
+// Removed duplicate function - see first definition above
 
 export const useActivateVersionMutation = () => {
   const queryClient = useQueryClient()
@@ -1081,40 +1070,7 @@ export const useDataSourceMetricsQuery = (data_source_id?: number, options = {})
 // EXPORT ALL ENTERPRISE API FUNCTIONS
 // ============================================================================
 
-export {
-  enterpriseApi,
-  getSecurityAudit,
-  createSecurityScan,
-  updateSecurityVulnerability,
-  getPerformanceMetrics,
-  createPerformanceMetric,
-  acknowledgePerformanceAlert,
-  getBackupStatus,
-  createBackup,
-  createBackupSchedule,
-  createRestoreOperation,
-  getScheduledTasks,
-  createTask,
-  updateTask,
-  executeTask,
-  getTaskStats,
-  getNotifications,
-  markNotificationRead,
-  createNotification,
-  getIntegrations,
-  createIntegration,
-  updateIntegration,
-  triggerIntegrationSync,
-  getIntegrationStats,
-  getReports,
-  createReport,
-  generateReport,
-  getReportStats,
-  getVersionHistory,
-  createVersion,
-  activateVersion,
-  rollbackVersion
-}
+// All functions are already exported individually above
 
 // ============================================================================
 // UTILITY FUNCTIONS FOR API MANAGEMENT
@@ -2331,7 +2287,7 @@ export const useWorkflowTemplatesQuery = (category?: string, options = {}) => {
 }
 
 // ENHANCED PERFORMANCE HOOKS
-export const useSystemHealthQuery = (include_detailed: boolean = false, options = {}) => {
+export const useEnhancedSystemHealthQuery = (include_detailed: boolean = false, options = {}) => {
   return useQuery({
     queryKey: ['performance', 'system', 'health', include_detailed],
     queryFn: () => getSystemHealth(include_detailed),

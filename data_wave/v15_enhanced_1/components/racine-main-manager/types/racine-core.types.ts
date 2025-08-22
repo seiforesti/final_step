@@ -1,10 +1,10 @@
 /**
  * Racine Core Types - Complete TypeScript Type Definitions
  * =========================================================
- * 
+ *
  * This file contains comprehensive TypeScript type definitions that map 100% to the backend
  * Racine models, ensuring complete type safety and perfect backend-frontend integration.
- * 
+ *
  * Type Categories:
  * - Core System Types: Master state management and system health
  * - Cross-Group Integration Types: Multi-group orchestration and coordination
@@ -16,7 +16,7 @@
  * - Collaboration Types: Team workspace and communication
  * - Integration Types: External system and API gateway integration
  * - User Management Types: RBAC and profile management
- * 
+ *
  * All types are designed to match backend models exactly and provide
  * comprehensive type safety for enterprise-grade applications.
  */
@@ -27,17 +27,25 @@
 
 export type UUID = string;
 export type ISODateString = string;
-export type JSONValue = string | number | boolean | null | JSONObject | JSONArray;
-export interface JSONObject { [key: string]: JSONValue; }
+export type JSONValue =
+  | string
+  | number
+  | boolean
+  | null
+  | JSONObject
+  | JSONArray;
+export interface JSONObject {
+  [key: string]: JSONValue;
+}
 export interface JSONArray extends Array<JSONValue> {}
 
 // Status enumerations matching backend
 export enum SystemStatus {
   HEALTHY = "healthy",
-  DEGRADED = "degraded", 
+  DEGRADED = "degraded",
   FAILED = "failed",
   MAINTENANCE = "maintenance",
-  INITIALIZING = "initializing"
+  INITIALIZING = "initializing",
 }
 
 export enum OperationStatus {
@@ -46,12 +54,12 @@ export enum OperationStatus {
   COMPLETED = "completed",
   FAILED = "failed",
   CANCELLED = "cancelled",
-  PAUSED = "paused"
+  PAUSED = "paused",
 }
 
 export enum ViewMode {
   DASHBOARD = "dashboard",
-  WORKSPACE = "workspace", 
+  WORKSPACE = "workspace",
   WORKFLOWS = "workflows",
   PIPELINES = "pipelines",
   AI_ASSISTANT = "ai_assistant",
@@ -60,28 +68,28 @@ export enum ViewMode {
   SETTINGS = "settings",
   // Data Governance Group SPAs - Full routing support
   DATA_SOURCES = "data_sources",
-  SCAN_RULE_SETS = "scan_rule_sets", 
+  SCAN_RULE_SETS = "scan_rule_sets",
   CLASSIFICATIONS = "classifications",
   COMPLIANCE_RULES = "compliance_rules",
   ADVANCED_CATALOG = "advanced_catalog",
   SCAN_LOGIC = "scan_logic",
-  RBAC_SYSTEM = "rbac_system"
+  RBAC_SYSTEM = "rbac_system",
 }
 
 export enum LayoutMode {
   SINGLE_PANE = "single_pane",
-  SPLIT_SCREEN = "split_screen", 
+  SPLIT_SCREEN = "split_screen",
   TABBED = "tabbed",
   GRID = "grid",
-  CUSTOM = "custom"
+  CUSTOM = "custom",
 }
 
 export enum IntegrationStatus {
   HEALTHY = "healthy",
   DEGRADED = "degraded",
-  FAILED = "failed", 
+  FAILED = "failed",
   MAINTENANCE = "maintenance",
-  INITIALIZING = "initializing"
+  INITIALIZING = "initializing",
 }
 
 // =============================================================================
@@ -100,22 +108,22 @@ export interface RacineState {
   sidebarCollapsed: boolean;
   loading: boolean;
   error: string | null;
-  
+
   // System health and monitoring
   systemHealth: SystemHealth;
   lastActivity: ISODateString;
   performanceMetrics: PerformanceMetrics;
-  
+
   // Cross-group state
   connectedGroups: GroupConfiguration[];
   activeIntegrations: Integration[];
   globalMetrics: Record<string, JSONValue>;
-  
+
   // User context
   currentUser: UserContext;
   permissions: RBACPermissions;
   preferences: UserPreferences;
-  
+
   // Real-time updates
   websocketConnected: boolean;
   lastSync: ISODateString;
@@ -364,10 +372,10 @@ export interface WorkspaceConfiguration {
 
 export enum WorkspaceType {
   PERSONAL = "personal",
-  TEAM = "team", 
+  TEAM = "team",
   ENTERPRISE = "enterprise",
   PROJECT = "project",
-  TEMPORARY = "temporary"
+  TEMPORARY = "temporary",
 }
 
 /**
@@ -391,7 +399,7 @@ export enum WorkspaceRole {
   ADMIN = "admin",
   MEMBER = "member",
   VIEWER = "viewer",
-  GUEST = "guest"
+  GUEST = "guest",
 }
 
 /**
@@ -501,7 +509,7 @@ export enum StepType {
   CATALOG = "catalog",
   SCAN_LOGIC = "scan_logic",
   AI_PROCESSING = "ai_processing",
-  CUSTOM = "custom"
+  CUSTOM = "custom",
 }
 
 export interface StepInput {
@@ -530,7 +538,7 @@ export enum ConditionType {
   ALWAYS = "always",
   ON_SUCCESS = "on_success",
   ON_FAILURE = "on_failure",
-  CONDITIONAL = "conditional"
+  CONDITIONAL = "conditional",
 }
 
 export interface StepPosition {
@@ -556,7 +564,7 @@ export enum DependencyType {
   SEQUENCE = "sequence",
   PARALLEL = "parallel",
   CONDITIONAL = "conditional",
-  LOOP = "loop"
+  LOOP = "loop",
 }
 
 /**
@@ -597,7 +605,7 @@ export enum ScheduleType {
   MANUAL = "manual",
   CRON = "cron",
   INTERVAL = "interval",
-  EVENT_TRIGGERED = "event_triggered"
+  EVENT_TRIGGERED = "event_triggered",
 }
 
 export interface NotificationRule {
@@ -611,7 +619,7 @@ export enum NotificationType {
   EMAIL = "email",
   SLACK = "slack",
   WEBHOOK = "webhook",
-  IN_APP = "in_app"
+  IN_APP = "in_app",
 }
 
 /**
@@ -637,7 +645,7 @@ export interface RetryPolicy {
 export enum BackoffStrategy {
   FIXED = "fixed",
   LINEAR = "linear",
-  EXPONENTIAL = "exponential"
+  EXPONENTIAL = "exponential",
 }
 
 export interface ErrorHandlingPolicy {
@@ -651,14 +659,14 @@ export enum FailureAction {
   STOP = "stop",
   CONTINUE = "continue",
   RETRY = "retry",
-  SKIP = "skip"
+  SKIP = "skip",
 }
 
 export enum LogLevel {
   DEBUG = "debug",
   INFO = "info",
   WARN = "warn",
-  ERROR = "error"
+  ERROR = "error",
 }
 
 export interface LoggingConfiguration {
@@ -707,7 +715,7 @@ export enum TriggerType {
   MANUAL = "manual",
   SCHEDULED = "scheduled",
   EVENT = "event",
-  API = "api"
+  API = "api",
 }
 
 export interface StepExecution {
@@ -802,70 +810,70 @@ export interface PipelineDefinition {
   description?: string;
   version: string;
   status: PipelineStatus;
-  
+
   // Pipeline configuration
   pipeline_definition: Record<string, JSONValue>; // Complete pipeline DAG definition
   stage_configurations?: Record<string, JSONValue>; // Individual stage configurations
   data_flow_mapping?: Record<string, JSONValue>; // Data flow between stages
   dependency_graph?: Record<string, JSONValue>; // Stage dependency graph
-  
+
   // Cross-group integration
   involved_groups?: string[]; // List of groups involved in pipeline
   group_stage_mapping?: Record<string, JSONValue>; // Mapping of stages to groups
   cross_group_data_flow?: Record<string, JSONValue>; // Data flow across groups
   group_specific_configs?: Record<string, JSONValue>; // Group-specific configurations
-  
+
   // Performance and optimization
   performance_targets?: Record<string, JSONValue>; // Performance targets and SLAs
   optimization_config?: Record<string, JSONValue>; // AI optimization configuration
   resource_allocation?: Record<string, JSONValue>; // Resource allocation per stage
   scaling_policies?: Record<string, JSONValue>; // Auto-scaling policies
-  
+
   // AI-driven optimization
   ai_optimization_enabled: boolean;
   optimization_history?: Record<string, JSONValue>; // History of AI optimizations
   performance_baselines?: Record<string, JSONValue>; // Performance baselines
   optimization_recommendations?: Record<string, JSONValue>; // Current AI recommendations
-  
+
   // Pipeline templates and reusability
   is_template: boolean;
   template_category?: string;
   template_tags?: string[]; // Template categorization tags
   parent_template_id?: UUID;
-  
+
   // Versioning and lifecycle
   previous_version_id?: UUID;
   next_version_id?: UUID;
   is_current_version: boolean;
   deprecation_date?: ISODateString;
-  
+
   // Data lineage and quality
   data_lineage_config?: Record<string, JSONValue>; // Data lineage tracking configuration
   quality_gates?: Record<string, JSONValue>; // Quality gates and validations
   data_governance_rules?: Record<string, JSONValue>; // Data governance rules
   compliance_requirements?: Record<string, JSONValue>; // Compliance requirements
-  
+
   // Monitoring and alerting
   monitoring_config?: Record<string, JSONValue>; // Monitoring configuration
   alerting_rules?: Record<string, JSONValue>; // Alerting rules and thresholds
   notification_settings?: Record<string, JSONValue>; // Notification preferences
   health_check_config?: Record<string, JSONValue>; // Health check configuration
-  
+
   // Security and access control
   access_level: AccessLevel; // private, team, organization, public
   allowed_groups?: string[]; // RBAC groups allowed to access
   execution_permissions?: Record<string, JSONValue>; // Execution permission configuration
   data_access_policies?: Record<string, JSONValue>; // Data access policies
-  
+
   // Integration with orchestration
   orchestration_master_id?: UUID;
-  
+
   // Audit and tracking fields
   created_at: ISODateString;
   updated_at: ISODateString;
   created_by: UUID;
   updated_by?: UUID;
-  
+
   // Legacy fields for backward compatibility
   workspaceId?: UUID;
   stages?: PipelineStage[];
@@ -879,21 +887,21 @@ export interface PipelineDefinition {
 
 export enum PipelineStatus {
   DRAFT = "draft",
-  ACTIVE = "active", 
+  ACTIVE = "active",
   RUNNING = "running",
   PAUSED = "paused",
   COMPLETED = "completed",
   FAILED = "failed",
   CANCELLED = "cancelled",
   OPTIMIZING = "optimizing",
-  ARCHIVED = "archived"
+  ARCHIVED = "archived",
 }
 
 export enum AccessLevel {
   PRIVATE = "private",
-  TEAM = "team", 
+  TEAM = "team",
   ORGANIZATION = "organization",
-  PUBLIC = "public"
+  PUBLIC = "public",
 }
 
 /**
@@ -901,26 +909,26 @@ export enum AccessLevel {
  */
 export interface PipelineExecution {
   id: UUID;
-  
+
   // Execution basic information
   execution_name?: string;
   status: PipelineStatus;
   trigger_type: TriggerType; // manual, scheduled, event_driven, api
-  
+
   // Execution context
   triggered_by: UUID;
   trigger_data?: Record<string, JSONValue>; // Data that triggered the execution
   execution_context?: Record<string, JSONValue>; // Execution environment context
   input_parameters?: Record<string, JSONValue>; // Input parameters for this execution
   input_data_sources?: Record<string, JSONValue>; // Input data sources
-  
+
   // Timing information
   started_at: ISODateString;
   completed_at?: ISODateString;
   estimated_completion?: ISODateString;
   actual_duration?: number; // Duration in seconds
   estimated_duration?: number; // Estimated duration in seconds
-  
+
   // Progress tracking
   total_stages: number;
   completed_stages: number;
@@ -928,45 +936,45 @@ export interface PipelineExecution {
   skipped_stages: number;
   current_stage?: string;
   progress_percentage: number;
-  
+
   // Resource tracking
   resource_usage?: Record<string, JSONValue>; // Current resource usage
   peak_resource_usage?: Record<string, JSONValue>; // Peak resource usage
   resource_allocation?: Record<string, JSONValue>; // Allocated resources
   cost_tracking?: Record<string, JSONValue>; // Cost tracking data
-  
+
   // Performance metrics
   throughput_metrics?: Record<string, JSONValue>; // Throughput measurements
   performance_metrics?: Record<string, JSONValue>; // Performance data
   bottlenecks_detected?: Record<string, JSONValue>; // Performance bottlenecks
   optimization_applied?: Record<string, JSONValue>; // Applied optimizations
-  
+
   // Data processing metrics
   total_records_processed: number;
   total_records_failed: number;
   total_data_size?: number; // Data size in bytes
   data_quality_score?: number; // Overall data quality score
-  
+
   // Output and results
   execution_results?: Record<string, JSONValue>; // Execution results
   output_artifacts?: string[]; // Output artifacts paths
   logs_location?: string; // Location of execution logs
   metrics_snapshot?: Record<string, JSONValue>; // Metrics snapshot
-  
+
   // Error handling
   error_details?: Record<string, JSONValue>; // Error details if execution failed
   error_recovery_attempts?: number;
   last_error_stage?: string;
   error_handling_stages?: string[]; // Stages to execute on error
-  
+
   // AI optimization
   ai_optimization_enabled: boolean;
   optimization_priorities?: Record<string, JSONValue>; // Optimization priorities
   learning_data?: Record<string, JSONValue>; // Data for AI learning
-  
+
   // Pipeline reference
   pipeline_id: UUID;
-  
+
   // Legacy fields for backward compatibility
   pipelineId?: UUID;
   pipelineVersion?: string;
@@ -990,53 +998,53 @@ export interface PipelineStage {
   stage_description?: string;
   stage_type: PipelineStageType;
   stage_order: number;
-  
+
   // Stage configuration
   stage_configuration: Record<string, JSONValue>; // Stage-specific configuration
   input_schema?: Record<string, JSONValue>; // Input data schema
   output_schema?: Record<string, JSONValue>; // Output data schema
   validation_rules?: Record<string, JSONValue>; // Data validation rules
-  
+
   // Dependencies and flow
   depends_on?: string[]; // Stage dependencies
   parallel_execution: boolean; // Can execute in parallel
   conditional_execution?: Record<string, JSONValue>; // Conditional execution logic
   data_flow_config?: Record<string, JSONValue>; // Data flow configuration
-  
+
   // Cross-group integration
   target_group: string; // Which group this stage targets
   group_operation: string; // Specific operation within the group
   group_specific_config?: Record<string, JSONValue>; // Group-specific configuration
-  
+
   // Performance and resources
   resource_requirements?: Record<string, JSONValue>; // Resource requirements
   performance_targets?: Record<string, JSONValue>; // Performance targets
   timeout_seconds?: number; // Stage timeout
   retry_policy?: RetryPolicy; // Retry configuration
-  
+
   // Quality and compliance
   quality_requirements?: Record<string, JSONValue>; // Quality requirements
   compliance_requirements?: Record<string, JSONValue>; // Compliance requirements
   data_lineage_config?: Record<string, JSONValue>; // Data lineage configuration
-  
+
   // Monitoring and alerting
   monitoring_config?: Record<string, JSONValue>; // Monitoring configuration
   alerting_config?: Record<string, JSONValue>; // Alerting configuration
   health_check_config?: Record<string, JSONValue>; // Health check configuration
-  
+
   // Error handling
   error_handling_policy?: Record<string, JSONValue>; // Error handling policy
   error_recovery_config?: Record<string, JSONValue>; // Error recovery configuration
   error_handling_stages?: string[]; // Stages to execute on error
-  
+
   // AI optimization
   ai_optimization_enabled: boolean;
   optimization_priorities?: Record<string, JSONValue>; // Optimization priorities
   learning_data?: Record<string, JSONValue>; // Data for AI learning
-  
+
   // Pipeline reference
   pipeline_id: UUID;
-  
+
   // Legacy fields for backward compatibility
   name?: string;
   description?: string;
@@ -1054,7 +1062,7 @@ export interface PipelineStage {
 
 export enum PipelineStageType {
   DATA_INGESTION = "data_ingestion",
-  DATA_TRANSFORMATION = "data_transformation", 
+  DATA_TRANSFORMATION = "data_transformation",
   DATA_VALIDATION = "data_validation",
   QUALITY_CHECK = "quality_check",
   CLASSIFICATION = "classification",
@@ -1065,7 +1073,7 @@ export enum PipelineStageType {
   NOTIFICATION = "notification",
   CONDITIONAL_BRANCH = "conditional_branch",
   PARALLEL_PROCESSING = "parallel_processing",
-  CUSTOM_OPERATION = "custom_operation"
+  CUSTOM_OPERATION = "custom_operation",
 }
 
 /**
@@ -1073,43 +1081,43 @@ export enum PipelineStageType {
  */
 export interface PipelineStageExecution {
   id: UUID;
-  
+
   // Execution information
   status: PipelineStatus;
   started_at: ISODateString;
   completed_at?: ISODateString;
   duration_seconds?: number;
-  
+
   // Data processing
   input_data?: Record<string, JSONValue>; // Actual input data for this execution
   output_data?: Record<string, JSONValue>; // Output data from this execution
   records_processed: number;
   records_failed: number;
   data_quality_metrics?: Record<string, JSONValue>; // Data quality metrics
-  
+
   // Performance tracking
   resource_usage?: Record<string, JSONValue>; // Resource consumption
   performance_metrics?: Record<string, JSONValue>; // Performance metrics
   throughput_metrics?: Record<string, JSONValue>; // Throughput measurements
   bottlenecks_detected?: Record<string, JSONValue>; // Performance bottlenecks
-  
+
   // Quality and compliance results
   quality_check_results?: Record<string, JSONValue>; // Quality validation results
   compliance_validation_results?: Record<string, JSONValue>; // Compliance validation results
   validation_errors?: Record<string, JSONValue>; // Validation errors encountered
-  
+
   // Error handling
   execution_logs?: string; // Execution logs
   error_details?: Record<string, JSONValue>; // Error details if stage failed
   retry_attempts: number;
   retry_reason?: string;
   recovery_actions?: Record<string, JSONValue>;
-  
+
   // AI optimization tracking
   optimization_applied?: Record<string, JSONValue>; // Applied optimizations
   performance_improvement?: number; // Performance improvement
   ai_recommendations_generated?: Record<string, JSONValue>; // AI recommendations generated
-  
+
   // References
   pipeline_execution_id: UUID;
   pipeline_stage_id: UUID;
@@ -1120,59 +1128,59 @@ export interface PipelineStageExecution {
  */
 export interface PipelineTemplate {
   id: UUID;
-  
+
   // Template information
   template_name: string;
   template_description?: string;
   template_category: string;
   template_version: string;
   complexity_level: ComplexityLevel; // beginner, intermediate, advanced
-  
+
   // Template configuration
   template_definition: Record<string, JSONValue>; // Complete template definition
   parameter_schema?: Record<string, JSONValue>; // Schema for template parameters
   default_parameters?: Record<string, JSONValue>; // Default parameter values
   validation_rules?: Record<string, JSONValue>; // Parameter validation rules
-  
+
   // Template metadata
   use_cases?: string[]; // Documented use cases
   prerequisites?: string[]; // Prerequisites for using template
   expected_outcomes?: string[]; // Expected outcomes
   supported_groups?: string[]; // Supported groups
   integration_examples?: Record<string, JSONValue>; // Integration examples
-  
+
   // Performance and optimization
   performance_benchmarks?: Record<string, JSONValue>; // Performance benchmarks
   optimization_recommendations?: Record<string, JSONValue>; // Optimization recommendations
   best_practices?: string[]; // Best practices
   common_issues?: string[]; // Common issues and solutions
-  
+
   // AI enhancements
   ai_optimization_enabled: boolean;
   ai_recommendations?: Record<string, JSONValue>; // AI recommendations for usage
   learning_data?: Record<string, JSONValue>; // Learning data for improvement
   success_patterns?: Record<string, JSONValue>; // Success patterns
-  
+
   // Usage tracking
   usage_count: number;
   success_rate: number;
   average_execution_time?: number;
   user_ratings?: Record<string, JSONValue>; // User ratings and feedback
-  
+
   // Versioning and maintenance
   is_active: boolean;
   maintenance_schedule?: Record<string, JSONValue>; // Maintenance schedule
   deprecation_notice?: string;
   migration_guide?: string;
-  
+
   // Access control
   access_level: AccessLevel;
   allowed_groups?: string[];
   created_by_organization?: UUID;
-  
+
   // Base pipeline reference
   base_pipeline_id?: UUID;
-  
+
   // Audit fields
   created_at: ISODateString;
   updated_at: ISODateString;
@@ -1182,8 +1190,8 @@ export interface PipelineTemplate {
 
 export enum ComplexityLevel {
   BEGINNER = "beginner",
-  INTERMEDIATE = "intermediate", 
-  ADVANCED = "advanced"
+  INTERMEDIATE = "intermediate",
+  ADVANCED = "advanced",
 }
 
 /**
@@ -1197,20 +1205,20 @@ export interface PipelineOptimization {
   expected_improvement: Record<string, JSONValue>;
   actual_improvement?: Record<string, JSONValue>;
   confidence_score: number;
-  
+
   // AI analysis
   ai_analysis: Record<string, JSONValue>;
   learning_source: string;
   validation_results?: Record<string, JSONValue>;
-  
+
   // Implementation tracking
   applied_at?: ISODateString;
   rollback_plan?: Record<string, JSONValue>;
   monitoring_config?: Record<string, JSONValue>;
-  
+
   // Pipeline reference
   pipeline_id: UUID;
-  
+
   // Audit fields
   created_at: ISODateString;
   updated_at: ISODateString;
@@ -1220,11 +1228,11 @@ export interface PipelineOptimization {
 export enum PipelineOptimizationType {
   PERFORMANCE = "performance",
   RESOURCE_USAGE = "resource_usage",
-  COST = "cost", 
+  COST = "cost",
   RELIABILITY = "reliability",
   THROUGHPUT = "throughput",
   LATENCY = "latency",
-  QUALITY = "quality"
+  QUALITY = "quality",
 }
 
 export enum OptimizationStatus {
@@ -1232,7 +1240,7 @@ export enum OptimizationStatus {
   APPROVED = "approved",
   APPLIED = "applied",
   REJECTED = "rejected",
-  ROLLED_BACK = "rolled_back"
+  ROLLED_BACK = "rolled_back",
 }
 
 // =============================================================================
@@ -1252,7 +1260,7 @@ export enum AIConversationType {
   TROUBLESHOOTING = "troubleshooting",
   KNOWLEDGE_DISCOVERY = "knowledge_discovery",
   CROSS_GROUP_ANALYSIS = "cross_group_analysis",
-  SYSTEM_MONITORING = "system_monitoring"
+  SYSTEM_MONITORING = "system_monitoring",
 }
 
 /**
@@ -1270,7 +1278,7 @@ export enum AIRecommendationType {
   COST_OPTIMIZATION = "cost_optimization",
   AUTOMATION_OPPORTUNITY = "automation_opportunity",
   KNOWLEDGE_SHARING = "knowledge_sharing",
-  PROCESS_IMPROVEMENT = "process_improvement"
+  PROCESS_IMPROVEMENT = "process_improvement",
 }
 
 /**
@@ -1286,7 +1294,7 @@ export enum AIInsightType {
   USAGE_ANALYSIS = "usage_analysis",
   RISK_ASSESSMENT = "risk_assessment",
   OPPORTUNITY_IDENTIFICATION = "opportunity_identification",
-  CROSS_GROUP_INSIGHTS = "cross_group_insights"
+  CROSS_GROUP_INSIGHTS = "cross_group_insights",
 }
 
 /**
@@ -1302,7 +1310,7 @@ export enum AILearningType {
   ERROR_PATTERN = "error_pattern",
   OPTIMIZATION_RESULT = "optimization_result",
   USER_PREFERENCE = "user_preference",
-  DOMAIN_KNOWLEDGE = "domain_knowledge"
+  DOMAIN_KNOWLEDGE = "domain_knowledge",
 }
 
 /**
@@ -1312,57 +1320,57 @@ export interface AIConversation {
   id: UUID;
   userId: UUID;
   workspaceId?: UUID;
-  
+
   // Conversation basic information
   conversationTitle: string;
   conversationType: AIConversationType;
   status: string; // active, archived, resolved
   priority: string; // low, normal, high, urgent
-  
+
   // Context information
   userContext: Record<string, JSONValue>;
   systemContext: Record<string, JSONValue>;
   workspaceContext: Record<string, JSONValue>;
   groupContext: Record<string, JSONValue>;
-  
+
   // Conversation metadata
   conversationSummary?: string;
   keyTopics: string[];
   mentionedEntities: Record<string, JSONValue>;
   crossGroupReferences: Record<string, JSONValue>;
-  
+
   // Resolution tracking
   isResolved: boolean;
   resolutionType?: string; // answered, escalated, automated, closed
   resolutionSummary?: string;
   userSatisfaction?: number; // 1-10 rating
-  
+
   // Learning and improvement
   learningPoints: Record<string, JSONValue>;
   improvementSuggestions: Record<string, JSONValue>;
   knowledgeGaps: Record<string, JSONValue>;
-  
+
   // Analytics and metrics
   messageCount: number;
   durationMinutes?: number;
   responseTimeAvg?: number;
   accuracyScore?: number;
-  
+
   // Integration tracking
   workflowsTriggered: Record<string, JSONValue>;
   pipelinesReferenced: Record<string, JSONValue>;
   resourcesAccessed: Record<string, JSONValue>;
   actionsPerformed: Record<string, JSONValue>;
-  
+
   // Timing
   startedAt: ISODateString;
   lastActivity: ISODateString;
   endedAt?: ISODateString;
-  
+
   // Relations
   messages: AIMessage[];
   recommendations: AIRecommendation[];
-  
+
   // Legacy compatibility
   title: string; // alias for conversationTitle
   context: AIContext;
@@ -1375,7 +1383,7 @@ export enum ConversationStatus {
   ACTIVE = "active",
   ARCHIVED = "archived",
   RESOLVED = "resolved",
-  DELETED = "deleted"
+  DELETED = "deleted",
 }
 
 /**
@@ -1384,50 +1392,50 @@ export enum ConversationStatus {
 export interface AIMessage {
   id: UUID;
   conversationId: UUID;
-  
+
   // Message basic information
   role: MessageRole;
   content: string;
   messageType: MessageType;
   isFromUser: boolean;
-  
+
   // AI analysis
   intentDetected?: string;
   entitiesExtracted: Record<string, JSONValue>;
   sentimentScore?: number;
   confidenceScore?: number;
   complexityScore?: number;
-  
+
   // Processing information
   processingTimeMs?: number;
   aiModelUsed?: string;
   processingPipeline: Record<string, JSONValue>;
   externalApisCalled: Record<string, JSONValue>;
-  
+
   // Context and references
   contextUsed: Record<string, JSONValue>;
   referencedDocuments: Record<string, JSONValue>;
   crossGroupDataUsed: Record<string, JSONValue>;
   workflowContext?: Record<string, JSONValue>;
-  
+
   // Quality and feedback
   userFeedback?: string; // helpful, not_helpful, etc.
   accuracyRating?: number;
   relevanceScore?: number;
   improvementNotes?: string;
-  
+
   // Actions and results
   actionsSuggested: Record<string, JSONValue>;
   actionsExecuted: Record<string, JSONValue>;
   followUpRequired: boolean;
   followUpActions: Record<string, JSONValue>;
-  
+
   // Message order
   messageOrder: number;
-  
+
   // Timing
   timestamp: ISODateString;
-  
+
   // Legacy compatibility
   context: MessageContext;
   attachments: MessageAttachment[];
@@ -1438,7 +1446,7 @@ export interface AIMessage {
 export enum MessageRole {
   USER = "user",
   ASSISTANT = "assistant",
-  SYSTEM = "system"
+  SYSTEM = "system",
 }
 
 export enum MessageType {
@@ -1448,7 +1456,7 @@ export enum MessageType {
   RECOMMENDATION = "recommendation",
   INSIGHT = "insight",
   ERROR = "error",
-  WARNING = "warning"
+  WARNING = "warning",
 }
 
 export interface MessageContext {
@@ -1475,7 +1483,7 @@ export enum AttachmentType {
   CODE = "code",
   DATA = "data",
   WORKFLOW = "workflow",
-  PIPELINE = "pipeline"
+  PIPELINE = "pipeline",
 }
 
 export interface MessageReaction {
@@ -1488,7 +1496,7 @@ export enum ReactionType {
   HELPFUL = "helpful",
   NOT_HELPFUL = "not_helpful",
   ACCURATE = "accurate",
-  INACCURATE = "inaccurate"
+  INACCURATE = "inaccurate",
 }
 
 /**
@@ -1527,13 +1535,13 @@ export enum ResponseStyle {
   CONCISE = "concise",
   DETAILED = "detailed",
   TECHNICAL = "technical",
-  BUSINESS = "business"
+  BUSINESS = "business",
 }
 
 export enum DetailLevel {
   MINIMAL = "minimal",
   STANDARD = "standard",
-  COMPREHENSIVE = "comprehensive"
+  COMPREHENSIVE = "comprehensive",
 }
 
 export interface SystemContextSnapshot {
@@ -1565,7 +1573,7 @@ export enum ExpertiseLevel {
   BEGINNER = "beginner",
   INTERMEDIATE = "intermediate",
   ADVANCED = "advanced",
-  EXPERT = "expert"
+  EXPERT = "expert",
 }
 
 /**
@@ -1575,75 +1583,75 @@ export interface AIRecommendation {
   id: UUID;
   userId: UUID;
   conversationId?: UUID;
-  
+
   // Recommendation basic information
   recommendationTitle: string;
   recommendationType: AIRecommendationType;
   description: string;
   priority: string; // low, medium, high, critical
-  
+
   // Recommendation details
   detailedAnalysis: Record<string, JSONValue>;
   implementationSteps: Record<string, JSONValue>;
   expectedBenefits: Record<string, JSONValue>;
   potentialRisks: Record<string, JSONValue>;
   resourceRequirements: Record<string, JSONValue>;
-  
+
   // AI analysis
   confidenceScore: number; // 0-1
   evidenceData: Record<string, JSONValue>;
   similarCases: Record<string, JSONValue>;
   successProbability?: number;
-  
+
   // Impact assessment
   impactAreas: Record<string, JSONValue>;
   performanceImpact: Record<string, JSONValue>;
   costImpact: Record<string, JSONValue>;
   userImpact: Record<string, JSONValue>;
   complianceImpact: Record<string, JSONValue>;
-  
+
   // Cross-group implications
   affectedGroups: Record<string, JSONValue>;
   crossGroupBenefits: Record<string, JSONValue>;
   integrationRequirements: Record<string, JSONValue>;
   coordinationNeeded: Record<string, JSONValue>;
-  
+
   // Implementation tracking
   implementationStatus: string; // pending, in_progress, completed, rejected
   implementationProgress?: number; // 0-100
   implementationNotes?: string;
   actualResults?: Record<string, JSONValue>;
-  
+
   // Quality and validation
   validationStatus: string; // pending, validated, disputed
   accuracyScore?: number;
   effectivenessScore?: number;
   userSatisfaction?: number;
-  
+
   // Learning and feedback
   userFeedback?: string;
   outcomeTracking: Record<string, JSONValue>;
   learningPoints: Record<string, JSONValue>;
   improvementSuggestions: Record<string, JSONValue>;
-  
+
   // Usage and sharing
   isPublic: boolean;
   accessLevel: string; // private, team, organization
   sharedWithGroups: Record<string, JSONValue>;
   usageCount: number;
-  
+
   // Context and generation
   generationContext: Record<string, JSONValue>;
   triggeringAnalysis: Record<string, JSONValue>;
   relatedRecommendations: string[];
-  
+
   // Timing
   createdAt: ISODateString;
   updatedAt: ISODateString;
   expiresAt?: ISODateString;
   implementedAt?: ISODateString;
   reviewedAt?: ISODateString;
-  
+
   // Legacy compatibility
   type: RecommendationType;
   title: string; // alias for recommendationTitle
@@ -1664,66 +1672,66 @@ export interface AIInsight {
   userId: UUID;
   conversationId?: UUID;
   orchestrationMasterId?: UUID;
-  
+
   // Insight basic information
   insightTitle: string;
   insightType: AIInsightType;
   description: string;
   significanceLevel: string; // low, medium, high, critical
-  
+
   // Insight analysis
   detailedAnalysis: Record<string, JSONValue>;
   keyFindings: Record<string, JSONValue>;
   supportingEvidence: Record<string, JSONValue>;
   statisticalData: Record<string, JSONValue>;
-  
+
   // Data and methodology
   dataSources: Record<string, JSONValue>;
   analysisMethodology: Record<string, JSONValue>;
   aiModelsUsed: Record<string, JSONValue>;
   confidenceIntervals: Record<string, JSONValue>;
-  
+
   // Cross-group analysis
   groupsAnalyzed: Record<string, JSONValue>;
   crossGroupPatterns: Record<string, JSONValue>;
   groupSpecificInsights: Record<string, JSONValue>;
   integrationOpportunities: Record<string, JSONValue>;
-  
+
   // Predictive elements
   predictions: Record<string, JSONValue>;
   trendAnalysis: Record<string, JSONValue>;
   forecasts: Record<string, JSONValue>;
   scenarioAnalysis: Record<string, JSONValue>;
-  
+
   // Impact and implications
   businessImpact: Record<string, JSONValue>;
   technicalImplications: Record<string, JSONValue>;
   operationalImpact: Record<string, JSONValue>;
   strategicImplications: Record<string, JSONValue>;
-  
+
   // Actionable information
   recommendedActions: Record<string, JSONValue>;
   nextSteps: Record<string, JSONValue>;
   monitoringRequirements: Record<string, JSONValue>;
   successMetrics: Record<string, JSONValue>;
-  
+
   // Quality and validation
   validationStatus: string; // pending, validated, disputed
   accuracyScore?: number;
   reliabilityScore?: number;
   peerReviewNotes: Record<string, JSONValue>;
-  
+
   // Usage and sharing
   isPublic: boolean;
   accessLevel: string; // private, team, organization
   sharedWithGroups: Record<string, JSONValue>;
   usageCount: number;
-  
+
   // Context and generation
   generationContext: Record<string, JSONValue>;
   triggeringAnalysis: Record<string, JSONValue>;
   relatedInsights: string[];
-  
+
   // Timing
   createdAt: ISODateString;
   updatedAt: ISODateString;
@@ -1736,14 +1744,14 @@ export enum RecommendationType {
   TROUBLESHOOTING = "troubleshooting",
   WORKFLOW = "workflow",
   PIPELINE = "pipeline",
-  INTEGRATION = "integration"
+  INTEGRATION = "integration",
 }
 
 export enum RecommendationPriority {
   LOW = "low",
   MEDIUM = "medium",
   HIGH = "high",
-  CRITICAL = "critical"
+  CRITICAL = "critical",
 }
 
 export enum RecommendationCategory {
@@ -1752,7 +1760,7 @@ export enum RecommendationCategory {
   COMPLIANCE = "compliance",
   COST = "cost",
   QUALITY = "quality",
-  MAINTENANCE = "maintenance"
+  MAINTENANCE = "maintenance",
 }
 
 export interface RecommendationContext {
@@ -1776,7 +1784,7 @@ export enum DifficultyLevel {
   EASY = "easy",
   MEDIUM = "medium",
   HARD = "hard",
-  EXPERT = "expert"
+  EXPERT = "expert",
 }
 
 export interface ImplementationStep {
@@ -1804,7 +1812,7 @@ export enum ActionType {
   CREATE_RESOURCE = "create_resource",
   MODIFY_WORKFLOW = "modify_workflow",
   SCHEDULE_TASK = "schedule_task",
-  SEND_NOTIFICATION = "send_notification"
+  SEND_NOTIFICATION = "send_notification",
 }
 
 export interface RecommendationMetrics {
@@ -1821,7 +1829,7 @@ export enum RecommendationStatus {
   VIEWED = "viewed",
   IMPLEMENTED = "implemented",
   DISMISSED = "dismissed",
-  EXPIRED = "expired"
+  EXPIRED = "expired",
 }
 
 export interface RecommendationFeedback {
@@ -1862,7 +1870,7 @@ export enum InsightType {
   PATTERN = "pattern",
   CORRELATION = "correlation",
   PREDICTION = "prediction",
-  OPTIMIZATION = "optimization"
+  OPTIMIZATION = "optimization",
 }
 
 export enum InsightCategory {
@@ -1871,7 +1879,7 @@ export enum InsightCategory {
   QUALITY = "quality",
   SECURITY = "security",
   COST = "cost",
-  COMPLIANCE = "compliance"
+  COMPLIANCE = "compliance",
 }
 
 export interface InsightAnalysis {
@@ -1899,13 +1907,13 @@ export enum VisualizationType {
   HEATMAP = "heatmap",
   TIMELINE = "timeline",
   NETWORK = "network",
-  TREEMAP = "treemap"
+  TREEMAP = "treemap",
 }
 
 export enum InsightStatus {
   ACTIVE = "active",
   ARCHIVED = "archived",
-  OUTDATED = "outdated"
+  OUTDATED = "outdated",
 }
 
 // =============================================================================
@@ -2021,7 +2029,7 @@ export interface RBACRole {
   inheritedRoles?: UUID[];
   isSystemRole: boolean;
   isActive: boolean;
-  scope: 'global' | 'workspace' | 'group';
+  scope: "global" | "workspace" | "group";
   workspaceId?: UUID;
   groupId?: string;
   auditInfo: AuditInfo;
@@ -2033,9 +2041,9 @@ export interface RBACPermission {
   name: string;
   resource: string;
   action: string;
-  effect: 'allow' | 'deny';
+  effect: "allow" | "deny";
   conditions?: RBACCondition[];
-  scope: 'global' | 'workspace' | 'group' | 'resource';
+  scope: "global" | "workspace" | "group" | "resource";
   description?: string;
   isSystemPermission: boolean;
   auditInfo: AuditInfo;
@@ -2046,7 +2054,7 @@ export interface RBACGroup {
   name: string;
   displayName: string;
   description: string;
-  type: 'functional' | 'organizational' | 'project';
+  type: "functional" | "organizational" | "project";
   members: RBACUser[];
   roles: RBACRole[];
   parentGroupId?: UUID;
@@ -2071,12 +2079,12 @@ export interface RBACResource {
 export interface RBACPolicy {
   id: UUID;
   name: string;
-  type: 'access' | 'data' | 'workflow' | 'security';
+  type: "access" | "data" | "workflow" | "security";
   rules: RBACPolicyRule[];
   conditions: RBACCondition[];
   priority: number;
   isActive: boolean;
-  scope: 'global' | 'workspace' | 'group';
+  scope: "global" | "workspace" | "group";
   workspaceId?: UUID;
   groupId?: string;
   auditInfo: AuditInfo;
@@ -2084,7 +2092,7 @@ export interface RBACPolicy {
 
 export interface RBACPolicyRule {
   id: UUID;
-  effect: 'allow' | 'deny';
+  effect: "allow" | "deny";
   subjects: RBACSubject[];
   resources: string[];
   actions: string[];
@@ -2092,35 +2100,43 @@ export interface RBACPolicyRule {
 }
 
 export interface RBACSubject {
-  type: 'user' | 'role' | 'group';
+  type: "user" | "role" | "group";
   id: UUID;
   name: string;
 }
 
 export interface RBACCondition {
   id: UUID;
-  type: 'time_based' | 'location_based' | 'attribute_based' | 'resource_based';
-  operator: 'equals' | 'not_equals' | 'greater_than' | 'less_than' | 'contains' | 'starts_with' | 'ends_with' | 'in';
+  type: "time_based" | "location_based" | "attribute_based" | "resource_based";
+  operator:
+    | "equals"
+    | "not_equals"
+    | "greater_than"
+    | "less_than"
+    | "contains"
+    | "starts_with"
+    | "ends_with"
+    | "in";
   value: JSONValue;
-  
+
   // Time-based conditions
   timeRange?: {
     start: string; // HH:MM format
-    end: string;   // HH:MM format
+    end: string; // HH:MM format
   };
   allowedDays?: number[]; // 0-6 (Sunday-Saturday)
-  
+
   // Location-based conditions
   allowedLocations?: string[];
   blockedLocations?: string[];
-  
+
   // Attribute-based conditions
   attributes?: Array<{
     name: string;
     value: JSONValue;
     operator: string;
   }>;
-  
+
   // Resource-based conditions
   resourceConstraints?: Array<{
     type: string;
@@ -2135,7 +2151,7 @@ export interface RBACAccessRequest {
   resource: string;
   action: string;
   reason: string;
-  status: 'pending' | 'approved' | 'denied' | 'expired';
+  status: "pending" | "approved" | "denied" | "expired";
   approvedBy?: UUID;
   approvalDate?: ISODateString;
   deniedBy?: UUID;
@@ -2154,7 +2170,7 @@ export interface RBACAuditLog {
   timestamp: ISODateString;
   ipAddress: string;
   userAgent: string;
-  status: 'success' | 'failed' | 'denied';
+  status: "success" | "failed" | "denied";
   details?: Record<string, JSONValue>;
   sessionId?: UUID;
 }
@@ -2195,7 +2211,7 @@ export interface RBACMetrics {
   complianceScore: number;
   violations: Array<{
     type: string;
-    severity: 'low' | 'medium' | 'high' | 'critical';
+    severity: "low" | "medium" | "high" | "critical";
     count: number;
     description: string;
   }>;
@@ -2251,7 +2267,7 @@ export interface RBACAnalytics {
     violations: Array<{
       type: string;
       count: number;
-      trend: 'increasing' | 'decreasing' | 'stable';
+      trend: "increasing" | "decreasing" | "stable";
     }>;
     auditFindings: Array<{
       finding: string;
@@ -2263,15 +2279,15 @@ export interface RBACAnalytics {
 
 export interface RBACCoordination {
   id: UUID;
-  type: 'cross_group' | 'workspace' | 'policy_sync';
+  type: "cross_group" | "workspace" | "policy_sync";
   participants: string[]; // group or workspace IDs
   rules: RBACPolicy[];
   syncConfig: {
     enabled: boolean;
     syncInterval: number; // minutes
-    conflictResolution: 'merge' | 'overwrite' | 'manual';
+    conflictResolution: "merge" | "overwrite" | "manual";
   };
-  status: 'active' | 'paused' | 'error';
+  status: "active" | "paused" | "error";
   lastSync?: ISODateString;
   auditInfo: AuditInfo;
 }
@@ -2311,7 +2327,7 @@ export interface UserPreferences {
 export enum ThemePreference {
   LIGHT = "light",
   DARK = "dark",
-  AUTO = "auto"
+  AUTO = "auto",
 }
 
 export interface NotificationSettings {
@@ -2363,7 +2379,7 @@ export interface DigestSettings {
 export enum DigestFrequency {
   DAILY = "daily",
   WEEKLY = "weekly",
-  MONTHLY = "monthly"
+  MONTHLY = "monthly",
 }
 
 export interface PrivacySettings {
@@ -2378,7 +2394,7 @@ export enum ProfileVisibility {
   PUBLIC = "public",
   ORGANIZATION = "organization",
   TEAM = "team",
-  PRIVATE = "private"
+  PRIVATE = "private",
 }
 
 export interface DashboardPreferences {
@@ -2425,14 +2441,14 @@ export enum FontSize {
   SMALL = "small",
   MEDIUM = "medium",
   LARGE = "large",
-  EXTRA_LARGE = "extra_large"
+  EXTRA_LARGE = "extra_large",
 }
 
 export enum ColorBlindnessType {
   NONE = "none",
   PROTANOPIA = "protanopia",
   DEUTERANOPIA = "deuteranopia",
-  TRITANOPIA = "tritanopia"
+  TRITANOPIA = "tritanopia",
 }
 
 export interface UserSession {
@@ -2491,7 +2507,7 @@ export enum ActivityType {
   PIPELINE_EVENT = "pipeline_event",
   INTEGRATION_EVENT = "integration_event",
   SECURITY_EVENT = "security_event",
-  ERROR_EVENT = "error_event"
+  ERROR_EVENT = "error_event",
 }
 
 export enum ActivityAction {
@@ -2508,7 +2524,7 @@ export enum ActivityAction {
   ACCESS = "access",
   SHARE = "share",
   EXPORT = "export",
-  IMPORT = "import"
+  IMPORT = "import",
 }
 
 export interface ActivityMetadata {
@@ -2525,7 +2541,7 @@ export enum ActivitySeverity {
   LOW = "low",
   MEDIUM = "medium",
   HIGH = "high",
-  CRITICAL = "critical"
+  CRITICAL = "critical",
 }
 
 export interface ActivityContext {
@@ -2548,7 +2564,7 @@ export enum ImpactScope {
   USER = "user",
   WORKSPACE = "workspace",
   GROUP = "group",
-  SYSTEM = "system"
+  SYSTEM = "system",
 }
 
 /**
@@ -2577,7 +2593,7 @@ export enum ComplianceLevel {
   BASIC = "basic",
   STANDARD = "standard",
   ENHANCED = "enhanced",
-  STRICT = "strict"
+  STRICT = "strict",
 }
 
 // =============================================================================
@@ -2613,7 +2629,7 @@ export enum DashboardType {
   EXECUTIVE = "executive",
   OPERATIONAL = "operational",
   ANALYTICAL = "analytical",
-  REAL_TIME = "real_time"
+  REAL_TIME = "real_time",
 }
 
 export interface DashboardLayout {
@@ -2629,7 +2645,7 @@ export enum LayoutType {
   GRID = "grid",
   FLEX = "flex",
   MASONRY = "masonry",
-  CUSTOM = "custom"
+  CUSTOM = "custom",
 }
 
 export interface LayoutBreakpoint {
@@ -2664,7 +2680,7 @@ export enum WidgetType {
   PROGRESS = "progress",
   ALERT = "alert",
   ACTIVITY_FEED = "activity_feed",
-  CUSTOM = "custom"
+  CUSTOM = "custom",
 }
 
 export interface WidgetConfiguration {
@@ -2691,7 +2707,7 @@ export enum ChartType {
   SCATTER = "scatter",
   HEATMAP = "heatmap",
   TREEMAP = "treemap",
-  SANKEY = "sankey"
+  SANKEY = "sankey",
 }
 
 export enum AggregationType {
@@ -2701,7 +2717,7 @@ export enum AggregationType {
   MIN = "min",
   MAX = "max",
   MEDIAN = "median",
-  PERCENTILE = "percentile"
+  PERCENTILE = "percentile",
 }
 
 export interface SortConfig {
@@ -2712,7 +2728,7 @@ export interface SortConfig {
 
 export enum SortDirection {
   ASC = "asc",
-  DESC = "desc"
+  DESC = "desc",
 }
 
 export interface LimitConfig {
@@ -2741,7 +2757,7 @@ export enum NumberFormatType {
   CURRENCY = "currency",
   PERCENTAGE = "percentage",
   BYTES = "bytes",
-  DURATION = "duration"
+  DURATION = "duration",
 }
 
 export interface InteractionConfig {
@@ -2758,7 +2774,7 @@ export enum ClickAction {
   DRILL_DOWN = "drill_down",
   FILTER = "filter",
   NAVIGATE = "navigate",
-  CUSTOM = "custom"
+  CUSTOM = "custom",
 }
 
 export interface StylingConfig {
@@ -2784,7 +2800,7 @@ export enum ErrorDisplayMode {
   INLINE = "inline",
   OVERLAY = "overlay",
   NOTIFICATION = "notification",
-  HIDDEN = "hidden"
+  HIDDEN = "hidden",
 }
 
 export interface WidgetDataSource {
@@ -2800,7 +2816,7 @@ export enum DataSourceType {
   DATABASE = "database",
   FILE = "file",
   REAL_TIME = "real_time",
-  COMPUTED = "computed"
+  COMPUTED = "computed",
 }
 
 export interface DataQuery {
@@ -2836,12 +2852,12 @@ export enum FilterOperator {
   IN = "in",
   NOT_IN = "not_in",
   IS_NULL = "is_null",
-  IS_NOT_NULL = "is_not_null"
+  IS_NOT_NULL = "is_not_null",
 }
 
 export enum FilterCondition {
   AND = "and",
-  OR = "or"
+  OR = "or",
 }
 
 export interface QueryAggregation {
@@ -2860,7 +2876,7 @@ export interface CachingConfig {
 export enum CachingStrategy {
   TIME_BASED = "time_based",
   EVENT_BASED = "event_based",
-  MANUAL = "manual"
+  MANUAL = "manual",
 }
 
 export interface InvalidationRule {
@@ -2872,7 +2888,7 @@ export interface InvalidationRule {
 export enum InvalidationAction {
   REFRESH = "refresh",
   CLEAR = "clear",
-  MARK_STALE = "mark_stale"
+  MARK_STALE = "mark_stale",
 }
 
 export interface RefreshTrigger {
@@ -2908,7 +2924,7 @@ export enum FilterType {
   SELECT = "select",
   MULTI_SELECT = "multi_select",
   RANGE = "range",
-  BOOLEAN = "boolean"
+  BOOLEAN = "boolean",
 }
 
 export interface FilterPosition {
@@ -2919,7 +2935,7 @@ export interface FilterPosition {
 export enum FilterSection {
   TOP = "top",
   SIDEBAR = "sidebar",
-  INLINE = "inline"
+  INLINE = "inline",
 }
 
 export interface DashboardPermissions {
@@ -2950,7 +2966,7 @@ export interface DateRange {
 export enum DateRangeType {
   RELATIVE = "relative",
   ABSOLUTE = "absolute",
-  CUSTOM = "custom"
+  CUSTOM = "custom",
 }
 
 export interface DateRangeValue {
@@ -2970,7 +2986,7 @@ export enum WatermarkPosition {
   TOP_RIGHT = "top_right",
   BOTTOM_LEFT = "bottom_left",
   BOTTOM_RIGHT = "bottom_right",
-  CENTER = "center"
+  CENTER = "center",
 }
 
 export interface DashboardAnalytics {
@@ -3043,7 +3059,7 @@ export enum CollaborationType {
   PIPELINE = "pipeline",
   DOCUMENT = "document",
   DASHBOARD = "dashboard",
-  MEETING = "meeting"
+  MEETING = "meeting",
 }
 
 export interface CollaborationParticipant {
@@ -3060,7 +3076,7 @@ export enum CollaborationRole {
   OWNER = "owner",
   MODERATOR = "moderator",
   CONTRIBUTOR = "contributor",
-  VIEWER = "viewer"
+  VIEWER = "viewer",
 }
 
 export interface CollaborationPermissions {
@@ -3076,7 +3092,7 @@ export enum ParticipantStatus {
   ONLINE = "online",
   AWAY = "away",
   BUSY = "busy",
-  OFFLINE = "offline"
+  OFFLINE = "offline",
 }
 
 export interface CollaborationSession {
@@ -3145,7 +3161,7 @@ export enum CollaborationMessageType {
   SUGGESTION = "suggestion",
   QUESTION = "question",
   ANNOUNCEMENT = "announcement",
-  SYSTEM = "system"
+  SYSTEM = "system",
 }
 
 export interface MessageMetadata {
@@ -3160,7 +3176,7 @@ export enum MessagePriority {
   LOW = "low",
   NORMAL = "normal",
   HIGH = "high",
-  URGENT = "urgent"
+  URGENT = "urgent",
 }
 
 export interface CollaborationActivity {
@@ -3181,7 +3197,7 @@ export enum CollaborationActivityType {
   INVITED = "invited",
   REMOVED = "removed",
   PROMOTED = "promoted",
-  DEMOTED = "demoted"
+  DEMOTED = "demoted",
 }
 
 export interface CollaborationSettings {
@@ -3201,14 +3217,14 @@ export enum CollaborationVisibility {
   PRIVATE = "private",
   TEAM = "team",
   ORGANIZATION = "organization",
-  PUBLIC = "public"
+  PUBLIC = "public",
 }
 
 export enum CollaborationStatus {
   ACTIVE = "active",
   INACTIVE = "inactive",
   ARCHIVED = "archived",
-  LOCKED = "locked"
+  LOCKED = "locked",
 }
 
 // =============================================================================
@@ -3241,7 +3257,7 @@ export enum IntegrationType {
   FILE_SYSTEM = "file_system",
   MESSAGE_QUEUE = "message_queue",
   WEBHOOK = "webhook",
-  STREAMING = "streaming"
+  STREAMING = "streaming",
 }
 
 export interface IntegrationSettings {
@@ -3265,7 +3281,7 @@ export enum AuthenticationType {
   OAUTH2 = "oauth2",
   BASIC_AUTH = "basic_auth",
   JWT = "jwt",
-  CERTIFICATE = "certificate"
+  CERTIFICATE = "certificate",
 }
 
 export interface ConnectionConfig {
@@ -3318,7 +3334,7 @@ export enum TransformationType {
   AGGREGATE = "aggregate",
   FILTER = "filter",
   SPLIT = "split",
-  MERGE = "merge"
+  MERGE = "merge",
 }
 
 export interface MappingFilter {
@@ -3350,7 +3366,7 @@ export enum TransformationErrorAction {
   SKIP = "skip",
   DEFAULT = "default",
   FAIL = "fail",
-  LOG = "log"
+  LOG = "log",
 }
 
 export interface TransformationErrorHandling {
@@ -3369,7 +3385,7 @@ export interface ValidationConfig {
 export enum ValidationErrorAction {
   REJECT = "reject",
   WARN = "warn",
-  IGNORE = "ignore"
+  IGNORE = "ignore",
 }
 
 export interface ErrorHandlingConfig {
@@ -3383,7 +3399,7 @@ export enum FallbackAction {
   SKIP = "skip",
   DEFAULT_VALUE = "default_value",
   PREVIOUS_VALUE = "previous_value",
-  FAIL = "fail"
+  FAIL = "fail",
 }
 
 export interface AlertingConfig {
@@ -3403,7 +3419,7 @@ export enum AlertSeverity {
   INFO = "info",
   WARNING = "warning",
   ERROR = "error",
-  CRITICAL = "critical"
+  CRITICAL = "critical",
 }
 
 export interface AlertChannel {
@@ -3434,7 +3450,7 @@ export interface LogFilter {
 export enum LogFormat {
   JSON = "json",
   TEXT = "text",
-  STRUCTURED = "structured"
+  STRUCTURED = "structured",
 }
 
 export interface CredentialReference {
@@ -3503,7 +3519,7 @@ export enum StageType {
   COMPLIANCE_CHECK = "compliance_check",
   CATALOGING = "cataloging",
   ANALYSIS = "analysis",
-  OUTPUT = "output"
+  OUTPUT = "output",
 }
 
 export interface PipelineConfiguration {
@@ -3657,18 +3673,18 @@ export interface QualityMetrics {
  */
 export enum DataSourceType {
   POSTGRESQL = "postgresql",
-  MYSQL = "mysql", 
+  MYSQL = "mysql",
   MONGODB = "mongodb",
   SNOWFLAKE = "snowflake",
   S3 = "s3",
   REDIS = "redis",
-  API = "api"
+  API = "api",
 }
 
 export enum DataSourceLocation {
   ON_PREM = "on_prem",
-  CLOUD = "cloud", 
-  HYBRID = "hybrid"
+  CLOUD = "cloud",
+  HYBRID = "hybrid",
 }
 
 export enum DataSourceStatus {
@@ -3677,41 +3693,41 @@ export enum DataSourceStatus {
   ERROR = "error",
   PENDING = "pending",
   SYNCING = "syncing",
-  MAINTENANCE = "maintenance"
+  MAINTENANCE = "maintenance",
 }
 
 export enum Environment {
   PRODUCTION = "production",
   STAGING = "staging",
   DEVELOPMENT = "development",
-  TEST = "test"
+  TEST = "test",
 }
 
 export enum Criticality {
   CRITICAL = "critical",
   HIGH = "high",
-  MEDIUM = "medium", 
-  LOW = "low"
+  MEDIUM = "medium",
+  LOW = "low",
 }
 
 export enum DataClassification {
   PUBLIC = "public",
   INTERNAL = "internal",
   CONFIDENTIAL = "confidential",
-  RESTRICTED = "restricted"
+  RESTRICTED = "restricted",
 }
 
 export enum ScanFrequency {
   HOURLY = "hourly",
   DAILY = "daily",
   WEEKLY = "weekly",
-  MONTHLY = "monthly"
+  MONTHLY = "monthly",
 }
 
 export enum CloudProvider {
   AWS = "aws",
   AZURE = "azure",
-  GCP = "gcp"
+  GCP = "gcp",
 }
 
 /**
@@ -3724,35 +3740,35 @@ export interface DataSource {
   type: DataSourceType;
   location: DataSourceLocation;
   status: DataSourceStatus;
-  
+
   // Connection configuration
   connectionConfig: ConnectionConfig;
   credentials?: EncryptedCredentials;
-  
+
   // Metadata and classification
   environment?: Environment;
   criticality?: Criticality;
   dataClassification?: DataClassification;
-  
+
   // Scheduling and automation
   scanFrequency?: ScanFrequency;
   isActive: boolean;
-  
+
   // Cloud configuration
   cloudProvider?: CloudProvider;
   cloudConfig?: Record<string, any>;
-  
+
   // Security and compliance
   security: SecurityPolicy;
   tags: string[];
-  
+
   // Timestamps and ownership
   createdAt: ISODateString;
   updatedAt: ISODateString;
   createdBy: string;
   ownerId: string;
   workspaceId: string;
-  
+
   // Performance and monitoring
   healthCheck?: HealthCheckConfig;
   lastScanAt?: ISODateString;
@@ -3795,7 +3811,7 @@ export enum AuthenticationMethod {
   OAUTH = "oauth",
   JWT = "jwt",
   IAM = "iam",
-  CERTIFICATE = "certificate"
+  CERTIFICATE = "certificate",
 }
 
 /**
@@ -3850,19 +3866,7 @@ export interface DiagnosticResult {
   details?: Record<string, any>;
 }
 
-/**
- * Performance Metrics
- */
-export interface PerformanceMetrics {
-  latency: number;
-  throughput: number;
-  cpuUsage: number;
-  memoryUsage: number;
-  diskUsage?: number;
-  networkUsage?: number;
-  score: number;
-  timestamp: ISODateString;
-}
+
 
 /**
  * Data Source Health
@@ -3879,7 +3883,7 @@ export interface DataSourceHealth {
 }
 
 export interface HealthIssue {
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
   category: string;
   message: string;
   suggestion?: string;
@@ -3992,7 +3996,7 @@ export interface ConnectionOptimization {
 
 export interface OptimizationRecommendation {
   category: string;
-  priority: 'low' | 'medium' | 'high';
+  priority: "low" | "medium" | "high";
   description: string;
   implementation: string;
   estimatedImpact: number;
@@ -4009,7 +4013,7 @@ export interface SecurityValidation {
 }
 
 export interface SecurityVulnerability {
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
   category: string;
   description: string;
   remediation: string;
@@ -4028,7 +4032,7 @@ export interface ConnectionReport {
 }
 
 export interface ReportSummary {
-  overallStatus: 'excellent' | 'good' | 'warning' | 'critical';
+  overallStatus: "excellent" | "good" | "warning" | "critical";
   score: number;
   criticalIssues: number;
   warnings: number;
@@ -4040,7 +4044,7 @@ export interface ReportSummary {
  */
 export interface DiagnosticLog {
   timestamp: ISODateString;
-  level: 'debug' | 'info' | 'warn' | 'error';
+  level: "debug" | "info" | "warn" | "error";
   category: string;
   message: string;
   details?: Record<string, any>;
@@ -4147,7 +4151,7 @@ export interface DataSourceMetrics {
 
 export interface MetricTrend {
   metric: string;
-  direction: 'up' | 'down' | 'stable';
+  direction: "up" | "down" | "stable";
   change: number;
   period: string;
 }
@@ -4178,7 +4182,7 @@ export interface MetricPoint {
 export interface TimeRange {
   start: ISODateString;
   end: ISODateString;
-  interval: '1m' | '5m' | '15m' | '1h' | '6h' | '12h' | '1d' | '7d' | '30d';
+  interval: "1m" | "5m" | "15m" | "1h" | "6h" | "12h" | "1d" | "7d" | "30d";
   timezone?: string;
 }
 
@@ -4188,7 +4192,7 @@ export enum MetricType {
   HISTOGRAM = "histogram",
   TIMER = "timer",
   PERCENTAGE = "percentage",
-  RATE = "rate"
+  RATE = "rate",
 }
 
 export enum AggregationMethod {
@@ -4199,13 +4203,13 @@ export enum AggregationMethod {
   COUNT = "count",
   PERCENTILE_95 = "percentile_95",
   PERCENTILE_99 = "percentile_99",
-  MEDIAN = "median"
+  MEDIAN = "median",
 }
 
 export interface PerformanceReport {
   id: string;
   dataSourceId: string;
-  reportType: 'daily' | 'weekly' | 'monthly' | 'custom';
+  reportType: "daily" | "weekly" | "monthly" | "custom";
   generatedAt: ISODateString;
   period: TimeRange;
   summary: PerformanceReportSummary;
@@ -4220,7 +4224,7 @@ export interface PerformanceReport {
 
 export interface PerformanceReportSummary {
   overallScore: number;
-  performanceGrade: 'A' | 'B' | 'C' | 'D' | 'F';
+  performanceGrade: "A" | "B" | "C" | "D" | "F";
   keyMetrics: KeyMetric[];
   criticalIssues: number;
   improvements: number;
@@ -4232,9 +4236,9 @@ export interface KeyMetric {
   current: number;
   previous?: number;
   change?: number;
-  trend: 'up' | 'down' | 'stable';
+  trend: "up" | "down" | "stable";
   unit: string;
-  status: 'good' | 'warning' | 'critical';
+  status: "good" | "warning" | "critical";
 }
 
 export interface ChartDataPoint {
@@ -4256,7 +4260,7 @@ export interface MetricChange {
   previousValue: number;
   currentValue: number;
   changePercent: number;
-  significance: 'minor' | 'moderate' | 'major';
+  significance: "minor" | "moderate" | "major";
 }
 
 export interface MetricAlert {
@@ -4282,7 +4286,13 @@ export interface MetricAlert {
 }
 
 export interface MetricThreshold {
-  operator: 'greater_than' | 'less_than' | 'equals' | 'not_equals' | 'between' | 'outside';
+  operator:
+    | "greater_than"
+    | "less_than"
+    | "equals"
+    | "not_equals"
+    | "between"
+    | "outside";
   value: number | number[];
   duration?: number;
   evaluationWindow?: number;
@@ -4292,19 +4302,19 @@ export enum AlertStatus {
   ACTIVE = "active",
   INACTIVE = "inactive",
   SUSPENDED = "suspended",
-  RESOLVED = "resolved"
+  RESOLVED = "resolved",
 }
 
 export enum AlertLevel {
   INFO = "info",
   WARNING = "warning",
   ERROR = "error",
-  CRITICAL = "critical"
+  CRITICAL = "critical",
 }
 
 export interface AlertHistoryEntry {
   timestamp: ISODateString;
-  action: 'triggered' | 'resolved' | 'acknowledged' | 'escalated';
+  action: "triggered" | "resolved" | "acknowledged" | "escalated";
   value: number;
   message: string;
   userId?: string;
@@ -4312,13 +4322,13 @@ export interface AlertHistoryEntry {
 
 export enum HealthStatus {
   HEALTHY = "healthy",
-  WARNING = "warning", 
+  WARNING = "warning",
   CRITICAL = "critical",
   ERROR = "error",
   UNKNOWN = "unknown",
   CONNECTING = "connecting",
   DISCONNECTED = "disconnected",
-  DEGRADED = "degraded"
+  DEGRADED = "degraded",
 }
 
 export interface SecurityStatus {
@@ -4339,17 +4349,17 @@ export interface SecurityRecommendation {
   id: string;
   title: string;
   description: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
   category: string;
   impact: string;
-  effort: 'low' | 'medium' | 'high';
+  effort: "low" | "medium" | "high";
   priority: number;
 }
 
 export interface SecurityUpdate {
   id: string;
   title: string;
-  type: 'patch' | 'configuration' | 'policy';
+  type: "patch" | "configuration" | "policy";
   description: string;
   scheduledDate?: ISODateString;
   estimatedDowntime?: number;
@@ -4382,7 +4392,7 @@ export enum HealthCheckType {
   QUERY = "query",
   AUTHENTICATION = "authentication",
   PERFORMANCE = "performance",
-  CUSTOM = "custom"
+  CUSTOM = "custom",
 }
 
 export interface HealthCheckResult {
@@ -4395,8 +4405,8 @@ export interface HealthCheckResult {
 }
 
 export interface HealthAlertThreshold {
-  metric: 'response_time' | 'consecutive_failures' | 'error_rate';
-  operator: 'greater_than' | 'less_than' | 'equals';
+  metric: "response_time" | "consecutive_failures" | "error_rate";
+  operator: "greater_than" | "less_than" | "equals";
   value: number;
   severity: AlertLevel;
 }
@@ -4419,22 +4429,27 @@ export interface StatusHistoryEntry {
 }
 
 export interface StatusEvent {
-  type: 'connection' | 'performance' | 'security' | 'configuration' | 'user_action';
+  type:
+    | "connection"
+    | "performance"
+    | "security"
+    | "configuration"
+    | "user_action";
   description: string;
   severity: AlertLevel;
   metadata?: Record<string, any>;
 }
 
 // =============================================================================
-// CLASSIFICATIONS TYPES - Complete Backend Integration  
+// CLASSIFICATIONS TYPES - Complete Backend Integration
 // =============================================================================
 
 export enum ClassificationLevel {
   PUBLIC = "public",
-  INTERNAL = "internal", 
+  INTERNAL = "internal",
   CONFIDENTIAL = "confidential",
   RESTRICTED = "restricted",
-  TOP_SECRET = "top_secret"
+  TOP_SECRET = "top_secret",
 }
 
 export enum ClassificationStatus {
@@ -4442,7 +4457,7 @@ export enum ClassificationStatus {
   INACTIVE = "inactive",
   DRAFT = "draft",
   PENDING_REVIEW = "pending_review",
-  APPROVED = "approved"
+  APPROVED = "approved",
 }
 
 export interface Classification {
@@ -4502,7 +4517,7 @@ export interface ClassificationMetrics {
 
 export interface ClassificationHistory {
   id: string;
-  action: 'created' | 'updated' | 'deleted' | 'classified';
+  action: "created" | "updated" | "deleted" | "classified";
   previousLevel?: ClassificationLevel;
   newLevel: ClassificationLevel;
   changedBy: string;
@@ -4519,15 +4534,15 @@ export interface ClassificationConfig {
 }
 
 // =============================================================================
-// COMPLIANCE RULE TYPES - Complete Backend Integration  
+// COMPLIANCE RULE TYPES - Complete Backend Integration
 // =============================================================================
 
 export enum ComplianceStatus {
   COMPLIANT = "compliant",
-  NON_COMPLIANT = "non_compliant", 
+  NON_COMPLIANT = "non_compliant",
   PENDING = "pending",
   REVIEWING = "reviewing",
-  REMEDIATED = "remediated"
+  REMEDIATED = "remediated",
 }
 
 export interface ComplianceRule {
@@ -4535,7 +4550,7 @@ export interface ComplianceRule {
   name: string;
   description: string;
   regulation: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
   status: RuleStatus;
   requirements: string[];
   conditions: RuleCondition[];
@@ -4558,7 +4573,7 @@ export interface CompliancePolicy {
   status: ComplianceStatus;
   scope: string;
   applicability: string[];
-  enforcement: 'manual' | 'automatic' | 'hybrid';
+  enforcement: "manual" | "automatic" | "hybrid";
   version: string;
   effectiveDate: ISODateString;
   expiryDate?: ISODateString;
@@ -4581,21 +4596,21 @@ export interface ComplianceReport {
 
 export interface ComplianceAudit {
   id: string;
-  auditType: 'internal' | 'external' | 'self_assessment';
+  auditType: "internal" | "external" | "self_assessment";
   auditor: string;
   startDate: ISODateString;
   endDate?: ISODateString;
   findings: AuditFinding[];
-  status: 'planning' | 'in_progress' | 'completed' | 'follow_up';
+  status: "planning" | "in_progress" | "completed" | "follow_up";
 }
 
 export interface AuditFinding {
   id: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
   description: string;
   evidence: string[];
   recommendation: string;
-  status: 'open' | 'resolved' | 'accepted_risk';
+  status: "open" | "resolved" | "accepted_risk";
 }
 
 export interface ComplianceMetrics {
@@ -4612,9 +4627,9 @@ export interface ComplianceViolation {
   id: string;
   ruleId: string;
   description: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
   detectedAt: ISODateString;
-  status: 'open' | 'investigating' | 'resolved' | 'false_positive';
+  status: "open" | "investigating" | "resolved" | "false_positive";
   affectedAssets: string[];
 }
 
@@ -4624,7 +4639,7 @@ export interface ComplianceRemediation {
   action: string;
   assignedTo: string;
   dueDate: ISODateString;
-  status: 'planned' | 'in_progress' | 'completed' | 'cancelled';
+  status: "planned" | "in_progress" | "completed" | "cancelled";
   completedAt?: ISODateString;
 }
 
@@ -4652,21 +4667,21 @@ export enum RuleCategory {
   SECURITY = "security",
   COMPLIANCE = "compliance",
   QUALITY = "quality",
-  CUSTOM = "custom"
+  CUSTOM = "custom",
 }
 
 export enum RuleComplexity {
   SIMPLE = "simple",
   MODERATE = "moderate",
   COMPLEX = "complex",
-  ADVANCED = "advanced"
+  ADVANCED = "advanced",
 }
 
 export enum RuleStatus {
   ACTIVE = "active",
   INACTIVE = "inactive",
   DRAFT = "draft",
-  ARCHIVED = "archived"
+  ARCHIVED = "archived",
 }
 
 /**
@@ -4679,12 +4694,12 @@ export interface ScanRuleSet {
   category: RuleCategory;
   complexity: RuleComplexity;
   status: RuleStatus;
-  
+
   // Rules and execution
   rules: ScanRule[];
   executionOrder: string[];
   parallelExecution: boolean;
-  
+
   // Metadata and ownership
   tags: string[];
   version: string;
@@ -4693,15 +4708,15 @@ export interface ScanRuleSet {
   createdBy: string;
   ownerId: string;
   workspaceId: string;
-  
+
   // Scheduling and automation
   isScheduled: boolean;
   scheduleConfig?: RuleSchedule;
-  
+
   // Performance and optimization
-  optimizationLevel: 'basic' | 'standard' | 'aggressive';
+  optimizationLevel: "basic" | "standard" | "aggressive";
   resourceLimits?: ResourceLimits;
-  
+
   // Analytics and reporting
   executionHistory: RuleExecution[];
   metrics?: RuleMetrics;
@@ -4718,29 +4733,29 @@ export interface ScanRule {
   category: RuleCategory;
   complexity: RuleComplexity;
   status: RuleStatus;
-  
+
   // Rule definition
   pattern: string;
   conditions: RuleCondition[];
   actions: RuleAction[];
-  
+
   // Execution settings
   priority: number;
   timeout: number;
   retryAttempts: number;
-  
+
   // Dependencies
   dependencies: string[];
   conflictsWith: string[];
-  
+
   // Validation and testing
   testCases: RuleTestCase[];
   lastValidatedAt?: ISODateString;
-  
+
   // Performance
   averageExecutionTime: number;
   successRate: number;
-  
+
   // Metadata
   tags: string[];
   version: string;
@@ -4751,9 +4766,16 @@ export interface ScanRule {
 
 export interface RuleCondition {
   id: string;
-  type: 'field' | 'value' | 'pattern' | 'custom';
+  type: "field" | "value" | "pattern" | "custom";
   field?: string;
-  operator: 'equals' | 'contains' | 'matches' | 'greater_than' | 'less_than' | 'in' | 'not_in';
+  operator:
+    | "equals"
+    | "contains"
+    | "matches"
+    | "greater_than"
+    | "less_than"
+    | "in"
+    | "not_in";
   value: any;
   caseSensitive?: boolean;
   negate?: boolean;
@@ -4761,9 +4783,9 @@ export interface RuleCondition {
 
 export interface RuleAction {
   id: string;
-  type: 'flag' | 'mask' | 'encrypt' | 'quarantine' | 'alert' | 'log' | 'custom';
+  type: "flag" | "mask" | "encrypt" | "quarantine" | "alert" | "log" | "custom";
   parameters: Record<string, any>;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
   requiresApproval?: boolean;
 }
 
@@ -4773,7 +4795,7 @@ export interface RuleTestCase {
   input: any;
   expectedOutput: any;
   expectedActions: string[];
-  status: 'pass' | 'fail' | 'pending';
+  status: "pass" | "fail" | "pending";
   lastRun?: ISODateString;
 }
 
@@ -4785,28 +4807,28 @@ export interface RuleExecution {
   ruleSetId: string;
   ruleId?: string;
   status: OperationStatus;
-  
+
   // Execution details
   startedAt: ISODateString;
   completedAt?: ISODateString;
   duration?: number;
-  
+
   // Results
   recordsProcessed: number;
   matchesFound: number;
   actionsExecuted: number;
   errorsOccurred: number;
-  
+
   // Execution context
   dataSourceId: string;
   executedBy: string;
-  executionMode: 'manual' | 'scheduled' | 'triggered';
-  
+  executionMode: "manual" | "scheduled" | "triggered";
+
   // Results and logs
   results: RuleExecutionResult[];
   logs: ExecutionLog[];
   errors: ExecutionError[];
-  
+
   // Performance metrics
   resourceUsage: ResourceUsage;
   performanceMetrics: PerformanceMetrics;
@@ -4846,7 +4868,7 @@ export interface RuleValidation {
 
 export interface RuleTestResult {
   testCaseId: string;
-  status: 'pass' | 'fail' | 'error';
+  status: "pass" | "fail" | "error";
   actualOutput?: any;
   actualActions?: string[];
   message?: string;
@@ -4875,21 +4897,21 @@ export interface RuleMetrics {
  */
 export interface RuleSchedule {
   id: string;
-  frequency: 'once' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'cron';
+  frequency: "once" | "hourly" | "daily" | "weekly" | "monthly" | "cron";
   cronExpression?: string;
   startDate: ISODateString;
   endDate?: ISODateString;
   timezone: string;
   enabled: boolean;
-  
+
   // Execution conditions
   conditions: ScheduleCondition[];
-  
+
   // Notification settings
   notifyOnSuccess: boolean;
   notifyOnFailure: boolean;
   notificationChannels: string[];
-  
+
   // History
   lastExecution?: ISODateString;
   nextExecution?: ISODateString;
@@ -4897,7 +4919,7 @@ export interface RuleSchedule {
 }
 
 export interface ScheduleCondition {
-  type: 'data_available' | 'resource_available' | 'time_window' | 'custom';
+  type: "data_available" | "resource_available" | "time_window" | "custom";
   parameters: Record<string, any>;
 }
 
@@ -4918,7 +4940,7 @@ export interface RuleHistory {
   id: string;
   ruleId: string;
   version: string;
-  changeType: 'created' | 'updated' | 'deleted' | 'deployed' | 'rollback';
+  changeType: "created" | "updated" | "deleted" | "deployed" | "rollback";
   changes: RuleChange[];
   changedBy: string;
   changedAt: ISODateString;
@@ -4931,7 +4953,7 @@ export interface RuleChange {
   field: string;
   oldValue: any;
   newValue: any;
-  operation: 'add' | 'update' | 'remove';
+  operation: "add" | "update" | "remove";
 }
 
 /**
@@ -4944,8 +4966,8 @@ export interface RuleOptimization {
   optimizedConditions?: RuleCondition[];
   estimatedImprovement: number;
   recommendations: OptimizationRecommendation[];
-  implementationComplexity: 'low' | 'medium' | 'high';
-  riskLevel: 'low' | 'medium' | 'high';
+  implementationComplexity: "low" | "medium" | "high";
+  riskLevel: "low" | "medium" | "high";
   testResults?: RuleTestResult[];
 }
 
@@ -4958,23 +4980,23 @@ export interface RuleTemplate {
   description: string;
   category: RuleCategory;
   complexity: RuleComplexity;
-  
+
   // Template definition
   patternTemplate: string;
   conditionTemplates: RuleConditionTemplate[];
   actionTemplates: RuleActionTemplate[];
-  
+
   // Usage and popularity
   usageCount: number;
   rating: number;
-  
+
   // Metadata
   tags: string[];
   version: string;
   createdAt: ISODateString;
   updatedAt: ISODateString;
   createdBy: string;
-  
+
   // Customization options
   customizableFields: string[];
   requiredParameters: string[];
@@ -4982,7 +5004,7 @@ export interface RuleTemplate {
 }
 
 export interface RuleConditionTemplate {
-  type: 'field' | 'value' | 'pattern' | 'custom';
+  type: "field" | "value" | "pattern" | "custom";
   fieldTemplate?: string;
   operatorOptions: string[];
   valueTemplate?: string;
@@ -4991,7 +5013,7 @@ export interface RuleConditionTemplate {
 }
 
 export interface RuleActionTemplate {
-  type: 'flag' | 'mask' | 'encrypt' | 'quarantine' | 'alert' | 'log' | 'custom';
+  type: "flag" | "mask" | "encrypt" | "quarantine" | "alert" | "log" | "custom";
   parameterTemplates: Record<string, ParameterTemplate>;
   severityOptions: string[];
   description: string;
@@ -4999,7 +5021,7 @@ export interface RuleActionTemplate {
 }
 
 export interface ParameterTemplate {
-  type: 'string' | 'number' | 'boolean' | 'array' | 'object';
+  type: "string" | "number" | "boolean" | "array" | "object";
   defaultValue?: any;
   options?: any[];
   validation?: string;
@@ -5018,7 +5040,7 @@ export interface ScanRuleSetCreateRequest {
   rules?: Partial<ScanRule>[];
   tags?: string[];
   workspaceId?: string;
-  optimizationLevel?: 'basic' | 'standard' | 'aggressive';
+  optimizationLevel?: "basic" | "standard" | "aggressive";
   parallelExecution?: boolean;
 }
 
@@ -5030,7 +5052,7 @@ export interface ScanRuleSetUpdateRequest {
   status?: RuleStatus;
   rules?: Partial<ScanRule>[];
   tags?: string[];
-  optimizationLevel?: 'basic' | 'standard' | 'aggressive';
+  optimizationLevel?: "basic" | "standard" | "aggressive";
   parallelExecution?: boolean;
 }
 
@@ -5065,90 +5087,249 @@ export interface ScanRuleSetStats {
 // Re-export all types for easy importing
 export type {
   // Core system types
-  SystemHealth, GroupHealth, ServiceHealth, PerformanceMetrics, SystemAlert,
-  UserContext, WorkspaceState, NavigationContext, GroupConfiguration, 
-  Integration, SharedResource, CrossGroupWorkflow, SynchronizationStatus,
-  
+  SystemHealth,
+  GroupHealth,
+  ServiceHealth,
+  SystemAlert,
+  UserContext,
+  WorkspaceState,
+  NavigationContext,
+  GroupConfiguration,
+  Integration,
+  SharedResource,
+  CrossGroupWorkflow,
+  SynchronizationStatus,
+
   // Workspace types
-  WorkspaceConfiguration, WorkspaceMember, WorkspaceResource, WorkspaceSettings,
-  WorkspaceAnalytics, WorkspaceTemplate, ResourceType, ResourceLink, ResourceDependency,
-  
+  WorkspaceConfiguration,
+  WorkspaceMember,
+  WorkspaceResource,
+  WorkspaceSettings,
+  WorkspaceAnalytics,
+  WorkspaceTemplate,
+  ResourceType,
+  ResourceLink,
+  ResourceDependency,
+
   // Workflow types
-  WorkflowDefinition, WorkflowStep, WorkflowDependency, WorkflowExecution,
-  
+  WorkflowDefinition,
+  WorkflowStep,
+  WorkflowDependency,
+  WorkflowExecution,
+
   // Pipeline types - Enhanced
-  PipelineDefinition, PipelineStage, PipelineExecution, PipelineStageExecution, 
-  PipelineTemplate, PipelineOptimization,
-  
+  PipelineDefinition,
+  PipelineStage,
+  PipelineExecution,
+  PipelineStageExecution,
+  PipelineTemplate,
+  PipelineOptimization,
+
   // Pipeline legacy types
-  PipelineOperation, StageInput, StageOutput, StagePosition, PipelineConfiguration,
-  OptimizationConfiguration, OptimizationRule, SecurityConfiguration, EncryptionSettings,
-  AuthenticationSettings, AuthorizationSettings, AuditSettings, StageExecution,
-  OperationExecution, OperationMetrics, StageMetrics, PipelineResults, PipelineMetrics,
+  PipelineOperation,
+  StageInput,
+  StageOutput,
+  StagePosition,
+  PipelineConfiguration,
+  OptimizationConfiguration,
+  OptimizationRule,
+  SecurityConfiguration,
+  EncryptionSettings,
+  AuthenticationSettings,
+  AuthorizationSettings,
+  AuditSettings,
+  StageExecution,
+  OperationExecution,
+  OperationMetrics,
+  StageMetrics,
+  PipelineResults,
+  PipelineMetrics,
   QualityMetrics,
-  
+
   // AI types
-  AIConversation, AIMessage, AIRecommendation, AIInsight,
-  AIConversationType, AIRecommendationType, AIInsightType, AILearningType,
-  
+  AIConversation,
+  AIMessage,
+  AIRecommendation,
+  AIInsight,
+  AIConversationType,
+  AIRecommendationType,
+  AIInsightType,
+  AILearningType,
+
   // Activity types
-  ActivityRecord, AuditTrail, ActivityFilter, ActivityTimeRange,
-  
+  ActivityRecord,
+  AuditTrail,
+  ActivityFilter,
+  ActivityTimeRange,
+
   // Dashboard types
-  DashboardState, Widget, WidgetConfiguration,
-  
+  DashboardState,
+  Widget,
+  WidgetConfiguration,
+
   // Collaboration types
-  CollaborationState, CollaborationSession, CollaborationMember,
-  
+  CollaborationState,
+  CollaborationSession,
+  CollaborationMember,
+
   // Integration types
-  IntegrationConfiguration, IntegrationEndpoint, ExternalSystemConfig,
-  
+  IntegrationConfiguration,
+  IntegrationEndpoint,
+  ExternalSystemConfig,
+
   // User management types
-  UserProfile, UserSession, UserPermissions, RolePermissions, GroupPermissions,
-  SystemPermissions, UserPreferences, NotificationSettings,
-  
+  UserProfile,
+  UserSession,
+  UserPermissions,
+  RolePermissions,
+  GroupPermissions,
+  SystemPermissions,
+  UserPreferences,
+  NotificationSettings,
+
   // Common utility types
-  RetryPolicy, ErrorHandlingPolicy, MonitoringConfiguration, ResourceConfiguration,
-  ResourceUsage, LogLevel, TriggerType, ExecutionLog, ExecutionError,
-  
+  RetryPolicy,
+  ErrorHandlingPolicy,
+  MonitoringConfiguration,
+  ResourceConfiguration,
+  ResourceUsage,
+  LogLevel,
+  TriggerType,
+  ExecutionLog,
+  ExecutionError,
+
   // Data Source Management Types
-  DataSource, DataSourceType as DataSourceTypeEnum, DataSourceLocation, DataSourceStatus,
-  Environment, Criticality, DataClassification, ScanFrequency, CloudProvider,
-  ConnectionConfig, ValidationResult, SecurityPolicy, DataSourceTemplate,
-  EncryptionConfig, AuthenticationMethod, ConnectionPool, DataSourceMetrics,
-  DataSourceHealth, PerformanceMetrics, ConnectionTestResult, ConnectionDiagnostics,
-  TestConfiguration, ConnectionHealth, NetworkLatency, TestSuite, DiagnosticLog,
-  ConnectionOptimization, SecurityValidation, ConnectionReport, DataSourceCreateRequest,
-  DataSourceUpdateRequest, DataSourceFilters, DataSourceStats,
-  
+  DataSource,
+  DataSourceType as DataSourceTypeEnum,
+  DataSourceLocation,
+  DataSourceStatus,
+  Environment,
+  Criticality,
+  DataClassification,
+  ScanFrequency,
+  CloudProvider,
+  ConnectionConfig,
+  ValidationResult,
+  SecurityPolicy,
+  DataSourceTemplate,
+  EncryptionConfig,
+  AuthenticationMethod,
+  ConnectionPool,
+  DataSourceMetrics,
+  DataSourceHealth,
+  ConnectionTestResult,
+  ConnectionDiagnostics,
+  TestConfiguration,
+  ConnectionHealth,
+  NetworkLatency,
+  TestSuite,
+  DiagnosticLog,
+  ConnectionOptimization,
+  SecurityValidation,
+  ConnectionReport,
+  DataSourceCreateRequest,
+  DataSourceUpdateRequest,
+  DataSourceFilters,
+  DataSourceStats,
+
   // Scan Rule Sets Types
-  ScanRuleSet, ScanRule, RuleCategory, RuleComplexity, RuleTemplate, RuleExecution,
-  RuleValidation, RuleMetrics, RuleSchedule, RuleHistory, RuleOptimization,
-  
-  // Classifications Types  
-  Classification, ClassificationRule, ClassificationLevel, ClassificationTemplate,
-  ClassificationResult, ClassificationMetrics, ClassificationHistory, ClassificationConfig,
-  
+  ScanRuleSet,
+  ScanRule,
+  RuleCategory,
+  RuleComplexity,
+  RuleTemplate,
+  RuleExecution,
+  RuleValidation,
+  RuleMetrics,
+  RuleSchedule,
+  RuleHistory,
+  RuleOptimization,
+
+  // Classifications Types
+  Classification,
+  ClassificationRule,
+  ClassificationLevel,
+  ClassificationTemplate,
+  ClassificationResult,
+  ClassificationMetrics,
+  ClassificationHistory,
+  ClassificationConfig,
+
   // Compliance Rule Types
-  ComplianceRule, CompliancePolicy, ComplianceStatus, ComplianceReport, ComplianceAudit,
-  ComplianceMetrics, ComplianceViolation, ComplianceRemediation, ComplianceHistory,
-  
+  ComplianceRule,
+  CompliancePolicy,
+  ComplianceStatus,
+  ComplianceReport,
+  ComplianceAudit,
+  ComplianceMetrics,
+  ComplianceViolation,
+  ComplianceRemediation,
+  ComplianceHistory,
+
   // Advanced Catalog Types - Enhanced
-  CatalogAsset, CatalogAssetType, AssetStatus, CatalogMetadata, LineageGraph, DataLineage,
-  AssetRelationship, AssetMetrics, CatalogSearch, AssetClassification, AssetGovernance,
-  CatalogConfiguration, AssetProfile, DataQuality, SchemaEvolution, AssetUsage,
-  CatalogTags, BusinessGlossary, DataDictionary, AssetSteward, CatalogCreateRequest,
-  CatalogUpdateRequest, CatalogFilters, CatalogStats, AssetDiscovery, SemanticSearch,
-  
+  CatalogAsset,
+  CatalogAssetType,
+  AssetStatus,
+  CatalogMetadata,
+  LineageGraph,
+  DataLineage,
+  AssetRelationship,
+  AssetMetrics,
+  CatalogSearch,
+  AssetClassification,
+  AssetGovernance,
+  CatalogConfiguration,
+  AssetProfile,
+  DataQuality,
+  SchemaEvolution,
+  AssetUsage,
+  CatalogTags,
+  BusinessGlossary,
+  DataDictionary,
+  AssetSteward,
+  CatalogCreateRequest,
+  CatalogUpdateRequest,
+  CatalogFilters,
+  CatalogStats,
+  AssetDiscovery,
+  SemanticSearch,
+
   // Scan Logic Types - Enhanced
-  ScanEngine, ScanEngineType, ScanEngineStatus, ScanLogic, ScanExecution, ScanConfiguration,
-  ScanSchedule, ScanResult, ScanMetrics, ScanHistory, ScanOptimization, ScanDiagnostics,
-  ScanTemplate, ScanPattern, ScanPolicy, ScanCreateRequest, ScanUpdateRequest, ScanFilters,
-  ScanStats, ScanPerformance, ScanAlert, ScanRecommendation,
-  
+  ScanEngine,
+  ScanEngineType,
+  ScanEngineStatus,
+  ScanLogic,
+  ScanExecution,
+  ScanConfiguration,
+  ScanSchedule,
+  ScanResult,
+  ScanMetrics,
+  ScanHistory,
+  ScanOptimization,
+  ScanDiagnostics,
+  ScanTemplate,
+  ScanPattern,
+  ScanPolicy,
+  ScanCreateRequest,
+  ScanUpdateRequest,
+  ScanFilters,
+  ScanStats,
+  ScanPerformance,
+  ScanAlert,
+  ScanRecommendation,
+
   // RBAC System Types
-  Role, Permission, User, UserRole, RolePermission, AccessControl, SecurityGroup,
-  PermissionSet, AuthenticationProvider, SessionManagement, AuditLog
+  Role,
+  Permission,
+  User,
+  UserRole,
+  RolePermission,
+  AccessControl,
+  SecurityGroup,
+  PermissionSet,
+  AuthenticationProvider,
+  SessionManagement,
+  AuditLog,
 };
 
 // ============================================================================
@@ -5156,584 +5337,584 @@ export type {
 // ============================================================================
 
 export enum CatalogAssetType {
-  TABLE = 'table',
-  VIEW = 'view',
-  SCHEMA = 'schema',
-  DATABASE = 'database',
-  COLUMN = 'column',
-  FILE = 'file',
-  DATASET = 'dataset',
-  MODEL = 'model',
-  REPORT = 'report',
-  DASHBOARD = 'dashboard',
-  API = 'api',
-  STREAM = 'stream',
-  TOPIC = 'topic',
-  QUEUE = 'queue'
+  TABLE = "table",
+  VIEW = "view",
+  SCHEMA = "schema",
+  DATABASE = "database",
+  COLUMN = "column",
+  FILE = "file",
+  DATASET = "dataset",
+  MODEL = "model",
+  REPORT = "report",
+  DASHBOARD = "dashboard",
+  API = "api",
+  STREAM = "stream",
+  TOPIC = "topic",
+  QUEUE = "queue",
 }
 
 export enum AssetStatus {
-  ACTIVE = 'active',
-  INACTIVE = 'inactive',
-  DEPRECATED = 'deprecated',
-  DRAFT = 'draft',
-  ARCHIVED = 'archived',
-  PENDING = 'pending'
+  ACTIVE = "active",
+  INACTIVE = "inactive",
+  DEPRECATED = "deprecated",
+  DRAFT = "draft",
+  ARCHIVED = "archived",
+  PENDING = "pending",
 }
 
 export interface CatalogAsset {
-  id?: string
-  name: string
-  type: CatalogAssetType
-  status: AssetStatus
-  description?: string
-  owner?: string
-  steward?: AssetSteward
-  tags?: CatalogTags[]
-  metadata?: CatalogMetadata
-  schema?: any
-  location?: string
-  source?: string
-  createdAt?: string
-  updatedAt?: string
-  lastAccessed?: string
-  version?: string
-  lineage?: DataLineage
-  quality?: DataQuality
-  usage?: AssetUsage
-  classification?: AssetClassification
-  governance?: AssetGovernance
-  profile?: AssetProfile
-  relationships?: AssetRelationship[]
-  metrics?: AssetMetrics
-  businessTerms?: BusinessGlossary[]
-  dataElements?: DataDictionary[]
+  id?: string;
+  name: string;
+  type: CatalogAssetType;
+  status: AssetStatus;
+  description?: string;
+  owner?: string;
+  steward?: AssetSteward;
+  tags?: CatalogTags[];
+  metadata?: CatalogMetadata;
+  schema?: any;
+  location?: string;
+  source?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  lastAccessed?: string;
+  version?: string;
+  lineage?: DataLineage;
+  quality?: DataQuality;
+  usage?: AssetUsage;
+  classification?: AssetClassification;
+  governance?: AssetGovernance;
+  profile?: AssetProfile;
+  relationships?: AssetRelationship[];
+  metrics?: AssetMetrics;
+  businessTerms?: BusinessGlossary[];
+  dataElements?: DataDictionary[];
 }
 
 export interface AssetSteward {
-  userId: string
-  name: string
-  email?: string
-  role: string
-  responsibilities?: string[]
-  assignedAt: string
+  userId: string;
+  name: string;
+  email?: string;
+  role: string;
+  responsibilities?: string[];
+  assignedAt: string;
 }
 
 export interface CatalogTags {
-  key: string
-  value: string
-  category?: string
-  source?: 'user' | 'system' | 'imported'
-  confidence?: number
+  key: string;
+  value: string;
+  category?: string;
+  source?: "user" | "system" | "imported";
+  confidence?: number;
 }
 
 export interface DataLineage {
-  upstream?: LineageNode[]
-  downstream?: LineageNode[]
-  graph?: LineageGraph
-  impact?: ImpactAnalysis
-  dependencies?: AssetDependency[]
+  upstream?: LineageNode[];
+  downstream?: LineageNode[];
+  graph?: LineageGraph;
+  impact?: ImpactAnalysis;
+  dependencies?: AssetDependency[];
 }
 
 export interface LineageNode {
-  assetId: string
-  assetName: string
-  assetType: CatalogAssetType
-  relationship: 'parent' | 'child' | 'sibling' | 'reference'
-  transformationType?: string
-  confidence?: number
+  assetId: string;
+  assetName: string;
+  assetType: CatalogAssetType;
+  relationship: "parent" | "child" | "sibling" | "reference";
+  transformationType?: string;
+  confidence?: number;
 }
 
 export interface LineageGraph {
-  nodes: LineageGraphNode[]
-  edges: LineageGraphEdge[]
-  metadata?: any
+  nodes: LineageGraphNode[];
+  edges: LineageGraphEdge[];
+  metadata?: any;
 }
 
 export interface LineageGraphNode {
-  id: string
-  label: string
-  type: CatalogAssetType
-  properties?: Record<string, any>
+  id: string;
+  label: string;
+  type: CatalogAssetType;
+  properties?: Record<string, any>;
 }
 
 export interface LineageGraphEdge {
-  source: string
-  target: string
-  type: string
-  properties?: Record<string, any>
+  source: string;
+  target: string;
+  type: string;
+  properties?: Record<string, any>;
 }
 
 export interface ImpactAnalysis {
-  upstreamImpact: number
-  downstreamImpact: number
-  criticalPath: string[]
-  riskScore: number
-  affectedAssets: string[]
+  upstreamImpact: number;
+  downstreamImpact: number;
+  criticalPath: string[];
+  riskScore: number;
+  affectedAssets: string[];
 }
 
 export interface AssetDependency {
-  dependentAssetId: string
-  dependencyType: 'hard' | 'soft' | 'reference'
-  criticality: 'high' | 'medium' | 'low'
+  dependentAssetId: string;
+  dependencyType: "hard" | "soft" | "reference";
+  criticality: "high" | "medium" | "low";
 }
 
 export interface DataQuality {
-  overallScore?: number
-  dimensions?: QualityDimension[]
-  issues?: QualityIssue[]
-  rules?: QualityRule[]
-  history?: QualityHistory[]
+  overallScore?: number;
+  dimensions?: QualityDimension[];
+  issues?: QualityIssue[];
+  rules?: QualityRule[];
+  history?: QualityHistory[];
 }
 
 export interface QualityDimension {
-  name: string
-  score: number
-  weight: number
-  description?: string
-  measurements?: QualityMeasurement[]
+  name: string;
+  score: number;
+  weight: number;
+  description?: string;
+  measurements?: QualityMeasurement[];
 }
 
 export interface QualityMeasurement {
-  metric: string
-  value: number
-  threshold: number
-  status: 'pass' | 'fail' | 'warning'
+  metric: string;
+  value: number;
+  threshold: number;
+  status: "pass" | "fail" | "warning";
 }
 
 export interface QualityIssue {
-  id: string
-  type: string
-  severity: 'low' | 'medium' | 'high' | 'critical'
-  description: string
-  affectedRows?: number
-  affectedColumns?: string[]
-  detectedAt: string
-  resolved?: boolean
-  resolvedAt?: string
+  id: string;
+  type: string;
+  severity: "low" | "medium" | "high" | "critical";
+  description: string;
+  affectedRows?: number;
+  affectedColumns?: string[];
+  detectedAt: string;
+  resolved?: boolean;
+  resolvedAt?: string;
 }
 
 export interface QualityRule {
-  id: string
-  name: string
-  description?: string
-  condition: string
-  threshold: number
-  enabled: boolean
-  lastRun?: string
-  status?: 'pass' | 'fail' | 'error'
+  id: string;
+  name: string;
+  description?: string;
+  condition: string;
+  threshold: number;
+  enabled: boolean;
+  lastRun?: string;
+  status?: "pass" | "fail" | "error";
 }
 
 export interface QualityHistory {
-  timestamp: string
-  score: number
-  dimensions: Record<string, number>
-  issues: number
+  timestamp: string;
+  score: number;
+  dimensions: Record<string, number>;
+  issues: number;
 }
 
 export interface AssetUsage {
-  totalQueries?: number
-  uniqueUsers?: number
-  avgQueriesPerDay?: number
-  peakUsageTime?: string
-  usageTrend?: 'increasing' | 'decreasing' | 'stable'
-  topConsumers?: AssetConsumer[]
-  usageByTime?: TimeSeriesData[]
+  totalQueries?: number;
+  uniqueUsers?: number;
+  avgQueriesPerDay?: number;
+  peakUsageTime?: string;
+  usageTrend?: "increasing" | "decreasing" | "stable";
+  topConsumers?: AssetConsumer[];
+  usageByTime?: TimeSeriesData[];
 }
 
 export interface AssetConsumer {
-  userId: string
-  userName?: string
-  queryCount: number
-  lastAccess: string
-  accessType: string[]
+  userId: string;
+  userName?: string;
+  queryCount: number;
+  lastAccess: string;
+  accessType: string[];
 }
 
 export interface TimeSeriesData {
-  timestamp: string
-  value: number
-  metadata?: Record<string, any>
+  timestamp: string;
+  value: number;
+  metadata?: Record<string, any>;
 }
 
 export interface AssetProfile {
-  summary?: string
-  sampleData?: any[]
-  columnProfiles?: ColumnProfile[]
-  distributionAnalysis?: DistributionAnalysis
-  anomalies?: DataAnomaly[]
-  recommendations?: string[]
+  summary?: string;
+  sampleData?: any[];
+  columnProfiles?: ColumnProfile[];
+  distributionAnalysis?: DistributionAnalysis;
+  anomalies?: DataAnomaly[];
+  recommendations?: string[];
 }
 
 export interface ColumnProfile {
-  name: string
-  dataType: string
-  nullable: boolean
-  unique: boolean
-  distinctCount?: number
-  nullCount?: number
-  minValue?: any
-  maxValue?: any
-  meanValue?: any
-  medianValue?: any
-  mode?: any
-  standardDeviation?: number
-  patterns?: string[]
-  examples?: any[]
+  name: string;
+  dataType: string;
+  nullable: boolean;
+  unique: boolean;
+  distinctCount?: number;
+  nullCount?: number;
+  minValue?: any;
+  maxValue?: any;
+  meanValue?: any;
+  medianValue?: any;
+  mode?: any;
+  standardDeviation?: number;
+  patterns?: string[];
+  examples?: any[];
 }
 
 export interface DistributionAnalysis {
-  histogram?: HistogramBin[]
-  percentiles?: Record<string, number>
-  outliers?: any[]
-  trends?: TrendAnalysis[]
+  histogram?: HistogramBin[];
+  percentiles?: Record<string, number>;
+  outliers?: any[];
+  trends?: TrendAnalysis[];
 }
 
 export interface HistogramBin {
-  range: [number, number]
-  count: number
-  percentage: number
+  range: [number, number];
+  count: number;
+  percentage: number;
 }
 
 export interface TrendAnalysis {
-  metric: string
-  trend: 'increasing' | 'decreasing' | 'stable'
-  confidence: number
-  timeRange: string
+  metric: string;
+  trend: "increasing" | "decreasing" | "stable";
+  confidence: number;
+  timeRange: string;
 }
 
 export interface DataAnomaly {
-  type: 'outlier' | 'missing' | 'duplicate' | 'format' | 'range'
-  description: string
-  severity: 'low' | 'medium' | 'high'
-  count: number
-  examples?: any[]
-  suggestions?: string[]
+  type: "outlier" | "missing" | "duplicate" | "format" | "range";
+  description: string;
+  severity: "low" | "medium" | "high";
+  count: number;
+  examples?: any[];
+  suggestions?: string[];
 }
 
 export interface BusinessGlossary {
-  termId: string
-  term: string
-  definition: string
-  category?: string
-  synonyms?: string[]
-  relatedTerms?: string[]
-  owner?: string
-  status: 'draft' | 'approved' | 'deprecated'
+  termId: string;
+  term: string;
+  definition: string;
+  category?: string;
+  synonyms?: string[];
+  relatedTerms?: string[];
+  owner?: string;
+  status: "draft" | "approved" | "deprecated";
 }
 
 export interface DataDictionary {
-  elementId: string
-  name: string
-  dataType: string
-  description?: string
-  businessRules?: string[]
-  validValues?: string[]
-  format?: string
-  constraints?: string[]
+  elementId: string;
+  name: string;
+  dataType: string;
+  description?: string;
+  businessRules?: string[];
+  validValues?: string[];
+  format?: string;
+  constraints?: string[];
 }
 
 export interface CatalogSearch {
-  query: string
-  filters?: CatalogFilters
-  facets?: SearchFacet[]
-  sort?: SearchSort
-  pagination?: SearchPagination
-  suggestions?: string[]
-  results?: SearchResult[]
+  query: string;
+  filters?: CatalogFilters;
+  facets?: SearchFacet[];
+  sort?: SearchSort;
+  pagination?: SearchPagination;
+  suggestions?: string[];
+  results?: SearchResult[];
 }
 
 export interface SearchFacet {
-  field: string
-  values: FacetValue[]
+  field: string;
+  values: FacetValue[];
 }
 
 export interface FacetValue {
-  value: string
-  count: number
-  selected?: boolean
+  value: string;
+  count: number;
+  selected?: boolean;
 }
 
 export interface SearchSort {
-  field: string
-  order: 'asc' | 'desc'
+  field: string;
+  order: "asc" | "desc";
 }
 
 export interface SearchPagination {
-  page: number
-  size: number
-  total?: number
+  page: number;
+  size: number;
+  total?: number;
 }
 
 export interface SearchResult {
-  asset: CatalogAsset
-  score: number
-  highlights?: Record<string, string[]>
-  explanation?: string
+  asset: CatalogAsset;
+  score: number;
+  highlights?: Record<string, string[]>;
+  explanation?: string;
 }
 
 export interface AssetDiscovery {
-  discoveredAssets?: DiscoveredAsset[]
-  patterns?: DiscoveryPattern[]
-  recommendations?: DiscoveryRecommendation[]
-  statistics?: DiscoveryStatistics
+  discoveredAssets?: DiscoveredAsset[];
+  patterns?: DiscoveryPattern[];
+  recommendations?: DiscoveryRecommendation[];
+  statistics?: DiscoveryStatistics;
 }
 
 export interface DiscoveredAsset {
-  source: string
-  path: string
-  type: CatalogAssetType
-  confidence: number
-  metadata?: any
-  suggestedTags?: string[]
-  similarAssets?: string[]
+  source: string;
+  path: string;
+  type: CatalogAssetType;
+  confidence: number;
+  metadata?: any;
+  suggestedTags?: string[];
+  similarAssets?: string[];
 }
 
 export interface DiscoveryPattern {
-  pattern: string
-  frequency: number
-  examples: string[]
-  confidence: number
+  pattern: string;
+  frequency: number;
+  examples: string[];
+  confidence: number;
 }
 
 export interface DiscoveryRecommendation {
-  type: 'tag' | 'classification' | 'owner' | 'description'
-  suggestion: string
-  confidence: number
-  reasoning: string
+  type: "tag" | "classification" | "owner" | "description";
+  suggestion: string;
+  confidence: number;
+  reasoning: string;
 }
 
 export interface DiscoveryStatistics {
-  totalAssets: number
-  newAssets: number
-  modifiedAssets: number
-  missingMetadata: number
-  qualityIssues: number
+  totalAssets: number;
+  newAssets: number;
+  modifiedAssets: number;
+  missingMetadata: number;
+  qualityIssues: number;
 }
 
 export interface SemanticSearch {
-  semanticQuery?: string
-  conceptualMatches?: ConceptualMatch[]
-  contextualResults?: ContextualResult[]
-  knowledgeGraph?: KnowledgeGraph
+  semanticQuery?: string;
+  conceptualMatches?: ConceptualMatch[];
+  contextualResults?: ContextualResult[];
+  knowledgeGraph?: KnowledgeGraph;
 }
 
 export interface ConceptualMatch {
-  concept: string
-  similarity: number
-  relatedConcepts: string[]
-  assets: string[]
+  concept: string;
+  similarity: number;
+  relatedConcepts: string[];
+  assets: string[];
 }
 
 export interface ContextualResult {
-  assetId: string
-  contextScore: number
-  relevanceFactors: string[]
-  semanticSimilarity: number
+  assetId: string;
+  contextScore: number;
+  relevanceFactors: string[];
+  semanticSimilarity: number;
 }
 
 export interface KnowledgeGraph {
-  entities: KnowledgeEntity[]
-  relationships: KnowledgeRelationship[]
-  concepts: KnowledgeConcept[]
+  entities: KnowledgeEntity[];
+  relationships: KnowledgeRelationship[];
+  concepts: KnowledgeConcept[];
 }
 
 export interface KnowledgeEntity {
-  id: string
-  type: string
-  label: string
-  properties: Record<string, any>
+  id: string;
+  type: string;
+  label: string;
+  properties: Record<string, any>;
 }
 
 export interface KnowledgeRelationship {
-  source: string
-  target: string
-  type: string
-  weight: number
+  source: string;
+  target: string;
+  type: string;
+  weight: number;
 }
 
 export interface KnowledgeConcept {
-  id: string
-  name: string
-  description?: string
-  synonyms: string[]
-  category: string
+  id: string;
+  name: string;
+  description?: string;
+  synonyms: string[];
+  category: string;
 }
 
 export interface CatalogConfiguration {
-  indexing?: IndexingConfig
-  discovery?: DiscoveryConfig
-  quality?: QualityConfig
-  governance?: GovernanceConfig
-  search?: SearchConfig
-  lineage?: LineageConfig
+  indexing?: IndexingConfig;
+  discovery?: DiscoveryConfig;
+  quality?: QualityConfig;
+  governance?: GovernanceConfig;
+  search?: SearchConfig;
+  lineage?: LineageConfig;
 }
 
 export interface IndexingConfig {
-  enabled: boolean
-  frequency: string
-  batchSize: number
-  parallelism: number
-  includedSources: string[]
-  excludedPatterns: string[]
+  enabled: boolean;
+  frequency: string;
+  batchSize: number;
+  parallelism: number;
+  includedSources: string[];
+  excludedPatterns: string[];
 }
 
 export interface DiscoveryConfig {
-  autoDiscovery: boolean
-  discoveryRules: DiscoveryRule[]
-  confidenceThreshold: number
-  notificationSettings: any
+  autoDiscovery: boolean;
+  discoveryRules: DiscoveryRule[];
+  confidenceThreshold: number;
+  notificationSettings: any;
 }
 
 export interface DiscoveryRule {
-  id: string
-  name: string
-  pattern: string
-  action: string
-  enabled: boolean
+  id: string;
+  name: string;
+  pattern: string;
+  action: string;
+  enabled: boolean;
 }
 
 export interface QualityConfig {
-  enabledRules: string[]
-  thresholds: Record<string, number>
-  alerting: AlertingConfig
-  reporting: ReportingConfig
+  enabledRules: string[];
+  thresholds: Record<string, number>;
+  alerting: AlertingConfig;
+  reporting: ReportingConfig;
 }
 
 export interface AlertingConfig {
-  enabled: boolean
-  channels: string[]
-  severity: string[]
-  frequency: string
+  enabled: boolean;
+  channels: string[];
+  severity: string[];
+  frequency: string;
 }
 
 export interface ReportingConfig {
-  enabled: boolean
-  schedule: string
-  recipients: string[]
-  format: string[]
+  enabled: boolean;
+  schedule: string;
+  recipients: string[];
+  format: string[];
 }
 
 export interface GovernanceConfig {
-  policies: string[]
-  approvalWorkflows: WorkflowConfig[]
-  certificationLevels: string[]
-  lifecycleStages: string[]
+  policies: string[];
+  approvalWorkflows: WorkflowConfig[];
+  certificationLevels: string[];
+  lifecycleStages: string[];
 }
 
 export interface WorkflowConfig {
-  id: string
-  name: string
-  steps: WorkflowStep[]
-  triggers: string[]
+  id: string;
+  name: string;
+  steps: WorkflowStep[];
+  triggers: string[];
 }
 
 export interface SearchConfig {
-  indexFields: string[]
-  facetFields: string[]
-  boostFields: Record<string, number>
-  semanticSearch: boolean
+  indexFields: string[];
+  facetFields: string[];
+  boostFields: Record<string, number>;
+  semanticSearch: boolean;
 }
 
 export interface LineageConfig {
-  autoDetection: boolean
-  trackingLevel: 'column' | 'table' | 'schema'
-  retentionDays: number
-  computeImpact: boolean
+  autoDetection: boolean;
+  trackingLevel: "column" | "table" | "schema";
+  retentionDays: number;
+  computeImpact: boolean;
 }
 
 // Request/Response types
 export interface CatalogCreateRequest {
-  name: string
-  type: CatalogAssetType
-  description?: string
-  metadata?: CatalogMetadata
-  tags?: CatalogTags[]
-  owner?: string
-  source?: string
-  location?: string
-  schema?: any
+  name: string;
+  type: CatalogAssetType;
+  description?: string;
+  metadata?: CatalogMetadata;
+  tags?: CatalogTags[];
+  owner?: string;
+  source?: string;
+  location?: string;
+  schema?: any;
 }
 
 export interface CatalogUpdateRequest {
-  name?: string
-  description?: string
-  metadata?: Partial<CatalogMetadata>
-  tags?: CatalogTags[]
-  owner?: string
-  status?: AssetStatus
-  governance?: Partial<AssetGovernance>
+  name?: string;
+  description?: string;
+  metadata?: Partial<CatalogMetadata>;
+  tags?: CatalogTags[];
+  owner?: string;
+  status?: AssetStatus;
+  governance?: Partial<AssetGovernance>;
 }
 
 export interface CatalogFilters {
-  types?: CatalogAssetType[]
-  statuses?: AssetStatus[]
-  owners?: string[]
-  tags?: string[]
-  sources?: string[]
-  dateRange?: DateRange
-  qualityScore?: NumberRange
-  usageLevel?: 'high' | 'medium' | 'low'
+  types?: CatalogAssetType[];
+  statuses?: AssetStatus[];
+  owners?: string[];
+  tags?: string[];
+  sources?: string[];
+  dateRange?: DateRange;
+  qualityScore?: NumberRange;
+  usageLevel?: "high" | "medium" | "low";
 }
 
 export interface NumberRange {
-  min?: number
-  max?: number
+  min?: number;
+  max?: number;
 }
 
 export interface DateRange {
-  start: Date
-  end: Date
+  start: Date;
+  end: Date;
 }
 
 export interface CatalogStats {
-  totalAssets?: number
-  assetsByType?: Record<CatalogAssetType, number>
-  assetsByStatus?: Record<AssetStatus, number>
-  qualityDistribution?: QualityDistribution
-  usageStats?: UsageStatistics
-  governanceStats?: GovernanceStatistics
-  recentActivity?: ActivitySummary[]
+  totalAssets?: number;
+  assetsByType?: Record<CatalogAssetType, number>;
+  assetsByStatus?: Record<AssetStatus, number>;
+  qualityDistribution?: QualityDistribution;
+  usageStats?: UsageStatistics;
+  governanceStats?: GovernanceStatistics;
+  recentActivity?: ActivitySummary[];
 }
 
 export interface QualityDistribution {
-  excellent: number  // 90-100
-  good: number       // 70-89
-  fair: number       // 50-69
-  poor: number       // 0-49
+  excellent: number; // 90-100
+  good: number; // 70-89
+  fair: number; // 50-69
+  poor: number; // 0-49
 }
 
 export interface UsageStatistics {
-  totalQueries: number
-  activeUsers: number
-  topAssets: AssetUsageSummary[]
-  usageTrends: TrendData[]
+  totalQueries: number;
+  activeUsers: number;
+  topAssets: AssetUsageSummary[];
+  usageTrends: TrendData[];
 }
 
 export interface AssetUsageSummary {
-  assetId: string
-  assetName: string
-  queryCount: number
-  userCount: number
+  assetId: string;
+  assetName: string;
+  queryCount: number;
+  userCount: number;
 }
 
 export interface TrendData {
-  period: string
-  value: number
-  change: number
+  period: string;
+  value: number;
+  change: number;
 }
 
 export interface GovernanceStatistics {
-  governedAssets: number
-  ungoverned: number
-  pendingApproval: number
-  complianceRate: number
+  governedAssets: number;
+  ungoverned: number;
+  pendingApproval: number;
+  complianceRate: number;
 }
 
 export interface ActivitySummary {
-  type: string
-  count: number
-  timestamp: string
-  assets: string[]
+  type: string;
+  count: number;
+  timestamp: string;
+  assets: string[];
 }
 
 // ============================================================================
@@ -5741,527 +5922,502 @@ export interface ActivitySummary {
 // ============================================================================
 
 export enum ScanEngineType {
-  PATTERN_BASED = 'pattern_based',
-  ML_BASED = 'ml_based',
-  RULE_BASED = 'rule_based',
-  HYBRID = 'hybrid',
-  CUSTOM = 'custom'
+  PATTERN_BASED = "pattern_based",
+  ML_BASED = "ml_based",
+  RULE_BASED = "rule_based",
+  HYBRID = "hybrid",
+  CUSTOM = "custom",
 }
 
 export enum ScanEngineStatus {
-  IDLE = 'idle',
-  RUNNING = 'running',
-  PAUSED = 'paused',
-  STOPPED = 'stopped',
-  ERROR = 'error',
-  MAINTENANCE = 'maintenance'
+  IDLE = "idle",
+  RUNNING = "running",
+  PAUSED = "paused",
+  STOPPED = "stopped",
+  ERROR = "error",
+  MAINTENANCE = "maintenance",
 }
 
 export interface ScanEngine {
-  id?: string
-  name: string
-  type: ScanEngineType
-  status: ScanEngineStatus
-  version?: string
-  description?: string
-  capabilities?: string[]
-  configuration?: ScanConfiguration
-  performance?: ScanPerformance
-  createdAt?: string
-  updatedAt?: string
-  lastUsed?: string
+  id?: string;
+  name: string;
+  type: ScanEngineType;
+  status: ScanEngineStatus;
+  version?: string;
+  description?: string;
+  capabilities?: string[];
+  configuration?: ScanConfiguration;
+  performance?: ScanPerformance;
+  createdAt?: string;
+  updatedAt?: string;
+  lastUsed?: string;
 }
 
 export interface ScanLogic {
-  id?: string
-  name: string
-  description?: string
-  engine: string
-  engineType: ScanEngineType
-  patterns?: ScanPattern[]
-  policies?: ScanPolicy[]
-  template?: ScanTemplate
-  configuration?: ScanConfiguration
-  schedule?: ScanSchedule
-  metrics?: ScanMetrics
-  history?: ScanHistory[]
-  optimization?: ScanOptimization
-  diagnostics?: ScanDiagnostics
-  status?: ScanEngineStatus
-  createdAt?: string
-  updatedAt?: string
-  createdBy?: string
-  tags?: string[]
+  id?: string;
+  name: string;
+  description?: string;
+  engine: string;
+  engineType: ScanEngineType;
+  patterns?: ScanPattern[];
+  policies?: ScanPolicy[];
+  template?: ScanTemplate;
+  configuration?: ScanConfiguration;
+  schedule?: ScanSchedule;
+  metrics?: ScanMetrics;
+  history?: ScanHistory[];
+  optimization?: ScanOptimization;
+  diagnostics?: ScanDiagnostics;
+  status?: ScanEngineStatus;
+  createdAt?: string;
+  updatedAt?: string;
+  createdBy?: string;
+  tags?: string[];
 }
 
 export interface ScanPattern {
-  id?: string
-  name: string
-  type: 'regex' | 'sql' | 'semantic' | 'ml' | 'custom'
-  pattern: string
-  description?: string
-  confidence?: number
-  sensitivity?: 'low' | 'medium' | 'high'
-  category?: string
-  examples?: string[]
-  exclusions?: string[]
-  metadata?: Record<string, any>
+  id?: string;
+  name: string;
+  type: "regex" | "sql" | "semantic" | "ml" | "custom";
+  pattern: string;
+  description?: string;
+  confidence?: number;
+  sensitivity?: "low" | "medium" | "high";
+  category?: string;
+  examples?: string[];
+  exclusions?: string[];
+  metadata?: Record<string, any>;
 }
 
 export interface ScanPolicy {
-  id?: string
-  name: string
-  description?: string
-  rules: ScanRule[]
-  scope?: ScanScope
-  priority?: number
-  enforcement?: 'strict' | 'advisory' | 'disabled'
-  notifications?: NotificationConfig[]
-  exceptions?: PolicyException[]
+  id?: string;
+  name: string;
+  description?: string;
+  rules: ScanRule[];
+  scope?: ScanScope;
+  priority?: number;
+  enforcement?: "strict" | "advisory" | "disabled";
+  notifications?: NotificationConfig[];
+  exceptions?: PolicyException[];
 }
 
 export interface ScanRule {
-  id?: string
-  name: string
-  condition: string
-  action: 'alert' | 'block' | 'log' | 'quarantine'
-  severity: 'low' | 'medium' | 'high' | 'critical'
-  enabled: boolean
-  parameters?: Record<string, any>
+  id?: string;
+  name: string;
+  condition: string;
+  action: "alert" | "block" | "log" | "quarantine";
+  severity: "low" | "medium" | "high" | "critical";
+  enabled: boolean;
+  parameters?: Record<string, any>;
 }
 
 export interface ScanScope {
-  dataSources?: string[]
-  assetTypes?: string[]
-  locations?: string[]
-  excludePatterns?: string[]
-  includePatterns?: string[]
-  maxDepth?: number
+  dataSources?: string[];
+  assetTypes?: string[];
+  locations?: string[];
+  excludePatterns?: string[];
+  includePatterns?: string[];
+  maxDepth?: number;
 }
 
 export interface NotificationConfig {
-  type: 'email' | 'webhook' | 'slack' | 'teams'
-  recipients: string[]
-  template?: string
-  conditions?: string[]
+  type: "email" | "webhook" | "slack" | "teams";
+  recipients: string[];
+  template?: string;
+  conditions?: string[];
 }
 
 export interface PolicyException {
-  id?: string
-  pattern: string
-  reason: string
-  approver: string
-  validUntil?: string
-  metadata?: Record<string, any>
+  id?: string;
+  pattern: string;
+  reason: string;
+  approver: string;
+  validUntil?: string;
+  metadata?: Record<string, any>;
 }
 
 export interface ScanTemplate {
-  id?: string
-  name: string
-  description?: string
-  category?: string
-  patterns: ScanPattern[]
-  policies: ScanPolicy[]
-  configuration: ScanConfiguration
-  metadata?: TemplateMetadata
+  id?: string;
+  name: string;
+  description?: string;
+  category?: string;
+  patterns: ScanPattern[];
+  policies: ScanPolicy[];
+  configuration: ScanConfiguration;
+  metadata?: TemplateMetadata;
 }
 
 export interface TemplateMetadata {
-  author?: string
-  version?: string
-  tags?: string[]
-  compliance?: string[]
-  industry?: string[]
-  useCase?: string
+  author?: string;
+  version?: string;
+  tags?: string[];
+  compliance?: string[];
+  industry?: string[];
+  useCase?: string;
 }
 
 export interface ScanConfiguration {
-  concurrency?: number
-  timeout?: number
-  retries?: number
-  batchSize?: number
-  samplingRate?: number
-  enableCaching?: boolean
-  cacheExpiry?: number
-  enableProfiling?: boolean
-  enableLineage?: boolean
-  outputFormat?: 'json' | 'csv' | 'xml'
-  compression?: boolean
-  encryption?: boolean
-  customSettings?: Record<string, any>
+  concurrency?: number;
+  timeout?: number;
+  retries?: number;
+  batchSize?: number;
+  samplingRate?: number;
+  enableCaching?: boolean;
+  cacheExpiry?: number;
+  enableProfiling?: boolean;
+  enableLineage?: boolean;
+  outputFormat?: "json" | "csv" | "xml";
+  compression?: boolean;
+  encryption?: boolean;
+  customSettings?: Record<string, any>;
 }
 
 export interface ScanExecution {
-  id?: string
-  scanLogicId: string
-  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled'
-  startTime?: string
-  endTime?: string
-  duration?: number
-  progress?: number
-  processedItems?: number
-  totalItems?: number
-  results?: ScanResult[]
-  errors?: ScanError[]
-  warnings?: ScanWarning[]
-  metrics?: ExecutionMetrics
-  logs?: string[]
+  id?: string;
+  scanLogicId: string;
+  status: "pending" | "running" | "completed" | "failed" | "cancelled";
+  startTime?: string;
+  endTime?: string;
+  duration?: number;
+  progress?: number;
+  processedItems?: number;
+  totalItems?: number;
+  results?: ScanResult[];
+  errors?: ScanError[];
+  warnings?: ScanWarning[];
+  metrics?: ExecutionMetrics;
+  logs?: string[];
 }
 
 export interface ScanResult {
-  id?: string
-  executionId: string
-  assetId?: string
-  assetName?: string
-  assetType?: string
-  location?: string
-  findings: Finding[]
-  score?: number
-  riskLevel?: 'low' | 'medium' | 'high' | 'critical'
-  recommendations?: ScanRecommendation[]
-  metadata?: Record<string, any>
-  timestamp: string
+  id?: string;
+  executionId: string;
+  assetId?: string;
+  assetName?: string;
+  assetType?: string;
+  location?: string;
+  findings: Finding[];
+  score?: number;
+  riskLevel?: "low" | "medium" | "high" | "critical";
+  recommendations?: ScanRecommendation[];
+  metadata?: Record<string, any>;
+  timestamp: string;
 }
 
 export interface Finding {
-  id?: string
-  type: string
-  severity: 'low' | 'medium' | 'high' | 'critical'
-  description: string
-  pattern?: string
-  confidence: number
-  location?: FindingLocation
-  evidence?: Evidence[]
-  remediation?: RemediationAction[]
+  id?: string;
+  type: string;
+  severity: "low" | "medium" | "high" | "critical";
+  description: string;
+  pattern?: string;
+  confidence: number;
+  location?: FindingLocation;
+  evidence?: Evidence[];
+  remediation?: RemediationAction[];
 }
 
 export interface FindingLocation {
-  source?: string
-  line?: number
-  column?: number
-  offset?: number
-  context?: string
+  source?: string;
+  line?: number;
+  column?: number;
+  offset?: number;
+  context?: string;
 }
 
 export interface Evidence {
-  type: 'sample' | 'pattern' | 'metadata' | 'statistical'
-  value: any
-  description?: string
-  confidence?: number
+  type: "sample" | "pattern" | "metadata" | "statistical";
+  value: any;
+  description?: string;
+  confidence?: number;
 }
 
 export interface RemediationAction {
-  type: 'mask' | 'encrypt' | 'delete' | 'quarantine' | 'classify'
-  description: string
-  automated?: boolean
-  priority?: number
-  estimatedEffort?: string
+  type: "mask" | "encrypt" | "delete" | "quarantine" | "classify";
+  description: string;
+  automated?: boolean;
+  priority?: number;
+  estimatedEffort?: string;
 }
 
 export interface ScanError {
-  code: string
-  message: string
-  details?: string
-  timestamp: string
-  recoverable?: boolean
+  code: string;
+  message: string;
+  details?: string;
+  timestamp: string;
+  recoverable?: boolean;
 }
 
 export interface ScanWarning {
-  code: string
-  message: string
-  details?: string
-  timestamp: string
+  code: string;
+  message: string;
+  details?: string;
+  timestamp: string;
 }
 
 export interface ExecutionMetrics {
-  throughput?: number
-  accuracy?: number
-  precision?: number
-  recall?: number
-  falsePositives?: number
-  falseNegatives?: number
-  processingTime?: number
-  memoryUsage?: number
-  cpuUsage?: number
+  throughput?: number;
+  accuracy?: number;
+  precision?: number;
+  recall?: number;
+  falsePositives?: number;
+  falseNegatives?: number;
+  processingTime?: number;
+  memoryUsage?: number;
+  cpuUsage?: number;
 }
 
 export interface ScanMetrics {
-  totalExecutions?: number
-  successfulExecutions?: number
-  failedExecutions?: number
-  averageDuration?: number
-  averageAccuracy?: number
-  totalFindings?: number
-  findingsByType?: Record<string, number>
-  findingsBySeverity?: Record<string, number>
-  trends?: MetricTrend[]
+  totalExecutions?: number;
+  successfulExecutions?: number;
+  failedExecutions?: number;
+  averageDuration?: number;
+  averageAccuracy?: number;
+  totalFindings?: number;
+  findingsByType?: Record<string, number>;
+  findingsBySeverity?: Record<string, number>;
+  trends?: MetricTrend[];
 }
 
 export interface MetricTrend {
-  metric: string
-  period: string
-  value: number
-  change: number
-  trend: 'increasing' | 'decreasing' | 'stable'
+  metric: string;
+  period: string;
+  value: number;
+  change: number;
+  trend: "increasing" | "decreasing" | "stable";
 }
 
 export interface ScanHistory {
-  executionId: string
-  timestamp: string
-  status: string
-  duration: number
-  findings: number
-  errors: number
-  metrics?: ExecutionMetrics
-  summary?: string
+  executionId: string;
+  timestamp: string;
+  status: string;
+  duration: number;
+  findings: number;
+  errors: number;
+  metrics?: ExecutionMetrics;
+  summary?: string;
 }
 
 export interface ScanSchedule {
-  id?: string
-  name?: string
-  cron?: string
-  frequency?: 'hourly' | 'daily' | 'weekly' | 'monthly'
-  enabled?: boolean
-  nextRun?: string
-  lastRun?: string
-  timezone?: string
-  parameters?: Record<string, any>
+  id?: string;
+  name?: string;
+  cron?: string;
+  frequency?: "hourly" | "daily" | "weekly" | "monthly";
+  enabled?: boolean;
+  nextRun?: string;
+  lastRun?: string;
+  timezone?: string;
+  parameters?: Record<string, any>;
 }
 
 export interface ScanOptimization {
-  recommendations?: OptimizationRecommendation[]
-  performance?: PerformanceOptimization
-  cost?: CostOptimization
-  accuracy?: AccuracyOptimization
+  recommendations?: OptimizationRecommendation[];
+  performance?: PerformanceOptimization;
+  cost?: CostOptimization;
+  accuracy?: AccuracyOptimization;
 }
 
 export interface OptimizationRecommendation {
-  type: 'performance' | 'accuracy' | 'cost' | 'configuration'
-  description: string
-  impact: 'low' | 'medium' | 'high'
-  effort: 'low' | 'medium' | 'high'
-  estimatedImprovement?: number
-  implementation?: string[]
+  type: "performance" | "accuracy" | "cost" | "configuration";
+  description: string;
+  impact: "low" | "medium" | "high";
+  effort: "low" | "medium" | "high";
+  estimatedImprovement?: number;
+  implementation?: string[];
 }
 
 export interface PerformanceOptimization {
-  currentThroughput?: number
-  potentialThroughput?: number
-  bottlenecks?: string[]
-  suggestions?: string[]
+  currentThroughput?: number;
+  potentialThroughput?: number;
+  bottlenecks?: string[];
+  suggestions?: string[];
 }
 
 export interface CostOptimization {
-  currentCost?: number
-  potentialSavings?: number
-  costDrivers?: string[]
-  suggestions?: string[]
+  currentCost?: number;
+  potentialSavings?: number;
+  costDrivers?: string[];
+  suggestions?: string[];
 }
 
 export interface AccuracyOptimization {
-  currentAccuracy?: number
-  potentialAccuracy?: number
-  improvementAreas?: string[]
-  suggestions?: string[]
+  currentAccuracy?: number;
+  potentialAccuracy?: number;
+  improvementAreas?: string[];
+  suggestions?: string[];
 }
 
 export interface ScanDiagnostics {
-  health?: HealthStatus
-  performance?: PerformanceStatus
-  errors?: ErrorAnalysis
-  warnings?: WarningAnalysis
-  recommendations?: DiagnosticRecommendation[]
+  health?: HealthStatus;
+  performance?: PerformanceStatus;
+  errors?: ErrorAnalysis;
+  warnings?: WarningAnalysis;
+  recommendations?: DiagnosticRecommendation[];
 }
 
 export interface HealthStatus {
-  overall: 'healthy' | 'degraded' | 'unhealthy'
-  components?: ComponentHealth[]
-  lastCheck?: string
+  overall: "healthy" | "degraded" | "unhealthy";
+  components?: ComponentHealth[];
+  lastCheck?: string;
 }
 
 export interface ComponentHealth {
-  name: string
-  status: 'healthy' | 'degraded' | 'unhealthy'
-  message?: string
-  metrics?: Record<string, number>
+  name: string;
+  status: "healthy" | "degraded" | "unhealthy";
+  message?: string;
+  metrics?: Record<string, number>;
 }
 
 export interface PerformanceStatus {
-  throughput: number
-  latency: number
-  errorRate: number
-  resourceUtilization: ResourceUtilization
+  throughput: number;
+  latency: number;
+  errorRate: number;
+  resourceUtilization: ResourceUtilization;
 }
 
 export interface ResourceUtilization {
-  cpu: number
-  memory: number
-  disk: number
-  network: number
+  cpu: number;
+  memory: number;
+  disk: number;
+  network: number;
 }
 
 export interface ErrorAnalysis {
-  totalErrors: number
-  errorsByType: Record<string, number>
-  errorTrends: TrendData[]
-  topErrors: ErrorSummary[]
+  totalErrors: number;
+  errorsByType: Record<string, number>;
+  errorTrends: TrendData[];
+  topErrors: ErrorSummary[];
 }
 
 export interface ErrorSummary {
-  error: string
-  count: number
-  lastOccurrence: string
-  impact: 'low' | 'medium' | 'high'
+  error: string;
+  count: number;
+  lastOccurrence: string;
+  impact: "low" | "medium" | "high";
 }
 
 export interface WarningAnalysis {
-  totalWarnings: number
-  warningsByType: Record<string, number>
-  warningTrends: TrendData[]
-  topWarnings: WarningSummary[]
+  totalWarnings: number;
+  warningsByType: Record<string, number>;
+  warningTrends: TrendData[];
+  topWarnings: WarningSummary[];
 }
 
 export interface WarningSummary {
-  warning: string
-  count: number
-  lastOccurrence: string
-  impact: 'low' | 'medium' | 'high'
+  warning: string;
+  count: number;
+  lastOccurrence: string;
+  impact: "low" | "medium" | "high";
 }
 
 export interface DiagnosticRecommendation {
-  type: 'configuration' | 'resource' | 'pattern' | 'policy'
-  priority: 'low' | 'medium' | 'high' | 'critical'
-  description: string
-  action: string
-  expectedOutcome?: string
+  type: "configuration" | "resource" | "pattern" | "policy";
+  priority: "low" | "medium" | "high" | "critical";
+  description: string;
+  action: string;
+  expectedOutcome?: string;
 }
 
 export interface ScanPerformance {
-  throughput?: number
-  latency?: number
-  accuracy?: number
-  reliability?: number
-  scalability?: number
-  benchmarks?: PerformanceBenchmark[]
+  throughput?: number;
+  latency?: number;
+  accuracy?: number;
+  reliability?: number;
+  scalability?: number;
+  benchmarks?: PerformanceBenchmark[];
 }
 
 export interface PerformanceBenchmark {
-  name: string
-  value: number
-  unit: string
-  baseline?: number
-  target?: number
-  timestamp: string
+  name: string;
+  value: number;
+  unit: string;
+  baseline?: number;
+  target?: number;
+  timestamp: string;
 }
 
 export interface ScanAlert {
-  id?: string
-  type: 'finding' | 'error' | 'performance' | 'system'
-  severity: 'low' | 'medium' | 'high' | 'critical'
-  title: string
-  description: string
-  source?: string
-  timestamp: string
-  acknowledged?: boolean
-  acknowledgedBy?: string
-  acknowledgedAt?: string
-  resolved?: boolean
-  resolvedBy?: string
-  resolvedAt?: string
-  metadata?: Record<string, any>
+  id?: string;
+  type: "finding" | "error" | "performance" | "system";
+  severity: "low" | "medium" | "high" | "critical";
+  title: string;
+  description: string;
+  source?: string;
+  timestamp: string;
+  acknowledged?: boolean;
+  acknowledgedBy?: string;
+  acknowledgedAt?: string;
+  resolved?: boolean;
+  resolvedBy?: string;
+  resolvedAt?: string;
+  metadata?: Record<string, any>;
 }
 
 export interface ScanRecommendation {
-  id?: string
-  type: 'pattern' | 'policy' | 'configuration' | 'optimization'
-  category?: string
-  title: string
-  description: string
-  priority: 'low' | 'medium' | 'high'
-  confidence: number
-  implementation?: ImplementationGuide
-  benefits?: string[]
-  risks?: string[]
-  metadata?: Record<string, any>
+  id?: string;
+  type: "pattern" | "policy" | "configuration" | "optimization";
+  category?: string;
+  title: string;
+  description: string;
+  priority: "low" | "medium" | "high";
+  confidence: number;
+  implementation?: ImplementationGuide;
+  benefits?: string[];
+  risks?: string[];
+  metadata?: Record<string, any>;
 }
 
 export interface ImplementationGuide {
-  steps: string[]
-  estimatedTime?: string
-  requiredSkills?: string[]
-  prerequisites?: string[]
-  resources?: string[]
+  steps: string[];
+  estimatedTime?: string;
+  requiredSkills?: string[];
+  prerequisites?: string[];
+  resources?: string[];
 }
 
 // Request/Response types
 export interface ScanCreateRequest {
-  name: string
-  description?: string
-  engineType: ScanEngineType
-  patterns?: ScanPattern[]
-  policies?: ScanPolicy[]
-  configuration?: ScanConfiguration
-  schedule?: ScanSchedule
-  tags?: string[]
+  name: string;
+  description?: string;
+  engineType: ScanEngineType;
+  patterns?: ScanPattern[];
+  policies?: ScanPolicy[];
+  configuration?: ScanConfiguration;
+  schedule?: ScanSchedule;
+  tags?: string[];
 }
 
 export interface ScanUpdateRequest {
-  name?: string
-  description?: string
-  patterns?: ScanPattern[]
-  policies?: ScanPolicy[]
-  configuration?: Partial<ScanConfiguration>
-  schedule?: Partial<ScanSchedule>
-  tags?: string[]
-  status?: ScanEngineStatus
+  name?: string;
+  description?: string;
+  patterns?: ScanPattern[];
+  policies?: ScanPolicy[];
+  configuration?: Partial<ScanConfiguration>;
+  schedule?: Partial<ScanSchedule>;
+  tags?: string[];
+  status?: ScanEngineStatus;
 }
 
 export interface ScanFilters {
-  engineTypes?: ScanEngineType[]
-  statuses?: ScanEngineStatus[]
-  tags?: string[]
-  dateRange?: DateRange
-  performance?: NumberRange
-  accuracy?: NumberRange
-  createdBy?: string[]
+  engineTypes?: ScanEngineType[];
+  statuses?: ScanEngineStatus[];
+  tags?: string[];
+  dateRange?: DateRange;
+  performance?: NumberRange;
+  accuracy?: NumberRange;
+  createdBy?: string[];
 }
 
 export interface ScanStats {
-  totalEngines?: number
-  enginesByType?: Record<ScanEngineType, number>
-  enginesByStatus?: Record<ScanEngineStatus, number>
-  totalExecutions?: number
-  successRate?: number
-  averageAccuracy?: number
-  totalFindings?: number
-  findingsByType?: Record<string, number>
-  performanceMetrics?: PerformanceMetrics
-  recentActivity?: ActivitySummary[]
+  totalEngines?: number;
+  enginesByType?: Record<ScanEngineType, number>;
+  enginesByStatus?: Record<ScanEngineStatus, number>;
+  totalExecutions?: number;
+  successRate?: number;
+  averageAccuracy?: number;
+  totalFindings?: number;
+  findingsByType?: Record<string, number>;
+  performanceMetrics?: PerformanceMetrics;
+  recentActivity?: ActivitySummary[];
 }
 
-// Export enums separately
-export {
-  // Core system enums
-  SystemStatus, OperationStatus, ViewMode, LayoutMode, IntegrationStatus,
-  
-  // Pipeline enums - Enhanced
-  PipelineStatus, AccessLevel, PipelineStageType, ComplexityLevel, 
-  PipelineOptimizationType, OptimizationStatus,
-  
-  // Pipeline legacy enums
-  StageType,
-  
-  // User management enums
-  ThemePreference, DigestFrequency, ProfileVisibility,
-  
-  // Activity enums
-  ActivityType, ActivitySeverity, ResourceScope, CollaborationType,
-  NotificationType, IntegrationType, AlertLevel, ActivityCategory,
-  GroupType, AnalyticsMetric,
-  
-  // Advanced Catalog enums
-  CatalogAssetType, AssetStatus,
-  
-  // Scan Logic enums
-  ScanEngineType, ScanEngineStatus
-};
+// Note: All enums are already exported via their individual declarations above

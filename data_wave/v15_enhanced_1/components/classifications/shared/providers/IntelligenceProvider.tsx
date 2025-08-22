@@ -565,7 +565,7 @@ function intelligenceReducer(state: IntelligenceState, action: IntelligenceActio
 const IntelligenceContext = createContext<IntelligenceContextValue | undefined>(undefined);
 
 // Mock API functions (replace with actual API calls)
-const mockApiCall = async <T>(data: T, delay = 1000): Promise<T> => {
+const mockApiCall = async <T,>(data: T, delay = 1000): Promise<T> => {
   await new Promise(resolve => setTimeout(resolve, delay));
   return data;
 };

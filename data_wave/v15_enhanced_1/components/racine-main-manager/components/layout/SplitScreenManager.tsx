@@ -2347,7 +2347,6 @@ export const usePane = (paneId: UUID) => {
 // =============================================================================
 
 export default SplitScreenManager;
-export { SplitScreenContext, useSplitScreenContext };
 export type {
   SplitScreenManagerProps,
   SplitScreenState,

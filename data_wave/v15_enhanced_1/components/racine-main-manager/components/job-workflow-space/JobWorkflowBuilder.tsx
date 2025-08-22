@@ -1294,11 +1294,12 @@ const NodePalette: React.FC<NodePaletteProps> = ({
               <Card
                 key={nodeType.id}
                 className="cursor-pointer hover:shadow-md transition-shadow p-2"
-                onClick={() => {
-                  // Generate random position for demo
+                onClick={async () => {
+                  // Generate optimized position
+                  const optimal = await calculateOptimalNodePosition(existingNodes, canvasSize);
                   const position = {
-                    x: await calculateOptimalNodePosition(existingNodes, canvasSize).x || 150,
-                    y: await calculateOptimalNodePosition(existingNodes, canvasSize).y || 150
+                    x: optimal.x || 150,
+                    y: optimal.y || 150
                   };
                   onNodeCreate(nodeType, position);
                 }}

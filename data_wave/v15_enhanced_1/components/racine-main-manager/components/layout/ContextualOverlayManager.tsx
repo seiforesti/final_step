@@ -256,7 +256,7 @@ const ContextualOverlayManager: React.FC<ContextualOverlayManagerProps> = ({
     shareOverlay,
     syncOverlayChanges,
     getOverlayCollaborators
-  } = useCollaboration(userContext.id, workspaceContext.id, 'overlay');
+  } = useCollaboration(userContext?.id || 'default', workspaceContext?.id || 'default', 'overlay');
 
   const {
     aiState,

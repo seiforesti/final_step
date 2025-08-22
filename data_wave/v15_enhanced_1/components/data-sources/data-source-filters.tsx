@@ -61,7 +61,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { DatePickerWithRange } from "@/components/ui/date-range-picker"
+import { DatePickerWithRange } from "@/components/ui/date-picker"
 import { Slider } from "@/components/ui/slider"
 
 import { DataSource } from "./types"

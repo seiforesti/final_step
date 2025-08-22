@@ -154,7 +154,7 @@ import {
 // Racine Services
 import { activityTrackingAPI } from '../../services/activity-tracking-apis';
 import { racineOrchestrationAPI } from '../../services/racine-orchestration-apis';
-import { performanceMonitoringAPI } from '../../services/performance-monitoring-apis';
+import { performanceUtils } from '../../utils/performance-utils';
 
 // Racine Utilities
 import { navigationUtils } from '../../utils/navigation-utils';
@@ -2083,16 +2083,6 @@ export const useQuickNavigationSearch = () => {
 // ============================================================================
 
 export default QuickNavigationProvider;
-export { 
-  QuickNavigationProvider, 
-  useQuickNavigation,
-  QuickNavigationPanel,
-  QuickNavigationTrigger,
-  QuickNavigationSettings,
-  useQuickNavigationShortcuts,
-  useQuickNavigationBookmarks,
-  useQuickNavigationSearch
-};
 export type { 
   NavigationItem, 
   QuickAction, 

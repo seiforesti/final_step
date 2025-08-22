@@ -99,9 +99,11 @@ const ENDPOINTS = {
  */
 export class ScanPerformanceAPIService {
   private apiClient: ApiClient;
+  private baseUrl: string;
 
   constructor() {
     this.apiClient = new ApiClient();
+    this.baseUrl = '/api/v1/scan-performance';
   }
 
   private getAuthToken(): string {
@@ -727,5 +729,5 @@ export class ScanPerformanceAPIService {
 }
 
 // Export singleton instance
-export const scanPerformanceAPI = new ScanPerformanceAPI();
+export const scanPerformanceAPI = new ScanPerformanceAPIService();
 export default scanPerformanceAPI;

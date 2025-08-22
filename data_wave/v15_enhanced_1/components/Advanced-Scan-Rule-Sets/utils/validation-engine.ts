@@ -1237,10 +1237,6 @@ export class ValidationUtils {
 
 // Export main validation engine instance
 export const validationEngine = ValidationEngineFactory.getInstance();
+export default validationEngine;
 
-// Export all classes and utilities
-export {
-  ValidationEngine,
-  ValidationEngineFactory,
-  ValidationUtils
-};
+// Named classes are already exported above via `export class ...`

@@ -34,7 +34,7 @@ import { CatalogAIService } from '../../Advanced-Catalog/services/catalog-ai.ser
 import { DataProfilingService } from '../../Advanced-Catalog/services/data-profiling.service';
 import { CatalogAnalyticsService } from '../../Advanced-Catalog/services/catalog-analytics.service';
 import { CatalogRecommendationService } from '../../Advanced-Catalog/services/catalog-recommendation.service';
-import { CollaborationService } from '../../Advanced-Catalog/services/collaboration.service';
+import { collaborationService } from '../../Advanced-Catalog/services/collaboration.service';
 
 // Base API configuration
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1';

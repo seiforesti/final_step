@@ -1576,7 +1576,7 @@ const useKeyboardNavigation = () => {
 // EXPORT DEFAULT
 // ============================================================================
 
-export default RacineMainManagerSPA;
+// Export moved to end of file
 
 // ============================================================================
 // ADVANCED ANALYTICS ENGINE
@@ -7486,7 +7486,6 @@ const EnhancedRacineMainManagerSPA: React.FC = () => {
 // ============================================================================
 
 // Export the enhanced component as default
-export { EnhancedRacineMainManagerSPA as RacineMainManagerSPA };
 export default EnhancedRacineMainManagerSPA;
 
 // ============================================================================

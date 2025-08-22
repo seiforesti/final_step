@@ -67,7 +67,7 @@ import {
   Download, Upload, ExternalLink, Link, Share2, Copy, Save,
   RefreshCw, ChevronDown, ChevronRight, ChevronLeft, ChevronUp,
   ArrowRight, ArrowLeft, ArrowUp, ArrowDown, Maximize, Minimize,
-  Grid, List, Layout, Map, Layers, Network, Database, Table,
+  Grid, List, Layout, Map, Layers, Network, Database, Table as TableIcon,
   FileText, File, Folder, Tag, Hash, Code, Terminal, Monitor,
   Smartphone, Tablet, Laptop, Server, Cloud, HardDrive, Cpu,
   Memory, Gauge, Signal, Wifi, Bluetooth, Power, Battery
@@ -786,7 +786,7 @@ export default function ReviewWorkflowEngine({
   const [showInstanceDialog, setShowInstanceDialog] = useState(false);
   const [showWorkflowDesigner, setShowWorkflowDesigner] = useState(false);
   const [showBulkActions, setShowBulkActions] = useState(false);
-  const [selectedInstances, setSelectedInstances] = new Set<string>());
+  const [selectedInstances, setSelectedInstances] = useState<Set<string>>(new Set());
   const [viewMode, setViewMode] = useState<'list' | 'grid' | 'kanban' | 'timeline'>('list');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterPriority, setFilterPriority] = useState<string>('all');

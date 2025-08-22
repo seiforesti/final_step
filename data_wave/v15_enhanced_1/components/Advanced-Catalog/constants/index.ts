@@ -39,6 +39,38 @@ export const ASSET_TYPES = {
 export type AssetType = keyof typeof ASSET_TYPES;
 
 /**
+ * Asset statuses
+ */
+export const ASSET_STATUSES = {
+  ACTIVE: 'ACTIVE',
+  INACTIVE: 'INACTIVE',
+  DEPRECATED: 'DEPRECATED',
+  ARCHIVED: 'ARCHIVED',
+  DRAFT: 'DRAFT',
+  PUBLISHED: 'PUBLISHED',
+  UNDER_REVIEW: 'UNDER_REVIEW',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED',
+  PENDING: 'PENDING'
+} as const;
+
+export type AssetStatus = keyof typeof ASSET_STATUSES;
+
+/**
+ * Sensitivity levels
+ */
+export const SENSITIVITY_LEVELS = {
+  PUBLIC: 'PUBLIC',
+  INTERNAL: 'INTERNAL',
+  CONFIDENTIAL: 'CONFIDENTIAL',
+  RESTRICTED: 'RESTRICTED',
+  HIGHLY_RESTRICTED: 'HIGHLY_RESTRICTED',
+  CLASSIFIED: 'CLASSIFIED'
+} as const;
+
+export type SensitivityLevel = keyof typeof SENSITIVITY_LEVELS;
+
+/**
  * Data source types
  */
 export const DATA_SOURCE_TYPES = {
@@ -143,6 +175,98 @@ export const TIME_RANGES = {
 } as const;
 
 export type TimeRangeType = keyof typeof TIME_RANGES;
+
+/**
+ * Quality thresholds for data quality assessment
+ */
+export const QUALITY_THRESHOLDS = {
+  EXCELLENT: 0.9,
+  GOOD: 0.8,
+  FAIR: 0.7,
+  POOR: 0.6,
+  CRITICAL: 0.5
+} as const;
+
+export type QualityThreshold = keyof typeof QUALITY_THRESHOLDS;
+
+/**
+ * Search operators for advanced filtering
+ */
+export const SEARCH_OPERATORS = {
+  EQUALS: 'EQUALS',
+  NOT_EQUALS: 'NOT_EQUALS',
+  CONTAINS: 'CONTAINS',
+  NOT_CONTAINS: 'NOT_CONTAINS',
+  STARTS_WITH: 'STARTS_WITH',
+  ENDS_WITH: 'ENDS_WITH',
+  GREATER_THAN: 'GREATER_THAN',
+  LESS_THAN: 'LESS_THAN',
+  BETWEEN: 'BETWEEN',
+  IN: 'IN',
+  NOT_IN: 'NOT_IN',
+  IS_NULL: 'IS_NULL',
+  IS_NOT_NULL: 'IS_NOT_NULL',
+  REGEX: 'REGEX',
+  SEMANTIC_SIMILAR: 'SEMANTIC_SIMILAR',
+  SEMANTIC_RELATED: 'SEMANTIC_RELATED'
+} as const;
+
+export type SearchOperator = keyof typeof SEARCH_OPERATORS;
+
+/**
+ * Sort options for catalog items
+ */
+export const SORT_OPTIONS = {
+  NAME_ASC: 'NAME_ASC',
+  NAME_DESC: 'NAME_DESC',
+  CREATED_DATE_ASC: 'CREATED_DATE_ASC',
+  CREATED_DATE_DESC: 'CREATED_DATE_DESC',
+  MODIFIED_DATE_ASC: 'MODIFIED_DATE_ASC',
+  MODIFIED_DATE_DESC: 'MODIFIED_DATE_DESC',
+  QUALITY_SCORE_ASC: 'QUALITY_SCORE_ASC',
+  QUALITY_SCORE_DESC: 'QUALITY_SCORE_DESC',
+  USAGE_FREQUENCY_ASC: 'USAGE_FREQUENCY_ASC',
+  USAGE_FREQUENCY_DESC: 'USAGE_FREQUENCY_DESC',
+  SIZE_ASC: 'SIZE_ASC',
+  SIZE_DESC: 'SIZE_DESC'
+} as const;
+
+export type SortOption = keyof typeof SORT_OPTIONS;
+
+/**
+ * View modes for catalog display
+ */
+export const VIEW_MODES = {
+  GRID: 'GRID',
+  LIST: 'LIST',
+  TABLE: 'TABLE',
+  KANBAN: 'KANBAN',
+  TIMELINE: 'TIMELINE',
+  GRAPH: 'GRAPH',
+  MAP: 'MAP',
+  TREE: 'TREE'
+} as const;
+
+export type ViewMode = keyof typeof VIEW_MODES;
+
+/**
+ * Filter categories for advanced filtering
+ */
+export const FILTER_CATEGORIES = {
+  ASSET_TYPE: 'ASSET_TYPE',
+  STATUS: 'STATUS',
+  CLASSIFICATION: 'CLASSIFICATION',
+  QUALITY: 'QUALITY',
+  OWNERSHIP: 'OWNERSHIP',
+  USAGE: 'USAGE',
+  TECHNICAL: 'TECHNICAL',
+  BUSINESS: 'BUSINESS',
+  TEMPORAL: 'TEMPORAL',
+  SPATIAL: 'SPATIAL',
+  SEMANTIC: 'SEMANTIC'
+} as const;
+
+export type FilterCategory = keyof typeof FILTER_CATEGORIES;
 
 /**
  * Notification types

@@ -201,20 +201,20 @@ import {
 } from 'lucide-react';
 
 // Import hooks and services
-import { usePipelineManager } from '../../../hooks/usePipelineManager';
-import { useWorkspaceManagement } from '../../../hooks/useWorkspaceManagement';
-import { useUserManagement } from '../../../hooks/useUserManagement';
-import { useAIAssistant } from '../../../hooks/useAIAssistant';
-import { useCrossGroupIntegration } from '../../../hooks/useCrossGroupIntegration';
-import { useActivityTracking } from '../../../hooks/useActivityTracking';
-import { useJobWorkflow } from '../../../hooks/useJobWorkflow';
-import { useAdvancedCatalog } from '../../../hooks/useAdvancedCatalog';
-import { useDataSources } from '../../../hooks/useDataSources';
-import { useScanRuleSets } from '../../../hooks/useScanRuleSets';
-import { useClassifications } from '../../../hooks/useClassifications';
-import { useComplianceRule } from '../../../hooks/useComplianceRule';
-import { useScanLogic } from '../../../hooks/useScanLogic';
-import { useRBAC } from '../../../hooks/useRBAC';
+import { usePipelineManager } from '../../../../hooks/usePipelineManager';
+import { useWorkspaceManagement } from '../../../../hooks/useWorkspaceManagement';
+import { useUserManagement } from '../../../../hooks/useUserManagement';
+import { useAIAssistant } from '../../../../hooks/useAIAssistant';
+import { useCrossGroupIntegration } from '../../../../hooks/useCrossGroupIntegration';
+import { useActivityTracking } from '../../../../hooks/useActivityTracking';
+import { useJobWorkflow } from '../../../../hooks/useJobWorkflow';
+import { useAdvancedCatalog } from '../../../../hooks/useAdvancedCatalog';
+import { useDataSources } from '../../../../hooks/useDataSources';
+import { useScanRuleSets } from '../../../../hooks/useScanRuleSets';
+import { useClassifications } from '../../../../hooks/useClassifications';
+import { useComplianceRules as useComplianceRule } from '../../../../hooks/useComplianceRules';
+import { useScanLogic } from '../../../../hooks/useScanLogic';
+import { useRBACSystem as useRBAC } from '../../../../hooks/useRBACSystem';
 
 // Types
 interface PipelineStage {

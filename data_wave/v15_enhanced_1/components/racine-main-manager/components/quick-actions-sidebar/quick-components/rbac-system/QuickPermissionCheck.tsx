@@ -39,12 +39,12 @@ import {
   ChevronDown, ChevronRight, MoreHorizontal, ExternalLink
 } from 'lucide-react';
 
-import { useRBAC } from '../../../hooks/useRBAC';
-import { useWorkspaceManagement } from '../../../hooks/useWorkspaceManagement';
-import { useUserManagement } from '../../../hooks/useUserManagement';
-import { useAIAssistant } from '../../../hooks/useAIAssistant';
-import { useCrossGroupIntegration } from '../../../hooks/useCrossGroupIntegration';
-import { useActivityTracking } from '../../../hooks/useActivityTracking';
+import { useRBACSystem as useRBAC } from '../../../../hooks/useRBACSystem';
+import { useWorkspaceManagement } from '../../../../hooks/useWorkspaceManagement';
+import { useUserManagement } from '../../../../hooks/useUserManagement';
+import { useAIAssistant } from '../../../../hooks/useAIAssistant';
+import { useCrossGroupIntegration } from '../../../../hooks/useCrossGroupIntegration';
+import { useActivityTracking } from '../../../../hooks/useActivityTracking';
 
 interface Permission {
   id: string;
@@ -343,7 +343,8 @@ const QuickPermissionCheck: React.FC<QuickPermissionCheckProps> = ({
     );
   };
 
-  const renderCheckTab = () => (
+  const renderCheckTab = () => {
+    return (
     <div className="space-y-6">
       {/* Mode Toggle */}
       <div className="flex items-center justify-between">
@@ -604,7 +605,7 @@ const QuickPermissionCheck: React.FC<QuickPermissionCheckProps> = ({
         ) : (
           <Shield className="h-4 w-4 mr-2" />
         )}
-        {isChecking ? 'Checking...' : bulkMode ? `Check ${selectedUsers.length × selectedResources.length} Permissions` : 'Check Permission'}
+        {isChecking ? 'Checking...' : bulkMode ? `Check ${selectedUsers.length * selectedResources.length} Permissions` : 'Check Permission'}
       </Button>
 
       {/* Single Check Result */}
@@ -708,7 +709,8 @@ const QuickPermissionCheck: React.FC<QuickPermissionCheckProps> = ({
         </Card>
       )}
     </div>
-  );
+    );
+  };
 
   const renderHistoryTab = () => (
     <div className="space-y-4">

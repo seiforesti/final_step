@@ -147,7 +147,7 @@ import {
   Navigation,
   Route,
   MapPin,
-  Radar,
+  Radar as RadarIcon,
   Satellite,
   Radio,
   Mic,

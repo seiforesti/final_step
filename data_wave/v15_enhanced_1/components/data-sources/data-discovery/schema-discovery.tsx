@@ -25,9 +25,9 @@ import {
 } from "lucide-react"
 
 // Import enterprise services and utilities
-import { discoverSchemaWithOptions, SchemaDiscoveryRequest } from "@/services/enterprise-apis"
-import { setupProgressTracking } from "@/shared/utils/progress-tracking"
-import { logDiscoveryTelemetry, logPreviewTelemetry } from "@/shared/utils/telemetry"
+import { discoverSchemaWithOptions, SchemaDiscoveryRequest } from "../services/enterprise-apis"
+import { setupProgressTracking } from "../../../shared/utils/progress-tracking"
+import { logDiscoveryTelemetry, logPreviewTelemetry } from "../../../shared/utils/telemetry"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -667,7 +667,7 @@ export function SchemaDiscovery({
       {error && (
         <div className="p-4">
           <Alert variant="destructive">
-            <AlertDescription>{error}</Alert>
+            <AlertDescription>{error}</AlertDescription>
           </Alert>
         </div>
       )}

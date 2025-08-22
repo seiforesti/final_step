@@ -1,6 +1,6 @@
 /**
  * 🏗️ ROOT LAYOUT - ENTERPRISE DATA GOVERNANCE PLATFORM
- * =====================================================
+0* ====================================================
  * 
  * Enhanced root layout integrating with the MasterLayoutOrchestrator
  * to provide advanced layout management, theming, and global providers
@@ -16,6 +16,8 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
 import { FixResizeObserver } from "@/components/fix-resize-observer"
 import { MasterLayoutOrchestrator } from "@/components/racine-main-manager/components/layout"
+import { PerformanceProvider } from "@/components/providers/PerformanceProvider"
+import { TooltipProvider } from "@/components/ui/tooltip"
 
 import "./globals.css"
 
@@ -32,11 +34,6 @@ export const metadata = {
     type: 'website'
   },
   generator: "Racine v15 Enhanced",
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-  },
   robots: {
     index: false,
     follow: false,
@@ -47,12 +44,18 @@ export const metadata = {
   },
 }
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+}
+
 export default async function RootLayout({
   children,
-}: {
-  children: React.ReactNode
-}) {
-  const cookieStore = cookies()
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  const cookieStore = await cookies()
   const defaultOpen = cookieStore.get("sidebar:state")?.value === "true"
   const layoutMode = cookieStore.get("layout:mode")?.value || "adaptive"
   const theme = cookieStore.get("theme")?.value || "system"
@@ -66,26 +69,30 @@ export default async function RootLayout({
           enableSystem 
           disableTransitionOnChange
         >
-          <FixResizeObserver />
-          <MasterLayoutOrchestrator
-            currentView={null}
-            layoutMode={layoutMode as any}
-            spaContext={null}
-            userPreferences={{
-              sidebarOpen: defaultOpen,
-              theme: theme as any,
-              layout: layoutMode as any
-            }}
-            enableResponsive={true}
-            enableAnalytics={true}
-            enableAccessibility={true}
-            enablePerformanceOptimization={true}
-            theme={theme as any}
-            className="min-h-screen"
-          >
-            {children}
-          </MasterLayoutOrchestrator>
-          <Toaster />
+          <PerformanceProvider initialEnabled={true}>
+            <TooltipProvider>
+              <FixResizeObserver />
+              <MasterLayoutOrchestrator
+                currentView={"standard" as any}
+                layoutMode={layoutMode as any}
+                spaContext={null}
+                userPreferences={{
+                  sidebarOpen: defaultOpen,
+                  theme: theme as any,
+                  layout: layoutMode as any
+                }}
+                enableResponsive={true}
+                enableAnalytics={true}
+                enableAccessibility={true}
+                enablePerformanceOptimization={true}
+                theme={theme as any}
+                className="min-h-screen"
+              >
+                {children}
+              </MasterLayoutOrchestrator>
+              <Toaster />
+            </TooltipProvider>
+          </PerformanceProvider>
         </ThemeProvider>
       </body>
     </html>

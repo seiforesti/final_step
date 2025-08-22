@@ -1,11 +1,11 @@
 import React, { createContext, useContext, useReducer, useEffect, useCallback, useMemo } from 'react';
 import { toast } from 'sonner';
 
-// Import APIs and utilities
-import { classificationApi } from '../core/api/classificationApi';
-import { websocketApi } from '../core/api/websocketApi';
-import { defaultProcessor } from '../core/utils/intelligenceProcessor';
-import { defaultOptimizer } from '../core/utils/performanceOptimizer';
+// Import APIs and utilities (point to core/ from shared/providers)
+import { classificationApi } from '../../core/api/classificationApi';
+import { websocketApi } from '../../core/api/websocketApi';
+import { defaultProcessor } from '../../core/utils/intelligenceProcessor';
+import { defaultOptimizer } from '../../core/utils/performanceOptimizer';
 
 // Advanced TypeScript interfaces
 interface ClassificationContextState {

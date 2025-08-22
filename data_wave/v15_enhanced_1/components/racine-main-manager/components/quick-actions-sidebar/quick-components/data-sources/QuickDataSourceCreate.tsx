@@ -26,13 +26,13 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 
 // Import foundation layers (100% backend integration)
-import { useDataSources } from '../../../hooks/useDataSources'
-import { useConnectionValidator } from '../../../hooks/useConnectionValidator'
-import { useUserManagement } from '../../../hooks/useUserManagement'
-import { useWorkspaceManagement } from '../../../hooks/useWorkspaceManagement'
-import { useActivityTracker } from '../../../hooks/useActivityTracker'
-import { useNotificationManager } from '../../../hooks/useNotificationManager'
-import { useSecurityManager } from '../../../hooks/useSecurityManager'
+import { useDataSources } from '../../../../hooks/useDataSources'
+import { useConnectionValidator } from '../../../../hooks/useConnectionValidator'
+import { useUserManagement } from '../../../../hooks/useUserManagement'
+import { useWorkspaceManagement } from '../../../../hooks/useWorkspaceManagement'
+import { useActivityTracker } from '../../../../hooks/useActivityTracker'
+import { useNotificationManager } from '../../../../hooks/useNotificationManager'
+import { useSecurityManager } from '../../../../hooks/useSecurityManager'
 
 // Import types (already implemented and validated)
 import {
@@ -46,7 +46,7 @@ import {
   AuthenticationMethod,
   ConnectionPool,
   DataSourceMetrics
-} from '../../../types/racine-core.types'
+} from '../../../../types/racine-core.types'
 
 // Import utilities (already implemented and validated)
 import { 
@@ -58,13 +58,13 @@ import {
   generateDataSourceId,
   formatConnectionString,
   parseConnectionParameters
-} from '../../../utils/data-source-utils'
+} from '../../../../utils/data-source-utils'
 import { 
   formatTimestamp,
   formatFileSize,
   formatDuration,
   truncateText
-} from '../../../utils/formatting-utils'
+} from '../../../../utils/formatting-utils'
 
 // Data source type configurations
 const DATA_SOURCE_TYPES = {

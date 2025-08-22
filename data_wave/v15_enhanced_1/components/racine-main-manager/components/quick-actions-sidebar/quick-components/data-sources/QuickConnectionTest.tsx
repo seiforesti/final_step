@@ -25,12 +25,12 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Textarea } from '@/components/ui/textarea'
 
 // Import foundation layers (100% backend integration)
-import { useDataSources } from '../../../hooks/useDataSources'
-import { useConnectionValidator } from '../../../hooks/useConnectionValidator'
-import { useUserManagement } from '../../../hooks/useUserManagement'
-import { useActivityTracker } from '../../../hooks/useActivityTracker'
-import { useNotificationManager } from '../../../hooks/useNotificationManager'
-import { useRacineOrchestration } from '../../../hooks/useRacineOrchestration'
+import { useDataSources } from '../../../../hooks/useDataSources'
+import { useConnectionValidator } from '../../../../hooks/useConnectionValidator'
+import { useUserManagement } from '../../../../hooks/useUserManagement'
+import { useActivityTracker } from '../../../../hooks/useActivityTracker'
+import { useNotificationManager } from '../../../../hooks/useNotificationManager'
+import { useRacineOrchestration } from '../../../../hooks/useRacineOrchestration'
 
 // Import types (already implemented and validated)
 import {
@@ -43,7 +43,7 @@ import {
   NetworkLatency,
   TestSuite,
   DiagnosticLog
-} from '../../../types/racine-core.types'
+} from '../../../../types/racine-core.types'
 
 // Import utilities (already implemented and validated)
 import { 
@@ -52,14 +52,14 @@ import {
   formatFileSize,
   formatLatency,
   formatThroughput
-} from '../../../utils/formatting-utils'
+} from '../../../../utils/formatting-utils'
 import {
   calculateConnectionScore,
   analyzePerformancePattern,
   generateTestReport,
   classifyConnectionIssue,
   generateOptimizationSuggestions
-} from '../../../utils/connection-test-utils'
+} from '../../../../utils/connection-test-utils'
 
 // Test suite configurations
 const TEST_SUITES = {

@@ -38,7 +38,7 @@ import {
   Activity,
   Layers,
   Code,
-  Table,
+  Table as TableIcon,
   Columns,
   Key,
   Lock,

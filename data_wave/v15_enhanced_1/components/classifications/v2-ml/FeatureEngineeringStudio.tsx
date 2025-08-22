@@ -74,7 +74,7 @@ import {
   Eye,
   Filter,
   GitBranch,
-  LineChart,
+  LineChart as LucideLineChart,
   Loader2,
   MoreHorizontal,
   Pause,
@@ -138,7 +138,7 @@ import {
   Scan,
 } from 'lucide-react';
 import {
-  LineChart,
+  LineChart as RechartsLineChart,
   Line,
   AreaChart,
   Area,
@@ -157,7 +157,6 @@ import {
   ReferenceLine,
   Tooltip as RechartsTooltip,
   Legend,
-  Heatmap,
   RadarChart,
   PolarGrid,
   PolarAngleAxis,
@@ -414,7 +413,7 @@ const FeatureEngineeringStudio: React.FC = () => {
   });
 
   // Use real data or fallback to empty arrays
-  const featureEngineering = useMemo(() => 
+  const featureEngineeringProjects = useMemo(() => 
     featureEngineeringData?.projects || [], 
     [featureEngineeringData]
   );

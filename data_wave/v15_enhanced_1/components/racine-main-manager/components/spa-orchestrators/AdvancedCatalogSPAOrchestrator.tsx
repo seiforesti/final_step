@@ -128,7 +128,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 // Existing Advanced Catalog SPA Components - CRITICAL: Import without modification
 const CatalogManager = lazy(() => 
-  import('../../../Advanced-Catalog').then(module => ({
+  import('../../../Advanced-Catalog/spa/AdvancedCatalogSPA').then(module => ({
     default: module.CatalogManager || module.default
   }))
 );

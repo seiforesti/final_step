@@ -13,7 +13,7 @@ import { Progress } from '@/components/ui/progress';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Table as UITable, TableBody as UITableBody, TableCell as UITableCell, TableHead as UITableHead, TableHeader as UITableHeader, TableRow as UITableRow } from '@/components/ui/table';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Slider } from '@/components/ui/slider';
 import { 
@@ -749,7 +749,7 @@ const IntelligentPatternDetector: React.FC<IntelligentPatternDetectorProps> = ({
                         <SelectItem value="all">All Confidence</SelectItem>
                         <SelectItem value="high">High (80%+)</SelectItem>
                         <SelectItem value="medium">Medium (50-80%)</SelectItem>
-                        <SelectItem value="low">Low (<50%)</SelectItem>
+                        <SelectItem value="low">Low (&lt;50%)</SelectItem>
                       </SelectContent>
                     </Select>
 

@@ -664,3 +664,181 @@ export const useSchedulerJobsQuery = (dataSourceId?: number, options = {}) => {
     ...options,
   })
 }
+
+// ============================================================================
+// VALIDATION FUNCTIONS
+// ============================================================================
+
+export const validateCloudConfig = async (config: any): Promise<{ isValid: boolean; errors: string[] }> => {
+  try {
+    const { data } = await api.post('/scan/data-sources/validate-cloud-config', config);
+    return data;
+  } catch (error: any) {
+    return {
+      isValid: false,
+      errors: error.response?.data?.errors || ['Validation failed']
+    };
+  }
+};
+
+export const validateReplicaConfig = async (config: any): Promise<{ isValid: boolean; errors: string[] }> => {
+  try {
+    const { data } = await api.post('/scan/data-sources/validate-replica-config', config);
+    return data;
+  } catch (error: any) {
+    return {
+      isValid: false,
+      errors: error.response?.data?.errors || ['Validation failed']
+    };
+  }
+};
+
+export const validateSSLConfig = async (config: any): Promise<{ isValid: boolean; errors: string[] }> => {
+  try {
+    const { data } = await api.post('/scan/data-sources/validate-ssl-config', config);
+    return data;
+  } catch (error: any) {
+    return {
+      isValid: false,
+      errors: error.response?.data?.errors || ['Validation failed']
+    };
+  }
+};
+
+// ============================================================================
+// WORKSPACE MANAGEMENT EXPORTS (Aliases for compatibility)
+// ============================================================================
+
+export const useWorkspacesQuery = useWorkspaceQuery;
+export const useWorkspaceMembersQuery = (workspaceId?: number, options = {}) => {
+  return useQuery({
+    queryKey: ['workspace-members', workspaceId],
+    queryFn: async () => {
+      if (!workspaceId) return null;
+      const response = await api.get(`/workspaces/${workspaceId}/members`);
+      return response.data;
+    },
+    enabled: !!workspaceId,
+    ...options,
+  });
+};
+
+export const useWorkspaceInvitationsQuery = (workspaceId?: number, options = {}) => {
+  return useQuery({
+    queryKey: ['workspace-invitations', workspaceId],
+    queryFn: async () => {
+      if (!workspaceId) return null;
+      const response = await api.get(`/workspaces/${workspaceId}/invitations`);
+      return response.data;
+    },
+    enabled: !!workspaceId,
+    ...options,
+  });
+};
+
+export const useWorkspaceActivitiesQuery = useWorkspaceActivityQuery;
+
+// Workspace mutation hooks
+export const useCreateWorkspaceMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (workspaceData: any) => {
+      const response = await api.post('/workspaces', workspaceData);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['workspaces'] });
+    },
+  });
+};
+
+export const useUpdateWorkspaceMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: any }) => {
+      const response = await api.put(`/workspaces/${id}`, data);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['workspaces'] });
+    },
+  });
+};
+
+export const useDeleteWorkspaceMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (workspaceId: number) => {
+      await api.delete(`/workspaces/${workspaceId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['workspaces'] });
+    },
+  });
+};
+
+export const useInviteMemberMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ workspaceId, memberData }: { workspaceId: number; memberData: any }) => {
+      const response = await api.post(`/workspaces/${workspaceId}/invite`, memberData);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['workspace-members'] });
+      queryClient.invalidateQueries({ queryKey: ['workspace-invitations'] });
+    },
+  });
+};
+
+export const useUpdateMemberRoleMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ workspaceId, memberId, role }: { workspaceId: number; memberId: number; role: string }) => {
+      const response = await api.put(`/workspaces/${workspaceId}/members/${memberId}/role`, { role });
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['workspace-members'] });
+    },
+  });
+};
+
+export const useRemoveMemberMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ workspaceId, memberId }: { workspaceId: number; memberId: number }) => {
+      await api.delete(`/workspaces/${workspaceId}/members/${memberId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['workspace-members'] });
+    },
+  });
+};
+
+export const useAcceptInvitationMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (invitationId: number) => {
+      const response = await api.post(`/workspace-invitations/${invitationId}/accept`);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['workspace-invitations'] });
+      queryClient.invalidateQueries({ queryKey: ['workspaces'] });
+    },
+  });
+};
+
+export const useDeclineInvitationMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (invitationId: number) => {
+      const response = await api.post(`/workspace-invitations/${invitationId}/decline`);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['workspace-invitations'] });
+    },
+  });
+};

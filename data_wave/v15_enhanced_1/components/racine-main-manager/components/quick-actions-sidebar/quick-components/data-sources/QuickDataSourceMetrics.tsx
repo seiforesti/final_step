@@ -25,12 +25,12 @@ import { Label } from '@/components/ui/label'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 // Import foundation layers (100% backend integration)
-import { useDataSources } from '../../../hooks/useDataSources'
-import { useConnectionValidator } from '../../../hooks/useConnectionValidator'
-import { useUserManagement } from '../../../hooks/useUserManagement'
-import { useActivityTracker } from '../../../hooks/useActivityTracker'
-import { useNotificationManager } from '../../../hooks/useNotificationManager'
-import { useRacineOrchestration } from '../../../hooks/useRacineOrchestration'
+import { useDataSources } from '../../../../hooks/useDataSources'
+import { useConnectionValidator } from '../../../../hooks/useConnectionValidator'
+import { useUserManagement } from '../../../../hooks/useUserManagement'
+import { useActivityTracker } from '../../../../hooks/useActivityTracker'
+import { useNotificationManager } from '../../../../hooks/useNotificationManager'
+import { useRacineOrchestration } from '../../../../hooks/useRacineOrchestration'
 
 // Import types (already implemented and validated)
 import {
@@ -46,7 +46,7 @@ import {
   PerformanceReport,
   MetricAlert,
   MetricThreshold
-} from '../../../types/racine-core.types'
+} from '../../../../types/racine-core.types'
 
 // Import utilities (already implemented and validated)
 import { 
@@ -57,7 +57,7 @@ import {
   formatThroughput,
   formatPercent,
   formatNumber
-} from '../../../utils/formatting-utils'
+} from '../../../../utils/formatting-utils'
 import {
   calculateMetricTrend,
   aggregateMetrics,
@@ -67,7 +67,7 @@ import {
   predictMetricTrend,
   calculateMetricScore,
   normalizeMetricValue
-} from '../../../utils/metrics-analytics-utils'
+} from '../../../../utils/metrics-analytics-utils'
 
 // Metric configurations
 const METRIC_TYPES = {

@@ -440,31 +440,7 @@ class AdvancedCatalogCollaborationService {
     return response.data;
   }
 
-  /**
-   * Create asset review
-   */
-  async createAssetReview(review: {
-    assetId: string;
-    title: string;
-    description: string;
-    type: 'quality' | 'compliance' | 'security' | 'technical' | 'business';
-    priority: 'low' | 'medium' | 'high' | 'critical';
-    reviewer?: string;
-    dueDate?: Date;
-    templateId?: string;
-    checklist?: Array<{
-      item: string;
-      required: boolean;
-      category: string;
-    }>;
-    metadata?: Record<string, any>;
-  }): Promise<AssetReview> {
-    const response = await apiClient.post(`${this.baseUrl}/reviews`, {
-      ...review,
-      dueDate: review.dueDate?.toISOString()
-    });
-    return response.data;
-  }
+
 
   /**
    * Update asset review
@@ -1145,5 +1121,6 @@ class AdvancedCatalogCollaborationService {
 // EXPORT SERVICE INSTANCE
 // ============================================================================
 
+export const collaborationService = new AdvancedCatalogCollaborationService();
 export const advancedCatalogCollaborationService = new AdvancedCatalogCollaborationService();
-export default advancedCatalogCollaborationService;
+export default collaborationService;

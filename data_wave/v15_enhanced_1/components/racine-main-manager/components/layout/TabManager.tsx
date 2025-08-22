@@ -1764,7 +1764,6 @@ export const useTabCollaboration = () => {
 // =============================================================================
 
 export default TabManager;
-export { TabContext, useTabContext };
 export type { 
   TabManagerProps, 
   TabManagerState, 

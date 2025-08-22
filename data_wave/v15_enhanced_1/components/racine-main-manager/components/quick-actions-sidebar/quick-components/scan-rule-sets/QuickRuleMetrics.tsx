@@ -57,8 +57,8 @@ import type {
   OptimizationSuggestion
 } from '../../../types/racine-core.types';
 
-import { useScanRuleSets } from '../../../hooks/useScanRuleSets';
-import { useWorkspaceManagement } from '../../../hooks/useWorkspaceManagement';
+import { useScanRuleSets } from '../../../../hooks/useScanRuleSets';
+import { useWorkspaceManagement } from '../../../../hooks/useWorkspaceManagement';
 
 interface QuickRuleMetricsProps {
   isVisible?: boolean;

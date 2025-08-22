@@ -151,14 +151,14 @@ import { useUserManagement } from '@/components/racine-main-manager/hooks/useUse
 import { useAIAssistant } from '@/components/racine-main-manager/hooks/useAIAssistant';
 import { useCrossGroupIntegration } from '@/components/racine-main-manager/hooks/useCrossGroupIntegration';
 
-// SPA Integration Hooks
-import { useDataSources } from '@/components/data-sources/hooks/useDataSources';
-import { useScanRuleSets } from '@/components/Advanced-Scan-Rule-Sets/hooks/useScanRuleSets';
-import { useClassifications } from '@/components/classifications/hooks/useClassifications';
-import { useComplianceRule } from '@/components/Compliance-Rule/hooks/useComplianceRule';
-import { useAdvancedCatalog } from '@/components/Advanced-Catalog/hooks/useAdvancedCatalog';
-import { useScanLogic } from '@/components/Advanced-Scan-Logic/hooks/useScanLogic';
-import { useRBACSystem } from '@/components/Advanced_RBAC_Datagovernance_System/hooks/useRBACSystem';
+// SPA Integration Hooks (wired to Racine orchestrator hooks)
+import { useDataSources } from '@/components/racine-main-manager/hooks/useDataSources';
+import { useScanRuleSets } from '@/components/racine-main-manager/hooks/useScanRuleSets';
+import { useClassifications } from '@/components/racine-main-manager/hooks/useClassifications';
+import { useComplianceRules as useComplianceRule } from '@/components/racine-main-manager/hooks/useComplianceRules';
+import { useAdvancedCatalog } from '@/components/racine-main-manager/hooks/useAdvancedCatalog';
+import { useScanLogic } from '@/components/racine-main-manager/hooks/useScanLogic';
+import { useRBACSystem } from '@/components/racine-main-manager/hooks/useRBACSystem';
 
 // Types
 interface ActivityEvent {
@@ -617,7 +617,7 @@ const QuickActivityView: React.FC = () => {
 
   const {
     getCrossGroupMetrics,
-    getCrossGroupActivity,
+    getCrossGroupActivity: getCrossGroupActivityFromIntegration,
     getIntegrationHealth
   } = useCrossGroupIntegration();
 

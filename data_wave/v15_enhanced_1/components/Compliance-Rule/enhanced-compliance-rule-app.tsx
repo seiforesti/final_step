@@ -274,7 +274,7 @@ const NotificationCenter: React.FC = () => {
 
   const unreadCount = useMemo(() => 
     notifications.filter(n => !n.read).length, [notifications]
-  )
+  );
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -330,7 +330,7 @@ const NotificationCenter: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                ))}
+                ))
               )}
             </div>
           </ScrollArea>

@@ -998,7 +998,13 @@ export const CrossGroupResourceLinker: React.FC = () => {
           mitigations: []
         }
       }));
-        description: 'Classification rules for customer PII data across all data sources',
+
+      // Sample resource links for demonstration
+      const sampleResourceLinks: CrossGroupResourceLink[] = [
+        {
+          id: 'link-1' as UUID,
+          name: 'Customer PII Classification Rule',
+          description: 'Classification rules for customer PII data across all data sources',
         type: 'classification_rule',
         sourceGroup: SPAGroup.CLASSIFICATIONS,
         targetGroups: [SPAGroup.DATA_SOURCES, SPAGroup.COMPLIANCE_RULE, SPAGroup.ADVANCED_CATALOG],
@@ -1242,6 +1248,10 @@ export const CrossGroupResourceLinker: React.FC = () => {
               timeframe: '2 weeks'
             }
           ]
+        }
+      ];
+
+      return sampleResourceLinks;
     } catch (error) {
       console.error('Error loading enhanced resources:', error);
       return [];

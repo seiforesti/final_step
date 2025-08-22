@@ -320,7 +320,7 @@ const PatternRecognitionCenter: React.FC = () => {
     getPatternEvolution,
     validatePatterns,
     classifyPatterns,
-    optimizePatternDetection,
+    optimizePatternDetection: optimizePatternDetectionAPI,
     exportPatternData,
     generatePatternReport
   } = useScanIntelligence();
@@ -715,11 +715,11 @@ const PatternRecognitionCenter: React.FC = () => {
     }
   }, [state.selectedPatterns]);
 
-  const optimizePatternDetection = useCallback(async () => {
+  const runOptimizePatternDetection = useCallback(async () => {
     try {
       setState(prev => ({ ...prev, isAnalyzing: true }));
       
-      const optimizationResult = await optimizePatternDetection(state.algorithmConfig);
+      const optimizationResult = await optimizePatternDetectionAPI(state.algorithmConfig);
       
       setState(prev => ({
         ...prev,

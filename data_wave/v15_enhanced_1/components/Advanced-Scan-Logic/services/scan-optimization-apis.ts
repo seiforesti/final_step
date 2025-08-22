@@ -78,9 +78,11 @@ interface OptimizationScheduleRequest {
  */
 export class ScanOptimizationAPIService {
   private apiClient: ApiClient;
+  private baseUrl: string;
 
   constructor() {
     this.apiClient = new ApiClient();
+    this.baseUrl = '/api/v1/scan-optimization';
   }
 
   private getAuthToken(): string {
@@ -716,5 +718,5 @@ export class ScanOptimizationAPIService {
 }
 
 // Export singleton instance
-export const scanOptimizationAPI = new ScanOptimizationAPI();
+export const scanOptimizationAPI = new ScanOptimizationAPIService();
 export default scanOptimizationAPI;

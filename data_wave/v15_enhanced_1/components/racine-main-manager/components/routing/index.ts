@@ -50,7 +50,6 @@ export {
 // Route Protection System
 export { default as RouteGuardsProvider } from './RouteGuards';
 export { 
-  RouteGuardsProvider, 
   useRouteGuards,
   RouteGuard,
   withRouteGuards,
@@ -70,7 +69,6 @@ export {
 // Route Processing Pipeline
 export { default as RouteMiddlewareProvider } from './RouteMiddleware';
 export { 
-  RouteMiddlewareProvider, 
   useRouteMiddleware,
   RouteMiddleware,
   withRouteMiddleware,
@@ -92,7 +90,6 @@ export {
 // Deep Linking System
 export { default as DeepLinkManagerProvider } from './DeepLinkManager';
 export { 
-  DeepLinkManagerProvider, 
   useDeepLinkManager, 
   SmartLink,
   ShareLinkDialog,
@@ -107,7 +104,6 @@ export {
 // Breadcrumb Navigation
 export { default as BreadcrumbManagerProvider } from './BreadcrumbManager';
 export { 
-  BreadcrumbManagerProvider, 
   useBreadcrumbManager,
   BreadcrumbNavigation,
   BreadcrumbSettings,
@@ -120,7 +116,6 @@ export {
 // Quick Navigation System
 export { default as QuickNavigationProvider } from './QuickNavigationPanel';
 export { 
-  QuickNavigationProvider, 
   useQuickNavigation,
   QuickNavigationPanel,
   QuickNavigationTrigger,
@@ -179,9 +174,8 @@ export type {
 
 // Breadcrumb Types
 export type { 
-  BreadcrumbItem, 
-  BreadcrumbConfig, 
-  BreadcrumbAnalytics, 
+  BreadcrumbItem,
+  BreadcrumbConfig,
   BreadcrumbNavigation as BreadcrumbNavigationType,
   BreadcrumbContext
 } from './BreadcrumbManager';
@@ -215,20 +209,30 @@ export const createRoutingProvider = (
     quickNavigation?: any;
   }
 ) => {
-  return (
-    <RacineRouterProvider {...config?.router}>
-      <RouteGuardsProvider {...config?.guards}>
-        <RouteMiddlewareProvider {...config?.middleware}>
-          <DeepLinkManagerProvider {...config?.deepLinks}>
-            <BreadcrumbManagerProvider {...config?.breadcrumbs}>
-              <QuickNavigationProvider {...config?.quickNavigation}>
-                {children}
-              </QuickNavigationProvider>
-            </BreadcrumbManagerProvider>
-          </DeepLinkManagerProvider>
-        </RouteMiddlewareProvider>
-      </RouteGuardsProvider>
-    </RacineRouterProvider>
+  return React.createElement(
+    RacineRouterProvider,
+    { ...(config?.router || {}) },
+    React.createElement(
+      RouteGuardsProvider,
+      { ...(config?.guards || {}) },
+      React.createElement(
+        RouteMiddlewareProvider,
+        { ...(config?.middleware || {}) },
+        React.createElement(
+          DeepLinkManagerProvider,
+          { ...(config?.deepLinks || {}) },
+          React.createElement(
+            BreadcrumbManagerProvider,
+            { ...(config?.breadcrumbs || {}) },
+            React.createElement(
+              QuickNavigationProvider,
+              { ...(config?.quickNavigation || {}) },
+              children
+            )
+          )
+        )
+      )
+    )
   );
 };
 

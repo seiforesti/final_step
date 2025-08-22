@@ -549,20 +549,20 @@ import {
 } from 'lucide-react';
 
 // Import hooks and services
-import { useAIAssistant } from '../../../hooks/useAIAssistant';
-import { useWorkspaceManagement } from '../../../hooks/useWorkspaceManagement';
-import { useUserManagement } from '../../../hooks/useUserManagement';
-import { useCrossGroupIntegration } from '../../../hooks/useCrossGroupIntegration';
-import { useActivityTracking } from '../../../hooks/useActivityTracking';
-import { usePipelineManager } from '../../../hooks/usePipelineManager';
-import { useJobWorkflow } from '../../../hooks/useJobWorkflow';
-import { useDataSources } from '../../../hooks/useDataSources';
-import { useScanRuleSets } from '../../../hooks/useScanRuleSets';
-import { useClassifications } from '../../../hooks/useClassifications';
-import { useComplianceRule } from '../../../hooks/useComplianceRule';
-import { useAdvancedCatalog } from '../../../hooks/useAdvancedCatalog';
-import { useScanLogic } from '../../../hooks/useScanLogic';
-import { useRBAC } from '../../../hooks/useRBAC';
+import { useAIAssistant } from '../../../../hooks/useAIAssistant';
+import { useWorkspaceManagement } from '../../../../hooks/useWorkspaceManagement';
+import { useUserManagement } from '../../../../hooks/useUserManagement';
+import { useCrossGroupIntegration } from '../../../../hooks/useCrossGroupIntegration';
+import { useActivityTracking } from '../../../../hooks/useActivityTracking';
+import { usePipelineManager } from '../../../../hooks/usePipelineManager';
+import { useJobWorkflow } from '../../../../hooks/useJobWorkflow';
+import { useDataSources } from '../../../../hooks/useDataSources';
+import { useScanRuleSets } from '../../../../hooks/useScanRuleSets';
+import { useClassifications } from '../../../../hooks/useClassifications';
+import { useComplianceRules as useComplianceRule } from '../../../../hooks/useComplianceRules';
+import { useAdvancedCatalog } from '../../../../hooks/useAdvancedCatalog';
+import { useScanLogic } from '../../../../hooks/useScanLogic';
+import { useRBACSystem as useRBAC } from '../../../../hooks/useRBACSystem';
 
 // Types
 interface AIMessage {

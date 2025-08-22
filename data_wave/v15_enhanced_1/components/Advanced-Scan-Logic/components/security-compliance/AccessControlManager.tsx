@@ -1204,7 +1204,8 @@ export const AccessControlManager: React.FC = () => {
   }, [toast]);
 
   const revokeUserAccess = useCallback(async (userId: string, roleId: string) => {
-    setActionInProgress(prev => ({ ...prev, `revoke-${userId}-${roleId}`: true }));
+    const actionKey = `revoke-${userId}-${roleId}`;
+    setActionInProgress(prev => ({ ...prev, [actionKey]: true }));
     
     try {
       const response = await fetch(`/api/access-control/users/${userId}/roles/${roleId}`, {
@@ -1246,7 +1247,7 @@ export const AccessControlManager: React.FC = () => {
         variant: "destructive",
       });
     } finally {
-      setActionInProgress(prev => ({ ...prev, `revoke-${userId}-${roleId}`: false }));
+      setActionInProgress(prev => ({ ...prev, [actionKey]: false }));
     }
   }, [toast]);
 

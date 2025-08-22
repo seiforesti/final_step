@@ -14,8 +14,30 @@
  * - Configuration constants and templates
  */
 
-// Core types (100% backend mapping)
-export * from './types';
+// Core types (100% backend mapping) - export specific types to avoid conflicts
+export type {
+  RacineState,
+  SystemHealth,
+  WorkspaceConfiguration,
+  WorkspaceMember,
+  WorkspaceResource,
+  WorkflowDefinition,
+  WorkflowStep,
+  WorkflowExecution,
+  PipelineDefinition,
+  PipelineStage,
+  PipelineExecution,
+  AIConversation,
+  AIMessage,
+  AIInsight,
+  SystemAlert,
+  DashboardWidget,
+  DashboardAnalytics,
+  CollaborationSession,
+  CollaborationParticipant,
+  APIResponse,
+  APIError
+} from './types';
 
 // API services (backend integration)
 export * from './services';
@@ -30,58 +52,18 @@ export * from './utils';
 export * from './constants';
 
 // Re-export key modules for convenience
-export type {
-  // Core system types
-  RacineState,
-  SystemHealth,
-  CrossGroupIntegration,
-  
-  // Workspace types
-  WorkspaceConfiguration,
-  WorkspaceMember,
-  WorkspaceResource,
-  
-  // Workflow types
-  WorkflowDefinition,
-  WorkflowStep,
-  WorkflowExecution,
-  
-  // Pipeline types
-  PipelineDefinition,
-  PipelineStage,
-  PipelineExecution,
-  
-  // AI & Analytics types
-  AIConversation,
-  AIMessage,
-  AIInsight,
-  
-  // Activity & Monitoring types
-  ActivityLog,
-  ActivityCorrelation,
-  SystemAlert,
-  
-  // Dashboard types
-  DashboardConfiguration,
-  DashboardWidget,
-  DashboardAnalytics,
-  
-  // Collaboration types
-  CollaborationSession,
-  CollaborationParticipant,
-  
-  // API types
-  APIResponse,
-  APIError
-} from './types';
 
 export {
   // Main API service
   racineOrchestrationAPI,
-  
+} from './services';
+
+export {
   // Main React hook
   useRacineOrchestration,
-  
+} from './hooks';
+
+export {
   // Core orchestration functions
   coordinateServices,
   validateIntegration,
@@ -95,7 +77,9 @@ export {
   executePipeline,
   optimizePipeline,
   monitorHealth,
-  
+} from './utils';
+
+export {
   // Configuration constants
   SUPPORTED_GROUPS,
   API_ENDPOINTS,
@@ -108,7 +92,7 @@ export {
   buildApiUrl,
   getWorkflowTemplate,
   getPipelineTemplate
-} from './types';
+} from './constants';
 
 // Version information
 export const RACINE_MAIN_MANAGER_VERSION = '1.0.0';
@@ -170,7 +154,7 @@ export const DEFAULT_RACINE_CONFIG: RacineMainManagerConfig = {
 // ============================================================================
 
 // Export the main RacineMainManagerSPA component
-export { RacineMainManagerSPA, EnhancedRacineMainManagerSPA, COMPONENT_METRICS } from './RacineMainManagerSPA';
+export { RacineMainManagerSPA, COMPONENT_METRICS } from './RacineMainManagerSPA';
 export { default as RacineMainManagerSPADefault } from './RacineMainManagerSPA';
 
 // ============================================================================

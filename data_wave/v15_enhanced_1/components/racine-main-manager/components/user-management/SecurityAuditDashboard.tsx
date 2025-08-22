@@ -1876,7 +1876,7 @@ export const SecurityAuditDashboard: React.FC<SecurityAuditDashboardProps> = ({
                 <Card>
                   <CardHeader>
                     <CardTitle className="text-lg flex items-center space-x-2">
-                      <SEVERITY_CONFIG[selectedEvent.severity].icon className={`w-5 h-5 ${SEVERITY_CONFIG[selectedEvent.severity].color}`} />
+                      {React.createElement(SEVERITY_CONFIG[selectedEvent.severity].icon, { className: `w-5 h-5 ${SEVERITY_CONFIG[selectedEvent.severity].color}` })}
                       <span>Event Overview</span>
                     </CardTitle>
                   </CardHeader>

@@ -11,7 +11,7 @@ import {
   BarChart3, PieChart, LineChart, Activity, Users, Database,
   FileText, Image, Video, Music, Code, Archive, Folder,
   Calendar, MapPin, Link, Hash, Layers, Network, Globe,
-  Sparkles, Lightbulb, Compass, Crosshair, Telescope
+  Sparkles, Lightbulb, Compass, Crosshair, Binoculars
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'

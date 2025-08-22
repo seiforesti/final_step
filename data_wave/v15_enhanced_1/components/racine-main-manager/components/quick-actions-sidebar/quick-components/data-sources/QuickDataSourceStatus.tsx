@@ -25,12 +25,12 @@ import { Label } from '@/components/ui/label'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 // Import foundation layers (100% backend integration)
-import { useDataSources } from '../../../hooks/useDataSources'
-import { useConnectionValidator } from '../../../hooks/useConnectionValidator'
-import { useUserManagement } from '../../../hooks/useUserManagement'
-import { useActivityTracker } from '../../../hooks/useActivityTracker'
-import { useNotificationManager } from '../../../hooks/useNotificationManager'
-import { useRacineOrchestration } from '../../../hooks/useRacineOrchestration'
+import { useDataSources } from '../../../../hooks/useDataSources'
+import { useConnectionValidator } from '../../../../hooks/useConnectionValidator'
+import { useUserManagement } from '../../../../hooks/useUserManagement'
+import { useActivityTracker } from '../../../../hooks/useActivityTracker'
+import { useNotificationManager } from '../../../../hooks/useNotificationManager'
+import { useRacineOrchestration } from '../../../../hooks/useRacineOrchestration'
 
 // Import types (already implemented and validated)
 import {
@@ -44,7 +44,7 @@ import {
   HealthCheck,
   AlertLevel,
   StatusHistory
-} from '../../../types/racine-core.types'
+} from '../../../../types/racine-core.types'
 
 // Import utilities (already implemented and validated)
 import { 
@@ -54,7 +54,7 @@ import {
   formatLatency,
   formatThroughput,
   formatPercent
-} from '../../../utils/formatting-utils'
+} from '../../../../utils/formatting-utils'
 import {
   calculateHealthScore,
   determineHealthStatus,
@@ -62,7 +62,7 @@ import {
   generateHealthReport,
   getHealthColorScheme,
   classifyHealthIssues
-} from '../../../utils/health-monitoring-utils'
+} from '../../../../utils/health-monitoring-utils'
 
 // Health status configurations
 const HEALTH_STATUS_CONFIG = {

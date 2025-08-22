@@ -71,11 +71,11 @@ import type {
   RulePerformanceMetrics
 } from '../../../types/racine-core.types';
 
-import { useScanRuleSets } from '../../../hooks/useScanRuleSets';
-import { useWorkspaceManagement } from '../../../hooks/useWorkspaceManagement';
-import { useUserManagement } from '../../../hooks/useUserManagement';
-import { useAIAssistant } from '../../../hooks/useAIAssistant';
-import { useCrossGroupIntegration } from '../../../hooks/useCrossGroupIntegration';
+import { useScanRuleSets } from '../../../../hooks/useScanRuleSets';
+import { useWorkspaceManagement } from '../../../../hooks/useWorkspaceManagement';
+import { useUserManagement } from '../../../../hooks/useUserManagement';
+import { useAIAssistant } from '../../../../hooks/useAIAssistant';
+import { useCrossGroupIntegration } from '../../../../hooks/useCrossGroupIntegration';
 
 // Component props interface
 interface QuickRuleCreateProps {

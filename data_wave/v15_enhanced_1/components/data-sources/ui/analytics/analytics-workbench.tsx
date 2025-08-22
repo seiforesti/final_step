@@ -464,18 +464,7 @@ export const AnalyticsWorkbench: React.FC = () => {
     }
   }
 
-  const startRealTimeUpdates = () => {
-    intervalRef.current = setInterval(() => {
-      // Update real-time data
-      const newData = generateRealTimeData()
-      setRealTimeData(prev => [...prev.slice(-100), newData]) // Keep last 100 points
-      
-      // Update insights occasionally
-      if (Math.random() < 0.1) { // 10% chance
-        updateRealTimeInsights()
-      }
-    }, state.refreshInterval)
-  }
+  // Removed duplicate function - see first definition above
 
   // ========================================================================
   // ANALYSIS FUNCTIONS
@@ -566,14 +555,7 @@ export const AnalyticsWorkbench: React.FC = () => {
   }
 
   // Placeholder for legacy compatibility - all data comes from backend now
-        {
-          type: 'line',
-          data: generateChartData('line'),
-          options: { responsive: true, maintainAspectRatio: false }
-        }
-      ]
-    }
-  }
+  // Legacy chart configuration removed - using real-time analytics data instead
 
   const generateChartData = (type: string) => {
     const labels = Array.from({ length: 12 }, (_, i) => `Month ${i + 1}`)
