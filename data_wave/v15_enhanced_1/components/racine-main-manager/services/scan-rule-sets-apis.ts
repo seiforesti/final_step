@@ -26,10 +26,10 @@ import {
 } from '../types/racine-core.types';
 
 // Import existing Advanced-Scan-Rule-Sets services for integration
-import { ScanRulesAPIService } from '../../Advanced-Scan-Rule-Sets/services/scan-rules-apis';
-import { OptimizationAPIService } from '../../Advanced-Scan-Rule-Sets/services/optimization-apis';
-import { ValidationAPIService } from '../../Advanced-Scan-Rule-Sets/services/validation-apis';
-import { OrchestrationAPIService } from '../../Advanced-Scan-Rule-Sets/services/orchestration-apis';
+import { scanRulesAPIService } from '../../Advanced-Scan-Rule-Sets/services/scan-rules-apis';
+import { optimizationAPIService } from '../../Advanced-Scan-Rule-Sets/services/optimization-apis';
+import { validationAPIService } from '../../Advanced-Scan-Rule-Sets/services/validation-apis';
+import { orchestrationAPIService } from '../../Advanced-Scan-Rule-Sets/services/orchestration-apis';
 
 // Base API configuration
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1';
@@ -45,10 +45,10 @@ class RacineScanRuleSetsAPIService {
   private headers: HeadersInit;
   
   // Integration with existing SPA services
-  private scanRulesService: ScanRulesAPIService;
-  private optimizationService: OptimizationAPIService;
-  private validationService: ValidationAPIService;
-  private orchestrationService: OrchestrationAPIService;
+  private scanRulesService: typeof scanRulesAPIService;
+  private optimizationService: typeof optimizationAPIService;
+  private validationService: typeof validationAPIService;
+  private orchestrationService: typeof orchestrationAPIService;
 
   constructor() {
     this.baseURL = RACINE_SCAN_RULES_ENDPOINT;
@@ -60,10 +60,10 @@ class RacineScanRuleSetsAPIService {
     };
 
     // Initialize existing SPA service integrations
-    this.scanRulesService = new ScanRulesAPIService();
-    this.optimizationService = new OptimizationAPIService();
-    this.validationService = new ValidationAPIService();
-    this.orchestrationService = new OrchestrationAPIService();
+    this.scanRulesService = scanRulesAPIService;
+    this.optimizationService = optimizationAPIService;
+    this.validationService = validationAPIService;
+    this.orchestrationService = orchestrationAPIService;
   }
 
   /**

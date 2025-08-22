@@ -31,7 +31,7 @@ import type {
 
 // Import utilities
 import { rbacUtils } from '../utils/rbac-utils';
-import { crossGroupOrchestrator } from '../utils/cross-group-orchestrator';
+import { coordinateServices, validateIntegration, optimizeExecution, handleErrors } from '../utils/cross-group-orchestrator';
 import { securityUtils } from '../utils/security-utils';
 
 /**

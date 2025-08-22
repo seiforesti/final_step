@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
 // Import scan rule set APIs
 import { scanRuleSetApis } from '../services/racine-orchestration-apis'
-import { crossGroupIntegrationApis } from '../services/cross-group-integration-apis'
+import { crossGroupIntegrationAPI } from '../services/cross-group-integration-apis'
 
 // Import types
 import {
@@ -141,7 +141,7 @@ export const useScanRuleSets = (options: UseScanRuleSetsOptions = {}) => {
       queryClient.invalidateQueries({ queryKey: ['scanRuleSetStats'] })
       
       // Track creation event
-      crossGroupIntegrationApis.trackEvent('scan_rule_set_created', {
+      crossGroupIntegrationAPI.trackEvent('scan_rule_set_created', {
         ruleSetId: newRuleSet.id,
         category: newRuleSet.category,
         complexity: newRuleSet.complexity,
@@ -167,7 +167,7 @@ export const useScanRuleSets = (options: UseScanRuleSetsOptions = {}) => {
       }
       
       // Track update event
-      crossGroupIntegrationApis.trackEvent('scan_rule_set_updated', {
+      crossGroupIntegrationAPI.trackEvent('scan_rule_set_updated', {
         ruleSetId: updatedRuleSet.id,
         category: updatedRuleSet.category,
         complexity: updatedRuleSet.complexity
@@ -191,7 +191,7 @@ export const useScanRuleSets = (options: UseScanRuleSetsOptions = {}) => {
       }
       
       // Track deletion event
-      crossGroupIntegrationApis.trackEvent('scan_rule_set_deleted', {
+      crossGroupIntegrationAPI.trackEvent('scan_rule_set_deleted', {
         ruleSetId: deletedId
       })
     },
@@ -211,7 +211,7 @@ export const useScanRuleSets = (options: UseScanRuleSetsOptions = {}) => {
       setActiveExecutions(prev => [...prev, execution])
       
       // Track execution event
-      crossGroupIntegrationApis.trackEvent('scan_rule_set_executed', {
+      crossGroupIntegrationAPI.trackEvent('scan_rule_set_executed', {
         ruleSetId: execution.ruleSetId,
         executionId: execution.id,
         dataSourceId: execution.dataSourceId,
@@ -253,7 +253,7 @@ export const useScanRuleSets = (options: UseScanRuleSetsOptions = {}) => {
       queryClient.invalidateQueries({ queryKey: ['scanRuleSets'] })
       
       // Track duplication event
-      crossGroupIntegrationApis.trackEvent('scan_rule_set_duplicated', {
+      crossGroupIntegrationAPI.trackEvent('scan_rule_set_duplicated', {
         originalId: id,
         newId: result.id,
         newName
@@ -273,7 +273,7 @@ export const useScanRuleSets = (options: UseScanRuleSetsOptions = {}) => {
       queryClient.invalidateQueries({ queryKey: ['scanRuleSets'] })
       
       // Track rule addition
-      crossGroupIntegrationApis.trackEvent('scan_rule_added', {
+      crossGroupIntegrationAPI.trackEvent('scan_rule_added', {
         ruleSetId,
         ruleId: result.id,
         category: result.category,
@@ -294,7 +294,7 @@ export const useScanRuleSets = (options: UseScanRuleSetsOptions = {}) => {
       queryClient.invalidateQueries({ queryKey: ['scanRuleSets'] })
       
       // Track rule update
-      crossGroupIntegrationApis.trackEvent('scan_rule_updated', {
+      crossGroupIntegrationAPI.trackEvent('scan_rule_updated', {
         ruleSetId,
         ruleId,
         changes: Object.keys(updates)
@@ -314,7 +314,7 @@ export const useScanRuleSets = (options: UseScanRuleSetsOptions = {}) => {
       queryClient.invalidateQueries({ queryKey: ['scanRuleSets'] })
       
       // Track rule deletion
-      crossGroupIntegrationApis.trackEvent('scan_rule_deleted', {
+      crossGroupIntegrationAPI.trackEvent('scan_rule_deleted', {
         ruleSetId,
         ruleId
       })
@@ -351,7 +351,7 @@ export const useScanRuleSets = (options: UseScanRuleSetsOptions = {}) => {
       queryClient.invalidateQueries({ queryKey: ['scanRuleSets'] })
       
       // Track scheduling event
-      crossGroupIntegrationApis.trackEvent('scan_rule_set_scheduled', {
+      crossGroupIntegrationAPI.trackEvent('scan_rule_set_scheduled', {
         ruleSetId: id,
         frequency: schedule.frequency,
         enabled: schedule.enabled
@@ -391,7 +391,7 @@ export const useScanRuleSets = (options: UseScanRuleSetsOptions = {}) => {
       queryClient.invalidateQueries({ queryKey: ['scanRuleSets'] })
       
       // Track template usage
-      crossGroupIntegrationApis.trackEvent('scan_rule_set_created_from_template', {
+      crossGroupIntegrationAPI.trackEvent('scan_rule_set_created_from_template', {
         templateId,
         ruleSetId: result.id,
         name
@@ -421,7 +421,7 @@ export const useScanRuleSets = (options: UseScanRuleSetsOptions = {}) => {
       queryClient.invalidateQueries({ queryKey: ['scanRuleSets'] })
       
       // Track optimization application
-      crossGroupIntegrationApis.trackEvent('scan_rule_set_optimization_applied', {
+      crossGroupIntegrationAPI.trackEvent('scan_rule_set_optimization_applied', {
         ruleSetId: id,
         estimatedImprovement: optimization.estimatedImprovement,
         complexity: optimization.implementationComplexity
@@ -451,7 +451,7 @@ export const useScanRuleSets = (options: UseScanRuleSetsOptions = {}) => {
       queryClient.invalidateQueries({ queryKey: ['scanRuleSets'] })
       
       // Track import event
-      crossGroupIntegrationApis.trackEvent('scan_rule_set_imported', {
+      crossGroupIntegrationAPI.trackEvent('scan_rule_set_imported', {
         ruleSetId: result.id,
         fileName: file.name,
         fileSize: file.size
@@ -471,7 +471,7 @@ export const useScanRuleSets = (options: UseScanRuleSetsOptions = {}) => {
       queryClient.invalidateQueries({ queryKey: ['scanRuleSets'] })
       
       // Track bulk update
-      crossGroupIntegrationApis.trackEvent('scan_rule_sets_bulk_updated', {
+      crossGroupIntegrationAPI.trackEvent('scan_rule_sets_bulk_updated', {
         count: updates.length,
         ruleSetIds: updates.map(u => u.id)
       })
@@ -489,7 +489,7 @@ export const useScanRuleSets = (options: UseScanRuleSetsOptions = {}) => {
       queryClient.invalidateQueries({ queryKey: ['scanRuleSets'] })
       
       // Track bulk deletion
-      crossGroupIntegrationApis.trackEvent('scan_rule_sets_bulk_deleted', {
+      crossGroupIntegrationAPI.trackEvent('scan_rule_sets_bulk_deleted', {
         count: ids.length,
         ruleSetIds: ids
       })

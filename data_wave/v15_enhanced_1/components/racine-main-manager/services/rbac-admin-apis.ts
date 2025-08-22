@@ -19,16 +19,19 @@ import {
   RBACMetrics,
   RBACAnalytics,
   RBACCoordination,
-  APIResponse,
-  APIError,
   UUID,
   ISODateString,
   PaginationRequest,
   FilterRequest
 } from '../types/racine-core.types';
 
+import {
+  APIResponse,
+  APIError
+} from '../types/api.types';
+
 // Import existing RBAC services for integration
-import { RBACAPIService } from '../../Advanced_RBAC_Datagovernance_System/services/rbac-api.service';
+import { RBACApiService } from '../../Advanced_RBAC_Datagovernance_System/services/rbac-api.service';
 import { UserService } from '../../Advanced_RBAC_Datagovernance_System/services/user.service';
 import { RoleService } from '../../Advanced_RBAC_Datagovernance_System/services/role.service';
 import { PermissionService } from '../../Advanced_RBAC_Datagovernance_System/services/permission.service';
@@ -48,7 +51,7 @@ class RBACAdminAPIService {
   private headers: HeadersInit;
   
   // Integration with existing RBAC SPA services
-  private rbacApiService: RBACAPIService;
+  private rbacApiService: RBACApiService;
   private userService: UserService;
   private roleService: RoleService;
   private permissionService: PermissionService;
@@ -66,7 +69,7 @@ class RBACAdminAPIService {
     };
 
     // Initialize existing RBAC SPA service integrations
-    this.rbacApiService = new RBACAPIService();
+    this.rbacApiService = new RBACApiService();
     this.userService = new UserService();
     this.roleService = new RoleService();
     this.permissionService = new PermissionService();

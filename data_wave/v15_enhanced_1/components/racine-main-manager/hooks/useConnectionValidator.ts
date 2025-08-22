@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
 // Import connection APIs - these integrate with backend
 import { dataSourceApis } from '../services/racine-orchestration-apis'
-import { crossGroupIntegrationApis } from '../services/cross-group-integration-apis'
+import { crossGroupIntegrationAPI } from '../services/cross-group-integration-apis'
 
 // Import types from racine core types
 import {
@@ -86,7 +86,7 @@ export const useConnectionValidator = (options: UseConnectionValidatorOptions = 
           const result = await dataSourceApis.testConnection(config)
           
           // Track successful test
-          crossGroupIntegrationApis.trackEvent('connection_test_success', {
+          crossGroupIntegrationAPI.trackEvent('connection_test_success', {
             dataSourceType: config.type,
             attempt: attempts + 1,
             latency: result.latency
@@ -97,7 +97,7 @@ export const useConnectionValidator = (options: UseConnectionValidatorOptions = 
           attempts++
           if (attempts >= maxAttempts) {
             // Track failed test
-            crossGroupIntegrationApis.trackEvent('connection_test_failed', {
+            crossGroupIntegrationAPI.trackEvent('connection_test_failed', {
               dataSourceType: config.type,
               attempts: attempts,
               error: (error as Error).message
@@ -152,7 +152,7 @@ export const useConnectionValidator = (options: UseConnectionValidatorOptions = 
     mutationFn: (config: ConnectionConfig) => dataSourceApis.optimizeConnection(config),
     onSuccess: (optimization) => {
       // Track optimization event
-      crossGroupIntegrationApis.trackEvent('connection_optimized', {
+      crossGroupIntegrationAPI.trackEvent('connection_optimized', {
         dataSourceType: config.type,
         improvements: optimization.improvements,
         performanceGain: optimization.performanceGain
@@ -245,7 +245,7 @@ export const useConnectionValidator = (options: UseConnectionValidatorOptions = 
       const result = await dataSourceApis.runTestSuite(config, suite)
       
       // Track test suite completion
-      crossGroupIntegrationApis.trackEvent('test_suite_completed', {
+      crossGroupIntegrationAPI.trackEvent('test_suite_completed', {
         dataSourceType: config.type,
         suite: suite.id,
         success: result.success,

@@ -29,6 +29,11 @@ import {
   ScanRecommendation
 } from '../types/racine-core.types';
 
+import {
+  APIResponse,
+  PaginatedResponse
+} from '../types/api.types';
+
 // Import existing Advanced Scan Logic services for integration
 import intelligentScanningAPI from '../../Advanced-Scan-Logic/services/intelligent-scanning-apis';
 import scanOrchestrationAPI from '../../Advanced-Scan-Logic/services/scan-orchestration-apis';
@@ -131,7 +136,7 @@ class RacineScanLogicAPIService {
    * Get all scan engines with racine orchestration
    */
   async getAllScanEngines(filters?: ScanFilters): Promise<APIResponse<PaginatedResponse<ScanEngine>>> {
-    const existingResult = await this.scanOrchestrationAPIs.getAllScanEngines(filters);
+    const existingResult = await this.scanOrchestrationAPI.getAllScanEngines(filters);
     const racineResult = await this.makeRequest<PaginatedResponse<ScanEngine>>('/engines', {
       method: 'POST',
       body: JSON.stringify({ filters, integration: 'advanced-scan-logic-spa' })
@@ -159,7 +164,7 @@ class RacineScanLogicAPIService {
    * Get scan engine by ID with enhanced racine context
    */
   async getScanEngineById(id: string): Promise<APIResponse<ScanEngine>> {
-    const existingResult = await this.scanOrchestrationAPIs.getScanEngineById(id);
+    const existingResult = await this.scanOrchestrationAPI.getScanEngineById(id);
     const racineContext = await this.makeRequest<any>(`/engines/${id}/racine-context`);
     
     if (existingResult.success) {
@@ -180,7 +185,7 @@ class RacineScanLogicAPIService {
    * Create new scan engine with racine orchestration
    */
   async createScanEngine(request: ScanCreateRequest): Promise<APIResponse<ScanEngine>> {
-    const existingResult = await this.scanOrchestrationAPIs.createScanEngine(request);
+    const existingResult = await this.scanOrchestrationAPI.createScanEngine(request);
     
     if (existingResult.success) {
       await this.makeRequest('/engines/register', {
@@ -199,7 +204,7 @@ class RacineScanLogicAPIService {
    * Update scan engine with racine coordination
    */
   async updateScanEngine(id: string, updates: ScanUpdateRequest): Promise<APIResponse<ScanEngine>> {
-    const existingResult = await this.scanOrchestrationAPIs.updateScanEngine(id, updates);
+    const existingResult = await this.scanOrchestrationAPI.updateScanEngine(id, updates);
     
     if (existingResult.success) {
       await this.makeRequest(`/engines/${id}/sync`, {
@@ -215,7 +220,7 @@ class RacineScanLogicAPIService {
    */
   async deleteScanEngine(id: string): Promise<APIResponse<void>> {
     await this.makeRequest(`/engines/${id}/cleanup`, { method: 'DELETE' });
-    return await this.scanOrchestrationAPIs.deleteScanEngine(id);
+    return await this.scanOrchestrationAPI.deleteScanEngine(id);
   }
 
   // ============================================================================
@@ -226,35 +231,35 @@ class RacineScanLogicAPIService {
    * Execute scan with intelligent orchestration
    */
   async executeScan(engineId: string, configuration?: ScanConfiguration): Promise<APIResponse<ScanExecution>> {
-    return await this.intelligentScanningAPIs.executeScan(engineId, configuration);
+    return await this.intelligentScanningAPI.executeScan(engineId, configuration);
   }
 
   /**
    * Get scan execution status
    */
   async getScanExecution(executionId: string): Promise<APIResponse<ScanExecution>> {
-    return await this.intelligentScanningAPIs.getScanExecution(executionId);
+    return await this.intelligentScanningAPI.getScanExecution(executionId);
   }
 
   /**
    * Cancel scan execution
    */
   async cancelScanExecution(executionId: string): Promise<APIResponse<void>> {
-    return await this.intelligentScanningAPIs.cancelScanExecution(executionId);
+    return await this.intelligentScanningAPI.cancelScanExecution(executionId);
   }
 
   /**
    * Pause scan execution
    */
   async pauseScanExecution(executionId: string): Promise<APIResponse<ScanExecution>> {
-    return await this.intelligentScanningAPIs.pauseScanExecution(executionId);
+    return await this.intelligentScanningAPI.pauseScanExecution(executionId);
   }
 
   /**
    * Resume scan execution
    */
   async resumeScanExecution(executionId: string): Promise<APIResponse<ScanExecution>> {
-    return await this.intelligentScanningAPIs.resumeScanExecution(executionId);
+    return await this.intelligentScanningAPI.resumeScanExecution(executionId);
   }
 
   // ============================================================================
@@ -265,21 +270,21 @@ class RacineScanLogicAPIService {
    * Get scan results
    */
   async getScanResults(executionId: string, filters?: any): Promise<APIResponse<ScanResult[]>> {
-    return await this.scanAnalyticsAPIs.getScanResults(executionId, filters);
+    return await this.scanAnalyticsAPI.getScanResults(executionId, filters);
   }
 
   /**
    * Get scan result by ID
    */
   async getScanResultById(resultId: string): Promise<APIResponse<ScanResult>> {
-    return await this.scanAnalyticsAPIs.getScanResultById(resultId);
+    return await this.scanAnalyticsAPI.getScanResultById(resultId);
   }
 
   /**
    * Export scan results
    */
   async exportScanResults(executionId: string, format: 'json' | 'csv' | 'xml'): Promise<APIResponse<Blob>> {
-    return await this.scanAnalyticsAPIs.exportScanResults(executionId, format);
+    return await this.scanAnalyticsAPI.exportScanResults(executionId, format);
   }
 
   // ============================================================================
@@ -290,56 +295,56 @@ class RacineScanLogicAPIService {
    * Get scan patterns
    */
   async getScanPatterns(category?: string): Promise<APIResponse<ScanPattern[]>> {
-    return await this.scanIntelligenceAPIs.getScanPatterns(category);
+    return await this.scanIntelligenceAPI.getScanPatterns(category);
   }
 
   /**
    * Create scan pattern
    */
   async createScanPattern(pattern: Partial<ScanPattern>): Promise<APIResponse<ScanPattern>> {
-    return await this.scanIntelligenceAPIs.createScanPattern(pattern);
+    return await this.scanIntelligenceAPI.createScanPattern(pattern);
   }
 
   /**
    * Update scan pattern
    */
   async updateScanPattern(id: string, updates: Partial<ScanPattern>): Promise<APIResponse<ScanPattern>> {
-    return await this.scanIntelligenceAPIs.updateScanPattern(id, updates);
+    return await this.scanIntelligenceAPI.updateScanPattern(id, updates);
   }
 
   /**
    * Delete scan pattern
    */
   async deleteScanPattern(id: string): Promise<APIResponse<void>> {
-    return await this.scanIntelligenceAPIs.deleteScanPattern(id);
+    return await this.scanIntelligenceAPI.deleteScanPattern(id);
   }
 
   /**
    * Get scan policies
    */
   async getScanPolicies(): Promise<APIResponse<ScanPolicy[]>> {
-    return await this.scanIntelligenceAPIs.getScanPolicies();
+    return await this.scanIntelligenceAPI.getScanPolicies();
   }
 
   /**
    * Create scan policy
    */
   async createScanPolicy(policy: Partial<ScanPolicy>): Promise<APIResponse<ScanPolicy>> {
-    return await this.scanIntelligenceAPIs.createScanPolicy(policy);
+    return await this.scanIntelligenceAPI.createScanPolicy(policy);
   }
 
   /**
    * Update scan policy
    */
   async updateScanPolicy(id: string, updates: Partial<ScanPolicy>): Promise<APIResponse<ScanPolicy>> {
-    return await this.scanIntelligenceAPIs.updateScanPolicy(id, updates);
+    return await this.scanIntelligenceAPI.updateScanPolicy(id, updates);
   }
 
   /**
    * Delete scan policy
    */
   async deleteScanPolicy(id: string): Promise<APIResponse<void>> {
-    return await this.scanIntelligenceAPIs.deleteScanPolicy(id);
+    return await this.scanIntelligenceAPI.deleteScanPolicy(id);
   }
 
   // ============================================================================
@@ -350,35 +355,35 @@ class RacineScanLogicAPIService {
    * Get scan templates
    */
   async getScanTemplates(category?: string): Promise<APIResponse<ScanTemplate[]>> {
-    return await this.scanWorkflowAPIs.getScanTemplates(category);
+    return await this.scanWorkflowAPI.getScanTemplates(category);
   }
 
   /**
    * Get scan template by ID
    */
   async getScanTemplateById(id: string): Promise<APIResponse<ScanTemplate>> {
-    return await this.scanWorkflowAPIs.getScanTemplateById(id);
+    return await this.scanWorkflowAPI.getScanTemplateById(id);
   }
 
   /**
    * Create scan template
    */
   async createScanTemplate(template: Partial<ScanTemplate>): Promise<APIResponse<ScanTemplate>> {
-    return await this.scanWorkflowAPIs.createScanTemplate(template);
+    return await this.scanWorkflowAPI.createScanTemplate(template);
   }
 
   /**
    * Update scan template
    */
   async updateScanTemplate(id: string, updates: Partial<ScanTemplate>): Promise<APIResponse<ScanTemplate>> {
-    return await this.scanWorkflowAPIs.updateScanTemplate(id, updates);
+    return await this.scanWorkflowAPI.updateScanTemplate(id, updates);
   }
 
   /**
    * Delete scan template
    */
   async deleteScanTemplate(id: string): Promise<APIResponse<void>> {
-    return await this.scanWorkflowAPIs.deleteScanTemplate(id);
+    return await this.scanWorkflowAPI.deleteScanTemplate(id);
   }
 
   // ============================================================================
@@ -389,42 +394,42 @@ class RacineScanLogicAPIService {
    * Schedule scan
    */
   async scheduleScan(engineId: string, schedule: ScanSchedule): Promise<APIResponse<ScanSchedule>> {
-    return await this.scanCoordinationAPIs.scheduleScan(engineId, schedule);
+    return await this.scanCoordinationAPI.scheduleScan(engineId, schedule);
   }
 
   /**
    * Get scan schedules
    */
   async getScanSchedules(engineId?: string): Promise<APIResponse<ScanSchedule[]>> {
-    return await this.scanCoordinationAPIs.getScanSchedules(engineId);
+    return await this.scanCoordinationAPI.getScanSchedules(engineId);
   }
 
   /**
    * Update scan schedule
    */
   async updateScanSchedule(scheduleId: string, updates: Partial<ScanSchedule>): Promise<APIResponse<ScanSchedule>> {
-    return await this.scanCoordinationAPIs.updateScanSchedule(scheduleId, updates);
+    return await this.scanCoordinationAPI.updateScanSchedule(scheduleId, updates);
   }
 
   /**
    * Delete scan schedule
    */
   async deleteScanSchedule(scheduleId: string): Promise<APIResponse<void>> {
-    return await this.scanCoordinationAPIs.deleteScanSchedule(scheduleId);
+    return await this.scanCoordinationAPI.deleteScanSchedule(scheduleId);
   }
 
   /**
    * Enable scan schedule
    */
   async enableScanSchedule(scheduleId: string): Promise<APIResponse<ScanSchedule>> {
-    return await this.scanCoordinationAPIs.enableScanSchedule(scheduleId);
+    return await this.scanCoordinationAPI.enableScanSchedule(scheduleId);
   }
 
   /**
    * Disable scan schedule
    */
   async disableScanSchedule(scheduleId: string): Promise<APIResponse<ScanSchedule>> {
-    return await this.scanCoordinationAPIs.disableScanSchedule(scheduleId);
+    return await this.scanCoordinationAPI.disableScanSchedule(scheduleId);
   }
 
   // ============================================================================
@@ -435,35 +440,35 @@ class RacineScanLogicAPIService {
    * Get scan performance metrics
    */
   async getScanPerformanceMetrics(engineId?: string, timeRange?: string): Promise<APIResponse<ScanPerformance>> {
-    return await this.scanPerformanceAPIs.getScanPerformanceMetrics(engineId, timeRange);
+    return await this.scanPerformanceAPI.getScanPerformanceMetrics(engineId, timeRange);
   }
 
   /**
    * Get scan optimization recommendations
    */
   async getScanOptimizationRecommendations(engineId: string): Promise<APIResponse<ScanOptimization>> {
-    return await this.scanOptimizationAPIs.getScanOptimizationRecommendations(engineId);
+    return await this.scanOptimizationAPI.getScanOptimizationRecommendations(engineId);
   }
 
   /**
    * Apply scan optimization
    */
   async applyScanOptimization(engineId: string, optimization: any): Promise<APIResponse<ScanEngine>> {
-    return await this.scanOptimizationAPIs.applyScanOptimization(engineId, optimization);
+    return await this.scanOptimizationAPI.applyScanOptimization(engineId, optimization);
   }
 
   /**
    * Get scan benchmarks
    */
   async getScanBenchmarks(engineId: string): Promise<APIResponse<any[]>> {
-    return await this.scanPerformanceAPIs.getScanBenchmarks(engineId);
+    return await this.scanPerformanceAPI.getScanBenchmarks(engineId);
   }
 
   /**
    * Run performance benchmark
    */
   async runPerformanceBenchmark(engineId: string, config: any): Promise<APIResponse<any>> {
-    return await this.scanPerformanceAPIs.runPerformanceBenchmark(engineId, config);
+    return await this.scanPerformanceAPI.runPerformanceBenchmark(engineId, config);
   }
 
   // ============================================================================
@@ -474,35 +479,35 @@ class RacineScanLogicAPIService {
    * Get scan diagnostics
    */
   async getScanDiagnostics(engineId: string): Promise<APIResponse<ScanDiagnostics>> {
-    return await this.advancedMonitoringAPIs.getScanDiagnostics(engineId);
+    return await this.advancedMonitoringAPI.getScanDiagnostics(engineId);
   }
 
   /**
    * Get scan health status
    */
   async getScanHealthStatus(engineId?: string): Promise<APIResponse<any>> {
-    return await this.advancedMonitoringAPIs.getScanHealthStatus(engineId);
+    return await this.advancedMonitoringAPI.getScanHealthStatus(engineId);
   }
 
   /**
    * Get scan alerts
    */
   async getScanAlerts(filters?: any): Promise<APIResponse<ScanAlert[]>> {
-    return await this.advancedMonitoringAPIs.getScanAlerts(filters);
+    return await this.advancedMonitoringAPI.getScanAlerts(filters);
   }
 
   /**
    * Acknowledge scan alert
    */
   async acknowledgeScanAlert(alertId: string, acknowledgment: any): Promise<APIResponse<ScanAlert>> {
-    return await this.advancedMonitoringAPIs.acknowledgeScanAlert(alertId, acknowledgment);
+    return await this.advancedMonitoringAPI.acknowledgeScanAlert(alertId, acknowledgment);
   }
 
   /**
    * Configure scan monitoring
    */
   async configureScanMonitoring(config: any): Promise<APIResponse<any>> {
-    return await this.advancedMonitoringAPIs.configureScanMonitoring(config);
+    return await this.advancedMonitoringAPI.configureScanMonitoring(config);
   }
 
   // ============================================================================
@@ -513,35 +518,35 @@ class RacineScanLogicAPIService {
    * Get scan analytics
    */
   async getScanAnalytics(timeRange?: string, filters?: any): Promise<APIResponse<any>> {
-    return await this.scanAnalyticsAPIs.getScanAnalytics(timeRange, filters);
+    return await this.scanAnalyticsAPI.getScanAnalytics(timeRange, filters);
   }
 
   /**
    * Get scan metrics
    */
   async getScanMetrics(engineId?: string): Promise<APIResponse<ScanMetrics>> {
-    return await this.scanAnalyticsAPIs.getScanMetrics(engineId);
+    return await this.scanAnalyticsAPI.getScanMetrics(engineId);
   }
 
   /**
    * Get scan history
    */
   async getScanHistory(engineId: string, limit?: number): Promise<APIResponse<ScanHistory[]>> {
-    return await this.scanAnalyticsAPIs.getScanHistory(engineId, limit);
+    return await this.scanAnalyticsAPI.getScanHistory(engineId, limit);
   }
 
   /**
    * Generate scan report
    */
   async generateScanReport(config: any): Promise<APIResponse<any>> {
-    return await this.scanAnalyticsAPIs.generateScanReport(config);
+    return await this.scanAnalyticsAPI.generateScanReport(config);
   }
 
   /**
    * Export scan analytics
    */
   async exportScanAnalytics(format: 'json' | 'csv' | 'pdf', filters?: any): Promise<APIResponse<Blob>> {
-    return await this.scanAnalyticsAPIs.exportScanAnalytics(format, filters);
+    return await this.scanAnalyticsAPI.exportScanAnalytics(format, filters);
   }
 
   // ============================================================================
@@ -552,21 +557,21 @@ class RacineScanLogicAPIService {
    * Get cache status
    */
   async getCacheStatus(): Promise<APIResponse<any>> {
-    return await this.distributedCachingAPIs.getCacheStatus();
+    return await this.distributedCachingAPI.getCacheStatus();
   }
 
   /**
    * Clear cache
    */
   async clearCache(cacheKey?: string): Promise<APIResponse<void>> {
-    return await this.distributedCachingAPIs.clearCache(cacheKey);
+    return await this.distributedCachingAPI.clearCache(cacheKey);
   }
 
   /**
    * Configure cache
    */
   async configureCache(config: any): Promise<APIResponse<any>> {
-    return await this.distributedCachingAPIs.configureCache(config);
+    return await this.distributedCachingAPI.configureCache(config);
   }
 
   // ============================================================================
@@ -577,21 +582,21 @@ class RacineScanLogicAPIService {
    * Start streaming scan
    */
   async startStreamingScan(config: any): Promise<APIResponse<any>> {
-    return await this.streamingOrchestrationAPIs.startStreamingScan(config);
+    return await this.streamingOrchestrationAPI.startStreamingScan(config);
   }
 
   /**
    * Stop streaming scan
    */
   async stopStreamingScan(streamId: string): Promise<APIResponse<void>> {
-    return await this.streamingOrchestrationAPIs.stopStreamingScan(streamId);
+    return await this.streamingOrchestrationAPI.stopStreamingScan(streamId);
   }
 
   /**
    * Get streaming scan status
    */
   async getStreamingScanStatus(streamId: string): Promise<APIResponse<any>> {
-    return await this.streamingOrchestrationAPIs.getStreamingScanStatus(streamId);
+    return await this.streamingOrchestrationAPI.getStreamingScanStatus(streamId);
   }
 
   // ============================================================================
@@ -650,7 +655,7 @@ class RacineScanLogicAPIService {
    * Bulk update scan engines
    */
   async bulkUpdateScanEngines(updates: Array<{ id: string; updates: ScanUpdateRequest }>): Promise<APIResponse<ScanEngine[]>> {
-    return await this.scanOrchestrationAPIs.bulkUpdateScanEngines(updates);
+    return await this.scanOrchestrationAPI.bulkUpdateScanEngines(updates);
   }
 
   /**
@@ -660,14 +665,14 @@ class RacineScanLogicAPIService {
     await Promise.all(ids.map(id => 
       this.makeRequest(`/engines/${id}/cleanup`, { method: 'DELETE' })
     ));
-    return await this.scanOrchestrationAPIs.bulkDeleteScanEngines(ids);
+    return await this.scanOrchestrationAPI.bulkDeleteScanEngines(ids);
   }
 
   /**
    * Bulk execute scans
    */
   async bulkExecuteScans(executions: Array<{ engineId: string; configuration?: ScanConfiguration }>): Promise<APIResponse<ScanExecution[]>> {
-    return await this.intelligentScanningAPIs.bulkExecuteScans(executions);
+    return await this.intelligentScanningAPI.bulkExecuteScans(executions);
   }
 
   // ============================================================================
@@ -678,7 +683,7 @@ class RacineScanLogicAPIService {
    * Get scan statistics
    */
   async getScanStats(): Promise<APIResponse<ScanStats>> {
-    const existingStats = await this.scanAnalyticsAPIs.getScanStats();
+    const existingStats = await this.scanAnalyticsAPI.getScanStats();
     const racineStats = await this.makeRequest<any>('/racine-stats');
     
     if (existingStats.success && racineStats.success) {
@@ -703,14 +708,14 @@ class RacineScanLogicAPIService {
    * Get scan logic service health
    */
   async getServiceHealth(): Promise<APIResponse<any>> {
-    return await this.advancedMonitoringAPIs.getServiceHealth();
+    return await this.advancedMonitoringAPI.getServiceHealth();
   }
 
   /**
    * Get system status
    */
   async getSystemStatus(): Promise<APIResponse<any>> {
-    const existingStatus = await this.advancedMonitoringAPIs.getSystemStatus();
+    const existingStatus = await this.advancedMonitoringAPI.getSystemStatus();
     const racineStatus = await this.makeRequest<any>('/system-status');
     
     if (existingStatus.success && racineStatus.success) {

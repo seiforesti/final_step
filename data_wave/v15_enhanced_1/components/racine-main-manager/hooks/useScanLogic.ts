@@ -5,8 +5,8 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 // Import existing scan logic services
-import { scanLogicApis } from '../services/scan-logic-apis';
-import { scanOrchestrationApis } from '../services/racine-orchestration-apis';
+import { racineScanLogicAPI } from '../services/scan-logic-apis';
+import { racineOrchestrationAPI } from '../services/racine-orchestration-apis';
 
 // Import types
 import type {
@@ -26,7 +26,7 @@ import type {
 
 // Import utilities
 import { scanLogicUtils } from '../utils/scan-logic-utils';
-import { crossGroupOrchestrator } from '../utils/cross-group-orchestrator';
+import { coordinateServices, validateIntegration, optimizeExecution, handleErrors } from '../utils/cross-group-orchestrator';
 import { contextAnalyzer } from '../utils/context-analyzer';
 
 /**
@@ -171,7 +171,7 @@ export function useScanLogic(options: UseScanLogicOptions = {}): UseScanLogicRet
     refetch: refetchConfigs
   } = useQuery({
     queryKey: ['scanLogic', 'configs', workspaceId],
-    queryFn: () => scanLogicApis.getScanConfigs(workspaceId),
+    queryFn: () => racineScanLogicAPI.getScanConfigs(workspaceId),
     refetchInterval: autoRefresh ? refreshInterval : false,
     enabled: true
   });
@@ -183,7 +183,7 @@ export function useScanLogic(options: UseScanLogicOptions = {}): UseScanLogicRet
     refetch: refetchScans
   } = useQuery({
     queryKey: ['scanLogic', 'activeScans', workspaceId],
-    queryFn: () => scanLogicApis.getActiveScans(workspaceId),
+    queryFn: () => racineScanLogicAPI.getActiveScans(workspaceId),
     refetchInterval: autoRefresh ? 5000 : false,
     enabled: true
   });
@@ -195,7 +195,7 @@ export function useScanLogic(options: UseScanLogicOptions = {}): UseScanLogicRet
     refetch: refetchMetrics
   } = useQuery({
     queryKey: ['scanLogic', 'metrics', workspaceId],
-    queryFn: () => scanLogicApis.getScanMetrics(workspaceId),
+    queryFn: () => racineScanLogicAPI.getScanMetrics(workspaceId),
     refetchInterval: autoRefresh ? refreshInterval : false,
     enabled: true
   });
@@ -207,7 +207,7 @@ export function useScanLogic(options: UseScanLogicOptions = {}): UseScanLogicRet
     refetch: refetchHistory
   } = useQuery({
     queryKey: ['scanLogic', 'history', workspaceId],
-    queryFn: () => scanLogicApis.getScanHistory(workspaceId),
+    queryFn: () => racineScanLogicAPI.getScanHistory(workspaceId),
     enabled: true
   });
 
@@ -218,7 +218,7 @@ export function useScanLogic(options: UseScanLogicOptions = {}): UseScanLogicRet
     refetch: refetchCoordination
   } = useQuery({
     queryKey: ['scanLogic', 'crossGroup', workspaceId],
-    queryFn: () => scanOrchestrationApis.getCrossGroupScans(workspaceId),
+    queryFn: () => racineOrchestrationAPI.getCrossGroupScans(workspaceId),
     enabled: enableCoordination,
     refetchInterval: autoRefresh ? refreshInterval : false
   });
@@ -229,7 +229,7 @@ export function useScanLogic(options: UseScanLogicOptions = {}): UseScanLogicRet
     refetch: refetchOptimizations
   } = useQuery({
     queryKey: ['scanLogic', 'optimizations', workspaceId],
-    queryFn: () => scanLogicApis.getOptimizationSuggestions(workspaceId),
+    queryFn: () => racineScanLogicAPI.getOptimizationSuggestions(workspaceId),
     enabled: enableOptimization,
     refetchInterval: autoRefresh ? refreshInterval * 2 : false
   });
@@ -237,7 +237,7 @@ export function useScanLogic(options: UseScanLogicOptions = {}): UseScanLogicRet
   // Create scan configuration mutation
   const createScanConfigMutation = useMutation({
     mutationFn: (config: Partial<ScanLogicConfig>) => 
-      scanLogicApis.createScanConfig(config, workspaceId),
+      racineScanLogicAPI.createScanConfig(config, workspaceId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['scanLogic', 'configs'] });
     },
@@ -247,7 +247,7 @@ export function useScanLogic(options: UseScanLogicOptions = {}): UseScanLogicRet
   // Update scan configuration mutation
   const updateScanConfigMutation = useMutation({
     mutationFn: ({ id, updates }: { id: string; updates: Partial<ScanLogicConfig> }) =>
-      scanLogicApis.updateScanConfig(id, updates),
+      racineScanLogicAPI.updateScanConfig(id, updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['scanLogic', 'configs'] });
     },
@@ -256,7 +256,7 @@ export function useScanLogic(options: UseScanLogicOptions = {}): UseScanLogicRet
 
   // Delete scan configuration mutation
   const deleteScanConfigMutation = useMutation({
-    mutationFn: (id: string) => scanLogicApis.deleteScanConfig(id),
+    mutationFn: (id: string) => racineScanLogicAPI.deleteScanConfig(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['scanLogic', 'configs'] });
     },
@@ -266,7 +266,7 @@ export function useScanLogic(options: UseScanLogicOptions = {}): UseScanLogicRet
   // Execute scan mutation
   const executeScanMutation = useMutation({
     mutationFn: ({ configId, options }: { configId: string; options?: any }) =>
-      scanLogicApis.executeScan(configId, options),
+      racineScanLogicAPI.executeScan(configId, options),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['scanLogic', 'activeScans'] });
       queryClient.invalidateQueries({ queryKey: ['scanLogic', 'history'] });
@@ -276,21 +276,21 @@ export function useScanLogic(options: UseScanLogicOptions = {}): UseScanLogicRet
 
   // Scan control mutations
   const startScanMutation = useMutation({
-    mutationFn: (workflowId: string) => scanLogicApis.startScan(workflowId),
+    mutationFn: (workflowId: string) => racineScanLogicAPI.startScan(workflowId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['scanLogic', 'activeScans'] });
     }
   });
 
   const pauseScanMutation = useMutation({
-    mutationFn: (workflowId: string) => scanLogicApis.pauseScan(workflowId),
+    mutationFn: (workflowId: string) => racineScanLogicAPI.pauseScan(workflowId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['scanLogic', 'activeScans'] });
     }
   });
 
   const stopScanMutation = useMutation({
-    mutationFn: (workflowId: string) => scanLogicApis.stopScan(workflowId),
+    mutationFn: (workflowId: string) => racineScanLogicAPI.stopScan(workflowId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['scanLogic', 'activeScans'] });
     }
@@ -298,7 +298,7 @@ export function useScanLogic(options: UseScanLogicOptions = {}): UseScanLogicRet
 
   // Advanced optimization mutation
   const optimizeScanMutation = useMutation({
-    mutationFn: (configId: string) => scanLogicApis.optimizeScan(configId),
+    mutationFn: (configId: string) => racineScanLogicAPI.optimizeScan(configId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['scanLogic', 'optimizations'] });
     }
@@ -307,7 +307,7 @@ export function useScanLogic(options: UseScanLogicOptions = {}): UseScanLogicRet
   // Cross-group coordination mutation
   const coordinateCrossGroupScanMutation = useMutation({
     mutationFn: (coordination: ScanLogicCoordination) =>
-      scanOrchestrationApis.coordinateCrossGroupScan(coordination),
+      racineOrchestrationAPI.coordinateCrossGroupScan(coordination),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['scanLogic', 'crossGroup'] });
     }
@@ -318,7 +318,7 @@ export function useScanLogic(options: UseScanLogicOptions = {}): UseScanLogicRet
     const initializeScanLogic = async () => {
       try {
         // Initialize integration with existing Advanced-Scan-Logic SPA
-        await scanOrchestrationApis.initializeScanLogicIntegration(workspaceId);
+        await racineOrchestrationAPI.initializeScanLogicIntegration(workspaceId);
         
         // Set up cross-group coordination if enabled
         if (enableCoordination) {
@@ -341,7 +341,7 @@ export function useScanLogic(options: UseScanLogicOptions = {}): UseScanLogicRet
     const setupRealTimeUpdates = async () => {
       try {
         // Subscribe to scan status updates
-        const scanUpdatesSubscription = await scanLogicApis.subscribeToScanUpdates(
+        const scanUpdatesSubscription = await racineScanLogicAPI.subscribeToScanUpdates(
           workspaceId,
           (update) => {
             queryClient.setQueryData(
@@ -421,7 +421,7 @@ export function useScanLogic(options: UseScanLogicOptions = {}): UseScanLogicRet
   }, [stopScanMutation]);
 
   const restartScan = useCallback(async (workflowId: string) => {
-    await scanLogicApis.restartScan(workflowId);
+    await racineScanLogicAPI.restartScan(workflowId);
     await refetchScans();
   }, [refetchScans]);
 
@@ -431,7 +431,7 @@ export function useScanLogic(options: UseScanLogicOptions = {}): UseScanLogicRet
   }, [optimizeScanMutation]);
 
   const analyzeScanPerformance = useCallback(async (scanId: string) => {
-    return await scanLogicApis.analyzeScanPerformance(scanId);
+    return await racineScanLogicAPI.analyzeScanPerformance(scanId);
   }, []);
 
   const coordinateCrossGroupScan = useCallback(async (coordination: ScanLogicCoordination) => {
@@ -439,15 +439,15 @@ export function useScanLogic(options: UseScanLogicOptions = {}): UseScanLogicRet
   }, [coordinateCrossGroupScanMutation]);
 
   const getScansByWorkspace = useCallback(async (workspaceId: string) => {
-    return await scanLogicApis.getScansByWorkspace(workspaceId);
+    return await racineScanLogicAPI.getScansByWorkspace(workspaceId);
   }, []);
 
   const createWorkspaceScan = useCallback(async (workspaceId: string, config: Partial<ScanLogicConfig>) => {
-    return await scanLogicApis.createWorkspaceScan(workspaceId, config);
+    return await racineScanLogicAPI.createWorkspaceScan(workspaceId, config);
   }, []);
 
   const subscribeScanUpdates = useCallback((scanId: string, callback: (update: any) => void) => {
-    const unsubscribe = scanLogicApis.subscribeScanUpdates(scanId, callback);
+    const unsubscribe = racineScanLogicAPI.subscribeScanUpdates(scanId, callback);
     return unsubscribe;
   }, []);
 
@@ -470,22 +470,22 @@ export function useScanLogic(options: UseScanLogicOptions = {}): UseScanLogicRet
   }, [refetchConfigs, refetchScans, refetchMetrics, refetchHistory, refetchCoordination]);
 
   const clearScanHistory = useCallback(async () => {
-    await scanLogicApis.clearScanHistory(workspaceId);
+    await racineScanLogicAPI.clearScanHistory(workspaceId);
     await refetchHistory();
   }, [workspaceId, refetchHistory]);
 
   const exportScanResults = useCallback(async (scanIds: string[]) => {
-    return await scanLogicApis.exportScanResults(scanIds);
+    return await racineScanLogicAPI.exportScanResults(scanIds);
   }, []);
 
   // Advanced features
   const applyOptimization = useCallback(async (optimization: ScanLogicOptimization) => {
-    await scanLogicApis.applyOptimization(optimization);
+    await racineScanLogicAPI.applyOptimization(optimization);
     await refetchOptimizations();
   }, [refetchOptimizations]);
 
   const generateReport = useCallback(async () => {
-    return await scanLogicApis.generateAnalyticsReport(workspaceId);
+    return await racineScanLogicAPI.generateAnalyticsReport(workspaceId);
   }, [workspaceId]);
 
   // Integration status
