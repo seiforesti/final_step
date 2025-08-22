@@ -1833,7 +1833,7 @@ export const WorkspaceAnalytics: React.FC = () => {
                       <div className="text-xs text-muted-foreground">Uptime</div>
                     </div>
                   </div>
-                </div>
+                </Card>
                 
                 <Card className="p-3">
                   <div className="flex items-center gap-2">

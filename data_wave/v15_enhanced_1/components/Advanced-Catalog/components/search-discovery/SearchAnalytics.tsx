@@ -92,7 +92,6 @@ import {
 
 import {
   BarChart3,
-  PieChart as PieChartIcon,
   LineChart as LineChartIcon,
   TrendingUp,
   TrendingDown,
@@ -170,7 +169,6 @@ import {
   DollarSign,
   TrendingUp as TrendingUpIcon,
   BarChart as BarChartIcon,
-  PieChart,
   ChevronUp,
   ChevronDown,
   ChevronRight,

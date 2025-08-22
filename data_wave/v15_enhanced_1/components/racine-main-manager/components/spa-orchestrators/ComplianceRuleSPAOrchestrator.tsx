@@ -128,8 +128,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 // Existing Compliance Rule SPA Components - CRITICAL: Import without modification
 const ComplianceManager = lazy(() => 
-  import('../../../Compliance-Rule').then(module => ({
-    default: module.ComplianceManager || module.default
+  import('../../../Compliance-Rule/enhanced-compliance-rule-app').then(module => ({
+    default: module.default
   }))
 );
 

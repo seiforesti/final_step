@@ -22,7 +22,7 @@ import {
   useDataSourceHealthQuery 
 } from "./services/apis"
 import { DataDiscoveryWorkspace } from "./data-discovery/data-discovery-workspace"
-import { Eye, GitBranch } from "lucide-react"
+import { GitBranch } from "lucide-react" // Eye already imported above
 
 interface DataSourceDetailsProps {
   dataSourceId: number

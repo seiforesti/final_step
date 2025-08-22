@@ -86,7 +86,8 @@ interface PerformanceData {
 export function DataSourcePerformanceView({
   dataSource,
   onNavigateToComponent,
-  className = "": PerformanceViewProps) {
+  className = ""
+}: PerformanceViewProps) {
   const [timeRange, setTimeRange] = useState("24h")
   const [selectedMetric, setSelectedMetric] = useState<string | null>(null)
 
@@ -253,6 +254,8 @@ export function DataSourcePerformanceView({
 
   // Return null if no data available
   if (!performanceData) return null
+
+  const metrics = {
     responseTime: {
       name: "Response Time",
       value: 45,
@@ -341,11 +344,11 @@ export function DataSourcePerformanceView({
       errorRate: Math.random() * 0.5,
       cpuUsage: 50 + Math.random() * 30,
       memoryUsage: 60 + Math.random() * 25
-    })),
-  }), [])
+    }))
+  };
 
   // Use real performance data from enterprise APIs
-  const data = performanceData
+  const data = performanceData;
 
   const getStatusColor = (status: string) => {
     switch (status) {

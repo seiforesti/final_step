@@ -441,17 +441,17 @@ const ResponsiveLayoutEngine: React.FC<ResponsiveLayoutEngineProps> = ({
   const [responsiveState, setResponsiveState] = useState<ResponsiveState>({
     activeBreakpoint: breakpoint,
     deviceCapabilities: {
-      screenSize: { width: window.innerWidth, height: window.innerHeight },
-      pixelRatio: window.devicePixelRatio || 1,
-      touchSupport: 'ontouchstart' in window,
-      hoverSupport: window.matchMedia('(hover: hover)').matches,
+      screenSize: { width: typeof window !== 'undefined' ? window.innerWidth : 1920, height: typeof window !== 'undefined' ? window.innerHeight : 1080 },
+      pixelRatio: typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1,
+      touchSupport: typeof window !== 'undefined' ? 'ontouchstart' in window : false,
+      hoverSupport: typeof window !== 'undefined' ? window.matchMedia('(hover: hover)').matches : true,
       keyboardSupport: true,
-      gestureSupport: 'GestureEvent' in window,
-      accelerometerSupport: 'DeviceOrientationEvent' in window,
-      batteryAPI: 'getBattery' in navigator,
-      networkAPI: 'connection' in navigator,
-      memoryAPI: 'memory' in (performance as any),
-      performanceAPI: 'PerformanceObserver' in window
+      gestureSupport: typeof window !== 'undefined' ? 'GestureEvent' in window : false,
+      accelerometerSupport: typeof window !== 'undefined' ? 'DeviceOrientationEvent' in window : false,
+      batteryAPI: typeof navigator !== 'undefined' ? 'getBattery' in navigator : false,
+      networkAPI: typeof navigator !== 'undefined' ? 'connection' in navigator : false,
+      memoryAPI: typeof performance !== 'undefined' ? 'memory' in (performance as any) : false,
+      performanceAPI: typeof window !== 'undefined' ? 'PerformanceObserver' in window : false
     },
     networkCondition: {
       type: 'wifi',
@@ -1319,7 +1319,6 @@ export const useResponsiveQuery = (query: string) => {
 // =============================================================================
 
 export default ResponsiveLayoutEngine;
-export { ResponsiveContext, useResponsiveContext };
 export type { 
   ResponsiveLayoutEngineProps, 
   ResponsiveState, 

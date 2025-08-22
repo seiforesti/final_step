@@ -152,41 +152,17 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 
 // Existing Scan Rule Sets SPA Components - CRITICAL: Import without modification
-const RuleDesigner = lazy(() => 
-  import('../../../Advanced-Scan-Rule-Sets/components/rule-designer').then(module => ({
-    default: module.RuleDesigner || module.default
-  }))
-);
+const RuleDesigner = lazy(() => import('../../../Advanced-Scan-Rule-Sets/components/rule-designer/IntelligentRuleDesigner'));
 
-const RuleIntelligence = lazy(() => 
-  import('../../../Advanced-Scan-Rule-Sets/components/rule-intelligence').then(module => ({
-    default: module.RuleIntelligence || module.default
-  }))
-);
+const RuleIntelligence = lazy(() => import('../../../Advanced-Scan-Rule-Sets/components/rule-intelligence/IntelligentPatternDetector'));
 
-const AIEnhancement = lazy(() => 
-  import('../../../Advanced-Scan-Rule-Sets/components/ai-enhancement').then(module => ({
-    default: module.AIEnhancement || module.default
-  }))
-);
+const AIEnhancement = lazy(() => import('../../../Advanced-Scan-Rule-Sets/components/ai-enhancement/AIPatternSuggestions'));
 
-const TestingFramework = lazy(() => 
-  import('../../../Advanced-Scan-Rule-Sets/components/testing-framework').then(module => ({
-    default: module.TestingFramework || module.default
-  }))
-);
+const TestingFramework = lazy(() => import('../../../Advanced-Scan-Rule-Sets/components/testing-framework/RuleTestingFramework'));
 
-const RuleOrchestration = lazy(() => 
-  import('../../../Advanced-Scan-Rule-Sets/components/rule-orchestration').then(module => ({
-    default: module.RuleOrchestration || module.default
-  }))
-);
+const RuleOrchestration = lazy(() => import('../../../Advanced-Scan-Rule-Sets/components/rule-orchestration/RuleOrchestrationCenter'));
 
-const Collaboration = lazy(() => 
-  import('../../../Advanced-Scan-Rule-Sets/components/collaboration').then(module => ({
-    default: module.Collaboration || module.default
-  }))
-);
+const Collaboration = lazy(() => import('../../../Advanced-Scan-Rule-Sets/components/collaboration/TeamCollaborationHub'));
 
 // Core Types
 import {

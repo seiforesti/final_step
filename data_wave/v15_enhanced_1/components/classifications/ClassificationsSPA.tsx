@@ -28,60 +28,56 @@ import {
   AreaChart, Area, BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
   ComposedChart, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
   Legend, ResponsiveContainer, ScatterChart, Scatter, RadarChart, PolarGrid,
-  PolarAngleAxis, PolarRadiusAxis, Radar, Treemap, FunnelChart, Funnel,
+  PolarAngleAxis, PolarRadiusAxis, Treemap, FunnelChart, Funnel,
   LabelList, Sankey
 } from 'recharts';
 import {
   BarChart3, TrendingUp, Activity, DollarSign, Users, Target, Award,
   Clock, Database, Monitor, Cpu, AlertTriangle, CheckCircle, XCircle,
-  Info, Settings, Search, Filter, Download, Upload, Refresh, Play,
-  Pause, Stop, MoreVertical, Eye, Edit, Trash2, Plus, Minus, ArrowUp,
+  Info, Settings, Search, Filter, Download, Upload, RefreshCw, Play,
+  Pause, MoreVertical, Eye, Edit, Trash2, Plus, Minus, ArrowUp,
   ArrowDown, ArrowRight, Calendar, Globe, Shield, Lock, Unlock, Star,
   Heart, Bookmark, Share, MessageSquare, Bell, Mail, Phone, Video,
   Mic, Camera, Image, File, Folder, Archive, Tag, Flag, Map,
-  Navigation, Compass, Route, Layers, Grid, List, Table, Kanban,
-  Timeline, Chart, PieChart as PieChartIcon, LineChart as LineChartIcon,
+  Navigation, Compass, Route,   Layers, Grid, List, Table, Kanban,
+  PieChart as PieChartIcon, LineChart as LineChartIcon,
   Building, Briefcase, Calculator, CreditCard, FileText, Presentation,
-  Lightbulb, Zap, Brain, Network, Bot, Workflow, GitBranch, Boxes, Rocket,
+  Lightbulb, Zap, Brain, Network, Bot, Workflow, GitBranch, Boxes,
   Package, Server, Cloud, HardDrive, Wifi, Bluetooth, Smartphone,
-  Laptop, Desktop, Tablet, Watch, Headphones, Speaker, Gamepad2,
+  Laptop, Tablet, Watch, Headphones, Speaker, Gamepad2,
   Joystick, Home, Car, Plane, Train, Ship, Truck, Bike, Bus,
-  Rocket, Satellite, Radar, Microscope, Telescope, Atom, Dna,
+  Satellite, Radar, Microscope, Atom, Dna,
   Fingerprint, QrCode, Barcode, ScanLine, CameraOff, Volume2,
   VolumeX, Maximize, Minimize, RotateCcw, RotateCw, FlipHorizontal,
-  FlipVertical, Copy, Cut, Paste, Scissors, PaintBucket, Palette,
+  FlipVertical, Copy, Scissors, PaintBucket, Palette,
   Brush, Pen, PenTool, Eraser, Ruler, Move, MousePointer, Hand,
   GripHorizontal, GripVertical, CornerDownLeft, CornerDownRight,
   CornerUpLeft, CornerUpRight, ChevronDown, ChevronUp, ChevronLeft,
   ChevronRight, ChevronsDown, ChevronsUp, ChevronsLeft, ChevronsRight,
   Menu, X, Hash, AtSign, Percent, Ampersand, Quote, Italic, Bold,
   Underline, Strikethrough, AlignLeft, AlignCenter, AlignRight,
-  AlignJustify, Indent, Outdent, WrapText, Type, FontBold, FontItalic,
-  Superscript, Subscript, Code, Code2, Terminal, Command as CommandIcon,
-  Option, Alt, Shift, Ctrl, Enter, Space, Tab, Backspace, Delete,
-  Insert, PageUp, PageDown, End, Home as HomeIcon, ArrowBigDown,
-  ArrowBigUp, ArrowBigLeft, ArrowBigRight, Circle, Square, Triangle,
+  AlignJustify, Indent, Outdent, WrapText, Type, Code, Code2, Terminal, Command as CommandIcon,
+  Circle, Square, Triangle,
   Diamond, Pentagon, Hexagon, Octagon, Star as StarIcon, Heart as HeartIcon,
   Smile, Frown, Meh, ThumbsUp, ThumbsDown, TrendingDown, Minus as MinusIcon,
-  Equal, NotEqual, MoreHorizontal, MoreVertical as MoreVerticalIcon,
-  Ellipsis, DotSquare, CheckSquare, XSquare, MinusSquare, PlusSquare,
+  Equal, MoreHorizontal, MoreVertical as MoreVerticalIcon,
+  CheckSquare, XSquare, MinusSquare, PlusSquare,
   PlaySquare, PauseOctagon, StopCircle, SkipBack, SkipForward,
   Rewind, FastForward, Repeat, Repeat1, Shuffle, Volume, Volume1,
-  VolumeOff, Mic2, MicOff, Radio, Disc, Disc2, Disc3, Music,
+  Mic2, MicOff, Radio, Disc, Disc2, Disc3, Music,
   Music2, Music3, Music4, Headphones as HeadphonesIcon, Airplay,
   Cast, Tv, Tv2, Radio as RadioIcon, Podcast, Rss, Wifi as WifiIcon,
   WifiOff, Signal, SignalHigh, SignalLow, SignalMedium, SignalZero,
   Antenna, Bluetooth as BluetoothIcon, BluetoothConnected, BluetoothOff,
-  BluetoothSearching, Nfc, Usb, HardDrive as HardDriveIcon, Hdd,
+  BluetoothSearching, Nfc, Usb, HardDrive as HardDriveIcon,
   ScanEye, ScanFace, ScanSearch, ScanText, Scan, QrCode as QrCodeIcon,
-  Barcode as BarcodeIcon, BarcodeScanner, ScanLine as ScanLineIcon,
+  Barcode as BarcodeIcon, ScanLine as ScanLineIcon,
   Fingerprint as FingerprintIcon, ShieldCheck, ShieldAlert, ShieldClose,
   ShieldEllipsis, ShieldMinus, ShieldOff, ShieldPlus, ShieldQuestion,
-  ShieldX, Lock as LockIcon, LockKeyhole, LockKeyholeOpen, LockOpen,
-  Unlock as UnlockIcon, Key, KeyRound, KeySquare, Keypad, Safe,
-  Vault, BankNote, Banknote, Coins, CreditCard as CreditCardIcon,
-  Wallet, Receipt, ReceiptEuro, ReceiptIndianRupee, ReceiptJapaneseYen,
-  ReceiptPound, ReceiptRussianRuble, ReceiptSwissFranc, ReceiptText,
+  ShieldX, Lock as LockIcon, LockKeyhole,
+  Unlock as UnlockIcon, Key, KeyRound, KeySquare,
+  Banknote, Coins, CreditCard as CreditCardIcon,
+  Wallet, Receipt,
   PiggyBank, TrendingUp as TrendingUpIcon, TrendingDown as TrendingDownIcon
 } from 'lucide-react';
 
@@ -249,6 +245,8 @@ interface ClassificationsSPAProps {
   onNavigate?: (view: ClassificationView) => void;
   onWorkflowComplete?: (workflowId: string, result: any) => void;
 }
+
+interface ClassificationsSPAState {
   profileOpen: boolean;
   searchQuery: string;
   globalFilters: GlobalFilter[];
@@ -496,7 +494,7 @@ const CLASSIFICATION_VERSIONS = [
       { id: 'adaptive-learning-center', name: 'Adaptive Learning Center', icon: TrendingUp },
       { id: 'hyperparameter-optimizer', name: 'Hyperparameter Optimizer', icon: Target },
       { id: 'drift-detection-monitor', name: 'Drift Detection Monitor', icon: AlertTriangle },
-      { id: 'feature-engineering-studio', name: 'Feature Engineering Studio', icon: Wrench },
+      { id: 'feature-engineering-studio', name: 'Feature Engineering Studio', icon: Settings },
       { id: 'model-ensemble-builder', name: 'Model Ensemble Builder', icon: Boxes },
       { id: 'ml-analytics-dashboard', name: 'ML Analytics Dashboard', icon: BarChart3 }
     ]

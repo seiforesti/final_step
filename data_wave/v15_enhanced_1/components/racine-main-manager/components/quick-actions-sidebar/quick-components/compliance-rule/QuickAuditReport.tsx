@@ -323,7 +323,7 @@ import {
   Huckleberry,
   Chokeberry,
   Serviceberry,
-  Snowberry,
+  Snowberry as Snowberry1,
   Salmonberry,
   Thimbleberry,
   Dewberry,
@@ -359,7 +359,7 @@ import {
   Bowlberry,
   Plateberry,
   Cupberry,
-  Glassberry,
+  Glassberry as Glassberry1,
   Jarberry,
   Canberry,
   Bottleberry,
@@ -438,12 +438,12 @@ import {
 import { format } from 'date-fns';
 
 // Import hooks and services
-import { useComplianceRule } from '../../../hooks/useComplianceRule';
-import { useWorkspaceManagement } from '../../../hooks/useWorkspaceManagement';
-import { useUserManagement } from '../../../hooks/useUserManagement';
-import { useAIAssistant } from '../../../hooks/useAIAssistant';
-import { useCrossGroupIntegration } from '../../../hooks/useCrossGroupIntegration';
-import { useActivityTracking } from '../../../hooks/useActivityTracking';
+import { useComplianceRules as useComplianceRule } from '../../../../hooks/useComplianceRules';
+import { useWorkspaceManagement } from '../../../../hooks/useWorkspaceManagement';
+import { useUserManagement } from '../../../../hooks/useUserManagement';
+import { useAIAssistant } from '../../../../hooks/useAIAssistant';
+import { useCrossGroupIntegration } from '../../../../hooks/useCrossGroupIntegration';
+import { useActivityTracking } from '../../../../hooks/useActivityTracking';
 
 // Import types
 import {
@@ -457,7 +457,7 @@ import {
   ReportScope,
   AuditSummary,
   ReportTemplate,
-} from '../../../types/racine-core.types';
+} from '../../../../types/racine-core.types';
 
 interface QuickAuditReportProps {
   isVisible: boolean;

@@ -127,7 +127,7 @@ import { AspectRatio } from '@/components/ui/aspect-ratio'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card'
 import { Menubar, MenubarCheckboxItem, MenubarContent, MenubarItem, MenubarMenu, MenubarRadioGroup, MenubarRadioItem, MenubarSeparator, MenubarShortcut, MenubarSub, MenubarSubContent, MenubarSubTrigger, MenubarTrigger } from '@/components/ui/menubar'
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Table as UITable, TableBody as UITableBody, TableCaption as UITableCaption, TableCell as UITableCell, TableHead as UITableHead, TableHeader as UITableHeader, TableRow as UITableRow } from '@/components/ui/table'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { 
   LineChart as RechartsLineChart, 

@@ -86,9 +86,19 @@ const ENDPOINTS = {
  */
 export class ScanIntelligenceAPIService {
   private apiClient: ApiClient;
+  private baseUrl: string;
 
   constructor() {
     this.apiClient = new ApiClient();
+    this.baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+  }
+
+  private getAuthToken(): string {
+    // Get auth token from localStorage or context
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('authToken') || '';
+    }
+    return '';
   }
 
   // ==================== INTELLIGENCE ANALYSIS ====================
@@ -100,10 +110,11 @@ export class ScanIntelligenceAPIService {
    */
   async performIntelligenceAnalysis(request: IntelligenceAnalysisRequest): Promise<IntelligenceAnalysisResponse> {
     try {
-      return await this.apiClient.post<IntelligenceAnalysisResponse>(
+      const response = await this.apiClient.post<IntelligenceAnalysisResponse>(
         ENDPOINTS.ANALYZE_SCAN_INTELLIGENCE,
         request
       );
+      return response.data;
     } catch (error) {
       throw new Error(`Failed to perform intelligence analysis: ${error}`);
     }
@@ -639,5 +650,5 @@ export class ScanIntelligenceAPIService {
 }
 
 // Export singleton instance
-export const scanIntelligenceAPI = new ScanIntelligenceAPI();
+export const scanIntelligenceAPI = new ScanIntelligenceAPIService();
 export default scanIntelligenceAPI;

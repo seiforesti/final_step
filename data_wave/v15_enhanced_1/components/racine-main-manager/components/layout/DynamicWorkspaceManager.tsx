@@ -2100,7 +2100,6 @@ export const useDragDrop = () => {
 // =============================================================================
 
 export default DynamicWorkspaceManager;
-export { WorkspaceContext, useWorkspaceContext };
 export type { 
   DynamicWorkspaceManagerProps, 
   WorkspaceManagerState, 

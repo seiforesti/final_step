@@ -172,8 +172,8 @@ const DataSourceMonitoringDashboard = lazy(() =>
 );
 
 const DataSourceAnalytics = lazy(() => 
-  import('../../../data-sources/analytics').then(module => ({
-    default: module.DataSourceAnalytics || module.default
+  import('../../../data-sources/data-source-growth-analytics').then(module => ({
+    default: module.default
   }))
 );
 

@@ -88,6 +88,52 @@ export function validateMemberPermissions(permissions: string[]): { isValid: boo
   };
 }
 
+/**
+ * Validates workspace name format and uniqueness
+ */
+export function validateWorkspaceName(
+  name: string,
+  existingNames: string[] = []
+): { isValid: boolean; errors: string[] } {
+  const errors: string[] = [];
+
+  // Check if name is provided
+  if (!name || name.trim().length === 0) {
+    errors.push('Workspace name is required');
+  }
+
+  // Check name length
+  if (name && name.length > 100) {
+    errors.push('Workspace name must be less than 100 characters');
+  }
+
+  // Check for minimum length
+  if (name && name.trim().length < 3) {
+    errors.push('Workspace name must be at least 3 characters long');
+  }
+
+  // Check for valid characters (alphanumeric, spaces, hyphens, underscores)
+  if (name && !/^[a-zA-Z0-9\s\-_]+$/.test(name)) {
+    errors.push('Workspace name can only contain letters, numbers, spaces, hyphens, and underscores');
+  }
+
+  // Check for reserved words
+  const reservedWords = ['admin', 'root', 'system', 'default', 'temp', 'test'];
+  if (name && reservedWords.includes(name.toLowerCase())) {
+    errors.push('Workspace name cannot be a reserved word');
+  }
+
+  // Check for uniqueness (case-insensitive)
+  if (name && existingNames.some(existing => existing.toLowerCase() === name.toLowerCase())) {
+    errors.push('Workspace name already exists');
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors
+  };
+}
+
 // =============================================================================
 // WORKSPACE UTILITIES
 // =============================================================================

@@ -964,7 +964,7 @@ export const DependencyResolver: React.FC<{
     return String(a).localeCompare(String(b))
   }
 
-  const groupBy = <T>(array: T[], key: keyof T): Record<string, T[]> => {
+  const groupBy = <T,>(array: T[], key: keyof T): Record<string, T[]> => {
     return array.reduce((groups, item) => {
       const groupKey = String(item[key])
       if (!groups[groupKey]) {

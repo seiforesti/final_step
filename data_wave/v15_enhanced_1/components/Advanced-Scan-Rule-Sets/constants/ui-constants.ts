@@ -943,18 +943,7 @@ export const UI_CONSTANTS = {
   PERFORMANCE: PERFORMANCE_CONFIG
 } as const;
 
-// Export individual configuration groups
-export {
-  THEME_CONFIG,
-  LAYOUT_CONFIG,
-  ANIMATION_CONFIG,
-  COMPONENT_CONFIG,
-  ICON_CONFIG,
-  BREAKPOINTS,
-  Z_INDEX,
-  A11Y_CONFIG,
-  PERFORMANCE_CONFIG
-};
+// Note: individual groups are already exported above using `export const` declarations.
 
 // Default export
 export default UI_CONSTANTS;

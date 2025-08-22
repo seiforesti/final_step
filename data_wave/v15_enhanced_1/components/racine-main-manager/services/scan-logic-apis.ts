@@ -26,23 +26,21 @@ import {
   ScanStats,
   ScanPerformance,
   ScanAlert,
-  ScanRecommendation,
-  APIResponse,
-  PaginatedResponse
+  ScanRecommendation
 } from '../types/racine-core.types';
 
 // Import existing Advanced Scan Logic services for integration
-import { IntelligentScanningAPIs } from '../../Advanced-Scan-Logic/services/intelligent-scanning-apis';
-import { ScanOrchestrationAPIs } from '../../Advanced-Scan-Logic/services/scan-orchestration-apis';
-import { ScanOptimizationAPIs } from '../../Advanced-Scan-Logic/services/scan-optimization-apis';
-import { ScanPerformanceAPIs } from '../../Advanced-Scan-Logic/services/scan-performance-apis';
-import { ScanAnalyticsAPIs } from '../../Advanced-Scan-Logic/services/scan-analytics-apis';
-import { ScanCoordinationAPIs } from '../../Advanced-Scan-Logic/services/scan-coordination-apis';
-import { ScanIntelligenceAPIs } from '../../Advanced-Scan-Logic/services/scan-intelligence-apis';
-import { ScanWorkflowAPIs } from '../../Advanced-Scan-Logic/services/scan-workflow-apis';
-import { AdvancedMonitoringAPIs } from '../../Advanced-Scan-Logic/services/advanced-monitoring-apis';
-import { DistributedCachingAPIs } from '../../Advanced-Scan-Logic/services/distributed-caching-apis';
-import { StreamingOrchestrationAPIs } from '../../Advanced-Scan-Logic/services/streaming-orchestration-apis';
+import intelligentScanningAPI from '../../Advanced-Scan-Logic/services/intelligent-scanning-apis';
+import scanOrchestrationAPI from '../../Advanced-Scan-Logic/services/scan-orchestration-apis';
+import scanOptimizationAPI from '../../Advanced-Scan-Logic/services/scan-optimization-apis';
+import scanPerformanceAPI from '../../Advanced-Scan-Logic/services/scan-performance-apis';
+import scanAnalyticsAPI from '../../Advanced-Scan-Logic/services/scan-analytics-apis';
+import scanCoordinationAPI from '../../Advanced-Scan-Logic/services/scan-coordination-apis';
+import scanIntelligenceAPI from '../../Advanced-Scan-Logic/services/scan-intelligence-apis';
+import scanWorkflowAPI from '../../Advanced-Scan-Logic/services/scan-workflow-apis';
+import advancedMonitoringAPI from '../../Advanced-Scan-Logic/services/advanced-monitoring-apis';
+import distributedCachingAPI from '../../Advanced-Scan-Logic/services/distributed-caching-apis';
+import streamingOrchestrationAPI from '../../Advanced-Scan-Logic/services/streaming-orchestration-apis';
 
 // Base API configuration
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1';
@@ -58,17 +56,17 @@ class RacineScanLogicAPIService {
   private headers: HeadersInit;
   
   // Integration with existing SPA services
-  private intelligentScanningAPIs: IntelligentScanningAPIs;
-  private scanOrchestrationAPIs: ScanOrchestrationAPIs;
-  private scanOptimizationAPIs: ScanOptimizationAPIs;
-  private scanPerformanceAPIs: ScanPerformanceAPIs;
-  private scanAnalyticsAPIs: ScanAnalyticsAPIs;
-  private scanCoordinationAPIs: ScanCoordinationAPIs;
-  private scanIntelligenceAPIs: ScanIntelligenceAPIs;
-  private scanWorkflowAPIs: ScanWorkflowAPIs;
-  private advancedMonitoringAPIs: AdvancedMonitoringAPIs;
-  private distributedCachingAPIs: DistributedCachingAPIs;
-  private streamingOrchestrationAPIs: StreamingOrchestrationAPIs;
+  private intelligentScanningAPI: typeof intelligentScanningAPI;
+  private scanOrchestrationAPI: typeof scanOrchestrationAPI;
+  private scanOptimizationAPI: typeof scanOptimizationAPI;
+  private scanPerformanceAPI: typeof scanPerformanceAPI;
+  private scanAnalyticsAPI: typeof scanAnalyticsAPI;
+  private scanCoordinationAPI: typeof scanCoordinationAPI;
+  private scanIntelligenceAPI: typeof scanIntelligenceAPI;
+  private scanWorkflowAPI: typeof scanWorkflowAPI;
+  private advancedMonitoringAPI: typeof advancedMonitoringAPI;
+  private distributedCachingAPI: typeof distributedCachingAPI;
+  private streamingOrchestrationAPI: typeof streamingOrchestrationAPI;
 
   constructor() {
     this.baseURL = RACINE_SCAN_LOGIC_ENDPOINT;
@@ -80,17 +78,17 @@ class RacineScanLogicAPIService {
     };
 
     // Initialize existing SPA service integrations
-    this.intelligentScanningAPIs = new IntelligentScanningAPIs();
-    this.scanOrchestrationAPIs = new ScanOrchestrationAPIs();
-    this.scanOptimizationAPIs = new ScanOptimizationAPIs();
-    this.scanPerformanceAPIs = new ScanPerformanceAPIs();
-    this.scanAnalyticsAPIs = new ScanAnalyticsAPIs();
-    this.scanCoordinationAPIs = new ScanCoordinationAPIs();
-    this.scanIntelligenceAPIs = new ScanIntelligenceAPIs();
-    this.scanWorkflowAPIs = new ScanWorkflowAPIs();
-    this.advancedMonitoringAPIs = new AdvancedMonitoringAPIs();
-    this.distributedCachingAPIs = new DistributedCachingAPIs();
-    this.streamingOrchestrationAPIs = new StreamingOrchestrationAPIs();
+    this.intelligentScanningAPI = intelligentScanningAPI;
+    this.scanOrchestrationAPI = scanOrchestrationAPI;
+    this.scanOptimizationAPI = scanOptimizationAPI;
+    this.scanPerformanceAPI = scanPerformanceAPI;
+    this.scanAnalyticsAPI = scanAnalyticsAPI;
+    this.scanCoordinationAPI = scanCoordinationAPI;
+    this.scanIntelligenceAPI = scanIntelligenceAPI;
+    this.scanWorkflowAPI = scanWorkflowAPI;
+    this.advancedMonitoringAPI = advancedMonitoringAPI;
+    this.distributedCachingAPI = distributedCachingAPI;
+    this.streamingOrchestrationAPI = streamingOrchestrationAPI;
   }
 
   /**

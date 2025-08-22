@@ -2,22 +2,29 @@
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Card, CardContent, CardHeader, CardTitle,
-  Button, Badge, Progress, Tabs, TabsContent, TabsList, TabsTrigger,
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-  Input, Label, Textarea, Switch, Slider,
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
-  Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
-  Tooltip, TooltipContent, TooltipProvider, TooltipTrigger,
-  Separator, ScrollArea, Popover, PopoverContent, PopoverTrigger,
-  Collapsible, CollapsibleContent, CollapsibleTrigger,
-  Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList,
-  ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger,
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow
-} from '@/components/ui';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+import { Slider } from '@/components/ui/slider';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Separator } from '@/components/ui/separator';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@/components/ui/context-menu';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { 
   Bell, AlertTriangle, CheckCircle, XCircle, Info, Clock, 
   Play, Pause, Stop, RotateCcw, Settings, Filter, Search,

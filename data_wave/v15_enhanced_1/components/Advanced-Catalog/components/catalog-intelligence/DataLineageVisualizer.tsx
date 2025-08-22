@@ -62,29 +62,11 @@ import {
   impactAnalysisService
 } from '../../services/enterprise-catalog.service';
 
-import {
-  LINEAGE_VISUALIZATION_CONFIG,
-  LINEAGE_NODE_TYPES,
-  LINEAGE_EDGE_TYPES,
-  IMPACT_ANALYSIS_TYPES,
-  TEMPORAL_VIEW_MODES,
-  COLLABORATION_EVENTS,
-  VALIDATION_RULES,
-  EXPORT_FORMATS
-} from '../../constants/catalog-lineage.constants';
+// Import constants from available modules
+import { CATALOG_CONFIG } from '../../constants/catalog-constants';
 
-import {
-  useLineageDiscovery,
-  useLineageVisualization,
-  useImpactAnalysis,
-  useLineageValidation,
-  useLineageCollaboration,
-  useLineageMetrics,
-  useDataFlowAnalysis,
-  useLineageSearch,
-  useLineageExport,
-  useLineageHistory
-} from '../../hooks/useAdvancedLineage';
+// Import hooks from available modules
+import { useDataLineage } from '../../hooks/useDataLineage';
 
 // ============================================================================
 // LINEAGE NETWORK GRAPH COMPONENT

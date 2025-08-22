@@ -47,13 +47,13 @@ import {
   TreePine, Boxes, Component, Layers3, Binary, Code, Terminal
 } from 'lucide-react';
 
-import { useAdvancedCatalog } from '../../../hooks/useAdvancedCatalog';
-import { useWorkspaceManagement } from '../../../hooks/useWorkspaceManagement';
-import { useUserManagement } from '../../../hooks/useUserManagement';
-import { useAIAssistant } from '../../../hooks/useAIAssistant';
-import { useCrossGroupIntegration } from '../../../hooks/useCrossGroupIntegration';
-import { useActivityTracking } from '../../../hooks/useActivityTracking';
-import { usePipelineManagement } from '../../../hooks/usePipelineManagement';
+import { useAdvancedCatalog } from '../../../../hooks/useAdvancedCatalog';
+import { useWorkspaceManagement } from '../../../../hooks/useWorkspaceManagement';
+import { useUserManagement } from '../../../../hooks/useUserManagement';
+import { useAIAssistant } from '../../../../hooks/useAIAssistant';
+import { useCrossGroupIntegration } from '../../../../hooks/useCrossGroupIntegration';
+import { useActivityTracking } from '../../../../hooks/useActivityTracking';
+import { usePipelineManagement } from '../../../../hooks/usePipelineManagement';
 
 interface LineageNode {
   id: string;

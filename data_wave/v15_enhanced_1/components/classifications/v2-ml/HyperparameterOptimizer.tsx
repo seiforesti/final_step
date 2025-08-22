@@ -78,7 +78,7 @@ import {
   Eye,
   Filter,
   GitBranch,
-  LineChart,
+  LineChart as LucideLineChart,
   Loader2,
   MoreHorizontal,
   Pause,
@@ -134,7 +134,7 @@ import {
   BarChart2,
 } from 'lucide-react';
 import {
-  LineChart,
+  LineChart as RechartsLineChart,
   Line,
   AreaChart,
   Area,

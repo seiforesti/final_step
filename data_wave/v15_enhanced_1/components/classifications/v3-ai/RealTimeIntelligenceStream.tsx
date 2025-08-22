@@ -251,7 +251,7 @@ const STREAM_TYPES = [
   { id: 'analysis', name: 'Analysis Stream', icon: BarChart3, color: '#F59E0B', description: 'Real-time data analysis' },
   { id: 'monitoring', name: 'Monitoring Stream', icon: Monitor, color: '#EF4444', description: 'System monitoring streams' },
   { id: 'optimization', name: 'Optimization Stream', icon: Zap, color: '#8B5CF6', description: 'Performance optimization' },
-  { id: 'intelligence', name: 'Intelligence Stream', icon: Lightbulb, color: '#EC4899, description: 'AI intelligence processing' },
+  { id: 'intelligence', name: 'Intelligence Stream', icon: Lightbulb, color: '#EC4899', description: 'AI intelligence processing' },
 ];
 
 const CHANNEL_TYPES = [

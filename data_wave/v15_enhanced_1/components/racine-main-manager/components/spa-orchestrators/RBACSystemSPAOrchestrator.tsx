@@ -133,8 +133,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 // Existing RBAC System SPA Components - CRITICAL: Import without modification
 const RBACManager = lazy(() => 
-  import('../../../Advanced_RBAC_Datagovernance_System').then(module => ({
-    default: module.RBACManager || module.default
+  import('../../../Advanced_RBAC_Datagovernance_System/RBACSystemSPA').then(module => ({
+    default: module.default
   }))
 );
 

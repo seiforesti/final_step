@@ -536,7 +536,7 @@ export function SchemaDiscovery({
       {error && (
         <div className="p-4">
           <Alert variant="destructive">
-            <AlertDescription>{error}</Alert>
+            <AlertDescription>{error}</AlertDescription>
           </Alert>
         </div>
       )}

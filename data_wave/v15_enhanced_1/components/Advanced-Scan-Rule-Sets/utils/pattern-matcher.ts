@@ -1359,10 +1359,6 @@ export class PatternUtils {
 
 // Export main pattern matcher instance
 export const patternMatcher = PatternMatcherFactory.getInstance();
+export default patternMatcher;
 
-// Export all classes and utilities
-export {
-  PatternMatcher,
-  PatternMatcherFactory,
-  PatternUtils
-};
+// Named classes are already exported above via `export class ...`

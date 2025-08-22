@@ -358,7 +358,7 @@ import {
 } from '../../types';
 import { useDataLineage } from '../../hooks/useDataLineage';
 import { useRealTimeUpdates } from '@/components/shared/hooks/useRealTimeUpdates';
-import { usePerformanceMonitoring } from '@/components/shared/hooks/usePerformanceMonitoring';
+import { usePerformanceMonitoring } from '@/components/racine-main-manager/hooks/usePerformanceMonitoring';
 import { useEnterpriseNotifications } from '@/components/shared/hooks/useEnterpriseNotifications';
 
 // ============================================================================
@@ -1719,7 +1719,7 @@ export const DependencyResolver = forwardRef<
       const analysisResult = await lineageService.analyzeLineageImpact(analysisRequest);
       
       // Detect circular dependencies
-      await detectCircularDependencies();
+      await performCircularDependencyDetection();
       
       // Generate optimization suggestions
       await generateOptimizationSuggestions();
@@ -1783,7 +1783,7 @@ export const DependencyResolver = forwardRef<
     }
   }, [state.config, lineageService]);
   
-  const detectCircularDependencies = useCallback(async () => {
+  const performCircularDependencyDetection = useCallback(async () => {
     try {
       setState(prev => ({
         ...prev,

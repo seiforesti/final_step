@@ -303,7 +303,7 @@ import {
   autoTuningCache,
   selfHealingCache,
   selfOptimizingCache
-} from '../../services/cache-management-apis'
+} from '../../services/cache-services'
 
 // Enhanced interfaces for advanced cache management
 interface CacheManagerState {

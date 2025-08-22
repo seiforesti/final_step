@@ -42,14 +42,14 @@ import {
   Fingerprint, Radar, Crosshair, Focus, Scan, Bell
 } from 'lucide-react';
 
-import { useScanLogic } from '../../../hooks/useScanLogic';
-import { useWorkspaceManagement } from '../../../hooks/useWorkspaceManagement';
-import { useUserManagement } from '../../../hooks/useUserManagement';
-import { useAIAssistant } from '../../../hooks/useAIAssistant';
-import { useCrossGroupIntegration } from '../../../hooks/useCrossGroupIntegration';
-import { useActivityTracking } from '../../../hooks/useActivityTracking';
-import { useDataSources } from '../../../hooks/useDataSources';
-import { useScanRuleSets } from '../../../hooks/useScanRuleSets';
+import { useScanLogic } from '../../../../hooks/useScanLogic';
+import { useWorkspaceManagement } from '../../../../hooks/useWorkspaceManagement';
+import { useUserManagement } from '../../../../hooks/useUserManagement';
+import { useAIAssistant } from '../../../../hooks/useAIAssistant';
+import { useCrossGroupIntegration } from '../../../../hooks/useCrossGroupIntegration';
+import { useActivityTracking } from '../../../../hooks/useActivityTracking';
+import { useDataSources } from '../../../../hooks/useDataSources';
+import { useScanRuleSets } from '../../../../hooks/useScanRuleSets';
 
 interface ScanConfiguration {
   name: string;

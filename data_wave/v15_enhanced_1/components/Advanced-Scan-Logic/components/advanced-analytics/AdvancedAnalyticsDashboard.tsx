@@ -166,6 +166,9 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
+import { useAdvancedAnalytics } from '../../hooks/useAdvancedAnalytics';
+import { advancedMonitoringAPI } from '../../services/advanced-monitoring-apis';
+import { scanAnalyticsAPI } from '../../services/scan-analytics-apis';
 
 // ==================== Types and Interfaces ====================
 
@@ -1233,112 +1236,213 @@ export const AdvancedAnalyticsDashboard: React.FC = () => {
   const wsRef = useRef<WebSocket | null>(null);
 
   // ==================== Backend Integration Functions ====================
+  const analytics = useAdvancedAnalytics({
+    autoRefresh: true,
+    refreshInterval: 30,
+    enableRealTimeUpdates: true,
+    analyticsScope: ['performance', 'intelligence', 'bi'],
+    enablePredictiveAnalytics: true,
+    enableAnomalyDetection: true,
+    enablePatternRecognition: true,
+    cacheAnalytics: true
+  });
 
   const fetchAnalyticsOverview = useCallback(async () => {
     try {
-      const response = await fetch('/api/analytics/overview', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
-          'Content-Type': 'application/json',
-        },
+      const overviewReport = await scanAnalyticsAPI.getMonitoringAnalytics({
+        analytics_type: 'comprehensive'
       });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      setAnalyticsOverview(data);
+      const perf = await scanAnalyticsAPI.getPerformanceMetrics({
+        metrics: ['throughput', 'latency', 'error_rate']
+      });
+      setAnalyticsOverview({
+        totalDashboards: Array.isArray(overviewReport?.analytics_data?.dashboards)
+          ? overviewReport.analytics_data.dashboards.length
+          : (overviewReport?.analytics_data?.dashboards_count || 0),
+        activeDashboards: overviewReport?.analytics_data?.active_dashboards || 0,
+        totalMetrics: Object.keys(perf?.metrics || {}).length,
+        activeMetrics: Object.values(perf?.metrics || {}).filter(Boolean).length,
+        totalModels: (analytics?.forecastingModels || []).length,
+        deployedModels: (analytics?.forecastingModels || []).filter((m: any) => m.status === 'deployed').length,
+        totalPredictions: (analytics?.predictiveAnalysis?.predictions || []).length,
+        avgModelAccuracy: analytics?.predictiveAnalysis?.confidence_scores
+          ? Object.values(analytics.predictiveAnalysis.confidence_scores as Record<string, number>).reduce((a: number, b: number) => a + b, 0) /
+            Object.values(analytics.predictiveAnalysis.confidence_scores as Record<string, number>).length
+          : 0,
+        dataProcessingVolume: (perf as any)?.resource_utilization?.processed_bytes || 0,
+        avgQueryTime: (overviewReport?.metrics?.avg_query_time_ms as number) || 0,
+        systemUptime: (overviewReport?.metrics?.uptime_percent as number) || 0,
+        lastUpdated: new Date().toISOString()
+      });
     } catch (error) {
-      console.error('Failed to fetch analytics overview:', error);
-      // Initialize with mock data for development
+      console.error('Failed to load analytics overview:', error);
       initializeMockData();
     }
-  }, []);
+  }, [analytics]);
 
   const fetchDashboards = useCallback(async () => {
     try {
-      const response = await fetch('/api/analytics/dashboards', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
-          'Content-Type': 'application/json',
+      const templates = await advancedMonitoringAPI.getDashboardTemplates();
+      const mapped: Dashboard[] = (templates || []).map((t: any) => ({
+        id: t.template_id || t.dashboard_id || `dash_${Date.now()}`,
+        name: t.name || 'Dashboard',
+        description: t.description || '',
+        layout: {
+          type: LayoutType.GRID,
+          columns: 12,
+          rows: 8,
+          gridSize: 50,
+          responsive: true
         },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      setDashboards(data.dashboards || []);
+        widgets: t.widgets || [],
+        refreshInterval: t.refresh_interval || 300,
+        autoRefresh: true,
+        globalFilters: [],
+        timeRange: { start: '', end: '', timezone: 'UTC' },
+        owner: t.owner || 'system',
+        shared: true,
+        permissions: [],
+        status: DashboardStatus.ACTIVE,
+        lastUpdated: t.last_updated || new Date().toISOString(),
+        tags: t.tags || [],
+        category: t.category || 'general',
+        version: t.version || '1.0.0',
+        changelog: [],
+        viewCount: 0,
+        lastViewed: new Date().toISOString(),
+        favoriteCount: 0
+      }));
+      setDashboards(mapped);
     } catch (error) {
-      console.error('Failed to fetch dashboards:', error);
+      console.error('Failed to load dashboards:', error);
     }
   }, []);
 
   const fetchMetrics = useCallback(async () => {
     try {
-      const response = await fetch('/api/analytics/metrics', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
-          'Content-Type': 'application/json',
-        },
+      const perf = await scanAnalyticsAPI.getPerformanceMetrics({
+        metrics: ['throughput', 'latency', 'error_rate']
       });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      setMetrics(data.metrics || []);
+      const nowIso = new Date().toISOString();
+      const mapped: AnalyticsMetric[] = Object.entries((perf?.metrics as Record<string, any>) || {}).map(
+        ([key, val]) => ({
+          id: key,
+          name: key,
+          description: key,
+          value: typeof val === 'number' ? val : Number(val || 0),
+          previousValue: undefined,
+          unit: 'unit',
+          displayFormat: MetricFormat.NUMBER,
+          precision: 2,
+          trend: TrendDirection.STABLE,
+          trendPercentage: 0,
+          trendPeriod: '24h',
+          thresholds: [],
+          status: MetricStatus.NORMAL,
+          lastUpdated: nowIso,
+          category: 'performance',
+          tags: [],
+          dataSource: 'monitoring',
+          query: '',
+          refreshInterval: 300,
+          visualizationType: VisualizationType.KPI_CARD,
+          chartConfig: {
+            width: 300,
+            height: 200,
+            colors: ['#2563eb'],
+            xAxis: { label: 'Time', showTicks: true, showLabels: true },
+            yAxis: { label: key, showTicks: true, showLabels: true },
+            showLegend: false,
+            legendPosition: LegendPosition.NONE,
+            showGrid: true,
+            gridOpacity: 0.1,
+            animationEnabled: true,
+            animationDuration: 800,
+            tooltipEnabled: true,
+            zoomEnabled: false,
+            panEnabled: false,
+            customProperties: {}
+          }
+        })
+      );
+      setMetrics(mapped);
     } catch (error) {
-      console.error('Failed to fetch metrics:', error);
+      console.error('Failed to load metrics:', error);
     }
   }, []);
 
   const fetchMLModels = useCallback(async () => {
     try {
-      const response = await fetch('/api/analytics/models', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      setModels(data.models || []);
+      const fm = (analytics?.forecastingModels || []) as any[];
+      const now = new Date().toISOString();
+      const mapped: MLModel[] = fm.map((m: any, i: number) => ({
+        id: m.id || `model_${i}`,
+        name: m.name || 'Forecasting Model',
+        description: m.description || '',
+        type: ModelType.TIME_SERIES,
+        algorithm: MLAlgorithm.NEURAL_NETWORK,
+        hyperparameters: m.hyperparameters || {},
+        trainingDataSource: m.dataSource || 'analytics',
+        trainingQuery: '',
+        features: [],
+        target: { name: 'value', type: TargetType.CONTINUOUS },
+        metrics: m.metrics || {},
+        deployed: Boolean(m.deployed),
+        deploymentEndpoint: m.endpoint,
+        version: m.version || '1.0.0',
+        status: (m.status as any) || ModelStatus.TRAINED,
+        trainedAt: now,
+        trainingDuration: 0,
+        lastPrediction: now,
+        predictionCount: 0,
+        tags: [],
+        owner: 'system',
+        createdAt: now,
+        updatedAt: now
+      }));
+      setModels(mapped);
     } catch (error) {
-      console.error('Failed to fetch ML models:', error);
+      console.error('Failed to load ML models:', error);
     }
-  }, []);
+  }, [analytics]);
 
   const createDashboard = useCallback(async (dashboardData: Partial<Dashboard>) => {
     setActionInProgress(prev => ({ ...prev, 'create-dashboard': true }));
     
     try {
-      const response = await fetch('/api/analytics/dashboards', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
-          'Content-Type': 'application/json',
+      const created = await advancedMonitoringAPI.createCustomDashboard({
+        ...(dashboardData as any)
+      } as any);
+      const mapped: Dashboard = {
+        id: created.dashboard_id || `dash_${Date.now()}`,
+        name: (created as any).name || 'Dashboard',
+        description: (created as any).description || '',
+        layout: {
+          type: LayoutType.GRID,
+          columns: 12,
+          rows: 8,
+          gridSize: 50,
+          responsive: true
         },
-        body: JSON.stringify(dashboardData),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const newDashboard = await response.json();
-      setDashboards(prev => [newDashboard, ...prev]);
+        widgets: (created as any).widgets || [],
+        refreshInterval: created.refresh_interval || 300,
+        autoRefresh: true,
+        globalFilters: [],
+        timeRange: { start: '', end: '', timezone: 'UTC' },
+        owner: (created as any).owner || 'system',
+        shared: true,
+        permissions: [],
+        status: DashboardStatus.ACTIVE,
+        lastUpdated: created.creation_timestamp || new Date().toISOString(),
+        tags: (created as any).tags || [],
+        category: (created as any).category || 'general',
+        version: (created as any).version || '1.0.0',
+        changelog: [],
+        viewCount: 0,
+        lastViewed: new Date().toISOString(),
+        favoriteCount: 0
+      };
+      setDashboards(prev => [mapped, ...prev]);
       
       toast({
         title: "Dashboard Created",
@@ -1356,20 +1460,10 @@ export const AdvancedAnalyticsDashboard: React.FC = () => {
   }, [toast]);
 
   const trainModel = useCallback(async (modelId: string) => {
-    setActionInProgress(prev => ({ ...prev, `train-${modelId}`: true }));
+    setActionInProgress(prev => ({ ...prev, [`train-${modelId}`]: true }));
     
     try {
-      const response = await fetch(`/api/analytics/models/${modelId}/train`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      await analytics.trainForecastingModel({ modelId });
 
       // Update model status
       setModels(prev =>
@@ -1391,7 +1485,7 @@ export const AdvancedAnalyticsDashboard: React.FC = () => {
         variant: "destructive",
       });
     } finally {
-      setActionInProgress(prev => ({ ...prev, `train-${modelId}`: false }));
+      setActionInProgress(prev => ({ ...prev, [`train-${modelId}`]: false }));
     }
   }, [toast]);
 

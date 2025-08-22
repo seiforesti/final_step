@@ -144,7 +144,7 @@ import {
 // Racine Services
 import { activityTrackingAPI } from '../../services/activity-tracking-apis';
 import { racineOrchestrationAPI } from '../../services/racine-orchestration-apis';
-import { performanceMonitoringAPI } from '../../services/performance-monitoring-apis';
+import { performanceUtils } from '../../utils/performance-utils';
 
 // Racine Utilities
 import { navigationUtils } from '../../utils/navigation-utils';
@@ -1433,16 +1433,6 @@ export const useBreadcrumbAnalytics = () => {
 // ============================================================================
 
 export default BreadcrumbManagerProvider;
-export { 
-  BreadcrumbManagerProvider, 
-  useBreadcrumbManager,
-  BreadcrumbNavigation,
-  BreadcrumbSettings,
-  BreadcrumbAnalytics,
-  useBreadcrumb,
-  useBreadcrumbNavigation,
-  useBreadcrumbAnalytics
-};
 export type { 
   BreadcrumbItem, 
   BreadcrumbConfig, 

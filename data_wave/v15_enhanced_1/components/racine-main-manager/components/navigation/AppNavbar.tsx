@@ -42,15 +42,13 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { 
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-  DropdownMenuShortcut
-} from '@/components/ui/dropdown-menu'
+import { DropdownMenu } from '@/components/ui/dropdown-menu'
+import { DropdownMenuContent } from '@/components/ui/dropdown-menu'
+import { DropdownMenuItem } from '@/components/ui/dropdown-menu'
+import { DropdownMenuLabel } from '@/components/ui/dropdown-menu'
+import { DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
+import { DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { DropdownMenuShortcut } from '@/components/ui/dropdown-menu'
 import {
   Tooltip,
   TooltipContent,
@@ -651,7 +649,8 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({
   )
 
   // Render user profile menu
-  const renderUserProfile = () => (
+  const renderUserProfile = useCallback(() => {
+    return (
     <DropdownMenu open={isProfileOpen} onOpenChange={setIsProfileOpen}>
       <DropdownMenuTrigger asChild>
         <Button
@@ -724,11 +723,11 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({
           className="text-destructive focus:text-destructive"
         >
           Sign out
-        </DropdownMenuShortcut>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+    )
+  }, [isProfileOpen, userContext])
 
   // Render SPA navigation menu
   const renderSPANavigation = () => (

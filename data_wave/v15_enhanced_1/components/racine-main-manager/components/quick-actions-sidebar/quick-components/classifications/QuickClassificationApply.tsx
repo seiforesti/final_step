@@ -47,10 +47,10 @@ import type {
   DataAsset, 
   ClassificationApplication,
   ApplyClassificationRequest
-} from '../../../types/racine-core.types';
+} from '../../../../types/racine-core.types';
 
-import { useClassifications } from '../../../hooks/useClassifications';
-import { useCrossGroupIntegration } from '../../../hooks/useCrossGroupIntegration';
+import { useClassifications } from '../../../../hooks/useClassifications';
+import { useCrossGroupIntegration } from '../../../../hooks/useCrossGroupIntegration';
 
 interface QuickClassificationApplyProps {
   isVisible?: boolean;

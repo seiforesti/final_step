@@ -1927,7 +1927,7 @@ const ModelEnsembleBuilder: React.FC = () => {
                       
                       <div>
                         <div className="flex justify-between items-center mb-1">
-                          <span className="text-sm">High Confidence (>90%)</span>
+                          <span className="text-sm">High Confidence (&gt;90%)</span>
                           <span className="text-sm font-medium">62%</span>
                         </div>
                         <Progress value={62} />
@@ -1943,7 +1943,7 @@ const ModelEnsembleBuilder: React.FC = () => {
                       
                       <div>
                         <div className="flex justify-between items-center mb-1">
-                          <span className="text-sm">Low Confidence (<70%)</span>
+                          <span className="text-sm">Low Confidence (&lt;70%)</span>
                           <span className="text-sm font-medium">4%</span>
                         </div>
                         <Progress value={4} />

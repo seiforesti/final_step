@@ -2222,7 +2222,6 @@ export const useGuardAudit = () => {
 // ============================================================================
 
 export default RouteGuard;
-export { RouteGuardsProvider, useRouteGuards, withRouteGuards };
 export type { 
   RouteGuard, 
   RouteContext, 

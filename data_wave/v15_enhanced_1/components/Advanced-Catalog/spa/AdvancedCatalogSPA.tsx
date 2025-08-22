@@ -157,9 +157,9 @@ import {
   CartesianGrid,
   Tooltip as RechartsTooltip,
   ResponsiveContainer,
-  LineChart,
+  LineChart as RechartsLineChart,
   Line,
-  PieChart,
+  PieChart as RechartsPieChart,
   Pie,
   Cell,
   AreaChart,
@@ -209,7 +209,7 @@ import {
   
   // Analytics & Intelligence
   BarChart3,
-  PieChart,
+  PieChart as PieChartIcon,
   TrendingUp,
   TrendingDown,
   Activity,

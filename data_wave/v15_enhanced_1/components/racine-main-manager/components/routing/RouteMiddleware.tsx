@@ -108,7 +108,7 @@ import {
 } from '../../types/racine-core.types';
 
 // Racine Services
-import { performanceMonitoringAPI } from '../../services/performance-monitoring-apis';
+import { performanceMonitoringAPI } from '../../services/dashboard-apis';
 import { activityTrackingAPI } from '../../services/activity-tracking-apis';
 import { racineOrchestrationAPI } from '../../services/racine-orchestration-apis';
 
@@ -1832,14 +1832,6 @@ export const MiddlewareMonitor: React.FC<MiddlewareMonitorProps> = ({
 // ============================================================================
 
 export default RouteMiddlewareComponent;
-export { 
-  RouteMiddlewareProvider, 
-  useRouteMiddleware, 
-  MiddlewareMonitor,
-  useMiddlewareStatus,
-  useMiddlewareAnalytics,
-  useMiddlewarePerformance
-};
 export type { 
   RouteMiddleware, 
   MiddlewareContext, 

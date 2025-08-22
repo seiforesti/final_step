@@ -30,7 +30,6 @@ import { Separator } from '@/components/ui/separator';
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import {
@@ -158,8 +157,9 @@ import {
   MicOff,
   Camera,
   Video,
-  Image,
-  File,
+  FileText as FileTextIcon,
+  File as FileIcon,
+  Image as ImageIcon,
   FileText,
   Folder,
   FolderOpen,
@@ -350,20 +350,20 @@ import {
 } from 'lucide-react';
 
 // Import hooks and services
-import { useAIAssistant } from '../../../hooks/useAIAssistant';
-import { useWorkspaceManagement } from '../../../hooks/useWorkspaceManagement';
-import { useUserManagement } from '../../../hooks/useUserManagement';
-import { useCrossGroupIntegration } from '../../../hooks/useCrossGroupIntegration';
-import { useActivityTracking } from '../../../hooks/useActivityTracking';
-import { usePipelineManager } from '../../../hooks/usePipelineManager';
-import { useJobWorkflow } from '../../../hooks/useJobWorkflow';
-import { useDataSources } from '../../../hooks/useDataSources';
-import { useScanRuleSets } from '../../../hooks/useScanRuleSets';
-import { useClassifications } from '../../../hooks/useClassifications';
-import { useComplianceRule } from '../../../hooks/useComplianceRule';
-import { useAdvancedCatalog } from '../../../hooks/useAdvancedCatalog';
-import { useScanLogic } from '../../../hooks/useScanLogic';
-import { useRBAC } from '../../../hooks/useRBAC';
+import { useAIAssistant } from '../../../../hooks/useAIAssistant';
+import { useWorkspaceManagement } from '../../../../hooks/useWorkspaceManagement';
+import { useUserManagement } from '../../../../hooks/useUserManagement';
+import { useCrossGroupIntegration } from '../../../../hooks/useCrossGroupIntegration';
+import { useActivityTracking } from '../../../../hooks/useActivityTracking';
+import { usePipelineManager } from '../../../../hooks/usePipelineManager';
+import { useJobWorkflow } from '../../../../hooks/useJobWorkflow';
+import { useDataSources } from '../../../../hooks/useDataSources';
+import { useScanRuleSets } from '../../../../hooks/useScanRuleSets';
+import { useClassifications } from '../../../../hooks/useClassifications';
+import { useComplianceRules as useComplianceRule } from '../../../../hooks/useComplianceRules';
+import { useAdvancedCatalog } from '../../../../hooks/useAdvancedCatalog';
+import { useScanLogic } from '../../../../hooks/useScanLogic';
+import { useRBACSystem as useRBAC } from '../../../../hooks/useRBACSystem';
 
 // Types
 interface DashboardWidget {
@@ -1429,7 +1429,7 @@ const QuickDashboardCreate: React.FC<QuickDashboardCreateProps> = ({
   if (!isVisible) return null;
 
   return (
-    <TooltipProvider>
+    <div>
       <div className={`fixed inset-0 z-50 bg-background/80 backdrop-blur-sm ${className}`}>
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
@@ -1491,15 +1491,15 @@ const QuickDashboardCreate: React.FC<QuickDashboardCreateProps> = ({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
                   <DropdownMenuItem onClick={() => handleExport('json')}>
-                    <FileText className="h-3 w-3 mr-1" />
+                    <FileTextIcon className="h-3 w-3 mr-1" />
                     JSON
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => handleExport('pdf')}>
-                    <File className="h-3 w-3 mr-1" />
+                    <FileIcon className="h-3 w-3 mr-1" />
                     PDF
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => handleExport('png')}>
-                    <Image className="h-3 w-3 mr-1" />
+                    <ImageIcon className="h-3 w-3 mr-1" />
                     PNG
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -1527,7 +1527,7 @@ const QuickDashboardCreate: React.FC<QuickDashboardCreateProps> = ({
                     <TabsTrigger value="widgets" className="text-xs">Widgets</TabsTrigger>
                     <TabsTrigger value="templates" className="text-xs">Templates</TabsTrigger>
                     <TabsTrigger value="data" className="text-xs">Data</TabsTrigger>
-                  </Tabs>
+                  </TabsList>
 
                   <div className="flex-1 overflow-hidden">
                     {/* Design Tab */}
@@ -2218,7 +2218,7 @@ const QuickDashboardCreate: React.FC<QuickDashboardCreateProps> = ({
           </div>
         </motion.div>
       </div>
-    </TooltipProvider>
+    </div>
   );
 };
 

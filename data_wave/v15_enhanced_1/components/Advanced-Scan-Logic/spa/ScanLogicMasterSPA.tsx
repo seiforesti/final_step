@@ -236,7 +236,6 @@ import {
   OrchestrationJobStatus, 
   OrchestrationPriority,
   WorkflowTemplate,
-  ExecutionPipeline,
   ResourcePool 
 } from '../types/orchestration.types';
 import { 

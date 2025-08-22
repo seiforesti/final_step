@@ -615,7 +615,7 @@ const QualityReportGenerator: React.FC<QualityReportGeneratorProps> = ({
     return Math.max(baseTime + assetMultiplier + sectionMultiplier, 60); // minimum 1 minute
   }, [selectedAssets, selectedSections]);
 
-  const selectedTemplate = useMemo(() => {
+  const selectedTemplateData = useMemo(() => {
     return templates.find(t => t.id === selectedTemplate);
   }, [templates, selectedTemplate]);
 

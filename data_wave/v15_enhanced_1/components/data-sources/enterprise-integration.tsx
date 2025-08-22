@@ -10,10 +10,10 @@ import { v4 as uuidv4 } from 'uuid'
 
 // Import all three phases
 import { CoreInfrastructure } from './core/index'
-import { AnalyticsEngine } from './analytics/correlation-engine'
-import { CollaborationEngine } from './collaboration/realtime-collaboration'
+import correlationEngine, { CorrelationEngine } from './analytics/correlation-engine'
+import realTimeCollaborationManager, { RealTimeCollaborationManager } from './collaboration/realtime-collaboration'
 import { WorkflowEngine } from './workflows/approval-system'
-import { BulkOperationsEngine } from './workflows/bulk-operations'
+import bulkOperationsManager, { BulkOperationsManager } from './workflows/bulk-operations'
 
 // Import UI components
 import { EnterpriseDashboard } from './ui/dashboard/enterprise-dashboard'
@@ -55,10 +55,10 @@ import { DataSource } from './types'
 export interface EnterpriseContext {
   // Core Infrastructure
   core: CoreInfrastructure
-  analytics: AnalyticsEngine
-  collaboration: CollaborationEngine
+  analytics: CorrelationEngine
+  collaboration: RealTimeCollaborationManager
   workflows: WorkflowEngine
-  bulkOps: BulkOperationsEngine
+  bulkOps: BulkOperationsManager
   
   // State Management
   selectedDataSource: DataSource | null

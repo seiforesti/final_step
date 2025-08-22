@@ -1068,7 +1068,7 @@ export const QuickActionsPanel: React.FC<QuickActionsPanelProps> = ({
                         SPA_QUICK_ACTIONS[currentSPAContext.spaKey as keyof typeof SPA_QUICK_ACTIONS]?.color || "bg-muted"
                       )}>
                         {SPA_QUICK_ACTIONS[currentSPAContext.spaKey as keyof typeof SPA_QUICK_ACTIONS]?.icon && (
-                          <SPA_QUICK_ACTIONS[currentSPAContext.spaKey as keyof typeof SPA_QUICK_ACTIONS].icon className="w-4 h-4 text-white" />
+                          React.createElement(SPA_QUICK_ACTIONS[currentSPAContext.spaKey as keyof typeof SPA_QUICK_ACTIONS].icon, { className: "w-4 h-4 text-white" })
                         )}
                       </div>
                       <div>

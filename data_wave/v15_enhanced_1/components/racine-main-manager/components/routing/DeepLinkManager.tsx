@@ -158,7 +158,7 @@ import {
 // Racine Services
 import { activityTrackingAPI } from '../../services/activity-tracking-apis';
 import { racineOrchestrationAPI } from '../../services/racine-orchestration-apis';
-import { performanceMonitoringAPI } from '../../services/performance-monitoring-apis';
+import { performanceUtils } from '../../utils/performance-utils';
 
 // Racine Utilities
 import { navigationUtils } from '../../utils/navigation-utils';
@@ -2052,18 +2052,6 @@ export const LinkBuilder: React.FC<LinkBuilderProps> = ({
 // ============================================================================
 
 export default DeepLinkManagerProvider;
-export { 
-  DeepLinkManagerProvider, 
-  useDeepLinkManager, 
-  SmartLink,
-  ShareLinkDialog,
-  LinkHistory,
-  LinkBuilder,
-  useDeepLink,
-  useShareableLink,
-  useLinkAnalytics,
-  useLinkValidation
-};
 export type { 
   DeepLinkConfig, 
   DeepLinkResult, 

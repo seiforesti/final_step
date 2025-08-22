@@ -84,9 +84,19 @@ const ENDPOINTS = {
  */
 export class ScanOrchestrationAPIService {
   private apiClient: ApiClient;
+  private baseUrl: string;
 
   constructor() {
     this.apiClient = new ApiClient();
+    this.baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+  }
+
+  private getAuthToken(): string {
+    // Get auth token from localStorage or context
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('authToken') || '';
+    }
+    return '';
   }
 
   // ==================== CORE ORCHESTRATION JOBS ====================
@@ -98,10 +108,11 @@ export class ScanOrchestrationAPIService {
    */
   async createOrchestrationJob(request: CreateOrchestrationJobRequest): Promise<ScanOrchestrationJob> {
     try {
-      return await this.apiClient.post<ScanOrchestrationJob>(
+      const response = await this.apiClient.post<ScanOrchestrationJob>(
         ENDPOINTS.CREATE_ORCHESTRATION_JOB,
         request
       );
+      return response.data;
     } catch (error) {
       throw new Error(`Failed to create orchestration job: ${error}`);
     }
@@ -730,20 +741,14 @@ export class ScanOrchestrationAPIService {
 
   // ==================== UTILITY METHODS ====================
 
-  /**
-   * Get authentication token from storage or context
-   */
-  private getAuthToken(): string {
-    // This would typically get the token from localStorage, sessionStorage, or context
-    return localStorage.getItem('auth_token') || '';
-  }
+
 
   /**
    * Handle WebSocket connection for real-time updates
    * Maps to: WebSocket /scan-orchestration/ws/jobs/{job_id}
    */
   subscribeToJobUpdates(jobId: string, onUpdate: (data: any) => void): WebSocket {
-    const wsUrl = `${API_BASE_URL.replace('http', 'ws')}/scan-orchestration/ws/jobs/${jobId}`;
+    const wsUrl = `${this.baseUrl.replace('http', 'ws')}/scan-orchestration/ws/jobs/${jobId}`;
     const ws = new WebSocket(wsUrl);
 
     ws.onmessage = (event) => {
@@ -825,5 +830,5 @@ export class ScanOrchestrationAPIService {
 }
 
 // Export singleton instance
-export const scanOrchestrationAPI = new ScanOrchestrationAPI();
+export const scanOrchestrationAPI = new ScanOrchestrationAPIService();
 export default scanOrchestrationAPI;

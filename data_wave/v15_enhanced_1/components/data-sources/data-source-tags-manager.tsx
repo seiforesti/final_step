@@ -113,8 +113,9 @@ export function DataSourceTagsManager({ dataSourceId, onClose }: TagsManagerProp
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold flex items-center gap-2    <Tag className="h-6 text-blue-600" />
-          Tags Manager
+          <h2 className="text-2xl font-bold flex items-center gap-2">
+            <Tag className="h-6 text-blue-600" />
+            Tags Manager
           </h2>
           <p className="text-muted-foreground">
             Manage tags and metadata for {dataSource?.name || "this data source"}

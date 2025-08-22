@@ -674,5 +674,5 @@ export class ScanCoordinationAPIService {
 }
 
 // Export singleton instance
-export const scanCoordinationAPI = new ScanCoordinationAPI();
+export const scanCoordinationAPI = new ScanCoordinationAPIService();
 export default scanCoordinationAPI;

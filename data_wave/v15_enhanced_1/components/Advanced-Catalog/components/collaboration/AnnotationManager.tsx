@@ -65,7 +65,7 @@ import {
   RefreshCw, ChevronDown, ChevronRight, ChevronLeft, ChevronUp,
   ArrowRight, ArrowLeft, ArrowUp, ArrowDown, Maximize, Minimize,
   Grid, List, Layout, Map, Layers, Network, GitMerge, Code, Hash,
-  Calendar as CalendarIcon, FileText, Database, Table, Columns,
+  Calendar as CalendarIcon, FileText, Database, Table as TableIcon, Columns,
   Workflow, BrainCircuit, Sparkles, Wand2, Robot, MessageCircle,
   ChatBubbleIcon, Quote, Type, Bold, Italic, Underline, Strikethrough,
   AlignLeft, AlignCenter, AlignRight, AlignJustify, ListOrdered,
@@ -484,7 +484,7 @@ export default function AnnotationManager({
   const [showTemplateDialog, setShowTemplateDialog] = useState(false);
   const [showWorkflowDialog, setShowWorkflowDialog] = useState(false);
   const [showBulkActions, setShowBulkActions] = useState(false);
-  const [selectedAnnotations, setSelectedAnnotations] = new Set<string>());
+  const [selectedAnnotations, setSelectedAnnotations] = useState<Set<string>>(new Set());
   const [viewMode, setViewMode] = useState<'list' | 'grid' | 'timeline' | 'kanban'>('list');
   const [filterType, setFilterType] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');

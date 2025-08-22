@@ -128,11 +128,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 
 // Existing Advanced Scan Logic SPA Components - CRITICAL: Import without modification
-const ScanLogicManager = lazy(() => 
-  import('../../../Advanced-Scan-Logic').then(module => ({
-    default: module.ScanLogicManager || module.default
-  }))
-);
+const ScanLogicManager = lazy(() => import('../../../Advanced-Scan-Logic/spa/ScanLogicMasterSPA'));
 
 // Core Types
 import {

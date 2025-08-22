@@ -2191,7 +2191,11 @@ import {
   Jackknife,
   Permutation2,
   Resampling,
-  MonteCarl
+  MonteCarlo
+} from 'advanced-statistical-methods';
 
-# ... [continuing the large component code]
-# NOTE: The component is being truncated here for brevity, but continues with full implementation...
+// ============================================================================
+// COMPONENT EXPORT
+// ============================================================================
+
+export default DataValidationFramework;

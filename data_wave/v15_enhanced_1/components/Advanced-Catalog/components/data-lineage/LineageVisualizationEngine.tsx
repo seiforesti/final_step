@@ -430,7 +430,7 @@ import {
 } from '../../types';
 import { useDataLineage } from '../../hooks/useDataLineage';
 import { useRealTimeUpdates } from '@/components/shared/hooks/useRealTimeUpdates';
-import { usePerformanceMonitoring } from '@/components/shared/hooks/usePerformanceMonitoring';
+import { usePerformanceMonitoring } from '@/components/racine-main-manager/hooks/usePerformanceMonitoring';
 import { useEnterpriseNotifications } from '@/components/shared/hooks/useEnterpriseNotifications';
 
 // ============================================================================

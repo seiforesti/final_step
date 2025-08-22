@@ -50,8 +50,8 @@ import type {
   RuleHealthMetrics
 } from '../../../types/racine-core.types';
 
-import { useScanRuleSets } from '../../../hooks/useScanRuleSets';
-import { useWorkspaceManagement } from '../../../hooks/useWorkspaceManagement';
+import { useScanRuleSets } from '../../../../hooks/useScanRuleSets';
+import { useWorkspaceManagement } from '../../../../hooks/useWorkspaceManagement';
 
 interface QuickRuleStatusProps {
   isVisible?: boolean;

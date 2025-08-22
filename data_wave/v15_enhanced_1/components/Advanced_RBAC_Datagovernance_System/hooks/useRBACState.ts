@@ -604,10 +604,10 @@ export function useRBACStateManager(): RBACSystemContext {
 export function RBACStateProvider({ children }: { children: React.ReactNode }) {
   const rbacState = useRBACStateManager();
   
-  return (
-    <RBACStateContext.Provider value={rbacState}>
-      {children}
-    </RBACStateContext.Provider>
+  return React.createElement(
+    RBACStateContext.Provider,
+    { value: rbacState },
+    children
   );
 }
 
