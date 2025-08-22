@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { Metadata } from 'next';
-import { MasterCollaborationHub } from '@/components/racine-main-manager/components/collaboration';
+import { CollaborationHub } from '@/components/racine-main-manager/components/collaboration/CollaborationHub';
 
 // ============================================================================
 // METADATA
@@ -32,23 +32,21 @@ export const metadata: Metadata = {
 
 export default function CollaborationPage() {
   return (
-    <MasterCollaborationHub 
+    <CollaborationHub 
       mode="full-hub"
-      enableRealTimeChat={true}
-      enableSharedTasks={true}
-      enableDocumentManagement={true}
-      enableWorkflowCoAuthoring={true}
+      enableRealTimeCollaboration={true}
+      enableTeamWorkspaces={true}
+      enableDocumentSharing={true}
       enableVideoConferencing={true}
-      enableScreenSharing={true}
-      enableFileSharing={true}
-      enableCollaborationAnalytics={true}
-      enablePresenceIndicators={true}
+      enableProjectManagement={true}
+      enableTaskAssignment={true}
+      enableProgressTracking={true}
       enableNotifications={true}
-      showActiveCollaborations={true}
-      showRecentActivity={true}
-      showTaskProgress={true}
+      showTeamDirectory={true}
+      showProjectOverview={true}
+      showTaskBoard={true}
+      showCollaborationHistory={true}
       showQuickActions={true}
-      showParticipantsList={true}
     />
   );
 }

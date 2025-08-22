@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { Metadata } from 'next';
-import { IntelligentDashboardOrchestrator } from '@/components/racine-main-manager/components/dashboard';
+import { DashboardHub } from '@/components/racine-main-manager/components/dashboard/DashboardHub';
 
 // ============================================================================
 // METADATA
@@ -32,24 +32,21 @@ export const metadata: Metadata = {
 
 export default function DashboardPage() {
   return (
-    <IntelligentDashboardOrchestrator 
+    <DashboardHub 
       mode="full-dashboard"
       enableRealTimeUpdates={true}
       enableCustomWidgets={true}
-      enableDrillDownAnalytics={true}
-      enableExportCapabilities={true}
-      enableAlertManagement={true}
+      enableCrossGroupVisualizations={true}
       enablePredictiveAnalytics={true}
-      enableCrossGroupCorrelation={true}
-      enablePerformanceMetrics={true}
-      enableNotifications={true}
-      showSystemHealth={true}
-      showDataQuality={true}
-      showComplianceScores={true}
-      showUsageStatistics={true}
+      enableExecutiveReporting={true}
+      enableDrillDownAnalytics={true}
+      enableAlertSystem={true}
+      enablePerformanceMonitoring={true}
+      showKPIMetrics={true}
       showTrendAnalysis={true}
+      showPerformanceCharts={true}
+      showAlertHistory={true}
       showQuickActions={true}
-      autoRefreshInterval={30000}
     />
   );
 }

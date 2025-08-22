@@ -37,14 +37,7 @@
 // Main Router
 export { default as RacineRouter } from './RacineRouter';
 export { 
-  RacineRouterProvider, 
-  useRacineRouter,
-  RouteAnalytics,
-  RouteConfiguration,
-  RouteBreadcrumbs,
-  useRouteNavigation,
-  useRouteAnalytics,
-  useRouteConfiguration
+  useRacineRouter
 } from './RacineRouter';
 
 // Route Protection System
@@ -53,76 +46,37 @@ export {
   useRouteGuards,
   RouteGuard,
   withRouteGuards,
-  AuthenticationGuard,
-  AuthorizationGuard,
-  MFAGuard,
-  RateLimitGuard,
-  SecurityContextGuard,
-  WorkspaceAccessGuard,
-  FeatureFlagGuard,
-  MaintenanceModeGuard,
-  useGuardExecution,
-  useGuardConfiguration,
-  useGuardAnalytics
+  useGuardStatus,
+  useSecurityContext,
+  useGuardAudit
 } from './RouteGuards';
 
 // Route Processing Pipeline
 export { default as RouteMiddlewareProvider } from './RouteMiddleware';
 export { 
   useRouteMiddleware,
-  RouteMiddleware,
-  withRouteMiddleware,
-  PerformanceMonitoringMiddleware,
-  AnalyticsMiddleware,
-  SecurityMonitoringMiddleware,
-  AuditLoggingMiddleware,
-  CachingMiddleware,
-  RateLimitingMiddleware,
-  RequestValidationMiddleware,
-  CrossGroupCoordinationMiddleware,
-  ResponseCompressionMiddleware,
-  ErrorHandlingMiddleware,
-  useMiddlewareExecution,
-  useMiddlewareConfiguration,
-  useMiddlewareAnalytics
+  RouteMiddlewareComponent,
+  useMiddlewareAnalytics,
+  useMiddlewarePerformance,
+  useMiddlewareStatus
 } from './RouteMiddleware';
 
 // Deep Linking System
 export { default as DeepLinkManagerProvider } from './DeepLinkManager';
 export { 
-  useDeepLinkManager, 
-  SmartLink,
-  ShareLinkDialog,
-  LinkHistory,
-  LinkBuilder,
-  useDeepLink,
-  useShareableLink,
-  useLinkAnalytics,
-  useLinkValidation
+  useDeepLinkManager
 } from './DeepLinkManager';
 
 // Breadcrumb Navigation
 export { default as BreadcrumbManagerProvider } from './BreadcrumbManager';
 export { 
-  useBreadcrumbManager,
-  BreadcrumbNavigation,
-  BreadcrumbSettings,
-  BreadcrumbAnalytics,
-  useBreadcrumb,
-  useBreadcrumbNavigation,
-  useBreadcrumbAnalytics
+  useBreadcrumbManager
 } from './BreadcrumbManager';
 
 // Quick Navigation System
 export { default as QuickNavigationProvider } from './QuickNavigationPanel';
 export { 
-  useQuickNavigation,
-  QuickNavigationPanel,
-  QuickNavigationTrigger,
-  QuickNavigationSettings,
-  useQuickNavigationShortcuts,
-  useQuickNavigationBookmarks,
-  useQuickNavigationSearch
+  useQuickNavigation
 } from './QuickNavigationPanel';
 
 // ============================================================================
@@ -133,10 +87,7 @@ export {
 export type { 
   RouteConfig, 
   RouteMetadata, 
-  NavigationState, 
-  RouteAnalyticsData,
-  RouteConfigurationOptions,
-  RouteBreadcrumbItem
+  NavigationState
 } from './RacineRouter';
 
 // Route Guards Types
@@ -165,28 +116,20 @@ export type {
 export type { 
   DeepLinkConfig, 
   DeepLinkResult, 
-  LinkState, 
-  DeepLinkAnalytics, 
-  ShareableLink,
-  DeepLinkOptions,
-  ShareableLinkOptions
+  LinkState
 } from './DeepLinkManager';
 
 // Breadcrumb Types
 export type { 
   BreadcrumbItem,
-  BreadcrumbConfig,
-  BreadcrumbNavigation as BreadcrumbNavigationType,
-  BreadcrumbContext
+  BreadcrumbConfig
 } from './BreadcrumbManager';
 
 // Quick Navigation Types
 export type { 
   NavigationItem, 
   QuickAction, 
-  SearchResult, 
-  QuickNavigationConfig,
-  KeyboardShortcut
+  SearchResult
 } from './QuickNavigationPanel';
 
 // ============================================================================
@@ -210,25 +153,21 @@ export const createRoutingProvider = (
   }
 ) => {
   return React.createElement(
-    RacineRouterProvider,
-    { ...(config?.router || {}) },
+    RouteGuardsProvider,
+    { ...(config?.guards || {}) },
     React.createElement(
-      RouteGuardsProvider,
-      { ...(config?.guards || {}) },
+      RouteMiddlewareProvider,
+      { ...(config?.middleware || {}) },
       React.createElement(
-        RouteMiddlewareProvider,
-        { ...(config?.middleware || {}) },
+        DeepLinkManagerProvider,
+        { ...(config?.deepLinks || {}) },
         React.createElement(
-          DeepLinkManagerProvider,
-          { ...(config?.deepLinks || {}) },
+          BreadcrumbManagerProvider,
+          { ...(config?.breadcrumbs || {}) },
           React.createElement(
-            BreadcrumbManagerProvider,
-            { ...(config?.breadcrumbs || {}) },
-            React.createElement(
-              QuickNavigationProvider,
-              { ...(config?.quickNavigation || {}) },
-              children
-            )
+            QuickNavigationProvider,
+            { ...(config?.quickNavigation || {}) },
+            children
           )
         )
       )
@@ -240,7 +179,6 @@ export const createRoutingProvider = (
  * Hook for accessing all routing functionality in one place
  */
 export const useRacineRouting = () => {
-  const router = useRacineRouter();
   const guards = useRouteGuards();
   const middleware = useRouteMiddleware();
   const deepLinks = useDeepLinkManager();
@@ -248,7 +186,6 @@ export const useRacineRouting = () => {
   const quickNav = useQuickNavigation();
 
   return {
-    router,
     guards,
     middleware,
     deepLinks,
@@ -607,22 +544,9 @@ export const useEnterpriseRouting = () => {
   return {
     ...routing,
     
-    // Convenience methods
-    navigate: routing.router.navigate,
-    goBack: routing.router.goBack,
-    goForward: routing.router.goForward,
-    refresh: routing.router.refresh,
-    
     // Quick navigation
     openQuickNav: routing.quickNav.openPanel,
     closeQuickNav: routing.quickNav.closePanel,
-    
-    // Breadcrumb navigation
-    navigateToBreadcrumb: routing.breadcrumbs.navigateToBreadcrumb,
-    
-    // Deep linking
-    generateDeepLink: routing.deepLinks.generateDeepLink,
-    parseDeepLink: routing.deepLinks.parseDeepLink,
     
     // Security
     executeGuards: routing.guards.executeGuards,
@@ -659,8 +583,9 @@ export const useRouteSpecific = (routePattern: string) => {
       });
     }
     
-    routing.navigate(path);
-  }, [routePattern, routing.navigate]);
+    // Use Next.js router for navigation
+    window.location.href = path;
+  }, [routePattern]);
   
   return {
     config: routeConfig,
@@ -689,7 +614,6 @@ export const MasterRoutingProvider: React.FC<MasterRoutingProviderProps> = ({
   const finalConfig = { ...ENTERPRISE_ROUTING_CONFIG, ...config };
   
   return createRoutingProvider(children, {
-    router: finalConfig,
     guards: finalConfig.guards,
     middleware: finalConfig.middleware,
     deepLinks: finalConfig.deepLinks,
@@ -705,7 +629,6 @@ export const MasterRoutingProvider: React.FC<MasterRoutingProviderProps> = ({
 export default {
   // Providers
   MasterRoutingProvider,
-  RacineRouterProvider,
   RouteGuardsProvider,
   RouteMiddlewareProvider,
   DeepLinkManagerProvider,
@@ -715,11 +638,7 @@ export default {
   // Components
   RacineRouter,
   RouteGuard,
-  RouteMiddleware,
-  SmartLink,
-  BreadcrumbNavigation,
-  QuickNavigationPanel,
-  QuickNavigationTrigger,
+  RouteMiddlewareComponent,
   
   // Hooks
   useRacineRouting,

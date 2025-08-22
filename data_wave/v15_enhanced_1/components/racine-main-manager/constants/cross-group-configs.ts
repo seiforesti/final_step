@@ -13,6 +13,32 @@ import { SystemStatus, OperationStatus, HealthStatus } from '../types/racine-cor
 // SUPPORTED GROUPS CONFIGURATION
 // ============================================================================
 
+// ============================================================================
+// VIEW AND LAYOUT MODES
+// ============================================================================
+
+export const VIEW_MODES = {
+  GRID: 'grid',
+  LIST: 'list',
+  TABLE: 'table',
+  CARD: 'card',
+  TIMELINE: 'timeline',
+  KANBAN: 'kanban',
+  CALENDAR: 'calendar',
+  MAP: 'map',
+  CHART: 'chart',
+  DASHBOARD: 'dashboard'
+} as const;
+
+export const LAYOUT_MODES = {
+  COMPACT: 'compact',
+  COMFORTABLE: 'comfortable',
+  SPACIOUS: 'spacious',
+  CUSTOM: 'custom',
+  RESPONSIVE: 'responsive',
+  ADAPTIVE: 'adaptive'
+} as const;
+
 export const SUPPORTED_GROUPS = {
   DATA_SOURCES: {
     id: 'data_sources',

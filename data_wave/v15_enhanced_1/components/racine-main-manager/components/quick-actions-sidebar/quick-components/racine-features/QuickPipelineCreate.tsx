@@ -75,7 +75,7 @@ import {
   GitBranch,
   Play,
   Pause,
-  Stop,
+  Square,
   Save,
   Copy,
   Edit,

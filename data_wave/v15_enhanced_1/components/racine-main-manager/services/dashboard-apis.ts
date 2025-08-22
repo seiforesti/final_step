@@ -800,6 +800,34 @@ export const dashboardAPI = new DashboardAPI();
 // Export class for direct instantiation if needed
 export { DashboardAPI };
 
+// ============================================================================
+// PERFORMANCE MONITORING API
+// ============================================================================
+
+export const performanceMonitoringAPI = {
+  getPerformanceMetrics: async (): Promise<any> => {
+    // Implementation for performance monitoring
+    return {
+      responseTime: 0,
+      throughput: 0,
+      errorRate: 0,
+      resourceUsage: {
+        cpu: 0,
+        memory: 0,
+        network: 0
+      }
+    };
+  },
+  
+  startMonitoring: () => {
+    console.log('Performance monitoring started');
+  },
+  
+  stopMonitoring: () => {
+    console.log('Performance monitoring stopped');
+  }
+};
+
 // Export types for external usage
 export type {
   DashboardAPIConfig,

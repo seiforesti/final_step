@@ -30,7 +30,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
 import { 
-  Workspace, 
+  Building2, 
   Users, 
   Settings, 
   Plus, 
@@ -85,7 +85,6 @@ import {
   Target,
   Rocket,
   Globe,
-  Building2,
   Users2,
   UserCheck,
   ShieldCheck,
