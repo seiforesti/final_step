@@ -26,10 +26,10 @@ import {
 } from '../types/racine-core.types';
 
 // Import existing Advanced-Scan-Rule-Sets services for integration
-import { scanRulesAPIService } from '../../Advanced-Scan-Rule-Sets/services/scan-rules-apis';
-import { optimizationAPIService } from '../../Advanced-Scan-Rule-Sets/services/optimization-apis';
+import { scanRulesAPI } from '../../Advanced-Scan-Rule-Sets/services/scan-rules-apis';
+import { optimizationAPI } from '../../Advanced-Scan-Rule-Sets/services/optimization-apis';
 import { validationAPIService } from '../../Advanced-Scan-Rule-Sets/services/validation-apis';
-import { orchestrationAPIService } from '../../Advanced-Scan-Rule-Sets/services/orchestration-apis';
+import { orchestrationAPI } from '../../Advanced-Scan-Rule-Sets/services/orchestration-apis';
 
 // Base API configuration
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1';
@@ -45,10 +45,10 @@ class RacineScanRuleSetsAPIService {
   private headers: HeadersInit;
   
   // Integration with existing SPA services
-  private scanRulesService: typeof scanRulesAPIService;
-  private optimizationService: typeof optimizationAPIService;
+  private scanRulesService: typeof scanRulesAPI;
+  private optimizationService: typeof optimizationAPI;
   private validationService: typeof validationAPIService;
-  private orchestrationService: typeof orchestrationAPIService;
+  private orchestrationService: typeof orchestrationAPI;
 
   constructor() {
     this.baseURL = RACINE_SCAN_RULES_ENDPOINT;
@@ -60,10 +60,10 @@ class RacineScanRuleSetsAPIService {
     };
 
     // Initialize existing SPA service integrations
-    this.scanRulesService = scanRulesAPIService;
-    this.optimizationService = optimizationAPIService;
+    this.scanRulesService = scanRulesAPI;
+    this.optimizationService = optimizationAPI;
     this.validationService = validationAPIService;
-    this.orchestrationService = orchestrationAPIService;
+    this.orchestrationService = orchestrationAPI;
   }
 
   /**

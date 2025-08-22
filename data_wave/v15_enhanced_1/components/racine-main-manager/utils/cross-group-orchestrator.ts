@@ -887,3 +887,29 @@ async function notifyStakeholders(errorContext: ErrorContext, recoveryResult: Re
 async function logCriticalError(criticalError: any): Promise<void> {
   console.error('Critical error:', criticalError);
 }
+
+// ============================================================================
+// CROSS GROUP ORCHESTRATOR INSTANCE
+// ============================================================================
+
+export const crossGroupOrchestrator = {
+  validateCrossGroupIntegration: validateCrossGroupIntegration,
+  optimizeExecutionPath: optimizeExecutionPath,
+  coordinateServices: coordinateServices,
+  handleErrors: handleErrors,
+  getSystemHealth: getSystemHealth,
+  getPerformanceMetrics: getPerformanceMetrics,
+  generateOptimizationRecommendations: generateOptimizationRecommendations,
+  analyzeDependencies: analyzeDependencies,
+  identifyParallelizationOpportunities: identifyParallelizationOpportunities,
+  identifyBottlenecks: identifyBottlenecks,
+  calculateTotalResourceRequirements: calculateTotalResourceRequirements,
+  findCriticalPath: findCriticalPath,
+  assessOptimizationPotential: assessOptimizationPotential,
+  logError: logError,
+  classifyError: classifyError,
+  determineRecoveryStrategy: determineRecoveryStrategy,
+  executeRecovery: executeRecovery,
+  notifyStakeholders: notifyStakeholders,
+  logCriticalError: logCriticalError
+};

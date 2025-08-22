@@ -433,7 +433,7 @@ import {
   CalendarCheck,
   CalendarCheck2,
   CalendarRange,
-  Date,
+  Calendar,
   Clock1,
   Clock2,
   Clock3,

@@ -72,7 +72,7 @@ import {
   Workflow,
   Play,
   Pause,
-  Stop,
+  Square,
   Save,
   Copy,
   Edit,
