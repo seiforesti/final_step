@@ -524,12 +524,12 @@ const ResponsiveLayoutEngine: React.FC<ResponsiveLayoutEngineProps> = ({
     highContrastMode: false,
     reducedMotion: false,
     touchSupport: {
-      maxTouchPoints: navigator.maxTouchPoints || 0,
-      touchType: 'ontouchstart' in window ? 'coarse' : 'none',
-      gestureSupport: 'GestureEvent' in window,
-      forceTouch: 'webkitForce' in (document.createElement('div') as any),
+      maxTouchPoints: typeof navigator !== 'undefined' ? (navigator.maxTouchPoints || 0) : 0,
+      touchType: typeof window !== 'undefined' && 'ontouchstart' in window ? 'coarse' : 'none',
+      gestureSupport: typeof window !== 'undefined' && 'GestureEvent' in window,
+      forceTouch: typeof document !== 'undefined' && 'webkitForce' in (document.createElement('div') as any),
       stylus: false,
-      multiTouch: (navigator.maxTouchPoints || 0) > 1
+      multiTouch: typeof navigator !== 'undefined' ? ((navigator.maxTouchPoints || 0) > 1) : false
     },
     gestureRecognition: {
       isEnabled: false,

@@ -11,35 +11,28 @@
 // Cross-group orchestration utilities
 export * from './cross-group-orchestrator';
 export { 
-  orchestrateWorkflow,
-  validateCrossGroupDependencies,
-  executeWorkflowStep,
-  rollbackWorkflow,
-  optimizeWorkflowExecution,
-  generateWorkflowReport
+  coordinateServices,
+  validateIntegration,
+  optimizeExecution,
+  handleErrors
 } from './cross-group-orchestrator';
 
 // Workflow engine utilities
 export * from './workflow-engine';
 export {
-  createWorkflow,
   executeWorkflow,
-  pauseWorkflow,
-  resumeWorkflow,
-  cancelWorkflow,
-  getWorkflowStatus,
-  validateWorkflowDefinition
+  handleDependencies,
+  optimizeWorkflow,
+  validateWorkflow
 } from './workflow-engine';
 
 // Pipeline engine utilities
 export * from './pipeline-engine';
 export {
-  createPipeline,
   executePipeline,
-  monitorPipeline,
-  optimizePipelinePerformance,
-  generatePipelineMetrics,
-  validatePipelineConfiguration
+  monitorHealth,
+  optimizePipeline,
+  handleErrors as handlePipelineErrors
 } from './pipeline-engine';
 
 // Context analyzer utilities

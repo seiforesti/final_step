@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
 // Import compliance rule APIs
 import { racineComplianceRuleAPI } from '../services/compliance-rule-apis'
-import { crossGroupIntegrationApis } from '../services/cross-group-integration-apis'
+import { crossGroupIntegrationAPI } from '../services/cross-group-integration-apis'
 
 // Import types
 import {
@@ -377,7 +377,7 @@ export function useComplianceRules(options: UseComplianceRulesOptions = {}) {
   const linkToDataSources = useCallback(async (complianceRuleId: string, dataSourceIds: string[]): Promise<void> => {
     try {
       await racineComplianceRuleAPI.linkToDataSources(complianceRuleId, dataSourceIds)
-      await crossGroupIntegrationApis.syncComplianceRuleWithDataSources(complianceRuleId, dataSourceIds)
+      await crossGroupIntegrationAPI.syncComplianceRuleWithDataSources(complianceRuleId, dataSourceIds)
     } catch (error) {
       console.error('Error linking to data sources:', error)
       throw error
@@ -387,7 +387,7 @@ export function useComplianceRules(options: UseComplianceRulesOptions = {}) {
   const linkToScanRuleSets = useCallback(async (complianceRuleId: string, ruleSetIds: string[]): Promise<void> => {
     try {
       await racineComplianceRuleAPI.linkToScanRuleSets(complianceRuleId, ruleSetIds)
-      await crossGroupIntegrationApis.syncComplianceRuleWithScanRuleSets(complianceRuleId, ruleSetIds)
+      await crossGroupIntegrationAPI.syncComplianceRuleWithScanRuleSets(complianceRuleId, ruleSetIds)
     } catch (error) {
       console.error('Error linking to scan rule sets:', error)
       throw error
@@ -397,7 +397,7 @@ export function useComplianceRules(options: UseComplianceRulesOptions = {}) {
   const linkToClassifications = useCallback(async (complianceRuleId: string, classificationIds: string[]): Promise<void> => {
     try {
       await racineComplianceRuleAPI.linkToClassifications(complianceRuleId, classificationIds)
-      await crossGroupIntegrationApis.syncComplianceRuleWithClassifications(complianceRuleId, classificationIds)
+      await crossGroupIntegrationAPI.syncComplianceRuleWithClassifications(complianceRuleId, classificationIds)
     } catch (error) {
       console.error('Error linking to classifications:', error)
       throw error

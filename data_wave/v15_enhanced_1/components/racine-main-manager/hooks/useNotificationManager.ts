@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
 // Import notification APIs
 import { racineOrchestrationAPI } from '../services/racine-orchestration-apis'
-import { crossGroupIntegrationApis } from '../services/cross-group-integration-apis'
+import { crossGroupIntegrationAPI } from '../services/cross-group-integration-apis'
 
 // Import types
 import {
@@ -245,7 +245,7 @@ export const useNotificationManager = (options: UseNotificationManagerOptions = 
     }
 
     // Track notification
-    crossGroupIntegrationApis.trackEvent('notification_shown', {
+    crossGroupIntegrationAPI.trackEvent('notification_shown', {
       id,
       type: options.type || 'info',
       priority: options.priority || 'medium',
@@ -412,7 +412,7 @@ export const useNotificationManager = (options: UseNotificationManagerOptions = 
     setNotifications(prev => prev.filter(n => n.id !== id))
     
     // Track dismissal
-    crossGroupIntegrationApis.trackEvent('notification_dismissed', { id })
+    crossGroupIntegrationAPI.trackEvent('notification_dismissed', { id })
   }, [])
 
   // Dismiss all notifications
@@ -421,7 +421,7 @@ export const useNotificationManager = (options: UseNotificationManagerOptions = 
     setNotifications([])
     
     // Track bulk dismissal
-    crossGroupIntegrationApis.trackEvent('notifications_dismissed_all', { count })
+    crossGroupIntegrationAPI.trackEvent('notifications_dismissed_all', { count })
   }, [notifications.length])
 
   // Clear expired notifications
@@ -463,7 +463,7 @@ export const useNotificationManager = (options: UseNotificationManagerOptions = 
     const permission = await Notification.requestPermission()
     
     // Track permission request
-    crossGroupIntegrationApis.trackEvent('notification_permission_requested', {
+    crossGroupIntegrationAPI.trackEvent('notification_permission_requested', {
       permission,
       userAgent: navigator.userAgent
     })
@@ -486,7 +486,7 @@ export const useNotificationManager = (options: UseNotificationManagerOptions = 
       }, 5000)
       
       // Track browser notification
-      crossGroupIntegrationApis.trackEvent('browser_notification_shown', {
+      crossGroupIntegrationAPI.trackEvent('browser_notification_shown', {
         title,
         hasIcon: !!options?.icon,
         hasImage: !!options?.image
@@ -534,7 +534,7 @@ export const useNotificationManager = (options: UseNotificationManagerOptions = 
     setNotifications(prev => prev.filter(n => !ids.includes(n.id)))
     
     // Track bulk dismissal
-    crossGroupIntegrationApis.trackEvent('notifications_bulk_dismissed', {
+    crossGroupIntegrationAPI.trackEvent('notifications_bulk_dismissed', {
       count: ids.length,
       ids
     })

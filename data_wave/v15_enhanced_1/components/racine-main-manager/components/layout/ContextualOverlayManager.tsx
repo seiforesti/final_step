@@ -263,7 +263,7 @@ const ContextualOverlayManager: React.FC<ContextualOverlayManagerProps> = ({
     getContextualOverlays,
     optimizeOverlayLayout,
     analyzeOverlayUsage
-  } = useAIAssistant(userContext.id, {
+  } = useAIAssistant(userContext?.id || 'default', {
     context: 'overlay_management',
     activeViews,
     currentLayout: layoutMode
