@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Timer, Zap, TrendingDown, Activity, Target, Gauge, BarChart3, LineChart, PieChart, Clock, RefreshCw, Settings, Play, Pause, Square, RotateCcw, Plus, Minus, ArrowUp, ArrowDown, TrendingUp, Server, Cpu, MemoryStick, Network, Database, Calendar, Users, User, CheckCircle, AlertTriangle, XCircle, Info, Flag, Star, Shield, Lock, Unlock, Key, Eye, EyeOff, Search, Filter, Download, Upload, Share2, Edit, Trash2, Copy, Code, FileText, Archive, History, Award, Crown, Hash, Percent, DollarSign, TrendingUpDown, Maximize, Minimize, ArrowLeft, ArrowRight, Volume2, VolumeX, Wifi, WifiOff, Signal, Battery, BatteryLow, Thermometer, Monitor, Smartphone, Tablet, Laptop, Desktop, Package, Layers, Globe } from 'lucide-react'
+import { Timer, Zap, TrendingDown, Activity, Target, Gauge, BarChart3, LineChart, PieChart, Clock, RefreshCw, Settings, Play, Pause, Square, RotateCcw, Plus, Minus, ArrowUp, ArrowDown, TrendingUp, Server, Cpu, MemoryStick, Network, Database, Calendar, Users, User, CheckCircle, AlertTriangle, XCircle, Info, Flag, Star, Shield, Lock, Unlock, Key, Eye, EyeOff, Search, Filter, Download, Upload, Share2, Edit, Trash2, Copy, Code, FileText, Archive, History, Award, Crown, Hash, Percent, DollarSign, Maximize, Minimize, ArrowLeft, ArrowRight, Volume2, VolumeX, Wifi, WifiOff, Signal, Battery, BatteryLow, Thermometer, Monitor, Smartphone, Tablet, Laptop, Desktop, Package, Layers, Globe } from 'lucide-react'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -741,7 +741,7 @@ export const LatencyReducer: React.FC<{
     switch (trend) {
       case 'decreasing': return <TrendingDown className="h-4 w-4" />
       case 'increasing': return <TrendingUp className="h-4 w-4" />
-      case 'stable': return <TrendingUpDown className="h-4 w-4" />
+      case 'stable': return <Minus className="h-4 w-4" />
       case 'volatile': return <Activity className="h-4 w-4" />
       default: return <Activity className="h-4 w-4" />
     }

@@ -587,3 +587,46 @@ export enum TimeGranularity {
   QUARTER = 'quarter',
   YEAR = 'year'
 }
+
+// Type aliases for component compatibility
+export type InsightCategory = IntelligenceCategory;
+export type InsightPriority = ActionItemPriority;
+export type InsightType = IntelligenceInsightType;
+export type InsightStatus = IntelligenceStatus;
+export type PredictionType = PredictiveModelType;
+export type ModelType = PredictiveModelType;
+
+// Missing enum types
+export enum TimeHorizon {
+  SHORT_TERM = 'short_term',
+  MEDIUM_TERM = 'medium_term',
+  LONG_TERM = 'long_term',
+  IMMEDIATE = 'immediate',
+  DAILY = 'daily',
+  WEEKLY = 'weekly',
+  MONTHLY = 'monthly',
+  QUARTERLY = 'quarterly',
+  YEARLY = 'yearly'
+}
+
+export enum ModelStatus {
+  DRAFT = 'draft',
+  TRAINING = 'training',
+  VALIDATION = 'validation',
+  DEPLOYED = 'deployed',
+  DEPRECATED = 'deprecated',
+  FAILED = 'failed',
+  ARCHIVED = 'archived',
+  UPDATING = 'updating',
+  TESTING = 'testing',
+  PRODUCTION = 'production'
+}
+
+// API Error type for service compatibility
+export interface APIError {
+  code: string;
+  message: string;
+  details?: any;
+  timestamp: string;
+  request_id?: string;
+}

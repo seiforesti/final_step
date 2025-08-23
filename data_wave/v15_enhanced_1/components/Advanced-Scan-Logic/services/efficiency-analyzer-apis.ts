@@ -15,6 +15,11 @@ export class EfficiencyAnalyzerAPIService {
   async getMetrics(params?: Record<string, any>) { return this.client.get(`${BASE}/metrics`, { params }); }
   async getConfiguration(id: string) { return this.client.get(`${BASE}/analyzers/${id}/configuration`); }
   async updateConfiguration(id: string, payload: any) { return this.client.put(`${BASE}/analyzers/${id}/configuration`, payload); }
+  
+  // Missing function referenced by components
+  async optimizeEfficiency(params?: Record<string, any>) { 
+    return this.client.post(`${BASE}/optimize`, params); 
+  }
 }
 
 export const efficiencyAnalyzerAPI = new EfficiencyAnalyzerAPIService();
@@ -28,6 +33,7 @@ export const {
   getMetrics: fetchEfficiencyMetrics,
   getConfiguration: fetchEfficiencyConfiguration,
   updateConfiguration: updateEfficiencyConfiguration,
+  optimizeEfficiency,
 } = efficiencyAnalyzerAPI;
 
 

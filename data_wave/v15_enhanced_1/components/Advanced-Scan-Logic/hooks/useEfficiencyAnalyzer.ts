@@ -50,5 +50,102 @@ export function useEfficiencyConfiguration(id: string) {
   return { configuration, update };
 }
 
+// Missing hooks referenced by components
+export function useEfficiencyMonitoring(params?: Record<string, any>) {
+  return useQuery({ 
+    queryKey: ['efficiency', 'monitoring', params], 
+    queryFn: () => fetchEfficiencyMetrics(params),
+    refetchInterval: 30000 // Real-time monitoring
+  });
+}
+
+export function useEfficiencyAnalysis(analysisParams?: Record<string, any>) {
+  return useQuery({ 
+    queryKey: ['efficiency', 'analysis', analysisParams], 
+    queryFn: () => fetchEfficiencyMetrics(analysisParams) 
+  });
+}
+
+export function useEfficiencyTargets(targetParams?: Record<string, any>) {
+  const qc = useQueryClient();
+  const targets = useQuery({ 
+    queryKey: ['efficiency', 'targets', targetParams], 
+    queryFn: () => fetchEfficiencyMetrics(targetParams) 
+  });
+  
+  const updateTargets = useMutation({
+    mutationFn: (payload: any) => updateEfficiencyConfiguration('targets', payload),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['efficiency', 'targets'] }),
+  });
+  
+  return { targets, updateTargets };
+}
+
+export function useEfficiencyBenchmarks(benchmarkParams?: Record<string, any>) {
+  return useQuery({ 
+    queryKey: ['efficiency', 'benchmarks', benchmarkParams], 
+    queryFn: () => fetchEfficiencyMetrics(benchmarkParams) 
+  });
+}
+
+export function useEfficiencyTests(testParams?: Record<string, any>) {
+  const qc = useQueryClient();
+  const tests = useQuery({ 
+    queryKey: ['efficiency', 'tests', testParams], 
+    queryFn: () => fetchEfficiencyMetrics(testParams) 
+  });
+  
+  const runTest = useMutation({
+    mutationFn: (testConfig: any) => createEfficiencyAnalyzer(testConfig),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['efficiency', 'tests'] }),
+  });
+  
+  return { tests, runTest };
+}
+
+export function useEfficiencyOptimization(optimizationParams?: Record<string, any>) {
+  const qc = useQueryClient();
+  const optimization = useQuery({ 
+    queryKey: ['efficiency', 'optimization', optimizationParams], 
+    queryFn: () => fetchEfficiencyMetrics(optimizationParams) 
+  });
+  
+  const optimize = useMutation({
+    mutationFn: (payload: any) => updateEfficiencyConfiguration('optimization', payload),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['efficiency', 'optimization'] }),
+  });
+  
+  return { optimization, optimize };
+}
+
+export function useEfficiencyPredictions(predictionParams?: Record<string, any>) {
+  return useQuery({ 
+    queryKey: ['efficiency', 'predictions', predictionParams], 
+    queryFn: () => fetchEfficiencyMetrics(predictionParams) 
+  });
+}
+
+export function useEfficiencyRecommendations(recommendationParams?: Record<string, any>) {
+  return useQuery({ 
+    queryKey: ['efficiency', 'recommendations', recommendationParams], 
+    queryFn: () => fetchEfficiencyMetrics(recommendationParams) 
+  });
+}
+
+export function useEfficiencyAudit(auditParams?: Record<string, any>) {
+  const qc = useQueryClient();
+  const audit = useQuery({ 
+    queryKey: ['efficiency', 'audit', auditParams], 
+    queryFn: () => fetchEfficiencyMetrics(auditParams) 
+  });
+  
+  const runAudit = useMutation({
+    mutationFn: (auditConfig: any) => createEfficiencyAnalyzer(auditConfig),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['efficiency', 'audit'] }),
+  });
+  
+  return { audit, runAudit };
+}
+
 
 

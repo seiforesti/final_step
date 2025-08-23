@@ -25,7 +25,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Activity, AlertTriangle, ArrowUp, ArrowDown, BarChart3, CheckCircle, Clock, Database, GitBranch, Globe, Layers, Network, Play, Pause, Square, Settings, Shield, Zap, TrendingUp, TrendingDown, Users, Server, Monitor, RefreshCw, AlertCircle, ChevronDown, ChevronRight, Filter, Search, Download, Upload, Eye, Edit, Trash2, Plus, Minus, X, Check, Info, ExternalLink, Copy, Share2, MoreHorizontal, Maximize2, Minimize2, Target, Flag, Star, Crown, Timer, Gauge, LineChart, PieChart, BarChart, Workflow, Route, Priority, ArrowUpCircle, ArrowDownCircle, Equal, Flame, Snowflake, Calendar, User, Building, Briefcase } from 'lucide-react';
+import { Activity, AlertTriangle, ArrowUp, ArrowDown, BarChart3, CheckCircle, Clock, Database, GitBranch, Globe, Layers, Network, Play, Pause, Square, Settings, Shield, Zap, TrendingUp, TrendingDown, Users, Server, Monitor, RefreshCw, AlertCircle, ChevronDown, ChevronRight, Filter, Search, Download, Upload, Eye, Edit, Trash2, Plus, Minus, X, Check, Info, ExternalLink, Copy, Share2, MoreHorizontal, Maximize2, Minimize2, Target, Flag, Star, Crown, Timer, Gauge, LineChart, PieChart, BarChart, Workflow, Route, ArrowUpCircle, ArrowDownCircle, Equal, Flame, Snowflake, Calendar, User, Building, Briefcase } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -1198,7 +1198,7 @@ export const ScanPriorityManager: React.FC<ScanPriorityManagerProps> = ({
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <Priority className="h-5 w-5" />
+                    <Flag className="h-5 w-5" />
                     <span>Scan Priority Queue</span>
                   </div>
                   <div className="flex items-center space-x-2">
