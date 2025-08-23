@@ -15,6 +15,19 @@ export class ScalabilityManagerAPIService {
   async getConfiguration(id: string) { return this.client.get(`${BASE}/managers/${id}/configuration`); }
   async updateConfiguration(id: string, payload: any) { return this.client.put(`${BASE}/managers/${id}/configuration`, payload); }
   async getMetrics(id: string, params?: Record<string, any>) { return this.client.get(`${BASE}/managers/${id}/metrics`, { params }); }
+  
+  // Missing functions referenced by components
+  async scaleUp(id: string, params?: Record<string, any>) { 
+    return this.client.post(`${BASE}/managers/${id}/scale-up`, params); 
+  }
+  
+  async scaleDown(id: string, params?: Record<string, any>) { 
+    return this.client.post(`${BASE}/managers/${id}/scale-down`, params); 
+  }
+  
+  async analyzeScalability(id: string, params?: Record<string, any>) { 
+    return this.client.post(`${BASE}/managers/${id}/analyze`, params); 
+  }
 }
 
 export const scalabilityManagerAPI = new ScalabilityManagerAPIService();
@@ -28,6 +41,9 @@ export const {
   getConfiguration: fetchScalabilityConfiguration,
   updateConfiguration: updateScalabilityConfiguration,
   getMetrics: fetchScalabilityMetrics,
+  scaleUp,
+  scaleDown,
+  analyzeScalability,
 } = scalabilityManagerAPI;
 
 

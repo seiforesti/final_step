@@ -928,6 +928,28 @@ export const PERFORMANCE_CONFIG = {
 } as const;
 
 // =============================================================================
+// EXECUTION STATUS COLORS
+// =============================================================================
+
+export const EXECUTION_STATUS_COLORS = {
+  pending: '#f59e0b',    // amber-500
+  running: '#3b82f6',    // blue-500
+  completed: '#10b981',  // emerald-500
+  failed: '#ef4444',     // red-500
+  cancelled: '#6b7280',  // gray-500
+  paused: '#8b5cf6',     // violet-500
+  warning: '#f97316',    // orange-500
+  success: '#22c55e',    // green-500
+  error: '#dc2626',      // red-600
+  stopped: '#374151',    // gray-700
+  queued: '#06b6d4',     // cyan-500
+  scheduled: '#a855f7',  // purple-500
+  timeout: '#db2777',    // pink-600
+  retrying: '#eab308',   // yellow-500
+  skipped: '#9ca3af'     // gray-400
+} as const;
+
+// =============================================================================
 // EXPORT ALL UI CONSTANTS
 // =============================================================================
 

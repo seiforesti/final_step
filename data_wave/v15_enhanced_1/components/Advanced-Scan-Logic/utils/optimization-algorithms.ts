@@ -596,3 +596,75 @@ export class OptimizationAlgorithms {
 
 export const optimizationAlgorithms = new OptimizationAlgorithms();
 export default optimizationAlgorithms;
+
+// Missing algorithm functions referenced by components
+export const schedulingEngine = {
+  schedule: async (tasks: any[], resources: any[], constraints?: any) => {
+    return await optimizationAlgorithms.optimizeResourceAllocation(
+      resources,
+      tasks,
+      tasks.map(() => 1), // Default priorities
+      constraints
+    );
+  },
+  
+  rebalance: async (currentAllocation: any, newRequirements: any[]) => {
+    return await optimizationAlgorithms.multiObjectiveOptimization(
+      { ...currentAllocation },
+      newRequirements.map(() => ({ objective: 'maximize', weight: 1 }))
+    );
+  }
+};
+
+export const capacityPlanner = {
+  plan: async (demandForecast: any[], currentCapacity: any, constraints?: any) => {
+    return await optimizationAlgorithms.optimizeResourceAllocation(
+      currentCapacity,
+      demandForecast,
+      demandForecast.map(() => 1),
+      constraints
+    );
+  },
+  
+  analyze: (utilization: any[], trends: any[]) => {
+    return {
+      recommendedCapacity: utilization.reduce((sum: number, val: any) => sum + (val.peak || 0), 0) * 1.2,
+      growthProjection: trends.length > 0 ? trends[trends.length - 1].growth || 0 : 0,
+      bottlenecks: utilization.filter((u: any) => u.utilization > 0.8)
+    };
+  }
+};
+
+export const conflictResolver = {
+  resolve: async (conflicts: any[], resolutionStrategy: string = 'priority') => {
+    const resolved = [];
+    
+    for (const conflict of conflicts) {
+      let resolution;
+      
+      switch (resolutionStrategy) {
+        case 'priority':
+          resolution = conflict.items.sort((a: any, b: any) => (b.priority || 0) - (a.priority || 0))[0];
+          break;
+        case 'first_come_first_served':
+          resolution = conflict.items.sort((a: any, b: any) => 
+            new Date(a.timestamp || 0).getTime() - new Date(b.timestamp || 0).getTime())[0];
+          break;
+        case 'resource_based':
+          resolution = conflict.items.sort((a: any, b: any) => (a.resourceRequirement || 0) - (b.resourceRequirement || 0))[0];
+          break;
+        default:
+          resolution = conflict.items[0];
+      }
+      
+      resolved.push({
+        conflictId: conflict.id,
+        resolution,
+        strategy: resolutionStrategy,
+        timestamp: new Date().toISOString()
+      });
+    }
+    
+    return resolved;
+  }
+};
