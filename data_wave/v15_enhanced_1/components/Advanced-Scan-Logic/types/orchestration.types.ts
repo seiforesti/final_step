@@ -683,3 +683,32 @@ export interface ResourceRequirements {
   gpu_units?: number;
   special_requirements?: string[];
 }
+
+// Missing enum type referenced by components
+export enum WorkflowStatus {
+  DRAFT = 'draft',
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
+  PENDING = 'pending',
+  RUNNING = 'running',
+  PAUSED = 'paused',
+  COMPLETED = 'completed',
+  FAILED = 'failed',
+  CANCELLED = 'cancelled',
+  SUSPENDED = 'suspended',
+  ARCHIVED = 'archived',
+  TEMPLATE = 'template',
+  DEPRECATED = 'deprecated',
+  UNDER_REVIEW = 'under_review',
+  APPROVED = 'approved',
+  REJECTED = 'rejected'
+}
+
+// API Error type for service compatibility
+export interface APIError {
+  code: string;
+  message: string;
+  details?: any;
+  timestamp: string;
+  request_id?: string;
+}

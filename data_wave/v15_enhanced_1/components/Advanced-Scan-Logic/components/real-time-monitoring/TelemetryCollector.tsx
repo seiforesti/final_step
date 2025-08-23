@@ -24,7 +24,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { Activity, AlertTriangle, CheckCircle, Clock, RefreshCw, Settings, Zap, TrendingUp, TrendingDown, Server, Monitor, AlertCircle, Filter, Search, Download, Eye, Edit, Trash2, Plus, X, Check, Info, Copy, MoreHorizontal, Target, Timer, Gauge, LineChart, PieChart, BarChart, Workflow, Brain, Lightbulb, Cpu, Database, GitBranch, HardDrive, Network, Users, Play, Pause, Square, RotateCcw, Layers, Globe, Shield, Bell, BellOff, Radio, Satellite, Radar, Antenna, Wifi, Signal, Rss, Calendar, MapPin, Send, UserCheck, UserX, ArrowRight, ArrowUp, ArrowDown, ExternalLink, Link, Unlink, TestTube, FlaskConical, Wrench, Tool, Cog, CircuitBoard, Waves, CloudUpload, CloudDownload, Inbox, Outbox, Package, Archive, FileText, Code, Braces } from 'lucide-react';
+import { Activity, AlertTriangle, CheckCircle, Clock, RefreshCw, Settings, Zap, TrendingUp, TrendingDown, Server, Monitor, AlertCircle, Filter, Search, Download, Eye, Edit, Trash2, Plus, X, Check, Info, Copy, MoreHorizontal, Target, Timer, Gauge, LineChart, PieChart, BarChart, Workflow, Brain, Lightbulb, Cpu, Database, GitBranch, HardDrive, Network, Users, Play, Pause, Square, RotateCcw, Layers, Globe, Shield, Bell, BellOff, Radio, Satellite, Radar, Antenna, Wifi, Signal, Rss, Calendar, MapPin, Send, UserCheck, UserX, ArrowRight, ArrowUp, ArrowDown, ExternalLink, Link, Unlink, TestTube, FlaskConical, Wrench, Tool, Cog, CircuitBoard, Waves, Upload, Cloud, Inbox, Outbox, Package, Archive, FileText, Code, Braces } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -1789,7 +1789,7 @@ export const TelemetryCollector: React.FC<TelemetryCollectorProps> = ({
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <CloudUpload className="h-5 w-5" />
+                    <Upload className="h-5 w-5" />
                     <span>Data Exports</span>
                   </div>
                   <Button
@@ -1818,7 +1818,7 @@ export const TelemetryCollector: React.FC<TelemetryCollectorProps> = ({
                               {exportConfig.destination === 'elasticsearch' ? <Search className="h-4 w-4" /> :
                                exportConfig.destination === 's3' ? <Archive className="h-4 w-4" /> :
                                exportConfig.destination === 'kafka' ? <Waves className="h-4 w-4" /> :
-                               <CloudUpload className="h-4 w-4" />}
+                               <Upload className="h-4 w-4" />}
                             </div>
                             <div>
                               <h4 className="font-semibold text-gray-900">{exportConfig.name}</h4>

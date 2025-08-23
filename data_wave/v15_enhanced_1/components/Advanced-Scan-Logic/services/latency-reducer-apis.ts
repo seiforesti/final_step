@@ -15,6 +15,11 @@ export class LatencyReducerAPIService {
   async getMetrics(params?: Record<string, any>) { return this.client.get(`${BASE}/metrics`, { params }); }
   async getConfiguration(id: string) { return this.client.get(`${BASE}/reducers/${id}/configuration`); }
   async updateConfiguration(id: string, payload: any) { return this.client.put(`${BASE}/reducers/${id}/configuration`, payload); }
+  
+  // Missing function referenced by components
+  async optimizeLatency(params?: Record<string, any>) { 
+    return this.client.post(`${BASE}/optimize`, params); 
+  }
 }
 
 export const latencyReducerAPI = new LatencyReducerAPIService();
@@ -28,6 +33,7 @@ export const {
   getMetrics: fetchLatencyMetrics,
   getConfiguration: fetchLatencyConfiguration,
   updateConfiguration: updateLatencyConfiguration,
+  optimizeLatency,
 } = latencyReducerAPI;
 
 
