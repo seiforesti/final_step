@@ -704,6 +704,9 @@ export const WORKFLOW_TEMPLATES_REGISTRY = {
 
 export default WORKFLOW_TEMPLATES_REGISTRY;
 
+// Export alias for backward compatibility
+export const WORKFLOW_TEMPLATES = ENTERPRISE_WORKFLOW_TEMPLATES;
+
 // ==========================================
 // FAILURE AND RECOVERY CONFIGURATIONS
 // ==========================================
