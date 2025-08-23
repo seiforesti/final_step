@@ -817,8 +817,121 @@ export function formatJsonForDisplay(
   }
 }
 
+/**
+ * Format date and time for display
+ */
+export function formatDateTime(
+  date: string | Date | null | undefined,
+  options: {
+    format?: 'short' | 'medium' | 'long' | 'full';
+    timezone?: string;
+    locale?: string;
+    showTime?: boolean;
+  } = {}
+): string {
+  if (!date) return 'Never';
+  
+  const {
+    format = 'medium',
+    timezone = Intl.DateTimeFormat().resolvedOptions().timeZone,
+    locale = 'en-US',
+    showTime = true
+  } = options;
+  
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  
+  if (isNaN(dateObj.getTime())) {
+    return 'Invalid Date';
+  }
+  
+  const dateOptions: Intl.DateTimeFormatOptions = {
+    timeZone: timezone
+  };
+  
+  switch (format) {
+    case 'short':
+      dateOptions.year = 'numeric';
+      dateOptions.month = '2-digit';
+      dateOptions.day = '2-digit';
+      if (showTime) {
+        dateOptions.hour = '2-digit';
+        dateOptions.minute = '2-digit';
+      }
+      break;
+      
+    case 'medium':
+      dateOptions.year = 'numeric';
+      dateOptions.month = 'short';
+      dateOptions.day = 'numeric';
+      if (showTime) {
+        dateOptions.hour = '2-digit';
+        dateOptions.minute = '2-digit';
+      }
+      break;
+      
+    case 'long':
+      dateOptions.year = 'numeric';
+      dateOptions.month = 'long';
+      dateOptions.day = 'numeric';
+      if (showTime) {
+        dateOptions.hour = '2-digit';
+        dateOptions.minute = '2-digit';
+        dateOptions.second = '2-digit';
+      }
+      break;
+      
+    case 'full':
+      dateOptions.weekday = 'long';
+      dateOptions.year = 'numeric';
+      dateOptions.month = 'long';
+      dateOptions.day = 'numeric';
+      if (showTime) {
+        dateOptions.hour = '2-digit';
+        dateOptions.minute = '2-digit';
+        dateOptions.second = '2-digit';
+        dateOptions.timeZoneName = 'short';
+      }
+      break;
+  }
+  
+  return new Intl.DateTimeFormat(locale, dateOptions).format(dateObj);
+}
+
+/**
+ * Format bytes to human readable format
+ */
+export function formatBytes(
+  bytes: number,
+  options: {
+    decimals?: number;
+    binary?: boolean;
+    compact?: boolean;
+  } = {}
+): string {
+  const { decimals = 2, binary = false, compact = false } = options;
+  
+  if (bytes === 0) return '0 Bytes';
+  
+  const k = binary ? 1024 : 1000;
+  const sizes = binary 
+    ? ['Bytes', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB']
+    : ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+  
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  
+  if (compact && i === 0) {
+    return `${bytes}${sizes[i]}`;
+  }
+  
+  const value = parseFloat((bytes / Math.pow(k, i)).toFixed(decimals));
+  const size = sizes[i];
+  
+  return `${value} ${size}`;
+}
+
 export default {
   formatDate,
+  formatDateTime,
   formatRelativeTime,
   formatDuration,
   formatUserName,
@@ -834,6 +947,7 @@ export default {
   formatAccessRequestStatus,
   formatNumber,
   formatFileSize,
+  formatBytes,
   formatPercentage,
   capitalizeFirst,
   toTitleCase,

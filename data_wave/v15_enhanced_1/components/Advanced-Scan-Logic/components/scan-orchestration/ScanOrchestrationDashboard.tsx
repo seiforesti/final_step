@@ -24,51 +24,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Activity, 
-  BarChart3, 
-  Settings, 
-  Play, 
-  Pause, 
-  Square, 
-  RefreshCw,
-  Filter,
-  Search,
-  Download,
-  Upload,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  Zap,
-  Database,
-  Server,
-  Network,
-  Cpu,
-  HardDrive,
-  Memory,
-  TrendingUp,
-  TrendingDown,
-  Eye,
-  EyeOff,
-  Maximize2,
-  Minimize2,
-  Grid,
-  List,
-  Calendar,
-  Users,
-  Shield,
-  Target,
-  Layers,
-  GitBranch,
-  MoreHorizontal,
-  Plus,
-  Edit,
-  Trash2,
-  Copy,
-  ExternalLink,
-  Bell,
-  BellOff
-} from 'lucide-react';
+import { Activity, BarChart3, Settings, Play, Pause, Square, RefreshCw, Filter, Search, Download, Upload, AlertTriangle, CheckCircle, Clock, Zap, Database, Server, Network, Cpu, HardDrive, TrendingUp, TrendingDown, Eye, EyeOff, Maximize2, Minimize2, Grid, List, Calendar, Users, Shield, Target, Layers, GitBranch, MoreHorizontal, Plus, Edit, Trash2, Copy, ExternalLink, Bell, BellOff } from 'lucide-react';
 
 // UI Components
 import { Button } from '@/components/ui/button';
@@ -816,8 +772,8 @@ export const ScanOrchestrationDashboard: React.FC = () => {
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
                 <span className="flex items-center space-x-1">
-                  <Memory className="h-4 w-4" />
-                  <span>Memory</span>
+                  <HardDrive className="h-4 w-4" />
+                  <span>HardDrive</span>
                 </span>
                 <span>{systemHealth.memory}%</span>
               </div>

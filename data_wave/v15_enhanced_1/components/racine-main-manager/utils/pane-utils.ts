@@ -4,6 +4,13 @@ export function createPane(id: string, title?: string): Pane {
 	return { id, title, closable: true }
 }
 
+export function createPaneLayout(panes: Pane[]): { panes: Pane[]; layout: string } {
+	return {
+		panes,
+		layout: panes.map(p => p.id).join('|')
+	}
+}
+
 export const validatePaneConstraints = (
   pane: Pane,
   constraints: {
@@ -33,4 +40,10 @@ export const validatePaneConstraints = (
     isValid: errors.length === 0,
     errors
   };
+};
+
+export const paneUtils = {
+	createPane,
+	createPaneLayout,
+	validatePaneConstraints
 };

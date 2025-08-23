@@ -21,12 +21,12 @@ import {
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { AlertTriangle } from "lucide-react"
+import { AlertTriangle } from 'lucide-react'
 
 import { DataSourceCreateParams } from "./types"
 import { DataDiscoveryWorkspace } from "./data-discovery/data-discovery-workspace"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { CheckCircle, Eye, RefreshCw, Database, Search, Layers } from "lucide-react"
+import { CheckCircle, Eye, RefreshCw, Database, Search, Layers } from 'lucide-react'
 
 interface DataSourceCreateModalProps {
   open: boolean

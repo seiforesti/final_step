@@ -41,6 +41,7 @@ import {
 /**
  * API endpoints configuration mapping to backend routes
  */
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1';
 const API_BASE = '/scan-workflows';
 
 const ENDPOINTS = {
@@ -1364,4 +1365,264 @@ const createHistoryEntry = (dep: any): any => {
     change: 'modified',
     timestamp: new Date().toISOString()
   };
+};
+
+// Analytics and Workflow Management Functions
+export const aggregateWorkflowData = async (workflows: any[]): Promise<any> => {
+  try {
+    const response = await ApiClient.post(`${API_BASE}/analytics/aggregate`, { workflows });
+    return response.data;
+  } catch (error) {
+    console.error('Error aggregating workflow data:', error);
+    throw error;
+  }
+};
+
+export const detectWorkflowAnomalies = async (workflowData: any[]): Promise<any[]> => {
+  try {
+    const response = await ApiClient.post(`${API_BASE}/analytics/anomalies`, { workflowData });
+    return response.data;
+  } catch (error) {
+    console.error('Error detecting workflow anomalies:', error);
+    throw error;
+  }
+};
+
+export const predictWorkflowOutcomes = async (workflowId: string, parameters: any): Promise<any> => {
+  try {
+    const response = await ApiClient.post(`${API_BASE}/analytics/predict`, { 
+      workflowId, 
+      parameters 
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error predicting workflow outcomes:', error);
+    throw error;
+  }
+};
+
+export const exportAnalyticsData = async (filters: any, format: string = 'json'): Promise<any> => {
+  try {
+    const response = await ApiClient.post(`${API_BASE}/analytics/export`, { 
+      filters, 
+      format 
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error exporting analytics data:', error);
+    throw error;
+  }
+};
+
+export const applyTemplate = async (templateId: string, parameters: any): Promise<any> => {
+  try {
+    const response = await ApiClient.post(`${API_BASE}/templates/apply`, { 
+      templateId, 
+      parameters 
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error applying template:', error);
+    throw error;
+  }
+};
+
+export const favoriteTemplate = async (templateId: string): Promise<any> => {
+  try {
+    const response = await ApiClient.post(`${API_BASE}/templates/favorite`, { templateId });
+    return response.data;
+  } catch (error) {
+    console.error('Error favoriting template:', error);
+    throw error;
+  }
+};
+
+export const rateTemplate = async (templateId: string, rating: number, review?: string): Promise<any> => {
+  try {
+    const response = await ApiClient.post(`${API_BASE}/templates/rate`, { 
+      templateId, 
+      rating, 
+      review 
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error rating template:', error);
+    throw error;
+  }
+};
+
+export const importTemplate = async (templateData: any): Promise<any> => {
+  try {
+    const response = await ApiClient.post(`${API_BASE}/templates/import`, { templateData });
+    return response.data;
+  } catch (error) {
+    console.error('Error importing template:', error);
+    throw error;
+  }
+};
+
+export const exportTemplate = async (templateId: string, format: string = 'json'): Promise<any> => {
+  try {
+    const response = await ApiClient.post(`${API_BASE}/templates/export`, { 
+      templateId, 
+      format 
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error exporting template:', error);
+    throw error;
+  }
+};
+
+// Conditional Logic API functions
+export const optimizeRules = async (rules: any[]): Promise<any> => {
+  try {
+    const response = await ApiClient.post(`${API_BASE}/rules/optimize`, { rules });
+    return response.data;
+  } catch (error) {
+    console.error('Error optimizing rules:', error);
+    throw error;
+  }
+};
+
+export const exportRules = async (rules: any[], format: string = 'json'): Promise<any> => {
+  try {
+    const response = await ApiClient.post(`${API_BASE}/rules/export`, { rules, format });
+    return response.data;
+  } catch (error) {
+    console.error('Error exporting rules:', error);
+    throw error;
+  }
+};
+
+export const importRules = async (rulesData: any): Promise<any> => {
+  try {
+    const response = await ApiClient.post(`${API_BASE}/rules/import`, { rulesData });
+    return response.data;
+  } catch (error) {
+    console.error('Error importing rules:', error);
+    throw error;
+  }
+};
+
+// Failure Recovery API functions
+export const triggerRecovery = async (failureId: string, strategy: string): Promise<any> => {
+  try {
+    const response = await ApiClient.post(`${API_BASE}/recovery/trigger`, { failureId, strategy });
+    return response.data;
+  } catch (error) {
+    console.error('Error triggering recovery:', error);
+    throw error;
+  }
+};
+
+export const executeRecovery = async (recoveryId: string, parameters: any): Promise<any> => {
+  try {
+    const response = await ApiClient.post(`${API_BASE}/recovery/execute`, { recoveryId, parameters });
+    return response.data;
+  } catch (error) {
+    console.error('Error executing recovery:', error);
+    throw error;
+  }
+};
+
+export const validateRecovery = async (recoveryId: string): Promise<any> => {
+  try {
+    const response = await ApiClient.post(`${API_BASE}/recovery/validate`, { recoveryId });
+    return response.data;
+  } catch (error) {
+    console.error('Error validating recovery:', error);
+    throw error;
+  }
+};
+
+export const manageCircuitBreaker = async (circuitId: string, action: string): Promise<any> => {
+  try {
+    const response = await ApiClient.post(`${API_BASE}/circuit-breaker/manage`, { circuitId, action });
+    return response.data;
+  } catch (error) {
+    console.error('Error managing circuit breaker:', error);
+    throw error;
+  }
+};
+
+// Template Management API functions
+export const createFailureTemplate = async (templateData: any): Promise<any> => {
+  try {
+    const response = await ApiClient.post(`${API_BASE}/templates/failure/create`, templateData);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating failure template:', error);
+    throw error;
+  }
+};
+
+export const updateFailureTemplate = async (templateId: string, templateData: any): Promise<any> => {
+  try {
+    const response = await ApiClient.put(`${API_BASE}/templates/failure/${templateId}`, templateData);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating failure template:', error);
+    throw error;
+  }
+};
+
+export const deleteFailureTemplate = async (templateId: string): Promise<any> => {
+  try {
+    const response = await ApiClient.delete(`${API_BASE}/templates/failure/${templateId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting failure template:', error);
+    throw error;
+  }
+};
+
+export const duplicateFailureTemplate = async (templateId: string): Promise<any> => {
+  try {
+    const response = await ApiClient.post(`${API_BASE}/templates/failure/${templateId}/duplicate`);
+    return response.data;
+  } catch (error) {
+    console.error('Error duplicating failure template:', error);
+    throw error;
+  }
+};
+
+export const validateFailureTemplate = async (templateId: string): Promise<any> => {
+  try {
+    const response = await ApiClient.post(`${API_BASE}/templates/failure/${templateId}/validate`);
+    return response.data;
+  } catch (error) {
+    console.error('Error validating failure template:', error);
+    throw error;
+  }
+};
+
+export const testFailureTemplate = async (templateId: string): Promise<any> => {
+  try {
+    const response = await ApiClient.post(`${API_BASE}/templates/failure/${templateId}/test`);
+    return response.data;
+  } catch (error) {
+    console.error('Error testing failure template:', error);
+    throw error;
+  }
+};
+
+export const getFailureTemplateAnalytics = async (templateId: string): Promise<any> => {
+  try {
+    const response = await ApiClient.get(`${API_BASE}/templates/failure/${templateId}/analytics`);
+    return response.data;
+  } catch (error) {
+    console.error('Error getting failure template analytics:', error);
+    throw error;
+  }
+};
+
+export const applyFailureTemplate = async (templateId: string): Promise<any> => {
+  try {
+    const response = await ApiClient.post(`${API_BASE}/templates/failure/${templateId}/apply`);
+    return response.data;
+  } catch (error) {
+    console.error('Error applying failure template:', error);
+    throw error;
+  }
 };

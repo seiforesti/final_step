@@ -765,3 +765,33 @@ export function validateImportData(data: any): { isValid: boolean; errors: strin
     errors
   };
 }
+
+/**
+ * Get workspace icon based on type
+ */
+export function getWorkspaceIcon(workspaceType: string): string {
+  switch (workspaceType.toLowerCase()) {
+    case 'project':
+      return '📁'
+    case 'environment':
+      return '🌍'
+    case 'department':
+      return '🏢'
+    case 'temporary':
+      return '⏰'
+    case 'development':
+      return '💻'
+    case 'staging':
+      return '🔧'
+    case 'production':
+      return '🚀'
+    case 'testing':
+      return '🧪'
+    case 'research':
+      return '🔬'
+    case 'analytics':
+      return '📊'
+    default:
+      return '📋'
+  }
+}

@@ -222,7 +222,7 @@ const DEFAULT_FILTERS: AccessRequestFilter = {
   tags: []
 };
 
-const AccessRequestManagement: React.FC<AccessRequestManagementProps> = ({
+export const AccessRequestManagement: React.FC<AccessRequestManagementProps> = ({
   className = ''
 }) => {
   // State Management
@@ -1036,4 +1036,3 @@ const AccessRequestManagement: React.FC<AccessRequestManagementProps> = ({
   );
 };
 
-export default AccessRequestManagement;

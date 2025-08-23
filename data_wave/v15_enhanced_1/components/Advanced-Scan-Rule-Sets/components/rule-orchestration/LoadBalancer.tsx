@@ -1,43 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  BarChart3, 
-  Server, 
-  Activity,
-  Gauge,
-  TrendingUp,
-  TrendingDown,
-  Zap,
-  Target,
-  Settings,
-  RefreshCw,
-  Play,
-  Pause,
-  Square,
-  AlertTriangle,
-  CheckCircle2,
-  XCircle,
-  Clock,
-  Cpu,
-  Memory,
-  HardDrive,
-  Network,
-  Database,
-  Monitor,
-  Eye,
-  Edit,
-  Plus,
-  Filter,
-  Search,
-  MoreHorizontal,
-  Layers,
-  Grid,
-  List,
-  PieChart,
-  LineChart,
-  Maximize2,
-  Minimize2
-} from 'lucide-react';
+import { BarChart3, Server, Activity, Gauge, TrendingUp, TrendingDown, Zap, Target, Settings, RefreshCw, Play, Pause, Square, AlertTriangle, CheckCircle2, XCircle, Clock, Cpu, HardDrive, Network, Database, Monitor, Eye, Edit, Plus, Filter, Search, MoreHorizontal, Layers, Grid, List, PieChart, LineChart, Maximize2, Minimize2 } from 'lucide-react';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -591,7 +554,7 @@ export const LoadBalancer: React.FC<LoadBalancerProps> = ({
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Memory</span>
+                <span className="text-sm font-medium">HardDrive</span>
                 <span className={`text-sm ${getUtilizationColor(loadBalancerState.memoryUtilization)}`}>
                   {loadBalancerState.memoryUtilization.toFixed(1)}%
                 </span>
@@ -720,7 +683,7 @@ export const LoadBalancer: React.FC<LoadBalancerProps> = ({
           <SelectContent>
             <SelectItem value="name">Name</SelectItem>
             <SelectItem value="cpu">CPU Usage</SelectItem>
-            <SelectItem value="memory">Memory Usage</SelectItem>
+            <SelectItem value="memory">HardDrive Usage</SelectItem>
             <SelectItem value="connections">Connections</SelectItem>
           </SelectContent>
         </Select>
@@ -766,7 +729,7 @@ export const LoadBalancer: React.FC<LoadBalancerProps> = ({
                   </div>
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span>Memory:</span>
+                      <span>HardDrive:</span>
                       <span className={getUtilizationColor(node.metrics?.memory || 0)}>
                         {node.metrics?.memory || 0}%
                       </span>
@@ -823,7 +786,7 @@ export const LoadBalancer: React.FC<LoadBalancerProps> = ({
                 <TableHead>Name</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>CPU</TableHead>
-                <TableHead>Memory</TableHead>
+                <TableHead>HardDrive</TableHead>
                 <TableHead>Connections</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>

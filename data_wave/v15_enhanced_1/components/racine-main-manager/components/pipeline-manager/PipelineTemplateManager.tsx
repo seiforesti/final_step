@@ -30,29 +30,11 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 // Advanced Chart Components for Analytics
 import { LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, ScatterChart, Scatter, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
 
-// Monaco Editor for Template Code Editing
+// Monaco Editor for FileText Code Editing
 import Editor from '@monaco-editor/react';
 
 // Icons
-import { 
-  Template, FileTemplate, Star, StarOff, Heart, HeartOff, Download, Upload, 
-  Copy, Share, Share2, Edit, Edit3, Trash2, Plus, Search, Filter, 
-  SortAsc, SortDesc, Grid, List, Eye, EyeOff, Settings, Cog,
-  Users, User, UserPlus, UserMinus, Crown, Shield, Lock, Unlock,
-  Calendar as CalendarIcon, Clock, Timer, History, Bookmark, BookmarkPlus,
-  Tag, Tags, Category, Archive, Folder, FolderOpen, File, FileText,
-  GitBranch, GitCommit, GitMerge, GitPullRequest, Code, CodeSquare,
-  Layers, Component, Puzzle, Workflow, Zap, Activity, TrendingUp,
-  BarChart3, PieChart as PieChartIcon, LineChart as LineChartIcon,
-  Target, Gauge, Monitor, Database, Server, Network, Cloud,
-  CheckCircle, XCircle, AlertCircle, Info, Warning, HelpCircle,
-  ThumbsUp, ThumbsDown, MessageSquare, MessageCircle, Bell, BellOff,
-  Maximize, Minimize, Expand, Shrink, MoreVertical, MoreHorizontal,
-  ArrowUp, ArrowDown, ArrowLeft, ArrowRight, RotateCcw, RotateCw,
-  RefreshCw, Pause, Play, Stop, FastForward, Rewind, SkipBack, SkipForward,
-  Save, SaveAll, Import, Export, ExternalLink, Link, Unlink,
-  Package, PackageOpen, Sparkles, Wand2, Magic, Bot, Brain
-} from 'lucide-react';
+import { FileText, FileTemplate, Star, StarOff, Heart, HeartOff, Download, Upload, Copy, Share, Share2, Edit, Edit3, Trash2, Plus, Search, Filter, SortAsc, SortDesc, Grid, List, Eye, EyeOff, Settings, Cog, Users, User, UserPlus, UserMinus, Crown, Shield, Lock, Unlock, Calendar as CalendarIcon, Clock, Timer, History, Bookmark, BookmarkPlus, Tag, Tags, Category, Archive, Folder, FolderOpen, File, GitBranch, GitCommit, GitMerge, GitPullRequest, Code, CodeSquare, Layers, Component, Puzzle, Workflow, Zap, Activity, TrendingUp, BarChart3, PieChart as PieChartIcon, LineChart as LineChartIcon, Target, Gauge, Monitor, Database, Server, Network, Cloud, CheckCircle, XCircle, AlertCircle, Info, Warning, HelpCircle, ThumbsUp, ThumbsDown, MessageSquare, MessageCircle, Bell, BellOff, Maximize, Minimize, Expand, Shrink, MoreVertical, MoreHorizontal, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, RotateCcw, RotateCw, RefreshCw, Pause, Play, Square, FastForward, Rewind, SkipBack, SkipForward, Save, SaveAll, Import, ExternalLink, Link, Unlink, Package, PackageOpen, Sparkles, Wand2, Magic, Bot, Brain } from 'lucide-react';
 
 // Racine System Hooks
 import { usePipelineManagement } from '../../hooks/usePipelineManagement';
@@ -143,7 +125,7 @@ import {
   TemplateImport
 } from '../../types/racine-core.types';
 
-// Template Categories Configuration
+// FileText Categories Configuration
 const TEMPLATE_CATEGORIES = {
   data_ingestion: { label: 'Data Ingestion', icon: Database, color: '#3B82F6' },
   data_processing: { label: 'Data Processing', icon: Cog, color: '#10B981' },
@@ -159,7 +141,7 @@ const TEMPLATE_CATEGORIES = {
   automation: { label: 'Automation', icon: Zap, color: '#CA8A04' }
 };
 
-// Template View Modes
+// FileText View Modes
 const VIEW_MODES = {
   grid: { label: 'Grid View', icon: Grid },
   list: { label: 'List View', icon: List },
@@ -167,7 +149,7 @@ const VIEW_MODES = {
   analytics: { label: 'Analytics', icon: BarChart3 }
 };
 
-// Template Sorting Options
+// FileText Sorting Options
 const SORT_OPTIONS = {
   name_asc: { label: 'Name (A-Z)', icon: SortAsc },
   name_desc: { label: 'Name (Z-A)', icon: SortDesc },
@@ -178,7 +160,7 @@ const SORT_OPTIONS = {
   updated_desc: { label: 'Recently Updated', icon: RefreshCw }
 };
 
-// Template Status Types
+// FileText Status Types
 const TEMPLATE_STATUS = {
   draft: { label: 'Draft', color: '#6B7280', icon: Edit },
   published: { label: 'Published', color: '#10B981', icon: CheckCircle },
@@ -188,19 +170,19 @@ const TEMPLATE_STATUS = {
 };
 
 /**
- * PipelineTemplateManager - Enterprise-Grade Template Management System
+ * PipelineTemplateManager - Enterprise-Grade FileText Management System
  * 
  * Comprehensive template management system that provides advanced features for
  * creating, sharing, versioning, and collaborating on pipeline templates.
  * 
  * Key Features:
- * - Template marketplace with community templates
+ * - FileText marketplace with community templates
  * - AI-powered template generation and enhancement
  * - Version control and collaborative editing
  * - Advanced template analytics and metrics
- * - Template validation and optimization
+ * - FileText validation and optimization
  * - Cross-group template integration
- * - Template documentation and tutorials
+ * - FileText documentation and tutorials
  * - Advanced customization and parameterization
  */
 const PipelineTemplateManager: React.FC = () => {
@@ -259,7 +241,7 @@ const PipelineTemplateManager: React.FC = () => {
   const [showCollaborators, setShowCollaborators] = useState(false);
   const [showAnalytics, setShowAnalytics] = useState(false);
 
-  // Template Creation/Editing State
+  // FileText Creation/Editing State
   const [templateForm, setTemplateForm] = useState({
     name: '',
     description: '',
@@ -337,7 +319,7 @@ const PipelineTemplateManager: React.FC = () => {
     }
   }, [trackActivity]);
 
-  // Load Template Categories
+  // Load FileText Categories
   const loadTemplateCategories = useCallback(async () => {
     try {
       const categories = await getTemplateCategories();
@@ -441,7 +423,7 @@ const PipelineTemplateManager: React.FC = () => {
     setFilteredTemplates(filtered);
   }, [allTemplates, searchQuery, selectedCategory, selectedStatus, showFavorites, sortOption, filters]);
 
-  // Create New Template
+  // Create New FileText
   const handleCreateTemplate = useCallback(async () => {
     setIsCreating(true);
     try {
@@ -479,7 +461,7 @@ const PipelineTemplateManager: React.FC = () => {
     }
   }, [templateForm, currentUser.id, currentWorkspace.id, trackActivity]);
 
-  // Update Template
+  // Update FileText
   const handleUpdateTemplate = useCallback(async (templateId: string, updates: Partial<PipelineTemplate>) => {
     try {
       const updatedTemplate = await updatePipelineTemplate(templateId, updates);
@@ -497,7 +479,7 @@ const PipelineTemplateManager: React.FC = () => {
     }
   }, [trackActivity]);
 
-  // Delete Template
+  // Delete FileText
   const handleDeleteTemplate = useCallback(async (templateId: string) => {
     try {
       await deletePipelineTemplate(templateId);
@@ -513,7 +495,7 @@ const PipelineTemplateManager: React.FC = () => {
     }
   }, [trackActivity]);
 
-  // Clone Template
+  // Clone FileText
   const handleCloneTemplate = useCallback(async (templateId: string) => {
     try {
       const clonedTemplate = await cloneTemplate(templateId);
@@ -529,7 +511,7 @@ const PipelineTemplateManager: React.FC = () => {
     }
   }, [trackActivity]);
 
-  // Generate Template with AI
+  // Generate FileText with AI
   const handleAIGeneration = useCallback(async () => {
     setIsGeneratingWithAI(true);
     try {
@@ -562,7 +544,7 @@ const PipelineTemplateManager: React.FC = () => {
     }
   }, [aiGenerationPrompt, templateForm, trackActivity]);
 
-  // Load Template Details
+  // Load FileText Details
   const loadTemplateDetails = useCallback(async (templateId: string) => {
     try {
       const [
@@ -593,7 +575,7 @@ const PipelineTemplateManager: React.FC = () => {
     }
   }, []);
 
-  // Validate Template
+  // Validate FileText
   const handleValidateTemplate = useCallback(async (templateId: string) => {
     try {
       const validation = await validateTemplate(templateId);
@@ -604,7 +586,7 @@ const PipelineTemplateManager: React.FC = () => {
     }
   }, []);
 
-  // Render Template Card
+  // Render FileText Card
   const renderTemplateCard = useCallback((template: PipelineTemplate) => {
     const categoryConfig = TEMPLATE_CATEGORIES[template.category as keyof typeof TEMPLATE_CATEGORIES];
     const statusConfig = TEMPLATE_STATUS[template.status as keyof typeof TEMPLATE_STATUS];
@@ -717,11 +699,11 @@ const PipelineTemplateManager: React.FC = () => {
           </ContextMenuItem>
           <ContextMenuItem onClick={() => handleCloneTemplate(template.id)}>
             <Copy className="h-4 w-4 mr-2" />
-            Clone Template
+            Clone FileText
           </ContextMenuItem>
           <ContextMenuItem>
             <Edit className="h-4 w-4 mr-2" />
-            Edit Template
+            Edit FileText
           </ContextMenuItem>
           <ContextMenuItem>
             <GitBranch className="h-4 w-4 mr-2" />
@@ -730,11 +712,11 @@ const PipelineTemplateManager: React.FC = () => {
           <ContextMenuSeparator />
           <ContextMenuItem>
             <Share2 className="h-4 w-4 mr-2" />
-            Share Template
+            Share FileText
           </ContextMenuItem>
           <ContextMenuItem>
             <Export className="h-4 w-4 mr-2" />
-            Export Template
+            Export FileText
           </ContextMenuItem>
           <ContextMenuSeparator />
           <ContextMenuItem 
@@ -742,14 +724,14 @@ const PipelineTemplateManager: React.FC = () => {
             className="text-red-600"
           >
             <Trash2 className="h-4 w-4 mr-2" />
-            Delete Template
+            Delete FileText
           </ContextMenuItem>
         </ContextMenuContent>
       </ContextMenu>
     );
   }, [handleUpdateTemplate, loadTemplateDetails, handleCloneTemplate, handleDeleteTemplate]);
 
-  // Render Template List View
+  // Render FileText List View
   const renderTemplateList = () => (
     <div className="space-y-2">
       {filteredTemplates.map((template) => {
@@ -820,14 +802,14 @@ const PipelineTemplateManager: React.FC = () => {
     </div>
   );
 
-  // Render Template Grid View
+  // Render FileText Grid View
   const renderTemplateGrid = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {filteredTemplates.map(renderTemplateCard)}
     </div>
   );
 
-  // Render Template Analytics
+  // Render FileText Analytics
   const renderTemplateAnalytics = () => (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -943,14 +925,14 @@ const PipelineTemplateManager: React.FC = () => {
     </div>
   );
 
-  // Render Create Template Dialog
+  // Render Create FileText Dialog
   const renderCreateTemplateDialog = () => (
     <Dialog open={isCreating} onOpenChange={setIsCreating}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
             <Plus className="h-5 w-5" />
-            <span>Create New Template</span>
+            <span>Create New FileText</span>
           </DialogTitle>
           <DialogDescription>
             Create a new pipeline template for reuse across your organization
@@ -960,7 +942,7 @@ const PipelineTemplateManager: React.FC = () => {
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="template-name">Template Name</Label>
+              <Label htmlFor="template-name">FileText Name</Label>
               <Input
                 id="template-name"
                 value={templateForm.name}
@@ -1003,7 +985,7 @@ const PipelineTemplateManager: React.FC = () => {
           </div>
 
           <div>
-            <Label>Template Configuration</Label>
+            <Label>FileText Configuration</Label>
             <div className="border rounded-lg">
               <Editor
                 ref={editorRef}
@@ -1070,7 +1052,7 @@ const PipelineTemplateManager: React.FC = () => {
             Cancel
           </Button>
           <Button onClick={handleCreateTemplate} disabled={!templateForm.name || !templateForm.category}>
-            Create Template
+            Create FileText
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -1084,7 +1066,7 @@ const PipelineTemplateManager: React.FC = () => {
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
             <Bot className="h-5 w-5" />
-            <span>Generate Template with AI</span>
+            <span>Generate FileText with AI</span>
           </DialogTitle>
           <DialogDescription>
             Describe what kind of pipeline template you want to create and our AI will generate it for you
@@ -1093,7 +1075,7 @@ const PipelineTemplateManager: React.FC = () => {
 
         <div className="space-y-4">
           <div>
-            <Label htmlFor="ai-prompt">Template Description</Label>
+            <Label htmlFor="ai-prompt">FileText Description</Label>
             <Textarea
               id="ai-prompt"
               value={aiGenerationPrompt}
@@ -1120,7 +1102,7 @@ const PipelineTemplateManager: React.FC = () => {
             ) : (
               <div className="flex items-center space-x-2">
                 <Sparkles className="h-4 w-4" />
-                <span>Generate Template</span>
+                <span>Generate FileText</span>
               </div>
             )}
           </Button>
@@ -1138,8 +1120,8 @@ const PipelineTemplateManager: React.FC = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
-                <Template className="h-6 w-6 text-blue-500" />
-                <h1 className="text-2xl font-bold">Template Manager</h1>
+                <FileText className="h-6 w-6 text-blue-500" />
+                <h1 className="text-2xl font-bold">FileText Manager</h1>
               </div>
               <Badge variant="outline">
                 {filteredTemplates.length} templates
@@ -1157,7 +1139,7 @@ const PipelineTemplateManager: React.FC = () => {
               </Button>
               <Button onClick={() => setIsCreating(true)}>
                 <Plus className="h-4 w-4 mr-2" />
-                Create Template
+                Create FileText
               </Button>
             </div>
           </div>
@@ -1252,7 +1234,7 @@ const PipelineTemplateManager: React.FC = () => {
                   </Tabs>
                 </div>
 
-                {/* Template Content */}
+                {/* FileText Content */}
                 <div className="flex-1 p-6 overflow-auto">
                   <Tabs value={activeTab} className="h-full">
                     <TabsContent value="my-templates" className="h-full">
@@ -1266,14 +1248,14 @@ const PipelineTemplateManager: React.FC = () => {
                       ) : filteredTemplates.length === 0 ? (
                         <div className="flex items-center justify-center h-64">
                           <div className="text-center">
-                            <Template className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                            <FileText className="h-12 w-12 mx-auto mb-4 text-gray-400" />
                             <h3 className="text-lg font-medium mb-2">No templates found</h3>
                             <p className="text-gray-600 mb-4">
                               {searchQuery ? 'Try adjusting your search criteria' : 'Get started by creating your first template'}
                             </p>
                             <Button onClick={() => setIsCreating(true)}>
                               <Plus className="h-4 w-4 mr-2" />
-                              Create Template
+                              Create FileText
                             </Button>
                           </div>
                         </div>
@@ -1296,7 +1278,7 @@ const PipelineTemplateManager: React.FC = () => {
                     <TabsContent value="marketplace" className="h-full">
                       <div className="text-center py-12">
                         <Package className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                        <h3 className="text-lg font-medium mb-2">Template Marketplace</h3>
+                        <h3 className="text-lg font-medium mb-2">FileText Marketplace</h3>
                         <p className="text-gray-600">Discover and use community templates</p>
                       </div>
                     </TabsContent>
@@ -1313,7 +1295,7 @@ const PipelineTemplateManager: React.FC = () => {
 
             <ResizablePanel defaultSize={25} minSize={20}>
               <div className="h-full p-4 bg-white border-l">
-                <h3 className="font-semibold mb-4">Template Recommendations</h3>
+                <h3 className="font-semibold mb-4">FileText Recommendations</h3>
                 <ScrollArea className="h-full">
                   <div className="space-y-4">
                     {templateRecommendations.map((recommendation, index) => (
@@ -1352,7 +1334,7 @@ const PipelineTemplateManager: React.FC = () => {
             >
               <Alert className="bg-red-50 border-red-200">
                 <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Template Manager Error</AlertTitle>
+                <AlertTitle>FileText Manager Error</AlertTitle>
                 <AlertDescription>
                   {error}
                   <Button

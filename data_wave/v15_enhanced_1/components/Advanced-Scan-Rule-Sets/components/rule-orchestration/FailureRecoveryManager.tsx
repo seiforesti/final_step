@@ -1,41 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  AlertTriangle, 
-  RefreshCw, 
-  Shield, 
-  Activity,
-  Target,
-  Clock,
-  Play,
-  Pause,
-  Square,
-  Settings,
-  MoreHorizontal,
-  CheckCircle2,
-  XCircle,
-  AlertCircle,
-  Info,
-  Zap,
-  TrendingUp,
-  TrendingDown,
-  BarChart3,
-  PieChart,
-  Gauge,
-  Brain,
-  Robot,
-  Lightbulb,
-  Search,
-  Filter,
-  Edit,
-  Trash2,
-  Copy,
-  Eye,
-  Plus,
-  Download,
-  Upload,
-  Save
-} from 'lucide-react';
+import { AlertTriangle, RefreshCw, Shield, Activity, Target, Clock, Play, Pause, Square, Settings, MoreHorizontal, CheckCircle2, XCircle, AlertCircle, Info, Zap, TrendingUp, TrendingDown, BarChart3, PieChart, Gauge, Brain, Robot, Lightbulb, Search, Filter, Edit, Trash2, Copy, Eye, Plus, Download, Upload, Save } from 'lucide-react';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

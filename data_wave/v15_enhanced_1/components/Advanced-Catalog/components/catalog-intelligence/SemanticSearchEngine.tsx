@@ -3,16 +3,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  Search, Filter, SortAsc, SortDesc, BookOpen, Tag, Target, 
-  Brain, Zap, TrendingUp, Clock, Star, Share2, Download, 
-  Settings, RefreshCw, AlertCircle, CheckCircle, XCircle,
-  ChevronDown, ChevronRight, Eye, EyeOff, Grid, List,
-  BarChart3, PieChart, LineChart, Activity, Users, Database,
-  FileText, Image, Video, Music, Code, Archive, Folder,
-  Calendar, MapPin, Link, Hash, Layers, Network, Globe,
-  Sparkles, Lightbulb, Compass, Crosshair, Binoculars
-} from 'lucide-react'
+import { Search, Filter, SortAsc, SortDesc, BookOpen, Tag, Target, Brain, Zap, TrendingUp, Clock, Star, Share2, Download, Settings, RefreshCw, AlertCircle, CheckCircle, XCircle, ChevronDown, ChevronRight, Eye, EyeOff, Grid, List, BarChart3, PieChart, LineChart, Activity, Users, Database, FileText, Image, Video, Music, Code, Archive, Folder, Calendar, MapPin, Link, Hash, Layers, Network, Globe, Sparkles, Lightbulb, Compass, Crosshair, Binoculars } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -393,7 +384,7 @@ export const SemanticSearchEngine: React.FC = () => {
       switch (action) {
         case 'download':
           await semanticSearchService.downloadResult(result.id)
-          toast({ title: "Download Started", description: `Downloading ${result.title}` })
+          toast({ title: "ArrowDownTrayIcon Started", description: `Downloading ${result.title}` })
           break
         case 'bookmark':
           await semanticSearchService.bookmarkResult(result.id)

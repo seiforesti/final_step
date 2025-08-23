@@ -40,76 +40,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Calendar } from '@/components/ui/calendar';
 
 // Icons
-import {
-  Activity,
-  AlertCircle,
-  AlertTriangle,
-  ArrowDown,
-  ArrowLeft,
-  ArrowRight,
-  ArrowUp,
-  BarChart3,
-  Bell,
-  BookOpen,
-  Brain,
-  Calendar as CalendarIcon,
-  Check,
-  CheckCircle,
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  ChevronUp,
-  Clock,
-  Code,
-  Copy,
-  Database,
-  Download,
-  Eye,
-  EyeOff,
-  FileText,
-  Filter,
-  Flag,
-  GitBranch,
-  Globe,
-  Hash,
-  HelpCircle,
-  History,
-  Home,
-  Info,
-  Layers,
-  Link,
-  Loader2,
-  Lock,
-  LucideIcon,
-  MapPin,
-  Maximize2,
-  Minimize2,
-  MoreHorizontal,
-  Move,
-  Play,
-  Plus,
-  RefreshCw,
-  Save,
-  Search,
-  Settings,
-  Share,
-  Shield,
-  ShieldAlert,
-  Star,
-  Table,
-  Tag,
-  Target,
-  Trash2,
-  TrendingDown,
-  TrendingUp,
-  Users,
-  Wand2,
-  Warning,
-  X,
-  Zap,
-  ZoomIn,
-  ZoomOut
-} from 'lucide-react';
+import { Activity, AlertCircle, AlertTriangle, ArrowDown, ArrowLeft, ArrowRight, ArrowUp, BarChart3, Bell, BookOpen, Brain, Calendar as CalendarIcon, Check, CheckCircle, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Clock, Code, Copy, Database, Download, Eye, EyeOff, FileText, Filter, Flag, GitBranch, Globe, Hash, HelpCircle, History, Home, Info, Layers, Link, Loader2, Lock, LucideIcon, MapPin, Maximize2, Minimize2, MoreHorizontal, Move, Play, Plus, RefreshCw, Save, Search, Settings, Share, Shield, ShieldAlert, Star, Table, Tag, Target, Trash2, TrendingDown, TrendingUp, Users, Wand2, X, Zap, ZoomIn, ZoomOut } from 'lucide-react';
 
 // Services and Types
 import { enterpriseCatalogService } from '../../services/enterprise-catalog.service';
@@ -299,7 +230,7 @@ const QualityIssuesList: React.FC<{
     switch (severity) {
       case 'critical': return <AlertTriangle className="h-4 w-4" />;
       case 'high': return <AlertCircle className="h-4 w-4" />;
-      case 'medium': return <Warning className="h-4 w-4" />;
+      case 'medium': return <AlertTriangle className="h-4 w-4" />;
       case 'low': return <Info className="h-4 w-4" />;
       default: return <Info className="h-4 w-4" />;
     }

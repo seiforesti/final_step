@@ -3,23 +3,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  Network, GitBranch, Layers, Target, Zap, Eye, EyeOff,
-  Search, Filter, Settings, Download, Share2, RefreshCw,
-  ChevronLeft, ChevronRight, ChevronUp, ChevronDown,
-  Maximize2, Minimize2, RotateCcw, ZoomIn, ZoomOut,
-  Play, Pause, Square, SkipBack, SkipForward,
-  AlertTriangle, CheckCircle, XCircle, Clock, 
-  Database, FileText, Cpu, Server, Cloud, Globe,
-  ArrowRight, ArrowLeft, ArrowUp, ArrowDown,
-  Compass, Map, Route, Navigation, Crosshair,
-  Activity, TrendingUp, BarChart3, PieChart,
-  Users, Tag, Hash, Link, Folder, Archive,
-  Calendar, MapPin, Sparkles, Lightbulb,
-  Brain, Telescope, Microscope, Radar,
-  TreePine, Shuffle, GitMerge, Split,
-  Workflow, Hierarchy, Boxes, Combine
-} from 'lucide-react'
+import { Network, GitBranch, Layers, Target, Zap, Eye, EyeOff, Search, Filter, Settings, Download, Share2, RefreshCw, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Maximize2, Minimize2, RotateCcw, ZoomIn, ZoomOut, Play, Pause, Square, SkipBack, SkipForward, AlertTriangle, CheckCircle, XCircle, Clock, Database, FileText, Cpu, Server, Cloud, Globe, ArrowRight, ArrowLeft, ArrowUp, ArrowDown, Compass, Map, Route, Navigation, Crosshair, Activity, TrendingUp, BarChart3, PieChart, Users, Tag, Hash, Link, Folder, Archive, Calendar, MapPin, Sparkles, Lightbulb, Brain, Microscope, Radar, TreePine, Shuffle, GitMerge, Split, Workflow, Hierarchy, Boxes, Combine } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'

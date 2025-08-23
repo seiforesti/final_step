@@ -1,27 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
-import {
-  ChartBarIcon,
-  PresentationChartLineIcon,
-  CircleStackIcon,
-  CpuChipIcon,
-  EyeIcon,
-  AdjustmentsHorizontalIcon,
-  FunnelIcon,
-  ArrowTrendingUpIcon,
-  ArrowTrendingDownIcon,
-  ExclamationTriangleIcon,
-  InformationCircleIcon,
-  SparklesIcon,
-  BeakerIcon,
-  LightBulbIcon,
-  MagnifyingGlassIcon,
-  CogIcon,
-  DocumentTextIcon,
-  CloudArrowDownIcon,
-  PlayIcon,
-  PauseIcon,
-  StopIcon
-} from '@heroicons/react/24/outline'
+import { ChartBarIcon, PresentationChartLineIcon, CircleStackIcon, CpuChipIcon, EyeIcon, AdjustmentsHorizontalIcon, FunnelIcon, ArrowTrendingUpIcon, ArrowTrendingDownIcon, ExclamationTriangleIcon, InformationCircleIcon, SparklesIcon, BeakerIcon, LightBulbIcon, MagnifyingGlassIcon, CogIcon, DocumentTextIcon, CloudArrowDownIcon, PlayIcon, PauseIcon, StopIcon } from '@heroicons/react/24/outline'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Chart as ChartJS,

@@ -65,3 +65,24 @@ export enum WidgetType {
   HEATMAP = 'heatmap',
   STATUS_INDICATOR = 'status_indicator'
 }
+
+export enum MonitoringScope {
+  SYSTEM = 'system',
+  APPLICATION = 'application',
+  DATABASE = 'database',
+  NETWORK = 'network',
+  INFRASTRUCTURE = 'infrastructure',
+  BUSINESS = 'business',
+  SECURITY = 'security',
+  COMPLIANCE = 'compliance',
+  CUSTOM = 'custom'
+}
+
+export enum AlertStatus {
+  ACTIVE = 'active',
+  ACKNOWLEDGED = 'acknowledged',
+  RESOLVED = 'resolved',
+  CLOSED = 'closed',
+  ESCALATED = 'escalated',
+  SUPPRESSED = 'suppressed'
+}

@@ -235,7 +235,7 @@ const getResourceColor = (type: string) => {
   return typeConfig?.color || 'bg-gray-500';
 };
 
-export default function ResourceTree({
+export function ResourceTree({
   resources,
   expandedNodes,
   onToggleExpand,

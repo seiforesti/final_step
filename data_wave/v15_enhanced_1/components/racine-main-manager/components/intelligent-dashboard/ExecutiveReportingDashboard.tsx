@@ -25,17 +25,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@/components/ui/context-menu';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { 
-  TrendingUp, TrendingDown, BarChart3, LineChart, PieChart, Activity,
-  Target, Users, Database, Server, Shield, AlertTriangle, CheckCircle,
-  Calendar, Clock, MapPin, Globe, Building, Briefcase, Star,
-  Download, Share2, Filter, Search, RefreshCw, Settings, Eye,
-  ArrowUp, ArrowDown, ArrowRight, MoreVertical, ExternalLink,
-  FileText, Image, Video, Mail, Phone, MessageSquare,
-  Plus, Save, Edit3, Trash2, Copy, Maximize2, Minimize2,
-  Zap, Layers, Grid3X3, Layout, Palette, Code, Book,
-  Home, Navigation, Compass, Map, Flag, Tag, Bookmark
-} from 'lucide-react';
+import { TrendingUp, TrendingDown, BarChart3, LineChart, PieChart, Activity, Target, Users, Database, Server, Shield, AlertTriangle, CheckCircle, Calendar, Clock, MapPin, Globe, Building, Briefcase, Star, Download, Share2, Filter, Search, RefreshCw, Settings, Eye, ArrowUp, ArrowDown, ArrowRight, MoreVertical, ExternalLink, FileText, Image, Video, Mail, Phone, MessageSquare, Plus, Save, Edit3, Trash2, Copy, Maximize2, Minimize2, Zap, Layers, Grid3X3, Layout, Palette, Code, Book, Home, Navigation, Compass, Map, Flag, Tag, Bookmark } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { 
   ResponsiveContainer, LineChart as RechartsLineChart, AreaChart, BarChart as RechartsBarChart,

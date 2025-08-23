@@ -2,79 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  BarChart3, 
-  TrendingUp, 
-  TrendingDown, 
-  Activity, 
-  Zap, 
-  Clock, 
-  Gauge, 
-  Target, 
-  Settings, 
-  Play, 
-  Pause, 
-  Square, 
-  RotateCcw,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
-  Download,
-  Upload,
-  Save,
-  Eye,
-  EyeOff,
-  Plus,
-  Minus,
-  Copy,
-  Trash2,
-  Edit3,
-  Search,
-  Filter,
-  RefreshCw,
-  Maximize,
-  Minimize,
-  ArrowRight,
-  ArrowLeft,
-  ArrowUp,
-  ArrowDown,
-  MoreHorizontal,
-  Info,
-  HelpCircle,
-  Layers,
-  Workflow,
-  Database,
-  Cpu,
-  Memory,
-  HardDrive,
-  Network,
-  Shield,
-  Lock,
-  Unlock,
-  Key,
-  Users,
-  User,
-  Calendar,
-  Hash,
-  Type,
-  PieChart,
-  LineChart,
-  AreaChart,
-  ScatterChart,
-  Map,
-  Globe,
-  MapPin,
-  Briefcase,
-  Star,
-  Heart,
-  ThumbsUp,
-  MessageSquare,
-  Share2,
-  ExternalLink,
-  FileText,
-  BookOpen,
-  Code
-} from 'lucide-react';
+import { BarChart3, TrendingUp, TrendingDown, Activity, Zap, Clock, Gauge, Target, Settings, Play, Pause, Square, RotateCcw, CheckCircle, XCircle, AlertCircle, Download, Upload, Save, Eye, EyeOff, Plus, Minus, Copy, Trash2, Edit3, Search, Filter, RefreshCw, Maximize, Minimize, ArrowRight, ArrowLeft, ArrowUp, ArrowDown, MoreHorizontal, Info, HelpCircle, Layers, Workflow, Database, Cpu, HardDrive, Network, Shield, Lock, Unlock, Key, Users, User, Calendar, Hash, Type, PieChart, LineChart, AreaChart, ScatterChart, Map, Globe, MapPin, Briefcase, Star, Heart, ThumbsUp, MessageSquare, Share2, ExternalLink, FileText, BookOpen, Code } from 'lucide-react';
 
 // shadcn/ui Components
 import { Button } from '@/components/ui/button';
@@ -932,7 +860,7 @@ export const PipelineAnalytics: React.FC<PipelineAnalyticsProps> = ({
             <div className="text-center text-muted-foreground">
               <AreaChart className="h-12 w-12 mx-auto mb-4" />
               <p>Resource utilization chart</p>
-              <p className="text-sm">CPU, Memory, Storage usage</p>
+              <p className="text-sm">CPU, HardDrive, Storage usage</p>
             </div>
           </div>
         </Card>
@@ -954,10 +882,10 @@ export const PipelineAnalytics: React.FC<PipelineAnalyticsProps> = ({
         <Card className="p-4">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-yellow-100 dark:bg-yellow-900 rounded-lg">
-              <Memory className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+              <HardDrive className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
             </div>
             <div>
-              <div className="text-sm font-medium">Memory Usage</div>
+              <div className="text-sm font-medium">HardDrive Usage</div>
               <div className="text-2xl font-bold">{(overviewMetrics.resourceUtilization * 0.8).toFixed(0)}%</div>
             </div>
           </div>
@@ -1126,7 +1054,7 @@ export const PipelineAnalytics: React.FC<PipelineAnalyticsProps> = ({
               <div>
                 <div className="font-medium text-yellow-900 dark:text-yellow-100">Resource Alert</div>
                 <div className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
-                  Memory usage is trending upward. Consider scaling resources within the next 2 weeks.
+                  HardDrive usage is trending upward. Consider scaling resources within the next 2 weeks.
                 </div>
               </div>
             </div>

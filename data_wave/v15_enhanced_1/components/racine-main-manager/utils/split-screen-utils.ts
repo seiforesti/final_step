@@ -58,3 +58,9 @@ export const validateSplitConfiguration = (
     errors
   };
 };
+
+export const splitScreenUtils = {
+	normalizePaneSizes,
+	rebalancePanes,
+	validateSplitConfiguration
+};

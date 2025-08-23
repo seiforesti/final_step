@@ -26,57 +26,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo, useRef, useReducer } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Server,
-  Cpu,
-  MemoryStick,
-  HardDrive,
-  Network,
-  Zap,
-  TrendingUp,
-  Target,
-  Activity,
-  AlertTriangle,
-  CheckCircle,
-  XCircle,
-  Clock,
-  Settings,
-  RefreshCw,
-  Play,
-  Pause,
-  Stop,
-  Search,
-  Filter,
-  Download,
-  Upload,
-  Plus,
-  Minus,
-  X,
-  Eye,
-  MoreVertical,
-  BarChart3,
-  LineChart,
-  PieChart,
-  Users,
-  User,
-  Building,
-  Globe,
-  Map,
-  Route,
-  Navigation,
-  Layers,
-  Grid,
-  List,
-  Maximize,
-  Minimize,
-  Info,
-  AlertCircle,
-  HelpCircle,
-  ChevronDown,
-  ChevronUp,
-  ChevronLeft,
-  ChevronRight
-} from 'lucide-react';
+import { Server, Cpu, MemoryStick, HardDrive, Network, Zap, TrendingUp, Target, Activity, AlertTriangle, CheckCircle, XCircle, Clock, Settings, RefreshCw, Play, Pause, Square, Search, Filter, Download, Upload, Plus, Minus, X, Eye, MoreVertical, BarChart3, LineChart, PieChart, Users, User, Building, Globe, Map, Route, Navigation, Layers, Grid, List, Maximize, Minimize, Info, AlertCircle, HelpCircle, ChevronDown, ChevronUp, ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';

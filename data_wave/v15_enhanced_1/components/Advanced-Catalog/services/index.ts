@@ -51,8 +51,8 @@ export {
 } from './catalog-ai.service';
 
 export { 
-  AdvancedCatalogCollaborationService,
-  advancedCatalogCollaborationService 
+  advancedCatalogCollaborationService,
+  collaborationService
 } from './collaboration.service';
 
 export {

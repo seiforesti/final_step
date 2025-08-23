@@ -2,76 +2,7 @@
 
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  MessageSquare, 
-  Brain, 
-  Zap, 
-  Target, 
-  Search, 
-  Filter, 
-  Eye, 
-  EyeOff, 
-  Settings, 
-  RefreshCw, 
-  Play, 
-  Pause, 
-  Stop, 
-  SkipForward, 
-  Volume2, 
-  VolumeX, 
-  Mic, 
-  MicOff, 
-  Languages, 
-  Code, 
-  FileText, 
-  Database, 
-  Users, 
-  Shield, 
-  Activity, 
-  TrendingUp, 
-  BarChart3, 
-  Lightbulb, 
-  AlertTriangle, 
-  CheckCircle, 
-  XCircle, 
-  Info, 
-  Clock, 
-  Calendar, 
-  Globe, 
-  Bookmark, 
-  Star, 
-  Hash, 
-  AtSign, 
-  Quote, 
-  Type, 
-  Layers, 
-  GitBranch, 
-  Workflow, 
-  Link, 
-  Unlink, 
-  Copy, 
-  Download, 
-  Upload, 
-  Save, 
-  FolderOpen, 
-  Plus, 
-  Minus, 
-  X, 
-  Check, 
-  ChevronDown, 
-  ChevronUp, 
-  ChevronLeft, 
-  ChevronRight, 
-  MoreHorizontal,
-  Cpu,
-  Memory,
-  HardDrive,
-  Network,
-  Gauge,
-  Radar,
-  Compass,
-  Map,
-} from 'lucide-react';
+import { MessageSquare, Brain, Zap, Target, Search, Filter, Eye, EyeOff, Settings, RefreshCw, Play, Pause, Square, SkipForward, Volume2, VolumeX, Mic, MicOff, Languages, Code, FileText, Database, Users, Shield, Activity, TrendingUp, BarChart3, Lightbulb, AlertTriangle, CheckCircle, XCircle, Info, Clock, Calendar, Globe, Bookmark, Star, Hash, AtSign, Quote, Type, Layers, GitBranch, Workflow, Link, Unlink, Copy, Download, Upload, Save, FolderOpen, Plus, Minus, X, Check, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, MoreHorizontal, Cpu, HardDrive, Network, Gauge, Radar, Compass, Map,  } from 'lucide-react';
 
 // UI Components
 import { Button } from '@/components/ui/button';
@@ -480,7 +411,7 @@ export const NaturalLanguageProcessor: React.FC<NaturalLanguageProcessorProps> =
         setVoiceRecognition(recognition);
       }
     } else {
-      // Stop voice recognition
+      // Square voice recognition
       if (voiceRecognition) {
         voiceRecognition.stop();
       }
@@ -1453,7 +1384,7 @@ const ProcessingMetrics: React.FC<ProcessingMetricsProps> = ({
               </div>
               
               <div className="flex justify-between items-center">
-                <span className="text-sm">Memory Usage</span>
+                <span className="text-sm">HardDrive Usage</span>
                 <div className="flex items-center gap-2">
                   <Progress value={(metrics.systemMetrics?.memoryUsage || 0) * 100} className="w-20" />
                   <span className="text-sm">{Math.round((metrics.systemMetrics?.memoryUsage || 0) * 100)}%</span>

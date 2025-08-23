@@ -99,44 +99,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 
 // Icons
-import {
-  TrendingUp,
-  TrendingDown,
-  Activity,
-  BarChart3,
-  PieChart as PieChartIcon,
-  LineChart as LineChartIcon,
-  Users,
-  Database,
-  Shield,
-  Scan,
-  FileText,
-  Settings,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  Target,
-  Zap,
-  Eye,
-  Filter,
-  Calendar,
-  Download,
-  Share,
-  Maximize2,
-  Minimize2,
-  RotateCcw,
-  Play,
-  Pause,
-  MoreHorizontal,
-  ArrowUp,
-  ArrowDown,
-  Minus,
-  Info,
-  ExternalLink,
-  RefreshCw,
-  ChevronDown,
-  ChevronUp
-} from 'lucide-react';
+import { TrendingUp, TrendingDown, Activity, BarChart3, PieChart as PieChartIcon, LineChart as LineChartIcon, Users, Database, Shield, Scan, FileText, Settings, AlertTriangle, CheckCircle, Clock, Target, Zap, Eye, Filter, Calendar, Download, Share, Maximize2, Minimize2, RotateCcw, Play, Pause, MoreHorizontal, ArrowUp, ArrowDown, Minus, Info, ExternalLink, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react';
 
 // Types
 import {

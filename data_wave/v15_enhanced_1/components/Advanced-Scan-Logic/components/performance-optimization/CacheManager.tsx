@@ -2,85 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  Database,
-  Server,
-  Layers,
-  Package,
-  HardDrive,
-  MemoryStick,
-  Zap,
-  RefreshCw,
-  Activity,
-  BarChart3,
-  PieChart,
-  LineChart,
-  TrendingUp,
-  TrendingDown,
-  Clock,
-  Timer,
-  Target,
-  Gauge,
-  Settings,
-  Trash2,
-  Archive,
-  Download,
-  Upload,
-  Search,
-  Filter,
-  Eye,
-  EyeOff,
-  Play,
-  Pause,
-  Stop,
-  RotateCcw,
-  Plus,
-  Minus,
-  Edit,
-  Copy,
-  Share2,
-  CheckCircle,
-  AlertTriangle,
-  XCircle,
-  Info,
-  Flag,
-  Star,
-  Hash,
-  Percent,
-  Users,
-  User,
-  Calendar,
-  Shield,
-  Lock,
-  Unlock,
-  Key,
-  Code,
-  FileText,
-  History,
-  Award,
-  Crown,
-  DollarSign,
-  TrendingUpDown,
-  Maximize,
-  Minimize,
-  ArrowUp,
-  ArrowDown,
-  ArrowLeft,
-  ArrowRight,
-  Volume2,
-  VolumeX,
-  Wifi,
-  WifiOff,
-  Signal,
-  Battery,
-  BatteryLow,
-  Thermometer,
-  Monitor,
-  Smartphone,
-  Tablet,
-  Laptop,
-  Desktop
-} from 'lucide-react'
+import { Database, Server, Layers, Package, HardDrive, MemoryStick, Zap, RefreshCw, Activity, BarChart3, PieChart, LineChart, TrendingUp, TrendingDown, Clock, Timer, Target, Gauge, Settings, Trash2, Archive, Download, Upload, Search, Filter, Eye, EyeOff, Play, Pause, Square, RotateCcw, Plus, Minus, Edit, Copy, Share2, CheckCircle, AlertTriangle, XCircle, Info, Flag, Star, Hash, Percent, Users, User, Calendar, Shield, Lock, Unlock, Key, Code, FileText, History, Award, Crown, DollarSign, TrendingUpDown, Maximize, Minimize, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Volume2, VolumeX, Wifi, WifiOff, Signal, Battery, BatteryLow, Thermometer, Monitor, Smartphone, Tablet, Laptop, Desktop } from 'lucide-react'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -1367,8 +1289,8 @@ export const CacheManager: React.FC<{
                   </DropdownMenuItem>
                 ) : (
                   <DropdownMenuItem onClick={() => handleStopInstance(instance)}>
-                    <Stop className="h-4 w-4 mr-2" />
-                    Stop
+                    <Square className="h-4 w-4 mr-2" />
+                    Square
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuItem onClick={() => handleRestartInstance(instance)}>

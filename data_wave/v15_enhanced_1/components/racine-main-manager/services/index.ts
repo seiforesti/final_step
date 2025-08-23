@@ -68,11 +68,11 @@ export { dashboardAPI } from './dashboard-apis';
 export { collaborationAPI } from './collaboration-apis';
 export { crossGroupIntegrationAPI } from './cross-group-integration-apis';
 export { userManagementAPI } from './user-management-apis';
-export { scanLogicAPI } from './scan-logic-apis';
-export { advancedCatalogAPI } from './advanced-catalog-apis';
-export { classificationsAPI } from './classifications-apis';
-export { complianceRuleAPI } from './compliance-rule-apis';
-export { scanRuleSetsAPI } from './scan-rule-sets-apis';
+export { racineScanLogicAPI as scanLogicAPI } from './scan-logic-apis';
+export { racineAdvancedCatalogAPI as advancedCatalogAPI } from './advanced-catalog-apis';
+export { racineClassificationsAPI as classificationsAPI } from './classifications-apis';
+export { racineComplianceRuleAPI as complianceRuleAPI } from './compliance-rule-apis';
+export { racineScanRuleSetsAPI as scanRuleSetsAPI } from './scan-rule-sets-apis';
 export { rbacAdminAPI } from './rbac-admin-apis';
 export { quickActionsAPI } from './quick-actions-apis';
 

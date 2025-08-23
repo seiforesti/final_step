@@ -29,16 +29,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
-import { 
-  BookOpen, FileText, Search, Tag, Users, Star, Eye, Edit, Share2,
-  Plus, MoreHorizontal, RefreshCw, Settings, Filter, Clock, User,
-  Bookmark, Heart, MessageSquare, ThumbsUp, ThumbsDown, Flag,
-  Download, Upload, Link, ExternalLink, Copy, Archive, Trash2,
-  ChevronRight, ChevronDown, Folder, File, Image, Video, Code,
-  Database, Table, BarChart3, PieChart, TrendingUp, Target,
-  Lightbulb, Brain, Zap, Award, Trophy, CheckCircle, XCircle,
-  AlertTriangle, Info, HelpCircle, Globe, Lock, Unlock, Crown
-} from 'lucide-react';
+import { BookOpen, FileText, Search, Tag, Users, Star, Eye, Edit, Share2, Plus, MoreHorizontal, RefreshCw, Settings, Filter, Clock, User, Bookmark, Heart, MessageSquare, ThumbsUp, ThumbsDown, Flag, Download, Upload, Link, ExternalLink, Copy, Archive, Trash2, ChevronRight, ChevronDown, Folder, File, Image, Video, Code, Database, Table, BarChart3, PieChart, TrendingUp, Target, Lightbulb, Brain, Zap, Award, Trophy, CheckCircle, XCircle, AlertTriangle, Info, HelpCircle, Globe, Lock, Unlock, Crown } from 'lucide-react';
 
 import { 
   LineChart as RechartsLineChart, Line, AreaChart, Area, BarChart, Bar, 
@@ -50,7 +41,7 @@ import { format, subDays, parseISO, formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 // Import backend services
-import { collaborationService } from '../../services/collaboration.service';
+import { collaborationService } from '../../services';
 import { intelligentDiscoveryService } from '../../services/intelligent-discovery.service';
 
 // Import types

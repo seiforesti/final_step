@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox"
 import { Separator } from "@/components/ui/separator"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Users, UserCheck, Shield, Lock, Unlock, Plus, Edit, Trash2, Search, AlertCircle, CheckCircle, XCircle } from "lucide-react"
+import { Users, UserCheck, Shield, Lock, Unlock, Plus, Edit, Trash2, Search, AlertCircle, CheckCircle, XCircle } from 'lucide-react'
 import { toast } from "sonner"
 
 // Import backend services and hooks

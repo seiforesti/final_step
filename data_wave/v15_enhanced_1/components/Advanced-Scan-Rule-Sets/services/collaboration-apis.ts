@@ -1162,6 +1162,12 @@ export class CollaborationAPIService {
 
 export const collaborationAPI = new CollaborationAPIService();
 
+// Export service instance for hooks
+export const collaborationAPIService = new CollaborationAPIService();
+
+// Export lowercase alias for compatibility
+export const collaborationApi = collaborationAPI;
+
 /**
  * Enterprise utilities for collaboration management
  */

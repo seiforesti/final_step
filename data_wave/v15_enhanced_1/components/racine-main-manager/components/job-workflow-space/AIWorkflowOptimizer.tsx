@@ -2,15 +2,7 @@
 
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Brain, Zap, TrendingUp, TrendingDown, Target, Activity, BarChart3,
-  LineChart, PieChart, DollarSign, Clock, Cpu, Memory, HardDrive,
-  Network, Database, Shield, AlertTriangle, CheckCircle, XCircle,
-  RefreshCw, Play, Pause, Settings, Download, Upload, Save, Eye,
-  EyeOff, Filter, Search, MoreHorizontal, X, Plus, Minus, Edit3,
-  Lightbulb, Layers, Route, MapPin, Compass, Navigation, Telescope,
-  Microscope, Gauge, Thermometer, Volume2, Wifi, Battery, Power
-} from 'lucide-react';
+import { Brain, Zap, TrendingUp, TrendingDown, Target, Activity, BarChart3, LineChart, PieChart, DollarSign, Clock, Cpu, HardDrive, Network, Database, Shield, AlertTriangle, CheckCircle, XCircle, RefreshCw, Play, Pause, Settings, Download, Upload, Save, Eye, EyeOff, Filter, Search, MoreHorizontal, X, Plus, Minus, Edit3, Lightbulb, Layers, Route, MapPin, Compass, Navigation, Microscope, Gauge, Thermometer, Volume2, Wifi, Battery, Power } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -737,7 +729,7 @@ const AIWorkflowOptimizer: React.FC<AIWorkflowOptimizerProps> = ({
               <div className="space-y-4">
                 {Object.entries({
                   CPU: { value: resourceMetrics.cpu_utilization || 0, color: '#3b82f6', icon: Cpu },
-                  Memory: { value: resourceMetrics.memory_usage || 0, color: '#10b981', icon: Memory },
+                  Memory: { value: resourceMetrics.memory_usage || 0, color: '#10b981', icon: HardDrive },
                   Storage: { value: resourceMetrics.storage_usage || 0, color: '#f59e0b', icon: HardDrive },
                   Network: { value: resourceMetrics.network_usage || 0, color: '#8b5cf6', icon: Network }
                 }).map(([resource, data]) => (
@@ -1221,7 +1213,7 @@ const AIWorkflowOptimizer: React.FC<AIWorkflowOptimizerProps> = ({
                         </CardHeader>
                         <CardContent>
                           <div className="text-center py-8 text-gray-500">
-                            <Telescope className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                            <Search className="h-12 w-12 mx-auto mb-4 opacity-50" />
                             <p>Advanced predictive analytics dashboard</p>
                             <p className="text-sm">ML models for performance forecasting and capacity planning</p>
                           </div>

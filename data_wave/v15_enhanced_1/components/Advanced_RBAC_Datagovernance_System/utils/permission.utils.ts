@@ -799,6 +799,31 @@ export function exportPermissionMatrixToExcel(matrix: PermissionMatrix): string 
   return rows.join('\n');
 }
 
+/**
+ * Check if a user has a specific permission
+ * Maps to backend: rbac_service.has_permission()
+ */
+export async function hasPermission(
+  userId: string,
+  action: string,
+  resource: string,
+  context?: Record<string, any>
+): Promise<boolean> {
+  try {
+    const response = await rbacApiService.post<{ has_permission: boolean }>('/rbac/check-permission', {
+      user_id: userId,
+      action,
+      resource,
+      context
+    });
+    
+    return response.data.has_permission;
+  } catch (error) {
+    console.error('Failed to check permission:', error);
+    return false;
+  }
+}
+
 export default {
   createPermission,
   updatePermission,
@@ -821,5 +846,6 @@ export default {
   groupPermissionsByCategory,
   getPermissionAuditTrail,
   exportPermissionsToCsv,
-  exportPermissionMatrixToExcel
+  exportPermissionMatrixToExcel,
+  hasPermission
 };

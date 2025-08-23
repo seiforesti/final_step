@@ -24,21 +24,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback, useRef, useReducer } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Users, User, Eye, Activity, TrendingUp, BarChart3, PieChart, LineChart, 
-  Target, Brain, Shield, AlertTriangle, Clock, Calendar, Settings, RefreshCw,
-  Download, Upload, Play, Pause, Square, CheckCircle, XCircle, Database,
-  Server, Network, Cpu, HardDrive, Memory, Lock, Unlock, GitBranch, Box,
-  Grid, List, MoreHorizontal, ChevronDown, ChevronRight, ChevronLeft,
-  ExternalLink, Info, HelpCircle, Star, Bookmark, Share, Copy, Edit,
-  Trash2, Plus, Minus, Maximize, Minimize, RotateCcw, Save, Send,
-  MessageSquare, MapPin, Globe, Wifi, WifiOff, Signal, Battery, Bluetooth,
-  Volume2, VolumeX, Camera, Video, Image, FileText, File, Folder,
-  FolderOpen, Archive, Package, Layers3, Component, Puzzle, Zap, Filter,
-  Search, Gauge, Radar, Compass, Map, Lightbulb, BookOpen, Code, Workflow,
-  Link, Timer, Crosshair, Focus, UserCheck, UserX, UserPlus, MousePointer,
-  Keyboard, Monitor, Smartphone, Layers
-} from 'lucide-react';
+import { Users, User, Eye, Activity, TrendingUp, BarChart3, PieChart, LineChart, Target, Brain, Shield, AlertTriangle, Clock, Calendar, Settings, RefreshCw, Download, Upload, Play, Pause, Square, CheckCircle, XCircle, Database, Server, Network, Cpu, HardDrive, Lock, Unlock, GitBranch, Box, Grid, List, MoreHorizontal, ChevronDown, ChevronRight, ChevronLeft, ExternalLink, Info, HelpCircle, Star, Bookmark, Share, Copy, Edit, Trash2, Plus, Minus, Maximize, Minimize, RotateCcw, Save, Send, MessageSquare, MapPin, Globe, Wifi, WifiOff, Signal, Battery, Bluetooth, Volume2, VolumeX, Camera, Video, Image, FileText, File, Folder, FolderOpen, Archive, Package, Layers3, Component, Puzzle, Zap, Filter, Search, Gauge, Radar, Compass, Map, Lightbulb, BookOpen, Code, Workflow, Link, Timer, Crosshair, Focus, UserCheck, UserX, UserPlus, MousePointer, Keyboard, Monitor, Smartphone, Layers } from 'lucide-react';
 
 // UI Components
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';

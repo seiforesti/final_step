@@ -46,54 +46,7 @@ import React, {
 } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
-import { 
-  Activity,
-  BarChart3,
-  Clock,
-  Cpu,
-  Database,
-  Globe,
-  Monitor,
-  Network,
-  Radar,
-  Shield,
-  Zap,
-  AlertTriangle,
-  CheckCircle,
-  RefreshCw,
-  TrendingUp,
-  Eye,
-  Filter,
-  Search,
-  Settings,
-  Users,
-  Workflow,
-  Bot,
-  MessageCircle,
-  Target,
-  PieChart,
-  LineChart,
-  MoreVertical,
-  ArrowRight,
-  ArrowLeft,
-  Play,
-  Pause,
-  Square,
-  RotateCcw,
-  Download,
-  Upload,
-  Save,
-  FileText,
-  Hash,
-  Calendar,
-  MapPin,
-  Smartphone,
-  Laptop,
-  Tablet,
-  Chrome,
-  Firefox,
-  Safari
-} from 'lucide-react';
+import { Activity, BarChart3, Clock, Cpu, Database, Globe, Monitor, Network, Radar, Shield, Zap, AlertTriangle, CheckCircle, RefreshCw, TrendingUp, Eye, Filter, Search, Settings, Users, Workflow, Bot, MessageCircle, Target, PieChart, LineChart, MoreVertical, ArrowRight, ArrowLeft, Play, Pause, Square, RotateCcw, Download, Upload, Save, FileText, Hash, Calendar, MapPin, Smartphone, Laptop, Tablet, Chrome, Firefox, Safari } from 'lucide-react';
 
 // Racine Types
 import { 

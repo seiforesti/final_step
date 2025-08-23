@@ -1,12 +1,6 @@
 "use client"
 
-import {
-  BellIcon,
-  CreditCardIcon,
-  LogOutIcon,
-  MoreVerticalIcon,
-  UserCircleIcon,
-} from "lucide-react"
+import { BellIcon, CreditCardIcon, LogOutIcon, MoreVerticalIcon, UserCircleIcon,  } from 'lucide-react'
 
 import {
   Avatar,

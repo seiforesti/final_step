@@ -24,54 +24,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Search, 
-  Filter, 
-  TrendingUp, 
-  Eye,
-  Activity,
-  BarChart3,
-  Target,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  Brain,
-  Zap,
-  Network,
-  GitBranch,
-  Layers,
-  RefreshCw,
-  Download,
-  Upload,
-  Settings,
-  MoreHorizontal,
-  ChevronDown,
-  ChevronRight,
-  ExternalLink,
-  Info,
-  Star,
-  Bookmark,
-  Share,
-  Copy,
-  Edit,
-  Trash2,
-  Plus,
-  Minus,
-  Maximize,
-  Play,
-  Pause,
-  Square,
-  Database,
-  Server,
-  HardDrive,
-  Shield,
-  Lock,
-  Grid,
-  List,
-  Timeline,
-  Map,
-  PieChart
-} from 'lucide-react';
+import { Search, Filter, TrendingUp, Eye, Activity, BarChart3, Target, AlertTriangle, CheckCircle, Clock, Brain, Zap, Network, GitBranch, Layers, RefreshCw, Download, Upload, Settings, MoreHorizontal, ChevronDown, ChevronRight, ExternalLink, Info, Star, Bookmark, Share, Copy, Edit, Trash2, Plus, Minus, Maximize, Play, Pause, Square, Database, Server, HardDrive, Shield, Lock, Grid, List, Timeline, Map, PieChart } from 'lucide-react';
 
 // UI Components
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -949,7 +902,7 @@ const PatternRecognitionCenter: React.FC = () => {
         includeRecommendations: true
       });
 
-      // Download the report
+      // ArrowDownTrayIcon the report
       const blob = new Blob([JSON.stringify(reportData, null, 2)], { 
         type: 'application/json' 
       });

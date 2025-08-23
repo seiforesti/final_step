@@ -40,57 +40,7 @@ import React, {
   lazy
 } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Tag,
-  Network,
-  Brain,
-  Users,
-  Settings,
-  TrendingUp,
-  Zap,
-  Activity,
-  BarChart3,
-  TestTube,
-  GitBranch,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  Search,
-  Filter,
-  RefreshCw,
-  Plus,
-  Edit,
-  Trash2,
-  Download,
-  Upload,
-  Share2,
-  Eye,
-  EyeOff,
-  Lock,
-  Unlock,
-  Bell,
-  BellOff,
-  Star,
-  Bookmark,
-  Link,
-  Unlink,
-  Copy,
-  ExternalLink,
-  MoreHorizontal,
-  ChevronDown,
-  ChevronRight,
-  Info,
-  HelpCircle,
-  Settings2,
-  Layers,
-  Workflow,
-  Code,
-  FileText,
-  Target,
-  Gauge,
-  Sparkles,
-  TreePine
-} from 'lucide-react';
+import { Tag, Network, Brain, Users, Settings, TrendingUp, Zap, Activity, BarChart3, TestTube, GitBranch, AlertTriangle, CheckCircle, Clock, Search, Filter, RefreshCw, Plus, Edit, Trash2, Download, Upload, Share2, Eye, EyeOff, Lock, Unlock, Bell, BellOff, Star, Bookmark, Link, Unlink, Copy, ExternalLink, MoreHorizontal, ChevronDown, ChevronRight, Info, HelpCircle, Settings2, Layers, Workflow, Code, FileText, Target, Gauge, Sparkles, TreePine } from 'lucide-react';
 
 // UI Components
 import { Button } from '@/components/ui/button';

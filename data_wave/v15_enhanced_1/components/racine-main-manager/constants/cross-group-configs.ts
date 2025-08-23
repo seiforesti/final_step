@@ -10,6 +10,82 @@
 import { SystemStatus, OperationStatus, HealthStatus } from '../types/racine-core.types';
 
 // ============================================================================
+// VIEW AND LAYOUT MODES
+// ============================================================================
+
+export const VIEW_MODES = {
+  GRID: 'grid',
+  LIST: 'list',
+  TABLE: 'table',
+  CARD: 'card',
+  DETAIL: 'detail',
+  COMPACT: 'compact',
+  EXPANDED: 'expanded',
+  CUSTOM: 'custom'
+} as const;
+
+export const LAYOUT_MODES = {
+  SIDEBAR: 'sidebar',
+  TOPBAR: 'topbar',
+  FULLSCREEN: 'fullscreen',
+  SPLIT: 'split',
+  DOCKED: 'docked',
+  FLOATING: 'floating',
+  RESPONSIVE: 'responsive',
+  CUSTOM: 'custom'
+} as const;
+
+// Sidebar dimensions
+export const DEFAULT_SIDEBAR_WIDTH = 280;
+export const COLLAPSED_SIDEBAR_WIDTH = 64;
+export const MIN_SIDEBAR_WIDTH = 200;
+export const MAX_SIDEBAR_WIDTH = 400;
+
+// Layout configuration
+export const DEFAULT_LAYOUT_CONFIG = {
+  sidebar: {
+    width: DEFAULT_SIDEBAR_WIDTH,
+    collapsedWidth: COLLAPSED_SIDEBAR_WIDTH,
+    minWidth: MIN_SIDEBAR_WIDTH,
+    maxWidth: MAX_SIDEBAR_WIDTH,
+  },
+  header: {
+    height: 64,
+    collapsedHeight: 48,
+  },
+  content: {
+    padding: 24,
+    maxWidth: 1200,
+  },
+};
+
+// Layout animations
+export const LAYOUT_ANIMATIONS = {
+  sidebar: {
+    expand: { width: DEFAULT_SIDEBAR_WIDTH },
+    collapse: { width: COLLAPSED_SIDEBAR_WIDTH },
+    transition: { duration: 0.3, ease: 'easeInOut' },
+  },
+  content: {
+    slide: { x: 0 },
+    transition: { duration: 0.2, ease: 'easeOut' },
+  },
+};
+
+// Responsive breakpoints
+export const RESPONSIVE_BREAKPOINTS = {
+  xs: 0,
+  sm: 640,
+  md: 768,
+  lg: 1024,
+  xl: 1280,
+  '2xl': 1536,
+};
+
+// Health check configuration
+export const HEALTH_CHECK_INTERVAL = 30000; // 30 seconds
+
+// ============================================================================
 // SUPPORTED GROUPS CONFIGURATION
 // ============================================================================
 

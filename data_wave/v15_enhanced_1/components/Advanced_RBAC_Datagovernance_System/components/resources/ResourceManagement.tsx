@@ -144,10 +144,10 @@ import {
 import { Role } from '../../types/role.types';
 import { Permission } from '../../types/permission.types';
 import { cn } from '@/lib/utils';
-import ResourceTreeComponent from './ResourceTree';
-import ResourceDetails from './ResourceDetails';
-import ResourceCreateEdit from './ResourceCreateEdit';
-import ResourceRoleAssignment from './ResourceRoleAssignment';
+import { ResourceTree as ResourceTreeComponent } from './ResourceTree';
+import { ResourceDetails } from './ResourceDetails';
+import { ResourceCreateEdit } from './ResourceCreateEdit';
+import { ResourceRoleAssignment } from './ResourceRoleAssignment';
 
 interface ResourceManagementProps {
   className?: string;
@@ -222,7 +222,7 @@ const getResourceColor = (type: string) => {
   return typeConfig?.color || 'bg-gray-500';
 };
 
-export default function ResourceManagement({
+export function ResourceManagement({
   className,
   initialView = 'tree',
   onResourceSelect,

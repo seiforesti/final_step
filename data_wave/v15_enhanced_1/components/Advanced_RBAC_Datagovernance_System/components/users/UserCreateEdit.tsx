@@ -2,37 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  UserIcon,
-  EnvelopeIcon,
-  PhoneIcon,
-  MapPinIcon,
-  BuildingOfficeIcon,
-  CalendarIcon,
-  EyeIcon,
-  EyeSlashIcon,
-  ShieldCheckIcon,
-  KeyIcon,
-  PhotoIcon,
-  CheckCircleIcon,
-  XCircleIcon,
-  ExclamationTriangleIcon,
-  InformationCircleIcon,
-  PlusIcon,
-  XMarkIcon,
-  ArrowPathIcon,
-  CloudArrowUpIcon,
-  DocumentTextIcon,
-  CogIcon,
-  LockClosedIcon,
-  UserGroupIcon,
-  GlobeAltIcon,
-  DevicePhoneMobileIcon,
-  ComputerDesktopIcon,
-  SparklesIcon,
-  BoltIcon,
-  StarIcon
-} from '@heroicons/react/24/outline';
+import { UserIcon, EnvelopeIcon, PhoneIcon, MapPinIcon, BuildingOfficeIcon, CalendarIcon, EyeIcon, EyeSlashIcon, ShieldCheckIcon, KeyIcon, PhotoIcon, CheckCircleIcon, XCircleIcon, ExclamationTriangleIcon, InformationCircleIcon, PlusIcon, XMarkIcon, ArrowPathIcon, CloudArrowUpIcon, DocumentTextIcon, CogIcon, LockClosedIcon, UserGroupIcon, GlobeAltIcon, DevicePhoneMobileIcon, ComputerDesktopIcon, SparklesIcon, BoltIcon, StarIcon } from '@heroicons/react/24/outline';
 import { userService } from '../../services/user.service';
 import { roleService } from '../../services/role.service';
 import { useCurrentUser } from '../../hooks/useCurrentUser';

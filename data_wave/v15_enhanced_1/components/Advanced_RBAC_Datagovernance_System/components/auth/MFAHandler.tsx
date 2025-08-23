@@ -2,33 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence, useAnimation } from 'framer-motion';
-import {
-  ShieldCheckIcon,
-  DevicePhoneMobileIcon,
-  EnvelopeIcon,
-  KeyIcon,
-  QrCodeIcon,
-  ExclamationTriangleIcon,
-  CheckCircleIcon,
-  XMarkIcon,
-  ArrowPathIcon,
-  ClockIcon,
-  EyeIcon,
-  EyeSlashIcon,
-  DocumentDuplicateIcon,
-  PrinterIcon,
-  DownloadIcon,
-  CogIcon,
-  FingerprintIcon,
-  FaceSmileIcon,
-  LockClosedIcon,
-  BoltIcon,
-  InformationCircleIcon,
-  ChevronRightIcon,
-  ChevronDownIcon,
-  StarIcon,
-  ExclamationCircleIcon
-} from '@heroicons/react/24/outline';
+import { ShieldCheckIcon, DevicePhoneMobileIcon, EnvelopeIcon, KeyIcon, QrCodeIcon, ExclamationTriangleIcon, CheckCircleIcon, XMarkIcon, ArrowPathIcon, ClockIcon, EyeIcon, EyeSlashIcon, DocumentDuplicateIcon, PrinterIcon, ArrowDownTrayIcon, CogIcon, FingerPrintIcon, FaceSmileIcon, LockClosedIcon, BoltIcon, InformationCircleIcon, ChevronRightIcon, ChevronDownIcon, StarIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline';
 import { authService } from '../../services/auth.service';
 import { useCurrentUser } from '../../hooks/useCurrentUser';
 import { formatDate, formatRelativeTime } from '../../utils/format.utils';
@@ -521,7 +495,7 @@ export const MFAHandler: React.FC = () => {
       case 'totp': return <ShieldCheckIcon className="h-5 w-5" />;
       case 'sms': return <DevicePhoneMobileIcon className="h-5 w-5" />;
       case 'email': return <EnvelopeIcon className="h-5 w-5" />;
-      case 'biometric': return <FingerprintIcon className="h-5 w-5" />;
+      case 'biometric': return <FingerPrintIcon className="h-5 w-5" />;
       case 'backup_codes': return <KeyIcon className="h-5 w-5" />;
       default: return <LockClosedIcon className="h-5 w-5" />;
     }
@@ -1002,8 +976,8 @@ export const MFAHandler: React.FC = () => {
                       onClick={downloadBackupCodes}
                       className="flex-1 inline-flex items-center justify-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
-                      <DownloadIcon className="h-4 w-4 mr-2" />
-                      Download
+                      <Download className="h-4 w-4 mr-2" />
+                      ArrowDownTrayIcon
                     </button>
                   </div>
 

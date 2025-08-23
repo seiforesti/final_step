@@ -22,18 +22,7 @@ import {
   Legend, ResponsiveContainer, ScatterChart, Scatter, RadarChart, PolarGrid,
   PolarAngleAxis, PolarRadiusAxis, Radar, Treemap, Sankey
 } from 'recharts';
-import {
-  Brain, Network, Zap, Target, Award, Clock, Users, Database,
-  Monitor, Cpu, AlertTriangle, CheckCircle, XCircle, Info, Settings,
-  Search, Filter, Download, Upload, Refresh, Play, Pause, Stop,
-  MoreVertical, Eye, Edit, Trash2, Plus, Minus, ArrowUp, ArrowDown,
-  ArrowRight, Calendar, Globe, Shield, Lock, Unlock, Star, Heart,
-  Bookmark, Share, MessageSquare, Bell, Mail, Phone, Video, Mic,
-  Camera, Image, File, Folder, Archive, Tag, Flag, Map, Navigation,
-  Compass, Route, Layers, Grid, List, Table, Kanban, Timeline,
-  Chart, Activity, TrendingUp, BarChart3, PieChart as PieChartIcon,
-  LineChart as LineChartIcon, GitBranch, Workflow, Bot, Lightbulb
-} from 'lucide-react';
+import { Brain, Network, Zap, Target, Award, Clock, Users, Database, Monitor, Cpu, AlertTriangle, CheckCircle, XCircle, Info, Settings, Search, Filter, Download, Upload, RefreshCw, Play, Pause, Square, MoreVertical, Eye, Edit, Trash2, Plus, Minus, ArrowUp, ArrowDown, ArrowRight, Calendar, Globe, Shield, Lock, Unlock, Star, Heart, Bookmark, Share, MessageSquare, Bell, Mail, Phone, Video, Mic, Camera, Image, File, Folder, Archive, Tag, Flag, Map, Navigation, Compass, Route, Layers, Grid, List, Table, Kanban, Timeline, Chart, Activity, TrendingUp, BarChart3, PieChart as PieChartIcon, LineChart as LineChartIcon, GitBranch, Workflow, Bot, Lightbulb } from 'lucide-react';
 
 // Import custom hooks and utilities
 import { useClassificationState } from '../core/hooks/useClassificationState';
@@ -711,7 +700,7 @@ export const IntelligenceCoordinator: React.FC = () => {
       case 'retired':
       case 'offline':
       case 'stopped':
-        return <Stop className="h-4 w-4 text-gray-600" />;
+        return <Square className="h-4 w-4 text-gray-600" />;
       default:
         return <Info className="h-4 w-4 text-gray-600" />;
     }
@@ -979,7 +968,7 @@ export const IntelligenceCoordinator: React.FC = () => {
                       size="sm"
                       onClick={() => handleStopModel(model.id)}
                     >
-                      <Stop className="h-4 w-4 mr-1" />
+                      <Square className="h-4 w-4 mr-1" />
                       Stop
                     </Button>
                   ) : (

@@ -151,91 +151,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 // Icons
-import {
-  Shield,
-  ShieldCheck,
-  ShieldAlert,
-  ShieldOff,
-  Key,
-  KeyRound,
-  Lock,
-  LockKeyhole,
-  Unlock,
-  Eye,
-  EyeOff,
-  Smartphone,
-  Monitor,
-  Tablet,
-  Fingerprint,
-  Scan,
-  ScanFace,
-  QrCode,
-  CreditCard,
-  Usb,
-  Wifi,
-  WifiOff,
-  Globe,
-  Building,
-  Server,
-  Database,
-  Cloud,
-  Network,
-  Settings,
-  Cog,
-  User,
-  Users,
-  UserCheck,
-  UserX,
-  UserPlus,
-  UserMinus,
-  Clock,
-  Calendar,
-  MapPin,
-  AlertTriangle,
-  AlertCircle,
-  CheckCircle,
-  XCircle,
-  Info,
-  Bell,
-  BellOff,
-  Download,
-  Upload,
-  Copy,
-  RefreshCw,
-  RotateCcw,
-  Loader2,
-  Plus,
-  Minus,
-  X,
-  Check,
-  ChevronDown,
-  ChevronRight,
-  ChevronLeft,
-  ArrowRight,
-  ArrowLeft,
-  ExternalLink,
-  Link,
-  Unlink,
-  Search,
-  Filter,
-  SortAsc,
-  SortDesc,
-  MoreHorizontal,
-  Edit,
-  Trash2,
-  Save,
-  Zap,
-  Activity,
-  BarChart3,
-  TrendingUp,
-  Target,
-  Flag,
-  Star,
-  History,
-  FileText,
-  Download as DownloadIcon,
-  Share2
-} from 'lucide-react';
+import { Shield, ShieldCheckIcon, ShieldAlert, ShieldOff, Key, KeyRound, Lock, LockKeyhole, Unlock, Eye, EyeOff, Smartphone, Monitor, Tablet, Fingerprint, Scan, ScanFace, QrCode, CreditCard, Usb, Wifi, WifiOff, Globe, Building, Server, Database, Cloud, Network, Settings, Cog, User, Users, UserCheck, UserX, UserPlus, UserMinus, Clock, Calendar, MapPin, AlertTriangle, AlertCircle, CheckCircle, XCircle, Info, Bell, BellOff, Download, Upload, Copy, RefreshCw, RotateCcw, Loader2, Plus, Minus, X, Check, ChevronDown, ChevronRight, ChevronLeft, ArrowRight, ArrowLeft, ExternalLink, Link, Unlink, Search, Filter, SortAsc, SortDesc, MoreHorizontal, Edit, Trash2, Save, Zap, Activity, BarChart3, TrendingUp, Target, Flag, Star, History, FileText, Download as DownloadIcon, Share2 } from 'lucide-react';
 
 // Form validation
 import { useForm, Controller } from 'react-hook-form';
@@ -1084,7 +1000,7 @@ export const EnterpriseAuthenticationCenter: React.FC<EnterpriseAuthenticationCe
             <CardContent className="p-6">
               <div className="flex items-center space-x-3">
                 <div className={`p-2 rounded-lg ${authState.twoFactorEnabled ? 'bg-green-100 dark:bg-green-900' : 'bg-gray-100 dark:bg-gray-800'}`}>
-                  <ShieldCheck className={`w-5 h-5 ${authState.twoFactorEnabled ? 'text-green-600' : 'text-gray-600'}`} />
+                  <ShieldCheckIcon className={`w-5 h-5 ${authState.twoFactorEnabled ? 'text-green-600' : 'text-gray-600'}`} />
                 </div>
                 <div>
                   <p className="font-medium">Two-Factor Auth</p>
@@ -1186,7 +1102,7 @@ export const EnterpriseAuthenticationCenter: React.FC<EnterpriseAuthenticationCe
                 className="flex items-center space-x-2 h-auto p-4"
                 onClick={() => setShowMfaSetup(true)}
               >
-                <ShieldCheck className="w-5 h-5" />
+                <ShieldCheckIcon className="w-5 h-5" />
                 <div className="text-left">
                   <p className="font-medium">Setup 2FA</p>
                   <p className="text-sm text-gray-500">Enable two-factor auth</p>
@@ -1221,7 +1137,7 @@ export const EnterpriseAuthenticationCenter: React.FC<EnterpriseAuthenticationCe
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
-              <ShieldCheck className="w-5 h-5" />
+              <ShieldCheckIcon className="w-5 h-5" />
               <span>Two-Factor Authentication</span>
             </CardTitle>
             <CardDescription>
@@ -1876,7 +1792,7 @@ export const EnterpriseAuthenticationCenter: React.FC<EnterpriseAuthenticationCe
               className="w-full flex items-center space-x-2"
             >
               <DownloadIcon className="w-4 h-4" />
-              <span>Download Backup Codes</span>
+              <span>ArrowDownTrayIcon Backup Codes</span>
             </Button>
           </div>
         )}
@@ -2127,7 +2043,7 @@ export const EnterpriseAuthenticationCenter: React.FC<EnterpriseAuthenticationCe
                       <span>Overview</span>
                     </TabsTrigger>
                     <TabsTrigger value="mfa" className="flex items-center space-x-2">
-                      <ShieldCheck className="w-4 h-4" />
+                      <ShieldCheckIcon className="w-4 h-4" />
                       <span>Two-Factor Auth</span>
                     </TabsTrigger>
                     <TabsTrigger value="sso" className="flex items-center space-x-2">

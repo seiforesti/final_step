@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
 // Import data source APIs - these integrate with backend
 import { dataSourceApis } from '../services/racine-orchestration-apis'
-import { crossGroupIntegrationApis } from '../services/cross-group-integration-apis'
+import { crossGroupIntegrationAPI } from '../services/cross-group-integration-apis'
 
 // Import types from racine core types
 import {
@@ -91,6 +91,23 @@ interface DataSourceOperations {
   getWorkspaceDataSources: (workspaceId: string) => Promise<DataSource[]>
 }
 
+// Export the missing hook for data source compliance status
+export const useDataSourceComplianceStatusQuery = (dataSourceId: number, options = {}) => {
+  return useQuery({
+    queryKey: ['data-source-compliance-status', dataSourceId],
+    queryFn: async () => {
+      // Integrate with backend endpoint in real implementation
+      const response = await fetch(`/api/data-sources/${dataSourceId}/compliance-status`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch compliance status');
+      }
+      return response.json();
+    },
+    enabled: !!dataSourceId,
+    ...options,
+  });
+};
+
 export const useDataSources = (options: UseDataSourcesOptions = {}) => {
   const queryClient = useQueryClient()
   const [loading, setLoading] = useState(false)
@@ -139,7 +156,7 @@ export const useDataSources = (options: UseDataSourcesOptions = {}) => {
       queryClient.invalidateQueries({ queryKey: ['dataSourceStats'] })
       
       // Track creation in activity system
-      crossGroupIntegrationApis.trackEvent('data_source_created', {
+      crossGroupIntegrationAPI.trackEvent('data_source_created', {
         dataSourceId: newDataSource.id,
         type: newDataSource.type,
         name: newDataSource.name
@@ -159,7 +176,7 @@ export const useDataSources = (options: UseDataSourcesOptions = {}) => {
       queryClient.setQueryData(['dataSource', updatedDataSource.id], updatedDataSource)
       
       // Track update in activity system
-      crossGroupIntegrationApis.trackEvent('data_source_updated', {
+      crossGroupIntegrationAPI.trackEvent('data_source_updated', {
         dataSourceId: updatedDataSource.id,
         type: updatedDataSource.type,
         name: updatedDataSource.name
@@ -179,7 +196,7 @@ export const useDataSources = (options: UseDataSourcesOptions = {}) => {
       queryClient.invalidateQueries({ queryKey: ['dataSourceStats'] })
       
       // Track deletion in activity system
-      crossGroupIntegrationApis.trackEvent('data_source_deleted', {
+      crossGroupIntegrationAPI.trackEvent('data_source_deleted', {
         dataSourceId: deletedId
       })
     },
@@ -289,7 +306,7 @@ export const useDataSources = (options: UseDataSourcesOptions = {}) => {
   // Cross-group integration operations
   const linkToScanRuleSets = useCallback(async (dataSourceId: string, ruleSetIds: string[]) => {
     try {
-      await crossGroupIntegrationApis.linkDataSourceToScanRuleSets(dataSourceId, ruleSetIds)
+      await crossGroupIntegrationAPI.linkDataSourceToScanRuleSets(dataSourceId, ruleSetIds)
       queryClient.invalidateQueries({ queryKey: ['dataSource', dataSourceId] })
     } catch (error) {
       console.error('Error linking to scan rule sets:', error)
@@ -299,7 +316,7 @@ export const useDataSources = (options: UseDataSourcesOptions = {}) => {
 
   const linkToClassifications = useCallback(async (dataSourceId: string, classificationIds: string[]) => {
     try {
-      await crossGroupIntegrationApis.linkDataSourceToClassifications(dataSourceId, classificationIds)
+      await crossGroupIntegrationAPI.linkDataSourceToClassifications(dataSourceId, classificationIds)
       queryClient.invalidateQueries({ queryKey: ['dataSource', dataSourceId] })
     } catch (error) {
       console.error('Error linking to classifications:', error)
@@ -309,7 +326,7 @@ export const useDataSources = (options: UseDataSourcesOptions = {}) => {
 
   const linkToComplianceRules = useCallback(async (dataSourceId: string, ruleIds: string[]) => {
     try {
-      await crossGroupIntegrationApis.linkDataSourceToComplianceRules(dataSourceId, ruleIds)
+      await crossGroupIntegrationAPI.linkDataSourceToComplianceRules(dataSourceId, ruleIds)
       queryClient.invalidateQueries({ queryKey: ['dataSource', dataSourceId] })
     } catch (error) {
       console.error('Error linking to compliance rules:', error)
@@ -370,11 +387,11 @@ export const useDataSources = (options: UseDataSourcesOptions = {}) => {
     
     // Workspace integration
     addToWorkspace: (dataSourceId: string, workspaceId: string) => 
-      crossGroupIntegrationApis.addDataSourceToWorkspace(dataSourceId, workspaceId),
+      crossGroupIntegrationAPI.addDataSourceToWorkspace(dataSourceId, workspaceId),
     removeFromWorkspace: (dataSourceId: string, workspaceId: string) => 
-      crossGroupIntegrationApis.removeDataSourceFromWorkspace(dataSourceId, workspaceId),
+      crossGroupIntegrationAPI.removeDataSourceFromWorkspace(dataSourceId, workspaceId),
     getWorkspaceDataSources: (workspaceId: string) => 
-      crossGroupIntegrationApis.getWorkspaceDataSources(workspaceId)
+      crossGroupIntegrationAPI.getWorkspaceDataSources(workspaceId)
   }), [
     createDataSourceMutation,
     updateDataSourceMutation,

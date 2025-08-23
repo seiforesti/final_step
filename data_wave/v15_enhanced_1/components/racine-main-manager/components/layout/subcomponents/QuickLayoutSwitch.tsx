@@ -24,25 +24,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Layout,
-  Grid3X3,
-  Columns2,
-  Rows2,
-  Square,
-  Monitor,
-  Smartphone,
-  Tablet,
-  Zap,
-  Brain,
-  Star,
-  Clock,
-  ChevronDown,
-  Settings,
-  RefreshCw,
-  Check,
-  ArrowRight
-} from 'lucide-react';
+import { Layout, Grid3X3, Square, Monitor, Smartphone, Tablet, Zap, Brain, Star, Clock, ChevronDown, Settings, RefreshCw, Check, ArrowRight } from 'lucide-react';
 
 // Shadcn/UI Components
 import { Button } from '@/components/ui/button';
@@ -126,15 +108,15 @@ const LAYOUT_OPTIONS: Omit<LayoutOption, 'isRecommended' | 'isRecent' | 'isFavor
     mode: 'split_screen',
     name: 'Split Screen',
     description: 'Side-by-side comparison',
-    icon: Columns2,
+    icon: Layout,
     preview: 'M4 4h6v16H4zM14 4h6v16h-6z'
   },
   {
     mode: 'tabbed',
     name: 'Tabbed',
     description: 'Multiple tabs for easy switching',
-    icon: Rows2,
-    preview: 'M4 4h16v3H4zM4 9h16v11H4z'
+    icon: Grid3X3,
+    preview: 'M4 4h6v16H4zM14 4h6v16h-6z'
   },
   {
     mode: 'grid',

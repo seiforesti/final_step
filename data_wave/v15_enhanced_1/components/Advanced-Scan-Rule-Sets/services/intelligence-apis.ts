@@ -1192,4 +1192,7 @@ export const IntelligenceAPIUtils = {
   })
 };
 
+// Export service instance
+export const intelligenceAPIService = new IntelligenceAPIService();
+
 export default intelligenceAPI;

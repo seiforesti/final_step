@@ -11,18 +11,7 @@ import {
   Popover, PopoverContent, PopoverTrigger, Alert, AlertDescription, AlertTitle,
   ResizablePanelGroup, ResizablePanel, ResizableHandle
 } from '@/components/ui';
-import { 
-  Users, UserPlus, UserMinus, UserCheck, UserX, Shield, Lock, Unlock, Globe, Building, Factory, Briefcase,
-  Mail, Phone, Calendar, Clock, MessageCircle, Video, FileText, Share, Download, Upload, Eye, Edit, Trash2,
-  Plus, Search, Filter, Settings, Bell, BellOff, RefreshCw, MoreHorizontal, ChevronDown, ChevronUp, ChevronLeft,
-  ChevronRight, ArrowUp, ArrowDown, ArrowRight, ArrowLeft, X, Check, CheckCircle, AlertTriangle, Info, HelpCircle,
-  Loader2, Star, Heart, Bookmark, Flag, Copy, ExternalLink, Tag, Tags, Folder, FolderOpen, Database, Server,
-  Cloud, Cpu, Monitor, Smartphone, Tablet, Laptop, MousePointer, Hand, Grab, Move, CornerDownRight, Maximize2,
-  Minimize2, RotateCcw, Play, Pause, StopCircle, SkipForward, SkipBack, Volume2, VolumeX, Mic, MicOff, Camera,
-  CameraOff, Navigation, Compass, Map, Route, Telescope, Microscope, FlaskConical, Beaker, Atom, Dna, Type,
-  Palette, Layers, Grid, Layout, Activity, TrendingUp, BarChart3, PieChart, LineChart, Target, Award, Trophy,
-  Medal, Crown, Zap, Brain, Lightbulb, GraduationCap, BookMarked, Library
-} from 'lucide-react';
+import { Users, UserPlus, UserMinus, UserCheck, UserX, Shield, Lock, Unlock, Globe, Building, Factory, Briefcase, Mail, Phone, Calendar, Clock, MessageCircle, Video, FileText, Share, Download, Upload, Eye, Edit, Trash2, Plus, Search, Filter, Settings, Bell, BellOff, RefreshCw, MoreHorizontal, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, ArrowUp, ArrowDown, ArrowRight, ArrowLeft, X, Check, CheckCircle, AlertTriangle, Info, HelpCircle, Loader2, Star, Heart, Bookmark, Flag, Copy, ExternalLink, Tag, Tags, Folder, FolderOpen, Database, Server, Cloud, Cpu, Monitor, Smartphone, Tablet, Laptop, MousePointer, Hand, Grab, Move, CornerDownRight, Maximize2, Minimize2, RotateCcw, Play, Pause, StopCircle, SkipForward, SkipBack, Volume2, VolumeX, Mic, MicOff, Camera, CameraOff, Navigation, Compass, Map, Route, Microscope, FlaskConical, Beaker, Atom, Dna, Type, Palette, Layers, Grid, Layout, Activity, TrendingUp, BarChart3, PieChart, LineChart, Target, Award, Trophy, Medal, Crown, Zap, Brain, Lightbulb, GraduationCap, BookMarked, Library } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCollaboration } from '../../hooks/useCollaboration';
 import { useRacineOrchestration } from '../../hooks/useRacineOrchestration';

@@ -18,22 +18,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from '@/components/ui/navigation-menu';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import {
-  BarChart3, TrendingUp, Activity, Database, Monitor, Cpu, AlertTriangle, CheckCircle, XCircle,
-  Settings, Search, Filter, Download, Upload, Refresh, Play, Pause, Stop, MoreVertical,
-  Eye, Edit, Trash2, Plus, Bell, Shield, Lock, Star, Brain, Network, Bot, Workflow,
-  GitBranch, Boxes, Package, Server, Cloud, HardDrive, Zap, Lightbulb, Target,
-  Users, Calendar, Globe, Menu, X, ChevronDown, ChevronUp, ChevronLeft, ChevronRight,
-  Home, Building, Briefcase, Calculator, CreditCard, FileText, Presentation,
-  MessageSquare, Mail, Phone, Video, Mic, Camera, Image, File, Folder, Archive,
-  Tag, Flag, Map, Navigation, Compass, Route, Layers, Grid, List, Table,
-  Timeline, Chart, PieChart, LineChart, Radar, Microscope, Telescope, Atom,
-  Fingerprint, QrCode, Barcode, ScanLine, Volume2, VolumeX, Maximize, Minimize,
-  RotateCcw, RotateCw, FlipHorizontal, FlipVertical, Copy, Cut, Paste, Scissors,
-  PaintBucket, Palette, Brush, Pen, PenTool, Eraser, Ruler, Move, MousePointer,
-  Hand, GripHorizontal, GripVertical, CornerDownLeft, CornerDownRight,
-  CornerUpLeft, CornerUpRight, ChevronsDown, ChevronsUp, ChevronsLeft, ChevronsRight
-} from 'lucide-react';
+import { BarChart3, TrendingUp, Activity, Database, Monitor, Cpu, AlertTriangle, CheckCircle, XCircle, Settings, Search, Filter, Download, Upload, RefreshCw, Play, Pause, Square, MoreVertical, Eye, Edit, Trash2, Plus, Bell, Shield, Lock, Star, Brain, Network, Bot, Workflow, GitBranch, Boxes, Package, Server, Cloud, HardDrive, Zap, Lightbulb, Target, Users, Calendar, Globe, Menu, X, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Home, Building, Briefcase, Calculator, CreditCard, FileText, Presentation, MessageSquare, Mail, Phone, Video, Mic, Camera, Image, File, Folder, Archive, Tag, Flag, Map, Navigation, Compass, Route, Layers, Grid, List, Table, Timeline, Chart, PieChart, LineChart, Radar, Microscope, Atom, Fingerprint, QrCode, Barcode, ScanLine, Volume2, VolumeX, Maximize, Minimize, RotateCcw, RotateCw, FlipHorizontal, FlipVertical, Copy, Cut, Paste, Scissors, PaintBucket, Palette, Brush, Pen, PenTool, Eraser, Ruler, Move, MousePointer, Hand, GripHorizontal, GripVertical, CornerDownLeft, CornerDownRight, CornerUpLeft, CornerUpRight, ChevronsDown, ChevronsUp, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { motion, AnimatePresence, useAnimation } from 'framer-motion';
 import { toast } from 'sonner';
 
@@ -274,7 +259,7 @@ const quickActionsConfig: QuickAction[] = [
   {
     id: 'export-results',
     label: 'Export Results',
-    icon: Download,
+    icon: ArrowDownTrayIcon,
     action: () => {},
     shortcut: 'Ctrl+E'
   },

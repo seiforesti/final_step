@@ -8,6 +8,9 @@ import { stateManager } from '../core/state-manager'
 // CORE APPROVAL INTERFACES
 // ============================================================================
 
+// Export a WorkflowEngine type for consumers that import it for typing only
+export type WorkflowEngine = typeof workflowEngine
+
 export interface ApprovalRequest {
   id: string
   type: ApprovalType
@@ -1211,3 +1214,6 @@ interface ApprovalMetrics {
 // Export singleton instance
 export const approvalSystem = new ApprovalSystem()
 export default approvalSystem
+
+// Export WorkflowEngine for component integration
+export const WorkflowEngine = approvalSystem

@@ -138,97 +138,7 @@ import {
 } from '@/components/ui/popover';
 
 // Icons
-import {
-  Shield,
-  ShieldAlert,
-  ShieldCheck,
-  ShieldOff,
-  Security,
-  Lock,
-  Unlock,
-  Eye,
-  EyeOff,
-  AlertTriangle,
-  AlertCircle,
-  CheckCircle,
-  XCircle,
-  Info,
-  Search,
-  Filter,
-  Download,
-  Upload,
-  RefreshCw,
-  Calendar as CalendarIcon,
-  Clock,
-  Activity,
-  BarChart3,
-  LineChart,
-  PieChart,
-  TrendingUp,
-  TrendingDown,
-  Target,
-  Zap,
-  Bell,
-  BellOff,
-  Settings,
-  MoreHorizontal,
-  ChevronDown,
-  ChevronRight,
-  ChevronLeft,
-  ChevronUp,
-  ArrowUp,
-  ArrowDown,
-  ArrowUpDown,
-  Plus,
-  Minus,
-  X,
-  Check,
-  Copy,
-  Share2,
-  ExternalLink,
-  FileText,
-  Folder,
-  Archive,
-  History,
-  Star,
-  Flag,
-  Bookmark,
-  Tag,
-  Hash,
-  AtSign,
-  Globe,
-  Server,
-  Database,
-  Cloud,
-  Network,
-  Cpu,
-  HardDrive,
-  Monitor,
-  Smartphone,
-  Tablet,
-  Users,
-  User,
-  UserCheck,
-  UserX,
-  Building,
-  Home,
-  MapPin,
-  Navigation,
-  Compass,
-  Map,
-  Route,
-  Loader2,
-  Gauge,
-  Timer,
-  Stopwatch,
-  AlarmClock,
-  Radio,
-  Wifi,
-  Signal,
-  Battery,
-  Power,
-  Bluetooth
-} from 'lucide-react';
+import { Shield, ShieldAlert, ShieldCheckIcon, ShieldOff, Security, Lock, Unlock, Eye, EyeOff, AlertTriangle, AlertCircle, CheckCircle, XCircle, Info, Search, Filter, Download, Upload, RefreshCw, Calendar as CalendarIcon, Clock, Activity, BarChart3, LineChart, PieChart, TrendingUp, TrendingDown, Target, Zap, Bell, BellOff, Settings, MoreHorizontal, ChevronDown, ChevronRight, ChevronLeft, ChevronUp, ArrowUp, ArrowDown, ArrowUpDown, Plus, Minus, X, Check, Copy, Share2, ExternalLink, FileText, Folder, Archive, History, Star, Flag, Bookmark, Tag, Hash, AtSign, Globe, Server, Database, Cloud, Network, Cpu, HardDrive, Monitor, Smartphone, Tablet, Users, User, UserCheck, UserX, Building, Home, MapPin, Navigation, Compass, Map, Route, Loader2, Gauge, Timer, Stopwatch, AlarmClock, Radio, Wifi, Signal, Battery, Power, Bluetooth } from 'lucide-react';
 
 // Date handling
 import { format, parseISO, isValid, addDays, addHours, addMonths, startOfDay, endOfDay, subDays } from 'date-fns';
@@ -1626,7 +1536,7 @@ export const SecurityAuditDashboard: React.FC<SecurityAuditDashboardProps> = ({
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
-              <ShieldCheck className="w-5 h-5" />
+              <ShieldCheckIcon className="w-5 h-5" />
               <span>Compliance Overview</span>
             </CardTitle>
             <CardDescription>
@@ -1801,7 +1711,7 @@ export const SecurityAuditDashboard: React.FC<SecurityAuditDashboardProps> = ({
                 <span className="hidden sm:inline">Threats</span>
               </TabsTrigger>
               <TabsTrigger value="compliance" className="flex items-center space-x-2">
-                <ShieldCheck className="w-4 h-4" />
+                <ShieldCheckIcon className="w-4 h-4" />
                 <span className="hidden sm:inline">Compliance</span>
               </TabsTrigger>
               <TabsTrigger value="incidents" className="flex items-center space-x-2">
@@ -1836,7 +1746,7 @@ export const SecurityAuditDashboard: React.FC<SecurityAuditDashboardProps> = ({
 
             <TabsContent value="compliance">
               <div className="text-center py-12">
-                <ShieldCheck className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                <ShieldCheckIcon className="w-12 h-12 mx-auto text-gray-400 mb-4" />
                 <h3 className="text-lg font-semibold mb-2">Compliance Management</h3>
                 <p className="text-gray-500">Detailed compliance tracking and reporting will be implemented here</p>
               </div>

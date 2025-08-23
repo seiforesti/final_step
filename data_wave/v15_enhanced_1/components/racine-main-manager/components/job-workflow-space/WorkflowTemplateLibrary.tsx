@@ -2,15 +2,7 @@
 
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Package, Search, Filter, Download, Upload, Star, Heart, Eye, 
-  ThumbsUp, ThumbsDown, Share2, Copy, Edit3, Trash2, Plus, Minus,
-  MoreHorizontal, X, RefreshCw, Settings, Save, BookOpen, Tag,
-  Users, Clock, Calendar, TrendingUp, Award, Shield, CheckCircle,
-  XCircle, AlertTriangle, Info, Zap, Brain, Target, Activity,
-  FileText, Code, Database, Network, Globe, Lock, Unlock, Crown,
-  Bookmark, History, GitBranch, GitCommit, ExternalLink, Layers
-} from 'lucide-react';
+import { Package, Search, Filter, Download, Upload, Star, Heart, Eye, ThumbsUp, ThumbsDown, Share2, Copy, Edit3, Trash2, Plus, Minus, MoreHorizontal, X, RefreshCw, Settings, Save, BookOpen, Tag, Users, Clock, Calendar, TrendingUp, Award, Shield, CheckCircle, XCircle, AlertTriangle, Info, Zap, Brain, Target, Activity, FileText, Code, Database, Network, Globe, Lock, Unlock, Crown, Bookmark, History, GitBranch, GitCommit, ExternalLink, Layers } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -199,7 +191,7 @@ const SORT_OPTIONS = [
   { value: 'rating', label: 'Highest Rated', icon: Star },
   { value: 'recent', label: 'Recently Added', icon: Clock },
   { value: 'updated', label: 'Recently Updated', icon: RefreshCw },
-  { value: 'downloads', label: 'Most Downloaded', icon: Download },
+  { value: 'downloads', label: 'Most Downloaded', icon: ArrowDownTrayIcon },
   { value: 'name', label: 'Name (A-Z)', icon: FileText },
   { value: 'author', label: 'Author', icon: Users },
   { value: 'complexity', label: 'Complexity', icon: Target }

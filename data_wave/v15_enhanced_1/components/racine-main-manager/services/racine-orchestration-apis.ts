@@ -1182,6 +1182,39 @@ export class RacineOrchestrationAPI {
     });
   }
 
+  // =============================================================================
+  // SCAN LOGIC INTEGRATION METHODS
+  // =============================================================================
+
+  /**
+   * Get cross-group scans for workspace
+   */
+  async getCrossGroupScans(workspaceId: string): Promise<any[]> {
+    const response = await this.makeRequest(`/workspaces/${workspaceId}/cross-group-scans`, {
+      method: 'GET'
+    });
+    return response.success ? response.data : [];
+  }
+
+  /**
+   * Coordinate cross-group scan execution
+   */
+  async coordinateCrossGroupScan(coordination: any): Promise<any> {
+    return this.makeRequest('/scans/coordinate', {
+      method: 'POST',
+      data: coordination
+    });
+  }
+
+  /**
+   * Initialize scan logic integration for workspace
+   */
+  async initializeScanLogicIntegration(workspaceId: string): Promise<void> {
+    await this.makeRequest(`/workspaces/${workspaceId}/scan-logic/initialize`, {
+      method: 'POST'
+    });
+  }
+
   /**
    * Clean up resources
    */
@@ -1692,3 +1725,6 @@ export type {
   OrchestrationEventHandler,
   RequestOptions
 };
+
+// Export as scanOrchestrationApis for backward compatibility
+export const scanOrchestrationApis = racineOrchestrationAPI;

@@ -19,30 +19,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { 
-  Play, 
-  Pause, 
-  Square, 
-  RotateCcw, 
-  CheckCircle, 
-  AlertTriangle, 
-  Clock, 
-  BarChart3,
-  Target,
-  Zap,
-  FileText,
-  Search,
-  RefreshCw,
-  Download,
-  TrendingUp,
-  Activity,
-  Database,
-  Timer,
-  TestTube,
-  GitBranch,
-  Eye,
-  Settings
-} from 'lucide-react';
+import { Play, Pause, Square, RotateCcw, CheckCircle, AlertTriangle, Clock, BarChart3, Target, Zap, FileText, Search, RefreshCw, Download, TrendingUp, Activity, Database, Timer, TestTube, GitBranch, Eye, Settings } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 

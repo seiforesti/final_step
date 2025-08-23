@@ -18,77 +18,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { 
-  Brain,
-  Zap,
-  Target,
-  TrendingUp,
-  TrendingDown,
-  Settings,
-  Activity,
-  BarChart3,
-  LineChart,
-  PieChart,
-  Cpu,
-  Database,
-  Server,
-  Monitor,
-  Gauge,
-  Scale,
-  Layers,
-  GitBranch,
-  GitCommit,
-  GitMerge,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  Calendar,
-  Download,
-  Upload,
-  Save,
-  Eye,
-  EyeOff,
-  RefreshCw,
-  Play,
-  Pause,
-  Stop,
-  FastForward,
-  Rewind,
-  SkipForward,
-  SkipBack,
-  Filter,
-  Search,
-  Plus,
-  Minus,
-  Edit,
-  Trash2,
-  Copy,
-  MoreHorizontal,
-  ArrowUpDown,
-  ArrowUp,
-  ArrowDown,
-  RotateCcw,
-  ChevronDown,
-  ChevronUp,
-  ChevronRight,
-  ChevronLeft,
-  Maximize,
-  Minimize,
-  Split,
-  Merge,
-  Grid,
-  List,
-  Code,
-  FileText,
-  FolderOpen,
-  Archive,
-  CloudDownload,
-  CloudUpload,
-  Wrench,
-  TestTube,
-  Microscope,
-  Beaker
-} from 'lucide-react';
+import { Brain, Zap, Target, TrendingUp, TrendingDown, Settings, Activity, BarChart3, LineChart, PieChart, Cpu, Database, Server, Monitor, Gauge, Scale, Layers, GitBranch, GitCommit, GitMerge, AlertTriangle, CheckCircle, Clock, Calendar, Download, Upload, Save, Eye, EyeOff, RefreshCw, Play, Pause, Square, FastForward, Rewind, SkipForward, SkipBack, Filter, Search, Plus, Minus, Edit, Trash2, Copy, MoreHorizontal, ArrowUpDown, ArrowUp, ArrowDown, RotateCcw, ChevronDown, ChevronUp, ChevronRight, ChevronLeft, Maximize, Minimize, Split, Merge, Grid, List, Code, FileText, FolderOpen, Archive, CloudDownload, Wrench, TestTube, Microscope, Beaker } from 'lucide-react';
 import { LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, BarChart, Bar, PieChart as RechartsPieChart, Cell, ComposedChart, Area, AreaChart, ScatterChart, Scatter, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
 import { cn } from '@/lib/utils';
 import { useOptimization } from '../../hooks/useOptimization';
@@ -766,7 +696,7 @@ export const MLModelManager: React.FC<MLModelManagerProps> = ({
                     onClick={() => handleDeployModel(model.id, 'production')}
                     disabled={model.status !== 'trained' || loading}
                   >
-                    <CloudUpload className="h-4 w-4 mr-1" />
+                    <Upload className="h-4 w-4 mr-1" />
                     Deploy
                   </Button>
                   <Button 

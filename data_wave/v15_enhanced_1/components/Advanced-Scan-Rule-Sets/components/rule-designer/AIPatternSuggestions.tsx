@@ -8,50 +8,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Brain, 
-  Lightbulb, 
-  TrendingUp, 
-  Target, 
-  Zap, 
-  ChevronRight,
-  Search,
-  Filter,
-  Download,
-  Share2,
-  BookOpen,
-  Code,
-  Database,
-  Shield,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  Users,
-  Bookmark,
-  Star,
-  MessageSquare,
-  RefreshCw,
-  Layers,
-  GitBranch,
-  Cpu,
-  BarChart3,
-  Activity,
-  Sparkles,
-  Wand2,
-  BrainCircuit,
-  Network,
-  Workflow,
-  Gauge,
-  Puzzle,
-  Settings,
-  Eye,
-  ThumbsUp,
-  ThumbsDown,
-  Copy,
-  ExternalLink,
-  HelpCircle,
-  Info
-} from 'lucide-react';
+import { Brain, Lightbulb, TrendingUp, Target, Zap, ChevronRight, Search, Filter, Download, Share2, BookOpen, Code, Database, Shield, AlertTriangle, CheckCircle, Clock, Users, Bookmark, Star, MessageSquare, RefreshCw, Layers, GitBranch, Cpu, BarChart3, Activity, Sparkles, Wand2, BrainCircuit, Network, Workflow, Gauge, Puzzle, Settings, Eye, ThumbsUp, ThumbsDown, Copy, ExternalLink, HelpCircle, Info } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';

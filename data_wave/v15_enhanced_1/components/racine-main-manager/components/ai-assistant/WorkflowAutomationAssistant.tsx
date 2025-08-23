@@ -2,77 +2,7 @@
 
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Workflow, 
-  Zap, 
-  Play, 
-  Pause, 
-  Stop, 
-  RotateCcw, 
-  FastForward, 
-  Rewind,
-  Settings, 
-  Brain, 
-  Bot, 
-  Cpu, 
-  Activity, 
-  CheckCircle, 
-  XCircle, 
-  AlertTriangle, 
-  Clock, 
-  Calendar, 
-  Timer, 
-  Users, 
-  Database, 
-  Shield, 
-  Search, 
-  Filter, 
-  Upload, 
-  Download, 
-  Save, 
-  Copy, 
-  Edit, 
-  Trash2, 
-  Plus, 
-  Minus, 
-  X, 
-  Check, 
-  ChevronDown, 
-  ChevronUp, 
-  ChevronLeft, 
-  ChevronRight, 
-  MoreHorizontal, 
-  BarChart3, 
-  LineChart, 
-  PieChart, 
-  TrendingUp, 
-  TrendingDown, 
-  Target, 
-  Flag, 
-  BookOpen, 
-  FileText, 
-  Code, 
-  GitBranch, 
-  Layers, 
-  Route, 
-  MapPin, 
-  Compass, 
-  Navigation, 
-  Globe, 
-  Link, 
-  ExternalLink, 
-  Eye, 
-  EyeOff, 
-  Maximize, 
-  Minimize,
-  RefreshCw,
-  HelpCircle,
-  Info,
-  Star,
-  Bookmark,
-  Tag,
-  Hash
-} from 'lucide-react';
+import { Workflow, Zap, Play, Pause, Square, RotateCcw, FastForward, Rewind, Settings, Brain, Bot, Cpu, Activity, CheckCircle, XCircle, AlertTriangle, Clock, Calendar, Timer, Users, Database, Shield, Search, Filter, Upload, Download, Save, Copy, Edit, Trash2, Plus, Minus, X, Check, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, MoreHorizontal, BarChart3, LineChart, PieChart, TrendingUp, TrendingDown, Target, Flag, BookOpen, FileText, Code, GitBranch, Layers, Route, MapPin, Compass, Navigation, Globe, Link, ExternalLink, Eye, EyeOff, Maximize, Minimize, RefreshCw, HelpCircle, Info, Star, Bookmark, Tag, Hash } from 'lucide-react';
 
 // UI Components
 import { Button } from '@/components/ui/button';
@@ -525,7 +455,7 @@ export const WorkflowAutomationAssistant: React.FC<WorkflowAutomationAssistantPr
 
   const handleWorkflowStop = useCallback(async (executionId: string) => {
     try {
-      // Stop workflow execution
+      // Square workflow execution
       await monitorWorkflowExecution(executionId, { action: 'stop' });
 
       trackActivity({
@@ -1092,7 +1022,7 @@ const ExecutionMonitor: React.FC<ExecutionMonitorProps> = ({
       case 'completed': return <CheckCircle className="h-4 w-4 text-green-500" />;
       case 'failed': return <XCircle className="h-4 w-4 text-red-500" />;
       case 'pending': return <Clock className="h-4 w-4 text-yellow-500" />;
-      case 'stopped': return <Stop className="h-4 w-4 text-gray-500" />;
+      case 'stopped': return <Square className="h-4 w-4 text-gray-500" />;
       default: return <Clock className="h-4 w-4 text-gray-500" />;
     }
   };
@@ -1167,7 +1097,7 @@ const ExecutionMonitor: React.FC<ExecutionMonitorProps> = ({
                       onExecutionStop(execution.id);
                     }}
                   >
-                    <Stop className="h-3 w-3" />
+                    <Square className="h-3 w-3" />
                   </Button>
                 )}
                 

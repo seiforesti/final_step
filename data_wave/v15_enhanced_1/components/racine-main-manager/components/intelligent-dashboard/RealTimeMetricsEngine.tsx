@@ -96,57 +96,7 @@ import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
 
 // Icons
-import {
-  Activity,
-  Zap,
-  TrendingUp,
-  TrendingDown,
-  BarChart3,
-  LineChart as LineChartIcon,
-  PieChart,
-  Gauge,
-  Signal,
-  Wifi,
-  WifiOff,
-  Play,
-  Pause,
-  Square,
-  RotateCcw,
-  FastForward,
-  Rewind,
-  Settings,
-  Filter,
-  Download,
-  Share,
-  Maximize2,
-  Minimize2,
-  MoreHorizontal,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  Target,
-  Eye,
-  EyeOff,
-  Volume2,
-  VolumeX,
-  Layers,
-  Grid,
-  Radar,
-  RefreshCw,
-  Database,
-  Server,
-  Cpu,
-  HardDrive,
-  Network,
-  Users,
-  Shield,
-  Scan,
-  FileText,
-  ChevronUp,
-  ChevronDown,
-  Info,
-  Sparkles
-} from 'lucide-react';
+import { Activity, Zap, TrendingUp, TrendingDown, BarChart3, LineChart as LineChartIcon, PieChart, Gauge, Signal, Wifi, WifiOff, Play, Pause, Square, RotateCcw, FastForward, Rewind, Settings, Filter, Download, Share, Maximize2, Minimize2, MoreHorizontal, AlertTriangle, CheckCircle, Clock, Target, Eye, EyeOff, Volume2, VolumeX, Layers, Grid, Radar, RefreshCw, Database, Server, Cpu, HardDrive, Network, Users, Shield, Scan, FileText, ChevronUp, ChevronDown, Info, Sparkles } from 'lucide-react';
 
 // Types
 import {

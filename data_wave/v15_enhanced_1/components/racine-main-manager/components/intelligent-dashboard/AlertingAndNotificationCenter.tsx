@@ -25,20 +25,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@/components/ui/context-menu';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { 
-  Bell, AlertTriangle, CheckCircle, XCircle, Info, Clock, 
-  Play, Pause, Stop, RotateCcw, Settings, Filter, Search,
-  Calendar, Users, Database, Server, Shield, Activity,
-  TrendingUp, TrendingDown, AlertCircle, Zap, Target,
-  Mail, Phone, MessageSquare, Webhook, Slack, Discord,
-  Volume2, VolumeX, Eye, EyeOff, Edit3, Trash2, Copy,
-  Plus, Save, Download, Upload, Share2, RefreshCw,
-  BarChart3, LineChart, PieChart, MapPin, Globe, 
-  ArrowUp, ArrowDown, ArrowRight, MoreVertical, 
-  Star, Heart, Bookmark, Tag, Flag, Home, Building,
-  ChevronDown, ChevronUp, ChevronLeft, ChevronRight,
-  Maximize2, Minimize2, ExternalLink, Link, Unlink
-} from 'lucide-react';
+import { Bell, AlertTriangle, CheckCircle, XCircle, Info, Clock, Play, Pause, Square, RotateCcw, Settings, Filter, Search, Calendar, Users, Database, Server, Shield, Activity, TrendingUp, TrendingDown, AlertCircle, Zap, Target, Mail, Phone, MessageSquare, Webhook, Slack, Discord, Volume2, VolumeX, Eye, EyeOff, Edit3, Trash2, Copy, Plus, Save, Download, Upload, Share2, RefreshCw, BarChart3, LineChart, PieChart, MapPin, Globe, ArrowUp, ArrowDown, ArrowRight, MoreVertical, Star, Heart, Bookmark, Tag, Flag, Home, Building, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Maximize2, Minimize2, ExternalLink, Link, Unlink } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { 
   DashboardState, AlertConfiguration, NotificationChannel, 

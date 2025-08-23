@@ -133,6 +133,15 @@ export interface CrossGroupIntegrationHookOperations {
   
   // Resource linking operations
   linkResources: (request: ResourceLinkRequest) => Promise<ResourceLinkResponse | null>;
+  linkCrossGroupResource: (params: {
+    sourceResourceId: string;
+    sourceGroup: string;
+    targetGroup: string;
+    linkType: string;
+    configuration: Record<string, any>;
+    syncSettings: Record<string, any>;
+  }) => Promise<{ success: boolean; link?: any; error?: string }>;
+  unlinkCrossGroupResource: (resourceId: string, targetGroup: string) => Promise<{ success: boolean; error?: string }>;
   unlinkResources: (linkId: string) => Promise<boolean>;
   getResourceLinks: (resourceId?: string) => Promise<ResourceLinkResponse[]>;
   
@@ -567,6 +576,43 @@ export function useCrossGroupIntegration(config: CrossGroupIntegrationHookConfig
 
     // Resource linking operations
     linkResources,
+    linkCrossGroupResource: async (params: {
+      sourceResourceId: string;
+      sourceGroup: string;
+      targetGroup: string;
+      linkType: string;
+      configuration: Record<string, any>;
+      syncSettings: Record<string, any>;
+    }) => {
+      try {
+        const result = await crossGroupIntegrationAPI.linkCrossGroupResource(params);
+        if (result.success) {
+          updateState({
+            resourceLinks: [...state.resourceLinks, result.link]
+          });
+        }
+        return result;
+      } catch (error) {
+        handleError(error, 'linkCrossGroupResource');
+        return { success: false, error: 'Failed to link cross-group resource' };
+      }
+    },
+    unlinkCrossGroupResource: async (resourceId: string, targetGroup: string) => {
+      try {
+        const result = await crossGroupIntegrationAPI.unlinkCrossGroupResource(resourceId, targetGroup);
+        if (result.success) {
+          updateState({
+            resourceLinks: state.resourceLinks.filter(link => 
+              !(link.sourceResourceId === resourceId && link.targetGroup === targetGroup)
+            )
+          });
+        }
+        return result;
+      } catch (error) {
+        handleError(error, 'unlinkCrossGroupResource');
+        return { success: false, error: 'Failed to unlink cross-group resource' };
+      }
+    },
     unlinkResources: async (linkId: string) => {
       try {
         await crossGroupIntegrationAPI.unlinkResources(linkId);

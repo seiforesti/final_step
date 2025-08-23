@@ -60,41 +60,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import {
-  BookmarkIcon,
-  CloudDownloadIcon,
-  CloudUploadIcon,
-  CodeIcon,
-  CopyIcon,
-  DatabaseIcon,
-  DeleteIcon,
-  EditIcon,
-  EyeIcon,
-  FilterIcon,
-  FolderIcon,
-  GitBranchIcon,
-  HeartIcon,
-  HistoryIcon,
-  InfoIcon,
-  LayersIcon,
-  LightbulbIcon,
-  ListIcon,
-  LockIcon,
-  MapIcon,
-  MoreHorizontalIcon,
-  PlusIcon,
-  SearchIcon,
-  SettingsIcon,
-  ShareIcon,
-  StarIcon,
-  TagIcon,
-  ThumbsUpIcon,
-  TrendingUpIcon,
-  UserIcon,
-  UsersIcon,
-  VersionIcon,
-  ZapIcon
-} from 'lucide-react';
+import { BookmarkIcon, Download, Upload, CodeIcon, CopyIcon, DatabaseIcon, DeleteIcon, EditIcon, EyeIcon, FilterIcon, FolderIcon, GitBranchIcon, HeartIcon, HistoryIcon, InfoIcon, LayersIcon, LightbulbIcon, ListIcon, LockIcon, MapIcon, MoreHorizontalIcon, PlusIcon, SearchIcon, SettingsIcon, ShareIcon, StarIcon, TagIcon, ThumbsUpIcon, TrendingUpIcon, UserIcon, UsersIcon, VersionIcon, ZapIcon } from 'lucide-react';
 
 // Racine System Integration
 import { usePipelineManagement } from '../../hooks/usePipelineManagement';
@@ -1354,7 +1320,7 @@ export const PipelineTemplateLibrary: React.FC<PipelineTemplateLibraryProps> = (
                   variant="outline"
                   size="sm"
                 >
-                  <CloudDownloadIcon className="h-4 w-4 mr-2" />
+                  <Download className="h-4 w-4 mr-2" />
                   Import
                 </Button>
                 <Button
@@ -1916,3 +1882,5 @@ export const PipelineTemplateLibrary: React.FC<PipelineTemplateLibraryProps> = (
     </TooltipProvider>
   );
 };
+
+export default PipelineTemplateLibrary;

@@ -456,7 +456,7 @@ const PREDEFINED_FUNCTIONS: FunctionDefinition[] = [
   }
 ];
 
-const ConditionBuilder: React.FC<ConditionBuilderProps> = ({
+export const ConditionBuilder: React.FC<ConditionBuilderProps> = ({
   condition,
   templates,
   onSave,
@@ -1577,4 +1577,3 @@ const ConditionBuilder: React.FC<ConditionBuilderProps> = ({
   );
 };
 
-export default ConditionBuilder;

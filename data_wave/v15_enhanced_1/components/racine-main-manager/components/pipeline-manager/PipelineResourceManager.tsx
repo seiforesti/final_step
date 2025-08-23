@@ -66,34 +66,7 @@ import {
   RadialBar,
   Legend
 } from 'recharts';
-import {
-  ActivityIcon,
-  AlertTriangleIcon,
-  BarChartIcon,
-  CpuIcon,
-  DatabaseIcon,
-  DollarSignIcon,
-  GaugeIcon,
-  HardDriveIcon,
-  MemoryStickIcon,
-  MonitorIcon,
-  NetworkIcon,
-  OptimizeIcon,
-  PieChartIcon,
-  ServerIcon,
-  SettingsIcon,
-  TrendingUpIcon,
-  ZapIcon,
-  ClockIcon,
-  CheckCircleIcon,
-  XCircleIcon,
-  InfoIcon,
-  PlayIcon,
-  PauseIcon,
-  StopIcon,
-  RefreshCwIcon,
-  MoreHorizontalIcon
-} from 'lucide-react';
+import { ActivityIcon, AlertTriangleIcon, BarChartIcon, CpuIcon, DatabaseIcon, DollarSignIcon, GaugeIcon, HardDriveIcon, MemoryStickIcon, MonitorIcon, NetworkIcon, Zap, PieChartIcon, ServerIcon, SettingsIcon, TrendingUpIcon, ZapIcon, ClockIcon, CheckCircleIcon, XCircleIcon, InfoIcon, PlayIcon, PauseIcon, StopIcon, RefreshCwIcon, MoreHorizontalIcon } from 'lucide-react';
 
 // Racine System Integration
 import { usePipelineManagement } from '../../hooks/usePipelineManagement';
@@ -1451,7 +1424,7 @@ export const PipelineResourceManager: React.FC<PipelineResourceManagerProps> = (
                   onClick={() => setState(prev => ({ ...prev, showOptimizeDialog: true }))}
                   size="sm"
                 >
-                  <OptimizeIcon className="h-4 w-4 mr-2" />
+                  <Zap className="h-4 w-4 mr-2" />
                   Optimize
                 </Button>
               </div>
@@ -1935,3 +1908,5 @@ export const PipelineResourceManager: React.FC<PipelineResourceManagerProps> = (
     </TooltipProvider>
   );
 };
+
+export default PipelineResourceManager;

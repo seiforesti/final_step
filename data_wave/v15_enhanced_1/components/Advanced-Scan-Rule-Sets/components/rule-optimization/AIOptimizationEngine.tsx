@@ -53,53 +53,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  Brain,
-  Zap,
-  TrendingUp,
-  Target,
-  Settings,
-  Play,
-  Pause,
-  RotateCcw,
-  Download,
-  Upload,
-  AlertTriangle,
-  CheckCircle,
-  XCircle,
-  Clock,
-  BarChart3,
-  Activity,
-  Cpu,
-  Database,
-  Network,
-  HardDrive,
-  Eye,
-  EyeOff,
-  Filter,
-  Search,
-  RefreshCw,
-  Save,
-  Share,
-  FileText,
-  MoreHorizontal,
-  ChevronDown,
-  ChevronRight,
-  Info,
-  Lightbulb,
-  Sparkles,
-  Gauge,
-  Timer,
-  Layers,
-  GitBranch,
-  Users,
-  ShieldCheck,
-  Rocket,
-  Award,
-  LineChart,
-  PieChart,
-  BarChart2,
-} from 'lucide-react';
+import { Brain, Zap, TrendingUp, Target, Settings, Play, Pause, RotateCcw, Download, Upload, AlertTriangle, CheckCircle, XCircle, Clock, BarChart3, Activity, Cpu, Database, Network, HardDrive, Eye, EyeOff, Filter, Search, RefreshCw, Save, Share, FileText, MoreHorizontal, ChevronDown, ChevronRight, Info, Lightbulb, Sparkles, Gauge, Timer, Layers, GitBranch, Users, ShieldCheckIcon, Rocket, Award, LineChart, PieChart, BarChart2,  } from 'lucide-react';
 import { LineChart as ReLineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart as RePieChart, Pie, Cell, BarChart as ReBarChart, Bar, Area, AreaChart, ScatterChart, Scatter, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
 import { useOptimization } from '../../hooks/useOptimization';
 import { useIntelligence } from '../../hooks/useIntelligence';
@@ -354,7 +308,7 @@ export const AIOptimizationEngine: React.FC = () => {
         format: 'pdf',
       });
       
-      // Download report
+      // ArrowDownTrayIcon report
       const url = URL.createObjectURL(new Blob([report], { type: 'application/pdf' }));
       const a = document.createElement('a');
       a.href = url;

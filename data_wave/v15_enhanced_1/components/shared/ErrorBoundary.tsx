@@ -300,7 +300,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
                           size="sm"
                         >
                           <Download className="mr-2 h-4 w-4" />
-                          Download Report
+                          ArrowDownTrayIcon Report
                         </Button>
                       </>
                     )}

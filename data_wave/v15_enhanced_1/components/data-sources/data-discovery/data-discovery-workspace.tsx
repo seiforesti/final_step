@@ -1,28 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { 
-  Play, 
-  Pause, 
-  SkipForward, 
-  SkipBack,
-  Settings,
-  Save,
-  Download,
-  Share2,
-  Eye,
-  BarChart3,
-  GitBranch,
-  Database,
-  Table,
-  Layers,
-  CheckCircle,
-  AlertTriangle,
-  Clock,
-  Info,
-  RefreshCw,
-  X
-} from "lucide-react"
+import { Play, Pause, SkipForward, SkipBack, Settings, Save, Download, Share2, Eye, BarChart3, GitBranch, Database, Table, Layers, CheckCircle, AlertTriangle, Clock, Info, RefreshCw, X } from 'lucide-react'
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"

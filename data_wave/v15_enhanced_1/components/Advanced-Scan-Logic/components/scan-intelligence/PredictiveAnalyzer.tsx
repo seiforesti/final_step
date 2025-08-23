@@ -24,18 +24,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback, useRef, useReducer } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  TrendingUp, Brain, Target, Activity, BarChart3, LineChart, PieChart, Eye, Settings,
-  RefreshCw, Download, Upload, Play, Pause, Square, CheckCircle, XCircle, Clock,
-  Calendar, Database, Server, Network, Cpu, HardDrive, Memory, Shield, Lock,
-  Unlock, GitBranch, Layers, Box, Grid, List, MoreHorizontal, ChevronDown,
-  ChevronRight, ChevronLeft, ExternalLink, Info, HelpCircle, Star, Bookmark,
-  Share, Copy, Edit, Trash2, Plus, Minus, Maximize, Minimize, RotateCcw,
-  Save, Send, MessageSquare, Users, User, MapPin, Globe, Wifi, WifiOff,
-  Signal, Battery, Bluetooth, Volume2, VolumeX, Camera, Video, Image,
-  FileText, File, Folder, FolderOpen, Archive, Package, Layers3, Component,
-  Puzzle, Zap, AlertTriangle, Filter, Search, Gauge, Radar, Compass
-} from 'lucide-react';
+import { TrendingUp, Brain, Target, Activity, BarChart3, LineChart, PieChart, Eye, Settings, RefreshCw, Download, Upload, Play, Pause, Square, CheckCircle, XCircle, Clock, Calendar, Database, Server, Network, Cpu, HardDrive, Shield, Lock, Unlock, GitBranch, Layers, Box, Grid, List, MoreHorizontal, ChevronDown, ChevronRight, ChevronLeft, ExternalLink, Info, HelpCircle, Star, Bookmark, Share, Copy, Edit, Trash2, Plus, Minus, Maximize, Minimize, RotateCcw, Save, Send, MessageSquare, Users, User, MapPin, Globe, Wifi, WifiOff, Signal, Battery, Bluetooth, Volume2, VolumeX, Camera, Video, Image, FileText, File, Folder, FolderOpen, Archive, Package, Layers3, Component, Puzzle, Zap, AlertTriangle, Filter, Search, Gauge, Radar, Compass } from 'lucide-react';
 
 // UI Components
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';

@@ -2,14 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import {
-  BarChart3, TrendingUp, TrendingDown, Activity, Database,
-  RefreshCw, Download, Calendar, Clock, Zap, Target,
-  Gauge, Timer, Signal, Cpu, Memory, HardDrive, Network,
-  Users, Eye, Settings, Filter, ArrowUp, ArrowDown,
-  AlertTriangle, CheckCircle2, Info, LineChart,
-  PieChart, BarChart, Area, Layers, Globe, Server
-} from 'lucide-react'
+import { BarChart3, TrendingUp, TrendingDown, Activity, Database, RefreshCw, Download, Calendar, Clock, Zap, Target, Gauge, Timer, Signal, Cpu, HardDrive, Network, Users, Eye, Settings, Filter, ArrowUp, ArrowDown, AlertTriangle, CheckCircle2, Info, LineChart, PieChart, BarChart, Area, Layers, Globe, Server } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -372,7 +365,7 @@ export const QuickDataSourceMetrics: React.FC<QuickDataSourceMetricsProps> = ({
     }))
   }, [])
 
-  // Download metrics report
+  // ArrowDownTrayIcon metrics report
   const handleDownloadReport = useCallback(async () => {
     if (!selectedDataSource || !metricsData) return
 
@@ -404,7 +397,7 @@ export const QuickDataSourceMetrics: React.FC<QuickDataSourceMetricsProps> = ({
       console.error('Failed to download report:', error)
       showNotification({
         type: 'error',
-        title: 'Download Failed',
+        title: 'ArrowDownTrayIcon Failed',
         message: 'Failed to generate metrics report.',
         duration: 3000
       })
@@ -785,7 +778,7 @@ export const QuickDataSourceMetrics: React.FC<QuickDataSourceMetricsProps> = ({
                   {renderThresholdIndicator(
                     performanceMetrics.memoryUsage || 0,
                     METRIC_THRESHOLDS.memory_usage,
-                    'Memory Usage (%)'
+                    'HardDrive Usage (%)'
                   )}
                   {renderThresholdIndicator(
                     performanceMetrics.errorRate || 0,
@@ -930,7 +923,7 @@ export const QuickDataSourceMetrics: React.FC<QuickDataSourceMetricsProps> = ({
 
                   <Button onClick={handleDownloadReport} className="w-full">
                     <Download className="w-4 h-4 mr-2" />
-                    Download Full Report
+                    ArrowDownTrayIcon Full Report
                   </Button>
                 </div>
               </CardContent>

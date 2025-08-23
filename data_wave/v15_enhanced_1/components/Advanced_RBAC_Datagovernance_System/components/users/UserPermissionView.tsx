@@ -2,37 +2,8 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  KeyIcon,
-  ShieldCheckIcon,
-  UserGroupIcon,
-  EyeIcon,
-  XMarkIcon,
-  ArrowPathIcon,
-  MagnifyingGlassIcon,
-  FunnelIcon,
-  ChevronDownIcon,
-  ChevronRightIcon,
-  ExclamationTriangleIcon,
-  InformationCircleIcon,
-  CheckCircleIcon,
-  XCircleIcon,
-  StarIcon,
-  BoltIcon,
-  SparklesIcon,
-  DocumentTextIcon,
-  CogIcon,
-  TagIcon,
-  ClockIcon,
-  GlobeAltIcon,
-  LockClosedIcon,
-  TreePineIcon,
-  ShareIcon,
-  AdjustmentsHorizontalIcon,
-  TableCellsIcon,
-  ListBulletIcon,
-  Squares2X2Icon
-} from '@heroicons/react/24/outline';
+import { KeyIcon, ShieldCheckIcon, UserGroupIcon, EyeIcon, XMarkIcon, ArrowPathIcon, MagnifyingGlassIcon, FunnelIcon, ChevronDownIcon, ChevronRightIcon, ExclamationTriangleIcon, InformationCircleIcon, CheckCircleIcon, XCircleIcon, StarIcon, BoltIcon, SparklesIcon, DocumentTextIcon, CogIcon, TagIcon, ClockIcon, GlobeAltIcon, LockClosedIcon, ShareIcon, AdjustmentsHorizontalIcon, TableCellsIcon, ListBulletIcon, Squares2X2Icon } from '@heroicons/react/24/outline';
+import { TreePine } from 'lucide-react';
 import { userService } from '../../services/user.service';
 import { permissionService } from '../../services/permission.service';
 import { useCurrentUser } from '../../hooks/useCurrentUser';
@@ -452,7 +423,7 @@ export const UserPermissionView: React.FC<UserPermissionViewProps> = ({
             className={`p-2 ${viewMode === 'tree' ? 'bg-blue-100 text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
             title="Tree view"
           >
-            <TreePineIcon className="h-4 w-4" />
+                            <TreePine className="h-4 w-4" />
           </button>
         </div>
       </div>
@@ -894,7 +865,7 @@ export const UserPermissionView: React.FC<UserPermissionViewProps> = ({
             {[
               { id: 'list', name: 'Permissions', icon: ListBulletIcon },
               { id: 'matrix', name: 'Matrix', icon: TableCellsIcon },
-              { id: 'tree', name: 'Hierarchy', icon: TreePineIcon },
+              { id: 'tree', name: 'Hierarchy', icon: TreePine },
               { id: 'analysis', name: 'Analysis', icon: ChartBarIcon }
             ].map((tab) => {
               const Icon = tab.icon;
@@ -978,7 +949,7 @@ export const UserPermissionView: React.FC<UserPermissionViewProps> = ({
               
               {activeTab === 'tree' && (
                 <div className="text-center py-12">
-                  <TreePineIcon className="mx-auto h-12 w-12 text-gray-400" />
+                  <TreePine className="mx-auto h-12 w-12 text-gray-400" />
                   <h3 className="mt-2 text-sm font-medium text-gray-900">Permission Hierarchy</h3>
                   <p className="mt-1 text-sm text-gray-500">
                     Hierarchical permission view coming soon.

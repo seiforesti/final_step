@@ -53,65 +53,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  Activity,
-  BarChart3,
-  TrendingUp,
-  TrendingDown,
-  Zap,
-  Clock,
-  Cpu,
-  Database,
-  Network,
-  HardDrive,
-  Memory,
-  AlertTriangle,
-  CheckCircle,
-  XCircle,
-  Timer,
-  Gauge,
-  Target,
-  Filter,
-  Search,
-  RefreshCw,
-  Download,
-  Upload,
-  Settings,
-  Eye,
-  EyeOff,
-  Play,
-  Pause,
-  RotateCcw,
-  Calendar,
-  MapPin,
-  Layers,
-  GitBranch,
-  Users,
-  Share,
-  FileText,
-  MoreHorizontal,
-  ChevronDown,
-  ChevronRight,
-  ChevronUp,
-  Info,
-  Lightbulb,
-  Sparkles,
-  LineChart,
-  PieChart,
-  BarChart2,
-  Radar,
-  Flame,
-  Snowflake,
-  Wind,
-  Sun,
-  CloudRain,
-  Award,
-  ShieldCheck,
-  Rocket,
-  Bell,
-  Hash,
-  Percent,
-} from 'lucide-react';
+import { Activity, BarChart3, TrendingUp, TrendingDown, Zap, Clock, Cpu, Database, Network, HardDrive, AlertTriangle, CheckCircle, XCircle, Timer, Gauge, Target, Filter, Search, RefreshCw, Download, Upload, Settings, Eye, EyeOff, Play, Pause, RotateCcw, Calendar, MapPin, Layers, GitBranch, Users, Share, FileText, MoreHorizontal, ChevronDown, ChevronRight, ChevronUp, Info, Lightbulb, Sparkles, LineChart, PieChart, BarChart2, Radar, Flame, Snowflake, Wind, Sun, CloudRain, Award, ShieldCheckIcon, Rocket, Bell, Hash, Percent,  } from 'lucide-react';
 import {
   LineChart as ReLineChart,
   Line,
@@ -1134,7 +1076,7 @@ export const PerformanceAnalytics: React.FC = () => {
                           </div>
                           <div className="space-y-1">
                             <div className="flex justify-between text-xs">
-                              <span>Memory</span>
+                              <span>HardDrive</span>
                               <span>{profile.metrics.resourceUsage.memory.toFixed(1)}%</span>
                             </div>
                             <Progress value={profile.metrics.resourceUsage.memory} className="h-1" />

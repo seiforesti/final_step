@@ -1,28 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import {
-  Play,
-  Pause,
-  Trash2,
-  Settings,
-  Download,
-  Upload,
-  RefreshCw,
-  CheckCircle,
-  AlertTriangle,
-  Info,
-  X,
-  Database,
-  Edit,
-  Copy,
-  Tag,
-  Shield,
-  Monitor,
-  Activity,
-  Archive,
-  Layers,
-} from "lucide-react"
+import { Play, Pause, Trash2, Settings, Download, Upload, RefreshCw, CheckCircle, AlertTriangle, Info, X, Database, Edit, Copy, Tag, Shield, Monitor, Activity, Archive, Layers,  } from 'lucide-react'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -155,7 +134,7 @@ const bulkOperations: BulkOperation[] = [
     id: "export-config",
     name: "Export Configuration",
     description: "Export configuration for selected data sources",
-    icon: Download,
+    icon: ArrowDownTrayIcon,
     color: "text-indigo-600",
     requiresConfirmation: false,
     fields: [

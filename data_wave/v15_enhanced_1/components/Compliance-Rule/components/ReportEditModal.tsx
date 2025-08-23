@@ -22,25 +22,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import {
-  Edit,
-  FileText,
-  Download,
-  Calendar,
-  Clock,
-  Users,
-  Settings,
-  Eye,
-  Loader2,
-  AlertTriangle,
-  CheckCircle,
-  FileSpreadsheet,
-  FileCode,
-  FileImage,
-  Activity,
-  BarChart3,
-  RefreshCw
-} from "lucide-react"
+import { Edit, FileText, Download, Calendar, Clock, Users, Settings, Eye, Loader2, AlertTriangle, CheckCircle, FileSpreadsheet, FileCode, FileImage, Activity, BarChart3, RefreshCw } from 'lucide-react'
 import { useEnterpriseFeatures } from "../hooks/use-enterprise-features"
 import { ComplianceAPIs } from "../services/enterprise-apis"
 import type { ComplianceReport } from "../types"
@@ -342,7 +324,7 @@ export function ReportEditModal({ isOpen, onClose, report, onSuccess }: ReportEd
                           className="flex items-center gap-2"
                         >
                           <Download className="h-4 w-4" />
-                          Download Latest
+                          ArrowDownTrayIcon Latest
                         </Button>
                       )}
                     </div>

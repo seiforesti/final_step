@@ -14,30 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { 
-  CheckCircle, 
-  AlertTriangle, 
-  Clock, 
-  Activity,
-  Play,
-  Pause,
-  Square,
-  RefreshCw,
-  Eye,
-  Settings,
-  BarChart3,
-  TrendingUp,
-  TrendingDown,
-  Zap,
-  AlertCircle,
-  Info,
-  Search,
-  Filter,
-  Calendar,
-  Timer,
-  Database,
-  Target
-} from 'lucide-react';
+import { CheckCircle, AlertTriangle, Clock, Activity, Play, Pause, Square, RefreshCw, Eye, Settings, BarChart3, TrendingUp, TrendingDown, Zap, AlertCircle, Info, Search, Filter, Calendar, Timer, Database, Target } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 

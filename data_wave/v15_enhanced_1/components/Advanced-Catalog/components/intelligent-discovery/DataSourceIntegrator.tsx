@@ -26,17 +26,7 @@ import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
-import { 
-  Database, Server, Globe, Cloud, Folder, FileText, Settings, 
-  CheckCircle, AlertTriangle, RefreshCw, Play, Pause, Stop, 
-  Upload, Download, Eye, EyeOff, Lock, Unlock, Plus, Minus, 
-  Edit, Trash2, Copy, Link, Unlink, Search, Filter, BarChart3,
-  Calendar, Clock, TrendingUp, AlertCircle, Zap, Target, Shield,
-  Users, MessageSquare, Send, ArrowRight, ArrowLeft, ChevronDown,
-  ChevronUp, X, Save, Home, FolderOpen, Archive, BookOpen,
-  Lightbulb, Sparkles, Activity, Network, Layers, Box, Map,
-  GitBranch, Sync, Workflow, Monitor, Bell, Key, Hash, Grid
-} from 'lucide-react';
+import { Database, Server, Globe, Cloud, Folder, FileText, Settings, CheckCircle, AlertTriangle, RefreshCw, Play, Pause, Square, Upload, Download, Eye, EyeOff, Lock, Unlock, Plus, Minus, Edit, Trash2, Copy, Link, Unlink, Search, Filter, BarChart3, Calendar, Clock, TrendingUp, AlertCircle, Zap, Target, Shield, Users, MessageSquare, Send, ArrowRight, ArrowLeft, ChevronDown, ChevronUp, X, Save, Home, FolderOpen, Archive, BookOpen, Lightbulb, Sparkles, Activity, Network, Layers, Box, Map, GitBranch, Workflow, Monitor, Bell, Key, Hash, Grid } from 'lucide-react';
 
 // Charts
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, AreaChart, Area, ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';

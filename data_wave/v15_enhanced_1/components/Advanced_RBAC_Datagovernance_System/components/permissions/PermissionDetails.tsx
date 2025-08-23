@@ -198,7 +198,7 @@ const getRelativeTime = (date: Date) => {
   }
 };
 
-export default function PermissionDetails({
+export function PermissionDetails({
   isOpen,
   onClose,
   permission,

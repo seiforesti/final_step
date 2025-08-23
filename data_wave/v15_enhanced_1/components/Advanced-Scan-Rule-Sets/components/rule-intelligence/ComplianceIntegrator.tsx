@@ -1,53 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Shield, 
-  FileText, 
-  CheckCircle2,
-  XCircle,
-  AlertTriangle,
-  Info,
-  Zap,
-  Activity,
-  BarChart3,
-  PieChart,
-  Target,
-  Settings,
-  RefreshCw,
-  Play,
-  Pause,
-  Square,
-  Clock,
-  Search,
-  Filter,
-  Plus,
-  Edit,
-  Trash2,
-  Download,
-  Upload,
-  Save,
-  Copy,
-  MoreHorizontal,
-  ExternalLink,
-  Database,
-  Users,
-  Lock,
-  Unlock,
-  Key,
-  Eye,
-  EyeOff,
-  BookOpen,
-  Scale,
-  Gavel,
-  Badge as BadgeIcon,
-  Award,
-  AlertOctagon,
-  CheckSquare,
-  Clipboard,
-  FileCheck,
-  FileMinus,
-  FileX
-} from 'lucide-react';
+import { Shield, FileText, CheckCircle2, XCircle, AlertTriangle, Info, Zap, Activity, BarChart3, PieChart, Target, Settings, RefreshCw, Play, Pause, Square, Clock, Search, Filter, Plus, Edit, Trash2, Download, Upload, Save, Copy, MoreHorizontal, ExternalLink, Database, Users, Lock, Unlock, Key, Eye, EyeOff, BookOpen, Scale, Gavel, Badge as BadgeIcon, Award, AlertOctagon, CheckSquare, Clipboard, FileCheck, FileMinus, FileX } from 'lucide-react';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -552,7 +505,7 @@ export const ComplianceIntegrator: React.FC<ComplianceIntegratorProps> = ({
         format: 'pdf'
       });
 
-      // Download report
+      // ArrowDownTrayIcon report
       const link = document.createElement('a');
       link.href = report.downloadUrl;
       link.download = `compliance-report-${frameworkId}-${period}.pdf`;

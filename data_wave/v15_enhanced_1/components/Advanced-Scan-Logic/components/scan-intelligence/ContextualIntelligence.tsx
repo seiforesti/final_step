@@ -24,20 +24,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback, useRef, useReducer } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Brain, Eye, Layers, Network, Target, Activity, TrendingUp, BarChart3, 
-  PieChart, LineChart, Settings, RefreshCw, Download, Upload, Play, Pause,
-  Square, CheckCircle, XCircle, Clock, Calendar, Database, Server, Cpu,
-  HardDrive, Memory, Shield, Lock, Unlock, GitBranch, Box, Grid, List,
-  MoreHorizontal, ChevronDown, ChevronRight, ChevronLeft, ExternalLink,
-  Info, HelpCircle, Star, Bookmark, Share, Copy, Edit, Trash2, Plus,
-  Minus, Maximize, Minimize, RotateCcw, Save, Send, MessageSquare, Users,
-  User, MapPin, Globe, Wifi, WifiOff, Signal, Battery, Bluetooth, Volume2,
-  VolumeX, Camera, Video, Image, FileText, File, Folder, FolderOpen,
-  Archive, Package, Layers3, Component, Puzzle, Zap, AlertTriangle,
-  Filter, Search, Gauge, Radar, Compass, Map, Lightbulb, BookOpen, Code,
-  Workflow, Link, Timer, Crosshair, Focus
-} from 'lucide-react';
+import { Brain, Eye, Layers, Network, Target, Activity, TrendingUp, BarChart3, PieChart, LineChart, Settings, RefreshCw, Download, Upload, Play, Pause, Square, CheckCircle, XCircle, Clock, Calendar, Database, Server, Cpu, HardDrive, Shield, Lock, Unlock, GitBranch, Box, Grid, List, MoreHorizontal, ChevronDown, ChevronRight, ChevronLeft, ExternalLink, Info, HelpCircle, Star, Bookmark, Share, Copy, Edit, Trash2, Plus, Minus, Maximize, Minimize, RotateCcw, Save, Send, MessageSquare, Users, User, MapPin, Globe, Wifi, WifiOff, Signal, Battery, Bluetooth, Volume2, VolumeX, Camera, Video, Image, FileText, File, Folder, FolderOpen, Archive, Package, Layers3, Component, Puzzle, Zap, AlertTriangle, Filter, Search, Gauge, Radar, Compass, Map, Lightbulb, BookOpen, Code, Workflow, Link, Timer, Crosshair, Focus } from 'lucide-react';
 
 // UI Components
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';

@@ -2,35 +2,7 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  UserIcon,
-  UsersIcon,
-  CheckIcon,
-  XMarkIcon,
-  EyeIcon,
-  PencilIcon,
-  TrashIcon,
-  ShieldCheckIcon,
-  ClockIcon,
-  MapPinIcon,
-  DevicePhoneMobileIcon,
-  EnvelopeIcon,
-  CalendarIcon,
-  KeyIcon,
-  ExclamationTriangleIcon,
-  InformationCircleIcon,
-  ChevronUpIcon,
-  ChevronDownIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  EllipsisHorizontalIcon,
-  StarIcon,
-  BoltIcon,
-  CogIcon,
-  UserGroupIcon,
-  LockClosedIcon,
-  LockOpenIcon
-} from '@heroicons/react/24/outline';
+import { UserIcon, UsersIcon, CheckIcon, XMarkIcon, EyeIcon, PencilIcon, TrashIcon, ShieldCheckIcon, ClockIcon, MapPinIcon, DevicePhoneMobileIcon, EnvelopeIcon, CalendarIcon, KeyIcon, ExclamationTriangleIcon, InformationCircleIcon, ChevronUpIcon, ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, EllipsisHorizontalIcon, StarIcon, BoltIcon, CogIcon, UserGroupIcon, LockClosedIcon, LockOpenIcon } from '@heroicons/react/24/outline';
 import { formatDate, formatRelativeTime, formatUserName, formatUserEmail } from '../../utils/format.utils';
 import { getUserDisplayName, getRoleColor } from '../../utils/rbac.utils';
 import type {

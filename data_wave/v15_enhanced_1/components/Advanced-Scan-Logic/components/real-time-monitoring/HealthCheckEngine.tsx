@@ -24,82 +24,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { 
-  Activity, 
-  AlertTriangle, 
-  CheckCircle, 
-  Clock, 
-  RefreshCw,
-  Settings, 
-  Zap,
-  TrendingUp,
-  TrendingDown,
-  Server,
-  Monitor,
-  AlertCircle,
-  Filter,
-  Search,
-  Download,
-  Eye,
-  Edit,
-  Trash2,
-  Plus,
-  X,
-  Check,
-  Info,
-  Copy,
-  MoreHorizontal,
-  Target,
-  Timer,
-  Gauge,
-  LineChart,
-  PieChart,
-  BarChart,
-  Workflow,
-  Brain,
-  Lightbulb,
-  Cpu,
-  Database,
-  GitBranch,
-  HardDrive,
-  Network,
-  Users,
-  Play,
-  Pause,
-  Square,
-  RotateCcw,
-  Layers,
-  Globe,
-  Shield,
-  Bell,
-  BellOff,
-  Heart,
-  HeartHandshake,
-  Stethoscope,
-  Thermometer,
-  Pulse,
-  Activity as ActivityIcon,
-  Zap as ZapIcon,
-  Calendar,
-  MapPin,
-  Wifi,
-  Send,
-  UserCheck,
-  UserX,
-  ArrowRight,
-  ArrowUp,
-  ArrowDown,
-  ExternalLink,
-  Link,
-  Unlink,
-  TestTube,
-  FlaskConical,
-  Wrench,
-  Tool,
-  Cog,
-  CircuitBoard,
-  Radar
-} from 'lucide-react';
+import { Activity, AlertTriangle, CheckCircle, Clock, RefreshCw, Settings, Zap, TrendingUp, TrendingDown, Server, Monitor, AlertCircle, Filter, Search, Download, Eye, Edit, Trash2, Plus, X, Check, Info, Copy, MoreHorizontal, Target, Timer, Gauge, LineChart, PieChart, BarChart, Workflow, Brain, Lightbulb, Cpu, Database, GitBranch, HardDrive, Network, Users, Play, Pause, Square, RotateCcw, Layers, Globe, Shield, Bell, BellOff, Heart, HeartHandshake, Stethoscope, Thermometer, Activity as ActivityIcon, Zap as ZapIcon, Calendar, MapPin, Wifi, Send, UserCheck, UserX, ArrowRight, ArrowUp, ArrowDown, ExternalLink, Link, Unlink, TestTube, FlaskConical, Wrench, Cog, CircuitBoard, Radar } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -1238,7 +1163,7 @@ export const HealthCheckEngine: React.FC<HealthCheckEngineProps> = ({
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
-                    <Pulse className="h-5 w-5" />
+                    <Activity className="h-5 w-5" />
                     <span>Health Status Overview</span>
                   </CardTitle>
                 </CardHeader>
@@ -1718,7 +1643,7 @@ export const HealthCheckEngine: React.FC<HealthCheckEngineProps> = ({
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <Tool className="h-5 w-5" />
+                    <Wrench className="h-5 w-5" />
                     <span>Automated Remediation</span>
                   </div>
                   <Button

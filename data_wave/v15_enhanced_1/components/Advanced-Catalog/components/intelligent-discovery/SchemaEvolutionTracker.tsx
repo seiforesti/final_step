@@ -27,18 +27,7 @@ import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
-import { 
-  GitBranch, Timeline, History, Compare, AlertTriangle, CheckCircle, 
-  RefreshCw, Play, Pause, Stop, Upload, Download, Eye, EyeOff, 
-  Lock, Unlock, Plus, Minus, Edit, Trash2, Copy, Search, Filter, 
-  BarChart3, Calendar, Clock, TrendingUp, AlertCircle, Zap, Target, 
-  Shield, Users, MessageSquare, Send, ArrowRight, ArrowLeft, 
-  ChevronDown, ChevronUp, X, Save, Home, FolderOpen, Archive, 
-  BookOpen, Lightbulb, Activity, Network, Layers, Box, Map, 
-  Sync, Workflow, Monitor, Bell, Key, Hash, Grid, Star, 
-  ThumbsUp, ThumbsDown, Award, Bookmark, Database, FileText,
-  Settings, Brain, Sparkles, Tag, Diff, GitCommit, GitMerge
-} from 'lucide-react';
+import { GitBranch, Timeline, History, GitCompare, AlertTriangle, CheckCircle, RefreshCw, Play, Pause, Square, Upload, Download, Eye, EyeOff, Lock, Unlock, Plus, Minus, Edit, Trash2, Copy, Search, Filter, BarChart3, Calendar, Clock, TrendingUp, AlertCircle, Zap, Target, Shield, Users, MessageSquare, Send, ArrowRight, ArrowLeft, ChevronDown, ChevronUp, X, Save, Home, FolderOpen, Archive, BookOpen, Lightbulb, Activity, Network, Layers, Box, Map, Workflow, Monitor, Bell, Key, Hash, Grid, Star, ThumbsUp, ThumbsDown, Award, Bookmark, Database, FileText, Settings, Brain, Sparkles, Tag, Diff, GitCommit, GitMerge } from 'lucide-react';
 
 // Charts
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, AreaChart, Area, ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
@@ -403,7 +392,7 @@ const SchemaComparisonViewer: React.FC<{
           
           {filteredChanges.length === 0 && (
             <div className="text-center text-muted-foreground py-8">
-              <Compare className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <GitCompare className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <div className="text-lg font-medium mb-2">No Changes Found</div>
               <div>No schema changes match the selected filter</div>
             </div>
@@ -613,7 +602,7 @@ const SchemaTrackingConfigPanel: React.FC<{
                       comparison_settings: { ...config.comparison_settings, compare_data_types: checked }
                     })}
                   />
-                  <Label htmlFor="compare-types">Compare Data Types</Label>
+                  <Label htmlFor="compare-types">GitCompare Data Types</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Switch
@@ -623,7 +612,7 @@ const SchemaTrackingConfigPanel: React.FC<{
                       comparison_settings: { ...config.comparison_settings, compare_constraints: checked }
                     })}
                   />
-                  <Label htmlFor="compare-constraints">Compare Constraints</Label>
+                  <Label htmlFor="compare-constraints">GitCompare Constraints</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Switch
@@ -633,7 +622,7 @@ const SchemaTrackingConfigPanel: React.FC<{
                       comparison_settings: { ...config.comparison_settings, compare_indexes: checked }
                     })}
                   />
-                  <Label htmlFor="compare-indexes">Compare Indexes</Label>
+                  <Label htmlFor="compare-indexes">GitCompare Indexes</Label>
                 </div>
               </div>
             </div>
@@ -1017,7 +1006,7 @@ export const SchemaEvolutionTracker: React.FC<SchemaEvolutionTrackerProps> = ({
           ) : (
             <Card className="p-8 text-center">
               <div className="text-muted-foreground">
-                <Compare className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <GitCompare className="h-12 w-12 mx-auto mb-4 opacity-50" />
                 <div className="text-lg font-medium mb-2">No Comparison Selected</div>
                 <div>Select a schema comparison to view details</div>
               </div>

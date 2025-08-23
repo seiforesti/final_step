@@ -34,50 +34,7 @@ import React, {
   useContext
 } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Settings,
-  Palette,
-  Layout,
-  Monitor,
-  Smartphone,
-  Tablet,
-  Sun,
-  Moon,
-  Contrast,
-  Type,
-  Zap,
-  Brain,
-  Eye,
-  Accessibility,
-  Save,
-  RefreshCw,
-  Download,
-  Upload,
-  Share2,
-  Copy,
-  Trash2,
-  Plus,
-  Minus,
-  RotateCcw,
-  CheckCircle,
-  AlertTriangle,
-  Info,
-  HelpCircle,
-  Target,
-  Sparkles,
-  Wand2,
-  Activity,
-  BarChart3,
-  Users,
-  Clock,
-  History,
-  Filter,
-  Search,
-  SortAsc,
-  MoreHorizontal,
-  ChevronDown,
-  ChevronRight
-} from 'lucide-react';
+import { Settings, Palette, Layout, Monitor, Smartphone, Tablet, Sun, Moon, Contrast, Type, Zap, Brain, Eye, Accessibility, Save, RefreshCw, Download, Upload, Share2, Copy, Trash2, Plus, Minus, RotateCcw, CheckCircle, AlertTriangle, Info, HelpCircle, Target, Sparkles, Wand2, Activity, BarChart3, Users, Clock, History, Filter, Search, SortAsc, MoreHorizontal, ChevronDown, ChevronRight } from 'lucide-react';
 
 // Shadcn/UI Components
 import { Button } from '@/components/ui/button';

@@ -18,12 +18,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import {
-  UserPlus, Users, Shield, Mail, Phone, Calendar, Globe,
-  Building, Department, Key, Lock, Unlock, Eye, EyeOff,
-  Check, X, AlertTriangle, Info, RefreshCw, Save, Zap,
-  Brain, Sparkles, Target, Activity, Settings, Star
-} from 'lucide-react';
+import { UserPlus, Users, Shield, Mail, Phone, Calendar, Globe, Building, Department, Key, Lock, Unlock, Eye, EyeOff, Check, X, AlertTriangle, Info, RefreshCw, Save, Zap, Brain, Sparkles, Target, Activity, Settings, Star } from 'lucide-react';
 
 import { useRBACSystem as useRBAC } from '../../../../hooks/useRBACSystem';
 import { useWorkspaceManagement } from '../../../../hooks/useWorkspaceManagement';

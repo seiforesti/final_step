@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ArrowLeft, Database, Play, Pause, Edit, Trash2, RefreshCw, Settings, Activity, AlertTriangle, CheckCircle, TrendingUp, TrendingDown, Clock, Shield, FileText, HardDrive, Users, Star, ExternalLink, Download, Copy, MoreHorizontal, Eye } from "lucide-react"
+import { ArrowLeft, Database, Play, Pause, Edit, Trash2, RefreshCw, Settings, Activity, AlertTriangle, CheckCircle, TrendingUp, TrendingDown, Clock, Shield, FileText, HardDrive, Users, Star, ExternalLink, Download, Copy, MoreHorizontal, Eye } from 'lucide-react'
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -22,7 +22,7 @@ import {
   useDataSourceHealthQuery 
 } from "./services/apis"
 import { DataDiscoveryWorkspace } from "./data-discovery/data-discovery-workspace"
-import { GitBranch } from "lucide-react" // Eye already imported above
+import { GitBranch } from 'lucide-react' // Eye already imported above
 
 interface DataSourceDetailsProps {
   dataSourceId: number

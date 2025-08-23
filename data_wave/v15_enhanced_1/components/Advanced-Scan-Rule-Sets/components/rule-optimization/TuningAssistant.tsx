@@ -18,66 +18,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { 
-  Zap,
-  Target,
-  TrendingUp,
-  TrendingDown,
-  Settings,
-  Activity,
-  BarChart3,
-  LineChart,
-  PieChart,
-  Brain,
-  Lightbulb,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  Calendar,
-  Download,
-  Upload,
-  Save,
-  Eye,
-  EyeOff,
-  RefreshCw,
-  Play,
-  Pause,
-  Stop,
-  FastForward,
-  Rewind,
-  SkipForward,
-  SkipBack,
-  Cpu,
-  HardDrive,
-  Database,
-  Server,
-  Monitor,
-  Gauge,
-  Scale,
-  Layers,
-  Filter,
-  Search,
-  Plus,
-  Minus,
-  Edit,
-  Trash2,
-  Copy,
-  MoreHorizontal,
-  ArrowUpDown,
-  ArrowUp,
-  ArrowDown,
-  RotateCcw,
-  ChevronDown,
-  ChevronUp,
-  ChevronRight,
-  ChevronLeft,
-  Maximize,
-  Minimize,
-  Split,
-  Merge,
-  Grid,
-  List
-} from 'lucide-react';
+import { Zap, Target, TrendingUp, TrendingDown, Settings, Activity, BarChart3, LineChart, PieChart, Brain, Lightbulb, AlertTriangle, CheckCircle, Clock, Calendar, Download, Upload, Save, Eye, EyeOff, RefreshCw, Play, Pause, Square, FastForward, Rewind, SkipForward, SkipBack, Cpu, HardDrive, Database, Server, Monitor, Gauge, Scale, Layers, Filter, Search, Plus, Minus, Edit, Trash2, Copy, MoreHorizontal, ArrowUpDown, ArrowUp, ArrowDown, RotateCcw, ChevronDown, ChevronUp, ChevronRight, ChevronLeft, Maximize, Minimize, Split, Merge, Grid, List } from 'lucide-react';
 import { LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, BarChart, Bar, PieChart as RechartsPieChart, Cell, ComposedChart, Area, AreaChart, ScatterChart, Scatter, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
 import { cn } from '@/lib/utils';
 import { useOptimization } from '../../hooks/useOptimization';
@@ -491,7 +432,7 @@ export const TuningAssistant: React.FC<TuningAssistantProps> = ({
                     </Button>
                   )}
                   <Button size="sm" variant="outline" onClick={handleStopTuning}>
-                    <Stop className="h-4 w-4" />
+                    <Square className="h-4 w-4" />
                   </Button>
                 </div>
               </div>

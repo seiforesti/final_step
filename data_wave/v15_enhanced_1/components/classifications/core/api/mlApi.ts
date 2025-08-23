@@ -786,3 +786,6 @@ class EnhancedMLApiClient extends MLApiClient {
 export const mlApi = new EnhancedMLApiClient(defaultMLApiConfig);
 export { MLApiClient, EnhancedMLApiClient };
 export type { MLApiConfig, MLCacheEntry, MLRequestInterceptor, MLResponseInterceptor, MLRetryConfig };
+
+// Default export for compatibility
+export default EnhancedMLApiClient;

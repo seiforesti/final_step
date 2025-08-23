@@ -26,27 +26,7 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { 
-  Database, 
-  AlertTriangle, 
-  CheckCircle, 
-  Eye, 
-  RefreshCw, 
-  Settings, 
-  Shield, 
-  Cloud, 
-  Server,
-  Network,
-  Lock,
-  Monitor,
-  Archive,
-  Tag,
-  User,
-  Calendar,
-  Activity,
-  Zap,
-  Globe
-} from "lucide-react"
+import { Database, AlertTriangle, CheckCircle, Eye, RefreshCw, Settings, Shield, Cloud, Server, Network, Lock, Monitor, Archive, Tag, User, Calendar, Activity, Zap, Globe } from 'lucide-react'
 import { toast } from "sonner"
 
 // Import backend services and types

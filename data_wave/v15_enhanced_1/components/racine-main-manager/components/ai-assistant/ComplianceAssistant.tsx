@@ -2,80 +2,7 @@
 
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Shield, 
-  CheckCircle, 
-  XCircle, 
-  AlertTriangle, 
-  FileText, 
-  ScrollText, 
-  BookOpen, 
-  Scale, 
-  Gavel, 
-  Search, 
-  Filter, 
-  Eye, 
-  EyeOff, 
-  Target, 
-  Gauge, 
-  TrendingUp, 
-  TrendingDown, 
-  BarChart3, 
-  LineChart, 
-  PieChart, 
-  Settings, 
-  RefreshCw, 
-  Download, 
-  Upload, 
-  Save, 
-  Share, 
-  Bookmark, 
-  Star, 
-  Flag, 
-  Info, 
-  Clock, 
-  Calendar, 
-  Timer, 
-  Users, 
-  Database, 
-  Lock, 
-  Unlock, 
-  KeyRound, 
-  Edit, 
-  Copy, 
-  Trash2, 
-  Plus, 
-  Minus, 
-  X, 
-  Check, 
-  ChevronDown, 
-  ChevronUp, 
-  ChevronLeft, 
-  ChevronRight, 
-  MoreHorizontal, 
-  ArrowRight, 
-  ArrowUpRight, 
-  ArrowDownRight, 
-  Maximize, 
-  Minimize, 
-  ExternalLink, 
-  LinkIcon,
-  Hash,
-  Tag,
-  Workflow,
-  Route,
-  MapPin,
-  Crosshair,
-  Focus,
-  Scan,
-  Microscope,
-  Bell,
-  BellOff,
-  Award,
-  Certificate,
-  Zap,
-  Activity
-} from 'lucide-react';
+import { Shield, CheckCircle, XCircle, AlertTriangle, FileText, ScrollText, BookOpen, Scale, Gavel, Search, Filter, Eye, EyeOff, Target, Gauge, TrendingUp, TrendingDown, BarChart3, LineChart, PieChart, Settings, RefreshCw, Download, Upload, Save, Share, Bookmark, Star, Flag, Info, Clock, Calendar, Timer, Users, Database, Lock, Unlock, KeyRound, Edit, Copy, Trash2, Plus, Minus, X, Check, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, MoreHorizontal, ArrowRight, ArrowUpRight, ArrowDownRight, Maximize, Minimize, ExternalLink, LinkIcon, Hash, Tag, Workflow, Route, MapPin, Crosshair, Focus, Scan, Microscope, Bell, BellOff, Award, Zap, Activity } from 'lucide-react';
 
 // UI Components
 import { Button } from '@/components/ui/button';
@@ -590,7 +517,7 @@ export const ComplianceAssistant: React.FC<ComplianceAssistantProps> = ({
         timeRange: '30d'
       });
 
-      // Download the report
+      // ArrowDownTrayIcon the report
       const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       
@@ -686,7 +613,7 @@ export const ComplianceAssistant: React.FC<ComplianceAssistantProps> = ({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Certificate className="h-5 w-5" />
+                            <Award className="h-5 w-5" />
             Framework Compliance Status
           </CardTitle>
         </CardHeader>

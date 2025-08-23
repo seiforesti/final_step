@@ -145,82 +145,7 @@ import {
 } from '@/components/ui/command';
 
 // Icons
-import {
-  User,
-  Mail,
-  Phone,
-  Globe,
-  MapPin,
-  Calendar as CalendarIcon,
-  Clock,
-  Shield,
-  Key,
-  Bell,
-  Eye,
-  EyeOff,
-  Camera,
-  Upload,
-  Download,
-  Edit,
-  Save,
-  X,
-  Check,
-  AlertTriangle,
-  Info,
-  Settings,
-  Users,
-  Building,
-  Briefcase,
-  Award,
-  Star,
-  Heart,
-  MessageSquare,
-  Share2,
-  Link,
-  Github,
-  Linkedin,
-  Twitter,
-  Facebook,
-  Instagram,
-  Youtube,
-  Rss,
-  ExternalLink,
-  Plus,
-  Minus,
-  ChevronDown,
-  ChevronRight,
-  Search,
-  Filter,
-  SortAsc,
-  SortDesc,
-  MoreHorizontal,
-  Copy,
-  Trash2,
-  RefreshCw,
-  Loader2,
-  Zap,
-  TrendingUp,
-  Activity,
-  BarChart3,
-  PieChart,
-  LineChart,
-  Target,
-  Flag,
-  BookOpen,
-  GraduationCap,
-  Lightbulb,
-  Puzzle,
-  Code,
-  Database,
-  Server,
-  Cloud,
-  Cpu,
-  HardDrive,
-  Network,
-  Monitor,
-  Smartphone,
-  Tablet
-} from 'lucide-react';
+import { User, Mail, Phone, Globe, MapPin, Calendar as CalendarIcon, Clock, Shield, Key, Bell, Eye, EyeOff, Camera, Upload, Download, Edit, Save, X, Check, AlertTriangle, Info, Settings, Users, Building, Briefcase, Award, Star, Heart, MessageSquare, Share2, Link, Github, Linkedin, Twitter, Facebook, Instagram, Youtube, Rss, ExternalLink, Plus, Minus, ChevronDown, ChevronRight, Search, Filter, SortAsc, SortDesc, MoreHorizontal, Copy, Trash2, RefreshCw, Loader2, Zap, TrendingUp, Activity, BarChart3, PieChart, LineChart, Target, Flag, BookOpen, GraduationCap, Lightbulb, Puzzle, Code, Database, Server, Cloud, Cpu, HardDrive, Network, Monitor, Smartphone, Tablet } from 'lucide-react';
 
 // Form validation
 import { useForm, Controller } from 'react-hook-form';
@@ -2138,7 +2063,7 @@ export const UserProfileManager: React.FC<UserProfileManagerProps> = ({
                         <div className="text-center py-12 space-y-4">
                           <Download className="w-12 h-12 mx-auto text-gray-400 mb-4" />
                           <h3 className="text-lg font-semibold mb-2">Export Profile Data</h3>
-                          <p className="text-gray-500 mb-6">Download your complete profile data in JSON format</p>
+                          <p className="text-gray-500 mb-6">ArrowDownTrayIcon your complete profile data in JSON format</p>
                           <Button onClick={handleExportProfile}>
                             <Download className="w-4 h-4 mr-2" />
                             Export Data

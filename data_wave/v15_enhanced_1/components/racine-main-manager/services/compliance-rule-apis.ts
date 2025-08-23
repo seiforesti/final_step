@@ -21,7 +21,7 @@ import {
 } from '../types/racine-core.types';
 
 // Import existing Compliance Rule services for integration
-import { EnterpriseComplianceAPIService } from '../../Compliance-Rule/services/enterprise-apis';
+import { ComplianceAPIs } from '../../Compliance-Rule/services/enterprise-apis';
 
 // Base API configuration
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1';
@@ -37,7 +37,7 @@ class RacineComplianceRuleAPIService {
   private headers: HeadersInit;
   
   // Integration with existing SPA services
-  private complianceService: EnterpriseComplianceAPIService;
+  private complianceService: typeof ComplianceAPIs;
 
   constructor() {
     this.baseURL = RACINE_COMPLIANCE_ENDPOINT;
@@ -49,7 +49,7 @@ class RacineComplianceRuleAPIService {
     };
 
     // Initialize existing SPA service integrations
-    this.complianceService = new EnterpriseComplianceAPIService();
+    this.complianceService = ComplianceAPIs;
   }
 
   /**

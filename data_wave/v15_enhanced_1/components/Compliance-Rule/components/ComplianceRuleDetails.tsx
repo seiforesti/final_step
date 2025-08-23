@@ -18,27 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
 import { Separator } from "@/components/ui/separator"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import {
-  Eye,
-  Edit,
-  Shield,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  FileText,
-  User,
-  Calendar,
-  Activity,
-  Target,
-  Download,
-  ExternalLink,
-  Loader2,
-  RefreshCw,
-  History,
-  TrendingUp,
-  TrendingDown,
-  BarChart3
-} from "lucide-react"
+import { Eye, Edit, Shield, AlertTriangle, CheckCircle, Clock, FileText, User, Calendar, Activity, Target, Download, ExternalLink, Loader2, RefreshCw, History, TrendingUp, TrendingDown, BarChart3 } from 'lucide-react'
 import { useEnterpriseFeatures } from "../hooks/use-enterprise-features"
 import { ComplianceAPIs } from "../services/enterprise-apis"
 import type { ComplianceRequirement } from "../types"

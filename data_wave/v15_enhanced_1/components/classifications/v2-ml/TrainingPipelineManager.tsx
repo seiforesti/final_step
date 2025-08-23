@@ -60,68 +60,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
-import {
-  Play,
-  Pause,
-  Stop,
-  RotateCcw,
-  FastForward,
-  Settings,
-  Monitor,
-  Activity,
-  TrendingUp,
-  Database,
-  Brain,
-  Zap,
-  Clock,
-  AlertTriangle,
-  CheckCircle,
-  XCircle,
-  Info,
-  Download,
-  Upload,
-  Edit,
-  Trash2,
-  Copy,
-  Eye,
-  BarChart3,
-  LineChart,
-  PieChart,
-  Target,
-  Layers,
-  GitBranch,
-  Code,
-  Server,
-  Cpu,
-  MemoryStick,
-  HardDrive,
-  Network,
-  Filter,
-  Search,
-  SortAsc,
-  SortDesc,
-  MoreVertical,
-  RefreshCw,
-  Calendar,
-  Users,
-  Globe,
-  Lock,
-  Unlock,
-  History,
-  BookOpen,
-  Lightbulb,
-  Award,
-  Gauge,
-  Timer,
-  Sparkles,
-  Workflow,
-  ChevronDown,
-  ChevronRight,
-  ExternalLink,
-  FileText,
-  Package,
-  Wrench
-} from 'lucide-react';
+import { Play, Pause, Square, RotateCcw, FastForward, Settings, Monitor, Activity, TrendingUp, Database, Brain, Zap, Clock, AlertTriangle, CheckCircle, XCircle, Info, Download, Upload, Edit, Trash2, Copy, Eye, BarChart3, LineChart, PieChart, Target, Layers, GitBranch, Code, Server, Cpu, MemoryStick, HardDrive, Network, Filter, Search, SortAsc, SortDesc, MoreVertical, RefreshCw, Calendar, Users, Globe, Lock, Unlock, History, BookOpen, Lightbulb, Award, Gauge, Timer, Sparkles, Workflow, ChevronDown, ChevronRight, ExternalLink, FileText, Package, Wrench } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   LineChart as RechartsLineChart, 
@@ -144,7 +83,7 @@ import { toast } from 'sonner';
 
 import { useMLIntelligence } from '../core/hooks/useMLIntelligence';
 import { 
-  TrainingJob, 
+  TrainingJobWrapper, 
   MLModel, 
   TrainingPipeline,
   PipelineStage,
@@ -156,10 +95,10 @@ import {
   ValidationConfig,
   DeploymentConfig,
   MLNotification,
+  TrainingJobCreate,
   PipelineExecution,
   PipelineOptimization,
-  ResourceAllocation,
-  TrainingJobCreate
+  ResourceAllocation
 } from '../core/types';
 
 // Enhanced interfaces for training pipeline management
@@ -381,13 +320,13 @@ const TrainingPipelineManager: React.FC<TrainingPipelineManagerProps> = ({
     }
 
     return filtered.sort((a, b) => {
-      const aValue = a[sortBy as keyof TrainingJob];
-      const bValue = b[sortBy as keyof TrainingJob];
+      const aValue = a[sortBy as keyof TrainingJobWrapper];
+      const bValue = b[sortBy as keyof TrainingJobWrapper];
       
       if (sortOrder === 'asc') {
-        return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+        return (aValue || '') < (bValue || '') ? -1 : (aValue || '') > (bValue || '') ? 1 : 0;
       } else {
-        return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
+        return (aValue || '') > (bValue || '') ? -1 : (aValue || '') < (bValue || '') ? 1 : 0;
       }
     });
   }, [trainingJobs, searchQuery, statusFilter, modelId, sortBy, sortOrder]);
@@ -622,7 +561,7 @@ const TrainingPipelineManager: React.FC<TrainingPipelineManagerProps> = ({
       case 'completed': return <CheckCircle className="h-4 w-4" />;
       case 'failed': return <XCircle className="h-4 w-4" />;
       case 'pending': return <Clock className="h-4 w-4" />;
-      case 'cancelled': return <Stop className="h-4 w-4" />;
+      case 'cancelled': return <Square className="h-4 w-4" />;
       default: return <Info className="h-4 w-4" />;
     }
   };
@@ -667,8 +606,8 @@ const TrainingPipelineManager: React.FC<TrainingPipelineManagerProps> = ({
                   </DropdownMenuItem>
                   {job.status === 'running' && (
                     <DropdownMenuItem onClick={() => handleStopJob(job.id)} className="text-red-600">
-                      <Stop className="h-4 w-4 mr-2" />
-                      Stop Job
+                      <Square className="h-4 w-4 mr-2" />
+                      Square Job
                     </DropdownMenuItem>
                   )}
                   {job.status === 'failed' && (

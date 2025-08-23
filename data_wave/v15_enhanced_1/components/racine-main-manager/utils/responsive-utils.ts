@@ -6,3 +6,7 @@ export function getActiveBreakpoint(width: number): Breakpoint {
 	if (width < 1536) return 'desktop'
 	return 'ultrawide'
 }
+
+export const responsiveUtils = {
+	getActiveBreakpoint
+};

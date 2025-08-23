@@ -846,3 +846,5 @@ export function ComplianceRuleCreateModal({ isOpen, onClose, onSuccess, initialD
     </Dialog>
   )
 }
+
+export default IntegrationCreateModal;

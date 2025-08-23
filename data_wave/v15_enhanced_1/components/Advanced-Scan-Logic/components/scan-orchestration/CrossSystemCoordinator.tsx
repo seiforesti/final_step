@@ -26,49 +26,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Globe,
-  Network,
-  Settings,
-  Activity,
-  Zap,
-  Target,
-  Users,
-  Building,
-  Server,
-  Database,
-  Shield,
-  Lock,
-  Unlock,
-  Link,
-  ExternalLink,
-  GitBranch,
-  Workflow,
-  Route,
-  Navigation,
-  Compass,
-  Map,
-  Play,
-  Pause,
-  Stop,
-  RefreshCw,
-  Search,
-  Filter,
-  Download,
-  Upload,
-  Plus,
-  Minus,
-  X,
-  Eye,
-  MoreVertical,
-  CheckCircle,
-  XCircle,
-  AlertTriangle,
-  Clock,
-  Info,
-  BarChart3,
-  Grid
-} from 'lucide-react';
+import { Globe, Network, Settings, Activity, Zap, Target, Users, Building, Server, Database, Shield, Lock, Unlock, Link, ExternalLink, GitBranch, Workflow, Route, Navigation, Compass, Map, Play, Pause, Square, RefreshCw, Search, Filter, Download, Upload, Plus, Minus, X, Eye, MoreVertical, CheckCircle, XCircle, AlertTriangle, Clock, Info, BarChart3, Grid } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';

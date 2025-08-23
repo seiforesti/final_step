@@ -17,11 +17,7 @@ import {
   Alert, AlertDescription, ScrollArea, Input, Label, Accordion, AccordionContent, 
   AccordionItem, AccordionTrigger, Table, TableBody, TableCell, TableHead, TableHeader, TableRow
 } from '@/components/ui';
-import {
-  Zap, TrendingUp, AlertTriangle, CheckCircle, XCircle, Info, Activity, BarChart3, 
-  Database, Server, Layers, Download, Settings, RefreshCw, Maximize2, X, ArrowRight, 
-  Target, Brain, Cpu, Clock, Users, DollarSign, Shield, Gauge, Eye, Play, Pause
-} from 'lucide-react';
+import { Zap, TrendingUp, AlertTriangle, CheckCircle, XCircle, Info, Activity, BarChart3, Database, Server, Layers, Download, Settings, RefreshCw, Maximize2, X, ArrowRight, Target, Brain, Cpu, Clock, Users, DollarSign, Shield, Gauge, Eye, Play, Pause } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import * as d3 from 'd3';

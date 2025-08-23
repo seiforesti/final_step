@@ -2,13 +2,7 @@
 
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Code, Play, Pause, Save, Download, Upload, Copy, Trash2, Edit3, Settings, 
-  Plus, Minus, ZoomIn, ZoomOut, Grid, Target, ArrowRight, Database, Search, 
-  Shield, Users, Brain, CheckCircle, AlertTriangle, Loader2, RefreshCw, 
-  MoreHorizontal, X, Function, Variable, GitBranch, Repeat, Terminal,
-  WorkflowIcon, Package, Eye, EyeOff, Layers, Map, Activity
-} from 'lucide-react';
+import { Code, Play, Pause, Save, Download, Upload, Copy, Trash2, Edit3, Settings, Plus, Minus, ZoomIn, ZoomOut, Grid, Target, ArrowRight, Database, Search, Shield, Users, Brain, CheckCircle, AlertTriangle, Loader2, RefreshCw, MoreHorizontal, X, Variable, GitBranch, Repeat, Terminal, WorkflowIcon, Package, Eye, EyeOff, Layers, Map, Activity } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -95,7 +89,7 @@ const SCRIPT_NODE_TYPES = {
   },
   FUNCTION: { 
     type: 'function', 
-    icon: Function, 
+    icon: Code, 
     color: 'bg-green-500', 
     category: 'Functions',
     description: 'Function definition and call',
@@ -294,7 +288,7 @@ const SCRIPT_NODE_TYPES = {
 // Node Categories for Organization
 const SCRIPT_CATEGORIES = [
   { id: 'variables', name: 'Variables', icon: Variable, color: 'text-blue-500' },
-  { id: 'functions', name: 'Functions', icon: Function, color: 'text-green-500' },
+      { id: 'functions', name: 'Functions', icon: Code, color: 'text-green-500' },
   { id: 'control_flow', name: 'Control Flow', icon: GitBranch, color: 'text-yellow-500' },
   { id: 'data_sources', name: 'Data Sources', icon: Database, color: 'text-emerald-500' },
   { id: 'scan_rules', name: 'Scan Rules', icon: Search, color: 'text-violet-500' },
@@ -1239,7 +1233,7 @@ const VisualScriptingEngine: React.FC<VisualScriptingEngineProps> = ({
             disabled={!generatedCode}
           >
             <Download className="h-4 w-4" />
-            Download
+            ArrowDownTrayIcon
           </Button>
         </div>
       </div>

@@ -2,75 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  GitBranch,
-  GitCommit,
-  GitMerge,
-  GitPullRequest,
-  History,
-  Tag,
-  Archive,
-  Download,
-  Upload,
-  FileText,
-  Compare,
-  Clock,
-  User,
-  Users,
-  CheckCircle,
-  XCircle,
-  AlertTriangle,
-  Info,
-  Star,
-  Shield,
-  Lock,
-  Unlock,
-  Key,
-  Settings,
-  Filter,
-  Search,
-  RefreshCw,
-  Plus,
-  Edit,
-  Trash2,
-  Copy,
-  Eye,
-  ArrowLeft,
-  ArrowRight,
-  ArrowUp,
-  ArrowDown,
-  RotateCcw,
-  SkipBack,
-  SkipForward,
-  Play,
-  Pause,
-  Stop,
-  Volume2,
-  VolumeX,
-  Maximize,
-  Minimize,
-  ExternalLink,
-  Link,
-  Unlink,
-  Hash,
-  Percent,
-  Calendar,
-  Timer,
-  Activity,
-  TrendingUp,
-  BarChart3,
-  PieChart,
-  LineChart,
-  Layers,
-  Package,
-  Code,
-  Database,
-  Server,
-  Cloud,
-  Workflow,
-  Target,
-  Zap
-} from 'lucide-react'
+import { GitBranch, GitCommit, GitMerge, GitPullRequest, History, Tag, Archive, Download, Upload, FileText, GitCompare, Clock, User, Users, CheckCircle, XCircle, AlertTriangle, Info, Star, Shield, Lock, Unlock, Key, Settings, Filter, Search, RefreshCw, Plus, Edit, Trash2, Copy, Eye, ArrowLeft, ArrowRight, ArrowUp, ArrowDown, RotateCcw, SkipBack, SkipForward, Play, Pause, Square, Volume2, VolumeX, Maximize, Minimize, ExternalLink, Link, Unlink, Hash, Percent, Calendar, Timer, Activity, TrendingUp, BarChart3, PieChart, LineChart, Layers, Package, Code, Database, Server, Cloud, Workflow, Target, Zap } from 'lucide-react'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -1063,7 +995,7 @@ export const WorkflowVersionControl: React.FC<{
           <TabsList>
             <TabsTrigger value="timeline">Timeline</TabsTrigger>
             <TabsTrigger value="branches">Branches</TabsTrigger>
-            <TabsTrigger value="comparison">Compare</TabsTrigger>
+            <TabsTrigger value="comparison">GitCompare</TabsTrigger>
             <TabsTrigger value="history">History</TabsTrigger>
             <TabsTrigger value="tags">Tags</TabsTrigger>
             <TabsTrigger value="merges">Merges</TabsTrigger>
@@ -1232,8 +1164,8 @@ export const WorkflowVersionControl: React.FC<{
                 View Details
               </DropdownMenuItem>
               <DropdownMenuItem>
-                <Compare className="h-4 w-4 mr-2" />
-                Compare
+                <GitCompare className="h-4 w-4 mr-2" />
+                GitCompare
               </DropdownMenuItem>
               {canModifyVersion && (
                 <>
@@ -1321,7 +1253,7 @@ export const WorkflowVersionControl: React.FC<{
                 // Handle compare version
               }}
             >
-              <Compare className="h-4 w-4" />
+              <GitCompare className="h-4 w-4" />
             </Button>
           </div>
         </div>

@@ -9,28 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {
-  Gauge,
-  TrendingUp,
-  TrendingDown,
-  Activity,
-  Clock,
-  Zap,
-  Database,
-  Server,
-  Cpu,
-  Memory,
-  HardDrive,
-  Network,
-  Wifi,
-  AlertTriangle,
-  CheckCircle,
-  RefreshCw,
-  Download,
-  BarChart3,
-  LineChart,
-  PieChart,
-} from "lucide-react"
+import { Gauge, TrendingUp, TrendingDown, Activity, Clock, Zap, Database, Server, Cpu, HardDrive, Network, Wifi, AlertTriangle, CheckCircle, RefreshCw, Download, BarChart3, LineChart, PieChart,  } from 'lucide-react'
 
 import { useDataSourcePerformanceMetricsQuery } from "@/hooks/useDataSources"
 import { DataSource } from "./types"
@@ -220,7 +199,7 @@ export function DataSourcePerformanceView({
         timestamp: new Date().toISOString(),
       },
       memoryUsage: {
-        name: "Memory Usage", 
+        name: "HardDrive Usage", 
         value: metrics.memory_usage || health.memory_usage || 0,
         unit: "%",
         trend: metrics.memory_trend || "stable",
@@ -302,7 +281,7 @@ export function DataSourcePerformanceView({
       timestamp: new Date().toISOString(),
     },
     memoryUsage: {
-      name: "Memory Usage",
+      name: "HardDrive Usage",
       value: 78,
       unit: "%",
       trend: "up" as const,
@@ -556,8 +535,8 @@ export function DataSourcePerformanceView({
                   <div className="flex items-center gap-2 bg-yellow-50 rounded">
                     <AlertTriangle className="h-4 w-4 text-yellow-600" />
                     <div>
-                      <p className="text-sm font-medium">High Memory Usage</p>
-                      <p className="text-xs text-muted-foreground">Memory usage at 78%</p>
+                      <p className="text-sm font-medium">High HardDrive Usage</p>
+                      <p className="text-xs text-muted-foreground">HardDrive usage at 78%</p>
                     </div>
                   </div>
                 </div>
@@ -592,7 +571,7 @@ export function DataSourcePerformanceView({
 
             <Card>
               <CardHeader>
-                <CardTitle>Memory Usage</CardTitle>
+                <CardTitle>HardDrive Usage</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">

@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { GitBranch, Clock, User, FileText, Plus, Eye, Download, RotateCcw, AlertCircle, CheckCircle, XCircle } from "lucide-react"
+import { GitBranch, Clock, User, FileText, Plus, Eye, Download, RotateCcw, AlertCircle, CheckCircle, XCircle } from 'lucide-react'
 import { toast } from "sonner"
 
 // Import backend services and hooks

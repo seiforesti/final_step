@@ -2,28 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence, useAnimation } from 'framer-motion';
-import {
-  ClockIcon,
-  DevicePhoneMobileIcon,
-  ComputerDesktopIcon,
-  GlobeAltIcon,
-  ShieldCheckIcon,
-  ExclamationTriangleIcon,
-  CheckCircleIcon,
-  XMarkIcon,
-  ArrowPathIcon,
-  PowerIcon,
-  EyeIcon,
-  MapPinIcon,
-  CalendarIcon,
-  UserIcon,
-  LockClosedIcon,
-  SignalIcon,
-  BoltIcon,
-  CpuChipIcon,
-  WifiIcon,
-  DeviceTabletIcon
-} from '@heroicons/react/24/outline';
+import { ClockIcon, DevicePhoneMobileIcon, ComputerDesktopIcon, GlobeAltIcon, ShieldCheckIcon, ExclamationTriangleIcon, CheckCircleIcon, XMarkIcon, ArrowPathIcon, PowerIcon, EyeIcon, MapPinIcon, CalendarIcon, UserIcon, LockClosedIcon, SignalIcon, BoltIcon, CpuChipIcon, WifiIcon, DeviceTabletIcon } from '@heroicons/react/24/outline';
 import { authService } from '../../services/auth.service';
 import { useCurrentUser } from '../../hooks/useCurrentUser';
 import { useRBACWebSocket } from '../../hooks/useRBACWebSocket';

@@ -40,55 +40,7 @@ import React, { useState, useEffect, useCallback, useMemo, useRef, Suspense } fr
 import { motion, AnimatePresence, useAnimation, useMotionValue, useTransform } from 'framer-motion';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTheme } from 'next-themes';
-import { 
-  Activity, 
-  BarChart3, 
-  Bot, 
-  Building2, 
-  ChevronRight, 
-  Cpu, 
-  Database, 
-  GitBranch, 
-  Globe, 
-  Heart, 
-  Layout, 
-  Lightbulb, 
-  LineChart, 
-  MessageCircle, 
-  Monitor, 
-  Network, 
-  Palette, 
-  PieChart, 
-  Puzzle, 
-  Radar, 
-  Settings, 
-  Shield, 
-  Sparkles, 
-  Target, 
-  TrendingUp, 
-  Users, 
-  Workflow, 
-  Zap,
-  Bell,
-  Search,
-  Menu,
-  X,
-  ArrowRight,
-  Play,
-  Pause,
-  Square,
-  RefreshCw,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  Eye,
-  Filter,
-  MoreVertical,
-  Plus,
-  Minus,
-  Maximize2,
-  Minimize2
-} from 'lucide-react';
+import { Activity, BarChart3, Bot, Building2, ChevronRight, Cpu, Database, GitBranch, Globe, Heart, Layout, Lightbulb, LineChart, MessageCircle, Monitor, Network, Palette, PieChart, Puzzle, Radar, Settings, Shield, Sparkles, Target, TrendingUp, Users, Workflow, Zap, Bell, Search, Menu, X, ArrowRight, Play, Pause, Square, RefreshCw, AlertTriangle, CheckCircle, Clock, Eye, Filter, MoreVertical, Plus, Minus, Maximize2, Minimize2 } from 'lucide-react';
 
 // UI Components
 import { Button } from '@/components/ui/button';
@@ -185,7 +137,7 @@ import { IntelligentDashboardOrchestrator } from './components/intelligent-dashb
 import { ActivityTrackingHub } from './components/activity-tracker/ActivityTrackingHub';
 import { MasterCollaborationHub } from './components/collaboration/MasterCollaborationHub';
 import { JobWorkflowBuilder } from './components/job-workflow-space/JobWorkflowBuilder';
-import { PipelineDesigner } from './components/pipeline-manager/PipelineDesigner';
+import PipelineDesigner from './components/pipeline-manager/PipelineDesigner';
 import { WorkspaceOrchestrator } from './components/workspace/WorkspaceOrchestrator';
 import { UserProfileManager } from './components/user-management/UserProfileManager';
 

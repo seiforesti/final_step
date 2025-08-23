@@ -398,13 +398,143 @@ export const useComplianceStatusQuery = (dataSourceId?: number, options = {}) =>
     queryKey: ['compliance-status', dataSourceId],
     queryFn: async () => {
       if (!dataSourceId) return null
-      const { data } = await api.get(`/scan/data-sources/${dataSourceId}/compliance`)
+      const { data } = await api.get(`/data-discovery/data-sources/${dataSourceId}/compliance-status`)
       return data
     },
     enabled: !!dataSourceId,
     ...options,
   })
 }
+
+// Growth Trends Hook
+export const useGrowthTrendsQuery = (dataSourceId: number, timeRange: string, options = {}) => {
+  return useQuery({
+    queryKey: ['growth-trends', dataSourceId, timeRange],
+    queryFn: async () => {
+      const { data } = await api.get(`/scan/data-sources/${dataSourceId}/growth-trends?timeRange=${timeRange}`)
+      return data
+    },
+    enabled: !!dataSourceId,
+    ...options,
+  })
+}
+
+// Growth Predictions Hook
+export const useGrowthPredictionsQuery = (dataSourceId: number, predictionPeriod: string, options = {}) => {
+  return useQuery({
+    queryKey: ['growth-predictions', dataSourceId, predictionPeriod],
+    queryFn: async () => {
+      const { data } = await api.get(`/scan/data-sources/${dataSourceId}/growth-predictions?period=${predictionPeriod}`)
+      return data
+    },
+    enabled: !!dataSourceId,
+    ...options,
+  })
+}
+
+// Usage Analytics Hook
+export const useUsageAnalyticsQuery = (dataSourceId: number, timeRange: string, options = {}) => {
+  return useQuery({
+    queryKey: ['usage-analytics', dataSourceId, timeRange],
+    queryFn: async () => {
+      const { data } = await api.get(`/scan/data-sources/${dataSourceId}/usage-analytics?timeRange=${timeRange}`)
+      return data
+    },
+    enabled: !!dataSourceId,
+    ...options,
+  })
+}
+
+// Toggle Monitoring Hook
+export const useToggleMonitoringMutation = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ dataSourceId, enabled }: { dataSourceId: number; enabled: boolean }) => 
+      api.post(`/scan/data-sources/${dataSourceId}/toggle-monitoring`, { enabled }),
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['data-sources', variables.dataSourceId] });
+    },
+  });
+};
+
+// Reconfigure Connection Pool Hook
+export const useReconfigureConnectionPoolMutation = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ dataSourceId, config }: { dataSourceId: number; config: any }) => 
+      api.post(`/scan/data-sources/${dataSourceId}/reconfigure-connection-pool`, config),
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['data-sources', variables.dataSourceId] });
+    },
+  });
+};
+
+// Quality Issues Hook
+export const useQualityIssuesQuery = (dataSourceId: number, options = {}) => {
+  return useQuery({
+    queryKey: ['quality-issues', dataSourceId],
+    queryFn: async () => {
+      const { data } = await api.get(`/scan/data-sources/${dataSourceId}/quality-issues`)
+      return data
+    },
+    enabled: !!dataSourceId,
+    ...options,
+  })
+}
+
+// Quality Rules Hook
+export const useQualityRulesQuery = (dataSourceId: number, options = {}) => {
+  return useQuery({
+    queryKey: ['quality-rules', dataSourceId],
+    queryFn: async () => {
+      const { data } = await api.get(`/scan/data-sources/${dataSourceId}/quality-rules`)
+      return data
+    },
+    enabled: !!dataSourceId,
+    ...options,
+  })
+}
+
+// Quality Trends Hook
+export const useQualityTrendsQuery = (dataSourceId: number, timeRange: string, options = {}) => {
+  return useQuery({
+    queryKey: ['quality-trends', dataSourceId, timeRange],
+    queryFn: async () => {
+      const { data } = await api.get(`/scan/data-sources/${dataSourceId}/quality-trends?timeRange=${timeRange}`)
+      return data
+    },
+    enabled: !!dataSourceId,
+    ...options,
+  })
+}
+
+// Create Quality Rule Hook
+export const useCreateQualityRuleMutation = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ dataSourceId, rule }: { dataSourceId: number; rule: any }) => 
+      api.post(`/scan/data-sources/${dataSourceId}/quality-rules`, rule),
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['quality-rules', variables.dataSourceId] });
+    },
+  });
+};
+
+// Resolve Issue Hook
+export const useResolveIssueMutation = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ dataSourceId, issueId, resolution }: { dataSourceId: number; issueId: string; resolution: any }) => 
+      api.post(`/scan/data-sources/${dataSourceId}/quality-issues/${issueId}/resolve`, resolution),
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['quality-issues', variables.dataSourceId] });
+    },
+  });
+};
 
 // Security Audit Hook
 export const useSecurityAuditQuery = (dataSourceId?: number, options = {}) => {
@@ -840,5 +970,80 @@ export const useDeclineInvitationMutation = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['workspace-invitations'] });
     },
+  });
+};
+
+// ============================================================================
+// CATALOG & LINEAGE QUERY HOOKS
+// ============================================================================
+
+// Catalog Query Hook
+export const useCatalogQuery = (filters: any = {}, options = {}) => {
+  return useQuery({
+    queryKey: ['catalog', filters],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          params.append(key, String(value));
+        }
+      });
+      const { data } = await api.get(`/catalog?${params.toString()}`);
+      return data;
+    },
+    enabled: true,
+    ...options,
+  });
+};
+
+// Lineage Query Hook
+export const useLineageQuery = (entityId: string, entityType: string = 'table', depth: number = 3, options = {}) => {
+  return useQuery({
+    queryKey: ['lineage', entityId, entityType, depth],
+    queryFn: async () => {
+      const { data } = await api.get(`/lineage/${entityType}/${entityId}?depth=${depth}`);
+      return data;
+    },
+    enabled: !!entityId,
+    ...options,
+  });
+};
+
+// Metadata Stats Query Hook
+export const useMetadataStatsQuery = (dataSourceId?: number, timeRange: string = '30d', options = {}) => {
+  return useQuery({
+    queryKey: ['metadata-stats', dataSourceId, timeRange],
+    queryFn: async () => {
+      const endpoint = dataSourceId 
+        ? `/data-sources/${dataSourceId}/metadata-stats?timeRange=${timeRange}`
+        : `/metadata-stats?timeRange=${timeRange}`;
+      const { data } = await api.get(endpoint);
+      return data;
+    },
+    enabled: true,
+    ...options,
+  });
+};
+
+// ============================================================================
+// INTEGRATIONS QUERY HOOKS
+// ============================================================================
+
+// Integrations Query Hook
+export const useIntegrationsQuery = (filters: any = {}, options = {}) => {
+  return useQuery({
+    queryKey: ['integrations', filters],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          params.append(key, String(value));
+        }
+      });
+      const { data } = await api.get(`/integrations?${params.toString()}`);
+      return data;
+    },
+    enabled: true,
+    ...options,
   });
 };

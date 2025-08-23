@@ -32,162 +32,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence, useMotionValue, useSpring, useDragControls } from 'framer-motion';
-import { 
-  Link2,
-  Plus,
-  Search,
-  Filter,
-  MoreHorizontal,
-  Grid3X3,
-  List,
-  Network,
-  Clock,
-  Users,
-  Target,
-  TrendingUp,
-  AlertTriangle,
-  CheckCircle,
-  XCircle,
-  Play,
-  Pause,
-  Square,
-  RotateCcw,
-  Settings,
-  Share2,
-  Copy,
-  Archive,
-  Trash2,
-  ExternalLink,
-  ChevronDown,
-  ChevronRight,
-  ChevronLeft,
-  ArrowUpRight,
-  ArrowDownRight,
-  Sparkles,
-  Brain,
-  Rocket,
-  Globe,
-  Building2,
-  Users2,
-  UserCheck,
-  ShieldCheck,
-  Gauge,
-  Timer,
-  Cpu,
-  HardDrive,
-  Activity,
-  BarChart3,
-  PieChart,
-  LineChart,
-  MapPin,
-  Tag,
-  Bookmark,
-  Heart,
-  MessageSquare,
-  Bell,
-  BellOff,
-  Eye,
-  EyeOff,
-  Lock,
-  Unlock,
-  Crown,
-  UserPlus,
-  UserMinus,
-  Database,
-  GitBranch,
-  Zap,
-  Shield,
-  RefreshCw,
-  Download,
-  Upload,
-  FileText,
-  Image,
-  Video,
-  Music,
-  Code,
-  Package,
-  Briefcase,
-  Calendar,
-  Flag,
-  Award,
-  Trophy,
-  Medal,
-  Flame,
-  Lightning,
-  Sun,
-  Moon,
-  Cloud,
-  Workflow,
-  GitCommit,
-  GitMerge,
-  GitPullRequest,
-  Scissors,
-  Paperclip,
-  Hash,
-  AtSign,
-  Percent,
-  DollarSign,
-  Euro,
-  Pound,
-  Yen,
-  Bitcoin,
-  Coins,
-  CreditCard,
-  Wallet,
-  PiggyBank,
-  TrendingDown,
-  Maximize2,
-  Minimize2,
-  Move,
-  RotateCw,
-  FlipHorizontal,
-  FlipVertical,
-  Crop,
-  PenTool,
-  Paintbrush,
-  Palette,
-  Dropper,
-  Ruler,
-  Compass,
-  Circle,
-  Triangle,
-  Hexagon,
-  Pentagon,
-  Octagon,
-  Wand2,
-  Lightbulb,
-  Puzzle,
-  Wrench,
-  Cog,
-  Gear,
-  Sliders,
-  ToggleLeft,
-  ToggleRight,
-  Power,
-  PowerOff,
-  Layers,
-  TreePine,
-  Boxes,
-  Component,
-  Combine,
-  Split,
-  Merge,
-  Route,
-  Navigation,
-  Compass as CompassIcon,
-  Map,
-  Waypoints,
-  GitPullRequestArrow,
-  GitFork,
-  Shuffle,
-  Repeat,
-  SkipForward,
-  SkipBack,
-  FastForward,
-  Rewind,
-  StepForward,
-  StepBack
-} from 'lucide-react';
+import { Link2, Plus, Search, Filter, MoreHorizontal, Grid3X3, List, Network, Clock, Users, Target, TrendingUp, AlertTriangle, CheckCircle, XCircle, Play, Pause, Square, RotateCcw, Settings, Share2, Copy, Archive, Trash2, ExternalLink, ChevronDown, ChevronRight, ChevronLeft, ArrowUpRight, ArrowDownRight, Sparkles, Brain, Rocket, Globe, Building2, Users2, UserCheck, ShieldCheckIcon, Gauge, Timer, Cpu, HardDrive, Activity, BarChart3, PieChart, LineChart, MapPin, Tag, Bookmark, Heart, MessageSquare, Bell, BellOff, Eye, EyeOff, Lock, Unlock, Crown, UserPlus, UserMinus, Database, GitBranch, Zap, Shield, RefreshCw, Download, Upload, FileText, Image, Video, Music, Code, Package, Briefcase, Calendar, Flag, Award, Trophy, Medal, Flame, Sun, Moon, Cloud, Workflow, GitCommit, GitMerge, GitPullRequest, Scissors, Paperclip, Hash, AtSign, Percent, DollarSign, Euro, Bitcoin, Coins, CreditCard, Wallet, PiggyBank, TrendingDown, Maximize2, Minimize2, Move, RotateCw, FlipHorizontal, FlipVertical, Crop, PenTool, Paintbrush, Palette, Pipette, Ruler, Compass, Circle, Triangle, Hexagon, Pentagon, Octagon, Wand2, Lightbulb, Puzzle, Wrench, Cog, Sliders, ToggleLeft, ToggleRight, Power, PowerOff, Layers, TreePine, Boxes, Component, Combine, Split, Merge, Route, Navigation, Compass as CompassIcon, Map, Waypoints, GitPullRequestArrow, GitFork, Shuffle, Repeat, SkipForward, SkipBack, FastForward, Rewind, StepForward, StepBack } from 'lucide-react';
 
 // UI Components
 import { Button } from '@/components/ui/button';
@@ -646,13 +491,17 @@ export const CrossGroupResourceLinker: React.FC = () => {
     availableSPAs,
     spaStatuses,
     crossGroupResources,
-    linkCrossGroupResource,
-    unlinkCrossGroupResource,
     orchestrateWorkflow,
     syncResources,
     resolveConflicts,
-    getResourceMap
+    getResourceMap,
+    operations
   } = useCrossGroupIntegration();
+
+  const {
+    linkCrossGroupResource,
+    unlinkCrossGroupResource
+  } = operations;
 
   const {
     currentUser,
@@ -912,7 +761,7 @@ export const CrossGroupResourceLinker: React.FC = () => {
         id: SPAGroup.COMPLIANCE_RULE, 
         name: 'Compliance Rules', 
         description: 'Compliance monitoring and reporting',
-        icon: ShieldCheck,
+        icon: ShieldCheckIcon,
         color: 'bg-red-500'
       },
       { 
@@ -998,260 +847,6 @@ export const CrossGroupResourceLinker: React.FC = () => {
           mitigations: []
         }
       }));
-
-      // Sample resource links for demonstration
-      const sampleResourceLinks: CrossGroupResourceLink[] = [
-        {
-          id: 'link-1' as UUID,
-          name: 'Customer PII Classification Rule',
-          description: 'Classification rules for customer PII data across all data sources',
-        type: 'classification_rule',
-        sourceGroup: SPAGroup.CLASSIFICATIONS,
-        targetGroups: [SPAGroup.DATA_SOURCES, SPAGroup.COMPLIANCE_RULE, SPAGroup.ADVANCED_CATALOG],
-        resourceId: 'rule-001' as UUID,
-        resourceType: 'classification_rule',
-        resourceMetadata: {
-          ruleType: 'pii_detection',
-          sensitivity: 'high',
-          automatedClassification: true
-        },
-        linkStatus: ResourceLinkStatus.ACTIVE,
-        linkType: ResourceLinkType.DIRECT,
-        linkStrength: 95,
-        linkQuality: 88,
-        dependencies: [
-          {
-            id: 'dep-1' as UUID,
-            sourceResourceId: 'resource-2' as UUID,
-            targetResourceId: 'resource-1' as UUID,
-            dependencyType: 'requires',
-            isRequired: true,
-            createdAt: new Date().toISOString() as ISODateString
-          }
-        ],
-        dependents: ['resource-3' as UUID, 'resource-4' as UUID],
-        circularDependencies: false,
-        configuration: {
-          syncFrequency: 'realtime',
-          conflictResolution: 'source_wins',
-          enableAuditLog: true
-        },
-        syncSettings: {
-          enabled: true,
-          frequency: 'realtime',
-          bidirectional: true,
-          conflictResolution: 'source_wins',
-          batchSize: 100,
-          retryAttempts: 3,
-          timeoutSeconds: 30
-        },
-        accessSettings: {
-          public: false,
-          inheritPermissions: true,
-          customPermissions: {},
-          accessLog: true,
-          auditTrail: true,
-          encryptionRequired: true
-        },
-        usageCount: 1247,
-        performanceScore: 92,
-        errorRate: 0.5,
-        lastSyncTime: new Date().toISOString() as ISODateString,
-        avgResponseTime: 125,
-        conflicts: [],
-        resolutionHistory: [],
-        createdAt: subDays(new Date(), 15).toISOString() as ISODateString,
-        updatedAt: subDays(new Date(), 2).toISOString() as ISODateString,
-        lastAccessedAt: new Date().toISOString() as ISODateString,
-        createdBy: currentUser.id,
-        tags: ['pii', 'customer', 'gdpr', 'classification'],
-        category: 'data_governance',
-        priority: 'high',
-        aiRecommendations: [
-          {
-            id: 'rec-1' as UUID,
-            type: 'optimization',
-            title: 'Optimize Rule Frequency',
-            description: 'Consider reducing sync frequency to hourly for better performance',
-            impact: 'medium',
-            effort: 'low',
-            confidence: 85,
-            autoApplicable: true,
-            estimatedBenefit: '15% performance improvement'
-          }
-        ],
-        optimizationSuggestions: [
-          {
-            id: 'opt-1' as UUID,
-            category: 'performance',
-            suggestion: 'Enable batch processing for large datasets',
-            expectedImprovement: '25% faster processing',
-            implementationSteps: [
-              'Enable batch mode in configuration',
-              'Set optimal batch size',
-              'Monitor performance metrics'
-            ],
-            riskLevel: 'low'
-          }
-        ],
-        riskAssessment: {
-          overallRisk: 'low',
-          securityRisk: 15,
-          performanceRisk: 25,
-          complianceRisk: 10,
-          operationalRisk: 20,
-          risks: [
-            {
-              id: 'risk-1' as UUID,
-              type: 'performance',
-              description: 'High sync frequency may impact system performance',
-              probability: 30,
-              impact: 40,
-              severity: 'medium'
-            }
-          ],
-          mitigations: [
-            {
-              id: 'mit-1' as UUID,
-              riskId: 'risk-1' as UUID,
-              strategy: 'Implement intelligent batching',
-              effectiveness: 80,
-              cost: 'low',
-              timeframe: '1 week'
-            }
-          ]
-        }
-      },
-      {
-        id: 'resource-2' as UUID,
-        name: 'Data Source Connection Pool',
-        description: 'Shared connection pool for all database connections',
-        type: 'connection_pool',
-        sourceGroup: SPAGroup.DATA_SOURCES,
-        targetGroups: [SPAGroup.SCAN_LOGIC, SPAGroup.ADVANCED_CATALOG],
-        resourceId: 'pool-001' as UUID,
-        resourceType: 'connection_pool',
-        resourceMetadata: {
-          maxConnections: 100,
-          connectionTimeout: 30,
-          poolType: 'dynamic'
-        },
-        linkStatus: ResourceLinkStatus.ACTIVE,
-        linkType: ResourceLinkType.SHARED,
-        linkStrength: 88,
-        linkQuality: 95,
-        dependencies: [],
-        dependents: ['resource-1' as UUID, 'resource-5' as UUID],
-        circularDependencies: false,
-        configuration: {
-          maxConnections: 100,
-          minConnections: 10,
-          connectionTimeout: 30000
-        },
-        syncSettings: {
-          enabled: true,
-          frequency: 'hourly',
-          bidirectional: false,
-          conflictResolution: 'manual',
-          batchSize: 50,
-          retryAttempts: 5,
-          timeoutSeconds: 60
-        },
-        accessSettings: {
-          public: false,
-          inheritPermissions: false,
-          customPermissions: {
-            'data-sources': ['read', 'write'],
-            'scan-logic': ['read'],
-            'advanced-catalog': ['read']
-          },
-          accessLog: true,
-          auditTrail: true,
-          encryptionRequired: true
-        },
-        usageCount: 2156,
-        performanceScore: 96,
-        errorRate: 0.1,
-        lastSyncTime: subDays(new Date(), 1).toISOString() as ISODateString,
-        avgResponseTime: 85,
-        conflicts: [
-          {
-            id: 'conflict-1' as UUID,
-            type: ConflictType.CONFIGURATION,
-            severity: 'medium',
-            description: 'Connection timeout mismatch between source and target',
-            sourceValue: 30000,
-            targetValue: 45000,
-            suggestedResolution: 'Use source value (30000ms) for consistency',
-            autoResolvable: true,
-            detectedAt: subDays(new Date(), 1).toISOString() as ISODateString
-          }
-        ],
-        resolutionHistory: [],
-        createdAt: subDays(new Date(), 30).toISOString() as ISODateString,
-        updatedAt: subDays(new Date(), 1).toISOString() as ISODateString,
-        lastAccessedAt: new Date().toISOString() as ISODateString,
-        createdBy: currentUser.id,
-        tags: ['connection', 'database', 'performance', 'shared'],
-        category: 'infrastructure',
-        priority: 'critical',
-        aiRecommendations: [
-          {
-            id: 'rec-2' as UUID,
-            type: 'performance',
-            title: 'Increase Connection Pool Size',
-            description: 'Current usage patterns suggest increasing pool size to 150',
-            impact: 'high',
-            effort: 'low',
-            confidence: 92,
-            autoApplicable: false,
-            estimatedBenefit: '30% reduction in wait times'
-          }
-        ],
-        optimizationSuggestions: [
-          {
-            id: 'opt-2' as UUID,
-            category: 'performance',
-            suggestion: 'Implement connection pooling with smart routing',
-            expectedImprovement: '40% better connection utilization',
-            implementationSteps: [
-              'Analyze connection patterns',
-              'Implement smart routing algorithm',
-              'Configure load balancing'
-            ],
-            riskLevel: 'medium'
-          }
-        ],
-        riskAssessment: {
-          overallRisk: 'medium',
-          securityRisk: 20,
-          performanceRisk: 35,
-          complianceRisk: 15,
-          operationalRisk: 30,
-          risks: [
-            {
-              id: 'risk-2' as UUID,
-              type: 'performance',
-              description: 'Connection pool may become bottleneck during peak usage',
-              probability: 60,
-              impact: 70,
-              severity: 'high'
-            }
-          ],
-          mitigations: [
-            {
-              id: 'mit-2' as UUID,
-              riskId: 'risk-2' as UUID,
-              strategy: 'Implement auto-scaling connection pool',
-              effectiveness: 90,
-              cost: 'medium',
-              timeframe: '2 weeks'
-            }
-          ]
-        }
-      ];
-
-      return sampleResourceLinks;
     } catch (error) {
       console.error('Error loading enhanced resources:', error);
       return [];
@@ -1321,7 +916,7 @@ export const CrossGroupResourceLinker: React.FC = () => {
     } finally {
       setIsAnimating(false);
     }
-  }, [linkCrossGroupResource]);
+  }, [linkCrossGroupResource, setIsAnimating, setEnhancedResources, setShowLinkDialog, toast]);
 
   /**
    * Handle resource unlinking
@@ -1363,7 +958,7 @@ export const CrossGroupResourceLinker: React.FC = () => {
     } finally {
       setIsAnimating(false);
     }
-  }, [unlinkCrossGroupResource]);
+  }, [unlinkCrossGroupResource, setIsAnimating, setEnhancedResources, toast]);
 
   /**
    * Handle resource synchronization

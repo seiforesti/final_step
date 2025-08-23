@@ -37,55 +37,35 @@
 // Main Router
 export { default as RacineRouter } from './RacineRouter';
 export { 
-  RacineRouterProvider, 
-  useRacineRouter,
-  RouteAnalytics,
-  RouteConfiguration,
-  RouteBreadcrumbs,
-  useRouteNavigation,
-  useRouteAnalytics,
-  useRouteConfiguration
+  getAvailableRoutes,
+  getRouteConfig,
+  generateRouteUrl,
+  canAccessRoute,
+  useRacineRouter
 } from './RacineRouter';
 
 // Route Protection System
-export { default as RouteGuardsProvider } from './RouteGuards';
+export { default as RouteGuard } from './RouteGuards';
 export { 
   useRouteGuards,
-  RouteGuard,
   withRouteGuards,
-  AuthenticationGuard,
-  AuthorizationGuard,
-  MFAGuard,
-  RateLimitGuard,
-  SecurityContextGuard,
-  WorkspaceAccessGuard,
-  FeatureFlagGuard,
-  MaintenanceModeGuard,
-  useGuardExecution,
-  useGuardConfiguration,
-  useGuardAnalytics
+  useGuardStatus,
+  useSecurityContext,
+  useGuardAudit,
+  AdminRouteGuard
 } from './RouteGuards';
+export { RouteGuardsProvider } from './RouteGuards';
 
 // Route Processing Pipeline
-export { default as RouteMiddlewareProvider } from './RouteMiddleware';
+export { default as RouteMiddlewareComponent } from './RouteMiddleware';
 export { 
   useRouteMiddleware,
-  RouteMiddleware,
-  withRouteMiddleware,
-  PerformanceMonitoringMiddleware,
-  AnalyticsMiddleware,
-  SecurityMonitoringMiddleware,
-  AuditLoggingMiddleware,
-  CachingMiddleware,
-  RateLimitingMiddleware,
-  RequestValidationMiddleware,
-  CrossGroupCoordinationMiddleware,
-  ResponseCompressionMiddleware,
-  ErrorHandlingMiddleware,
-  useMiddlewareExecution,
-  useMiddlewareConfiguration,
+  MiddlewareMonitor,
+  useMiddlewarePerformance,
+  useMiddlewareStatus,
   useMiddlewareAnalytics
 } from './RouteMiddleware';
+export { RouteMiddlewareProvider } from './RouteMiddleware';
 
 // Deep Linking System
 export { default as DeepLinkManagerProvider } from './DeepLinkManager';

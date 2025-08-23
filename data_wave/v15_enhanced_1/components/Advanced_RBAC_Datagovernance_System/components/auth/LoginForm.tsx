@@ -2,41 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence, useAnimation } from 'framer-motion';
-import { 
-  EyeIcon, 
-  EyeSlashIcon, 
-  ExclamationTriangleIcon,
-  CheckCircleIcon,
-  InformationCircleIcon,
-  ArrowRightIcon,
-  ArrowLeftIcon,
-  UserIcon,
-  KeyIcon,
-  DevicePhoneMobileIcon,
-  EnvelopeIcon,
-  BuildingOfficeIcon,
-  MapPinIcon,
-  CalendarIcon,
-  PhotoIcon,
-  XMarkIcon,
-  SparklesIcon,
-  ShieldCheckIcon,
-  GlobeAltIcon,
-  CpuChipIcon,
-  BoltIcon,
-  FingerprintIcon,
-  LockClosedIcon,
-  ClockIcon,
-  WifiIcon,
-  ComputerDesktopIcon,
-  DeviceTabletIcon,
-  CommandLineIcon,
-  CogIcon,
-  StarIcon,
-  FireIcon,
-  RocketLaunchIcon,
-  AcademicCapIcon
-} from '@heroicons/react/24/outline';
+import { EyeIcon, EyeSlashIcon, ExclamationTriangleIcon, CheckCircleIcon, InformationCircleIcon, ArrowRightIcon, ArrowLeftIcon, UserIcon, KeyIcon, DevicePhoneMobileIcon, EnvelopeIcon, BuildingOfficeIcon, MapPinIcon, CalendarIcon, PhotoIcon, XMarkIcon, SparklesIcon, ShieldCheckIcon, GlobeAltIcon, CpuChipIcon, BoltIcon, LockClosedIcon, ClockIcon, WifiIcon, ComputerDesktopIcon, DeviceTabletIcon, CommandLineIcon, CogIcon, StarIcon, FireIcon, RocketLaunchIcon, AcademicCapIcon } from '@heroicons/react/24/outline';
 import { 
   GoogleIcon, 
   MicrosoftIcon, 
@@ -805,7 +771,7 @@ export const LoginForm: React.FC = () => {
             { label: 'Multi-Factor Auth', enabled: securityFeatures.twoFactor, icon: ShieldCheckIcon },
             { label: 'Zero Trust Architecture', enabled: securityFeatures.zeroTrust, icon: BoltIcon },
             { label: 'AI Threat Detection', enabled: securityFeatures.aiMonitoring, icon: CpuChipIcon },
-            { label: 'Biometric Support', enabled: securityFeatures.biometric, icon: FingerprintIcon },
+            { label: 'Biometric Support', enabled: securityFeatures.biometric, icon: ShieldCheckIcon },
             { label: 'Real-time Audit', enabled: securityFeatures.auditLogging, icon: ClockIcon }
           ].map((feature, index) => (
             <motion.div

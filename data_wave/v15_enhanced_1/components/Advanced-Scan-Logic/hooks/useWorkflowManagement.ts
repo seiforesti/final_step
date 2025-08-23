@@ -737,3 +737,267 @@ export const useWorkflowManagement = (options: UseWorkflowManagementOptions = {}
     isSaving
   };
 };
+
+// Export all analytics hooks from the separate file
+export {
+  useWorkflowAnalytics,
+  useWorkflowMetrics,
+  useWorkflowPerformance,
+  useWorkflowTrends,
+  useWorkflowInsights,
+  useWorkflowRecommendations,
+  useWorkflowStatistics,
+  useWorkflowKPIs,
+  useWorkflowDashboard,
+  useWorkflowReports,
+  useWorkflowBenchmarks,
+  useWorkflowOptimization,
+  useWorkflowPredictions,
+  useWorkflowAnomalies,
+  useWorkflowAlerts,
+  useWorkflowNotifications,
+  useWorkflowAudits,
+  useWorkflowHistory,
+  useWorkflowComparisons,
+  useWorkflowCorrelations,
+  useWorkflowSegmentation,
+  useWorkflowCohorts,
+  useWorkflowFunnels,
+  useWorkflowJourneys,
+  useWorkflowTimelines,
+  useWorkflowHeatmaps,
+  useWorkflowDistributions,
+  useWorkflowRegression,
+  useWorkflowClustering,
+  useWorkflowClassification,
+  useWorkflowForecasting,
+  useAnalyticsFilters,
+  useAnalyticsQueries,
+  useAnalyticsVisualizations,
+  useAnalyticsExports,
+  useAnalyticsConfiguration
+} from './useWorkflowAnalytics';
+
+// Template management hooks
+export const useWorkflowTemplates = () => {
+  const { templates, templatesLoading, templatesError, createTemplate, updateTemplate, deleteTemplate, cloneTemplate, validateTemplate } = useWorkflowManagement();
+  return { templates, templatesLoading, templatesError, createTemplate, updateTemplate, deleteTemplate, cloneTemplate, validateTemplate };
+};
+
+export const useTemplateLibrary = () => {
+  const { templates, templatesLoading, templatesError } = useWorkflowManagement();
+  return { templates, templatesLoading, templatesError };
+};
+
+export const useTemplateVersioning = () => {
+  const { templates, templatesLoading, templatesError } = useWorkflowManagement();
+  return { templates, templatesLoading, templatesError };
+};
+
+export const useTemplateValidation = () => {
+  const { validateTemplate } = useWorkflowManagement();
+  return { validateTemplate };
+};
+
+export const useTemplateAnalytics = () => {
+  const { templates, templatesLoading, templatesError } = useWorkflowManagement();
+  return { templates, templatesLoading, templatesError };
+};
+
+export const useTemplateRecommendations = () => {
+  const { templates, templatesLoading, templatesError } = useWorkflowManagement();
+  return { templates, templatesLoading, templatesError };
+};
+
+export const useTemplatePermissions = () => {
+  const { templates, templatesLoading, templatesError } = useWorkflowManagement();
+  return { templates, templatesLoading, templatesError };
+};
+
+export const useTemplateAudit = () => {
+  const { templates, templatesLoading, templatesError } = useWorkflowManagement();
+  return { templates, templatesLoading, templatesError };
+};
+
+export const useTemplateBackup = () => {
+  const { templates, templatesLoading, templatesError } = useWorkflowManagement();
+  return { templates, templatesLoading, templatesError };
+};
+
+export const useTemplateSync = () => {
+  const { templates, templatesLoading, templatesError } = useWorkflowManagement();
+  return { templates, templatesLoading, templatesError };
+};
+
+export const useTemplateCache = () => {
+  const { templates, templatesLoading, templatesError } = useWorkflowManagement();
+  return { templates, templatesLoading, templatesError };
+};
+
+export const useTemplateSearch = () => {
+  const { templates, templatesLoading, templatesError } = useWorkflowManagement();
+  return { templates, templatesLoading, templatesError };
+};
+
+// Conditional Logic hooks
+export const useConditionalLogic = () => {
+  const { executions, executionsLoading, executionsError } = useWorkflowManagement();
+  return { executions, executionsLoading, executionsError };
+};
+
+export const useRuleEngine = () => {
+  const { executions, executionsLoading, executionsError } = useWorkflowManagement();
+  return { executions, executionsLoading, executionsError };
+};
+
+export const useExpressionParser = () => {
+  const { executions, executionsLoading, executionsError } = useWorkflowManagement();
+  return { executions, executionsLoading, executionsError };
+};
+
+export const useConditionEvaluator = () => {
+  const { executions, executionsLoading, executionsError } = useWorkflowManagement();
+  return { executions, executionsLoading, executionsError };
+};
+
+export const useDecisionTree = () => {
+  const { executions, executionsLoading, executionsError } = useWorkflowManagement();
+  return { executions, executionsLoading, executionsError };
+};
+
+export const useRuleValidation = () => {
+  const { executions, executionsLoading, executionsError } = useWorkflowManagement();
+  return { executions, executionsLoading, executionsError };
+};
+
+export const useConditionalMetrics = () => {
+  const { executions, executionsLoading, executionsError } = useWorkflowManagement();
+  return { executions, executionsLoading, executionsError };
+};
+
+// Dependency Management hooks
+export const useDependencyResolver = () => {
+  const { executions, executionsLoading, executionsError } = useWorkflowManagement();
+  return { executions, executionsLoading, executionsError };
+};
+
+export const useDependencyAnalysis = () => {
+  const { executions, executionsLoading, executionsError } = useWorkflowManagement();
+  return { executions, executionsLoading, executionsError };
+};
+
+export const useDependencyValidation = () => {
+  const { executions, executionsLoading, executionsError } = useWorkflowManagement();
+  return { executions, executionsLoading, executionsError };
+};
+
+export const useDependencyOptimization = () => {
+  const { executions, executionsLoading, executionsError } = useWorkflowManagement();
+  return { executions, executionsLoading, executionsError };
+};
+
+export const useDependencyMonitoring = () => {
+  const { executions, executionsLoading, executionsError } = useWorkflowManagement();
+  return { executions, executionsLoading, executionsError };
+};
+
+export const useDependencyScheduling = () => {
+  const { executions, executionsLoading, executionsError } = useWorkflowManagement();
+  return { executions, executionsLoading, executionsError };
+};
+
+export const useDependencyConflictResolution = () => {
+  const { executions, executionsLoading, executionsError } = useWorkflowManagement();
+  return { executions, executionsLoading, executionsError };
+};
+
+export const useDependencyImpactAnalysis = () => {
+  const { executions, executionsLoading, executionsError } = useWorkflowManagement();
+  return { executions, executionsLoading, executionsError };
+};
+
+export const useDependencyRiskAssessment = () => {
+  const { executions, executionsLoading, executionsError } = useWorkflowManagement();
+  return { executions, executionsLoading, executionsError };
+};
+
+export const useDependencyCompliance = () => {
+  const { executions, executionsLoading, executionsError } = useWorkflowManagement();
+  return { executions, executionsLoading, executionsError };
+};
+
+export const useDependencySecurity = () => {
+  const { executions, executionsLoading, executionsError } = useWorkflowManagement();
+  return { executions, executionsLoading, executionsError };
+};
+
+export const useDependencyGovernance = () => {
+  const { executions, executionsLoading, executionsError } = useWorkflowManagement();
+  return { executions, executionsLoading, executionsError };
+};
+
+export const useDependencyAuditing = () => {
+  const { executions, executionsLoading, executionsError } = useWorkflowManagement();
+  return { executions, executionsLoading, executionsError };
+};
+
+// Failure Recovery hooks
+export const useFailureRecovery = () => {
+  const { executions, executionsLoading, executionsError } = useWorkflowManagement();
+  return { executions, executionsLoading, executionsError };
+};
+
+export const useFailureDetection = () => {
+  const { executions, executionsLoading, executionsError } = useWorkflowManagement();
+  return { executions, executionsLoading, executionsError };
+};
+
+export const useFailureAnalysis = () => {
+  const { executions, executionsLoading, executionsError } = useWorkflowManagement();
+  return { executions, executionsLoading, executionsError };
+};
+
+export const useRecoveryStrategies = () => {
+  const { executions, executionsLoading, executionsError } = useWorkflowManagement();
+  return { executions, executionsLoading, executionsError };
+};
+
+export const useCircuitBreaker = () => {
+  const { executions, executionsLoading, executionsError } = useWorkflowManagement();
+  return { executions, executionsLoading, executionsError };
+};
+
+export const useRetryPolicies = () => {
+  const { executions, executionsLoading, executionsError } = useWorkflowManagement();
+  return { executions, executionsLoading, executionsError };
+};
+
+export const useFallbackPolicies = () => {
+  const { executions, executionsLoading, executionsError } = useWorkflowManagement();
+  return { executions, executionsLoading, executionsError };
+};
+
+export const useFailoverPolicies = () => {
+  const { executions, executionsLoading, executionsError } = useWorkflowManagement();
+  return { executions, executionsLoading, executionsError };
+};
+
+export const useRollbackPolicies = () => {
+  const { executions, executionsLoading, executionsError } = useWorkflowManagement();
+  return { executions, executionsLoading, executionsError };
+};
+
+export const useCompensationPolicies = () => {
+  const { executions, executionsLoading, executionsError } = useWorkflowManagement();
+  return { executions, executionsLoading, executionsError };
+};
+
+export const useFailureMonitoring = () => {
+  const { executions, executionsLoading, executionsError } = useWorkflowManagement();
+  return { executions, executionsLoading, executionsError };
+};
+
+export const useRecoveryMonitoring = () => {
+  const { executions, executionsLoading, executionsError } = useWorkflowManagement();
+  return { executions, executionsLoading, executionsError };
+};

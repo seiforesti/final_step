@@ -2,14 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import {
-  Activity, AlertCircle, CheckCircle2, Clock, Database, 
-  RefreshCw, TrendingUp, TrendingDown, Zap, WifiOff,
-  Signal, AlertTriangle, Heart, Monitor, BarChart3,
-  Timer, Target, Gauge, Cpu, Memory, HardDrive,
-  Network, Server, Globe, Eye, Settings, Filter,
-  Calendar, MapPin, Shield, Lock, Key, Wifi
-} from 'lucide-react'
+import { Activity, AlertCircle, CheckCircle2, Clock, Database, RefreshCw, TrendingUp, TrendingDown, Zap, WifiOff, Signal, AlertTriangle, Heart, Monitor, BarChart3, Timer, Target, Gauge, Cpu, HardDrive, Network, Server, Globe, Eye, Settings, Filter, Calendar, MapPin, Shield, Lock, Key, Wifi } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -712,7 +705,7 @@ export const QuickDataSourceStatus: React.FC<QuickDataSourceStatusProps> = ({
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {renderMetric('CPU Usage', performanceMetrics.cpuUsage || 0, PERFORMANCE_THRESHOLDS.cpu)}
-                  {renderMetric('Memory Usage', performanceMetrics.memoryUsage || 0, PERFORMANCE_THRESHOLDS.memory)}
+                  {renderMetric('HardDrive Usage', performanceMetrics.memoryUsage || 0, PERFORMANCE_THRESHOLDS.memory)}
                   {renderMetric('Connection Pool', ((connectionPool?.active || 0) / (connectionPool?.total || 1)) * 100, PERFORMANCE_THRESHOLDS.connections)}
                   {renderMetric('Average Latency', performanceMetrics.avgResponseTime || 0, PERFORMANCE_THRESHOLDS.latency, 'ms', formatLatency)}
                 </CardContent>
@@ -737,7 +730,7 @@ export const QuickDataSourceStatus: React.FC<QuickDataSourceStatusProps> = ({
                     </div>
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
-                        <span>Memory Usage</span>
+                        <span>HardDrive Usage</span>
                         <span>{formatPercent(performanceMetrics.memoryUsage || 0)}</span>
                       </div>
                       <Progress value={performanceMetrics.memoryUsage || 0} className="h-2" />

@@ -22,34 +22,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { 
-  Tag, 
-  Save, 
-  Sparkles, 
-  Target, 
-  Shield, 
-  Eye, 
-  Lock,
-  CheckCircle,
-  AlertTriangle,
-  Clock,
-  BarChart3,
-  FileText,
-  Search,
-  RefreshCw,
-  Plus,
-  Minus,
-  Edit,
-  Trash2,
-  HelpCircle,
-  Lightbulb,
-  Database,
-  Users,
-  Settings,
-  Star,
-  Crown,
-  Flag
-} from 'lucide-react';
+import { Tag, Save, Sparkles, Target, Shield, Eye, Lock, CheckCircle, AlertTriangle, Clock, BarChart3, FileText, Search, RefreshCw, Plus, Minus, Edit, Trash2, HelpCircle, Lightbulb, Database, Users, Settings, Star, Crown, Flag } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 

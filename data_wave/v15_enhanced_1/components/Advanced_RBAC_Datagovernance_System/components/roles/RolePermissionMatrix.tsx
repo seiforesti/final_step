@@ -34,9 +34,9 @@ import {
 } from '@/components/ui/select';
 import {
   DropdownMenu,
-  DropdownMenuContent,
+  DropdownMenuContent,  
   DropdownMenuItem,
-  DropdownMenuLabel,
+  DropdownMenuLabel,  
   DropdownMenuSeparator,
   DropdownMenuTrigger,
   DropdownMenuCheckboxItem,
@@ -166,7 +166,7 @@ interface BulkOperation {
   sourceRole?: number;
 }
 
-export default function RolePermissionMatrix({
+export function RolePermissionMatrix({
   roles,
   permissions,
   onRefresh,
@@ -244,7 +244,7 @@ export default function RolePermissionMatrix({
       for (const role of roles) {
         for (const permission of permissions) {
           const matrixEntry = matrix.matrix.find(
-            entry => entry.role_id === role.id && entry.permission_id === permission.id
+            (entry: { role_id: number; permission_id: number }) => entry.role_id === role.id && entry.permission_id === permission.id
           );
           
           matrixCells.push({

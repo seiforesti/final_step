@@ -25,23 +25,10 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Calendar } from '@/components/ui/calendar';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import {
-  MessageSquare, Bot, Brain, Sparkles, Zap, Target, Eye, Lightbulb, Search,
-  Send, Mic, MicOff, Volume2, VolumeX, Play, Pause, RefreshCw, Loader2,
-  Settings, User, Hash, Clock, TrendingUp, BarChart3, PieChart, Activity,
-  FileText, Image, Video, Link, Download, Upload, Calendar as CalendarIcon,
-  CheckCircle, XCircle, AlertTriangle, Info, ChevronDown, ChevronUp,
-  ArrowRight, ArrowLeft, Copy, Share2, Flag, Bookmark, Star, Heart,
-  ThumbsUp, ThumbsDown, MoreHorizontal, Edit3, Trash2, Plus, Filter,
-  Database, Table as TableIcon, Layers, Grid3X3, List, FolderOpen, Globe, Map,
-  Users, UserCheck, Building, MapPin, Navigation, Compass, Route,
-  Timer, Stopwatch, History, Award, Crown, Shield, Lock, Unlock,
-  Key, Code, Terminal, Command, Cpu, HardDrive, Server, Cloud,
-  Wifi, Signal, Battery, Power, Gauge, Speedometer, Tachometer
-} from 'lucide-react';
+import { MessageSquare, Bot, Brain, Sparkles, Zap, Target, Eye, Lightbulb, Search, Send, Mic, MicOff, Volume2, VolumeX, Play, Pause, RefreshCw, Loader2, Settings, User, Hash, Clock, TrendingUp, BarChart3, PieChart, Activity, FileText, Image, Video, Link, Download, Upload, Calendar as CalendarIcon, CheckCircle, XCircle, AlertTriangle, Info, ChevronDown, ChevronUp, ArrowRight, ArrowLeft, Copy, Share2, Flag, Bookmark, Star, Heart, ThumbsUp, ThumbsDown, MoreHorizontal, Edit3, Trash2, Plus, Filter, Database, Table as TableIcon, Layers, Grid3X3, List, FolderOpen, Globe, Map, Users, UserCheck, Building, MapPin, Navigation, Compass, Route, Timer, Stopwatch, History, Award, Crown, Shield, Lock, Unlock, Key, Code, Terminal, Command, Cpu, HardDrive, Server, Cloud, Wifi, Signal, Battery, Power, Gauge, Speedometer, Tachometer } from 'lucide-react';
 import { LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart as RechartsPieChart, Cell, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Legend, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ScatterChart, Scatter, TreemapChart, Treemap } from 'recharts';
 import { intelligentDiscoveryService } from '../../services/intelligent-discovery.service';
-import { collaborationService } from '../../services/collaboration.service';
+import { collaborationService } from '../../services';
 import { enterpriseCatalogService } from '../../services/enterprise-catalog.service';
 import { advancedLineageService } from '../../services/advanced-lineage.service';
 

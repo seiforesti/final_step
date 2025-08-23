@@ -15,27 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
-import { 
-  Tag, 
-  Activity, 
-  TrendingUp, 
-  TrendingDown, 
-  CheckCircle, 
-  AlertTriangle, 
-  Clock,
-  Target,
-  Database,
-  FileText,
-  RefreshCw,
-  Eye,
-  BarChart3,
-  PieChart,
-  Users,
-  Shield,
-  Star,
-  Search,
-  Filter
-} from 'lucide-react';
+import { Tag, Activity, TrendingUp, TrendingDown, CheckCircle, AlertTriangle, Clock, Target, Database, FileText, RefreshCw, Eye, BarChart3, PieChart, Users, Shield, Star, Search, Filter } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 

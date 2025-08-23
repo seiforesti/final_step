@@ -22,14 +22,7 @@ import {
 } from "@/components/ui/select";
 import { LoadingSpinner } from "./components/LoadingSpinner";
 
-import {
-  Filter,
-  Plus,
-  RefreshCw,
-  Search,
-  Settings,
-  MoreHorizontal,
-} from "lucide-react";
+import { Filter, Plus, RefreshCw, Search, Settings, MoreHorizontal,  } from 'lucide-react';
 
 import { useScanRuleRBAC } from "./utils/rbac-integration";
 

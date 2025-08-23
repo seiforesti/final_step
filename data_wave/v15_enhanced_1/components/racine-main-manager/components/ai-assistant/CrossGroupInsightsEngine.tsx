@@ -2,75 +2,7 @@
 
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  BarChart3, 
-  LineChart, 
-  PieChart, 
-  TrendingUp, 
-  TrendingDown, 
-  Activity, 
-  Brain, 
-  Eye, 
-  Layers, 
-  GitBranch, 
-  Network, 
-  Zap, 
-  Target, 
-  Gauge, 
-  Compass, 
-  Globe, 
-  Search, 
-  Filter, 
-  Settings, 
-  RefreshCw, 
-  Download, 
-  Upload, 
-  Save, 
-  Share, 
-  Bookmark, 
-  Star, 
-  Flag, 
-  AlertTriangle, 
-  CheckCircle, 
-  XCircle, 
-  Info, 
-  Clock, 
-  Calendar, 
-  Timer, 
-  Users, 
-  Database, 
-  Shield, 
-  Edit, 
-  Copy, 
-  Trash2, 
-  Plus, 
-  Minus, 
-  X, 
-  Check, 
-  ChevronDown, 
-  ChevronUp, 
-  ChevronLeft, 
-  ChevronRight, 
-  MoreHorizontal, 
-  ArrowRight, 
-  ArrowUpRight, 
-  ArrowDownRight, 
-  Maximize, 
-  Minimize, 
-  ExternalLink, 
-  LinkIcon,
-  Hash,
-  Tag,
-  Workflow,
-  Route,
-  MapPin,
-  Crosshair,
-  Focus,
-  Scan,
-  Radar,
-  Microscope,
-  Telescope
-} from 'lucide-react';
+import { BarChart3, LineChart, PieChart, TrendingUp, TrendingDown, Activity, Brain, Eye, Layers, GitBranch, Network, Zap, Target, Gauge, Compass, Globe, Search, Filter, Settings, RefreshCw, Download, Upload, Save, Share, Bookmark, Star, Flag, AlertTriangle, CheckCircle, XCircle, Info, Clock, Calendar, Timer, Users, Database, Shield, Edit, Copy, Trash2, Plus, Minus, X, Check, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, MoreHorizontal, ArrowRight, ArrowUpRight, ArrowDownRight, Maximize, Minimize, ExternalLink, LinkIcon, Hash, Tag, Workflow, Route, MapPin, Crosshair, Focus, Scan, Radar, Microscope,  } from 'lucide-react';
 
 // UI Components
 import { Button } from '@/components/ui/button';
@@ -520,7 +452,7 @@ export const CrossGroupInsightsEngine: React.FC<CrossGroupInsightsEngineProps> =
         includeVisualizations: true
       });
 
-      // Download the export
+      // ArrowDownTrayIcon the export
       const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       
@@ -898,7 +830,7 @@ export const CrossGroupInsightsEngine: React.FC<CrossGroupInsightsEngineProps> =
               Trends
             </TabsTrigger>
             <TabsTrigger value="predictions" className="flex items-center gap-2">
-              <Telescope className="h-4 w-4" />
+                              <Search className="h-4 w-4" />
               Predictions
             </TabsTrigger>
             <TabsTrigger value="recommendations" className="flex items-center gap-2">
@@ -1256,7 +1188,7 @@ const PredictiveAnalytics: React.FC<PredictiveAnalyticsProps> = ({
         <CardContent>
           {filteredPredictions.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              <Telescope className="h-12 w-12 mx-auto mb-4" />
+              <Search className="h-12 w-12 mx-auto mb-4" />
               <h3 className="font-medium mb-2">No High-Confidence Predictions</h3>
               <p className="text-sm">
                 Lower the confidence threshold to see more predictions.

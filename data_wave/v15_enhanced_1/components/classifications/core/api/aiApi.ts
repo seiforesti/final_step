@@ -818,3 +818,6 @@ export type {
   MultiAgentConfig, 
   ExplainabilityConfig 
 };
+
+// Default export for compatibility
+export default EnhancedAIApiClient;

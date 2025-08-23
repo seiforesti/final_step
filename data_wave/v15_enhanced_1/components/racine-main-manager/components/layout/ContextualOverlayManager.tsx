@@ -41,38 +41,7 @@ import {
   useTransform,
   useDragControls
 } from 'framer-motion';
-import {
-  Layers,
-  PanelRightOpen,
-  PanelLeftOpen,
-  Bell,
-  BellRing,
-  X,
-  Maximize2,
-  Minimize2,
-  Move,
-  Settings,
-  Brain,
-  Zap,
-  Activity,
-  Users,
-  Share2,
-  Lock,
-  Unlock,
-  Eye,
-  EyeOff,
-  AlertTriangle,
-  CheckCircle,
-  Info,
-  HelpCircle,
-  RefreshCw,
-  Plus,
-  MoreHorizontal,
-  ChevronUp,
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight
-} from 'lucide-react';
+import { Layers, PanelRightOpen, PanelLeftOpen, Bell, BellRing, X, Maximize2, Minimize2, Move, Settings, Brain, Zap, Activity, Users, Share2, Lock, Unlock, Eye, EyeOff, AlertTriangle, CheckCircle, Info, HelpCircle, RefreshCw, Plus, MoreHorizontal, ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 
 // Shadcn/UI Components
 import { Button } from '@/components/ui/button';
@@ -263,7 +232,7 @@ const ContextualOverlayManager: React.FC<ContextualOverlayManagerProps> = ({
     getContextualOverlays,
     optimizeOverlayLayout,
     analyzeOverlayUsage
-  } = useAIAssistant(userContext.id, {
+  } = useAIAssistant(userContext?.id || 'default', {
     context: 'overlay_management',
     activeViews,
     currentLayout: layoutMode

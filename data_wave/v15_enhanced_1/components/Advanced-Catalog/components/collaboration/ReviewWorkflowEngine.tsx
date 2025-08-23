@@ -55,23 +55,7 @@ import {
   HoverCard, HoverCardContent, HoverCardTrigger
 } from '@/components/ui/hover-card';
 
-import { 
-  GitPullRequest, Workflow, Users, Clock, CheckCircle, XCircle, AlertCircle,
-  PlayCircle, PauseCircle, StopCircle, SkipForward, RotateCcw, FastForward,
-  Eye, Edit, Trash2, Plus, Search, Filter, MoreHorizontal, Settings,
-  AlertTriangle, CheckCircle2, Clock3, Activity, TrendingUp, Target,
-  BarChart3, PieChart, LineChart, Zap, Brain, Lightbulb, Star, Flag,
-  GitBranch, GitMerge, GitCommit, History, Calendar as CalendarIcon,
-  User, UserCheck, Users2, Crown, Award, Shield, Lock, Unlock,
-  Mail, Phone, Bell, MessageSquare, Send, Forward, Reply, Archive,
-  Download, Upload, ExternalLink, Link, Share2, Copy, Save,
-  RefreshCw, ChevronDown, ChevronRight, ChevronLeft, ChevronUp,
-  ArrowRight, ArrowLeft, ArrowUp, ArrowDown, Maximize, Minimize,
-  Grid, List, Layout, Map, Layers, Network, Database, Table as TableIcon,
-  FileText, File, Folder, Tag, Hash, Code, Terminal, Monitor,
-  Smartphone, Tablet, Laptop, Server, Cloud, HardDrive, Cpu,
-  Memory, Gauge, Signal, Wifi, Bluetooth, Power, Battery
-} from 'lucide-react';
+import { GitPullRequest, Workflow, Users, Clock, CheckCircle, XCircle, AlertCircle, PlayCircle, PauseCircle, StopCircle, SkipForward, RotateCcw, FastForward, Eye, Edit, Trash2, Plus, Search, Filter, MoreHorizontal, Settings, AlertTriangle, CheckCircle2, Clock3, Activity, TrendingUp, Target, BarChart3, PieChart, LineChart, Zap, Brain, Lightbulb, Star, Flag, GitBranch, GitMerge, GitCommit, History, Calendar as CalendarIcon, User, UserCheck, Users2, Crown, Award, Shield, Lock, Unlock, Mail, Phone, Bell, MessageSquare, Send, Forward, Reply, Archive, Download, Upload, ExternalLink, Link, Share2, Copy, Save, RefreshCw, ChevronDown, ChevronRight, ChevronLeft, ChevronUp, ArrowRight, ArrowLeft, ArrowUp, ArrowDown, Maximize, Minimize, Grid, List, Layout, Map, Layers, Network, Database, Table as TableIcon, FileText, File, Folder, Tag, Hash, Code, Terminal, Monitor, Smartphone, Tablet, Laptop, Server, Cloud, HardDrive, Cpu, Gauge, Signal, Wifi, Bluetooth, Power, Battery } from 'lucide-react';
 
 import { 
   LineChart as RechartsLineChart, Line, AreaChart, Area, BarChart, Bar, 
@@ -84,7 +68,7 @@ import { format, subDays, parseISO, formatDistanceToNow, isWithinInterval, start
 import { cn } from '@/lib/utils';
 
 // Import backend services
-import { collaborationService } from '../../services/collaboration.service';
+import { collaborationService } from '../../services';
 import { enterpriseCatalogService } from '../../services/enterprise-catalog.service';
 import { intelligentDiscoveryService } from '../../services/intelligent-discovery.service';
 import { advancedLineageService } from '../../services/advanced-lineage.service';

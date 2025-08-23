@@ -22,7 +22,6 @@ import {
   Lock,
   UserX,
   Mail,
-  Phone,
   ExternalLink
 } from 'lucide-react';
 
@@ -97,6 +96,8 @@ export default function AccessDeniedPage() {
   const [requestSent, setRequestSent] = useState(false);
 
   useEffect(() => {
+    if (!searchParams) return;
+    
     const reason = searchParams.get('reason') as keyof typeof DENIAL_REASONS;
     const route = searchParams.get('route');
     const permissions = searchParams.get('required');

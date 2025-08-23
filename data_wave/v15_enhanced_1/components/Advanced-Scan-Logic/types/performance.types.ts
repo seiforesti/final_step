@@ -431,3 +431,26 @@ export enum AggregationLevel {
   WEEK = 'week',
   MONTH = 'month'
 }
+
+export enum MonitoringScope {
+  SYSTEM = 'system',
+  APPLICATION = 'application',
+  DATABASE = 'database',
+  NETWORK = 'network',
+  INFRASTRUCTURE = 'infrastructure',
+  BUSINESS = 'business',
+  SECURITY = 'security',
+  COMPLIANCE = 'compliance',
+  CUSTOM = 'custom'
+}
+
+export enum PerformanceStatus {
+  OPTIMAL = 'optimal',
+  GOOD = 'good',
+  WARNING = 'warning',
+  CRITICAL = 'critical',
+  DEGRADED = 'degraded',
+  UNKNOWN = 'unknown',
+  MAINTENANCE = 'maintenance',
+  OFFLINE = 'offline'
+}

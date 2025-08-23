@@ -23,19 +23,7 @@ import {
   PolarAngleAxis, PolarRadiusAxis, Radar, Treemap, FunnelChart, Funnel,
   LabelList, Sankey
 } from 'recharts';
-import {
-  BarChart3, TrendingUp, Activity, DollarSign, Users, Target, Award,
-  Clock, Database, Monitor, Cpu, AlertTriangle, CheckCircle, XCircle,
-  Info, Settings, Search, Filter, Download, Upload, Refresh, Play,
-  Pause, Stop, MoreVertical, Eye, Edit, Trash2, Plus, Minus, ArrowUp,
-  ArrowDown, ArrowRight, Calendar, Globe, Shield, Lock, Unlock, Star,
-  Heart, Bookmark, Share, MessageSquare, Bell, Mail, Phone, Video,
-  Mic, Camera, Image, File, Folder, Archive, Tag, Flag, Map,
-  Navigation, Compass, Route, Layers, Grid, List, Table, Kanban,
-  Timeline, Chart, PieChart as PieChartIcon, LineChart as LineChartIcon,
-  Building, Briefcase, Calculator, CreditCard, FileText, Presentation,
-  Lightbulb, Zap, Brain, Network, Bot
-} from 'lucide-react';
+import { BarChart3, TrendingUp, Activity, DollarSign, Users, Target, Award, Clock, Database, Monitor, Cpu, AlertTriangle, CheckCircle, XCircle, Info, Settings, Search, Filter, Download, Upload, RefreshCw, Play, Pause, Square, MoreVertical, Eye, Edit, Trash2, Plus, Minus, ArrowUp, ArrowDown, ArrowRight, Calendar, Globe, Shield, Lock, Unlock, Star, Heart, Bookmark, Share, MessageSquare, Bell, Mail, Phone, Video, Mic, Camera, Image, File, Folder, Archive, Tag, Flag, Map, Navigation, Compass, Route, Layers, Grid, List, Table, Kanban, Timeline, Chart, PieChart as PieChartIcon, LineChart as LineChartIcon, Building, Briefcase, Calculator, CreditCard, FileText, Presentation, Lightbulb, Zap, Brain, Network, Bot } from 'lucide-react';
 
 // Import custom hooks and utilities
 import { useClassificationState } from '../core/hooks/useClassificationState';

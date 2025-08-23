@@ -22,18 +22,7 @@ import {
   ComposedChart, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
   Legend, ResponsiveContainer, ScatterChart, Scatter, Treemap
 } from 'recharts';
-import {
-  BarChart3, TrendingUp, Activity, Zap, Brain, Target, Award,
-  Clock, Users, Database, Monitor, Cpu, Network, AlertTriangle,
-  CheckCircle, XCircle, Info, Settings, Search, Filter, Download,
-  Upload, Refresh, Play, Pause, Stop, MoreVertical, Eye, Edit,
-  Trash2, Plus, Minus, ArrowUp, ArrowDown, ArrowRight, Calendar,
-  Globe, Shield, Lock, Unlock, Star, Heart, Bookmark, Share,
-  MessageSquare, Bell, Mail, Phone, Video, Mic, Camera, Image,
-  File, Folder, Archive, Tag, Flag, Map, Navigation, Compass,
-  Route, Layers, Grid, List, Table, Kanban, Timeline, Chart,
-  PieChart as PieChartIcon, BarChart as BarChartIcon, LineChart as LineChartIcon
-} from 'lucide-react';
+import { BarChart3, TrendingUp, Activity, Zap, Brain, Target, Award, Clock, Users, Database, Monitor, Cpu, Network, AlertTriangle, CheckCircle, XCircle, Info, Settings, Search, Filter, Download, Upload, RefreshCw, Play, Pause, Square, MoreVertical, Eye, Edit, Trash2, Plus, Minus, ArrowUp, ArrowDown, ArrowRight, Calendar, Globe, Shield, Lock, Unlock, Star, Heart, Bookmark, Share, MessageSquare, Bell, Mail, Phone, Video, Mic, Camera, Image, File, Folder, Archive, Tag, Flag, Map, Navigation, Compass, Route, Layers, Grid, List, Table, Kanban, Timeline, Chart, PieChart as PieChartIcon, BarChart as BarChartIcon, LineChart as LineChartIcon } from 'lucide-react';
 
 // Import custom hooks and utilities
 import { useClassificationState } from '../core/hooks/useClassificationState';
@@ -1311,7 +1300,7 @@ export const AIAnalyticsDashboard: React.FC = () => {
             onClick={handleRefreshData}
             disabled={state.isLoading}
           >
-            <Refresh className={`h-4 w-4 ${state.isLoading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-4 w-4 ${state.isLoading ? 'animate-spin' : ''}`} />
           </Button>
 
           {/* Settings */}

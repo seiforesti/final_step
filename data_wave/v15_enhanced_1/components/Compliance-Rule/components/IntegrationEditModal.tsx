@@ -22,7 +22,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Edit, Mail, Webhook, Settings, RefreshCw, Play, CheckCircle, AlertTriangle, Info, Loader2, Activity } from "lucide-react"
+import { Edit, Mail, Webhook, Settings, RefreshCw, Play, CheckCircle, AlertTriangle, Info, Loader2, Activity } from 'lucide-react'
 import { useEnterpriseFeatures } from "../hooks/use-enterprise-features"
 import { ComplianceAPIs } from "../services/enterprise-apis"
 import type { ComplianceIntegration } from "../types"

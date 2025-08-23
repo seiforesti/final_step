@@ -893,6 +893,7 @@ export class OrchestrationAPIService {
 // ============================================================================
 
 export const orchestrationAPI = new OrchestrationAPIService();
+export const orchestrationAPIService = orchestrationAPI;
 
 /**
  * Enterprise utilities for orchestration management

@@ -15,8 +15,8 @@ import type {
   RBACMetrics,
   RBACAnalytics,
   RBACCoordination,
-  WorkspaceContext,
-  UserPermissions
+  UserPermissions,
+  ISODateString
 } from '../types';
 
 /**
@@ -666,7 +666,7 @@ export class RBACAnalyticsUtils {
     const startDate = new Date(now.getTime() - timeframeDays * 24 * 60 * 60 * 1000);
     
     const relevantLogs = auditLogs.filter(log => 
-      log.timestamp >= startDate && log.action.startsWith('permission_')
+      new Date(log.timestamp) >= startDate && log.action.startsWith('permission_')
     );
     
     const permissionCounts = new Map<string, number>();
@@ -710,7 +710,7 @@ export class RBACAnalyticsUtils {
     const now = new Date();
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
     
-    const recentLogs = auditLogs.filter(log => log.timestamp >= thirtyDaysAgo);
+    const recentLogs = auditLogs.filter(log => new Date(log.timestamp) >= thirtyDaysAgo);
     const userActivity = new Map<string, number>();
     
     recentLogs.forEach(log => {
@@ -750,7 +750,7 @@ export class RBACAnalyticsUtils {
       const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
       
       const dayUsage = logs.filter(log => 
-        log.timestamp >= dayStart && log.timestamp < dayEnd
+        new Date(log.timestamp) >= dayStart && new Date(log.timestamp) < dayEnd
       ).length;
       
       trends.push({ date: dayStart, usage: dayUsage });
@@ -788,7 +788,7 @@ export class RBACAnalyticsUtils {
       }
       
       // Check for unusual access patterns
-      const accessHours = userLogs.map(log => log.timestamp.getHours());
+      const accessHours = userLogs.map(log => new Date(log.timestamp).getHours());
       const nightAccess = accessHours.filter(hour => hour < 6 || hour > 22).length;
       
       if (nightAccess > userLogs.length * 0.3) {
@@ -797,7 +797,7 @@ export class RBACAnalyticsUtils {
       }
       
       // Check for dormant account with recent activity
-      const lastActivity = Math.max(...userLogs.map(log => log.timestamp.getTime()));
+      const lastActivity = Math.max(...userLogs.map(log => new Date(log.timestamp).getTime()));
       const daysSinceActivity = (Date.now() - lastActivity) / (1000 * 60 * 60 * 24);
       
       if (daysSinceActivity > 90 && userLogs.length > 0) {
@@ -828,7 +828,20 @@ export class RBACConfigurationUtils {
           configs[policy.workspaceId] = {
             workspaceId: policy.workspaceId,
             policies: [],
-            settings: {}
+            settings: {
+              enableAuditLogging: true,
+              auditLogRetention: 90,
+              sessionTimeout: 30,
+              passwordPolicy: {
+                minLength: 8,
+                requireUppercase: true,
+                requireLowercase: true,
+                requireNumbers: true,
+                requireSpecialChars: true,
+                historyCount: 5
+              },
+              mfaRequired: false
+            }
           };
         }
         configs[policy.workspaceId].policies.push(policy);
@@ -978,6 +991,297 @@ export class RBACConfigurationUtils {
     };
   }
 }
+/**
+ * Additional RBAC utility functions for advanced analytics
+ */
+export function analyzeRoleHierarchy(
+  roles: RBACRole[],
+  targetRoleId?: string
+): Array<{ level: number; role: RBACRole; inheritedFrom: string[] }> {
+  const hierarchy: Array<{ level: number; role: RBACRole; inheritedFrom: string[] }> = [];
+  const visited = new Set<string>();
+  
+  const buildHierarchy = (currentRoleId: string, level: number, inheritedFrom: string[] = []) => {
+    if (visited.has(currentRoleId)) return;
+    visited.add(currentRoleId);
+    
+    const role = roles.find(r => r.id === currentRoleId);
+    if (!role) return;
+    
+    hierarchy.push({ level, role, inheritedFrom });
+    
+    if (role.inheritedRoles) {
+      role.inheritedRoles.forEach(inheritedRoleId => {
+        buildHierarchy(inheritedRoleId, level + 1, [...inheritedFrom, currentRoleId]);
+      });
+    }
+  };
+  
+  if (targetRoleId) {
+    buildHierarchy(targetRoleId, 0);
+  } else {
+    // Build hierarchy for all roles
+    roles.forEach(role => {
+      if (!visited.has(role.id)) {
+        buildHierarchy(role.id, 0);
+      }
+    });
+  }
+  
+  return hierarchy.sort((a, b) => a.level - b.level);
+}
+
+export function detectPermissionConflicts(
+  roles: RBACRole[],
+  users: RBACUser[]
+): Array<{
+  type: 'conflicting_permissions' | 'over_privileged' | 'under_privileged' | 'role_conflict';
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  description: string;
+  affectedRoles: string[];
+  affectedUsers: string[];
+  recommendation: string;
+}> {
+  const conflicts: Array<{
+    type: 'conflicting_permissions' | 'over_privileged' | 'under_privileged' | 'role_conflict';
+    severity: 'low' | 'medium' | 'high' | 'critical';
+    description: string;
+    affectedRoles: string[];
+    affectedUsers: string[];
+    recommendation: string;
+  }> = [];
+  
+  // Check for conflicting permissions within roles
+  roles.forEach(role => {
+    const permissions = RBACRoleUtils.calculateEffectivePermissions(role, roles);
+    const resourceActions = new Map<string, Set<string>>();
+    
+    permissions.forEach(permission => {
+      if (!resourceActions.has(permission.resource)) {
+        resourceActions.set(permission.resource, new Set());
+      }
+      resourceActions.get(permission.resource)!.add(permission.action);
+    });
+    
+    // Check for read/write conflicts
+    resourceActions.forEach((actions, resource) => {
+      if (actions.has('read') && actions.has('delete') && !actions.has('write')) {
+        conflicts.push({
+          type: 'conflicting_permissions',
+          severity: 'medium',
+          description: `Role ${role.name} has read and delete permissions for ${resource} but no write permission`,
+          affectedRoles: [role.id],
+          affectedUsers: users.filter(u => u.roles?.some(r => r.id === role.id)).map(u => u.id),
+          recommendation: 'Add write permission or remove delete permission to maintain consistency'
+        });
+      }
+    });
+  });
+  
+  // Check for over-privileged users
+  users.forEach(user => {
+    const userPermissions = RBACUserUtils.calculateUserEffectivePermissions(user, roles);
+    if (userPermissions.length > 50) {
+      conflicts.push({
+        type: 'over_privileged',
+        severity: 'high',
+        description: `User ${user.username} has excessive permissions (${userPermissions.length})`,
+        affectedRoles: user.roles?.map(r => r.id) || [],
+        affectedUsers: [user.id],
+        recommendation: 'Review and reduce user permissions to follow least privilege principle'
+      });
+    }
+  });
+  
+  return conflicts;
+}
+
+export function generateRoleAnalytics(
+  roles: RBACRole[],
+  users: RBACUser[],
+  auditLogs: RBACAuditLog[]
+): {
+  roleUtilization: Array<{ roleId: string; roleName: string; userCount: number; utilizationRate: number; lastUsed: Date; permissionCount: number }>;
+  permissionDistribution: Array<{ permission: string; userCount: number; roleCount: number; criticality: 'low' | 'medium' | 'high' | 'critical' }>;
+  accessPatterns: Array<{ userId: string; userName: string; roleId: string; roleName: string; accessCount: number; lastAccess: Date; resourcesAccessed: string[]; riskScore: number }>;
+} {
+  const now = new Date();
+  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+  
+  // Calculate role utilization
+  const roleUtilization = roles.map(role => {
+    const roleUsers = users.filter(user => user.roles?.some(r => r.id === role.id));
+    const recentActivity = auditLogs.filter(log => 
+      new Date(log.timestamp) >= thirtyDaysAgo && 
+      roleUsers.some(user => user.id === log.userId)
+    );
+    
+    const utilizationRate = roleUsers.length > 0 ? recentActivity.length / (roleUsers.length * 30) : 0;
+    const lastUsed = recentActivity.length > 0 ? 
+      new Date(Math.max(...recentActivity.map(log => new Date(log.timestamp).getTime()))) : 
+      new Date(0);
+    
+    return {
+      roleId: role.id,
+      roleName: role.name,
+      userCount: roleUsers.length,
+      utilizationRate: Math.min(utilizationRate, 1),
+      lastUsed,
+      permissionCount: role.permissions.length
+    };
+  });
+  
+  // Calculate permission distribution
+  const permissionUsage = new Map<string, { userCount: number; roleCount: number }>();
+  roles.forEach(role => {
+    role.permissions.forEach(permission => {
+      const key = `${permission.resource}:${permission.action}`;
+      if (!permissionUsage.has(key)) {
+        permissionUsage.set(key, { userCount: 0, roleCount: 0 });
+      }
+      const usage = permissionUsage.get(key)!;
+      usage.roleCount++;
+      usage.userCount += users.filter(user => user.roles?.some(r => r.id === role.id)).length;
+    });
+  });
+  
+  const permissionDistribution = Array.from(permissionUsage.entries()).map(([permission, usage]) => {
+    let criticality: 'low' | 'medium' | 'high' | 'critical' = 'low';
+    if (usage.userCount > 100) criticality = 'critical';
+    else if (usage.userCount > 50) criticality = 'high';
+    else if (usage.userCount > 20) criticality = 'medium';
+    
+    return {
+      permission,
+      userCount: usage.userCount,
+      roleCount: usage.roleCount,
+      criticality
+    };
+  });
+  
+  // Calculate access patterns
+  const accessPatterns = users.map(user => {
+    const userRoles = user.roles || [];
+    const userLogs = auditLogs.filter(log => log.userId === user.id && new Date(log.timestamp) >= thirtyDaysAgo);
+    const resourcesAccessed = [...new Set(userLogs.map(log => log.resource))];
+    
+    let riskScore = 0;
+    if (userRoles.length > 3) riskScore += 20;
+    if (userLogs.length > 100) riskScore += 30;
+    if (resourcesAccessed.length > 20) riskScore += 25;
+    
+    return {
+      userId: user.id,
+      userName: user.username,
+      roleId: userRoles[0]?.id || '',
+      roleName: userRoles[0]?.name || '',
+      accessCount: userLogs.length,
+      lastAccess: userLogs.length > 0 ? new Date(Math.max(...userLogs.map(log => new Date(log.timestamp).getTime()))) : new Date(0),
+      resourcesAccessed,
+      riskScore: Math.min(riskScore, 100)
+    };
+  });
+  
+  return {
+    roleUtilization,
+    permissionDistribution,
+    accessPatterns
+  };
+}
+
+export function calculateAccessScore(
+  user: RBACUser,
+  roles: RBACRole[],
+  resource: string,
+  action: string,
+  context?: Record<string, any>
+): {
+  score: number;
+  factors: Array<{ factor: string; impact: number; description: string }>;
+  recommendation: string;
+} {
+  let score = 100;
+  const factors: Array<{ factor: string; impact: number; description: string }> = [];
+  
+  // Check direct permissions
+  const directPermissions = user.permissions?.filter(p => 
+    RBACPermissionUtils.matchesPermission(p, resource, action)
+  ) || [];
+  
+  if (directPermissions.length > 0) {
+    score += 20;
+    factors.push({
+      factor: 'Direct permissions',
+      impact: 20,
+      description: 'User has direct permissions for this resource and action'
+    });
+  }
+  
+  // Check role-based permissions
+  const rolePermissions = RBACUserUtils.calculateUserEffectivePermissions(user, roles);
+  const resourcePermissions = rolePermissions.filter(p => 
+    RBACPermissionUtils.matchesResourcePattern(p.resource, resource)
+  );
+  
+  if (resourcePermissions.length > 0) {
+    score += 15;
+    factors.push({
+      factor: 'Role-based permissions',
+      impact: 15,
+      description: 'User has permissions through assigned roles'
+    });
+  }
+  
+  // Check for policy conditions
+  if (context) {
+    // Evaluate time-based conditions
+    const currentHour = new Date().getHours();
+    if (currentHour < 6 || currentHour > 22) {
+      score -= 10;
+      factors.push({
+        factor: 'Time restriction',
+        impact: -10,
+        description: 'Access attempted outside normal business hours'
+      });
+    }
+    
+    // Evaluate location-based conditions
+    if (context.location && context.location !== 'office') {
+      score -= 15;
+      factors.push({
+        factor: 'Location restriction',
+        impact: -15,
+        description: 'Access attempted from non-office location'
+      });
+    }
+  }
+  
+  // Check for risk factors
+  if (user.roles && user.roles.length > 5) {
+    score -= 20;
+    factors.push({
+      factor: 'Role proliferation',
+      impact: -20,
+      description: 'User has excessive number of roles'
+    });
+  }
+  
+  // Generate recommendation
+  let recommendation = 'Access granted';
+  if (score < 50) {
+    recommendation = 'Access denied - insufficient permissions';
+  } else if (score < 70) {
+    recommendation = 'Access granted with restrictions - review permissions';
+  } else if (score < 90) {
+    recommendation = 'Access granted - consider permission optimization';
+  }
+  
+  return {
+    score: Math.max(0, Math.min(100, score)),
+    factors,
+    recommendation
+  };
+}
 
 /**
  * Main export object with all RBAC utilities
@@ -999,7 +1303,13 @@ export const rbacUtils = {
   extractWorkspaceConfigs: RBACConfigurationUtils.extractWorkspaceConfigs.bind(RBACConfigurationUtils),
   validateConfiguration: RBACConfigurationUtils.validateConfiguration.bind(RBACConfigurationUtils),
   analyzePermissionUsage: RBACAnalyticsUtils.analyzePermissionUsage.bind(RBACAnalyticsUtils),
-  analyzeUserAccessPatterns: RBACAnalyticsUtils.analyzeUserAccessPatterns.bind(RBACAnalyticsUtils)
+  analyzeUserAccessPatterns: RBACAnalyticsUtils.analyzeUserAccessPatterns.bind(RBACAnalyticsUtils),
+  
+  // Additional utility functions
+  analyzeRoleHierarchy,
+  detectPermissionConflicts,
+  generateRoleAnalytics,
+  calculateAccessScore
 };
 
 export default rbacUtils;

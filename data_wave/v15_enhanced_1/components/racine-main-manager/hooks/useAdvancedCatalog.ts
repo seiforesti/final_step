@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
 // Import advanced catalog APIs
 import { racineAdvancedCatalogAPI } from '../services/advanced-catalog-apis'
-import { crossGroupIntegrationApis } from '../services/cross-group-integration-apis'
+import { crossGroupIntegrationAPI } from '../services/cross-group-integration-apis'
 
 // Import types
 import {
@@ -440,7 +440,7 @@ export function useAdvancedCatalog(options: UseAdvancedCatalogOptions = {}) {
   const linkToDataSources = useCallback(async (assetId: string, dataSourceIds: string[]): Promise<void> => {
     try {
       await racineAdvancedCatalogAPI.linkToDataSources(assetId, dataSourceIds)
-      await crossGroupIntegrationApis.syncCatalogAssetWithDataSources(assetId, dataSourceIds)
+      await crossGroupIntegrationAPI.syncCatalogAssetWithDataSources(assetId, dataSourceIds)
     } catch (error) {
       console.error('Error linking to data sources:', error)
       throw error
@@ -450,7 +450,7 @@ export function useAdvancedCatalog(options: UseAdvancedCatalogOptions = {}) {
   const linkToClassifications = useCallback(async (assetId: string, classificationIds: string[]): Promise<void> => {
     try {
       await racineAdvancedCatalogAPI.linkToClassifications(assetId, classificationIds)
-      await crossGroupIntegrationApis.syncCatalogAssetWithClassifications(assetId, classificationIds)
+      await crossGroupIntegrationAPI.syncCatalogAssetWithClassifications(assetId, classificationIds)
     } catch (error) {
       console.error('Error linking to classifications:', error)
       throw error
@@ -460,7 +460,7 @@ export function useAdvancedCatalog(options: UseAdvancedCatalogOptions = {}) {
   const linkToComplianceRules = useCallback(async (assetId: string, complianceRuleIds: string[]): Promise<void> => {
     try {
       await racineAdvancedCatalogAPI.linkToComplianceRules(assetId, complianceRuleIds)
-      await crossGroupIntegrationApis.syncCatalogAssetWithComplianceRules(assetId, complianceRuleIds)
+      await crossGroupIntegrationAPI.syncCatalogAssetWithComplianceRules(assetId, complianceRuleIds)
     } catch (error) {
       console.error('Error linking to compliance rules:', error)
       throw error

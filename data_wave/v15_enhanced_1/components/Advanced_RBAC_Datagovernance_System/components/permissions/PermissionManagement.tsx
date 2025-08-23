@@ -141,9 +141,9 @@ import {
 } from '../../types/permission.types';
 import { Role } from '../../types/role.types';
 import { cn } from '@/lib/utils';
-import PermissionList from './PermissionList';
-import PermissionDetails from './PermissionDetails';
-import PermissionCreateEdit from './PermissionCreateEdit';
+import { PermissionList } from './PermissionList';
+import { PermissionDetails } from './PermissionDetails';
+import { PermissionCreateEdit } from './PermissionCreateEdit';
 
 interface PermissionManagementProps {
   className?: string;
@@ -233,7 +233,7 @@ const resourceTypes = [
   { value: 'analytics', label: 'Analytics', icon: BarChart3, count: 0 }
 ];
 
-export default function PermissionManagement({
+export function PermissionManagement({
   className,
   initialView = 'list',
   onPermissionSelect,

@@ -26,59 +26,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo, useRef, useReducer } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Play,
-  Pause,
-  Stop,
-  RotateCcw,
-  Activity,
-  Zap,
-  Target,
-  TrendingUp,
-  AlertTriangle,
-  CheckCircle,
-  XCircle,
-  Clock,
-  Settings,
-  RefreshCw,
-  Search,
-  Filter,
-  Download,
-  Upload,
-  Plus,
-  Minus,
-  X,
-  Eye,
-  MoreVertical,
-  BarChart3,
-  LineChart,
-  PieChart,
-  Users,
-  User,
-  Building,
-  Globe,
-  Map,
-  Route,
-  Navigation,
-  Layers,
-  Grid,
-  List,
-  Maximize,
-  Minimize,
-  Info,
-  AlertCircle,
-  HelpCircle,
-  ChevronDown,
-  ChevronUp,
-  ChevronLeft,
-  ChevronRight,
-  GitBranch,
-  Workflow,
-  Link,
-  ExternalLink,
-  FileText,
-  FolderOpen
-} from 'lucide-react';
+import { Play, Pause, Square, RotateCcw, Activity, Zap, Target, TrendingUp, AlertTriangle, CheckCircle, XCircle, Clock, Settings, RefreshCw, Search, Filter, Download, Upload, Plus, Minus, X, Eye, MoreVertical, BarChart3, LineChart, PieChart, Users, User, Building, Globe, Map, Route, Navigation, Layers, Grid, List, Maximize, Minimize, Info, AlertCircle, HelpCircle, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, GitBranch, Workflow, Link, ExternalLink, FileText, FolderOpen } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -728,7 +676,7 @@ export const ExecutionPipeline: React.FC = () => {
                         Pause
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleExecutionAction(execution.id, 'cancel')}>
-                        <Stop className="h-4 w-4 mr-2" />
+                        <Square className="h-4 w-4 mr-2" />
                         Cancel
                       </DropdownMenuItem>
                     </>

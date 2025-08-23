@@ -2,87 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  Timer,
-  Zap,
-  TrendingDown,
-  Activity,
-  Target,
-  Gauge,
-  BarChart3,
-  LineChart,
-  PieChart,
-  Clock,
-  RefreshCw,
-  Settings,
-  Play,
-  Pause,
-  Stop,
-  RotateCcw,
-  Plus,
-  Minus,
-  ArrowUp,
-  ArrowDown,
-  TrendingUp,
-  Server,
-  Cpu,
-  MemoryStick,
-  Network,
-  Database,
-  Calendar,
-  Users,
-  User,
-  CheckCircle,
-  AlertTriangle,
-  XCircle,
-  Info,
-  Flag,
-  Star,
-  Shield,
-  Lock,
-  Unlock,
-  Key,
-  Eye,
-  EyeOff,
-  Search,
-  Filter,
-  Download,
-  Upload,
-  Share2,
-  Edit,
-  Trash2,
-  Copy,
-  Code,
-  FileText,
-  Archive,
-  History,
-  Award,
-  Crown,
-  Hash,
-  Percent,
-  DollarSign,
-  TrendingUpDown,
-  Maximize,
-  Minimize,
-  ArrowLeft,
-  ArrowRight,
-  Volume2,
-  VolumeX,
-  Wifi,
-  WifiOff,
-  Signal,
-  Battery,
-  BatteryLow,
-  Thermometer,
-  Monitor,
-  Smartphone,
-  Tablet,
-  Laptop,
-  Desktop,
-  Package,
-  Layers,
-  Globe
-} from 'lucide-react'
+import { Timer, Zap, TrendingDown, Activity, Target, Gauge, BarChart3, LineChart, PieChart, Clock, RefreshCw, Settings, Play, Pause, Square, RotateCcw, Plus, Minus, ArrowUp, ArrowDown, TrendingUp, Server, Cpu, MemoryStick, Network, Database, Calendar, Users, User, CheckCircle, AlertTriangle, XCircle, Info, Flag, Star, Shield, Lock, Unlock, Key, Eye, EyeOff, Search, Filter, Download, Upload, Share2, Edit, Trash2, Copy, Code, FileText, Archive, History, Award, Crown, Hash, Percent, DollarSign, TrendingUpDown, Maximize, Minimize, ArrowLeft, ArrowRight, Volume2, VolumeX, Wifi, WifiOff, Signal, Battery, BatteryLow, Thermometer, Monitor, Smartphone, Tablet, Laptop, Desktop, Package, Layers, Globe } from 'lucide-react'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -1111,8 +1031,8 @@ export const LatencyReducer: React.FC<{
             </Button>
           ) : (
             <Button onClick={handleStopOptimization} variant="destructive">
-              <Stop className="h-4 w-4 mr-2" />
-              Stop Optimization
+              <Square className="h-4 w-4 mr-2" />
+              Square Optimization
             </Button>
           )}
           

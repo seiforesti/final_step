@@ -26,19 +26,7 @@ import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
-import { 
-  BarChart3, TrendingUp, PieChart, Activity, Target, AlertTriangle,
-  CheckCircle, RefreshCw, Play, Pause, Stop, Upload, Download, 
-  Eye, EyeOff, Lock, Unlock, Plus, Minus, Edit, Trash2, Copy, 
-  Search, Filter, Calendar, Clock, Zap, Shield, Users, 
-  MessageSquare, Send, ArrowRight, ArrowLeft, ChevronDown, 
-  ChevronUp, X, Save, Home, FolderOpen, Archive, BookOpen, 
-  Lightbulb, Network, Layers, Box, Map, Sync, Workflow, 
-  Monitor, Bell, Key, Hash, Grid, Star, ThumbsUp, ThumbsDown, 
-  Award, Bookmark, Database, FileText, Settings, Brain, 
-  Sparkles, Tag, Calculator, Percent, Hash as HashIcon,
-  Binary, Type, ListOrdered, ScanLine, Gauge, Microscope
-} from 'lucide-react';
+import { BarChart3, TrendingUp, PieChart, Activity, Target, AlertTriangle, CheckCircle, RefreshCw, Play, Pause, Square, Upload, Download, Eye, EyeOff, Lock, Unlock, Plus, Minus, Edit, Trash2, Copy, Search, Filter, Calendar, Clock, Zap, Shield, Users, MessageSquare, Send, ArrowRight, ArrowLeft, ChevronDown, ChevronUp, X, Save, Home, FolderOpen, Archive, BookOpen, Lightbulb, Network, Layers, Box, Map, Workflow, Monitor, Bell, Key, Hash, Grid, Star, ThumbsUp, ThumbsDown, Award, Bookmark, Database, FileText, Settings, Brain, Sparkles, Tag, Calculator, Percent, Hash as HashIcon, Binary, Type, ListOrdered, ScanLine, Gauge, Microscope } from 'lucide-react';
 
 // Charts
 import { LineChart, Line, BarChart, Bar, PieChart as RechartsPieChart, Pie, Cell, AreaChart, Area, ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Histogram } from 'recharts';

@@ -371,4 +371,191 @@ export const workflowAnalyticsUtils = {
   aggregateData
 };
 
+// Additional analytics functions
+export const calculateStandardDeviation = (data: number[]): number => {
+  if (data.length === 0) return 0;
+  
+  const mean = data.reduce((sum, val) => sum + val, 0) / data.length;
+  const squaredDifferences = data.map(val => Math.pow(val - mean, 2));
+  const variance = squaredDifferences.reduce((sum, val) => sum + val, 0) / data.length;
+  
+  return Math.sqrt(variance);
+};
+
+export const calculateVariance = (data: number[]): number => {
+  if (data.length === 0) return 0;
+  
+  const mean = data.reduce((sum, val) => sum + val, 0) / data.length;
+  const squaredDifferences = data.map(val => Math.pow(val - mean, 2));
+  
+  return squaredDifferences.reduce((sum, val) => sum + val, 0) / data.length;
+};
+
+export const calculateSeasonality = (data: number[], period: number): number[] => {
+  if (data.length < period * 2) return [];
+  
+  const seasonalPatterns: number[] = [];
+  
+  for (let i = 0; i < period; i++) {
+    let sum = 0;
+    let count = 0;
+    
+    for (let j = i; j < data.length; j += period) {
+      sum += data[j];
+      count++;
+    }
+    
+    seasonalPatterns.push(count > 0 ? sum / count : 0);
+  }
+  
+  return seasonalPatterns;
+};
+
+export const calculateCyclicality = (data: number[], minPeriod: number = 2, maxPeriod: number = data.length / 2): number => {
+  if (data.length < minPeriod * 2) return 0;
+  
+  let maxCorrelation = 0;
+  let bestPeriod = minPeriod;
+  
+  for (let period = minPeriod; period <= Math.min(maxPeriod, data.length / 2); period++) {
+    const correlation = calculateAutocorrelation(data, period);
+    if (correlation > maxCorrelation) {
+      maxCorrelation = correlation;
+      bestPeriod = period;
+    }
+  }
+  
+  return maxCorrelation;
+};
+
+export const calculateForecast = (data: number[], periods: number, method: 'linear' | 'exponential' | 'moving_average' = 'linear'): number[] => {
+  switch (method) {
+    case 'linear':
+      return calculateLinearForecast(data, periods);
+    case 'exponential':
+      return calculateExponentialForecast(data, periods);
+    case 'moving_average':
+      return calculateMovingAverageForecast(data, periods);
+    default:
+      return calculateLinearForecast(data, periods);
+  }
+};
+
+export const calculateReliability = (successCount: number, totalCount: number): number => {
+  if (totalCount === 0) return 0;
+  return successCount / totalCount;
+};
+
+export const calculateStability = (data: number[]): number => {
+  if (data.length < 2) return 1;
+  
+  const variance = calculateVariance(data);
+  const mean = data.reduce((sum, val) => sum + val, 0) / data.length;
+  
+  if (mean === 0) return 1;
+  
+  const coefficientOfVariation = Math.sqrt(variance) / Math.abs(mean);
+  return Math.max(0, 1 - coefficientOfVariation);
+};
+
+export const formatTimestamp = (timestamp: string | Date, format: 'short' | 'long' | 'relative' = 'short'): string => {
+  const date = typeof timestamp === 'string' ? new Date(timestamp) : timestamp;
+  
+  switch (format) {
+    case 'short':
+      return date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    case 'long':
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+    case 'relative':
+      return formatRelativeTime(date);
+    default:
+      return date.toISOString();
+  }
+};
+
+// Helper functions
+const calculateAutocorrelation = (data: number[], lag: number): number => {
+  if (lag >= data.length) return 0;
+  
+  const mean = data.reduce((sum, val) => sum + val, 0) / data.length;
+  const variance = calculateVariance(data);
+  
+  if (variance === 0) return 0;
+  
+  let sum = 0;
+  for (let i = 0; i < data.length - lag; i++) {
+    sum += (data[i] - mean) * (data[i + lag] - mean);
+  }
+  
+  return sum / ((data.length - lag) * variance);
+};
+
+const calculateLinearForecast = (data: number[], periods: number): number[] => {
+  if (data.length < 2) return Array(periods).fill(data[0] || 0);
+  
+  const n = data.length;
+  const sumX = (n * (n - 1)) / 2;
+  const sumY = data.reduce((sum, val) => sum + val, 0);
+  const sumXY = data.reduce((sum, val, index) => sum + val * index, 0);
+  const sumX2 = data.reduce((sum, val, index) => sum + index * index, 0);
+  
+  const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+  const intercept = (sumY - slope * sumX) / n;
+  
+  const forecast: number[] = [];
+  for (let i = 0; i < periods; i++) {
+    forecast.push(slope * (n + i) + intercept);
+  }
+  
+  return forecast;
+};
+
+const calculateExponentialForecast = (data: number[], periods: number): number[] => {
+  if (data.length < 2) return Array(periods).fill(data[0] || 0);
+  
+  const alpha = 0.3; // Smoothing factor
+  let forecast = data[0];
+  const forecasts: number[] = [];
+  
+  for (let i = 0; i < periods; i++) {
+    forecast = alpha * data[data.length - 1] + (1 - alpha) * forecast;
+    forecasts.push(forecast);
+  }
+  
+  return forecasts;
+};
+
+const calculateMovingAverageForecast = (data: number[], periods: number): number[] => {
+  if (data.length < 3) return Array(periods).fill(data[0] || 0);
+  
+  const window = Math.min(3, data.length);
+  const movingAverage = data.slice(-window).reduce((sum, val) => sum + val, 0) / window;
+  
+  return Array(periods).fill(movingAverage);
+};
+
+const formatRelativeTime = (date: Date): string => {
+  const now = new Date();
+  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+  
+  if (diffInSeconds < 60) return `${diffInSeconds}s ago`;
+  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+  if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}d ago`;
+  
+  return date.toLocaleDateString();
+};
+
 export default workflowAnalyticsUtils;

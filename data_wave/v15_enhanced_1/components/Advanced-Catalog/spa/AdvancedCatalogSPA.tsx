@@ -176,184 +176,26 @@ import {
 } from 'recharts';
 
 // Lucide Icons
-import {
-  // Navigation & Layout
-  Layout,
-  Sidebar as SidebarIcon,
-  Menu,
-  MoreHorizontal,
-  MoreVertical,
-  ChevronDown,
-  ChevronUp,
-  ChevronLeft,
-  ChevronRight,
-  ArrowLeft,
-  ArrowRight,
-  ArrowUp,
-  ArrowDown,
-  
-  // Core Features
-  Search,
-  Filter,
-  Settings,
-  Database,
-  FileText,
-  Folder,
-  FolderOpen,
-  Tag,
-  Bookmark,
-  Star,
-  Heart,
-  Eye,
-  EyeOff,
-  
-  // Analytics & Intelligence
-  BarChart3,
-  PieChart as PieChartIcon,
-  TrendingUp,
-  TrendingDown,
-  Activity,
-  Target,
-  Zap,
-  Brain,
-  Sparkles,
-  Lightbulb,
-  Bot,
-  Cpu,
-  
-  // User & Collaboration
-  Users,
-  User,
-  UserPlus,
-  Share,
-  MessageSquare,
-  Bell,
-  BellRing,
-  
-  // Actions & Controls
-  Play,
-  Pause,
-  Stop,
-  RefreshCw,
-  Download,
-  Upload,
-  Save,
-  Copy,
-  Edit,
-  Trash2,
-  Plus,
-  Minus,
-  X,
-  Check,
-  
-  // Status & Indicators
-  AlertCircle,
-  CheckCircle,
-  Info,
-  AlertTriangle,
-  Clock,
-  Calendar,
-  Timer,
-  
-  // Advanced Features
-  Workflow,
-  Network,
-  Layers,
-  Globe,
-  Map,
-  Compass,
-  Route,
-  Navigation,
-  MapPin,
-  
-  // System & Technical
-  Server,
-  Shield,
-  Lock,
-  Unlock,
-  Key,
-  Terminal,
-  Code,
-  GitBranch,
-  Hash,
-  
-  // Data & Quality
-  Gauge,
-  BarChart2,
-  LineChart,
-  Percent,
-  DollarSign,
-  Archive,
-  HardDrive,
-  
-  // UI Controls
-  Maximize,
-  Minimize,
-  Expand,
-  Shrink,
-  ToggleLeft,
-  ToggleRight,
-  Sliders,
-  
-  // Communication
-  Mail,
-  Phone,
-  ExternalLink,
-  Link,
-  
-  // Time & Scheduling
-  History,
-  FastForward,
-  Rewind,
-  SkipForward,
-  SkipBack,
-  
-  // Quality & Validation
-  Award,
-  Medal,
-  Trophy,
-  Flag,
-  Verified,
-  
-  // Advanced Analytics
-  Binary,
-  Boxes,
-  Command as CommandIcon,
-  Crosshair,
-  Focus,
-  Scan,
-  ScanLine,
-  
-  // Enterprise Features
-  Building,
-  Building2,
-  Factory,
-  Warehouse,
-  Store,
-  
-  // AI & ML
-  Beaker,
-  FlaskConical,
-  Microscope,
-  TestTube,
-  Atom,
-  
-  // Notifications & Alerts
-  Volume2,
-  VolumeX,
-  Vibrate,
-  
-  // Miscellaneous
-  Puzzle,
-  Wrench,
-  Tool,
-  Cog,
-  Gear,
-  
-  // Additional icons for new components
-  Calculator,
-  BookOpen
-} from 'lucide-react';
+import { // Navigation & Layout
+  Layout, Sidebar as SidebarIcon, Menu, MoreHorizontal, MoreVertical, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, ArrowLeft, ArrowRight, ArrowUp, ArrowDown, // Core Features
+  Search, Filter, Settings, Database, FileText, Folder, FolderOpen, Tag, Bookmark, Star, Heart, Eye, EyeOff, // Analytics & Intelligence
+  BarChart3, PieChart as PieChartIcon, TrendingUp, TrendingDown, Activity, Target, Zap, Brain, Sparkles, Lightbulb, Bot, Cpu, // User & Collaboration
+  Users, User, UserPlus, Share, MessageSquare, Bell, BellRing, // Actions & Controls
+  Play, Pause, Square, RefreshCw, Download, Upload, Save, Copy, Edit, Trash2, Plus, Minus, X, Check, // Status & Indicators
+  AlertCircle, CheckCircle, Info, AlertTriangle, Clock, Calendar, Timer, // Advanced Features
+  Workflow, Network, Layers, Globe, Map, Compass, Route, Navigation, MapPin, // System & Technical
+  Server, Shield, Lock, Unlock, Key, Terminal, Code, GitBranch, Hash, // Data & Quality
+  Gauge, BarChart2, LineChart, Percent, DollarSign, Archive, HardDrive, // UI Controls
+  Maximize, Minimize, Expand, Shrink, ToggleLeft, ToggleRight, Sliders, // Communication
+  Mail, Phone, ExternalLink, Link, // Time & Scheduling
+  History, FastForward, Rewind, SkipForward, SkipBack, // Quality & Validation
+  Award, Medal, Trophy, Flag, Verified, // Advanced Analytics
+  Binary, Boxes, Command as CommandIcon, Crosshair, Focus, Scan, ScanLine, // Enterprise Features
+  Building, Building2, Factory, Warehouse, Store, // AI & ML
+  Beaker, FlaskConical, Microscope, TestTube, Atom, // Notifications & Alerts
+  Volume2, VolumeX, Vibrate, // Miscellaneous
+  Puzzle, Wrench, Tool, Cog, Gear, // Additional icons for new components
+  Calculator, BookOpen } from 'lucide-react';
 
 // Hooks and Services
 import { useCatalogAnalytics } from '../hooks/useCatalogAnalytics';

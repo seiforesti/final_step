@@ -24,143 +24,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { motion, AnimatePresence, useAnimation } from 'framer-motion';
-import { 
-  Shield, 
-  FileText, 
-  Lock, 
-  Unlock, 
-  Eye, 
-  EyeOff, 
-  Download, 
-  Upload, 
-  Search, 
-  Filter, 
-  Calendar as CalendarIcon,
-  Clock, 
-  AlertTriangle, 
-  CheckCircle, 
-  XCircle, 
-  Info, 
-  Settings, 
-  MoreHorizontal, 
-  Maximize2, 
-  Minimize2, 
-  RefreshCcw, 
-  Archive, 
-  Trash2, 
-  Copy, 
-  Share, 
-  ExternalLink, 
-  History, 
-  Tag, 
-  User, 
-  Building, 
-  Database, 
-  Server, 
-  Network, 
-  Activity, 
-  Zap, 
-  Target, 
-  Layers, 
-  GitBranch, 
-  Workflow, 
-  Users, 
-  Hash, 
-  Key, 
-  ChevronDown, 
-  ChevronUp, 
-  ChevronRight, 
-  ChevronLeft, 
-  Play, 
-  Pause, 
-  Square, 
-  RotateCw, 
-  Plus, 
-  Minus, 
-  Edit, 
-  Save, 
-  X, 
-  Check, 
-  AlertCircle, 
-  HelpCircle, 
-  BookOpen, 
-  Briefcase, 
-  Scale, 
-  Gavel, 
-  Scroll, 
-  Certificate, 
-  ShieldCheck, 
-  ShieldAlert, 
-  UserCheck, 
-  UserX, 
-  Globe, 
-  MapPin, 
-  Clock3, 
-  Timer, 
-  Calendar as CalendarIcon2,
-  Bookmark, 
-  Star, 
-  Flag, 
-  Bell, 
-  BellOff, 
-  Mail, 
-  Phone, 
-  MessageSquare, 
-  Printer, 
-  ScanLine, 
-  QrCode, 
-  BarChart3, 
-  PieChart, 
-  TrendingUp, 
-  TrendingDown, 
-  LineChart, 
-  Monitor, 
-  Cpu, 
-  HardDrive, 
-  Wifi, 
-  WifiOff, 
-  CloudUpload, 
-  CloudDownload, 
-  FolderOpen, 
-  FileCheck, 
-  FileLock, 
-  FileWarning, 
-  FileX, 
-  Folder, 
-  Grid3X3, 
-  List, 
-  Table as TableIcon,
-  Columns, 
-  Rows,
-  Binary,
-  Code,
-  Terminal,
-  Bug,
-  Zap as Lightning,
-  Fingerprint,
-  Scan,
-  Radar,
-  Crosshair,
-  Focus,
-  Microscope,
-  FlaskConical,
-  TestTube,
-  Beaker,
-  Atom,
-  Dna,
-  Brain,
-  BrainCircuit,
-  Lightbulb,
-  Sparkles,
-  Stars,
-  Crown,
-  Award,
-  Trophy,
-  Medal,
-  Badge as BadgeIcon,
-  Verified,
-  ShieldX
-} from 'lucide-react';
+import { Shield, FileText, Lock, Unlock, Eye, EyeOff, Download, Upload, Search, Filter, Calendar as CalendarIcon, Clock, AlertTriangle, CheckCircle, XCircle, Info, Settings, MoreHorizontal, Maximize2, Minimize2, RefreshCcw, Archive, Trash2, Copy, Share, ExternalLink, History, Tag, User, Building, Database, Server, Network, Activity, Zap, Target, Layers, GitBranch, Workflow, Users, Hash, Key, ChevronDown, ChevronUp, ChevronRight, ChevronLeft, Play, Pause, Square, RotateCw, Plus, Minus, Edit, Save, X, Check, AlertCircle, HelpCircle, BookOpen, Briefcase, Scale, Gavel, Scroll, ShieldCheckIcon, ShieldAlert, UserCheck, UserX, Globe, MapPin, Clock3, Timer, Calendar as CalendarIcon2, Bookmark, Star, Flag, Bell, BellOff, Mail, Phone, MessageSquare, Printer, ScanLine, QrCode, BarChart3, PieChart, TrendingUp, TrendingDown, LineChart, Monitor, Cpu, HardDrive, Wifi, WifiOff, UploadCloud, DownloadCloud, FolderOpen, FileCheck, FileLock, FileWarning, FileX, Folder, Grid3X3, List, Table as TableIcon, Columns, Rows, Binary, Code, Terminal, Bug, Zap as Lightning, Fingerprint, Scan, Radar, Crosshair, Focus, Microscope, FlaskConical, TestTube, Beaker, Atom, Dna, Brain, BrainCircuit, Lightbulb, Sparkles, Stars, Crown, Trophy, Medal, Badge as BadgeIcon, Verified, ShieldX } from 'lucide-react';
 
 // UI Components
 import { Button } from '@/components/ui/button';
@@ -481,7 +345,7 @@ const complianceFrameworks = {
     name: 'Service Organization Control 2',
     description: 'Security, availability, and confidentiality',
     color: '#EA580C',
-    icon: ShieldCheck,
+    icon: ShieldCheckIcon,
     requirements: ['system_access', 'data_processing', 'security_controls'],
     retentionPeriod: 1095, // 3 years
     riskFactors: ['security_breach', 'availability_loss', 'confidentiality_breach']
@@ -775,7 +639,7 @@ export const AuditTrailManager: React.FC<AuditTrailManagerProps> = ({
       clearInterval(progressInterval);
       setState(prev => ({ ...prev, exportProgress: 100 }));
       
-      // Download the exported file
+      // ArrowDownTrayIcon the exported file
       const blob = new Blob([exportResult.data], { type: exportResult.mimeType });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -936,7 +800,7 @@ export const AuditTrailManager: React.FC<AuditTrailManagerProps> = ({
         
         {state.isExporting && (
           <div className="flex items-center space-x-2">
-            <CloudDownload className="h-4 w-4 text-blue-600" />
+            <DownloadCloud className="h-4 w-4 text-blue-600" />
             <Progress value={state.exportProgress} className="w-32" />
             <span className="text-sm text-gray-500">{state.exportProgress}%</span>
           </div>
@@ -1008,7 +872,7 @@ export const AuditTrailManager: React.FC<AuditTrailManagerProps> = ({
                   onClick={() => setState(prev => ({ ...prev, showCompliance: !prev.showCompliance }))}
                   className={cn(state.showCompliance && "bg-green-50 border-green-300")}
                 >
-                  <ShieldCheck className="h-4 w-4" />
+                  <ShieldCheckIcon className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -1060,7 +924,7 @@ export const AuditTrailManager: React.FC<AuditTrailManagerProps> = ({
                 </DropdownMenuItem>
                 {enableSignatures && (
                   <DropdownMenuItem onClick={() => handleExport(AuditExportFormat.SIGNED_PDF, { digitalSignature: true })}>
-                    <Certificate className="h-4 w-4 mr-2" />
+                    <Medal className="h-4 w-4 mr-2" />
                     Signed PDF
                   </DropdownMenuItem>
                 )}
@@ -1120,7 +984,7 @@ export const AuditTrailManager: React.FC<AuditTrailManagerProps> = ({
               <p className="text-sm font-medium text-green-600">Compliance Score</p>
               <p className="text-2xl font-bold text-green-900">{state.complianceScore}%</p>
             </div>
-            <ShieldCheck className="h-8 w-8 text-green-600" />
+            <ShieldCheckIcon className="h-8 w-8 text-green-600" />
           </div>
         </CardContent>
       </Card>
@@ -1431,7 +1295,7 @@ export const AuditTrailManager: React.FC<AuditTrailManagerProps> = ({
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
-              <ShieldCheck className="h-5 w-5 text-green-600" />
+              <ShieldCheckIcon className="h-5 w-5 text-green-600" />
               <span>Compliance Summary</span>
             </CardTitle>
           </CardHeader>
@@ -1687,7 +1551,7 @@ export const AuditTrailManager: React.FC<AuditTrailManagerProps> = ({
         <DialogContent className="max-w-4xl">
           <DialogHeader>
             <DialogTitle className="flex items-center space-x-2">
-              <ShieldCheck className="h-5 w-5 text-green-600" />
+              <ShieldCheckIcon className="h-5 w-5 text-green-600" />
               <span>Compliance Dashboard</span>
             </DialogTitle>
             <DialogDescription>

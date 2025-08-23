@@ -2,43 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  GitBranch,
-  Split,
-  Merge,
-  Route,
-  Filter,
-  Code,
-  Terminal,
-  Settings,
-  Play,
-  Pause,
-  Square,
-  RotateCcw,
-  Zap,
-  Target,
-  CheckCircle,
-  XCircle,
-  AlertTriangle,
-  Info,
-  Edit,
-  Trash2,
-  Copy,
-  Plus,
-  Minus,
-  Search,
-  Eye,
-  EyeOff,
-  Save,
-  Download,
-  Upload,
-  RefreshCw,
-  Calculator,
-  Hash,
-  Percent,
-  Activity,
-  TrendingUp
-} from 'lucide-react'
+import { GitBranch, Split, Merge, Route, Filter, Code, Terminal, Settings, Play, Pause, Square, RotateCcw, Zap, Target, CheckCircle, XCircle, AlertTriangle, Info, Edit, Trash2, Copy, Plus, Minus, Search, Eye, EyeOff, Save, Download, Upload, RefreshCw, Calculator, Hash, Percent, Activity, TrendingUp } from 'lucide-react'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'

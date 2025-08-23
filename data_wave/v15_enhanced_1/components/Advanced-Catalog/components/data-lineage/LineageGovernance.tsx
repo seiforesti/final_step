@@ -86,84 +86,7 @@ import {
   TooltipTrigger
 } from '@/components/ui/tooltip';
 
-import { 
-  ChevronDown,
-  ChevronRight,
-  Settings,
-  Shield,
-  Eye,
-  AlertTriangle,
-  CheckCircle,
-  XCircle,
-  Clock,
-  Users,
-  FileText,
-  Database,
-  Network,
-  Zap,
-  Brain,
-  Activity,
-  BarChart3,
-  TrendingUp,
-  Filter,
-  Search,
-  Download,
-  Upload,
-  RefreshCw,
-  Play,
-  Pause,
-  Square,
-  Edit,
-  Trash2,
-  Plus,
-  Minus,
-  Copy,
-  Share,
-  Star,
-  Flag,
-  Mail,
-  Bell,
-  Calendar,
-  MapPin,
-  Tag,
-  Link,
-  ExternalLink,
-  GitBranch,
-  GitMerge,
-  GitCommit,
-  Workflow,
-  Layers,
-  TreePine,
-  Gauge,
-  Target,
-  Award,
-  Crown,
-  Sparkles,
-  Lightbulb,
-  Rocket,
-  Globe,
-  Lock,
-  Unlock,
-  Key,
-  ShieldCheck,
-  UserCheck,
-  UserX,
-  Users2,
-  Building,
-  Factory,
-  Server,
-  HardDrive,
-  Cpu,
-  Memory,
-  MonitorSpeaker,
-  Smartphone,
-  Tablet,
-  Laptop,
-  Desktop,
-  CloudUpload,
-  CloudDownload,
-  Cloud
-} from 'lucide-react';
+import { ChevronDown, ChevronRight, Settings, Shield, Eye, AlertTriangle, CheckCircle, XCircle, Clock, Users, FileText, Database, Network, Zap, Brain, Activity, BarChart3, TrendingUp, Filter, Search, Download, Upload, RefreshCw, Play, Pause, Square, Edit, Trash2, Plus, Minus, Copy, Share, Star, Flag, Mail, Bell, Calendar, MapPin, Tag, Link, ExternalLink, GitBranch, GitMerge, GitCommit, Workflow, Layers, TreePine, Gauge, Target, Award, Crown, Sparkles, Lightbulb, Rocket, Globe, Lock, Unlock, Key, ShieldCheckIcon, UserCheck, UserX, Users2, Building, Factory, Server, HardDrive, Cpu, MonitorSpeaker, Smartphone, Tablet, Laptop, Desktop, CloudUpload, CloudDownload, Cloud } from 'lucide-react';
 
 import { 
   LineChart, 
@@ -191,7 +114,7 @@ import { cn } from '@/lib/utils';
 
 // Import backend services
 import { advancedLineageService } from '../../services/advanced-lineage.service';
-import { collaborationService } from '../../services/collaboration.service';
+import { collaborationService } from '../../services';
 import { enterpriseCatalogService } from '../../services/enterprise-catalog.service';
 
 // Advanced Types for Lineage Governance
@@ -1169,7 +1092,7 @@ export default function LineageGovernance({
 
           <TabsContent value="compliance" className="mt-6">
             <div className="text-center py-12">
-              <ShieldCheck className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+              <ShieldCheckIcon className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
               <h3 className="text-lg font-semibold mb-2">Compliance Reports Coming Soon</h3>
               <p className="text-muted-foreground">Comprehensive compliance monitoring and reporting features will be available soon</p>
             </div>

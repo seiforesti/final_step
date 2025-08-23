@@ -5,6 +5,44 @@
 import { ReactNode } from 'react';
 
 // ============================================================================
+// API TYPES
+// ============================================================================
+
+export interface APIResponse<T = any> {
+  success: boolean;
+  data?: T;
+  error?: APIError;
+  metadata?: ResponseMetadata;
+  pagination?: PaginationInfo;
+}
+
+export interface APIError {
+  code: string;
+  message: string;
+  details?: Record<string, any>;
+  stackTrace?: string;
+  correlationId?: string;
+  timestamp: string;
+}
+
+export interface ResponseMetadata {
+  requestId: string;
+  timestamp: string;
+  duration: number;
+  version: string;
+  cached: boolean;
+}
+
+export interface PaginationInfo {
+  page: number;
+  pageSize: number;
+  totalItems: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrevious: boolean;
+}
+
+// ============================================================================
 // CORE SCAN RULE TYPES
 // ============================================================================
 

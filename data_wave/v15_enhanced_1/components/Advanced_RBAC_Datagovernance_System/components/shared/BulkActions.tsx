@@ -5,47 +5,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Check,
-  X,
-  ChevronDown,
-  ChevronUp,
-  Play,
-  Pause,
-  Square,
-  AlertTriangle,
-  AlertCircle,
-  CheckCircle,
-  Clock,
-  Users,
-  Shield,
-  Trash2,
-  Edit,
-  Copy,
-  Download,
-  Upload,
-  Mail,
-  Lock,
-  Unlock,
-  Eye,
-  EyeOff,
-  Archive,
-  ArchiveRestore,
-  UserPlus,
-  UserMinus,
-  Settings,
-  MoreHorizontal,
-  RefreshCw,
-  FileText,
-  Database,
-  Activity,
-  Zap,
-  Target,
-  Filter,
-  Search,
-  ArrowRight,
-  ArrowLeft
-} from 'lucide-react';
+import { Check, X, ChevronDown, ChevronUp, Play, Pause, Square, AlertTriangle, AlertCircle, CheckCircle, Clock, Users, Shield, Trash2, Edit, Copy, Download, Upload, Mail, Lock, Unlock, Eye, EyeOff, Archive, ArchiveRestore, UserPlus, UserMinus, Settings, MoreHorizontal, RefreshCw, FileText, Database, Activity, Zap, Target, Filter, Search, ArrowRight, ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCurrentUser } from '../../hooks/useCurrentUser';
 import { usePermissionCheck } from '../../hooks/usePermissionCheck';

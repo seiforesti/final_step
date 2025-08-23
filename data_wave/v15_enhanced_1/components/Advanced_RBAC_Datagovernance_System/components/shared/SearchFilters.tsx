@@ -5,42 +5,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Search,
-  Filter,
-  X,
-  ChevronDown,
-  ChevronUp,
-  Calendar,
-  Check,
-  Minus,
-  Plus,
-  SlidersHorizontal,
-  RefreshCw,
-  Save,
-  BookmarkPlus,
-  Settings,
-  Eye,
-  EyeOff,
-  ArrowUpDown,
-  Hash,
-  Type,
-  ToggleLeft,
-  ToggleRight,
-  Clock,
-  User,
-  Tag,
-  Globe,
-  Lock,
-  Unlock,
-  Star,
-  Heart,
-  MapPin,
-  FileText,
-  Database,
-  Activity,
-  Shield
-} from 'lucide-react';
+import { Search, Filter, X, ChevronDown, ChevronUp, Calendar, Check, Minus, Plus, SlidersHorizontal, RefreshCw, Save, BookmarkPlus, Settings, Eye, EyeOff, ArrowUpDown, Hash, Type, ToggleLeft, ToggleRight, Clock, User, Tag, Globe, Lock, Unlock, Star, Heart, MapPin, FileText, Database, Activity, Shield } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCurrentUser } from '../../hooks/useCurrentUser';
 import { usePermissionCheck } from '../../hooks/usePermissionCheck';

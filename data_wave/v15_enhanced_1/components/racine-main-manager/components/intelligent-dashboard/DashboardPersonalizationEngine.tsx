@@ -18,18 +18,7 @@ import {
   ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger,
   Accordion, AccordionContent, AccordionItem, AccordionTrigger
 } from '@/components/ui';
-import { 
-  Settings, User, Palette, Layout, Eye, EyeOff, 
-  Save, RotateCcw, Download, Upload, Share2, Copy,
-  Plus, Minus, Move, Grid3X3, Columns, Rows,
-  Sun, Moon, Monitor, Smartphone, Tablet,
-  Bell, Volume2, VolumeX, Globe, Calendar,
-  Filter, Search, SortAsc, SortDesc, Target,
-  Zap, RefreshCw, Clock, AlertTriangle, CheckCircle,
-  Brush, Type, Image, Video, BarChart3, PieChart,
-  ArrowUp, ArrowDown, ArrowLeft, ArrowRight, MoreVertical,
-  Star, Heart, Bookmark, Tag, Flag, Home
-} from 'lucide-react';
+import { Settings, User, Palette, Layout, Eye, EyeOff, Save, RotateCcw, Download, Upload, Share2, Copy, Plus, Minus, Move, Grid3X3, Columns, Rows, Sun, Moon, Monitor, Smartphone, Tablet, Bell, Volume2, VolumeX, Globe, Calendar, Filter, Search, SortAsc, SortDesc, Target, Zap, RefreshCw, Clock, AlertTriangle, CheckCircle, Brush, Type, Image, Video, BarChart3, PieChart, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, MoreVertical, Star, Heart, Bookmark, Tag, Flag, Home } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { 
   DashboardState, UserPreferences, WidgetConfiguration, 

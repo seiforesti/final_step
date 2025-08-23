@@ -2,47 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  Search, 
-  X, 
-  Command, 
-  Filter, 
-  History, 
-  Star, 
-  Database,
-  Shield,
-  FileText,
-  BookOpen,
-  Scan,
-  Users,
-  Activity,
-  Zap,
-  ArrowRight,
-  Clock,
-  TrendingUp,
-  Loader2,
-  Bot,
-  Sparkles,
-  ExternalLink,
-  ChevronRight,
-  Tags,
-  Globe,
-  AlertCircle,
-  CheckCircle2,
-  BarChart3,
-  Settings,
-  Eye,
-  Bookmark,
-  Hash,
-  Calendar,
-  User,
-  Folder,
-  Code,
-  Play,
-  Pause,
-  Square,
-  RotateCcw
-} from 'lucide-react'
+import { Search, X, Command, Filter, History, Star, Database, Shield, FileText, BookOpen, Scan, Users, Activity, Zap, ArrowRight, Clock, TrendingUp, Loader2, Bot, Sparkles, ExternalLink, ChevronRight, Tags, Globe, AlertCircle, CheckCircle2, BarChart3, Settings, Eye, Bookmark, Hash, Calendar, User, Folder, Code, Play, Pause, Square, RotateCcw } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'

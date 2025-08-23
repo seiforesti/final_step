@@ -3,40 +3,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  Search, 
-  Bell, 
-  Settings, 
-  User, 
-  ChevronDown, 
-  Menu, 
-  X, 
-  Activity, 
-  AlertTriangle, 
-  CheckCircle, 
-  Clock,
-  Home,
-  Database,
-  Shield,
-  FileText,
-  BookOpen,
-  Scan,
-  Users,
-  Workflow,
-  BarChart3,
-  Bot,
-  MessageSquare,
-  Zap,
-  Globe,
-  Command,
-  Plus,
-  Star,
-  History,
-  Filter,
-  ArrowRight,
-  ExternalLink,
-  Refresh
-} from 'lucide-react'
+import { Search, Bell, Settings, User, ChevronDown, Menu, X, Activity, AlertTriangle, CheckCircle, Clock, Home, Database, Shield, FileText, BookOpen, Scan, Users, Workflow, BarChart3, Bot, MessageSquare, Zap, Globe, Command, Plus, Star, History, Filter, ArrowRight, ExternalLink, RefreshCw } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -439,7 +406,7 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({
                 onClick={() => monitorHealth()}
                 className="h-6 px-2"
               >
-                <Refresh className="w-3 h-3" />
+                <RefreshCw className="w-3 h-3" />
               </Button>
             </div>
             

@@ -280,3 +280,100 @@ export const DEFAULT_ANALYTICS_CONFIG: AnalyticsConfig = {
   }
 };
 
+// Analytics defaults for quick configuration
+export const ANALYTICS_DEFAULTS = {
+  // Default time periods
+  TIME_PERIOD: TIME_PERIODS.LAST_WEEK,
+  REFRESH_INTERVAL: REFRESH_INTERVALS.MEDIUM,
+  
+  // Default metrics
+  PRIMARY_METRICS: [
+    ANALYTICS_METRICS.EXECUTION_TIME,
+    ANALYTICS_METRICS.SUCCESS_RATE,
+    ANALYTICS_METRICS.THROUGHPUT
+  ],
+  
+  // Default dimensions
+  PRIMARY_DIMENSIONS: [
+    ANALYTICS_DIMENSIONS.WORKFLOW_TYPE,
+    ANALYTICS_DIMENSIONS.TIME_DAY,
+    ANALYTICS_DIMENSIONS.USER_ROLE
+  ],
+  
+  // Default aggregations
+  PRIMARY_AGGREGATIONS: [
+    ANALYTICS_AGGREGATIONS.AVERAGE,
+    ANALYTICS_AGGREGATIONS.COUNT,
+    ANALYTICS_AGGREGATIONS.SUM
+  ],
+  
+  // Default chart types
+  CHART_TYPES: {
+    TIME_SERIES: CHART_TYPES.LINE_CHART,
+    COMPARISON: CHART_TYPES.BAR_CHART,
+    DISTRIBUTION: CHART_TYPES.HISTOGRAM,
+    COMPOSITION: CHART_TYPES.PIE_CHART,
+    CORRELATION: CHART_TYPES.SCATTER_PLOT
+  },
+  
+  // Default thresholds
+  THRESHOLDS: {
+    SUCCESS_RATE: ALERT_THRESHOLDS.WARNING_SUCCESS_RATE,
+    LATENCY: ALERT_THRESHOLDS.WARNING_LATENCY,
+    ERROR_RATE: ALERT_THRESHOLDS.WARNING_ERROR_RATE,
+    CPU_USAGE: ALERT_THRESHOLDS.WARNING_CPU_USAGE,
+    MEMORY_USAGE: ALERT_THRESHOLDS.WARNING_MEMORY_USAGE
+  }
+} as const;
+
+// Analytics color schemes for charts
+export const ANALYTICS_COLORS = {
+  // Primary color palette
+  PRIMARY: {
+    BLUE: '#3B82F6',
+    GREEN: '#10B981',
+    ORANGE: '#F59E0B',
+    RED: '#EF4444',
+    PURPLE: '#8B5CF6',
+    TEAL: '#14B8A6',
+    PINK: '#EC4899',
+    YELLOW: '#EAB308'
+  },
+  
+  // Semantic colors
+  SEMANTIC: {
+    SUCCESS: '#10B981',
+    WARNING: '#F59E0B',
+    ERROR: '#EF4444',
+    INFO: '#3B82F6',
+    NEUTRAL: '#6B7280'
+  },
+  
+  // Status colors
+  STATUS: {
+    RUNNING: '#3B82F6',
+    COMPLETED: '#10B981',
+    FAILED: '#EF4444',
+    PENDING: '#F59E0B',
+    CANCELLED: '#6B7280',
+    PAUSED: '#8B5CF6'
+  },
+  
+  // Performance colors
+  PERFORMANCE: {
+    EXCELLENT: '#10B981',
+    GOOD: '#22C55E',
+    AVERAGE: '#F59E0B',
+    POOR: '#F97316',
+    CRITICAL: '#EF4444'
+  },
+  
+  // Gradient colors
+  GRADIENTS: {
+    BLUE_TO_PURPLE: ['#3B82F6', '#8B5CF6'],
+    GREEN_TO_TEAL: ['#10B981', '#14B8A6'],
+    ORANGE_TO_RED: ['#F59E0B', '#EF4444'],
+    PURPLE_TO_PINK: ['#8B5CF6', '#EC4899']
+  }
+} as const;
+

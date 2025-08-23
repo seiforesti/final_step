@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
 // Import security APIs
 import { racineOrchestrationAPI } from '../services/racine-orchestration-apis'
-import { crossGroupIntegrationApis } from '../services/cross-group-integration-apis'
+import { crossGroupIntegrationAPI } from '../services/cross-group-integration-apis'
 
 // Import types
 import {
@@ -134,7 +134,7 @@ export const useSecurityManager = (options: UseSecurityManagerOptions = {}) => {
         setSecurityAlerts(vulnerabilities)
         
         // Track security event
-        crossGroupIntegrationApis.trackEvent('security_vulnerabilities_detected', {
+        crossGroupIntegrationAPI.trackEvent('security_vulnerabilities_detected', {
           resourceId: vulnerabilities[0].resourceId,
           count: vulnerabilities.length,
           severity: vulnerabilities[0].severity
@@ -152,7 +152,7 @@ export const useSecurityManager = (options: UseSecurityManagerOptions = {}) => {
       const result = await encryptDataMutation.mutateAsync(data)
       
       // Track encryption event
-      crossGroupIntegrationApis.trackEvent('data_encrypted', {
+      crossGroupIntegrationAPI.trackEvent('data_encrypted', {
         dataType: typeof data,
         algorithm: 'AES-256',
         timestamp: Date.now()
@@ -174,7 +174,7 @@ export const useSecurityManager = (options: UseSecurityManagerOptions = {}) => {
       })
       
       // Track decryption event
-      crossGroupIntegrationApis.trackEvent('data_decrypted', {
+      crossGroupIntegrationAPI.trackEvent('data_decrypted', {
         timestamp: Date.now()
       })
       
@@ -249,7 +249,7 @@ export const useSecurityManager = (options: UseSecurityManagerOptions = {}) => {
       })
       
       // Track token generation
-      crossGroupIntegrationApis.trackEvent('secure_token_generated', {
+      crossGroupIntegrationAPI.trackEvent('secure_token_generated', {
         payload: Object.keys(payload),
         expiresIn,
         timestamp: Date.now()
@@ -289,7 +289,7 @@ export const useSecurityManager = (options: UseSecurityManagerOptions = {}) => {
       })
       
       // Track key rotation
-      crossGroupIntegrationApis.trackEvent('encryption_keys_rotated', {
+      crossGroupIntegrationAPI.trackEvent('encryption_keys_rotated', {
         timestamp: Date.now()
       })
       
@@ -314,7 +314,7 @@ export const useSecurityManager = (options: UseSecurityManagerOptions = {}) => {
       queryClient.invalidateQueries({ queryKey: ['securityPolicies'] })
       
       // Track policy creation
-      crossGroupIntegrationApis.trackEvent('security_policy_created', {
+      crossGroupIntegrationAPI.trackEvent('security_policy_created', {
         policyId: result.id,
         encryption: policy.encryption,
         accessControl: policy.accessControl
@@ -338,7 +338,7 @@ export const useSecurityManager = (options: UseSecurityManagerOptions = {}) => {
       queryClient.invalidateQueries({ queryKey: ['securityPolicies'] })
       
       // Track policy update
-      crossGroupIntegrationApis.trackEvent('security_policy_updated', {
+      crossGroupIntegrationAPI.trackEvent('security_policy_updated', {
         policyId,
         changes: Object.keys(updates)
       })
@@ -421,7 +421,7 @@ export const useSecurityManager = (options: UseSecurityManagerOptions = {}) => {
       })
       
       // Track monitoring start
-      crossGroupIntegrationApis.trackEvent('security_monitoring_started', {
+      crossGroupIntegrationAPI.trackEvent('security_monitoring_started', {
         resourceId,
         timestamp: Date.now()
       })
@@ -439,7 +439,7 @@ export const useSecurityManager = (options: UseSecurityManagerOptions = {}) => {
       })
       
       // Track monitoring stop
-      crossGroupIntegrationApis.trackEvent('security_monitoring_stopped', {
+      crossGroupIntegrationAPI.trackEvent('security_monitoring_stopped', {
         resourceId,
         timestamp: Date.now()
       })

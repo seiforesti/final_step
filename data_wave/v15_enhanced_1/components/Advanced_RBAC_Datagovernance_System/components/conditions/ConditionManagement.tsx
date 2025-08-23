@@ -113,9 +113,9 @@ import {
 } from 'lucide-react';
 
 // Sub-components
-import ConditionBuilder from './ConditionBuilder';
-import ConditionTemplates from './ConditionTemplates';
-import ConditionValidator from './ConditionValidator';
+import { ConditionBuilder } from './ConditionBuilder';
+import { ConditionTemplates } from './ConditionTemplates';
+import { ConditionValidator } from './ConditionValidator';
 
 // Hooks and Services
 import { useConditions } from '../../hooks/useConditions';
@@ -179,7 +179,7 @@ const DEFAULT_FILTERS: ConditionFilter = {
   }
 };
 
-const ConditionManagement: React.FC<ConditionManagementProps> = ({
+export const ConditionManagement: React.FC<ConditionManagementProps> = ({
   className = ''
 }) => {
   // State Management
@@ -1140,4 +1140,3 @@ const ConditionManagement: React.FC<ConditionManagementProps> = ({
   );
 };
 
-export default ConditionManagement;

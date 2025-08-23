@@ -14,6 +14,239 @@ import {
 // COLLABORATION HUB TYPES
 // ============================================================================
 
+export enum PriorityLevel {
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+  CRITICAL = 'critical'
+}
+
+export enum MessageType {
+  INFO = 'info',
+  SUCCESS = 'success',
+  WARNING = 'warning',
+  ERROR = 'error',
+  SYSTEM = 'system'
+}
+
+// ============================================================================
+// MISSING INTERFACES - ADDED FOR COMPATIBILITY
+// ============================================================================
+
+export interface CollaborationHubConfig {
+  id: string;
+  name: string;
+  description?: string;
+  settings: Record<string, any>;
+}
+
+export interface CollaborationSettings {
+  id: string;
+  name: string;
+  config: Record<string, any>;
+}
+
+export interface CollaborationAnalytics {
+  id: string;
+  metrics: Record<string, any>;
+}
+
+export interface KnowledgeSharingConfig {
+  id: string;
+  enabled: boolean;
+  settings: Record<string, any>;
+}
+
+export interface TeamPermissions {
+  id: string;
+  permissions: string[];
+}
+
+export interface TeamLeader {
+  id: string;
+  userId: string;
+  role: string;
+}
+
+export interface TeamGoal {
+  id: string;
+  name: string;
+  description: string;
+}
+
+export interface TeamMetrics {
+  id: string;
+  metrics: Record<string, any>;
+}
+
+export interface TeamStatus {
+  id: string;
+  status: string;
+}
+
+export interface WorkspaceMember {
+  id: string;
+  userId: string;
+  role: string;
+}
+
+export interface WorkspaceAccessControl {
+  id: string;
+  permissions: string[];
+}
+
+export interface WorkspaceAsset {
+  id: string;
+  type: string;
+  name: string;
+}
+
+export interface WorkspaceDocument {
+  id: string;
+  type: string;
+  name: string;
+}
+
+export interface WorkspaceDiscussion {
+  id: string;
+  title: string;
+  content: string;
+}
+
+export interface WorkspaceTools {
+  id: string;
+  tools: string[];
+}
+
+export interface WorkspaceFeature {
+  id: string;
+  name: string;
+  enabled: boolean;
+}
+
+export interface WorkspaceTemplate {
+  id: string;
+  name: string;
+  config: Record<string, any>;
+}
+
+export interface WorkspaceAnalytics {
+  id: string;
+  metrics: Record<string, any>;
+}
+
+export interface WorkspaceSettings {
+  id: string;
+  config: Record<string, any>;
+}
+
+export interface TeamResponsibility {
+  id: string;
+  name: string;
+  description: string;
+}
+
+export interface StewardshipConfig {
+  id: string;
+  settings: Record<string, any>;
+}
+
+export interface StewardshipRole {
+  id: string;
+  name: string;
+  permissions: string[];
+}
+
+export interface StewardshipResponsibility {
+  id: string;
+  name: string;
+  description: string;
+}
+
+export interface StewardshipQualityManagement {
+  id: string;
+  config: Record<string, any>;
+}
+
+export interface StewardshipGovernance {
+  id: string;
+  config: Record<string, any>;
+}
+
+export interface StewardshipMetrics {
+  id: string;
+  metrics: Record<string, any>;
+}
+
+export interface StewardshipReporting {
+  id: string;
+  config: Record<string, any>;
+}
+
+export interface ExpertiseArea {
+  id: string;
+  name: string;
+  description: string;
+}
+
+export interface StewardshipDomain {
+  id: string;
+  name: string;
+  description: string;
+}
+
+export interface StewardPerformance {
+  id: string;
+  metrics: Record<string, any>;
+}
+
+export interface StewardActivity {
+  id: string;
+  type: string;
+  timestamp: Date;
+}
+
+export interface StewardCertification {
+  id: string;
+  name: string;
+  issuer: string;
+}
+
+export interface StewardStatus {
+  id: string;
+  status: string;
+}
+
+export interface WorkflowType {
+  id: string;
+  name: string;
+  description: string;
+}
+
+export interface WorkflowTrigger {
+  id: string;
+  type: string;
+  config: Record<string, any>;
+}
+
+export interface WorkflowParticipant {
+  id: string;
+  userId: string;
+  role: string;
+}
+
+export interface ApprovalStep {
+  id: string;
+  name: string;
+  approvers: string[];
+}
+
+export interface BusinessRule {
+  id: string;
+  name: string;
+  rule: string;
+}
+
 export interface CatalogCollaborationHub {
   id: string;
   name: string;

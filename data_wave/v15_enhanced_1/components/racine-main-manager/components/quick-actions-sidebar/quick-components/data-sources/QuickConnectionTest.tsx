@@ -2,13 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import {
-  TestTube, Play, Pause, RotateCcw, CheckCircle2, AlertCircle, 
-  Loader2, Activity, Zap, Clock, Network, Server, Database,
-  Wifi, Signal, AlertTriangle, TrendingUp, TrendingDown,
-  BarChart3, Timer, Target, Gauge, FileText, Download,
-  RefreshCw, Settings, Info, Eye, EyeOff, Terminal
-} from 'lucide-react'
+import { TestTube, Play, Pause, RotateCcw, CheckCircle2, AlertCircle, Loader2, Activity, Zap, Clock, Network, Server, Database, Wifi, Signal, AlertTriangle, TrendingUp, TrendingDown, BarChart3, Timer, Target, Gauge, FileText, Download, RefreshCw, Settings, Info, Eye, EyeOff, Terminal } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -549,7 +543,7 @@ export const QuickConnectionTest: React.FC<QuickConnectionTestProps> = ({
     })
   }, [])
 
-  // Download test report
+  // ArrowDownTrayIcon test report
   const handleDownloadReport = useCallback(async () => {
     if (!testState.results) return
 
@@ -575,7 +569,7 @@ export const QuickConnectionTest: React.FC<QuickConnectionTestProps> = ({
       console.error('Failed to download report:', error)
       showNotification({
         type: 'error',
-        title: 'Download Failed',
+        title: 'ArrowDownTrayIcon Failed',
         message: 'Failed to generate test report.',
         duration: 3000
       })

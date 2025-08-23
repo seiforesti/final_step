@@ -2,47 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  UserIcon,
-  EnvelopeIcon,
-  PhoneIcon,
-  MapPinIcon,
-  BuildingOfficeIcon,
-  CalendarIcon,
-  ClockIcon,
-  ShieldCheckIcon,
-  KeyIcon,
-  DevicePhoneMobileIcon,
-  ComputerDesktopIcon,
-  GlobeAltIcon,
-  ExclamationTriangleIcon,
-  CheckCircleIcon,
-  XMarkIcon,
-  PencilIcon,
-  TrashIcon,
-  UserGroupIcon,
-  EyeIcon,
-  ChartBarIcon,
-  DocumentTextIcon,
-  CogIcon,
-  BoltIcon,
-  StarIcon,
-  FlagIcon,
-  LockClosedIcon,
-  InformationCircleIcon,
-  ArrowPathIcon,
-  ChevronRightIcon,
-  ChevronDownIcon,
-  PhotoIcon,
-  LinkIcon,
-  HashtagIcon,
-  IdentificationIcon,
-  WifiIcon,
-  SignalIcon,
-  CpuChipIcon,
-  FireIcon,
-  SparklesIcon
-} from '@heroicons/react/24/outline';
+import { UserIcon, EnvelopeIcon, PhoneIcon, MapPinIcon, BuildingOfficeIcon, CalendarIcon, ClockIcon, ShieldCheckIcon, KeyIcon, DevicePhoneMobileIcon, ComputerDesktopIcon, GlobeAltIcon, ExclamationTriangleIcon, CheckCircleIcon, XMarkIcon, PencilIcon, TrashIcon, UserGroupIcon, EyeIcon, ChartBarIcon, DocumentTextIcon, CogIcon, BoltIcon, StarIcon, FlagIcon, LockClosedIcon, InformationCircleIcon, ArrowPathIcon, ChevronRightIcon, ChevronDownIcon, PhotoIcon, LinkIcon, HashtagIcon, IdentificationIcon, WifiIcon, SignalIcon, CpuChipIcon, FireIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import { userService } from '../../services/user.service';
 import { useCurrentUser } from '../../hooks/useCurrentUser';
 import { formatDate, formatRelativeTime, formatUserName, formatUserEmail, formatDuration } from '../../utils/format.utils';

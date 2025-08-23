@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Clock, Play, Pause, Edit, Trash2, Calendar, Zap, CheckCircle, AlertTriangle } from "lucide-react"
+import { Clock, Play, Pause, Edit, Trash2, Calendar, Zap, CheckCircle, AlertTriangle } from 'lucide-react'
 
 // Import enterprise hooks for better backend integration
 import { useEnterpriseFeatures } from "./hooks/use-enterprise-features"

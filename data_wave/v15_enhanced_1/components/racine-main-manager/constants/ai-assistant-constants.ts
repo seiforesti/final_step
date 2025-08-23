@@ -102,6 +102,39 @@ export const AI_ASSISTANT_SUGGESTION_CATEGORIES = {
   TRAINING: 'training'
 } as const;
 
+export const AI_PERSONALITIES = {
+  ANALYST: {
+    name: 'Data Analyst',
+    description: 'Specialized in data analysis, insights, and reporting',
+    traits: ['analytical', 'detail-oriented', 'insightful'],
+    expertise: ['data-analysis', 'statistics', 'visualization', 'trends']
+  },
+  ENGINEER: {
+    name: 'Systems Engineer',
+    description: 'Expert in system architecture, optimization, and technical solutions',
+    traits: ['technical', 'problem-solving', 'efficient'],
+    expertise: ['architecture', 'optimization', 'troubleshooting', 'performance']
+  },
+  SECURITY: {
+    name: 'Security Specialist',
+    description: 'Focused on security, compliance, and risk management',
+    traits: ['security-focused', 'compliance-aware', 'risk-conscious'],
+    expertise: ['security-audit', 'compliance', 'risk-assessment', 'threat-detection']
+  },
+  OPERATIONS: {
+    name: 'Operations Manager',
+    description: 'Specialized in workflow optimization and operational efficiency',
+    traits: ['efficient', 'process-oriented', 'results-driven'],
+    expertise: ['workflow-optimization', 'process-improvement', 'efficiency', 'automation']
+  },
+  GENERALIST: {
+    name: 'General Assistant',
+    description: 'Versatile assistant for general queries and support',
+    traits: ['helpful', 'versatile', 'knowledgeable'],
+    expertise: ['general-support', 'documentation', 'training', 'guidance']
+  }
+} as const;
+
 export const AI_ASSISTANT_CONTEXT_KEYS = {
   USER_ID: 'userId',
   SESSION_ID: 'sessionId',
@@ -287,4 +320,123 @@ export const AI_ASSISTANT_FEATURE_FLAGS = {
   ENABLE_SCREENSHARING: false,
   ENABLE_COLLABORATION: true,
   ENABLE_CUSTOM_PROMPTS: true
+} as const;
+
+// ============================================================================
+// ANOMALY DETECTION CONSTANTS
+// ============================================================================
+
+export const ANOMALY_CATEGORIES = {
+  PERFORMANCE: 'performance',
+  SECURITY: 'security',
+  DATA_QUALITY: 'data-quality',
+  SYSTEM_HEALTH: 'system-health',
+  USER_BEHAVIOR: 'user-behavior',
+  NETWORK: 'network',
+  STORAGE: 'storage',
+  COMPLIANCE: 'compliance'
+} as const;
+
+// ============================================================================
+// COMPLIANCE FRAMEWORK CONSTANTS
+// ============================================================================
+
+export const COMPLIANCE_FRAMEWORKS = {
+  GDPR: 'gdpr',
+  HIPAA: 'hipaa',
+  SOX: 'sox',
+  PCI_DSS: 'pci-dss',
+  ISO_27001: 'iso-27001',
+  NIST: 'nist',
+  FEDRAMP: 'fedramp',
+  SOC_2: 'soc-2'
+} as const;
+
+// ============================================================================
+// INSIGHT CATEGORIES CONSTANTS
+// ============================================================================
+
+export const INSIGHT_CATEGORIES = {
+  PERFORMANCE: 'performance',
+  SECURITY: 'security',
+  OPTIMIZATION: 'optimization',
+  TREND: 'trend',
+  ANOMALY: 'anomaly',
+  COMPLIANCE: 'compliance',
+  QUALITY: 'quality',
+  EFFICIENCY: 'efficiency',
+  COST: 'cost',
+  RISK: 'risk'
+} as const;
+
+// ============================================================================
+// CORRELATION THRESHOLDS CONSTANTS
+// ============================================================================
+
+export const CORRELATION_THRESHOLDS = {
+  STRONG: 0.8,
+  MODERATE: 0.6,
+  WEAK: 0.4,
+  MINIMUM: 0.2
+} as const;
+
+// ============================================================================
+// INSIGHT PRIORITIES CONSTANTS
+// ============================================================================
+
+export const INSIGHT_PRIORITIES = {
+  CRITICAL: 'critical',
+  HIGH: 'high',
+  MEDIUM: 'medium',
+  LOW: 'low',
+  INFO: 'info'
+} as const;
+
+// ============================================================================
+// RECOMMENDATION CATEGORIES CONSTANTS
+// ============================================================================
+
+export const RECOMMENDATION_CATEGORIES = {
+  PERFORMANCE: 'performance',
+  SECURITY: 'security',
+  OPTIMIZATION: 'optimization',
+  COST: 'cost',
+  COMPLIANCE: 'compliance',
+  USER_EXPERIENCE: 'user-experience',
+  OPERATIONAL: 'operational',
+  STRATEGIC: 'strategic'
+} as const;
+
+// ============================================================================
+// SUPPORTED LANGUAGES CONSTANTS
+// ============================================================================
+
+export const SUPPORTED_LANGUAGES = {
+  ENGLISH: 'en',
+  SPANISH: 'es',
+  FRENCH: 'fr',
+  GERMAN: 'de',
+  ITALIAN: 'it',
+  PORTUGUESE: 'pt',
+  RUSSIAN: 'ru',
+  CHINESE: 'zh',
+  JAPANESE: 'ja',
+  KOREAN: 'ko'
+} as const;
+
+// ============================================================================
+// SUPPORTED VOICE LANGUAGES CONSTANTS
+// ============================================================================
+
+export const SUPPORTED_VOICE_LANGUAGES = {
+  ENGLISH_US: 'en-US',
+  ENGLISH_UK: 'en-GB',
+  SPANISH: 'es-ES',
+  FRENCH: 'fr-FR',
+  GERMAN: 'de-DE',
+  ITALIAN: 'it-IT',
+  PORTUGUESE: 'pt-PT',
+  RUSSIAN: 'ru-RU',
+  CHINESE: 'zh-CN',
+  JAPANESE: 'ja-JP'
 } as const;

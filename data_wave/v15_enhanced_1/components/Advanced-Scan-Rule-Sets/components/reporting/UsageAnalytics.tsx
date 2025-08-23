@@ -40,87 +40,7 @@ import {
   Funnel,
   FunnelChart
 } from 'recharts';
-import { 
-  Users,
-  User,
-  Activity,
-  TrendingUp,
-  TrendingDown,
-  BarChart3,
-  PieChart as PieChartIcon,
-  Clock,
-  Calendar,
-  Eye,
-  Mouse,
-  Smartphone,
-  Monitor,
-  Globe,
-  MapPin,
-  Download,
-  Upload,
-  Search,
-  Filter,
-  Plus,
-  RefreshCw,
-  Settings,
-  Share2,
-  Bookmark,
-  Star,
-  Flag,
-  Bell,
-  Mail,
-  Target,
-  Zap,
-  Database,
-  Network,
-  Server,
-  Cpu,
-  MemoryStick,
-  HardDrive,
-  Wifi,
-  Timer,
-  Hourglass,
-  Hash,
-  Percent,
-  ArrowUp,
-  ArrowDown,
-  Minus,
-  Play,
-  Pause,
-  StopCircle,
-  SkipForward,
-  SkipBack,
-  Volume2,
-  VolumeX,
-  MousePointer,
-  Keyboard,
-  Fingerprint,
-  Shield,
-  Lock,
-  Unlock,
-  Key,
-  AlertTriangle,
-  CheckCircle,
-  XCircle,
-  Info,
-  HelpCircle,
-  FileText,
-  Image,
-  Video,
-  Code,
-  Link,
-  Layers,
-  GitBranch,
-  History,
-  Archive,
-  Edit,
-  Trash2,
-  Copy,
-  ExternalLink,
-  Maximize,
-  Minimize,
-  MoreHorizontal
-} from 'lucide-react';
+import { Users, User, Activity, TrendingUp, TrendingDown, BarChart3, PieChart as PieChartIcon, Clock, Calendar, Eye, Mouse, Smartphone, Monitor, Globe, MapPin, Download, Upload, Search, Filter, Plus, RefreshCw, Settings, Share2, Bookmark, Star, Flag, Bell, Mail, Target, Zap, Database, Network, Server, Cpu, MemoryStick, HardDrive, Wifi, Timer, Hourglass, Hash, Percent, ArrowUp, ArrowDown, Minus, Play, Pause, StopCircle, SkipForward, SkipBack, Volume2, VolumeX, MousePointer, Keyboard, Fingerprint, Shield, Lock, Unlock, Key, AlertTriangle, CheckCircle, XCircle, Info, HelpCircle, FileText, Image, Video, Code, Link, Layers, GitBranch, History, Archive, Edit, Trash2, Copy, ExternalLink, Maximize, Minimize, MoreHorizontal } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useReporting } from '../../hooks/useReporting';
 import { reportingApi } from '../../services/reporting-apis';
@@ -1472,7 +1392,7 @@ export const UsageAnalytics: React.FC<UsageAnalyticsProps> = ({
                 
                 <Card>
                   <CardHeader>
-                    <CardTitle>Download Analytics</CardTitle>
+                    <CardTitle>ArrowDownTrayIcon Analytics</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">

@@ -80,55 +80,7 @@ import {
 } from '../../types/racine-core.types';
 
 // Icons
-import {
-  Zap,
-  TrendingUp,
-  Target,
-  BarChart3,
-  Activity,
-  Settings,
-  Brain,
-  Lightbulb,
-  CheckCircle2,
-  AlertTriangle,
-  Clock,
-  DollarSign,
-  Cpu,
-  MemoryStick,
-  HardDrive,
-  Network,
-  Filter,
-  ArrowUpDown,
-  RefreshCw,
-  Play,
-  Pause,
-  Download,
-  Upload,
-  Maximize2,
-  Minimize2,
-  MoreHorizontal,
-  Plus,
-  Minus,
-  X,
-  Search,
-  Save,
-  Share2,
-  BookOpen,
-  Star,
-  ThumbsUp,
-  ThumbsDown,
-  Eye,
-  EyeOff,
-  Lock,
-  Unlock,
-  GitBranch,
-  Workflow,
-  Database,
-  Server,
-  Cloud,
-  Gauge,
-  ChevronDown
-} from 'lucide-react';
+import { Zap, TrendingUp, Target, BarChart3, Activity, Settings, Brain, Lightbulb, CheckCircle2, AlertTriangle, Clock, DollarSign, Cpu, MemoryStick, HardDrive, Network, Filter, ArrowUpDown, RefreshCw, Play, Pause, Download, Upload, Maximize2, Minimize2, MoreHorizontal, Plus, Minus, X, Search, Save, Share2, BookOpen, Star, ThumbsUp, ThumbsDown, Eye, EyeOff, Lock, Unlock, GitBranch, Workflow, Database, Server, Cloud, Gauge, ChevronDown } from 'lucide-react';
 
 // Advanced Chart Components
 import { LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, ScatterChart, Scatter, PieChart, Pie, Cell, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ComposedChart } from 'recharts';

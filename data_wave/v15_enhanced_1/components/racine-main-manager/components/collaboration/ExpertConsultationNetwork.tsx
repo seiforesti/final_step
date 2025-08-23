@@ -11,17 +11,7 @@ import {
   Popover, PopoverContent, PopoverTrigger, Alert, AlertDescription, AlertTitle,
   ResizablePanelGroup, ResizablePanel, ResizableHandle
 } from '@/components/ui';
-import { 
-  Users, User, Search, Filter, Star, Calendar, Clock, MessageCircle, Phone, Video, Send, Plus, Settings, Bell, BellOff,
-  BookOpen, Award, Target, TrendingUp, BarChart3, PieChart, LineChart, Activity, Zap, Brain, Lightbulb, Compass,
-  Map, Route, Navigation, Telescope, Microscope, FlaskConical, Beaker, Atom, Dna, Cpu, Database, Server, Cloud,
-  Globe, Building, Factory, Briefcase, GraduationCap, BookMarked, Library, FileText, Folder, FolderOpen, Tag, Tags,
-  Bookmark, BookmarkPlus, Heart, ThumbsUp, ThumbsDown, Flag, Share, Download, Upload, Copy, ExternalLink, Link,
-  Unlink, Edit, Trash2, Archive, MoreHorizontal, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, ArrowRight,
-  ArrowLeft, ArrowUp, ArrowDown, X, Check, CheckCircle, AlertTriangle, Info, HelpCircle, RefreshCw, Loader2,
-  PlayCircle, PauseCircle, StopCircle, SkipForward, SkipBack, Volume2, VolumeX, Mic, MicOff, Camera, CameraOff,
-  Monitor, Smartphone, Tablet, Laptop, MousePointer, Hand, Grab, Move
-} from 'lucide-react';
+import { Users, User, Search, Filter, Star, Calendar, Clock, MessageCircle, Phone, Video, Send, Plus, Settings, Bell, BellOff, BookOpen, Award, Target, TrendingUp, BarChart3, PieChart, LineChart, Activity, Zap, Brain, Lightbulb, Compass, Map, Route, Navigation, Microscope, FlaskConical, Beaker, Atom, Dna, Cpu, Database, Server, Cloud, Globe, Building, Factory, Briefcase, GraduationCap, BookMarked, Library, FileText, Folder, FolderOpen, Tag, Tags, Bookmark, BookmarkPlus, Heart, ThumbsUp, ThumbsDown, Flag, Share, Download, Upload, Copy, ExternalLink, Link, Unlink, Edit, Trash2, Archive, MoreHorizontal, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, ArrowRight, ArrowLeft, ArrowUp, ArrowDown, X, Check, CheckCircle, AlertTriangle, Info, HelpCircle, RefreshCw, Loader2, PlayCircle, PauseCircle, StopCircle, SkipForward, SkipBack, Volume2, VolumeX, Mic, MicOff, Camera, CameraOff, Monitor, Smartphone, Tablet, Laptop, MousePointer, Hand, Grab, Move } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCollaboration } from '../../hooks/useCollaboration';
 import { useRacineOrchestration } from '../../hooks/useRacineOrchestration';

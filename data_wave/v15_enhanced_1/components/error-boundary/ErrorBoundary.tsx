@@ -1,5 +1,5 @@
 import React from "react";
-import { AlertTriangle, Home, RefreshCw } from "lucide-react";
+import { AlertTriangle, Home, RefreshCw } from 'lucide-react';
 import { motion } from "framer-motion";
 import { Button } from "../ui/button";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";

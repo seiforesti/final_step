@@ -2,50 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  Activity, 
-  AlertCircle, 
-  AlertTriangle, 
-  CheckCircle2, 
-  XCircle, 
-  Clock, 
-  Zap,
-  RefreshCw,
-  TrendingUp,
-  TrendingDown,
-  Minus,
-  Server,
-  Database,
-  Shield,
-  FileText,
-  BookOpen,
-  Scan,
-  Users,
-  Bot,
-  MessageSquare,
-  Workflow,
-  BarChart3,
-  Globe,
-  Cpu,
-  HardDrive,
-  Wifi,
-  WifiOff,
-  Battery,
-  BatteryLow,
-  Signal,
-  SignalHigh,
-  SignalLow,
-  SignalMedium,
-  Eye,
-  Settings,
-  Info,
-  ExternalLink,
-  ChevronRight,
-  Loader2,
-  Gauge,
-  CircleDot,
-  Circle
-} from 'lucide-react'
+import { Activity, AlertCircle, AlertTriangle, CheckCircle2, XCircle, Clock, Zap, RefreshCw, TrendingUp, TrendingDown, Minus, Server, Database, Shield, FileText, BookOpen, Scan, Users, Bot, MessageSquare, Workflow, BarChart3, Globe, Cpu, HardDrive, Wifi, WifiOff, Battery, BatteryLow, Signal, SignalHigh, SignalLow, SignalMedium, Eye, Settings, Info, ExternalLink, ChevronRight, Loader2, Gauge, CircleDot, Circle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'

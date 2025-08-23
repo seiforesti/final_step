@@ -45,3 +45,8 @@ export const validateResponsiveLayout = (
     errors
   };
 };
+
+export const layoutEngine = {
+  optimizeLayout,
+  validateResponsiveLayout
+};

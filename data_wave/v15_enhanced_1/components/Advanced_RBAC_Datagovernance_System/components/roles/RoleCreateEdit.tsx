@@ -202,7 +202,7 @@ const permissionGroups: PermissionGroup[] = [
   }
 ];
 
-export default function RoleCreateEdit({
+export function RoleCreateEdit({
   isOpen,
   onClose,
   role,

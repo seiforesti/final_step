@@ -2,77 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Brain, 
-  Lightbulb, 
-  Eye, 
-  Search, 
-  Target, 
-  Workflow, 
-  BarChart3, 
-  Zap, 
-  Clock, 
-  TrendingUp,
-  AlertTriangle,
-  CheckCircle,
-  Users,
-  Database,
-  Settings,
-  Activity,
-  Layers,
-  RefreshCw,
-  Filter,
-  ArrowRight,
-  ChevronDown,
-  ChevronUp,
-  Play,
-  Pause,
-  MoreHorizontal,
-  X,
-  Plus,
-  Minus,
-  Star,
-  Bookmark,
-  Share,
-  Download,
-  Upload,
-  Copy,
-  ExternalLink,
-  Globe,
-  Lock,
-  Unlock,
-  Shield,
-  FileText,
-  Code,
-  Terminal,
-  Monitor,
-  Smartphone,
-  Tablet,
-  Server,
-  Cloud,
-  MapPin,
-  Navigation,
-  Compass,
-  Route,
-  Map,
-  Radar,
-  Telescope,
-  Microscope,
-  Cpu,
-  Memory,
-  HardDrive,
-  Wifi,
-  WifiOff,
-  Battery,
-  Power,
-  Gauge,
-  Thermometer,
-  Volume2,
-  Mic,
-  Camera,
-  Speaker,
-  Headphones
-} from 'lucide-react';
+import { Brain, Lightbulb, Eye, Search, Target, Workflow, BarChart3, Zap, Clock, TrendingUp, AlertTriangle, CheckCircle, Users, Database, Settings, Activity, Layers, RefreshCw, Filter, ArrowRight, ChevronDown, ChevronUp, Play, Pause, MoreHorizontal, X, Plus, Minus, Star, Bookmark, Share, Download, Upload, Copy, ExternalLink, Globe, Lock, Unlock, Shield, FileText, Code, Terminal, Monitor, Smartphone, Tablet, Server, Cloud, MapPin, Navigation, Compass, Route, Map, Radar, Microscope, Cpu, HardDrive, Wifi, WifiOff, Battery, Power, Gauge, Thermometer, Volume2, Mic, Camera, Speaker, Headphones } from 'lucide-react';
 
 // UI Components
 import { Button } from '@/components/ui/button';
@@ -1378,7 +1308,7 @@ const ContextVisualization: React.FC<ContextVisualizationProps> = ({
                     <div className="font-medium">{Math.round((context.environmental?.systemLoad || 0) * 100)}%</div>
                   </div>
                   <div className="p-3 bg-muted/30 rounded-lg">
-                    <Label className="text-xs text-muted-foreground">Memory Usage</Label>
+                    <Label className="text-xs text-muted-foreground">HardDrive Usage</Label>
                     <div className="font-medium">{Math.round((context.environmental?.memoryUsage || 0) * 100)}%</div>
                   </div>
                 </div>
@@ -1453,7 +1383,7 @@ const EnvironmentalAwareness: React.FC<EnvironmentalAwarenessProps> = ({
           </div>
           
           <div className="flex justify-between items-center">
-            <span className="text-sm">Memory Usage</span>
+            <span className="text-sm">HardDrive Usage</span>
             <div className="flex items-center gap-2">
               <Progress value={(environmentalContext.memoryUsage || 0) * 100} className="w-20" />
               <span className="text-sm">{Math.round((environmentalContext.memoryUsage || 0) * 100)}%</span>

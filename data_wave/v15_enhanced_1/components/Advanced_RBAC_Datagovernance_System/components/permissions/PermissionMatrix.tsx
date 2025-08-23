@@ -106,7 +106,7 @@ import {
   List,
   Maximize2,
   Minimize2,
-  Compare,
+  GitCompare,
   GitBranch,
   Share2,
   MessageSquare,
@@ -210,7 +210,7 @@ const getResourceIcon = (resource: string) => {
   return iconMap[resourceType] || Target;
 };
 
-export default function PermissionMatrix({
+export function PermissionMatrix({
   className,
   readOnly = false,
   onSelectionChange
@@ -845,7 +845,7 @@ export default function PermissionMatrix({
             size="sm"
             onClick={() => setComparisonState(prev => ({ ...prev, isOpen: true }))}
           >
-            <Compare className="h-4 w-4 mr-2" />
+             <GitCompare className="h-4 w-4 mr-2" />
             Compare
           </Button>
           

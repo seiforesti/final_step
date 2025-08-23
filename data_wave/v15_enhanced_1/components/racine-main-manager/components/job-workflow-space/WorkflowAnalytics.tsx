@@ -2,14 +2,7 @@
 
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  BarChart3, LineChart, PieChart, TrendingUp, TrendingDown, Activity,
-  Clock, Calendar, Users, Database, Network, Zap, Target, Eye,
-  Filter, Search, Download, Upload, RefreshCw, Settings, Share2,
-  MoreHorizontal, X, Plus, Minus, ArrowUp, ArrowDown, AlertTriangle,
-  CheckCircle, XCircle, Info, Lightbulb, Brain, Layers, Route,
-  MapPin, Compass, Navigation, Globe, Shield, Award, Star
-} from 'lucide-react';
+import { BarChart3, LineChart, PieChart, TrendingUp, TrendingDown, Activity, Clock, Calendar, Users, Database, Network, Zap, Target, Eye, Filter, Search, Download, Upload, RefreshCw, Settings, Share2, MoreHorizontal, X, Plus, Minus, ArrowUp, ArrowDown, AlertTriangle, CheckCircle, XCircle, Info, Lightbulb, Brain, Layers, Route, MapPin, Compass, Navigation, Globe, Shield, Award, Star } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

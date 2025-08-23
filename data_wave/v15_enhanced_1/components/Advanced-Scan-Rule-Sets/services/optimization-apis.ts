@@ -1043,6 +1043,10 @@ export class OptimizationAPIService {
 // ============================================================================
 
 export const optimizationAPI = new OptimizationAPIService();
+export const optimizationAPIService = optimizationAPI;
+
+// Export lowercase alias for compatibility
+export const optimizationApi = optimizationAPI;
 
 /**
  * Enterprise utilities for optimization management

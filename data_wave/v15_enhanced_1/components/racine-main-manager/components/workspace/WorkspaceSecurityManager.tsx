@@ -2,23 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  Shield, ShieldAlert, ShieldCheck, ShieldX, 
-  Lock, Unlock, Key, KeyRound, Eye, EyeOff,
-  Users, User, UserCheck, UserX, Crown,
-  AlertTriangle, AlertCircle, CheckCircle, XCircle,
-  Activity, TrendingUp, TrendingDown, BarChart3,
-  Settings, Filter, Search, RefreshCw, Download,
-  Clock, Calendar, MapPin, Globe, Smartphone,
-  Fingerprint, Scan, Camera, Wifi, WifiOff,
-  Database, Server, Cloud, HardDrive, Cpu,
-  Bug, Zap, Target, Crosshair, Radar,
-  FileText, Clipboard, Archive, Trash2,
-  Mail, Bell, Phone, MessageSquare,
-  Plus, Minus, Edit, Save, X, Check,
-  ChevronDown, ChevronRight, ChevronLeft,
-  MoreHorizontal, MoreVertical, ExternalLink
-} from 'lucide-react'
+import { Shield, ShieldAlert, ShieldCheckIcon, ShieldX, Lock, Unlock, Key, KeyRound, Eye, EyeOff, Users, User, UserCheck, UserX, Crown, AlertTriangle, AlertCircle, CheckCircle, XCircle, Activity, TrendingUp, TrendingDown, BarChart3, Settings, Filter, Search, RefreshCw, Download, Clock, Calendar, MapPin, Globe, Smartphone, Fingerprint, Scan, Camera, Wifi, WifiOff, Database, Server, Cloud, HardDrive, Cpu, Bug, Zap, Target, Crosshair, Radar, FileText, Clipboard, Archive, Trash2, Mail, Bell, Phone, MessageSquare, Plus, Minus, Edit, Save, X, Check, ChevronDown, ChevronRight, ChevronLeft, MoreHorizontal, MoreVertical, ExternalLink } from 'lucide-react'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'

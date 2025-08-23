@@ -41,14 +41,7 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import {
-  TrendingUp, TrendingDown, BarChart3, LineChart as LineChartIcon,
-  PieChart as PieChartIcon, Activity, Zap, Brain, Target, AlertTriangle,
-  Info, Settings, Download, Maximize2, Minimize2, RefreshCw, Play, Pause,
-  SkipForward, SkipBack, Filter, Search, Eye, EyeOff, Layers, Grid3X3,
-  Calendar, Clock, Users, Database, Shield, CheckCircle2, XCircle,
-  ArrowUp, ArrowDown, ArrowRight, MoreHorizontal, Lightbulb, Sparkles
-} from 'lucide-react';
+import { TrendingUp, TrendingDown, BarChart3, LineChart as LineChartIcon, PieChart as PieChartIcon, Activity, Zap, Brain, Target, AlertTriangle, Info, Settings, Download, Maximize2, Minimize2, RefreshCw, Play, Pause, SkipForward, SkipBack, Filter, Search, Eye, EyeOff, Layers, Grid3X3, Calendar, Clock, Users, Database, Shield, CheckCircle2, XCircle, ArrowUp, ArrowDown, ArrowRight, MoreHorizontal, Lightbulb, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 
 // Types and Interfaces

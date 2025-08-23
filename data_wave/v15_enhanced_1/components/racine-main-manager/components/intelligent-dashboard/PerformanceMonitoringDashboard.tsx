@@ -25,18 +25,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@/components/ui/context-menu';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { 
-  Activity, TrendingUp, TrendingDown, BarChart3, LineChart, 
-  Server, Database, Cpu, HardDrive, Memory, Network,
-  AlertTriangle, CheckCircle, Clock, Zap, Target, 
-  RefreshCw, Settings, Filter, Search, Download, Share2,
-  Play, Pause, StopCircle, SkipForward, SkipBack,
-  Maximize2, Minimize2, Eye, EyeOff, Plus, Minus,
-  ArrowUp, ArrowDown, ArrowRight, MoreVertical, ExternalLink,
-  Gauge, Thermometer, Wifi, WifiOff, Power, PowerOff,
-  Monitor, Smartphone, Tablet, Laptop, HardDriveIcon,
-  CloudIcon, CloudOff, Signal, SignalHigh, SignalLow, SignalMedium
-} from 'lucide-react';
+import { Activity, TrendingUp, TrendingDown, BarChart3, LineChart, Server, Database, Cpu, HardDrive, Network, AlertTriangle, CheckCircle, Clock, Zap, Target, RefreshCw, Settings, Filter, Search, Download, Share2, Play, Pause, StopCircle, SkipForward, SkipBack, Maximize2, Minimize2, Eye, EyeOff, Plus, Minus, ArrowUp, ArrowDown, ArrowRight, MoreVertical, ExternalLink, Gauge, Thermometer, Wifi, WifiOff, Power, PowerOff, Monitor, Smartphone, Tablet, Laptop, HardDriveIcon, CloudIcon, CloudOff, Signal, SignalHigh, SignalLow, SignalMedium } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { 
   ResponsiveContainer, LineChart as RechartsLineChart, AreaChart, BarChart as RechartsBarChart,
@@ -743,7 +732,7 @@ export const PerformanceMonitoringDashboard: React.FC<PerformanceMonitoringDashb
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="cpu">CPU</SelectItem>
-                <SelectItem value="memory">Memory</SelectItem>
+                <SelectItem value="memory">HardDrive</SelectItem>
                 <SelectItem value="disk">Disk</SelectItem>
                 <SelectItem value="network">Network</SelectItem>
               </SelectContent>
@@ -1047,3 +1036,5 @@ export const PerformanceMonitoringDashboard: React.FC<PerformanceMonitoringDashb
     </TooltipProvider>
   );
 };
+
+export default PerformanceMonitoringDashboard;

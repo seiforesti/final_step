@@ -9,7 +9,7 @@
  * Features:
  * - AI-powered resource allocation and optimization
  * - Predictive scaling based on workload patterns
- * - Multi-dimensional resource optimization (CPU, Memory, Storage, Network)
+ * - Multi-dimensional resource optimization (CPU, HardDrive, Storage, Network)
  * - Cost optimization with intelligent budgeting
  * - Real-time resource monitoring and adjustment
  * - Advanced performance analysis and bottleneck detection
@@ -34,121 +34,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback, useRef, useReducer } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Zap, 
-  Cpu, 
-  Memory, 
-  HardDrive, 
-  Network, 
-  DollarSign,
-  TrendingUp,
-  TrendingDown,
-  BarChart3,
-  PieChart,
-  LineChart,
-  Activity,
-  Target,
-  Settings,
-  Layers,
-  Cloud,
-  CloudLightning,
-  Server,
-  Database,
-  Monitor,
-  Gauge,
-  Timer,
-  Battery,
-  Thermometer,
-  Wifi,
-  Bluetooth,
-  Shield,
-  Lock,
-  Unlock,
-  AlertTriangle,
-  AlertCircle,
-  CheckCircle,
-  XCircle,
-  Info,
-  Clock,
-  Calendar,
-  Bell,
-  BellOff,
-  Eye,
-  EyeOff,
-  Filter,
-  Search,
-  Download,
-  Upload,
-  Share,
-  Copy,
-  Edit,
-  Trash2,
-  Plus,
-  Minus,
-  Maximize,
-  Minimize,
-  RefreshCw,
-  Save,
-  Send,
-  MessageSquare,
-  Users,
-  User,
-  MapPin,
-  Globe,
-  Link,
-  ExternalLink,
-  ArrowRight,
-  ArrowLeft,
-  ArrowUp,
-  ArrowDown,
-  ChevronRight,
-  ChevronLeft,
-  ChevronUp,
-  ChevronDown,
-  MoreHorizontal,
-  MoreVertical,
-  Grid,
-  List,
-  Box,
-  Package,
-  Archive,
-  Folder,
-  File,
-  FileText,
-  Image,
-  Video,
-  Music,
-  Code,
-  Terminal,
-  Command,
-  Shortcut,
-  Tag,
-  Hash,
-  AtSign,
-  Percent,
-  Euro,
-  Pound,
-  Yen,
-  Bitcoin,
-  CreditCard,
-  Banknote,
-  Receipt,
-  Calculator,
-  PenTool,
-  Brush,
-  Palette,
-  Droplet,
-  Flame,
-  Snowflake,
-  Wind,
-  Play,
-  Pause,
-  Square,
-  SkipForward,
-  SkipBack,
-  FastForward,
-  Rewind
-} from 'lucide-react';
+import { Zap, Cpu, HardDrive, Network, DollarSign, TrendingUp, TrendingDown, BarChart3, PieChart, LineChart, Activity, Target, Settings, Layers, Cloud, CloudLightning, Server, Database, Monitor, Gauge, Timer, Battery, Thermometer, Wifi, Bluetooth, Shield, Lock, Unlock, AlertTriangle, AlertCircle, CheckCircle, XCircle, Info, Clock, Calendar, Bell, BellOff, Eye, EyeOff, Filter, Search, Download, Upload, Share, Copy, Edit, Trash2, Plus, Minus, Maximize, Minimize, RefreshCw, Save, Send, MessageSquare, Users, User, MapPin, Globe, Link, ExternalLink, ArrowRight, ArrowLeft, ArrowUp, ArrowDown, ChevronRight, ChevronLeft, ChevronUp, ChevronDown, MoreHorizontal, MoreVertical, Grid, List, Box, Package, Archive, Folder, File, FileText, Image, Video, Music, Code, Terminal, Command, Shortcut, Tag, Hash, AtSign, Percent, Euro, Pound, Yen, Bitcoin, CreditCard, Banknote, Receipt, Calculator, PenTool, Brush, Palette, Droplet, Flame, Snowflake, Wind, Play, Pause, Square, SkipForward, SkipBack, FastForward, Rewind } from 'lucide-react';
 
 // UI Components
 import { Button } from '@/components/ui/button';
@@ -813,7 +699,7 @@ export const ResourceOptimizer: React.FC = () => {
       case ResourceType.CPU:
         return Cpu;
       case ResourceType.MEMORY:
-        return Memory;
+        return HardDrive;
       case ResourceType.STORAGE:
         return HardDrive;
       case ResourceType.NETWORK:
@@ -899,8 +785,8 @@ export const ResourceOptimizer: React.FC = () => {
         
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Memory Usage</CardTitle>
-            <Memory className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">HardDrive Usage</CardTitle>
+            <HardDrive className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{state.resourceMetrics.memoryUtilization}%</div>
@@ -1195,7 +1081,7 @@ export const ResourceOptimizer: React.FC = () => {
                     </div>
                     
                     <div>
-                      <div className="text-sm text-gray-500 mb-1">Memory</div>
+                      <div className="text-sm text-gray-500 mb-1">HardDrive</div>
                       <div className="text-sm font-medium">
                         {formatBytes(allocation.actual_usage.memory_mb * 1024 * 1024)} / {formatBytes(allocation.allocated_memory_mb * 1024 * 1024)}
                       </div>
