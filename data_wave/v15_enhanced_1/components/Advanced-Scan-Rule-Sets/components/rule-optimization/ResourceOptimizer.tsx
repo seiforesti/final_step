@@ -17,43 +17,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { 
-  Cpu, 
-  HardDrive, 
-  Zap, 
-  TrendingUp, 
-  TrendingDown,
-  Settings,
-  Activity,
-  BarChart3,
-  PieChart,
-  LineChart,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  Target,
-  Layers,
-  Database,
-  Server,
-  Monitor,
-  Gauge,
-  RefreshCw,
-  Play,
-  Pause,
-  Stop,
-  Download,
-  Upload,
-  Save,
-  Eye,
-  EyeOff,
-  Maximize,
-  Minimize,
-  RotateCcw,
-  Calendar,
-  Filter,
-  Search,
-  MoreHorizontal
-} from 'lucide-react';
+import { Cpu, HardDrive, Zap, TrendingUp, TrendingDown, Settings, Activity, BarChart3, PieChart, LineChart, AlertTriangle, CheckCircle, Clock, Target, Layers, Database, Server, Monitor, Gauge, RefreshCw, Play, Pause, Square, Download, Upload, Save, Eye, EyeOff, Maximize, Minimize, RotateCcw, Calendar, Filter, Search, MoreHorizontal } from 'lucide-react';
 import { LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, BarChart, Bar, PieChart as RechartsPieChart, Cell, ComposedChart, Area, AreaChart } from 'recharts';
 import { cn } from '@/lib/utils';
 import { useOptimization } from '../../hooks/useOptimization';

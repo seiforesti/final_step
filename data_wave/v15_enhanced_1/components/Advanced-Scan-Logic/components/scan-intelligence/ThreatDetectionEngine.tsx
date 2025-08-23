@@ -25,73 +25,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Shield, 
-  AlertTriangle, 
-  Eye, 
-  Brain, 
-  Zap, 
-  Target, 
-  Crosshair,
-  TrendingUp,
-  Activity,
-  Lock,
-  Unlock,
-  Flame,
-  Skull,
-  Bug,
-  Virus,
-  Search,
-  Filter,
-  RefreshCw,
-  Play,
-  Pause,
-  Stop,
-  Settings,
-  Download,
-  Upload,
-  BarChart3,
-  LineChart,
-  PieChart,
-  Map,
-  Globe,
-  Clock,
-  Calendar,
-  User,
-  Users,
-  Building,
-  Server,
-  Database,
-  Network,
-  Wifi,
-  HardDrive,
-  Cpu,
-  MemoryStick,
-  FileText,
-  FolderOpen,
-  Link,
-  ExternalLink,
-  Info,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
-  HelpCircle,
-  Plus,
-  Minus,
-  X,
-  ChevronDown,
-  ChevronUp,
-  ChevronLeft,
-  ChevronRight,
-  MoreVertical,
-  MoreHorizontal,
-  Maximize,
-  Minimize,
-  Layers,
-  Grid,
-  List,
-  LayoutGrid
-} from 'lucide-react';
+import { Shield, AlertTriangle, Eye, Brain, Zap, Target, Crosshair, TrendingUp, Activity, Lock, Unlock, Flame, Skull, Bug, Virus, Search, Filter, RefreshCw, Play, Pause, Square, Settings, Download, Upload, BarChart3, LineChart, PieChart, Map, Globe, Clock, Calendar, User, Users, Building, Server, Database, Network, Wifi, HardDrive, Cpu, MemoryStick, FileText, FolderOpen, Link, ExternalLink, Info, CheckCircle, XCircle, AlertCircle, HelpCircle, Plus, Minus, X, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, MoreVertical, MoreHorizontal, Maximize, Minimize, Layers, Grid, List, LayoutGrid } from 'lucide-react';
 
 // UI Components
 import { Button } from '@/components/ui/button';
@@ -340,7 +274,7 @@ export const ThreatDetectionEngine: React.FC = () => {
     
     try {
       if (state.isActive) {
-        // Stop detection
+        // Square detection
         if (refreshIntervalRef.current) {
           clearInterval(refreshIntervalRef.current);
           refreshIntervalRef.current = null;
@@ -701,11 +635,11 @@ export const ThreatDetectionEngine: React.FC = () => {
                 {state.isLoading ? (
                   <RefreshCw className="h-4 w-4 animate-spin mr-2" />
                 ) : state.isActive ? (
-                  <Stop className="h-4 w-4 mr-2" />
+                  <Square className="h-4 w-4 mr-2" />
                 ) : (
                   <Play className="h-4 w-4 mr-2" />
                 )}
-                {state.isActive ? "Stop" : "Start"} Detection
+                {state.isActive ? "Square" : "Start"} Detection
               </Button>
             </div>
           </div>

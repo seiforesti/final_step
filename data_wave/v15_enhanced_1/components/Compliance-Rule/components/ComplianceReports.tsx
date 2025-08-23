@@ -19,11 +19,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import {
-  FileText, Download, Eye, Edit, Trash2, Plus, Search, Filter, RefreshCw,
-  Calendar, Clock, AlertTriangle, CheckCircle, BarChart3, TrendingUp,
-  Settings, Share2, ExternalLink, Archive, MoreHorizontal
-} from "lucide-react"
+import { FileText, Download, Eye, Edit, Trash2, Plus, Search, Filter, RefreshCw, Calendar, Clock, AlertTriangle, CheckCircle, BarChart3, TrendingUp, Settings, Share2, ExternalLink, Archive, MoreHorizontal } from 'lucide-react'
 
 // Enterprise Integration
 import { ComplianceHooks } from '../hooks/use-enterprise-features'

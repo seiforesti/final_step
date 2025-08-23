@@ -5,37 +5,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  ChevronUp,
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
-  Search,
-  Filter,
-  Download,
-  Upload,
-  MoreHorizontal,
-  Eye,
-  Edit,
-  Trash2,
-  Plus,
-  Minus,
-  Grid,
-  List,
-  Settings,
-  RefreshCw,
-  AlertCircle,
-  CheckCircle2,
-  X,
-  ArrowUpDown,
-  SortAsc,
-  SortDesc,
-  Columns,
-  Copy,
-  ExternalLink
-} from 'lucide-react';
+import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Search, Filter, Download, Upload, MoreHorizontal, Eye, Edit, Trash2, Plus, Minus, Grid, List, Settings, RefreshCw, AlertCircle, CheckCircle2, X, ArrowUpDown, SortAsc, SortDesc, Columns, Copy, ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCurrentUser } from '../../hooks/useCurrentUser';
 import { usePermissionCheck } from '../../hooks/usePermissionCheck';

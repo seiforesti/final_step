@@ -25,51 +25,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Activity, 
-  AlertTriangle, 
-  ArrowRight, 
-  BarChart3, 
-  CheckCircle, 
-  Clock, 
-  Database, 
-  GitBranch, 
-  Globe, 
-  Layers, 
-  Network, 
-  Play, 
-  Pause, 
-  Square, 
-  Settings, 
-  Shield, 
-  Zap,
-  TrendingUp,
-  Users,
-  Server,
-  Monitor,
-  RefreshCw,
-  AlertCircle,
-  ChevronDown,
-  ChevronRight,
-  Filter,
-  Search,
-  Download,
-  Upload,
-  Eye,
-  Edit,
-  Trash2,
-  Plus,
-  Minus,
-  X,
-  Check,
-  Info,
-  ExternalLink,
-  Copy,
-  Share2,
-  MoreHorizontal,
-  Maximize2,
-  Minimize2
-} from 'lucide-react';
+import { Activity, AlertTriangle, ArrowRight, BarChart3, CheckCircle, Clock, Database, GitBranch, Globe, Layers, Network, Play, Pause, Square, Settings, Shield, Zap, TrendingUp, Users, Server, Monitor, RefreshCw, AlertCircle, ChevronDown, ChevronRight, Filter, Search, Download, Upload, Eye, Edit, Trash2, Plus, Minus, X, Check, Info, ExternalLink, Copy, Share2, MoreHorizontal, Maximize2, Minimize2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';

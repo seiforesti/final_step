@@ -2,26 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react"
 import { useDataSourceIntegrationsQuery } from "@/hooks/useDataSources"
-import { 
-  Settings, 
-  Plus, 
-  Trash2, 
-  Edit, 
-  RefreshCw, 
-  ExternalLink,
-  Check,
-  X,
-  AlertTriangle,
-  Play,
-  Pause,
-  MoreHorizontal,
-  Link,
-  Globe,
-  Database,
-  Cloud,
-  Shield,
-  Zap
-} from "lucide-react"
+import { Settings, Plus, Trash2, Edit, RefreshCw, ExternalLink, Check, X, AlertTriangle, Play, Pause, MoreHorizontal, Link, Globe, Database, Cloud, Shield, Zap } from 'lucide-react'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"

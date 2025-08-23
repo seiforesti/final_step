@@ -703,3 +703,121 @@ export const WORKFLOW_TEMPLATES_REGISTRY = {
 };
 
 export default WORKFLOW_TEMPLATES_REGISTRY;
+
+// ==========================================
+// FAILURE AND RECOVERY CONFIGURATIONS
+// ==========================================
+
+export const FAILURE_DEFAULT_CONFIGURATION = {
+  detection: {
+    enabled: true,
+    timeout_seconds: 300,
+    retry_attempts: 3,
+    retry_delay_seconds: 30,
+    escalation_threshold: 2
+  },
+  recovery: {
+    auto_recovery: true,
+    recovery_strategies: ['retry', 'fallback', 'circuit_breaker'],
+    max_recovery_time_seconds: 600,
+    rollback_on_failure: true
+  },
+  monitoring: {
+    alert_on_failure: true,
+    log_failures: true,
+    track_recovery_metrics: true,
+    notify_stakeholders: true
+  },
+  circuit_breaker: {
+    failure_threshold: 5,
+    recovery_timeout_seconds: 60,
+    half_open_state: true
+  }
+} as const;
+
+export const RECOVERY_DEFAULT_CONFIGURATION = {
+  strategies: {
+    retry: {
+      max_attempts: 3,
+      backoff_strategy: 'exponential',
+      base_delay_ms: 1000,
+      max_delay_ms: 30000
+    },
+    fallback: {
+      enabled: true,
+      fallback_actions: ['use_cached_data', 'skip_step', 'use_alternative_service'],
+      preserve_context: true
+    },
+    circuit_breaker: {
+      enabled: true,
+      failure_threshold: 5,
+      recovery_timeout_ms: 60000,
+      half_open_requests: 3
+    },
+    compensation: {
+      enabled: true,
+      compensation_actions: ['rollback_changes', 'restore_state', 'notify_admin'],
+      preserve_audit_trail: true
+    }
+  },
+  monitoring: {
+    track_recovery_success_rate: true,
+    alert_on_recovery_failure: true,
+    log_recovery_actions: true,
+    metrics_collection: true
+  },
+  notification: {
+    notify_on_recovery_start: true,
+    notify_on_recovery_success: true,
+    notify_on_recovery_failure: true,
+    escalation_channels: ['email', 'slack', 'pagerduty']
+  }
+} as const;
+
+// ==========================================
+// DEPENDENCY DEFAULT CONFIGURATION
+// ==========================================
+
+export const DEPENDENCY_DEFAULT_CONFIGURATION = {
+  // Dependency resolution settings
+  resolution_strategy: 'topological_sort',
+  max_dependency_depth: 10,
+  circular_dependency_handling: 'error',
+  dependency_timeout: 30000,
+  
+  // Dependency analysis settings
+  analysis_depth: 'full',
+  include_transitive: true,
+  validate_dependencies: true,
+  cache_dependency_graph: true,
+  
+  // Dependency optimization settings
+  optimize_execution_order: true,
+  parallel_dependency_groups: true,
+  resource_allocation_strategy: 'balanced',
+  
+  // Dependency monitoring settings
+  monitor_dependency_health: true,
+  alert_on_dependency_failure: true,
+  track_dependency_metrics: true,
+  
+  // Dependency conflict resolution
+  conflict_resolution_strategy: 'priority_based',
+  auto_resolve_conflicts: false,
+  require_manual_approval: true,
+  
+  // Dependency impact analysis
+  impact_analysis_enabled: true,
+  risk_assessment_threshold: 'medium',
+  compliance_check_enabled: true,
+  
+  // Dependency security settings
+  security_scan_dependencies: true,
+  vulnerability_check_enabled: true,
+  license_compliance_check: true,
+  
+  // Dependency governance
+  governance_policy_enforcement: true,
+  audit_dependency_changes: true,
+  version_control_enabled: true
+} as const;

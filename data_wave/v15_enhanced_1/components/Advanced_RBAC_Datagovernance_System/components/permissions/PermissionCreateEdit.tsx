@@ -218,7 +218,7 @@ const operators = [
   { value: 'less_than', label: 'Less Than', description: 'Numeric comparison' }
 ];
 
-export default function PermissionCreateEdit({
+export function PermissionCreateEdit({
   isOpen,
   onClose,
   permission,

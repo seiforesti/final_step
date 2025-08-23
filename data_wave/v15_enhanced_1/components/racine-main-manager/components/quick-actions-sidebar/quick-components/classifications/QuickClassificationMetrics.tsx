@@ -15,29 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
-import { 
-  BarChart3, 
-  TrendingUp, 
-  TrendingDown, 
-  Target, 
-  Gauge,
-  PieChart,
-  Timer,
-  Zap,
-  Tag,
-  CheckCircle,
-  AlertTriangle,
-  Database,
-  FileText,
-  RefreshCw,
-  Download,
-  Calendar,
-  ArrowUp,
-  ArrowDown,
-  Minus,
-  Star,
-  Activity
-} from 'lucide-react';
+import { BarChart3, TrendingUp, TrendingDown, Target, Gauge, PieChart, Timer, Zap, Tag, CheckCircle, AlertTriangle, Database, FileText, RefreshCw, Download, Calendar, ArrowUp, ArrowDown, Minus, Star, Activity } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 

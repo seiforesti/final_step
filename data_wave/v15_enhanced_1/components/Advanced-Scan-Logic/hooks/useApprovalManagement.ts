@@ -280,3 +280,143 @@ interface EscalationRule {
   delay: number;
 }
 
+// Additional approval management hooks
+export const useApprovalTemplates = () => {
+  const { hasPermission } = useRBAC();
+  const canManageTemplates = hasPermission('template', 'manage');
+  
+  return useQuery({
+    queryKey: ['approval-templates'],
+    queryFn: () => approvalAPI.getTemplates(),
+    enabled: canManageTemplates,
+    staleTime: 60000,
+    retry: 3,
+    refetchOnWindowFocus: false
+  });
+};
+
+export const useApprovalMetrics = () => {
+  const { hasPermission } = useRBAC();
+  const canViewMetrics = hasPermission('metrics', 'read');
+  
+  return useQuery({
+    queryKey: ['approval-metrics'],
+    queryFn: () => approvalAPI.getMetrics(),
+    enabled: canViewMetrics,
+    staleTime: 30000,
+    retry: 2,
+    refetchOnWindowFocus: true
+  });
+};
+
+export const useApprovalNotifications = () => {
+  const { hasPermission } = useRBAC();
+  const canManageNotifications = hasPermission('notification', 'manage');
+  
+  return useQuery({
+    queryKey: ['approval-notifications'],
+    queryFn: () => approvalAPI.getNotifications(),
+    enabled: canManageNotifications,
+    staleTime: 15000,
+    retry: 2,
+    refetchOnWindowFocus: true
+  });
+};
+
+export const useApprovalAudit = () => {
+  const { hasPermission } = useRBAC();
+  const canViewAudit = hasPermission('audit', 'read');
+  
+  return useQuery({
+    queryKey: ['approval-audit'],
+    queryFn: () => approvalAPI.getAuditLog(),
+    enabled: canViewAudit,
+    staleTime: 60000,
+    retry: 3,
+    refetchOnWindowFocus: false
+  });
+};
+
+export const useApprovalConfiguration = () => {
+  const { hasPermission } = useRBAC();
+  const canManageConfig = hasPermission('configuration', 'manage');
+  
+  return useQuery({
+    queryKey: ['approval-configuration'],
+    queryFn: () => approvalAPI.getConfiguration(),
+    enabled: canManageConfig,
+    staleTime: 120000,
+    retry: 3,
+    refetchOnWindowFocus: false
+  });
+};
+
+export const useApprovalPermissions = () => {
+  const { hasPermission } = useRBAC();
+  const canManagePermissions = hasPermission('permission', 'manage');
+  
+  return useQuery({
+    queryKey: ['approval-permissions'],
+    queryFn: () => approvalAPI.getPermissions(),
+    enabled: canManagePermissions,
+    staleTime: 60000,
+    retry: 3,
+    refetchOnWindowFocus: false
+  });
+};
+
+export const useApprovalEscalation = () => {
+  const { hasPermission } = useRBAC();
+  const canManageEscalation = hasPermission('escalation', 'manage');
+  
+  return useQuery({
+    queryKey: ['approval-escalation'],
+    queryFn: () => approvalAPI.getEscalationRules(),
+    enabled: canManageEscalation,
+    staleTime: 60000,
+    retry: 3,
+    refetchOnWindowFocus: false
+  });
+};
+
+export const useApprovalReports = () => {
+  const { hasPermission } = useRBAC();
+  const canViewReports = hasPermission('report', 'read');
+  
+  return useQuery({
+    queryKey: ['approval-reports'],
+    queryFn: () => approvalAPI.getReports(),
+    enabled: canViewReports,
+    staleTime: 300000,
+    retry: 3,
+    refetchOnWindowFocus: false
+  });
+};
+
+export const useApprovalIntegrations = () => {
+  const { hasPermission } = useRBAC();
+  const canManageIntegrations = hasPermission('integration', 'manage');
+  
+  return useQuery({
+    queryKey: ['approval-integrations'],
+    queryFn: () => approvalAPI.getIntegrations(),
+    enabled: canManageIntegrations,
+    staleTime: 120000,
+    retry: 3,
+    refetchOnWindowFocus: false
+  });
+};
+
+export const useApprovalAuditLogs = () => {
+  const { hasPermission } = useRBAC();
+  const canViewAuditLogs = hasPermission('audit_log', 'read');
+
+  return useQuery({
+    queryKey: ['approval-audit-logs'],
+    queryFn: () => approvalAPI.getAuditLogs(),
+    enabled: canViewAuditLogs,
+    staleTime: 300000,
+    retry: 3,
+    refetchOnWindowFocus: false
+  });
+};

@@ -2,18 +2,7 @@
 
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence, PanInfo } from 'framer-motion';
-import { 
-  Workflow, GitBranch, Database, Search, Shield, Users, Brain, Package,
-  Activity, Play, Pause, Stop, Settings, Save, Download, Upload, Copy,
-  Trash2, Edit3, Plus, Minus, ZoomIn, ZoomOut, Maximize2, Grid, Target,
-  ArrowRight, ArrowDown, ArrowUp, ArrowLeft, CornerDownRight, Route,
-  Layers, Code, Terminal, FileText, FolderOpen, Cpu, Memory, HardDrive,
-  Network, Globe, Monitor, Server, Cloud, RefreshCw, AlertTriangle, 
-  CheckCircle, XCircle, Clock, Eye, EyeOff, Filter, MoreHorizontal, X,
-  Zap, TrendingUp, BarChart3, PieChart, LineChart, DollarSign, Award,
-  Star, Crown, Diamond, Circle, Square, Triangle, Hexagon, Octagon,
-  MessageSquare, Share2, Send, List
-} from 'lucide-react';
+import { Workflow, GitBranch, Database, Search, Shield, Users, Brain, Package, Activity, Play, Pause, Square, Settings, Save, Download, Upload, Copy, Trash2, Edit3, Plus, Minus, ZoomIn, ZoomOut, Maximize2, Grid, Target, ArrowRight, ArrowDown, ArrowUp, ArrowLeft, CornerDownRight, Route, Layers, Code, Terminal, FileText, FolderOpen, Cpu, HardDrive, Network, Globe, Monitor, Server, Cloud, RefreshCw, AlertTriangle, CheckCircle, XCircle, Clock, Eye, EyeOff, Filter, MoreHorizontal, X, Zap, TrendingUp, BarChart3, PieChart, LineChart, DollarSign, Award, Star, Crown, Diamond, Circle, Triangle, Hexagon, Octagon, MessageSquare, Share2, Send, List } from 'lucide-react';
 
 // UI Components
 import { Button } from '@/components/ui/button';
@@ -478,7 +467,7 @@ const PIPELINE_TEMPLATES = {
 // Resource Types and Allocation Configurations
 const RESOURCE_TYPES = {
   CPU: { name: 'CPU Cores', unit: 'cores', min: 0.5, max: 32, step: 0.5, default: 2 },
-  MEMORY: { name: 'Memory', unit: 'GB', min: 1, max: 128, step: 1, default: 4 },
+  MEMORY: { name: 'HardDrive', unit: 'GB', min: 1, max: 128, step: 1, default: 4 },
   STORAGE: { name: 'Storage', unit: 'GB', min: 0.1, max: 1000, step: 0.1, default: 10 },
   NETWORK: { name: 'Network', unit: 'Mbps', min: 10, max: 10000, step: 10, default: 100 }
 };

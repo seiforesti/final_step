@@ -2,15 +2,7 @@
 
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Activity, Play, Pause, Stop, RotateCcw, Clock, Zap, TrendingUp, 
-  BarChart3, PieChart, LineChart, AlertTriangle, CheckCircle, XCircle,
-  Eye, EyeOff, Filter, Search, Download, RefreshCw, Settings, 
-  Monitor, Server, Cpu, Memory, HardDrive, Network, Database,
-  Users, Shield, Brain, Layers, Route, Target, MoreHorizontal, X,
-  Bell, BellOff, Maximize2, Minimize2, Volume2, VolumeX, Wifi, WifiOff,
-  FileText
-} from 'lucide-react';
+import { Activity, Play, Pause, Square, RotateCcw, Clock, Zap, TrendingUp, BarChart3, PieChart, LineChart, AlertTriangle, CheckCircle, XCircle, Eye, EyeOff, Filter, Search, Download, RefreshCw, Settings, Monitor, Server, Cpu, HardDrive, Network, Database, Users, Shield, Brain, Layers, Route, Target, MoreHorizontal, X, Bell, BellOff, Maximize2, Minimize2, Volume2, VolumeX, Wifi, WifiOff, FileText } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -71,7 +63,7 @@ const EXECUTION_STATUS_CONFIG = {
   paused: { color: '#f59e0b', bgColor: '#fef3c7', icon: Pause, label: 'Paused' },
   completed: { color: '#10b981', bgColor: '#d1fae5', icon: CheckCircle, label: 'Completed' },
   failed: { color: '#ef4444', bgColor: '#fee2e2', icon: XCircle, label: 'Failed' },
-  cancelled: { color: '#6b7280', bgColor: '#f3f4f6', icon: Stop, label: 'Cancelled' },
+  cancelled: { color: '#6b7280', bgColor: '#f3f4f6', icon: Square, label: 'Cancelled' },
   timeout: { color: '#f59e0b', bgColor: '#fef3c7', icon: AlertTriangle, label: 'Timeout' },
   retrying: { color: '#8b5cf6', bgColor: '#ede9fe', icon: RotateCcw, label: 'Retrying' }
 };
@@ -499,7 +491,7 @@ const RealTimeJobMonitor: React.FC<RealTimeJobMonitorProps> = ({
                       Pause
                     </Button>
                     <Button onClick={handleCancelExecution} variant="destructive" size="sm">
-                      <Stop className="h-4 w-4 mr-1" />
+                      <Square className="h-4 w-4 mr-1" />
                       Cancel
                     </Button>
                   </>
@@ -730,7 +722,7 @@ const RealTimeJobMonitor: React.FC<RealTimeJobMonitorProps> = ({
                       stroke="#10b981" 
                       fill="#10b981" 
                       fillOpacity={0.6}
-                      name="Memory %"
+                      name="HardDrive %"
                     />
                     <Area 
                       type="monotone" 

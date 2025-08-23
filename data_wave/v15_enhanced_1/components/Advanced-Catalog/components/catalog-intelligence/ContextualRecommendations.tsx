@@ -3,25 +3,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  Lightbulb, Brain, Target, TrendingUp, Star, Sparkles,
-  ThumbsUp, ThumbsDown, Heart, Bookmark, Share2, Copy,
-  Filter, Search, Settings, RefreshCw, Download, Upload,
-  ChevronLeft, ChevronRight, ChevronUp, ChevronDown,
-  MoreHorizontal, Eye, EyeOff, Clock, Calendar,
-  User, Users, Tag, Hash, Link, ExternalLink,
-  AlertTriangle, CheckCircle, XCircle, Info,
-  Database, FileText, Cpu, Server, Cloud, Globe,
-  BarChart3, PieChart, Activity, TrendingDown,
-  Zap, Rocket, Compass, Map, Route, Navigation,
-  Award, Crown, Medal, Trophy, Shield, Badge as BadgeIcon,
-  Play, Pause, Square, SkipBack, SkipForward,
-  Volume2, VolumeX, Maximize2, Minimize2,
-  ArrowRight, ArrowLeft, ArrowUp, ArrowDown,
-  Plus, Minus, X, Check, Edit, Trash2,
-  MessageSquare, Bell, Flag, Bookmark as BookmarkIcon,
-  Layers, GitBranch, Network, Workflow
-} from 'lucide-react'
+import { Lightbulb, Brain, Target, TrendingUp, Star, Sparkles, ThumbsUp, ThumbsDown, Heart, Bookmark, Share2, Copy, Filter, Search, Settings, RefreshCw, Download, Upload, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, MoreHorizontal, Eye, EyeOff, Clock, Calendar, User, Users, Tag, Hash, Link, ExternalLink, AlertTriangle, CheckCircle, XCircle, Info, Database, FileText, Cpu, Server, Cloud, Globe, BarChart3, PieChart, Activity, TrendingDown, Zap, Rocket, Compass, Map, Route, Navigation, Award, Crown, Medal, Trophy, Shield, Badge as BadgeIcon, Play, Pause, Square, SkipBack, SkipForward, Volume2, VolumeX, Maximize2, Minimize2, ArrowRight, ArrowLeft, ArrowUp, ArrowDown, Plus, Minus, X, Check, Edit, Trash2, MessageSquare, Bell, Flag, Bookmark as BookmarkIcon, Layers, GitBranch, Network, Workflow } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'

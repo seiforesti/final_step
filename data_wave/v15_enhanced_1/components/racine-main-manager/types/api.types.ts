@@ -48,6 +48,339 @@ import {
   UserSession
 } from './racine-core.types';
 
+// ============================================================================
+// API TYPES FOR RACINE MAIN MANAGER
+// ============================================================================
+
+// APIError class for throwing errors
+export class APIError extends Error {
+  public code: string;
+  public details?: any;
+  public timestamp: string;
+  public requestId: string;
+  public statusCode: number;
+
+  constructor(
+    code: string,
+    message: string,
+    statusCode: number = 500,
+    details?: any,
+    requestId?: string
+  ) {
+    super(message);
+    this.name = 'APIError';
+    this.code = code;
+    this.statusCode = statusCode;
+    this.details = details;
+    this.timestamp = new Date().toISOString();
+    this.requestId = requestId || `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
+}
+
+export interface ApiResponse<T = any> {
+  success: boolean;
+  data: T;
+  message?: string;
+  errors?: string[];
+  metadata?: {
+    timestamp: string;
+    requestId: string;
+    pagination?: {
+      page: number;
+      limit: number;
+      total: number;
+      totalPages: number;
+    };
+  };
+}
+
+export interface PaginationParams {
+  page?: number;
+  limit?: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+}
+
+export interface FilterParams {
+  [key: string]: any;
+}
+
+export interface SearchParams {
+  query: string;
+  fields?: string[];
+  filters?: FilterParams;
+  pagination?: PaginationParams;
+}
+
+// ============================================================================
+// RBAC TYPES
+// ============================================================================
+
+export interface User {
+  id: string;
+  username: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  status: 'active' | 'inactive' | 'suspended';
+  roles: string[];
+  permissions: string[];
+  metadata: {
+    createdAt: string;
+    updatedAt: string;
+    lastLogin?: string;
+  };
+}
+
+export interface Role {
+  id: string;
+  name: string;
+  description: string;
+  permissions: string[];
+  users: string[];
+  metadata: {
+    createdAt: string;
+    updatedAt: string;
+    createdBy: string;
+  };
+}
+
+export interface Permission {
+  id: string;
+  name: string;
+  description: string;
+  resource: string;
+  action: string;
+  conditions?: any;
+  metadata: {
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface Group {
+  id: string;
+  name: string;
+  description: string;
+  members: string[];
+  roles: string[];
+  metadata: {
+    createdAt: string;
+    updatedAt: string;
+    createdBy: string;
+  };
+}
+
+export interface Resource {
+  id: string;
+  name: string;
+  type: string;
+  path: string;
+  permissions: string[];
+  metadata: {
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+// ============================================================================
+// WORKFLOW TYPES
+// ============================================================================
+
+export interface Workflow {
+  id: string;
+  name: string;
+  description: string;
+  status: 'draft' | 'active' | 'paused' | 'archived';
+  steps: WorkflowStep[];
+  metadata: {
+    createdAt: string;
+    updatedAt: string;
+    createdBy: string;
+  };
+}
+
+export interface WorkflowStep {
+  id: string;
+  name: string;
+  type: 'action' | 'decision' | 'approval' | 'notification';
+  status: 'pending' | 'running' | 'completed' | 'failed';
+  dependencies: string[];
+  config: any;
+}
+
+export interface WorkflowExecution {
+  id: string;
+  workflowId: string;
+  status: 'running' | 'completed' | 'failed' | 'cancelled';
+  currentStep: string;
+  progress: number;
+  metadata: {
+    startedAt: string;
+    completedAt?: string;
+    initiatedBy: string;
+  };
+}
+
+// ============================================================================
+// DASHBOARD TYPES
+// ============================================================================
+
+export interface Dashboard {
+  id: string;
+  name: string;
+  description: string;
+  layout: DashboardLayout;
+  widgets: DashboardWidget[];
+  metadata: {
+    createdAt: string;
+    updatedAt: string;
+    createdBy: string;
+  };
+}
+
+export interface DashboardLayout {
+  type: 'grid' | 'flexible';
+  columns: number;
+  rows: number;
+  widgets: Array<{
+    id: string;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  }>;
+}
+
+export interface DashboardWidget {
+  id: string;
+  type: 'chart' | 'metric' | 'table' | 'list' | 'custom';
+  title: string;
+  config: any;
+  dataSource: string;
+}
+
+// ============================================================================
+// PIPELINE TYPES
+// ============================================================================
+
+export interface Pipeline {
+  id: string;
+  name: string;
+  description: string;
+  status: 'draft' | 'active' | 'paused' | 'archived';
+  stages: PipelineStage[];
+  metadata: {
+    createdAt: string;
+    updatedAt: string;
+    createdBy: string;
+  };
+}
+
+export interface PipelineStage {
+  id: string;
+  name: string;
+  type: 'data_ingestion' | 'transformation' | 'validation' | 'output';
+  status: 'pending' | 'running' | 'completed' | 'failed';
+  config: any;
+  dependencies: string[];
+}
+
+export interface PipelineExecution {
+  id: string;
+  pipelineId: string;
+  status: 'running' | 'completed' | 'failed' | 'cancelled';
+  currentStage: string;
+  progress: number;
+  metadata: {
+    startedAt: string;
+    completedAt?: string;
+    initiatedBy: string;
+  };
+}
+
+// ============================================================================
+// NOTIFICATION TYPES
+// ============================================================================
+
+export interface Notification {
+  id: string;
+  type: 'info' | 'warning' | 'error' | 'success';
+  title: string;
+  message: string;
+  read: boolean;
+  metadata: {
+    createdAt: string;
+    userId: string;
+  };
+}
+
+// ============================================================================
+// AUDIT TYPES
+// ============================================================================
+
+export interface AuditLog {
+  id: string;
+  action: string;
+  resource: string;
+  userId: string;
+  timestamp: string;
+  details: any;
+  ipAddress?: string;
+  userAgent?: string;
+}
+
+// ============================================================================
+// CONFIGURATION TYPES
+// ============================================================================
+
+export interface SystemConfig {
+  id: string;
+  key: string;
+  value: any;
+  type: 'string' | 'number' | 'boolean' | 'object' | 'array';
+  description: string;
+  metadata: {
+    createdAt: string;
+    updatedAt: string;
+    updatedBy: string;
+  };
+}
+
+// ============================================================================
+// UTILITY TYPES
+// ============================================================================
+
+export interface ValidationResult {
+  isValid: boolean;
+  errors: string[];
+  warnings: string[];
+}
+
+export interface SearchResult<T = any> {
+  items: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface BulkOperation {
+  id: string;
+  type: string;
+  status: 'pending' | 'running' | 'completed' | 'failed';
+  progress: number;
+  totalItems: number;
+  processedItems: number;
+  failedItems: number;
+  metadata: {
+    createdAt: string;
+    startedAt?: string;
+    completedAt?: string;
+    createdBy: string;
+  };
+}
+
 // =============================================================================
 // BASE API TYPES
 // =============================================================================
@@ -61,15 +394,6 @@ export interface APIResponse<T = any> {
   error?: APIError;
   metadata?: ResponseMetadata;
   pagination?: PaginationInfo;
-}
-
-export interface APIError {
-  code: string;
-  message: string;
-  details?: Record<string, JSONValue>;
-  stackTrace?: string;
-  correlationId?: UUID;
-  timestamp: ISODateString;
 }
 
 export interface ResponseMetadata {
@@ -2475,7 +2799,6 @@ export interface IntegrationPerformanceAnalyticsResponse {
 export type {
   // Core API response types
   APIResponse,
-  APIError,
   ResponseMetadata,
   PaginationInfo,
   

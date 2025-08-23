@@ -2,100 +2,7 @@
 
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence, PanInfo } from 'framer-motion';
-import { 
-  Workflow, 
-  Play, 
-  Pause, 
-  Stop, 
-  SkipForward, 
-  RotateCcw, 
-  Save, 
-  Download, 
-  Upload, 
-  Copy, 
-  Trash2, 
-  Edit3, 
-  Settings, 
-  Plus, 
-  Minus, 
-  ZoomIn, 
-  ZoomOut, 
-  Maximize2, 
-  Minimize2, 
-  Grid, 
-  Move, 
-  CornerDownRight, 
-  ArrowRight, 
-  ArrowDown, 
-  ArrowUp, 
-  ArrowLeft, 
-  Circle, 
-  Square, 
-  Diamond, 
-  Triangle, 
-  Star, 
-  Database, 
-  Search, 
-  Filter, 
-  Eye, 
-  EyeOff, 
-  Lock, 
-  Unlock, 
-  Clock, 
-  AlertTriangle, 
-  CheckCircle, 
-  XCircle, 
-  Info, 
-  Zap, 
-  Target, 
-  Layers, 
-  GitBranch, 
-  GitCommit, 
-  GitMerge, 
-  Code, 
-  Terminal, 
-  FileText, 
-  FolderOpen, 
-  Package, 
-  Cpu, 
-  Memory, 
-  HardDrive, 
-  Activity, 
-  TrendingUp, 
-  BarChart3, 
-  PieChart, 
-  LineChart, 
-  Users, 
-  User, 
-  Shield, 
-  Key, 
-  Globe, 
-  Monitor, 
-  Smartphone, 
-  Server, 
-  Cloud, 
-  Wifi, 
-  Link2, 
-  Unlink2, 
-  RefreshCw, 
-  MoreHorizontal, 
-  ChevronDown, 
-  ChevronUp, 
-  ChevronLeft, 
-  ChevronRight, 
-  X, 
-  Check, 
-  FastForward, 
-  Rewind, 
-  Volume2, 
-  VolumeX, 
-  Mic, 
-  Camera, 
-  Image, 
-  Video, 
-  Music, 
-  Headphones
-} from 'lucide-react';
+import { Workflow, Play, Pause, Square, SkipForward, RotateCcw, Save, Download, Upload, Copy, Trash2, Edit3, Settings, Plus, Minus, ZoomIn, ZoomOut, Maximize2, Minimize2, Grid, Move, CornerDownRight, ArrowRight, ArrowDown, ArrowUp, ArrowLeft, Circle, Diamond, Triangle, Star, Database, Search, Filter, Eye, EyeOff, Lock, Unlock, Clock, AlertTriangle, CheckCircle, XCircle, Info, Zap, Target, Layers, GitBranch, GitCommit, GitMerge, Code, Terminal, FileText, FolderOpen, Package, Cpu, HardDrive, Activity, TrendingUp, BarChart3, PieChart, LineChart, Users, User, Shield, Key, Globe, Monitor, Smartphone, Server, Cloud, Wifi, Link2, Unlink2, RefreshCw, MoreHorizontal, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, X, Check, FastForward, Rewind, Volume2, VolumeX, Mic, Camera, Image, Video, Music, Headphones } from 'lucide-react';
 
 // UI Components
 import { Button } from '@/components/ui/button';
@@ -1520,8 +1427,8 @@ const ExecutionPanel: React.FC<ExecutionPanelProps> = ({
               disabled={!execution || execution.status !== 'running'}
               className="flex items-center gap-2"
             >
-              <Stop className="h-4 w-4" />
-              Stop
+              <Square className="h-4 w-4" />
+              Square
             </Button>
 
             <Button

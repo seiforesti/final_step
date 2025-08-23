@@ -24,38 +24,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Briefcase,
-  Plus,
-  Star,
-  Clock,
-  Users,
-  Settings,
-  Copy,
-  Share2,
-  Download,
-  Upload,
-  Trash2,
-  Brain,
-  Zap,
-  Activity,
-  Database,
-  FileText,
-  BarChart3,
-  Shield,
-  Globe,
-  Lock,
-  Unlock,
-  ChevronDown,
-  ChevronRight,
-  Search,
-  Filter,
-  MoreHorizontal,
-  RefreshCw,
-  Check,
-  AlertTriangle,
-  Info
-} from 'lucide-react';
+import { Briefcase, Plus, Star, Clock, Users, Settings, Copy, Share2, Download, Upload, Trash2, Brain, Zap, Activity, Database, FileText, BarChart3, Shield, Globe, Lock, Unlock, ChevronDown, ChevronRight, Search, Filter, MoreHorizontal, RefreshCw, Check, AlertTriangle, Info } from 'lucide-react';
 
 // Shadcn/UI Components
 import { Button } from '@/components/ui/button';

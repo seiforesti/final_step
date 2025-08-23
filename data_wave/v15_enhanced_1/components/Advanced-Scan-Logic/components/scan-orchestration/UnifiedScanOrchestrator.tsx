@@ -25,74 +25,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo, useRef, useReducer } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Layers,
-  Settings,
-  Play,
-  Pause,
-  Stop,
-  RotateCcw,
-  Activity,
-  Zap,
-  Target,
-  TrendingUp,
-  BarChart3,
-  PieChart,
-  LineChart,
-  RefreshCw,
-  Clock,
-  Calendar,
-  Users,
-  Database,
-  Server,
-  Network,
-  HardDrive,
-  Cpu,
-  MemoryStick,
-  Globe,
-  Building,
-  User,
-  Search,
-  Filter,
-  Download,
-  Upload,
-  FileText,
-  FolderOpen,
-  Link,
-  ExternalLink,
-  Info,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
-  AlertTriangle,
-  HelpCircle,
-  Plus,
-  Minus,
-  X,
-  ChevronDown,
-  ChevronUp,
-  ChevronLeft,
-  ChevronRight,
-  MoreVertical,
-  MoreHorizontal,
-  Maximize,
-  Minimize,
-  Grid,
-  List,
-  LayoutGrid,
-  Map,
-  GitBranch,
-  Workflow,
-  Shuffle,
-  Route,
-  Navigation,
-  Compass,
-  Eye,
-  Brain,
-  Shield,
-  Lock,
-  Unlock
-} from 'lucide-react';
+import { Layers, Settings, Play, Pause, Square, RotateCcw, Activity, Zap, Target, TrendingUp, BarChart3, PieChart, LineChart, RefreshCw, Clock, Calendar, Users, Database, Server, Network, HardDrive, Cpu, MemoryStick, Globe, Building, User, Search, Filter, Download, Upload, FileText, FolderOpen, Link, ExternalLink, Info, CheckCircle, XCircle, AlertCircle, AlertTriangle, HelpCircle, Plus, Minus, X, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, MoreVertical, MoreHorizontal, Maximize, Minimize, Grid, List, LayoutGrid, Map, GitBranch, Workflow, Shuffle, Route, Navigation, Compass, Eye, Brain, Shield, Lock, Unlock } from 'lucide-react';
 
 // UI Components
 import { Button } from '@/components/ui/button';
@@ -864,7 +797,7 @@ export const UnifiedScanOrchestrator: React.FC<UnifiedScanOrchestratorProps> = (
                         Pause Job
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleJobAction(job.id, 'cancel')}>
-                        <Stop className="h-4 w-4 mr-2" />
+                        <Square className="h-4 w-4 mr-2" />
                         Cancel Job
                       </DropdownMenuItem>
                     </>
@@ -1356,7 +1289,7 @@ export const UnifiedScanOrchestrator: React.FC<UnifiedScanOrchestratorProps> = (
                               Pause Job
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleJobAction(job.id, 'cancel')}>
-                              <Stop className="h-4 w-4 mr-2" />
+                              <Square className="h-4 w-4 mr-2" />
                               Cancel Job
                             </DropdownMenuItem>
                           </>

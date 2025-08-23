@@ -25,16 +25,7 @@ import {
 import {
   Alert, AlertDescription, AlertTitle
 } from '@/components/ui/alert';
-import {
-  Search, Filter, Download, RefreshCw, Eye, EyeOff, X, 
-  BarChart3, PieChart, TrendingUp, TrendingDown, AlertCircle,
-  CheckCircle, XCircle, Clock, Calendar, User, Database,
-  Table, FileText, Shield, Target, Zap, Brain, Sparkles,
-  Activity, Settings, Info, HelpCircle, Star, Flag,
-  ChevronDown, ChevronRight, MoreHorizontal, Copy, Edit,
-  Trash, Plus, Minus, ExternalLink, Share, Save,
-  Grid, List, SortAsc, SortDesc, Maximize, Minimize
-} from 'lucide-react';
+import { Search, Filter, Download, RefreshCw, Eye, EyeOff, X, BarChart3, PieChart, TrendingUp, TrendingDown, AlertCircle, CheckCircle, XCircle, Clock, Calendar, User, Database, Table, FileText, Shield, Target, Zap, Brain, Sparkles, Activity, Settings, Info, HelpCircle, Star, Flag, ChevronDown, ChevronRight, MoreHorizontal, Copy, Edit, Trash, Plus, Minus, ExternalLink, Share, Save, Grid, List, SortAsc, SortDesc, Maximize, Minimize } from 'lucide-react';
 
 import { useScanLogic } from '../../../../hooks/useScanLogic';
 import { useWorkspaceManagement } from '../../../../hooks/useWorkspaceManagement';

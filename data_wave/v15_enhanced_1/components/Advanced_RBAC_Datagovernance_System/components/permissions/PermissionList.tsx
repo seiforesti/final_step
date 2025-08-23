@@ -202,7 +202,7 @@ const formatRelativeTime = (dateString: string) => {
   }
 };
 
-export default function PermissionList({
+export function PermissionList({
   permissions,
   groupedPermissions,
   viewState,

@@ -2,76 +2,7 @@
 
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Workflow, 
-  Bot, 
-  Zap, 
-  Play, 
-  Pause, 
-  Stop, 
-  SkipForward, 
-  Rewind,
-  Settings, 
-  RefreshCw, 
-  Clock, 
-  Calendar, 
-  Timer,
-  Target, 
-  CheckCircle, 
-  XCircle, 
-  AlertTriangle, 
-  Info,
-  Eye, 
-  EyeOff, 
-  Edit, 
-  Copy, 
-  Trash2,
-  Plus, 
-  Minus, 
-  X, 
-  Check,
-  Search, 
-  Filter, 
-  Download, 
-  Upload, 
-  Save, 
-  FolderOpen,
-  ChevronDown, 
-  ChevronUp, 
-  ChevronLeft, 
-  ChevronRight, 
-  MoreHorizontal,
-  GitBranch,
-  Layers,
-  Activity,
-  BarChart3,
-  TrendingUp,
-  Database,
-  Users,
-  Shield,
-  Code,
-  FileText,
-  Link,
-  Unlink,
-  Route,
-  Map,
-  Compass,
-  Navigation,
-  Flag,
-  Bookmark,
-  Star,
-  Heart,
-  MessageSquare,
-  Bell,
-  BellOff,
-  Volume2,
-  VolumeX,
-  Smartphone,
-  Monitor,
-  Globe,
-  Wifi,
-  WifiOff
-} from 'lucide-react';
+import { Workflow, Bot, Zap, Play, Pause, Square, SkipForward, Rewind, Settings, RefreshCw, Clock, Calendar, Timer, Target, CheckCircle, XCircle, AlertTriangle, Info, Eye, EyeOff, Edit, Copy, Trash2, Plus, Minus, X, Check, Search, Filter, Download, Upload, Save, FolderOpen, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, MoreHorizontal, GitBranch, Layers, Activity, BarChart3, TrendingUp, Database, Users, Shield, Code, FileText, Link, Unlink, Route, Map, Compass, Navigation, Flag, Bookmark, Star, Heart, MessageSquare, Bell, BellOff, Volume2, VolumeX, Smartphone, Monitor, Globe, Wifi, WifiOff } from 'lucide-react';
 
 // UI Components
 import { Button } from '@/components/ui/button';
@@ -473,7 +404,7 @@ export const WorkflowAutomationEngine: React.FC<WorkflowAutomationEngineProps> =
           // Resume execution
           break;
         case 'stop':
-          // Stop execution
+          // Square execution
           break;
         case 'retry':
           // Retry failed execution
@@ -1041,7 +972,7 @@ const ExecutionMonitor: React.FC<ExecutionMonitorProps> = ({
       case 'paused': return <Pause className="h-4 w-4 text-yellow-500" />;
       case 'completed': return <CheckCircle className="h-4 w-4 text-blue-500" />;
       case 'failed': return <XCircle className="h-4 w-4 text-red-500" />;
-      case 'stopped': return <Stop className="h-4 w-4 text-gray-500" />;
+      case 'stopped': return <Square className="h-4 w-4 text-gray-500" />;
       default: return <Clock className="h-4 w-4 text-gray-400" />;
     }
   };
@@ -1165,7 +1096,7 @@ const ExecutionMonitor: React.FC<ExecutionMonitorProps> = ({
                             onExecutionControl(execution.id, 'stop');
                           }}
                         >
-                          <Stop className="h-3 w-3" />
+                          <Square className="h-3 w-3" />
                         </Button>
                       </>
                     )}

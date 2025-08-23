@@ -54,23 +54,7 @@ import {
   HoverCard, HoverCardContent, HoverCardTrigger
 } from '@/components/ui/hover-card';
 
-import { 
-  MessageSquare, Tag, User, Clock, Edit, Trash2, Plus, Search, Filter,
-  MoreHorizontal, ThumbsUp, ThumbsDown, Reply, Forward, Flag, Archive,
-  Star, Bookmark, Link, Share2, Download, Upload, File, Image, Video,
-  Mic, Paperclip, Eye, EyeOff, Lock, Unlock, Globe, Users, UserCheck,
-  AlertTriangle, CheckCircle, XCircle, Clock3, Activity, TrendingUp,
-  BarChart3, PieChart, LineChart, Target, Zap, Brain, Lightbulb,
-  GitBranch, History, RotateCcw, Copy, Save, ExternalLink, Settings,
-  RefreshCw, ChevronDown, ChevronRight, ChevronLeft, ChevronUp,
-  ArrowRight, ArrowLeft, ArrowUp, ArrowDown, Maximize, Minimize,
-  Grid, List, Layout, Map, Layers, Network, GitMerge, Code, Hash,
-  Calendar as CalendarIcon, FileText, Database, Table as TableIcon, Columns,
-  Workflow, BrainCircuit, Sparkles, Wand2, Robot, MessageCircle,
-  ChatBubbleIcon, Quote, Type, Bold, Italic, Underline, Strikethrough,
-  AlignLeft, AlignCenter, AlignRight, AlignJustify, ListOrdered,
-  ListTodo, Heading1, Heading2, Heading3, Code2, Quote as QuoteIcon
-} from 'lucide-react';
+import { MessageSquare, Tag, User, Clock, Edit, Trash2, Plus, Search, Filter, MoreHorizontal, ThumbsUp, ThumbsDown, Reply, Forward, Flag, Archive, Star, Bookmark, Link, Share2, Download, Upload, File, Image, Video, Mic, Paperclip, Eye, EyeOff, Lock, Unlock, Globe, Users, UserCheck, AlertTriangle, CheckCircle, XCircle, Clock3, Activity, TrendingUp, BarChart3, PieChart, LineChart, Target, Zap, Brain, Lightbulb, GitBranch, History, RotateCcw, Copy, Save, ExternalLink, Settings, RefreshCw, ChevronDown, ChevronRight, ChevronLeft, ChevronUp, ArrowRight, ArrowLeft, ArrowUp, ArrowDown, Maximize, Minimize, Grid, List, Layout, Map, Layers, Network, GitMerge, Code, Hash, Calendar as CalendarIcon, FileText, Database, Table as TableIcon, Columns, Workflow, BrainCircuit, Sparkles, Wand2, Robot, MessageCircle, ChatBubbleIcon, Quote, Type, Bold, Italic, Underline, Strikethrough, AlignLeft, AlignCenter, AlignRight, AlignJustify, ListOrdered, ListTodo, Heading1, Heading2, Heading3, Code2, Quote as QuoteIcon } from 'lucide-react';
 
 import { 
   LineChart as RechartsLineChart, Line, AreaChart, Area, BarChart, Bar, 
@@ -83,7 +67,7 @@ import { format, subDays, parseISO, formatDistanceToNow, isWithinInterval, start
 import { cn } from '@/lib/utils';
 
 // Import backend services
-import { collaborationService } from '../../services/collaboration.service';
+import { collaborationService } from '../../services';
 import { enterpriseCatalogService } from '../../services/enterprise-catalog.service';
 import { intelligentDiscoveryService } from '../../services/intelligent-discovery.service';
 import { advancedLineageService } from '../../services/advanced-lineage.service';

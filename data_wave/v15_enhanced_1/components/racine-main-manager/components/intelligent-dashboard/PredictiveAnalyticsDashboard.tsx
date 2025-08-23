@@ -95,53 +95,7 @@ import { Slider } from '@/components/ui/slider';
 import { Textarea } from '@/components/ui/textarea';
 
 // Icons
-import {
-  Brain,
-  TrendingUp,
-  TrendingDown,
-  Target,
-  Zap,
-  Eye,
-  Sparkles,
-  BarChart3,
-  LineChart as LineChartIcon,
-  Activity,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  RefreshCw,
-  Download,
-  Share,
-  Settings,
-  Filter,
-  Calendar,
-  Maximize2,
-  Minimize2,
-  MoreHorizontal,
-  Play,
-  Pause,
-  Square,
-  FastForward,
-  Rewind,
-  Lightbulb,
-  Cpu,
-  Database,
-  Network,
-  Users,
-  Shield,
-  Scan,
-  FileText,
-  Server,
-  Info,
-  ChevronDown,
-  ChevronUp,
-  ArrowRight,
-  Star,
-  Bookmark,
-  MessageSquare,
-  ThumbsUp,
-  ThumbsDown
-} from 'lucide-react';
+import { Brain, TrendingUp, TrendingDown, Target, Zap, Eye, Sparkles, BarChart3, LineChart as LineChartIcon, Activity, AlertTriangle, CheckCircle, Clock, RefreshCw, Download, Share, Settings, Filter, Calendar, Maximize2, Minimize2, MoreHorizontal, Play, Pause, Square, FastForward, Rewind, Lightbulb, Cpu, Database, Network, Users, Shield, Scan, FileText, Server, Info, ChevronDown, ChevronUp, ArrowRight, Star, Bookmark, MessageSquare, ThumbsUp, ThumbsDown } from 'lucide-react';
 
 // Types
 import {

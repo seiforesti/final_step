@@ -17,27 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { 
-  Tag, 
-  Play, 
-  Check, 
-  X, 
-  Search, 
-  Filter,
-  CheckCircle,
-  AlertTriangle,
-  Clock,
-  Target,
-  Database,
-  FileText,
-  RefreshCw,
-  Eye,
-  Settings,
-  Zap,
-  Star,
-  Users,
-  Shield
-} from 'lucide-react';
+import { Tag, Play, Check, X, Search, Filter, CheckCircle, AlertTriangle, Clock, Target, Database, FileText, RefreshCw, Eye, Settings, Zap, Star, Users, Shield } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 

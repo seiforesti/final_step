@@ -1691,3 +1691,6 @@ export class ClassificationApi {
 
 // Default export
 export default ClassificationApi
+
+// Named export for backward compatibility
+export const classificationApi = new ClassificationApi()

@@ -93,66 +93,7 @@ import {
   CalendarDays
 } from '@/components/ui/calendar';
 
-import { 
-  FileText,
-  Download,
-  Upload,
-  Share2,
-  Eye,
-  Edit,
-  Trash2,
-  Plus,
-  Filter,
-  Search,
-  RefreshCw,
-  Settings,
-  BarChart3,
-  LineChart,
-  PieChart,
-  TrendingUp,
-  TrendingDown,
-  Clock,
-  Users,
-  Database,
-  GitBranch,
-  Link,
-  Network,
-  Layers,
-  MapPin,
-  Target,
-  Activity,
-  Zap,
-  Gauge,
-  AlertTriangle,
-  CheckCircle,
-  XCircle,
-  Minus,
-  Calendar as CalendarIcon,
-  Mail,
-  Bell,
-  Star,
-  BookOpen,
-  Archive,
-  History,
-  Play,
-  Pause,
-  Stop,
-  SkipForward,
-  Repeat,
-  ChevronDown,
-  ChevronRight,
-  ChevronLeft,
-  ChevronUp,
-  MoreHorizontal,
-  ExternalLink,
-  Copy,
-  Save,
-  Send,
-  Layout,
-  Grid,
-  List,
-  Table as TableIcon
-} from 'lucide-react';
+import { FileText, Download, Upload, Share2, Eye, Edit, Trash2, Plus, Filter, Search, RefreshCw, Settings, BarChart3, LineChart, PieChart, TrendingUp, TrendingDown, Clock, Users, Database, GitBranch, Link, Network, Layers, MapPin, Target, Activity, Zap, Gauge, AlertTriangle, CheckCircle, XCircle, Minus, Calendar as CalendarIcon, Mail, Bell, Star, BookOpen, Archive, History, Play, Pause, Square, SkipForward, Repeat, ChevronDown, ChevronRight, ChevronLeft, ChevronUp, MoreHorizontal, ExternalLink, Copy, Save, Send, Layout, Grid, List, Table as TableIcon } from 'lucide-react';
 
 import { 
   LineChart as RechartsLineChart, 
@@ -184,7 +125,7 @@ import { cn } from '@/lib/utils';
 
 // Import backend services
 import { advancedLineageService } from '../../services/advanced-lineage.service';
-import { collaborationService } from '../../services/collaboration.service';
+import { collaborationService } from '../../services';
 import { enterpriseCatalogService } from '../../services/enterprise-catalog.service';
 import { catalogAnalyticsService } from '../../services/catalog-analytics.service';
 
@@ -1180,7 +1121,7 @@ export default function LineageReporting({
                               <DropdownMenuItem key={format} asChild>
                                 <a href={url} download>
                                   <Download className="w-4 h-4 mr-2" />
-                                  Download {format.toUpperCase()}
+                                  ArrowDownTrayIcon {format.toUpperCase()}
                                 </a>
                               </DropdownMenuItem>
                             ))}

@@ -677,6 +677,7 @@ export class ScanRulesAPIService {
 // ============================================================================
 
 export const scanRulesAPI = new ScanRulesAPIService();
+export const scanRulesAPIService = scanRulesAPI;
 
 /**
  * Enterprise utilities for scan rules management

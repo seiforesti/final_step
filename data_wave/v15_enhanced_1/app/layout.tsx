@@ -18,6 +18,7 @@ import { FixResizeObserver } from "@/components/fix-resize-observer"
 import { MasterLayoutOrchestrator } from "@/components/racine-main-manager/components/layout"
 import { PerformanceProvider } from "@/components/providers/PerformanceProvider"
 import { TooltipProvider } from "@/components/ui/tooltip"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 
 import "./globals.css"
 
@@ -69,30 +70,32 @@ export default async function RootLayout({
           enableSystem 
           disableTransitionOnChange
         >
-          <PerformanceProvider initialEnabled={true}>
-            <TooltipProvider>
-              <FixResizeObserver />
-              <MasterLayoutOrchestrator
-                currentView={"standard" as any}
-                layoutMode={layoutMode as any}
-                spaContext={null}
-                userPreferences={{
-                  sidebarOpen: defaultOpen,
-                  theme: theme as any,
-                  layout: layoutMode as any
-                }}
-                enableResponsive={true}
-                enableAnalytics={true}
-                enableAccessibility={true}
-                enablePerformanceOptimization={true}
-                theme={theme as any}
-                className="min-h-screen"
-              >
-                {children}
-              </MasterLayoutOrchestrator>
-              <Toaster />
-            </TooltipProvider>
-          </PerformanceProvider>
+          <QueryClientProvider client={new QueryClient()}>
+            <PerformanceProvider initialEnabled={true}>
+              <TooltipProvider>
+                <FixResizeObserver />
+                <MasterLayoutOrchestrator
+                  currentView={"standard" as any}
+                  layoutMode={layoutMode as any}
+                  spaContext={null}
+                  userPreferences={{
+                    sidebarOpen: defaultOpen,
+                    theme: theme as any,
+                    layout: layoutMode as any
+                  }}
+                  enableResponsive={true}
+                  enableAnalytics={true}
+                  enableAccessibility={true}
+                  enablePerformanceOptimization={true}
+                  theme={theme as any}
+                  className="min-h-screen"
+                >
+                  {children}
+                </MasterLayoutOrchestrator>
+                <Toaster />
+              </TooltipProvider>
+            </PerformanceProvider>
+          </QueryClientProvider>
         </ThemeProvider>
       </body>
     </html>

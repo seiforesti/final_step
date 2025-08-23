@@ -1,43 +1,7 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
-import {
-  TrendingUp,
-  TrendingDown,
-  BarChart3,
-  LineChart,
-  PieChart,
-  Activity,
-  Database,
-  Users,
-  Clock,
-  Calendar,
-  Target,
-  Zap,
-  ArrowUp,
-  ArrowDown,
-  ArrowRight,
-  Minus,
-  Growth,
-  Scale,
-  Timer,
-  FileText,
-  DollarSign,
-  Percent,
-  Eye,
-  Download,
-  RefreshCw,
-  Filter,
-  Settings,
-  AlertTriangle,
-  CheckCircle,
-  Info,
-  Star,
-  ThumbsUp,
-  ThumbsDown,
-  Share2,
-  Bookmark,
-} from "lucide-react"
+import { TrendingUp, TrendingDown, BarChart3, LineChart, PieChart, Activity, Database, Users, Clock, Calendar, Target, Zap, ArrowUp, ArrowDown, ArrowRight, Minus, Growth, Scale, Timer, FileText, DollarSign, Percent, Eye, Download, RefreshCw, Filter, Settings, AlertTriangle, CheckCircle, Info, Star, ThumbsUp, ThumbsDown, Share2, Bookmark,  } from 'lucide-react'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"

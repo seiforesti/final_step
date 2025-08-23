@@ -205,7 +205,7 @@ interface AccessMatrix {
   assignments: Map<string, RoleAssignment>;
 }
 
-const ResourceRoleAssignment: React.FC<ResourceRoleAssignmentProps> = ({
+export const ResourceRoleAssignment: React.FC<ResourceRoleAssignmentProps> = ({
   resource,
   onClose,
   className = ''
@@ -1180,4 +1180,3 @@ const ResourceRoleAssignment: React.FC<ResourceRoleAssignmentProps> = ({
   );
 };
 
-export default ResourceRoleAssignment;

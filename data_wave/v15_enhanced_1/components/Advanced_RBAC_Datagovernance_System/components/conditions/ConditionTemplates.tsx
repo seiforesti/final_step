@@ -429,7 +429,7 @@ const BUILT_IN_TEMPLATES: ConditionTemplate[] = [
   }
 ];
 
-const ConditionTemplates: React.FC<ConditionTemplatesProps> = ({
+export const ConditionTemplates: React.FC<ConditionTemplatesProps> = ({
   templates: propTemplates,
   onUseTemplate,
   onEditTemplate,
@@ -1454,4 +1454,3 @@ const ConditionTemplates: React.FC<ConditionTemplatesProps> = ({
   );
 };
 
-export default ConditionTemplates;

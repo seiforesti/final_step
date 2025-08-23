@@ -279,7 +279,7 @@ interface ResourceGovernance {
   };
 }
 
-const ResourceDetails: React.FC<ResourceDetailsProps> = ({
+export const ResourceDetails: React.FC<ResourceDetailsProps> = ({
   resourceId,
   onEdit,
   onDelete,
@@ -1177,4 +1177,3 @@ const ResourceDetails: React.FC<ResourceDetailsProps> = ({
   );
 };
 
-export default ResourceDetails;

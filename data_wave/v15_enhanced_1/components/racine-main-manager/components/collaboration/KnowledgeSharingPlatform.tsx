@@ -11,18 +11,7 @@ import {
   Popover, PopoverContent, PopoverTrigger, Alert, AlertDescription, AlertTitle,
   ResizablePanelGroup, ResizablePanel, ResizableHandle
 } from '@/components/ui';
-import { 
-  BookOpen, Library, Search, Filter, Plus, Star, ThumbsUp, ThumbsDown, Share, Download, Upload, Eye, Edit, Trash2,
-  Users, User, MessageCircle, Calendar, Clock, Tag, Tags, Bookmark, BookmarkPlus, Heart, Flag, Copy, ExternalLink,
-  Play, Pause, SkipForward, SkipBack, Volume2, VolumeX, Maximize2, Minimize2, RotateCcw, Settings, Bell, BellOff,
-  TrendingUp, BarChart3, PieChart, LineChart, Activity, Target, Award, Trophy, Medal, Crown, Zap, Brain, Lightbulb,
-  Compass, Map, Route, Navigation, Telescope, Microscope, FlaskConical, Beaker, Atom, Dna, Cpu, Database, Server,
-  Cloud, Globe, Building, Factory, Briefcase, GraduationCap, BookMarked, FileText, Folder, FolderOpen, Image,
-  Video, Music, FileImage, FileVideo, FilePlus, FileCheck, FileX, Link, Unlink, AlignLeft, AlignCenter, AlignRight,
-  Bold, Italic, Underline, List, ListOrdered, Quote, Code, Type, Palette, Layers, Grid, Layout, MousePointer, Hand,
-  Grab, Move, CornerDownRight, ArrowRight, ArrowLeft, ArrowUp, ArrowDown, ChevronLeft, ChevronRight, ChevronUp,
-  ChevronDown, X, Check, CheckCircle, AlertTriangle, Info, HelpCircle, RefreshCw, Loader2, MoreHorizontal
-} from 'lucide-react';
+import { BookOpen, Library, Search, Filter, Plus, Star, ThumbsUp, ThumbsDown, Share, Download, Upload, Eye, Edit, Trash2, Users, User, MessageCircle, Calendar, Clock, Tag, Tags, Bookmark, BookmarkPlus, Heart, Flag, Copy, ExternalLink, Play, Pause, SkipForward, SkipBack, Volume2, VolumeX, Maximize2, Minimize2, RotateCcw, Settings, Bell, BellOff, TrendingUp, BarChart3, PieChart, LineChart, Activity, Target, Award, Trophy, Medal, Crown, Zap, Brain, Lightbulb, Compass, Map, Route, Navigation, Microscope, FlaskConical, Beaker, Atom, Dna, Cpu, Database, Server, Cloud, Globe, Building, Factory, Briefcase, GraduationCap, BookMarked, FileText, Folder, FolderOpen, Image, Video, Music, FileImage, FileVideo, FilePlus, FileCheck, FileX, Link, Unlink, AlignLeft, AlignCenter, AlignRight, Bold, Italic, Underline, List, ListOrdered, Quote, Code, Type, Palette, Layers, Grid, Layout, MousePointer, Hand, Grab, Move, CornerDownRight, ArrowRight, ArrowLeft, ArrowUp, ArrowDown, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, X, Check, CheckCircle, AlertTriangle, Info, HelpCircle, RefreshCw, Loader2, MoreHorizontal } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCollaboration } from '../../hooks/useCollaboration';
 import { useRacineOrchestration } from '../../hooks/useRacineOrchestration';

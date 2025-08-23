@@ -226,7 +226,7 @@ const ACTIVITY_ICONS = {
   policy_applied: Shield,
 };
 
-const GroupDetails: React.FC<GroupDetailsProps> = ({
+export const GroupDetails: React.FC<GroupDetailsProps> = ({
   group,
   onEdit,
   onDelete,
@@ -1068,4 +1068,3 @@ const GroupDetails: React.FC<GroupDetailsProps> = ({
   );
 };
 
-export default GroupDetails;

@@ -2,77 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  Activity,
-  BarChart3,
-  LineChart,
-  PieChart,
-  TrendingUp,
-  TrendingDown,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  Zap,
-  Target,
-  Gauge,
-  Monitor,
-  Cpu,
-  MemoryStick,
-  HardDrive,
-  Network,
-  Database,
-  Server,
-  Cloud,
-  Settings,
-  Filter,
-  Search,
-  RefreshCw,
-  Download,
-  Upload,
-  Share2,
-  Eye,
-  Play,
-  Pause,
-  Stop,
-  SkipForward,
-  SkipBack,
-  RotateCcw,
-  Maximize,
-  Minimize,
-  ExternalLink,
-  Info,
-  User,
-  Users,
-  Calendar,
-  Timer,
-  Hash,
-  Percent,
-  Archive,
-  History,
-  Flag,
-  Star,
-  Shield,
-  Lock,
-  Unlock,
-  Key,
-  Award,
-  Crown,
-  Layers,
-  Package,
-  Code,
-  FileText,
-  Workflow,
-  GitBranch,
-  GitCommit,
-  GitMerge,
-  Bell,
-  Volume2,
-  VolumeX,
-  Smartphone,
-  Tablet,
-  Laptop,
-  Desktop
-} from 'lucide-react'
+import { Activity, BarChart3, LineChart, PieChart, TrendingUp, TrendingDown, AlertTriangle, CheckCircle, Clock, Zap, Target, Gauge, Monitor, Cpu, MemoryStick, HardDrive, Network, Database, Server, Cloud, Settings, Filter, Search, RefreshCw, Download, Upload, Share2, Eye, Play, Pause, Square, SkipForward, SkipBack, RotateCcw, Maximize, Minimize, ExternalLink, Info, User, Users, Calendar, Timer, Hash, Percent, Archive, History, Flag, Star, Shield, Lock, Unlock, Key, Award, Crown, Layers, Package, Code, FileText, Workflow, GitBranch, GitCommit, GitMerge, Bell, Volume2, VolumeX, Smartphone, Tablet, Laptop, Desktop } from 'lucide-react'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -999,7 +929,7 @@ export const PerformanceMonitor: React.FC<{
         format
       })
       
-      // Download logic would go here
+      // ArrowDownTrayIcon logic would go here
       
       setState(prev => ({ ...prev, isExporting: false }))
       
@@ -1099,8 +1029,8 @@ export const PerformanceMonitor: React.FC<{
           ) : (
             <>
               <Button onClick={handleStopMonitoring} variant="destructive">
-                <Stop className="h-4 w-4 mr-2" />
-                Stop
+                <Square className="h-4 w-4 mr-2" />
+                Square
               </Button>
               {state.isPaused ? (
                 <Button onClick={handleResumeMonitoring}>

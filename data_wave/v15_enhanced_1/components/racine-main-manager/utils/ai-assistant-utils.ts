@@ -105,11 +105,142 @@ export function extractCodeBlocks(content: string): Array<{ language: string; co
   while ((match = codeBlockRegex.exec(content)) !== null) {
     blocks.push({
       language: match[1] || 'text',
-      code: match[2].trim()
+      code: match[2]
     });
   }
 
   return blocks;
+}
+
+/**
+ * Analyze user intent from message content
+ */
+export function analyzeUserIntent(content: string): {
+  intent: 'question' | 'command' | 'analysis' | 'optimization' | 'help' | 'general';
+  confidence: number;
+  entities: string[];
+  actions: string[];
+} {
+  const lowerContent = content.toLowerCase();
+  
+  // Intent classification
+  let intent: 'question' | 'command' | 'analysis' | 'optimization' | 'help' | 'general' = 'general';
+  let confidence = 0.5;
+  
+  // Question detection
+  if (lowerContent.includes('?') || 
+      lowerContent.includes('what') || 
+      lowerContent.includes('how') || 
+      lowerContent.includes('why') ||
+      lowerContent.includes('when') ||
+      lowerContent.includes('where')) {
+    intent = 'question';
+    confidence = 0.8;
+  }
+  
+  // Command detection
+  if (lowerContent.includes('show') || 
+      lowerContent.includes('display') || 
+      lowerContent.includes('create') || 
+      lowerContent.includes('delete') ||
+      lowerContent.includes('update') ||
+      lowerContent.includes('run') ||
+      lowerContent.includes('execute')) {
+    intent = 'command';
+    confidence = 0.7;
+  }
+  
+  // Analysis detection
+  if (lowerContent.includes('analyze') || 
+      lowerContent.includes('examine') || 
+      lowerContent.includes('review') || 
+      lowerContent.includes('investigate') ||
+      lowerContent.includes('check') ||
+      lowerContent.includes('verify')) {
+    intent = 'analysis';
+    confidence = 0.8;
+  }
+  
+  // Optimization detection
+  if (lowerContent.includes('optimize') || 
+      lowerContent.includes('improve') || 
+      lowerContent.includes('enhance') || 
+      lowerContent.includes('fix') ||
+      lowerContent.includes('resolve') ||
+      lowerContent.includes('tune')) {
+    intent = 'optimization';
+    confidence = 0.7;
+  }
+  
+  // Help detection
+  if (lowerContent.includes('help') || 
+      lowerContent.includes('support') || 
+      lowerContent.includes('guide') || 
+      lowerContent.includes('assist') ||
+      lowerContent.includes('tutorial')) {
+    intent = 'help';
+    confidence = 0.9;
+  }
+  
+  // Entity extraction
+  const entities = extractEntities(lowerContent);
+  
+  // Action extraction
+  const actions = extractActions(lowerContent);
+  
+  return {
+    intent,
+    confidence,
+    entities,
+    actions
+  };
+}
+
+/**
+ * Extract entities from user input
+ */
+function extractEntities(content: string): string[] {
+  const entities: string[] = [];
+  
+  // Extract potential entity patterns
+  const entityPatterns = [
+    /\b\d{4}-\d{2}-\d{2}\b/g, // Dates
+    /\b\d+\.\d+\.\d+\b/g, // Version numbers
+    /\b[A-Z]{2,}\b/g, // Acronyms
+    /\b[a-z]+_[a-z]+\b/g, // Snake case
+    /\b[A-Z][a-z]+[A-Z][a-z]+\b/g // Camel case
+  ];
+  
+  entityPatterns.forEach(pattern => {
+    const matches = content.match(pattern);
+    if (matches) {
+      entities.push(...matches);
+    }
+  });
+  
+  return [...new Set(entities)];
+}
+
+/**
+ * Extract potential actions from user input
+ */
+function extractActions(content: string): string[] {
+  const actions: string[] = [];
+  
+  const actionKeywords = [
+    'show', 'display', 'create', 'delete', 'update', 'run', 'execute',
+    'analyze', 'examine', 'review', 'investigate', 'check', 'verify',
+    'optimize', 'improve', 'enhance', 'fix', 'resolve', 'tune',
+    'help', 'support', 'guide', 'assist', 'tutorial'
+  ];
+  
+  actionKeywords.forEach(keyword => {
+    if (content.includes(keyword)) {
+      actions.push(keyword);
+    }
+  });
+  
+  return actions;
 }
 
 /**
@@ -361,6 +492,158 @@ export function generateInsightRecommendations(insight: AIAssistantInsight): str
 }
 
 /**
+ * Handle anomaly response and generate appropriate actions
+ */
+export function handleAnomalyResponse(anomaly: any, context: any): AIAssistantAction[] {
+  const actions: AIAssistantAction[] = [];
+  
+  // Analyze anomaly severity and type
+  const severity = anomaly.severity || 'medium';
+  const type = anomaly.type || 'unknown';
+  
+  // Generate appropriate actions based on anomaly type
+  switch (type) {
+    case 'performance':
+      actions.push({
+        id: `action-${Date.now()}-1`,
+        type: 'analyze',
+        title: 'Analyze Performance Impact',
+        description: 'Investigate the performance anomaly and identify root cause',
+        confidence: 0.8,
+        impact: severity === 'high' ? 'high' : 'medium'
+      });
+      break;
+    case 'security':
+      actions.push({
+        id: `action-${Date.now()}-2`,
+        type: 'execute',
+        title: 'Security Response',
+        description: 'Execute immediate security response procedures',
+        confidence: 0.9,
+        impact: 'high'
+      });
+      break;
+    case 'data-quality':
+      actions.push({
+        id: `action-${Date.now()}-3`,
+        type: 'optimize',
+        title: 'Data Quality Check',
+        description: 'Run comprehensive data quality assessment',
+        confidence: 0.7,
+        impact: 'medium'
+      });
+      break;
+  }
+  
+  return actions;
+}
+
+/**
+ * Calculate context relevance for AI responses
+ */
+export function calculateContextRelevance(userContext: any, systemContext: any): number {
+  let relevance = 0.5; // Base relevance
+  
+  // Check user role alignment
+  if (userContext.userRole && systemContext.requiredRole) {
+    if (userContext.userRole === systemContext.requiredRole) {
+      relevance += 0.2;
+    }
+  }
+  
+  // Check workspace alignment
+  if (userContext.workspaceId && systemContext.workspaceId) {
+    if (userContext.workspaceId === systemContext.workspaceId) {
+      relevance += 0.15;
+    }
+  }
+  
+  // Check permission alignment
+  if (userContext.permissions && systemContext.requiredPermissions) {
+    const hasRequiredPermissions = systemContext.requiredPermissions.every(
+      (perm: string) => userContext.permissions.includes(perm)
+    );
+    if (hasRequiredPermissions) {
+      relevance += 0.15;
+    }
+  }
+  
+  return Math.min(relevance, 1.0);
+}
+
+/**
+ * Personalize recommendations based on user context
+ */
+export function personalizeRecommendations(recommendations: any[], userContext: any): any[] {
+  return recommendations.map(rec => ({
+    ...rec,
+    personalized: true,
+    userRelevance: calculateContextRelevance(userContext, rec),
+    estimatedValue: rec.impact === 'high' ? 'High' : rec.impact === 'medium' ? 'Medium' : 'Low'
+  }));
+}
+
+/**
+ * Update learning model with user feedback
+ */
+export function updateLearningModel(feedback: any, currentModel: any): any {
+  const updatedModel = { ...currentModel };
+  
+  // Update confidence scores based on feedback
+  if (feedback.accuracy) {
+    updatedModel.confidenceAdjustment = (updatedModel.confidenceAdjustment || 0) + 
+      (feedback.accuracy - 0.5) * 0.1;
+  }
+  
+  // Update response patterns
+  if (feedback.responseType) {
+    updatedModel.responsePatterns = updatedModel.responsePatterns || {};
+    updatedModel.responsePatterns[feedback.responseType] = 
+      (updatedModel.responsePatterns[feedback.responseType] || 0) + 1;
+  }
+  
+  return updatedModel;
+}
+
+/**
+ * Import workflow from external source
+ */
+export function importWorkflow(workflowData: any, targetWorkspace: string): any {
+  const importedWorkflow = {
+    ...workflowData,
+    id: `imported-${Date.now()}`,
+    workspaceId: targetWorkspace,
+    importedAt: new Date().toISOString(),
+    status: 'draft',
+    metadata: {
+      ...workflowData.metadata,
+      imported: true,
+      originalSource: workflowData.source || 'unknown'
+    }
+  };
+  
+  return importedWorkflow;
+}
+
+/**
+ * Calibrate audio input for voice control
+ */
+export function calibrateAudioInput(audioContext: any, userPreferences: any): any {
+  const calibration = {
+    sampleRate: audioContext.sampleRate,
+    channelCount: audioContext.destination.channelCount,
+    userPreferences,
+    calibrationData: {
+      noiseThreshold: userPreferences.noiseThreshold || -50,
+      gainAdjustment: userPreferences.gainAdjustment || 1.0,
+      frequencyRange: userPreferences.frequencyRange || [85, 255]
+    }
+  };
+  
+  return calibration;
+}
+
+/**
  * Export all utilities as a single object
  */
 export const aiAssistantUtils = {
@@ -374,5 +657,11 @@ export const aiAssistantUtils = {
   validateConfig,
   formatProcessingTime,
   assessActionImpact,
-  generateInsightRecommendations
+  generateInsightRecommendations,
+  handleAnomalyResponse,
+  calculateContextRelevance,
+  personalizeRecommendations,
+  updateLearningModel,
+  importWorkflow,
+  calibrateAudioInput
 };

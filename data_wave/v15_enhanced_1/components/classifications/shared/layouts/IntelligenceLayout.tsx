@@ -23,24 +23,7 @@ import {
   Legend, ResponsiveContainer, ScatterChart, Scatter, RadarChart, PolarGrid,
   PolarAngleAxis, PolarRadiusAxis, Radar, Treemap
 } from 'recharts';
-import {
-  Brain, Bot, Cpu, Activity, TrendingUp, TrendingDown, AlertTriangle, CheckCircle,
-  XCircle, Info, Zap, Target, Network, GitBranch, Layers, Database, Monitor,
-  Play, Pause, Stop, RotateCcw, FastForward, Rewind, SkipBack, SkipForward,
-  Settings, Eye, Edit, Trash2, Plus, Minus, Download, Upload, Refresh,
-  Search, Filter, MoreVertical, Calendar, Clock, Users, Award, Star,
-  Lightbulb, Microscope, Telescope, Atom, Fingerprint, QrCode, Barcode,
-  ScanLine, Volume2, VolumeX, Maximize, Minimize, ChevronDown, ChevronUp,
-  ChevronLeft, ChevronRight, ArrowUp, ArrowDown, ArrowRight, ArrowLeft,
-  CornerDownLeft, CornerDownRight, CornerUpLeft, CornerUpRight, Home,
-  Building, Briefcase, Calculator, CreditCard, FileText, Presentation,
-  MessageSquare, Mail, Phone, Video, Mic, Camera, Image, File, Folder,
-  Archive, Tag, Flag, Map, Navigation, Compass, Route, Grid, List, Table,
-  Timeline, Chart, PieChart as PieChartIcon, LineChart as LineChartIcon,
-  Package, Server, Cloud, HardDrive, Wifi, Bluetooth, Smartphone, Laptop,
-  Desktop, Tablet, Watch, Headphones, Speaker, Gamepad2, Joystick, Rocket,
-  Satellite, Radar, Dna, Shield, Lock, Unlock, Bell, Globe, Workflow
-} from 'lucide-react';
+import { Brain, Bot, Cpu, Activity, TrendingUp, TrendingDown, AlertTriangle, CheckCircle, XCircle, Info, Zap, Target, Network, GitBranch, Layers, Database, Monitor, Play, Pause, Square, RotateCcw, FastForward, Rewind, SkipBack, SkipForward, Settings, Eye, Edit, Trash2, Plus, Minus, Download, Upload, RefreshCw, Search, Filter, MoreVertical, Calendar, Clock, Users, Award, Star, Lightbulb, Microscope, Atom, Fingerprint, QrCode, Barcode, ScanLine, Volume2, VolumeX, Maximize, Minimize, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, ArrowUp, ArrowDown, ArrowRight, ArrowLeft, CornerDownLeft, CornerDownRight, CornerUpLeft, CornerUpRight, Home, Building, Briefcase, Calculator, CreditCard, FileText, Presentation, MessageSquare, Mail, Phone, Video, Mic, Camera, Image, File, Folder, Archive, Tag, Flag, Map, Navigation, Compass, Route, Grid, List, Table, Timeline, Chart, PieChart as PieChartIcon, LineChart as LineChartIcon, Package, Server, Cloud, HardDrive, Wifi, Bluetooth, Smartphone, Laptop, Desktop, Tablet, Watch, Headphones, Speaker, Gamepad2, Joystick, Rocket, Satellite, Radar, Dna, Shield, Lock, Unlock, Bell, Globe, Workflow } from 'lucide-react';
 import { motion, AnimatePresence, useAnimation } from 'framer-motion';
 import { toast } from 'sonner';
 
@@ -579,7 +562,7 @@ export const IntelligenceLayout: React.FC<IntelligenceLayoutProps> = ({
         });
       }
     } catch (error) {
-      toast.error('Failed to Stop Training', {
+      toast.error('Failed to Square Training', {
         description: error instanceof Error ? error.message : 'Unknown error occurred'
       });
     }
@@ -836,8 +819,8 @@ export const IntelligenceLayout: React.FC<IntelligenceLayoutProps> = ({
             <CardTitle className="text-sm font-medium">Training Progress</CardTitle>
             <div className="flex items-center space-x-2">
               <Button size="sm" variant="outline" onClick={handleStopTraining}>
-                <Stop className="h-4 w-4" />
-                Stop
+                <Square className="h-4 w-4" />
+                Square
               </Button>
             </div>
           </div>
@@ -1240,8 +1223,8 @@ export const IntelligenceLayout: React.FC<IntelligenceLayoutProps> = ({
                 <>
                   {trainingStatus?.isTraining ? (
                     <Button size="sm" variant="outline" onClick={handleStopTraining}>
-                      <Stop className="h-4 w-4 mr-2" />
-                      Stop Training
+                      <Square className="h-4 w-4 mr-2" />
+                      Square Training
                     </Button>
                   ) : (
                     <Button size="sm" onClick={handleStartTraining}>

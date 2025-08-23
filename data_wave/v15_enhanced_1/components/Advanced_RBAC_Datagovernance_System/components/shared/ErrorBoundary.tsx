@@ -5,30 +5,7 @@
 
 import React, { Component, ErrorInfo, ReactNode, useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  AlertTriangle, 
-  RefreshCw, 
-  Bug, 
-  Shield, 
-  Lock, 
-  Network, 
-  Server, 
-  Database, 
-  Clock, 
-  User, 
-  Settings, 
-  FileX, 
-  AlertCircle, 
-  XCircle, 
-  Info, 
-  ChevronDown, 
-  ChevronUp,
-  Copy,
-  Download,
-  Send,
-  Home,
-  ArrowLeft
-} from 'lucide-react';
+import { AlertTriangle, RefreshCw, Bug, Shield, Lock, Network, Server, Database, Clock, User, Settings, FileX, AlertCircle, XCircle, Info, ChevronDown, ChevronUp, Copy, Download, Send, Home, ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCurrentUser } from '../../hooks/useCurrentUser';
 import { useAuth } from '../../hooks/useAuth';

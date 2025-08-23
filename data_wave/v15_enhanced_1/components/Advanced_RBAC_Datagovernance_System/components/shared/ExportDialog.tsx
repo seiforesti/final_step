@@ -5,39 +5,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Download,
-  Upload,
-  FileText,
-  File,
-  FileSpreadsheet,
-  Image,
-  Database,
-  X,
-  Check,
-  ChevronDown,
-  ChevronUp,
-  Settings,
-  Filter,
-  Calendar,
-  Users,
-  Shield,
-  Eye,
-  EyeOff,
-  AlertCircle,
-  CheckCircle,
-  Clock,
-  Zap,
-  Archive,
-  Share,
-  Mail,
-  Copy,
-  ExternalLink,
-  RefreshCw,
-  Pause,
-  Play,
-  Square
-} from 'lucide-react';
+import { Download, Upload, FileText, File, FileSpreadsheet, Image, Database, X, Check, ChevronDown, ChevronUp, Settings, Filter, Calendar, Users, Shield, Eye, EyeOff, AlertCircle, CheckCircle, Clock, Zap, Archive, Share, Mail, Copy, ExternalLink, RefreshCw, Pause, Play, Square } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCurrentUser } from '../../hooks/useCurrentUser';
 import { usePermissionCheck } from '../../hooks/usePermissionCheck';
@@ -846,7 +814,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                           className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                         >
                           <Download className="w-4 h-4 mr-2" />
-                          Download File
+                          ArrowDownTrayIcon File
                         </a>
                         
                         {enableSharing && (

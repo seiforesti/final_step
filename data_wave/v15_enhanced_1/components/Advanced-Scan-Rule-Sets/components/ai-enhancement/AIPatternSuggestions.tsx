@@ -107,103 +107,7 @@ import {
 } from '@/components/ui/popover';
 
 // Icons
-import {
-  Brain,
-  Sparkles,
-  Target,
-  TrendingUp,
-  TrendingDown,
-  Zap,
-  Star,
-  ThumbsUp,
-  ThumbsDown,
-  BookOpen,
-  Search,
-  Filter,
-  SortAsc,
-  SortDesc,
-  Eye,
-  EyeOff,
-  Copy,
-  Share2,
-  Download,
-  Upload,
-  Settings,
-  MoreHorizontal,
-  ChevronDown,
-  ChevronRight,
-  ChevronUp,
-  Play,
-  Pause,
-  Square,
-  RefreshCw,
-  Clock,
-  Timer,
-  Activity,
-  BarChart3,
-  LineChart,
-  PieChart,
-  Gauge,
-  Cpu,
-  Memory,
-  Network,
-  HardDrive,
-  Code,
-  Database,
-  Globe,
-  FileText,
-  Layers,
-  Workflow,
-  Puzzle,
-  Link,
-  Unlink,
-  Lock,
-  Unlock,
-  Shield,
-  AlertTriangle,
-  AlertCircle,
-  Info,
-  CheckCircle,
-  XCircle,
-  Plus,
-  Minus,
-  Edit,
-  Save,
-  Trash2,
-  ArrowUp,
-  ArrowDown,
-  ArrowLeft,
-  ArrowRight,
-  Maximize2,
-  Minimize2,
-  RotateCcw,
-  History,
-  GitBranch,
-  Users,
-  MessageSquare,
-  Flag,
-  Bookmark,
-  Heart,
-  Award,
-  Lightbulb,
-  Crosshair,
-  Radar,
-  Microscope,
-  Telescope,
-  MapPin,
-  Navigation,
-  Compass,
-  Route,
-  Package,
-  Box,
-  Container,
-  Server,
-  Cloud,
-  Smartphone,
-  Tablet,
-  Monitor,
-  Laptop
-} from 'lucide-react';
+import { Brain, Sparkles, Target, TrendingUp, TrendingDown, Zap, Star, ThumbsUp, ThumbsDown, BookOpen, Search, Filter, SortAsc, SortDesc, Eye, EyeOff, Copy, Share2, Download, Upload, Settings, MoreHorizontal, ChevronDown, ChevronRight, ChevronUp, Play, Pause, Square, RefreshCw, Clock, Timer, Activity, BarChart3, LineChart, PieChart, Gauge, Cpu, HardDrive, Network, Code, Database, Globe, FileText, Layers, Workflow, Puzzle, Link, Unlink, Lock, Unlock, Shield, AlertTriangle, AlertCircle, Info, CheckCircle, XCircle, Plus, Minus, Edit, Save, Trash2, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Maximize2, Minimize2, RotateCcw, History, GitBranch, Users, MessageSquare, Flag, Bookmark, Heart, Award, Lightbulb, Crosshair, Radar, Microscope, MapPin, Navigation, Compass, Route, Package, Box, Container, Server, Cloud, Smartphone, Tablet, Monitor, Laptop } from 'lucide-react';
 
 // Hooks
 import { useIntelligence } from '../../hooks/useIntelligence';
@@ -523,7 +427,7 @@ const PatternSuggestionCard: React.FC<PatternSuggestionCardProps> = ({
                         <span>{suggestion.metrics.executionTime}ms</span>
                       </div>
                       <div className="flex justify-between">
-                        <span>Memory Usage:</span>
+                        <span>HardDrive Usage:</span>
                         <span>{suggestion.metrics.memoryUsage}MB</span>
                       </div>
                       <div className="flex justify-between">
@@ -1976,7 +1880,7 @@ export const AIPatternSuggestions: React.FC<AIPatternSuggestionsProps> = ({
                                   </div>
                                 </div>
                                 <div>
-                                  <span className="font-medium">Memory Usage:</span>
+                                  <span className="font-medium">HardDrive Usage:</span>
                                   <div className="text-green-600">
                                     -{opt.improvements.memoryUsage}MB
                                   </div>

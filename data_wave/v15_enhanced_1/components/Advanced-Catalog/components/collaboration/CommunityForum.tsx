@@ -25,17 +25,9 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Calendar } from '@/components/ui/calendar';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import {
-  MessageSquare, Users, Pin, Lock, Eye, Heart, MessageCircle, Share2, Flag, Shield,
-  Search, Filter, SortAsc, SortDesc, Plus, Edit3, Trash2, MoreHorizontal,
-  Star, Award, Crown, Zap, ThumbsUp, ThumbsDown, Bookmark, Bell,
-  Settings, User, Hash, Clock, TrendingUp, BarChart3, PieChart, Activity,
-  FileText, Image, Video, Link, Download, Upload, Calendar as CalendarIcon,
-  CheckCircle, XCircle, AlertTriangle, Info, ChevronDown, ChevronUp,
-  ArrowRight, ArrowLeft, RefreshCw, ExternalLink, Copy, Send
-} from 'lucide-react';
+import { MessageSquare, Users, Pin, Lock, Eye, Heart, MessageCircle, Share2, Flag, Shield, Search, Filter, SortAsc, SortDesc, Plus, Edit3, Trash2, MoreHorizontal, Star, Award, Crown, Zap, ThumbsUp, ThumbsDown, Bookmark, Bell, Settings, User, Hash, Clock, TrendingUp, BarChart3, PieChart, Activity, FileText, Image, Video, Link, Download, Upload, Calendar as CalendarIcon, CheckCircle, XCircle, AlertTriangle, Info, ChevronDown, ChevronUp, ArrowRight, ArrowLeft, RefreshCw, ExternalLink, Copy, Send } from 'lucide-react';
 import { LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart as RechartsPieChart, Cell, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Legend } from 'recharts';
-import { collaborationService } from '../../services/collaboration.service';
+import { collaborationService } from '../../services';
 import { intelligentDiscoveryService } from '../../services/intelligent-discovery.service';
 
 // Enhanced Type Definitions for Community Forum

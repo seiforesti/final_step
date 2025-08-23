@@ -1,48 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import {
-  Activity,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  Database,
-  HardDrive,
-  Network,
-  Shield,
-  TrendingUp,
-  TrendingDown,
-  Zap,
-  Users,
-  BarChart3,
-  Gauge,
-  Thermometer,
-  Cpu,
-  Memory,
-  HardDriveIcon,
-  Wifi,
-  WifiOff,
-  RefreshCw,
-  Settings,
-  Eye,
-  EyeOff,
-  Calendar,
-  Target,
-  AlertCircle,
-  Info,
-  ExternalLink,
-  Download,
-  Upload,
-  Play,
-  Pause,
-  StopCircle,
-  RotateCcw,
-  History,
-  LineChart,
-  PieChart,
-  ScatterChart,
-  AreaChart,
-} from "lucide-react"
+import { Activity, AlertTriangle, CheckCircle, Clock, Database, HardDrive, Network, Shield, TrendingUp, TrendingDown, Zap, Users, BarChart3, Gauge, Thermometer, Cpu, HardDriveIcon, Wifi, WifiOff, RefreshCw, Settings, Eye, EyeOff, Calendar, Target, AlertCircle, Info, ExternalLink, Download, Upload, Play, Pause, StopCircle, RotateCcw, History, LineChart, PieChart, ScatterChart, AreaChart,  } from 'lucide-react'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -717,7 +676,7 @@ export function DataSourceMonitoringDashboard({
                         <span className="font-medium">N/A</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-sm">Memory Usage</span>
+                        <span className="text-sm">HardDrive Usage</span>
                         <span className="font-medium">N/A</span>
                       </div>
                       <div className="flex justify-between items-center">

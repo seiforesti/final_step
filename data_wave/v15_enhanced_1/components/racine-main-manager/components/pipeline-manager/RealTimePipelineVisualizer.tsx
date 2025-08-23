@@ -2,16 +2,7 @@
 
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Monitor, Activity, Play, Pause, Stop, RefreshCw, TrendingUp, TrendingDown,
-  BarChart3, LineChart, PieChart, Zap, Clock, AlertTriangle, CheckCircle,
-  XCircle, Eye, EyeOff, Filter, Search, Download, Upload, Settings, 
-  Maximize2, Minimize2, MoreHorizontal, X, Plus, Minus, Grid, Target,
-  Cpu, Memory, HardDrive, Network, Database, Server, Cloud, Wifi,
-  Users, Shield, Package, Code, Terminal, FileText, Bell, BellOff,
-  Volume2, VolumeX, Share2, Copy, Edit3, Save, Layers, Route, MapPin,
-  Brain, Cube
-} from 'lucide-react';
+import { Monitor, Activity, Play, Pause, RefreshCw, TrendingUp, TrendingDown, BarChart3, LineChart, PieChart, Zap, Clock, AlertTriangle, CheckCircle, XCircle, Eye, EyeOff, Filter, Search, Download, Upload, Settings, Maximize2, Minimize2, MoreHorizontal, X, Plus, Minus, Grid3X3, Target, Cpu, HardDrive, Network, Database, Server, Cloud, Wifi, Users, Shield, Package, Code, Terminal, FileText, Bell, BellOff, Volume2, VolumeX, Share2, Copy, Edit3, Save, Layers, Route, MapPin, Brain, Square } from 'lucide-react';
 
 // UI Components
 import { Button } from '@/components/ui/button';
@@ -47,7 +38,7 @@ import {
   CartesianGrid, 
   Tooltip as ChartTooltip, 
   Legend, 
-  Line, 
+  Line as RechartsLine, 
   Bar, 
   Area, 
   Pie, 
@@ -69,7 +60,7 @@ import {
   Text, 
   Box, 
   Sphere, 
-  Line, 
+  Line as ThreeLine, 
   Cylinder,
   Cone,
   Torus,
@@ -92,7 +83,7 @@ import * as tf from '@tensorflow/tfjs';
 import '@tensorflow/tfjs-backend-webgl';
 
 // Advanced Performance Monitoring
-import { PerformanceObserver } from 'perf_hooks';
+// PerformanceObserver is available in modern browsers
 
 // WebGL Shaders for Advanced Visualization
 const vertexShader = `
@@ -644,7 +635,7 @@ const Pipeline3DNode: React.FC<{
 
       {/* Throughput visualization */}
       {node.performanceMetrics.throughput > 0 && (
-        <Line
+        <ThreeLine
           points={[[0, 0, 0], [0, node.performanceMetrics.throughput / 20, 0]]}
           color="#00ff00"
           lineWidth={3}
@@ -748,7 +739,7 @@ const Pipeline3DConnection: React.FC<{
   return (
     <group>
       {/* Main connection line */}
-      <Line
+      <ThreeLine
         ref={lineRef}
         points={calculateConnectionPath}
         color={getConnectionColor()}
@@ -2239,7 +2230,7 @@ const RealTimePipelineVisualizer: React.FC<RealTimePipelineVisualizerProps> = ({
         ) : (
           <div className="w-full h-full flex items-center justify-center">
             <div className="text-center space-y-4">
-              <Cube className="h-16 w-16 mx-auto text-muted-foreground" />
+              <Square className="h-16 w-16 mx-auto text-muted-foreground" />
               <div className="text-lg font-medium">2D View</div>
               <Button 
                 onClick={() => setVisualization3D(prev => ({ ...prev, enable3D: true }))}

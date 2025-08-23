@@ -24,55 +24,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { 
-  BarChart3, 
-  LineChart, 
-  PieChart, 
-  TrendingUp, 
-  TrendingDown, 
-  Activity, 
-  AlertTriangle, 
-  CheckCircle, 
-  Clock, 
-  RefreshCw,
-  Settings, 
-  Download, 
-  Upload, 
-  Eye, 
-  Edit, 
-  Share2, 
-  Filter, 
-  Search, 
-  Calendar, 
-  Database, 
-  Server, 
-  Cpu, 
-  Network, 
-  Gauge, 
-  Target, 
-  Zap, 
-  Brain, 
-  Lightbulb, 
-  AlertCircle, 
-  Info, 
-  Plus, 
-  MoreHorizontal,
-  Maximize2,
-  Minimize2,
-  ExternalLink,
-  Copy,
-  FileText,
-  Image,
-  Mail,
-  Printer,
-  Save,
-  Layers,
-  GitBranch,
-  Users,
-  Building,
-  Globe,
-  Shield
-} from 'lucide-react';
+import { BarChart3, LineChart, PieChart, TrendingUp, TrendingDown, Activity, AlertTriangle, CheckCircle, Clock, RefreshCw, Settings, Download, Upload, Eye, Edit, Share2, Filter, Search, Calendar, Database, Server, Cpu, Network, Gauge, Target, Zap, Brain, Lightbulb, AlertCircle, Info, Plus, MoreHorizontal, Maximize2, Minimize2, ExternalLink, Copy, FileText, Image, Mail, Printer, Save, Layers, GitBranch, Users, Building, Globe, Shield } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';

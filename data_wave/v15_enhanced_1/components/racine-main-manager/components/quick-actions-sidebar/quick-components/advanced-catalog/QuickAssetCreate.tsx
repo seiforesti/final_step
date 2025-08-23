@@ -51,69 +51,7 @@ import {
   AlertDescription,
   AlertTitle,
 } from '@/components/ui/alert';
-import {
-  Plus,
-  X,
-  Upload,
-  FileText,
-  Database,
-  Table,
-  BarChart3,
-  GitBranch,
-  Brain,
-  Network,
-  Layers,
-  Zap,
-  Sparkles,
-  Magic,
-  Wand2,
-  Target,
-  Tag,
-  User,
-  Users,
-  Clock,
-  Calendar,
-  MapPin,
-  Globe,
-  Shield,
-  Lock,
-  Unlock,
-  Eye,
-  EyeOff,
-  CheckCircle,
-  AlertCircle,
-  Info,
-  HelpCircle,
-  Settings,
-  Save,
-  RefreshCw,
-  Download,
-  Share,
-  Copy,
-  Edit,
-  Trash,
-  Star,
-  Heart,
-  Bookmark,
-  Flag,
-  Search,
-  Filter,
-  Grid,
-  List,
-  ChevronDown,
-  ChevronRight,
-  ArrowRight,
-  ExternalLink,
-  Link,
-  Unlink,
-  PlusCircle,
-  MinusCircle,
-  Check,
-  AlertTriangle,
-  TrendingUp,
-  Activity,
-  Gauge,
-} from 'lucide-react';
+import { Plus, X, Upload, FileText, Database, Table, BarChart3, GitBranch, Brain, Network, Layers, Zap, Sparkles, Wand2, Target, Tag, User, Users, Clock, Calendar, MapPin, Globe, Shield, Lock, Unlock, Eye, EyeOff, CheckCircle, AlertCircle, Info, HelpCircle, Settings, Save, RefreshCw, Download, Share, Copy, Edit, Trash, Star, Heart, Bookmark, Flag, Search, Filter, Grid, List, ChevronDown, ChevronRight, ArrowRight, ExternalLink, Link, Unlink, PlusCircle, MinusCircle, Check, AlertTriangle, TrendingUp, Activity, Gauge,  } from 'lucide-react';
 
 // Import hooks and services
 import { useAdvancedCatalog } from '../../../../hooks/useAdvancedCatalog';
@@ -569,7 +507,7 @@ const QuickAssetCreate: React.FC<QuickAssetCreateProps> = ({
           <Card>
             <CardHeader>
               <CardTitle className="text-sm flex items-center">
-                <Magic className="h-4 w-4 mr-2" />
+                <Wand2 className="h-4 w-4 mr-2" />
                 Quick Start Templates
               </CardTitle>
             </CardHeader>

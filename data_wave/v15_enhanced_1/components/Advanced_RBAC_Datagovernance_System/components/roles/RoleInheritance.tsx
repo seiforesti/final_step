@@ -123,7 +123,7 @@ interface InheritanceConnection {
   isProposed?: boolean;
 }
 
-export default function RoleInheritance({
+export function RoleInheritance({
   roles,
   onRefresh,
   selectedRole,

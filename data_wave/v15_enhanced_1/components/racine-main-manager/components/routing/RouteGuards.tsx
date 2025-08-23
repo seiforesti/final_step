@@ -48,58 +48,7 @@ import React, {
 } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter, usePathname } from 'next/navigation';
-import { 
-  Shield,
-  Lock,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  Key,
-  UserX,
-  RefreshCw,
-  ArrowLeft,
-  Home,
-  Settings,
-  HelpCircle,
-  Eye,
-  EyeOff,
-  Fingerprint,
-  Smartphone,
-  Mail,
-  Phone,
-  QrCode,
-  Zap,
-  Activity,
-  BarChart3,
-  Users,
-  Database,
-  FileText,
-  Layers,
-  Building2,
-  Bot,
-  MessageCircle,
-  Search,
-  Filter,
-  MoreVertical,
-  ExternalLink,
-  Copy,
-  Download,
-  Upload,
-  Save,
-  X,
-  Plus,
-  Minus,
-  Edit,
-  Trash2,
-  Archive,
-  Star,
-  Bookmark,
-  Share2,
-  Link,
-  Globe,
-  Wifi,
-  WifiOff
-} from 'lucide-react';
+import { Shield, Lock, AlertTriangle, CheckCircle, Clock, Key, UserX, RefreshCw, ArrowLeft, Home, Settings, HelpCircle, Eye, EyeOff, Fingerprint, Smartphone, Mail, Phone, QrCode, Zap, Activity, BarChart3, Users, Database, FileText, Layers, Building2, Bot, MessageCircle, Search, Filter, MoreVertical, ExternalLink, Copy, Download, Upload, Save, X, Plus, Minus, Edit, Trash2, Archive, Star, Bookmark, Share2, Link, Globe, Wifi, WifiOff } from 'lucide-react';
 
 // UI Components
 import { Button } from '@/components/ui/button';
@@ -1775,6 +1724,19 @@ interface RouteGuardProps {
   onError?: (error: Error, context: RouteContext) => void;
 }
 
+interface AdminRouteGuardProps {
+  children: ReactNode;
+  requiredPermissions?: string[];
+  requiredRoles?: string[];
+  fallbackRoute?: string;
+  enableMFACheck?: boolean;
+  enableSessionValidation?: boolean;
+  enableAuditLogging?: boolean;
+  enableSecurityScoring?: boolean;
+  showLoadingState?: boolean;
+  minSecurityLevel?: 'low' | 'medium' | 'high' | 'critical';
+}
+
 export const RouteGuard: React.FC<RouteGuardProps> = ({
   children,
   guards: customGuards,
@@ -2218,6 +2180,156 @@ export const useGuardAudit = () => {
 };
 
 // ============================================================================
+// ADMIN ROUTE GUARD COMPONENT
+// ============================================================================
+
+export const AdminRouteGuard: React.FC<AdminRouteGuardProps> = ({
+  children,
+  requiredPermissions = ['admin.access'],
+  requiredRoles = ['admin', 'super_admin'],
+  fallbackRoute = '/access-denied',
+  enableMFACheck = true,
+  enableSessionValidation = true,
+  enableAuditLogging = true,
+  enableSecurityScoring = true,
+  showLoadingState = true,
+  minSecurityLevel = 'high'
+}) => {
+  const router = useRouter();
+  const pathname = usePathname();
+  
+  const [isChecking, setIsChecking] = useState(true);
+  const [hasAccess, setHasAccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const checkAdminAccess = async () => {
+      try {
+        setIsChecking(true);
+        setError(null);
+
+        // Get auth token
+        const authToken = localStorage.getItem('auth_token');
+        if (!authToken) {
+          setError('Authentication required');
+          router.push('/login');
+          return;
+        }
+
+        // Get user data
+        const userResponse = await fetch('/api/racine/auth/user', {
+          headers: {
+            'Authorization': `Bearer ${authToken}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!userResponse.ok) {
+          setError('Authentication failed');
+          router.push('/login');
+          return;
+        }
+
+        const userData = await userResponse.json();
+        const { user, permissions = [], roles = [] } = userData;
+
+        // Check required permissions
+        const hasRequiredPermissions = requiredPermissions.every(permission =>
+          permissions.includes(permission)
+        );
+
+        // Check required roles
+        const hasRequiredRoles = requiredRoles.some(role =>
+          roles.includes(role)
+        );
+
+        if (!hasRequiredPermissions || !hasRequiredRoles) {
+          setError('Insufficient permissions');
+          router.push(fallbackRoute);
+          return;
+        }
+
+        // Additional security checks
+        if (enableMFACheck && !user.mfaEnabled) {
+          setError('MFA required for admin access');
+          router.push('/mfa-setup');
+          return;
+        }
+
+        if (enableSessionValidation) {
+          const sessionValid = await validateSession(authToken);
+          if (!sessionValid) {
+            setError('Session expired');
+            router.push('/login');
+            return;
+          }
+        }
+
+        setHasAccess(true);
+      } catch (err) {
+        console.error('Admin route guard error:', err);
+        setError('Access check failed');
+        router.push(fallbackRoute);
+      } finally {
+        setIsChecking(false);
+      }
+    };
+
+    checkAdminAccess();
+  }, [pathname, requiredPermissions, requiredRoles, fallbackRoute, enableMFACheck, enableSessionValidation, router]);
+
+  // Loading state
+  if (isChecking && showLoadingState) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+        <div className="text-center space-y-6">
+          <div className="w-16 h-16 mx-auto border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+          <div className="space-y-2">
+            <h2 className="text-xl font-semibold text-gray-900">Verifying Admin Access</h2>
+            <p className="text-gray-600">Please wait while we validate your permissions...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-orange-50 flex items-center justify-center">
+        <div className="text-center space-y-6">
+          <div className="w-16 h-16 mx-auto bg-red-100 rounded-full flex items-center justify-center">
+            <Shield className="w-8 h-8 text-red-600" />
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-xl font-semibold text-gray-900">Access Denied</h2>
+            <p className="text-gray-600">{error}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Render children if access granted
+  return hasAccess ? <>{children}</> : null;
+};
+
+// Helper function to validate session
+const validateSession = async (token: string): Promise<boolean> => {
+  try {
+    const response = await fetch('/api/racine/auth/validate-session', {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
+};
+
+// ============================================================================
 // EXPORTS
 // ============================================================================
 
@@ -2228,5 +2340,6 @@ export type {
   GuardResult, 
   RouteErrorProps, 
   GuardConfiguration, 
-  SecurityContext 
+  SecurityContext,
+  AdminRouteGuardProps
 };

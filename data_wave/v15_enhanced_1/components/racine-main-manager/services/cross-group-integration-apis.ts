@@ -255,6 +255,35 @@ class CrossGroupIntegrationAPI {
   }
 
   /**
+   * Generic API request method
+   */
+  private async makeRequest<T>(endpoint: string, options: RequestInit = {}): Promise<APIResponse<T>> {
+    try {
+      const response = await fetch(`${this.config.baseURL}${endpoint}`, {
+        ...options,
+        headers: { ...this.getAuthHeaders(), ...options.headers }
+      });
+
+      if (!response.ok) {
+        throw new Error(`API request failed: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      return {
+        success: true,
+        data,
+        message: 'Request successful'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        message: 'Request failed'
+      };
+    }
+  }
+
+  /**
    * Initialize cross-group integration
    */
   async initializeIntegration(): Promise<void> {
@@ -1001,6 +1030,127 @@ class CrossGroupIntegrationAPI {
     this.eventSubscriptions.delete(subscriptionId);
   }
 
+  // =============================================================================
+  // ACTIVITY TRACKING METHODS
+  // =============================================================================
+
+  /**
+   * Track integration events for activity monitoring
+   */
+  async trackEvent(eventType: string, eventData: any): Promise<void> {
+    try {
+      await fetch(`${this.config.baseURL}/api/racine/integration/events/track`, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify({
+          event_type: eventType,
+          event_data: eventData,
+          timestamp: new Date().toISOString()
+        })
+      });
+    } catch (error) {
+      console.error('Failed to track event:', error);
+    }
+  }
+
+  // =============================================================================
+  // DATA SOURCE LINKING METHODS
+  // =============================================================================
+
+  /**
+   * Link data source to scan rule sets
+   */
+  async linkDataSourceToScanRuleSets(dataSourceId: string, ruleSetIds: string[]): Promise<void> {
+    const response = await fetch(`${this.config.baseURL}/api/racine/integration/data-sources/${dataSourceId}/link-scan-rule-sets`, {
+      method: 'POST',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify({ rule_set_ids: ruleSetIds })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to link data source to scan rule sets: ${response.statusText}`);
+    }
+  }
+
+  /**
+   * Link data source to classifications
+   */
+  async linkDataSourceToClassifications(dataSourceId: string, classificationIds: string[]): Promise<void> {
+    const response = await fetch(`${this.config.baseURL}/api/racine/integration/data-sources/${dataSourceId}/link-classifications`, {
+      method: 'POST',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify({ classification_ids: classificationIds })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to link data source to classifications: ${response.statusText}`);
+    }
+  }
+
+  /**
+   * Link data source to compliance rules
+   */
+  async linkDataSourceToComplianceRules(dataSourceId: string, ruleIds: string[]): Promise<void> {
+    const response = await fetch(`${this.config.baseURL}/api/racine/integration/data-sources/${dataSourceId}/link-compliance-rules`, {
+      method: 'POST',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify({ rule_ids: ruleIds })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to link data source to compliance rules: ${response.statusText}`);
+    }
+  }
+
+  // =============================================================================
+  // WORKSPACE INTEGRATION METHODS
+  // =============================================================================
+
+  /**
+   * Add data source to workspace
+   */
+  async addDataSourceToWorkspace(dataSourceId: string, workspaceId: string): Promise<void> {
+    const response = await fetch(`${this.config.baseURL}/api/racine/integration/workspaces/${workspaceId}/data-sources`, {
+      method: 'POST',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify({ data_source_id: dataSourceId })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to add data source to workspace: ${response.statusText}`);
+    }
+  }
+
+  /**
+   * Remove data source from workspace
+   */
+  async removeDataSourceFromWorkspace(dataSourceId: string, workspaceId: string): Promise<void> {
+    const response = await fetch(`${this.config.baseURL}/api/racine/integration/workspaces/${workspaceId}/data-sources/${dataSourceId}`, {
+      method: 'DELETE',
+      headers: this.getAuthHeaders()
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to remove data source from workspace: ${response.statusText}`);
+    }
+  }
+
+  /**
+   * Get workspace data sources
+   */
+  async getWorkspaceDataSources(workspaceId: string): Promise<any[]> {
+    const response = await fetch(`${this.config.baseURL}/api/racine/integration/workspaces/${workspaceId}/data-sources`, {
+      method: 'GET',
+      headers: this.getAuthHeaders()
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to get workspace data sources: ${response.statusText}`);
+    }
+
+    return response.json();
+  }
+
   /**
    * Cleanup all connections and monitoring
    */
@@ -1017,6 +1167,9 @@ class CrossGroupIntegrationAPI {
 
 // Create and export singleton instance
 export const crossGroupIntegrationAPI = new CrossGroupIntegrationAPI();
+
+// Export as crossGroupIntegrationApis for backward compatibility
+export const crossGroupIntegrationApis = crossGroupIntegrationAPI;
 
 // Export class for direct instantiation if needed
 export { CrossGroupIntegrationAPI };

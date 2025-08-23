@@ -10,12 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import {
-  BarChart3, TrendingUp, TrendingDown, Shield, AlertTriangle, CheckCircle,
-  Clock, Users, FileText, Activity, Target, Award, Zap, Database,
-  RefreshCw, Filter, Download, Settings, Bell, Calendar, Globe,
-  PieChart, LineChart, BarChart, Gauge, Eye, ExternalLink
-} from "lucide-react"
+import { BarChart3, TrendingUp, TrendingDown, Shield, AlertTriangle, CheckCircle, Clock, Users, FileText, Activity, Target, Award, Zap, Database, RefreshCw, Filter, Download, Settings, Bell, Calendar, Globe, PieChart, LineChart, BarChart, Gauge, Eye, ExternalLink } from 'lucide-react'
 
 // Enterprise Integration
 import { ComplianceHooks } from '../hooks/use-enterprise-features'

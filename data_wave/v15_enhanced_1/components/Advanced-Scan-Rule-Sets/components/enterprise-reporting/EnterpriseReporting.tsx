@@ -62,58 +62,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  Calendar as CalendarIcon,
-  BarChart3,
-  FileText,
-  Download,
-  Upload,
-  Settings,
-  Eye,
-  EyeOff,
-  Play,
-  Pause,
-  RefreshCw,
-  Filter,
-  Search,
-  Clock,
-  Users,
-  Share,
-  Edit,
-  Trash2,
-  Copy,
-  Plus,
-  Minus,
-  ChevronDown,
-  ChevronRight,
-  ChevronUp,
-  ArrowRight,
-  ExternalLink,
-  Mail,
-  Bell,
-  Star,
-  TrendingUp,
-  TrendingDown,
-  Activity,
-  Target,
-  Award,
-  DollarSign,
-  Zap,
-  Shield,
-  CheckCircle,
-  AlertTriangle,
-  XCircle,
-  Info,
-  Lightbulb,
-  PieChart,
-  LineChart,
-  BarChart2,
-  Calendar,
-  Grid,
-  List,
-  Maximize2,
-  Minimize2,
-} from 'lucide-react';
+import { Calendar as CalendarIcon, BarChart3, FileText, Download, Upload, Settings, Eye, EyeOff, Play, Pause, RefreshCw, Filter, Search, Clock, Users, Share, Edit, Trash2, Copy, Plus, Minus, ChevronDown, ChevronRight, ChevronUp, ArrowRight, ExternalLink, Mail, Bell, Star, TrendingUp, TrendingDown, Activity, Target, Award, DollarSign, Zap, Shield, CheckCircle, AlertTriangle, XCircle, Info, Lightbulb, PieChart, LineChart, BarChart2, Calendar, Grid, List, Maximize2, Minimize2,  } from 'lucide-react';
 import {
   LineChart as RechartsLineChart,
   Line,
@@ -954,7 +903,7 @@ export const EnterpriseReporting: React.FC<EnterpriseReportingProps> = ({
                                   <DropdownMenuContent align="end">
                                     <DropdownMenuItem onClick={() => handleExportReport(report.id, report.format)}>
                                       <Download className="h-4 w-4 mr-2" />
-                                      Download
+                                      ArrowDownTrayIcon
                                     </DropdownMenuItem>
                                     <DropdownMenuItem>
                                       <Share className="h-4 w-4 mr-2" />

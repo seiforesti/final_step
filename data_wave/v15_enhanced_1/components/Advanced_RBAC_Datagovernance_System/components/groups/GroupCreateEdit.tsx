@@ -259,7 +259,7 @@ const SYNC_SCHEDULES = [
   { value: 'manual', label: 'Manual Only' },
 ];
 
-const GroupCreateEdit: React.FC<GroupCreateEditProps> = ({
+export const GroupCreateEdit: React.FC<GroupCreateEditProps> = ({
   group,
   onSave,
   onCancel,
@@ -1402,4 +1402,3 @@ const GroupCreateEdit: React.FC<GroupCreateEditProps> = ({
   );
 };
 
-export default GroupCreateEdit;

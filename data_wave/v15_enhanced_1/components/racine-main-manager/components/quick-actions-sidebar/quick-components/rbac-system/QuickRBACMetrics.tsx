@@ -26,15 +26,7 @@ import {
 import {
   Alert, AlertDescription, AlertTitle
 } from '@/components/ui/alert';
-import {
-  Shield, BarChart3, PieChart, TrendingUp, TrendingDown, Users, 
-  Crown, Key, Lock, Unlock, Eye, EyeOff, Activity, Target,
-  Brain, Sparkles, AlertTriangle, CheckCircle, XCircle, Clock,
-  Calendar, User, Globe, Database, Settings, RefreshCw, Download,
-  Search, Filter, Info, HelpCircle, Star, Flag, Zap, Network,
-  Layers, GitBranch, Route, Workflow, Component, X, Plus,
-  Minus, Edit, Trash, Copy, Share, ExternalLink, MoreHorizontal
-} from 'lucide-react';
+import { Shield, BarChart3, PieChart, TrendingUp, TrendingDown, Users, Crown, Key, Lock, Unlock, Eye, EyeOff, Activity, Target, Brain, Sparkles, AlertTriangle, CheckCircle, XCircle, Clock, Calendar, User, Globe, Database, Settings, RefreshCw, Download, Search, Filter, Info, HelpCircle, Star, Flag, Zap, Network, Layers, GitBranch, Route, Workflow, Component, X, Plus, Minus, Edit, Trash, Copy, Share, ExternalLink, MoreHorizontal } from 'lucide-react';
 
 import { useRBACSystem as useRBAC } from '../../../../hooks/useRBACSystem';
 import { useWorkspaceManagement } from '../../../../hooks/useWorkspaceManagement';

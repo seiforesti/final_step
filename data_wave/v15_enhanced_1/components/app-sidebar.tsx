@@ -1,5 +1,5 @@
 import type React from "react"
-import { LayoutDashboard, ListChecks, ListTree, Settings, Scan, HelpCircle } from "lucide-react"
+import { LayoutDashboard, ListChecks, ListTree, Settings, Scan, HelpCircle } from 'lucide-react'
 
 interface SidebarProps {
   isOpen: boolean

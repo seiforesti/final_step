@@ -2,15 +2,7 @@
 
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Network, Globe, ArrowRight, ArrowDown, ArrowUp, GitBranch, Workflow,
-  Database, Search, Shield, Users, Brain, Package, Activity, Zap,
-  CheckCircle, XCircle, AlertTriangle, Clock, Play, Pause, Settings,
-  MoreHorizontal, X, Plus, Minus, RefreshCw, Download, Upload, Eye,
-  BarChart3, TrendingUp, Layers, Route, Target, Filter, Monitor,
-  Link2, Unlink2, Share2, Copy, Edit3, Trash2, Save, FileText,
-  EyeOff, HelpCircle, Code, Terminal, Cpu, Memory, HardDrive
-} from 'lucide-react';
+import { Network, Globe, ArrowRight, ArrowDown, ArrowUp, GitBranch, Workflow, Database, Search, Shield, Users, Brain, Package, Activity, Zap, CheckCircle, XCircle, AlertTriangle, Clock, Play, Pause, Settings, MoreHorizontal, X, Plus, Minus, RefreshCw, Download, Upload, Eye, BarChart3, TrendingUp, Layers, Route, Target, Filter, Monitor, Link2, Unlink2, Share2, Copy, Edit3, Trash2, Save, FileText, EyeOff, HelpCircle, Code, Terminal, Cpu, HardDrive } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

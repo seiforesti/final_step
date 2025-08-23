@@ -2,55 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  BarChart3,
-  TrendingUp,
-  TrendingDown,
-  Activity,
-  Eye,
-  Clock,
-  Users,
-  MousePointer,
-  Navigation,
-  Map,
-  Target,
-  Zap,
-  Filter,
-  Search,
-  Download,
-  Share2,
-  Settings,
-  RefreshCw,
-  Calendar,
-  ChevronDown,
-  ChevronUp,
-  ArrowRight,
-  ArrowLeft,
-  MoreHorizontal,
-  Database,
-  Shield,
-  FileText,
-  BookOpen,
-  Scan,
-  Workflow,
-  Bot,
-  MessageSquare,
-  Globe,
-  Hash,
-  Layers,
-  Pie,
-  LineChart,
-  AreaChart,
-  Gauge,
-  HelpCircle,
-  Info,
-  AlertCircle,
-  CheckCircle,
-  XCircle,
-  Star,
-  Heart,
-  Bookmark
-} from 'lucide-react'
+import { BarChart3, TrendingUp, TrendingDown, Activity, Eye, Clock, Users, MousePointer, Navigation, Map, Target, Zap, Filter, Search, Download, Share2, Settings, RefreshCw, Calendar, ChevronDown, ChevronUp, ArrowRight, ArrowLeft, MoreHorizontal, Database, Shield, FileText, BookOpen, Scan, Workflow, Bot, MessageSquare, Globe, Hash, Layers, Pie, LineChart, AreaChart, Gauge, HelpCircle, Info, AlertCircle, CheckCircle, XCircle, Star, Heart, Bookmark } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'

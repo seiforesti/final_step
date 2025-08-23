@@ -43,92 +43,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
 
-import {
-  BarChart3,
-  LineChart,
-  PieChart,
-  ScatterChart,
-  Activity,
-  Calculator,
-  Target,
-  TrendingUp,
-  TrendingDown,
-  Zap,
-  Settings,
-  Filter,
-  Download,
-  Upload,
-  RefreshCw,
-  PlayCircle,
-  PauseCircle,
-  AlertTriangle,
-  CheckCircle,
-  Info,
-  HelpCircle,
-  ArrowRight,
-  ArrowUp,
-  ArrowDown,
-  Plus,
-  Minus,
-  X,
-  Search,
-  MoreHorizontal,
-  Database,
-  Cpu,
-  MemoryStick,
-  Network,
-  Server,
-  Monitor,
-  Gauge,
-  Sparkles,
-  Layers,
-  Globe,
-  Building,
-  DollarSign,
-  AlertCircle,
-  Eye,
-  EyeOff,
-  Maximize2,
-  Minimize2,
-  RotateCcw,
-  Save,
-  Share,
-  Copy,
-  ExternalLink,
-  FileText,
-  Image,
-  Calendar as CalendarIcon,
-  Clock,
-  CheckSquare,
-  Square,
-  Circle,
-  Triangle,
-  Diamond,
-  Star,
-  Grid3X3,
-  Layout,
-  Type,
-  Palette,
-  Move,
-  Resize,
-  RotateCw,
-  Trash2,
-  Edit,
-  BookOpen,
-  Folder,
-  FolderOpen,
-  File,
-  FilePlus,
-  Archive,
-  Send,
-  Schedule,
-  Timer,
-  Bell,
-  Users,
-  UserCheck,
-  Mail,
-  Printer
-} from 'lucide-react';
+import { BarChart3, LineChart, PieChart, ScatterChart, Activity, Calculator, Target, TrendingUp, TrendingDown, Zap, Settings, Filter, Download, Upload, RefreshCw, PlayCircle, PauseCircle, AlertTriangle, CheckCircle, Info, HelpCircle, ArrowRight, ArrowUp, ArrowDown, Plus, Minus, X, Search, MoreHorizontal, Database, Cpu, MemoryStick, Network, Server, Monitor, Gauge, Sparkles, Layers, Globe, Building, DollarSign, AlertCircle, Eye, EyeOff, Maximize2, Minimize2, RotateCcw, Save, Share, Copy, ExternalLink, FileText, Image, Calendar as CalendarIcon, Clock, CheckSquare, Square, Circle, Triangle, Diamond, Star, Grid3X3, Layout, Type, Palette, Move, Resize, RotateCw, Trash2, Edit, BookOpen, Folder, FolderOpen, File, FilePlus, Archive, Send, Timer, Bell, Users, UserCheck, Mail, Printer } from 'lucide-react';
 
 // Charts and Visualization
 import {
@@ -1426,7 +1341,7 @@ const CustomReportBuilder: React.FC = () => {
               size="sm"
               onClick={() => setIsScheduleDialogOpen(true)}
             >
-              <Schedule className="h-4 w-4 mr-1" />
+              <Clock className="h-4 w-4 mr-1" />
               Schedule
             </Button>
           </div>

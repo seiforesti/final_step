@@ -77,6 +77,22 @@ export const formatTimestamp = (
 }
 
 /**
+ * Format date to human-readable string (alias for formatTimestamp)
+ */
+export const formatDate = (
+  date: number | string | Date,
+  options: {
+    includeTime?: boolean
+    includeSeconds?: boolean
+    relative?: boolean
+    format?: 'short' | 'medium' | 'long' | 'full'
+    timezone?: string
+  } = {}
+): string => {
+  return formatTimestamp(date, options)
+}
+
+/**
  * Format relative time (e.g., "2 minutes ago", "in 3 hours")
  */
 export const formatRelativeTime = (date: Date | number | string): string => {
@@ -230,6 +246,27 @@ export const formatFileSize = (
     return 'Invalid size'
   }
 }
+
+// Backwards-compatible aliases expected by callers
+export const formatBytes = (
+  bytes: number,
+  options?: {
+    precision?: number
+    binary?: boolean
+    compact?: boolean
+  }
+): string => formatFileSize(bytes, options)
+
+export const formatDateTime = (
+  timestamp: number | string | Date,
+  options?: {
+    includeTime?: boolean
+    includeSeconds?: boolean
+    relative?: boolean
+    format?: 'short' | 'medium' | 'long' | 'full'
+    timezone?: string
+  }
+): string => formatTimestamp(timestamp, options)
 
 /**
  * Format latency/response time
@@ -582,13 +619,163 @@ export const formatObject = (
 }
 
 /**
+ * Format action time for display
+ */
+export const formatActionTime = (
+  timestamp: number | string | Date,
+  options: {
+    format?: 'relative' | 'absolute' | 'both'
+    includeSeconds?: boolean
+    timezone?: string
+  } = {}
+): string => {
+  try {
+    const { format = 'relative', includeSeconds = false, timezone } = options
+    const date = new Date(timestamp)
+    
+    if (isNaN(date.getTime())) {
+      return 'Invalid time'
+    }
+
+    switch (format) {
+      case 'relative':
+        return formatRelativeTime(date)
+      case 'absolute':
+        return formatTimestamp(date, { 
+          includeTime: true, 
+          includeSeconds, 
+          format: 'medium',
+          timezone 
+        })
+      case 'both':
+        const absolute = formatTimestamp(date, { 
+          includeTime: true, 
+          includeSeconds, 
+          format: 'short',
+          timezone 
+        })
+        const relative = formatRelativeTime(date)
+        return `${absolute} (${relative})`
+      default:
+        return formatRelativeTime(date)
+    }
+  } catch (error) {
+    console.error('Error formatting action time:', error)
+    return 'Invalid time'
+  }
+}
+
+// Additional formatting utilities
+export const formatPercentage = (value: number, decimals: number = 1): string => {
+  try {
+    if (isNaN(value) || !isFinite(value)) {
+      return '0%'
+    }
+    return `${(value * 100).toFixed(decimals)}%`
+  } catch (error) {
+    console.error('Error formatting percentage:', error)
+    return '0%'
+  }
+}
+
+export const formatTimeAgo = (timestamp: number | string | Date): string => {
+  try {
+    const date = new Date(timestamp)
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffAbs = Math.abs(diffMs)
+    
+    const seconds = Math.floor(diffAbs / 1000)
+    const minutes = Math.floor(seconds / 60)
+    const hours = Math.floor(minutes / 60)
+    const days = Math.floor(hours / 24)
+    const weeks = Math.floor(days / 7)
+    const months = Math.floor(days / 30)
+    const years = Math.floor(days / 365)
+    
+    if (years > 0) {
+      return `${years}y ago`
+    } else if (months > 0) {
+      return `${months}mo ago`
+    } else if (weeks > 0) {
+      return `${weeks}w ago`
+    } else if (days > 0) {
+      return `${days}d ago`
+    } else if (hours > 0) {
+      return `${hours}h ago`
+    } else if (minutes > 0) {
+      return `${minutes}m ago`
+    } else {
+      return `${seconds}s ago`
+    }
+  } catch (error) {
+    console.error('Error formatting time ago:', error)
+    return 'Unknown time'
+  }
+}
+
+export const formatSearchTime = (timestamp: number | string | Date): string => {
+  try {
+    const date = new Date(timestamp)
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffAbs = Math.abs(diffMs)
+    
+    const seconds = Math.floor(diffAbs / 1000)
+    const minutes = Math.floor(seconds / 60)
+    const hours = Math.floor(diffAbs / 3600)
+    
+    if (hours > 0) {
+      return `${hours}h ${minutes % 60}m ago`
+    } else if (minutes > 0) {
+      return `${minutes}m ago`
+    } else {
+      return `${seconds}s ago`
+    }
+  } catch (error) {
+    console.error('Error formatting search time:', error)
+    return 'Just now'
+  }
+}
+
+export const getSearchResultIcon = (resultType: string): string => {
+  switch (resultType.toLowerCase()) {
+    case 'file':
+    case 'document':
+      return '📄'
+    case 'database':
+    case 'table':
+      return '🗄️'
+    case 'user':
+    case 'profile':
+      return '👤'
+    case 'folder':
+    case 'directory':
+      return '📁'
+    case 'link':
+    case 'url':
+      return '🔗'
+    case 'image':
+    case 'photo':
+      return '🖼️'
+    case 'video':
+    case 'media':
+      return '🎥'
+    default:
+      return '📋'
+  }
+}
+
+/**
  * Export all formatting functions
  */
 export default {
   formatTimestamp,
+  formatDateTime,
   formatRelativeTime,
   formatDuration,
   formatFileSize,
+  formatBytes,
   formatLatency,
   formatThroughput,
   formatPercent,
@@ -597,5 +784,10 @@ export default {
   formatBoolean,
   formatStatus,
   formatArray,
-  formatObject
+  formatObject,
+  formatActionTime,
+  formatPercentage,
+  formatTimeAgo,
+  formatSearchTime,
+  getSearchResultIcon
 }

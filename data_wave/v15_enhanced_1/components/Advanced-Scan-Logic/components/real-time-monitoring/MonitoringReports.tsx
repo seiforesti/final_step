@@ -24,98 +24,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { 
-  Activity, 
-  AlertTriangle, 
-  CheckCircle, 
-  Clock, 
-  RefreshCw,
-  Settings, 
-  Zap,
-  TrendingUp,
-  TrendingDown,
-  Server,
-  Monitor,
-  AlertCircle,
-  Filter,
-  Search,
-  Download,
-  Eye,
-  Edit,
-  Trash2,
-  Plus,
-  X,
-  Check,
-  Info,
-  Copy,
-  MoreHorizontal,
-  Target,
-  Timer,
-  Gauge,
-  LineChart,
-  PieChart,
-  BarChart,
-  Workflow,
-  Brain,
-  Lightbulb,
-  Cpu,
-  Database,
-  GitBranch,
-  HardDrive,
-  Network,
-  Users,
-  Play,
-  Pause,
-  Square,
-  RotateCcw,
-  Layers,
-  Globe,
-  Shield,
-  Bell,
-  BellOff,
-  Calendar,
-  MapPin,
-  Send,
-  UserCheck,
-  UserX,
-  ArrowRight,
-  ArrowUp,
-  ArrowDown,
-  ExternalLink,
-  Link,
-  Unlink,
-  TestTube,
-  FlaskConical,
-  Wrench,
-  Tool,
-  Cog,
-  CircuitBoard,
-  Package,
-  Archive,
-  FileText,
-  Code,
-  Braces,
-  BarChart3,
-  FileSpreadsheet,
-  FilePdf,
-  FileJson,
-  Mail,
-  Share,
-  Bookmark,
-  Star,
-  Printer,
-  Image,
-  Layout,
-  Grid3X3,
-  List,
-  ChevronDown,
-  ChevronUp,
-  Maximize2,
-  Minimize2,
-  ZoomIn,
-  ZoomOut,
-  RotateCw
-} from 'lucide-react';
+import { Activity, AlertTriangle, CheckCircle, Clock, RefreshCw, Settings, Zap, TrendingUp, TrendingDown, Server, Monitor, AlertCircle, Filter, Search, Download, Eye, Edit, Trash2, Plus, X, Check, Info, Copy, MoreHorizontal, Target, Timer, Gauge, LineChart, PieChart, BarChart, Workflow, Brain, Lightbulb, Cpu, Database, GitBranch, HardDrive, Network, Users, Play, Pause, Square, RotateCcw, Layers, Globe, Shield, Bell, BellOff, Calendar, MapPin, Send, UserCheck, UserX, ArrowRight, ArrowUp, ArrowDown, ExternalLink, Link, Unlink, TestTube, FlaskConical, Wrench, Tool, Cog, CircuitBoard, Package, Archive, FileText, Code, Braces, BarChart3, FileSpreadsheet, FilePdf, FileJson, Mail, Share, Bookmark, Star, Printer, Image, Layout, Grid3X3, List, ChevronDown, ChevronUp, Maximize2, Minimize2, ZoomIn, ZoomOut, RotateCw } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -522,7 +431,7 @@ export const MonitoringReports: React.FC<MonitoringReportsProps> = ({
             document.body.removeChild(link);
             toast.success(`Report "${report.name}" downloaded`);
           } else {
-            toast.error('Download URL not available');
+            toast.error('ArrowDownTrayIcon URL not available');
           }
           break;
           
@@ -1458,7 +1367,7 @@ export const MonitoringReports: React.FC<MonitoringReportsProps> = ({
                                   <>
                                     <DropdownMenuItem onClick={() => handleReportAction(report.id, 'download')}>
                                       <Download className="h-4 w-4 mr-2" />
-                                      Download
+                                      ArrowDownTrayIcon
                                     </DropdownMenuItem>
                                     <DropdownMenuItem onClick={() => handleReportAction(report.id, 'view')}>
                                       <Eye className="h-4 w-4 mr-2" />

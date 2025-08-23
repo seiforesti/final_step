@@ -9,11 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
-import {
-  Play, Pause, Square, RotateCcw, Clock, CheckCircle, AlertCircle,
-  RefreshCw, PlusCircle, Eye, Edit, Trash2, Search, Users, 
-  ArrowRight, Calendar, Timer
-} from "lucide-react"
+import { Play, Pause, Square, RotateCcw, Clock, CheckCircle, AlertCircle, RefreshCw, PlusCircle, Eye, Edit, Trash2, Search, Users, ArrowRight, Calendar, Timer } from 'lucide-react'
 
 // Enterprise Integration
 import { ComplianceHooks } from '../hooks/use-enterprise-features'

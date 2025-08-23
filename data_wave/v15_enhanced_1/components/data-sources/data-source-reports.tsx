@@ -15,35 +15,7 @@ import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import { Progress } from "@/components/ui/progress"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { 
-  FileText, 
-  Download, 
-  Plus, 
-  Eye, 
-  Calendar, 
-  BarChart3, 
-  PieChart, 
-  LineChart,
-  Settings,
-  Trash2,
-  Play,
-  Pause,
-  RefreshCw,
-  Shield,
-  Clock,
-  Activity,
-  TrendingUp,
-  Filter,
-  Search,
-  FileSpreadsheet,
-  FileImage,
-  FilePdf,
-  Share2,
-  Copy,
-  ExternalLink,
-  AlertTriangle,
-  CheckCircle
-} from "lucide-react"
+import { FileText, Download, Plus, Eye, Calendar, BarChart3, PieChart, LineChart, Settings, Trash2, Play, Pause, RefreshCw, Shield, Clock, Activity, TrendingUp, Filter, Search, FileSpreadsheet, FileImage, FileText as FilePdf, Share2, Copy, ExternalLink, AlertTriangle, CheckCircle } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 

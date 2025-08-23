@@ -2,56 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  Zap, 
-  Plus, 
-  Play, 
-  Pause, 
-  Square, 
-  RotateCcw,
-  Database,
-  Shield,
-  FileText,
-  BookOpen,
-  Scan,
-  Users,
-  Activity,
-  Bot,
-  MessageSquare,
-  Settings,
-  Download,
-  Upload,
-  Share2,
-  Copy,
-  Edit3,
-  Trash2,
-  Archive,
-  Bookmark,
-  Star,
-  Eye,
-  Search,
-  Filter,
-  Calendar,
-  Clock,
-  TrendingUp,
-  BarChart3,
-  Globe,
-  ExternalLink,
-  ChevronRight,
-  Command,
-  Workflow,
-  GitBranch,
-  Layers,
-  Target,
-  Briefcase,
-  Code,
-  Hash,
-  Sparkles,
-  CheckCircle2,
-  AlertTriangle,
-  Info,
-  Loader2
-} from 'lucide-react'
+import { Zap, Plus, Play, Pause, Square, RotateCcw, Database, Shield, FileText, BookOpen, Scan, Users, Activity, Bot, MessageSquare, Settings, Download, Upload, Share2, Copy, Edit3, Trash2, Archive, Bookmark, Star, Eye, Search, Filter, Calendar, Clock, TrendingUp, BarChart3, Globe, ExternalLink, ChevronRight, Command, Workflow, GitBranch, Layers, Target, Briefcase, Code, Hash, Sparkles, CheckCircle2, AlertTriangle, Info, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'

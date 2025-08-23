@@ -1,28 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
-import { 
-  ChevronRight, 
-  ChevronDown, 
-  Database, 
-  Table, 
-  Columns, 
-  Search, 
-  Filter, 
-  Eye, 
-  Download,
-  RefreshCw,
-  Check,
-  Square,
-  MinusSquare,
-  CheckSquare,
-  FileText,
-  Folder,
-  FolderOpen,
-  Info,
-  BarChart3,
-  Activity
-} from "lucide-react"
+import { ChevronRight, ChevronDown, Database, Table, Columns, Search, Filter, Eye, Download, RefreshCw, Check, Square, MinusSquare, CheckSquare, FileText, Folder, FolderOpen, Info, BarChart3, Activity } from 'lucide-react'
 
 // Import enterprise services and utilities
 import { discoverSchemaWithOptions, SchemaDiscoveryRequest } from "../services/enterprise-apis"

@@ -1,44 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Brain, 
-  Lightbulb, 
-  Target,
-  Search,
-  Filter,
-  RefreshCw,
-  Settings,
-  BarChart3,
-  PieChart,
-  TrendingUp,
-  Activity,
-  CheckCircle2,
-  XCircle,
-  AlertTriangle,
-  Info,
-  Zap,
-  Database,
-  FileText,
-  Code,
-  GitBranch,
-  Network,
-  Layers,
-  Sparkles,
-  Robot,
-  Eye,
-  Edit,
-  Plus,
-  MoreHorizontal,
-  Download,
-  Upload,
-  Save,
-  Copy,
-  Trash2,
-  Play,
-  Pause,
-  Square,
-  Clock
-} from 'lucide-react';
+import { Brain, Lightbulb, Target, Search, Filter, RefreshCw, Settings, BarChart3, PieChart, TrendingUp, Activity, CheckCircle2, XCircle, AlertTriangle, Info, Zap, Database, FileText, Code, GitBranch, Network, Layers, Sparkles, Robot, Eye, Edit, Plus, MoreHorizontal, Download, Upload, Save, Copy, Trash2, Play, Pause, Square, Clock } from 'lucide-react';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

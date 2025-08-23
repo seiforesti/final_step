@@ -2,56 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  Briefcase, 
-  Plus, 
-  Check, 
-  ChevronDown, 
-  Settings, 
-  Users, 
-  Globe, 
-  Lock, 
-  Unlock,
-  Star,
-  Clock,
-  Copy,
-  Trash2,
-  Edit3,
-  Share2,
-  Archive,
-  ExternalLink,
-  Search,
-  Filter,
-  MoreHorizontal,
-  ChevronRight,
-  Folder,
-  FolderOpen,
-  Building,
-  Shield,
-  Database,
-  FileText,
-  BookOpen,
-  Scan,
-  Activity,
-  Bot,
-  MessageSquare,
-  Workflow,
-  BarChart3,
-  Zap,
-  Hash,
-  Calendar,
-  Eye,
-  EyeOff,
-  UserPlus,
-  LogOut,
-  Download,
-  Upload,
-  RefreshCw,
-  AlertCircle,
-  CheckCircle2,
-  Info,
-  Loader2
-} from 'lucide-react'
+import { Briefcase, Plus, Check, ChevronDown, Settings, Users, Globe, Lock, Unlock, Star, Clock, Copy, Trash2, Edit3, Share2, Archive, ExternalLink, Search, Filter, MoreHorizontal, ChevronRight, Folder, FolderOpen, Building, Shield, Database, FileText, BookOpen, Scan, Activity, Bot, MessageSquare, Workflow, BarChart3, Zap, Hash, Calendar, Eye, EyeOff, UserPlus, LogOut, Download, Upload, RefreshCw, AlertCircle, CheckCircle2, Info, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'

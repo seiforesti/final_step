@@ -286,7 +286,7 @@ export const validateDependencyConstraints = (dependencies: any[]): {
   dependencies.forEach(dep => {
     // Check for orphaned dependencies
     if (dep.dependencies && dep.dependencies.length > 0) {
-      dep.dependencies.forEach(depId => {
+      dep.dependencies.forEach((depId: string) => {
         const targetDep = dependencies.find(d => d.id === depId);
         if (!targetDep) {
           violations.push(`Dependency ${dep.name} references non-existent dependency ${depId}`);
@@ -306,7 +306,7 @@ export const validateDependencyConstraints = (dependencies: any[]): {
     
     // Check for inactive dependencies
     if (dep.status === 'active' && dep.dependencies) {
-      const inactiveDeps = dep.dependencies.filter(depId => {
+      const inactiveDeps = dep.dependencies.filter((depId: string) => {
         const targetDep = dependencies.find(d => d.id === depId);
         return targetDep && targetDep.status !== 'active';
       });
@@ -352,3 +352,185 @@ export const dependencyResolverUtils = {
 };
 
 export default dependencyResolverUtils;
+
+// Additional functions for DependencyResolver component
+export const calculateDependencyEfficiency = (dependencies: any[]): {
+  efficiency: number;
+  bottlenecks: string[];
+  recommendations: string[];
+} => {
+  let totalEfficiency = 0;
+  const bottlenecks: string[] = [];
+  const recommendations: string[] = [];
+  
+  dependencies.forEach(dep => {
+    const efficiency = dep.efficiency || 0.8;
+    totalEfficiency += efficiency;
+    
+    if (efficiency < 0.6) {
+      bottlenecks.push(dep.name);
+      recommendations.push(`Optimize ${dep.name} - current efficiency: ${(efficiency * 100).toFixed(1)}%`);
+    }
+  });
+  
+  const avgEfficiency = dependencies.length > 0 ? totalEfficiency / dependencies.length : 0;
+  
+  return {
+    efficiency: Math.round(avgEfficiency * 100) / 100,
+    bottlenecks,
+    recommendations
+  };
+};
+
+export const calculateDependencyReliability = (dependencies: any[]): {
+  reliability: number;
+  weakPoints: string[];
+  recommendations: string[];
+} => {
+  let totalReliability = 0;
+  const weakPoints: string[] = [];
+  const recommendations: string[] = [];
+  
+  dependencies.forEach(dep => {
+    const reliability = dep.reliability || 0.9;
+    totalReliability += reliability;
+    
+    if (reliability < 0.8) {
+      weakPoints.push(dep.name);
+      recommendations.push(`Improve reliability of ${dep.name} - current: ${(reliability * 100).toFixed(1)}%`);
+    }
+  });
+  
+  const avgReliability = dependencies.length > 0 ? totalReliability / dependencies.length : 0;
+  
+  return {
+    reliability: Math.round(avgReliability * 100) / 100,
+    weakPoints,
+    recommendations
+  };
+};
+
+export const calculateDependencyPerformance = (dependencies: any[]): {
+  performance: number;
+  slowDependencies: string[];
+  recommendations: string[];
+} => {
+  let totalPerformance = 0;
+  const slowDependencies: string[] = [];
+  const recommendations: string[] = [];
+  
+  dependencies.forEach(dep => {
+    const performance = dep.performance || 0.85;
+    totalPerformance += performance;
+    
+    if (performance < 0.7) {
+      slowDependencies.push(dep.name);
+      recommendations.push(`Optimize performance of ${dep.name} - current: ${(performance * 100).toFixed(1)}%`);
+    }
+  });
+  
+  const avgPerformance = dependencies.length > 0 ? totalPerformance / dependencies.length : 0;
+  
+  return {
+    performance: Math.round(avgPerformance * 100) / 100,
+    slowDependencies,
+    recommendations
+  };
+};
+
+// ==========================================
+// DEPENDENCY ANALYZER
+// ==========================================
+
+export const dependencyAnalyzer = {
+  async analyzeDependencies(dependencies: any[]): Promise<any> {
+    try {
+      const response = await apiClient.post('/api/v1/dependencies/analyze', { dependencies });
+      return response.data;
+    } catch (error) {
+      console.error('Error analyzing dependencies:', error);
+      throw error;
+    }
+  },
+
+  async detectCircularDependencies(dependencies: any[]): Promise<any[]> {
+    try {
+      const response = await apiClient.post('/api/v1/dependencies/circular', { dependencies });
+      return response.data.circular_dependencies;
+    } catch (error) {
+      console.error('Error detecting circular dependencies:', error);
+      throw error;
+    }
+  },
+
+  async analyzeDependencyImpact(dependencyId: string, changes: any[]): Promise<any> {
+    try {
+      const response = await apiClient.post('/api/v1/dependencies/impact', { dependency_id: dependencyId, changes });
+      return response.data;
+    } catch (error) {
+      console.error('Error analyzing dependency impact:', error);
+      throw error;
+    }
+  },
+
+  async optimizeDependencyGraph(dependencies: any[]): Promise<any> {
+    try {
+      const response = await apiClient.post('/api/v1/dependencies/optimize', { dependencies });
+      return response.data;
+    } catch (error) {
+      console.error('Error optimizing dependency graph:', error);
+      throw error;
+    }
+  },
+
+  async validateDependencyConstraints(dependencies: any[], constraints: any[]): Promise<any> {
+    try {
+      const response = await apiClient.post('/api/v1/dependencies/validate', { dependencies, constraints });
+      return response.data;
+    } catch (error) {
+      console.error('Error validating dependency constraints:', error);
+      throw error;
+    }
+  }
+};
+
+export const calculateDependencyComplexity = (dependencies: any[]): {
+  complexity: number;
+  factors: string[];
+  recommendations: string[];
+} => {
+  let totalComplexity = 0;
+  const factors: string[] = [];
+  const recommendations: string[] = [];
+  
+  dependencies.forEach(dep => {
+    let complexity = 0;
+    
+    // Factor in number of dependencies
+    complexity += (dep.dependencies?.length || 0) * 0.1;
+    
+    // Factor in depth
+    complexity += (dep.depth || 0) * 0.2;
+    
+    // Factor in criticality
+    complexity += (dep.criticality || 0.5) * 0.3;
+    
+    // Factor in volatility
+    complexity += (dep.volatility || 0.5) * 0.2;
+    
+    totalComplexity += complexity;
+    
+    if (complexity > 0.8) {
+      factors.push(dep.name);
+      recommendations.push(`Simplify ${dep.name} - complexity: ${(complexity * 100).toFixed(1)}%`);
+    }
+  });
+  
+  const avgComplexity = dependencies.length > 0 ? totalComplexity / dependencies.length : 0;
+  
+  return {
+    complexity: Math.round(avgComplexity * 100) / 100,
+    factors,
+    recommendations
+  };
+};

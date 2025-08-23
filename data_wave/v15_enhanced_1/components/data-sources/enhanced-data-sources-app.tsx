@@ -9,29 +9,7 @@ import React, { useState, useEffect, Suspense, useCallback, useMemo, createConte
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import { Toaster } from "sonner"
-import {
-  Database, Settings, Activity, TrendingUp, Users, Shield, Cloud, Search,
-  BarChart3, Eye, Zap, Target, Bell, Menu, X, ChevronLeft, ChevronRight,
-  Plus, Filter, Download, Upload, RefreshCw, HelpCircle, User, LogOut,
-  Monitor, Palette, Globe, Lock, Building, FileText, MessageSquare, Star,
-  Grid, List, Layers, GitBranch, Workflow, Calendar, Clock, AlertTriangle,
-  CheckCircle, Info, Play, Pause, Stop, Edit, Trash2, Copy, Share2,
-  ExternalLink, MoreHorizontal, ChevronDown, ChevronUp, Maximize2, Minimize2,
-  PanelLeftOpen, PanelRightOpen, SplitSquareHorizontal, Layout, Command,
-  Cpu, HardDrive, Network, Gauge, LineChart, PieChart, AreaChart,
-  TestTube, Beaker, Microscope, Cog, Wrench, Tool, Package, Server,
-  CircuitBoard, Boxes, Archive, FolderOpen, Folder, File, Code2,
-  Terminal, Bug, Sparkles, Rocket, Flame, Lightbulb, Brain, Bot,
-  Radar, Crosshair, Focus, Scan, SearchX, ScanLine, Binary, Hash,
-  Type, Key, ShieldCheck, UserCheck, Crown, Badge as BadgeIcon,
-  Award, Medal, Trophy, Flag, Bookmark, Heart, ThumbsUp, Smile,
-  Frown, AlertCircle, XCircle, Wifi, WifiOff, Signal, SignalHigh,
-  SignalLow, SignalMedium, Route, Map, MapPin, Navigation, Compass,
-  TreePine, Workflow as WorkflowIcon, Camera, Video, Mic, MicOff,
-  Maximize, Minimize, RotateCcw, RotateCw, ZoomIn, ZoomOut, Expand,
-  Shrink, Move, Resize, PinIcon, UnpinIcon, Bookmark as BookmarkIcon,
-  Tag, Tags, Hash as HashIcon, Percent, DollarSign, Euro, Pound
-} from "lucide-react"
+import { Database, Settings, Activity, TrendingUp, Users, Shield, Cloud, Search, BarChart3, Eye, Zap, Target, Bell, Menu, X, ChevronLeft, ChevronRight, Plus, Filter, Download, Upload, RefreshCw, HelpCircle, User, LogOut, Monitor, Palette, Globe, Lock, Building, FileText, MessageSquare, Star, Grid, List, Layers, GitBranch, Workflow, Calendar, Clock, AlertTriangle, CheckCircle, Info, Play, Pause, Square, Edit, Trash2, Copy, Share2, ExternalLink, MoreHorizontal, ChevronDown, ChevronUp, Maximize2, Minimize2, PanelLeftOpen, PanelRightOpen, SplitSquareHorizontal, Layout, Command, Cpu, HardDrive, Network, Gauge, LineChart, PieChart, AreaChart, TestTube, Beaker, Microscope, Cog, Wrench, Package, Server, CircuitBoard, Boxes, Archive, FolderOpen, Folder, File, Code2, Terminal, Bug, Sparkles, Rocket, Flame, Lightbulb, Brain, Bot, Radar, Crosshair, Focus, Scan, SearchX, ScanLine, Binary, Hash, Type, Key, ShieldCheckIcon, UserCheck, Crown, Badge as BadgeIcon, Award, Medal, Trophy, Flag, Bookmark, Heart, ThumbsUp, Smile, Frown, AlertCircle, XCircle, Wifi, WifiOff, Signal, SignalHigh, SignalLow, SignalMedium, Route, Map, MapPin, Navigation, Compass, TreePine, Workflow as WorkflowIcon, Camera, Video, Mic, MicOff, Maximize, Minimize, RotateCcw, RotateCw, ZoomIn, ZoomOut, Expand, Shrink, Move, Resize, PinIcon, UnpinIcon, Bookmark as BookmarkIcon, Tag, Tags, Hash as HashIcon, Percent, DollarSign, Euro, Pound } from 'lucide-react'
 
 // Import shadcn/ui components
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -283,7 +261,7 @@ const createAdvancedWorkflowActions = (context: any): WorkflowAction[] => [
     id: "security-assessment",
     label: "Security Assessment Suite",
     description: "Complete security audit with vulnerability scanning and threat detection",
-    icon: ShieldCheck,
+    icon: ShieldCheckIcon,
     category: "security",
     priority: "critical",
     shortcut: "⌘+Shift+A",
@@ -642,7 +620,7 @@ const enterpriseNavigationStructure = {
       { id: "schema-discovery", label: "Schema Discovery", icon: TreePine, component: "schema-discovery", description: "Automated schema mapping", shortcut: "⌘+H" },
       { id: "data-lineage", label: "Data Lineage", icon: WorkflowIcon, component: "data-lineage", description: "Interactive lineage visualization", shortcut: "⌘+L", features: ["analytics"] },
       { id: "scan-results", label: "Scan Results", icon: ScanLine, component: "scan-results", description: "Detailed scan results with insights", shortcut: "⌘+S" },
-      { id: "compliance", label: "Compliance", icon: ShieldCheck, component: "compliance", description: "Compliance monitoring and reporting", shortcut: "⌘+C", features: ["workflows", "analytics"] },
+      { id: "compliance", label: "Compliance", icon: ShieldCheckIcon, component: "compliance", description: "Compliance monitoring and reporting", shortcut: "⌘+C", features: ["workflows", "analytics"] },
       { id: "security", label: "Security", icon: Lock, component: "security", description: "Security assessment with AI analysis", shortcut: "⌘+E", features: ["ai", "workflows"] },
     ]
   },
@@ -672,7 +650,7 @@ const enterpriseNavigationStructure = {
   },
   operations: {
     label: "Operations & Maintenance",
-    icon: Tool,
+    icon: Wrench,
     category: "operations",
     items: [
       { id: "backup-restore", label: "Backup & Restore", icon: Archive, component: "backup-restore", description: "Automated backup management", shortcut: "⌘+B", features: ["workflows"] },
@@ -1159,13 +1137,13 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
     const contextActions = {
       'enterprise-dashboard': [
         { id: 'customize_dashboard', label: 'Customize Dashboard', icon: Settings },
-        { id: 'export_insights', label: 'Export Insights', icon: Download },
+        { id: 'export_insights', label: 'Export Insights', icon: ArrowDownTrayIcon },
         { id: 'schedule_report', label: 'Schedule Report', icon: Calendar }
       ],
       'analytics-workbench': [
         { id: 'run_analysis', label: 'Run Analysis', icon: Play },
         { id: 'share_notebook', label: 'Share Notebook', icon: Share2 },
-        { id: 'export_model', label: 'Export Model', icon: Download }
+        { id: 'export_model', label: 'Export Model', icon: ArrowDownTrayIcon }
       ],
       'security': [
         { id: 'run_scan', label: 'Run Security Scan', icon: Scan },
@@ -2323,7 +2301,7 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
                 </div>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => executeWorkflowAction('security-assessment')}>
-                <ShieldCheck className="mr-2 h-4 w-4" />
+                <ShieldCheckIcon className="mr-2 h-4 w-4" />
                 <div>
                   <div className="font-medium">Security Assessment</div>
                   <div className="text-xs text-muted-foreground">Complete security audit</div>

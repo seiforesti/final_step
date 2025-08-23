@@ -2,89 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  Cpu,
-  MemoryStick,
-  HardDrive,
-  Network,
-  Database,
-  Server,
-  Cloud,
-  Zap,
-  Target,
-  Gauge,
-  Activity,
-  TrendingUp,
-  TrendingDown,
-  BarChart3,
-  PieChart,
-  LineChart,
-  Settings,
-  Sliders,
-  RotateCcw,
-  RefreshCw,
-  Play,
-  Pause,
-  Stop,
-  Square,
-  CheckCircle,
-  AlertTriangle,
-  XCircle,
-  Clock,
-  Timer,
-  Calendar,
-  Users,
-  User,
-  Shield,
-  Lock,
-  Unlock,
-  Key,
-  Eye,
-  EyeOff,
-  Search,
-  Filter,
-  Download,
-  Upload,
-  Share2,
-  Copy,
-  Edit,
-  Trash2,
-  Plus,
-  Minus,
-  ArrowUp,
-  ArrowDown,
-  ArrowLeft,
-  ArrowRight,
-  Maximize,
-  Minimize,
-  Layers,
-  Package,
-  Code,
-  FileText,
-  Archive,
-  History,
-  Flag,
-  Star,
-  Award,
-  Crown,
-  Hash,
-  Percent,
-  DollarSign,
-  TrendingUpDown,
-  Battery,
-  BatteryLow,
-  Thermometer,
-  Wifi,
-  WifiOff,
-  Signal,
-  Volume2,
-  VolumeX,
-  Monitor,
-  Smartphone,
-  Tablet,
-  Laptop,
-  Desktop
-} from 'lucide-react'
+import { Cpu, MemoryStick, HardDrive, Network, Database, Server, Cloud, Zap, Target, Gauge, Activity, TrendingUp, TrendingDown, BarChart3, PieChart, LineChart, Settings, Sliders, RotateCcw, RefreshCw, Play, Pause, Square, CheckCircle, AlertTriangle, XCircle, Clock, Timer, Calendar, Users, User, Shield, Lock, Unlock, Key, Eye, EyeOff, Search, Filter, Download, Upload, Share2, Copy, Edit, Trash2, Plus, Minus, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Maximize, Minimize, Layers, Package, Code, FileText, Archive, History, Flag, Star, Award, Crown, Hash, Percent, DollarSign, TrendingUpDown, Battery, BatteryLow, Thermometer, Wifi, WifiOff, Signal, Volume2, VolumeX, Monitor, Smartphone, Tablet, Laptop, Desktop } from 'lucide-react'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -1250,8 +1168,8 @@ export const ResourceOptimizer: React.FC<{
             </Button>
           ) : (
             <Button onClick={handleStopOptimization} variant="destructive">
-              <Stop className="h-4 w-4 mr-2" />
-              Stop Optimization
+              <Square className="h-4 w-4 mr-2" />
+              Square Optimization
             </Button>
           )}
           

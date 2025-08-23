@@ -115,7 +115,7 @@ const GROUP_TYPE_CONFIG = {
   custom: { icon: Tag, color: 'bg-purple-100 text-purple-800' },
 };
 
-const GroupList: React.FC<GroupListProps> = ({
+export const GroupList: React.FC<GroupListProps> = ({
   groups,
   selectedGroups,
   filter,
@@ -713,4 +713,3 @@ const GroupList: React.FC<GroupListProps> = ({
   );
 };
 
-export default GroupList;

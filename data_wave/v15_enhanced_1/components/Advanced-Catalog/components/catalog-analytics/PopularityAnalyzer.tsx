@@ -75,55 +75,7 @@ import {
   cn 
 } from "@/lib/utils";
 import { format, subDays, subHours, isWithinInterval } from "date-fns";
-import { 
-  Download,
-  Filter,
-  MoreHorizontal,
-  RefreshCw,
-  Settings,
-  Share,
-  Clock,
-  TrendingUp,
-  TrendingDown,
-  BarChart3,
-  Users,
-  Activity,
-  Database,
-  Target,
-  Star,
-  Heart,
-  Eye,
-  Search,
-  ThumbsUp,
-  MessageSquare,
-  Bookmark,
-  ArrowUp,
-  ArrowDown,
-  Minus,
-  Zap,
-  Flame as Fire,
-  Award,
-  Crown,
-  Sparkles,
-  Calendar,
-  Clock3,
-  Globe,
-  Hash,
-  Link2,
-  ExternalLink,
-  Copy,
-  ChevronUp,
-  ChevronDown,
-  Info,
-  HelpCircle,
-  Layers,
-  FileType,
-  Folder,
-  Tag,
-  MapPin,
-  Navigation,
-  Compass
-} from 'lucide-react';
+import { Download, Filter, MoreHorizontal, RefreshCw, Settings, Share, Clock, TrendingUp, TrendingDown, BarChart3, Users, Activity, Database, Target, Star, Heart, Eye, Search, ThumbsUp, MessageSquare, Bookmark, ArrowUp, ArrowDown, Minus, Zap, Flame as Fire, Award, Crown, Sparkles, Calendar, Clock3, Globe, Hash, Link2, ExternalLink, Copy, ChevronUp, ChevronDown, Info, HelpCircle, Layers, FileType, Folder, Tag, MapPin, Navigation, Compass } from 'lucide-react';
 import { toast } from 'sonner';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -256,7 +208,7 @@ const TIME_RANGES = [
 
 const POPULARITY_METRICS = [
   { value: 'views', label: 'Views', icon: Eye, weight: 1 },
-  { value: 'downloads', label: 'Downloads', icon: Download, weight: 3 },
+  { value: 'downloads', label: 'Downloads', icon: ArrowDownTrayIcon, weight: 3 },
   { value: 'shares', label: 'Shares', icon: Share, weight: 5 },
   { value: 'bookmarks', label: 'Bookmarks', icon: Bookmark, weight: 4 },
   { value: 'ratings', label: 'Ratings', icon: Star, weight: 3 },
@@ -514,7 +466,7 @@ const PopularityAnalyzer: React.FC<PopularityAnalyzerProps> = ({
         value: engagementData.totalDownloads,
         change: engagementData.downloadsChange,
         trend: engagementData.downloadsChange > 0 ? 'up' : engagementData.downloadsChange < 0 ? 'down' : 'stable',
-        icon: Download,
+        icon: ArrowDownTrayIcon,
         color: '#10b981'
       },
       {

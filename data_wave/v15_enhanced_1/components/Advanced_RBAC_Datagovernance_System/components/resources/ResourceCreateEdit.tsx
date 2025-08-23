@@ -299,7 +299,7 @@ const COMPLIANCE_FRAMEWORKS = [
   'GDPR', 'HIPAA', 'SOX', 'PCI-DSS', 'CCPA', 'SOC2', 'ISO27001', 'NIST'
 ];
 
-const ResourceCreateEdit: React.FC<ResourceCreateEditProps> = ({
+export const ResourceCreateEdit: React.FC<ResourceCreateEditProps> = ({
   resource,
   parentResource,
   onSave,
@@ -1278,4 +1278,3 @@ const ResourceCreateEdit: React.FC<ResourceCreateEditProps> = ({
   );
 };
 
-export default ResourceCreateEdit;

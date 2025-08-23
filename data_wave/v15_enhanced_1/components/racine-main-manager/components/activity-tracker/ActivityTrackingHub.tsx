@@ -22,74 +22,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { motion, AnimatePresence, useAnimation } from 'framer-motion';
-import { 
-  Activity, 
-  Search, 
-  Filter, 
-  BarChart3, 
-  Timeline, 
-  Shield, 
-  Download, 
-  Settings, 
-  Eye, 
-  AlertTriangle, 
-  Clock, 
-  Users, 
-  Database, 
-  Workflow, 
-  FileText, 
-  Zap, 
-  TrendingUp,
-  Calendar as CalendarIcon,
-  RefreshCcw,
-  ChevronDown,
-  ChevronRight,
-  Play,
-  Pause,
-  Square,
-  MoreHorizontal,
-  Bell,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
-  Info,
-  Hash,
-  Globe,
-  MapPin,
-  Clock3,
-  User,
-  Building,
-  Lock,
-  Unlock,
-  Target,
-  Layers,
-  GitBranch,
-  Network,
-  Radar,
-  Cpu,
-  HardDrive,
-  Gauge,
-  PieChart,
-  LineChart,
-  BarChart,
-  Heatmap,
-  TreePine,
-  Grid3X3,
-  List,
-  Table as TableIcon,
-  Kanban,
-  Archive,
-  Trash2,
-  Star,
-  Bookmark,
-  Share,
-  ExternalLink,
-  Copy,
-  Edit,
-  Save,
-  Undo,
-  Redo
-} from 'lucide-react';
+import { Activity, Search, Filter, BarChart3, Clock, Shield, Download, Settings, Eye, AlertTriangle, Users, Database, Workflow, FileText, Zap, TrendingUp, Calendar as CalendarIcon, RefreshCcw, ChevronDown, ChevronRight, Play, Pause, Square, MoreHorizontal, Bell, CheckCircle, XCircle, AlertCircle, Info, Hash, Globe, MapPin, Clock3, User, Building, Lock, Unlock, Target, Layers, GitBranch, Network, Radar, Cpu, HardDrive, Gauge, PieChart, LineChart, BarChart, TreePine, Grid3X3, List, Table as TableIcon, Kanban, Archive, Trash2, Star, Bookmark, Share, ExternalLink, Copy, Edit, Save, Undo, Redo } from 'lucide-react';
 
 // UI Components
 import { Button } from '@/components/ui/button';
@@ -198,26 +131,16 @@ import { useRacineOrchestration } from '../../hooks/useRacineOrchestration';
 
 // Types
 import {
-  RacineActivity,
+  ActivityRecord,
   ActivityFilter,
-  ActivityAnalytics,
   ActivityType,
   ActivitySeverity,
   AuditTrail,
-  ActivityAnomaly,
-  ActivityCorrelation,
   UUID,
-  UserRole,
-  WorkspaceContext,
-  CrossGroupActivity,
-  SystemActivity,
-  UserActivity,
-  ComplianceActivity
+  UserRole
 } from '../../types/racine-core.types';
 import {
-  ActivitySearchRequest,
-  ActivityAnalyticsRequest,
-  AuditTrailRequest,
+  ActivityReportRequest,
   PaginationRequest,
   FilterRequest
 } from '../../types/api.types';
@@ -748,11 +671,11 @@ export const ActivityTrackingHub: React.FC = () => {
                 List View
               </DropdownMenuRadioItem>
               <DropdownMenuRadioItem value={ActivityLayoutType.TIMELINE}>
-                <Timeline className="h-4 w-4 mr-2" />
+                <Clock className="h-4 w-4 mr-2" />
                 Timeline View
               </DropdownMenuRadioItem>
               <DropdownMenuRadioItem value={ActivityLayoutType.HEATMAP}>
-                <Heatmap className="h-4 w-4 mr-2" />
+                <BarChart3 className="h-4 w-4 mr-2" />
                 Heatmap View
               </DropdownMenuRadioItem>
               <DropdownMenuRadioItem value={ActivityLayoutType.NETWORK}>

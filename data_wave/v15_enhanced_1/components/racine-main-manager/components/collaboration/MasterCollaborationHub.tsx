@@ -33,61 +33,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence, useAnimation } from 'framer-motion';
-import { 
-  Users, 
-  MessageSquare, 
-  FileText, 
-  Share2, 
-  Settings, 
-  Search,
-  Plus,
-  Filter,
-  MoreHorizontal,
-  Bell,
-  Video,
-  Phone,
-  Screen,
-  Mic,
-  MicOff,
-  Camera,
-  CameraOff,
-  Volume2,
-  VolumeX,
-  Minimize2,
-  Maximize2,
-  X,
-  ChevronDown,
-  ChevronRight,
-  Star,
-  Clock,
-  Users2,
-  Activity,
-  TrendingUp,
-  AlertCircle,
-  CheckCircle,
-  Calendar,
-  Globe,
-  Lock,
-  Unlock,
-  Eye,
-  EyeOff,
-  Download,
-  Upload,
-  RefreshCw,
-  Zap,
-  Target,
-  Layers,
-  GitBranch,
-  Database,
-  Shield,
-  Workflow,
-  BarChart3,
-  PieChart,
-  LineChart,
-  Map,
-  Network,
-  Sparkles
-} from 'lucide-react';
+import { Users, MessageSquare, FileText, Share2, Settings, Search, Plus, Filter, MoreHorizontal, Bell, Video, Phone, Monitor, Mic, MicOff, Camera, CameraOff, Volume2, VolumeX, Minimize2, Maximize2, X, ChevronDown, ChevronRight, Star, Clock, Users2, Activity, TrendingUp, AlertCircle, CheckCircle, Calendar, Globe, Lock, Unlock, Eye, EyeOff, Download, Upload, RefreshCw, Zap, Target, Layers, GitBranch, Database, Shield, Workflow, BarChart3, PieChart, LineChart, Map, Network, Sparkles } from 'lucide-react';
 
 // UI Components
 import { Button } from '@/components/ui/button';
@@ -662,7 +608,7 @@ export const MasterCollaborationHub: React.FC<MasterCollaborationHubProps> = ({
             </div>
             <div className="flex items-center space-x-2">
               <Button variant="outline" size="sm">
-                <Screen className="w-4 h-4 mr-2" />
+                <Monitor className="w-4 h-4 mr-2" />
                 Share Screen
               </Button>
               <Button variant="outline" size="sm">

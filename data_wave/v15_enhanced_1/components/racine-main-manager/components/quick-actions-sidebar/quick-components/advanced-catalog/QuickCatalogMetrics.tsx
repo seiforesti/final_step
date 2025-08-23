@@ -13,11 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import {
-  BarChart3, TrendingUp, TrendingDown, Target, Award, Clock, 
-  ArrowUpRight, ArrowDownRight, Activity, Gauge, PieChart,
-  RefreshCw, Download, X, Database, Eye, Search, Users, Heart
-} from 'lucide-react';
+import { BarChart3, TrendingUp, TrendingDown, Target, Award, Clock, ArrowUpRight, ArrowDownRight, Activity, Gauge, PieChart, RefreshCw, Download, X, Database, Eye, Search, Users, Heart } from 'lucide-react';
 
 import { useAdvancedCatalog } from '../../../../hooks/useAdvancedCatalog';
 import { useWorkspaceManagement } from '../../../../hooks/useWorkspaceManagement';

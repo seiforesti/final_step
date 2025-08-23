@@ -246,6 +246,35 @@ export const QUALITY_CONSTANTS = {
 } as const;
 
 // ============================================================================
+// SYNC FREQUENCIES
+// ============================================================================
+
+export const SYNC_FREQUENCIES = [
+  { value: 'REAL_TIME', label: 'Real-time', interval: 0, description: 'Immediate synchronization' },
+  { value: 'EVERY_MINUTE', label: 'Every minute', interval: 60, description: 'Minute-level synchronization' },
+  { value: 'EVERY_5_MINUTES', label: 'Every 5 minutes', interval: 300, description: '5-minute interval synchronization' },
+  { value: 'EVERY_15_MINUTES', label: 'Every 15 minutes', interval: 900, description: '15-minute interval synchronization' },
+  { value: 'EVERY_HOUR', label: 'Every hour', interval: 3600, description: 'Hourly synchronization' },
+  { value: 'DAILY', label: 'Daily', interval: 86400, description: 'Daily synchronization' },
+  { value: 'WEEKLY', label: 'Weekly', interval: 604800, description: 'Weekly synchronization' },
+  { value: 'MONTHLY', label: 'Monthly', interval: 2592000, description: 'Monthly synchronization' },
+  { value: 'MANUAL', label: 'Manual', interval: -1, description: 'Manual synchronization only' }
+] as const;
+
+// ============================================================================
+// ENRICHMENT STRATEGIES
+// ============================================================================
+
+export const ENRICHMENT_STRATEGIES = [
+  { value: 'AUTOMATIC', label: 'Automatic', description: 'Automatically enrich data based on rules' },
+  { value: 'MANUAL', label: 'Manual', description: 'Manual enrichment only' },
+  { value: 'HYBRID', label: 'Hybrid', description: 'Combination of automatic and manual enrichment' },
+  { value: 'AI_POWERED', label: 'AI-Powered', description: 'AI-driven enrichment using machine learning' },
+  { value: 'RULE_BASED', label: 'Rule-Based', description: 'Enrichment based on predefined rules' },
+  { value: 'PATTERN_MATCHING', label: 'Pattern Matching', description: 'Enrichment using pattern recognition' }
+] as const;
+
+// ============================================================================
 // LINEAGE CONSTANTS
 // ============================================================================
 
@@ -401,6 +430,29 @@ export const ANALYTICS_CONSTANTS = {
     { value: 'DISTINCT', label: 'Distinct', description: 'Unique count' }
   ]
 } as const;
+
+// ============================================================================
+// DATA SOURCE TYPES
+// ============================================================================
+
+export const DATA_SOURCE_TYPES = [
+  { value: 'DATABASE', label: 'Database', icon: 'database', description: 'Database systems', category: 'Structured' },
+  { value: 'FILE_SYSTEM', label: 'File System', icon: 'folder', description: 'File system sources', category: 'File-based' },
+  { value: 'CLOUD_STORAGE', label: 'Cloud Storage', icon: 'cloud', description: 'Cloud storage services', category: 'Cloud' },
+  { value: 'API', label: 'API', icon: 'globe', description: 'REST/GraphQL APIs', category: 'Service' },
+  { value: 'STREAMING', label: 'Streaming', icon: 'zap', description: 'Streaming data sources', category: 'Real-time' },
+  { value: 'DATA_WAREHOUSE', label: 'Data Warehouse', icon: 'layers', description: 'Data warehouse systems', category: 'Analytics' },
+  { value: 'DATA_LAKE', label: 'Data Lake', icon: 'database', description: 'Data lake storage', category: 'Storage' },
+  { value: 'NOSQL', label: 'NoSQL', icon: 'hard-drive', description: 'NoSQL databases', category: 'Unstructured' },
+  { value: 'MESSAGE_QUEUE', label: 'Message Queue', icon: 'message-circle', description: 'Message queue systems', category: 'Messaging' },
+  { value: 'CACHE', label: 'Cache', icon: 'zap', description: 'Cache systems', category: 'Performance' },
+  { value: 'SEARCH_ENGINE', label: 'Search Engine', icon: 'search', description: 'Search engine systems', category: 'Search' },
+  { value: 'BLOCKCHAIN', label: 'Blockchain', icon: 'link', description: 'Blockchain networks', category: 'Distributed' },
+  { value: 'IOT_DEVICE', label: 'IoT Device', icon: 'radio', description: 'Internet of Things devices', category: 'Edge' },
+  { value: 'SOCIAL_MEDIA', label: 'Social Media', icon: 'users', description: 'Social media platforms', category: 'Social' },
+  { value: 'WEB_SCRAPING', label: 'Web Scraping', icon: 'globe', description: 'Web scraping sources', category: 'Web' },
+  { value: 'LEGACY_SYSTEM', label: 'Legacy System', icon: 'server', description: 'Legacy system integrations', category: 'Legacy' }
+] as const;
 
 // ============================================================================
 // DISCOVERY CONSTANTS

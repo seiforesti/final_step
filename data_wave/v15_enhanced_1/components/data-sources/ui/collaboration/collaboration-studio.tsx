@@ -1,24 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react'
-import {
-  UserGroupIcon,
-  VideoCameraIcon,
-  MicrophoneIcon,
-  ChatBubbleLeftRightIcon,
-  DocumentTextIcon,
-  PencilIcon,
-  EyeIcon,
-  ExclamationTriangleIcon,
-  CheckCircleIcon,
-  ClockIcon,
-  LockClosedIcon,
-  LockOpenIcon,
-  ArrowPathIcon,
-  ShareIcon,
-  BellIcon,
-  HandRaisedIcon,
-  CursorArrowRaysIcon,
-  SparklesIcon
-} from '@heroicons/react/24/outline'
+import { UserGroupIcon, VideoCameraIcon, MicrophoneIcon, ChatBubbleLeftRightIcon, DocumentTextIcon, PencilIcon, EyeIcon, ExclamationTriangleIcon, CheckCircleIcon, ClockIcon, LockClosedIcon, LockOpenIcon, ArrowPathIcon, ShareIcon, BellIcon, HandRaisedIcon, CursorArrowRaysIcon, SparklesIcon } from '@heroicons/react/24/outline'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Editor } from '@monaco-editor/react'
 

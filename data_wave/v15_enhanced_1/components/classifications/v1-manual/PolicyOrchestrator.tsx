@@ -72,80 +72,7 @@ import {
 import { 
   Checkbox 
 } from '@/components/ui/checkbox';
-import { 
-  AlertTriangle, 
-  CheckCircle, 
-  XCircle, 
-  Play, 
-  Pause, 
-  StopCircle, 
-  Settings, 
-  Filter, 
-  Search, 
-  Download, 
-  Upload, 
-  Copy, 
-  Edit, 
-  Trash2, 
-  Plus, 
-  ChevronDown, 
-  ChevronRight, 
-  Eye, 
-  Code, 
-  Database, 
-  FileText, 
-  Activity, 
-  BarChart3, 
-  TrendingUp, 
-  Clock, 
-  Users, 
-  Shield, 
-  Zap, 
-  Brain, 
-  Target, 
-  Layers, 
-  GitBranch, 
-  History, 
-  TestTube, 
-  Workflow, 
-  MessageSquare, 
-  Bell, 
-  Calendar, 
-  MapPin, 
-  Link, 
-  ExternalLink,
-  RefreshCw,
-  Save,
-  X,
-  Check,
-  Info,
-  AlertCircle,
-  Gauge,
-  Network,
-  Route,
-  Timer,
-  Sliders,
-  Command,
-  Cpu,
-  MemoryStick,
-  HardDrive,
-  Wifi,
-  Cloud,
-  Server,
-  Globe,
-  Lock,
-  Key,
-  UserCheck,
-  Building,
-  Tag,
-  Flag,
-  Star,
-  BookOpen,
-  FileCheck,
-  ClipboardList,
-  Archive,
-  FolderTree
-} from 'lucide-react';
+import { AlertTriangle, CheckCircle, XCircle, Play, Pause, StopCircle, Settings, Filter, Search, Download, Upload, Copy, Edit, Trash2, Plus, ChevronDown, ChevronRight, Eye, Code, Database, FileText, Activity, BarChart3, TrendingUp, Clock, Users, Shield, Zap, Brain, Target, Layers, GitBranch, History, TestTube, Workflow, MessageSquare, Bell, Calendar, MapPin, Link, ExternalLink, RefreshCw, Save, X, Check, Info, AlertCircle, Gauge, Network, Route, Timer, Sliders, Command, Cpu, MemoryStick, HardDrive, Wifi, Cloud, Server, Globe, Lock, Key, UserCheck, Building, Tag, Flag, Star, BookOpen, FileCheck, ClipboardList, Archive, FolderTree } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { useClassificationState } from '../core/hooks/useClassificationState';
 import { 
@@ -1546,7 +1473,7 @@ export const PolicyOrchestrator: React.FC<PolicyOrchestratorProps> = ({
                       </div>
                       <Button variant="outline" size="sm">
                         <Download className="h-4 w-4 mr-1" />
-                        Download
+                        ArrowDownTrayIcon
                       </Button>
                     </div>
                   ))}

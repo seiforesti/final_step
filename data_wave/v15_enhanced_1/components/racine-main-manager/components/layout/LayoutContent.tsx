@@ -32,34 +32,7 @@ import React, {
   createElement,
 } from "react";
 import { motion, AnimatePresence, useMotionValue } from "framer-motion";
-import {
-  Layout,
-  Monitor,
-  Columns,
-  Grid3X3,
-  Layers,
-  Settings,
-  RefreshCw,
-  AlertTriangle,
-  CheckCircle,
-  Brain,
-  Users,
-  Activity,
-  BarChart3,
-  Maximize2,
-  Minimize2,
-  Eye,
-  EyeOff,
-  Trash2,
-  Plus,
-  Zap,
-  Target,
-  Sparkles,
-  Wand2,
-  MoreHorizontal,
-  Smartphone,
-  Tablet,
-} from "lucide-react";
+import { Layout, Monitor, Columns, Grid3X3, Layers, Settings, RefreshCw, AlertTriangle, CheckCircle, Brain, Users, Activity, BarChart3, Maximize2, Minimize2, Eye, EyeOff, Trash2, Plus, Zap, Target, Sparkles, Wand2, MoreHorizontal, Smartphone, Tablet,  } from 'lucide-react';
 
 // Shadcn/UI Components
 import { Button } from "@/components/ui/button";

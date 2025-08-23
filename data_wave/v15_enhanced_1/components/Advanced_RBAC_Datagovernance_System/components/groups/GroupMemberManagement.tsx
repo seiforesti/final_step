@@ -216,7 +216,7 @@ const BULK_OPERATIONS = [
   { value: 'remove_member', label: 'Remove', icon: Trash2, description: 'Remove selected members from group' },
 ];
 
-const GroupMemberManagement: React.FC<GroupMemberManagementProps> = ({
+export const GroupMemberManagement: React.FC<GroupMemberManagementProps> = ({
   group,
   onBack,
   className = ''
@@ -1458,4 +1458,3 @@ const GroupMemberManagement: React.FC<GroupMemberManagementProps> = ({
   );
 };
 
-export default GroupMemberManagement;

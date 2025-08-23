@@ -8,6 +8,19 @@ import { z } from 'zod'
 
 // Import specific APIs to avoid conflicts
 // export * from './apis'  // Commented out to prevent duplicate exports
+export {
+  useDataSourcesQuery,
+  useDataSourceHealthQuery,
+  useConnectionPoolStatsQuery,
+  useDiscoveryHistoryQuery,
+  useScanResultsQuery,
+  useQualityMetricsQuery,
+  useGrowthMetricsQuery,
+  useSchemaDiscoveryQuery,
+  useDataLineageQuery,
+  useDataCatalogQuery,
+  useTagsQuery
+} from './apis'
 
 // Import types from backend models
 import {
@@ -2796,3 +2809,213 @@ if (typeof window !== 'undefined' && !window.enterpriseEventBus) {
     }
   }
 }
+
+// ============================================================================
+// ENTERPRISE ANALYTICS & METADATA HOOKS
+// ============================================================================
+
+// Metadata Stats Hook
+export const useMetadataStatsQuery = (dataSourceId?: number, timeRange: string = '30d', options = {}) => {
+  return useQuery({
+    queryKey: ['metadata-stats', dataSourceId, timeRange],
+    queryFn: async () => {
+      const endpoint = dataSourceId 
+        ? `/enterprise/data-sources/${dataSourceId}/metadata-stats?timeRange=${timeRange}`
+        : `/enterprise/metadata-stats?timeRange=${timeRange}`;
+      const { data } = await enterpriseApi.get(endpoint);
+      return data;
+    },
+    enabled: true,
+    ...options,
+  });
+};
+
+// Analytics Correlations Hook
+export const useAnalyticsCorrelationsQuery = (dataSourceId?: number, metricType: string = 'all', options = {}) => {
+  return useQuery({
+    queryKey: ['analytics-correlations', dataSourceId, metricType],
+    queryFn: async () => {
+      const endpoint = dataSourceId 
+        ? `/enterprise/data-sources/${dataSourceId}/analytics/correlations?metricType=${metricType}`
+        : `/enterprise/analytics/correlations?metricType=${metricType}`;
+      const { data } = await enterpriseApi.get(endpoint);
+      return data;
+    },
+    enabled: true,
+    ...options,
+  });
+};
+
+// Analytics Insights Hook
+export const useAnalyticsInsightsQuery = (dataSourceId?: number, insightType: string = 'all', options = {}) => {
+  return useQuery({
+    queryKey: ['analytics-insights', dataSourceId, insightType],
+    queryFn: async () => {
+      const endpoint = dataSourceId 
+        ? `/enterprise/data-sources/${dataSourceId}/analytics/insights?insightType=${insightType}`
+        : `/enterprise/analytics/insights?insightType=${insightType}`;
+      const { data } = await enterpriseApi.get(endpoint);
+      return data;
+    },
+    enabled: true,
+    ...options,
+  });
+};
+
+// Analytics Predictions Hook
+export const useAnalyticsPredictionsQuery = (dataSourceId?: number, predictionHorizon: string = '30d', options = {}) => {
+  return useQuery({
+    queryKey: ['analytics-predictions', dataSourceId, predictionHorizon],
+    queryFn: async () => {
+      const endpoint = dataSourceId 
+        ? `/enterprise/data-sources/${dataSourceId}/analytics/predictions?horizon=${predictionHorizon}`
+        : `/enterprise/analytics/predictions?horizon=${predictionHorizon}`;
+      const { data } = await enterpriseApi.get(endpoint);
+      return data;
+    },
+    enabled: true,
+    ...options,
+  });
+};
+
+// Analytics Patterns Hook
+export const useAnalyticsPatternsQuery = (dataSourceId?: number, patternType: string = 'all', options = {}) => {
+  return useQuery({
+    queryKey: ['analytics-patterns', dataSourceId, patternType],
+    queryFn: async () => {
+      const endpoint = dataSourceId 
+        ? `/enterprise/data-sources/${dataSourceId}/analytics/patterns?patternType=${patternType}`
+        : `/enterprise/analytics/patterns?patternType=${patternType}`;
+      const { data } = await enterpriseApi.get(endpoint);
+      return data;
+    },
+    enabled: true,
+    ...options,
+  });
+};
+
+// Collaboration Sessions Hook
+export const useCollaborationSessionsQuery = (workspaceId?: string, options = {}) => {
+  return useQuery({
+    queryKey: ['collaboration-sessions', workspaceId],
+    queryFn: async () => {
+      const endpoint = workspaceId 
+        ? `/enterprise/collaboration/sessions?workspaceId=${workspaceId}`
+        : '/enterprise/collaboration/sessions';
+      const { data } = await enterpriseApi.get(endpoint);
+      return data;
+    },
+    enabled: true,
+    ...options,
+  });
+};
+
+// Collaboration Operations Hook
+export const useCollaborationOperationsQuery = (sessionId?: string, options = {}) => {
+  return useQuery({
+    queryKey: ['collaboration-operations', sessionId],
+    queryFn: async () => {
+      const endpoint = sessionId 
+        ? `/enterprise/collaboration/operations?sessionId=${sessionId}`
+        : '/enterprise/collaboration/operations';
+      const { data } = await enterpriseApi.get(endpoint);
+      return data;
+    },
+    enabled: true,
+    ...options,
+  });
+};
+
+// Workflow Integration Hook
+export const useWorkflowIntegrationQuery = (workflowId?: string, options = {}) => {
+  return useQuery({
+    queryKey: ['workflow-integration', workflowId],
+    queryFn: async () => {
+      const endpoint = workflowId 
+        ? `/enterprise/workflows/integration?workflowId=${workflowId}`
+        : '/enterprise/workflows/integration';
+      const { data } = await enterpriseApi.get(endpoint);
+      return data;
+    },
+    enabled: true,
+    ...options,
+  });
+};
+
+// Dashboard Summary Hook
+export const useDashboardSummaryQuery = (timeRange: string = '30d', options = {}) => {
+  return useQuery({
+    queryKey: ['dashboard-summary', timeRange],
+    queryFn: async () => {
+      const { data } = await enterpriseApi.get(`/enterprise/dashboard/summary?timeRange=${timeRange}`);
+      return data;
+    },
+    enabled: true,
+    ...options,
+  });
+};
+
+// Dashboard Trends Hook
+export const useDashboardTrendsQuery = (timeRange: string = '30d', trendType: string = 'all', options = {}) => {
+  return useQuery({
+    queryKey: ['dashboard-trends', timeRange, trendType],
+    queryFn: async () => {
+      const { data } = await enterpriseApi.get(`/enterprise/dashboard/trends?timeRange=${timeRange}&trendType=${trendType}`);
+      return data;
+    },
+    enabled: true,
+    ...options,
+  });
+};
+
+// Data Source Stats Hook
+export const useDataSourceStatsQuery = (dataSourceId?: number, timeRange: string = '30d', options = {}) => {
+  return useQuery({
+    queryKey: ['data-source-stats', dataSourceId, timeRange],
+    queryFn: async () => {
+      const endpoint = dataSourceId 
+        ? `/enterprise/data-sources/${dataSourceId}/stats?timeRange=${timeRange}`
+        : `/enterprise/data-sources/stats?timeRange=${timeRange}`;
+      const { data } = await enterpriseApi.get(endpoint);
+      return data;
+    },
+    enabled: true,
+    ...options,
+  });
+};
+
+// ============================================================================
+// CATALOG & LINEAGE QUERY HOOKS
+// ============================================================================
+
+// Catalog Query Hook
+export const useCatalogQuery = (filters: any = {}, options = {}) => {
+  return useQuery({
+    queryKey: ['catalog', filters],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          params.append(key, String(value));
+        }
+      });
+      const { data } = await enterpriseApi.get(`/enterprise/catalog?${params.toString()}`);
+      return data;
+    },
+    enabled: true,
+    ...options,
+  });
+};
+
+// Lineage Query Hook
+export const useLineageQuery = (entityId: string, entityType: string = 'table', depth: number = 3, options = {}) => {
+  return useQuery({
+    queryKey: ['lineage', entityId, entityType, depth],
+    queryFn: async () => {
+      const { data } = await enterpriseApi.get(`/enterprise/lineage/${entityType}/${entityId}?depth=${depth}`);
+      return data;
+    },
+    enabled: !!entityId,
+    ...options,
+  });
+};

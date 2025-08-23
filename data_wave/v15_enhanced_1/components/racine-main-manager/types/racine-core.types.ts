@@ -39,6 +39,18 @@ export interface JSONObject {
 }
 export interface JSONArray extends Array<JSONValue> {}
 
+/**
+ * Standard API response format
+ */
+export interface APIResponse<T> {
+  success: boolean;
+  data: T;
+  error?: string;
+  message?: string;
+  timestamp?: string;
+  metadata?: Record<string, any>;
+}
+
 // Status enumerations matching backend
 export enum SystemStatus {
   HEALTHY = "healthy",
@@ -74,6 +86,15 @@ export enum ViewMode {
   ADVANCED_CATALOG = "advanced_catalog",
   SCAN_LOGIC = "scan_logic",
   RBAC_SYSTEM = "rbac_system",
+}
+
+// Basic user role enumeration used by activity tracker and audit components
+export enum UserRole {
+  ADMIN = 'admin',
+  EDITOR = 'editor',
+  VIEWER = 'viewer',
+  AUDITOR = 'auditor',
+  OPERATOR = 'operator'
 }
 
 export enum LayoutMode {
@@ -368,6 +389,91 @@ export interface WorkspaceConfiguration {
   lastAccessed: ISODateString;
   isActive: boolean;
   tags: string[];
+}
+
+/**
+ * RacineWorkspace - Main workspace interface for cross-group integration
+ */
+export interface RacineWorkspace {
+  id: UUID;
+  name: string;
+  description: string;
+  type: WorkspaceType;
+  owner: UUID;
+  members: WorkspaceMember[];
+  groups: string[];
+  resources: WorkspaceResource[];
+  settings: WorkspaceSettings;
+  securitySettings: WorkspaceSecuritySettings;
+  analytics: WorkspaceAnalytics;
+  permissions: WorkspacePermissions;
+  createdAt: ISODateString;
+  updatedAt: ISODateString;
+  lastAccessed: ISODateString;
+  isActive: boolean;
+  tags: string[];
+  metadata: Record<string, JSONValue>;
+}
+
+/**
+ * Workspace security settings for advanced access control
+ */
+export interface WorkspaceSecuritySettings {
+  id: UUID;
+  workspaceId: UUID;
+  encryptionLevel: 'basic' | 'standard' | 'high' | 'enterprise';
+  accessControl: 'open' | 'restricted' | 'strict' | 'enterprise';
+  authenticationMethods: string[];
+  sessionTimeout: number;
+  maxFailedAttempts: number;
+  ipWhitelist: string[];
+  auditLogging: boolean;
+  complianceStandards: string[];
+  securityPolicies: Record<string, JSONValue>;
+  lastSecurityAudit: ISODateString;
+  securityScore: number;
+}
+
+/**
+ * Cross-group resource for advanced integration
+ */
+export interface CrossGroupResource {
+  id: UUID;
+  resourceId: UUID;
+  sourceGroup: string;
+  targetGroup: string;
+  resourceType: string;
+  name: string;
+  description: string;
+  metadata: Record<string, JSONValue>;
+  permissions: ResourcePermissions;
+  syncSettings: CrossGroupSyncSettings;
+  lastSync: ISODateString;
+  syncStatus: 'synced' | 'pending' | 'failed' | 'conflict';
+  conflicts: CrossGroupConflict[];
+  createdAt: ISODateString;
+  updatedAt: ISODateString;
+}
+
+export interface CrossGroupSyncSettings {
+  syncFrequency: 'realtime' | 'hourly' | 'daily' | 'weekly' | 'manual';
+  conflictResolution: 'source_wins' | 'target_wins' | 'manual' | 'merge';
+  dataRetention: number;
+  encryption: boolean;
+  compression: boolean;
+  validationRules: Record<string, JSONValue>;
+}
+
+export interface CrossGroupConflict {
+  id: UUID;
+  type: 'data' | 'permission' | 'structure' | 'metadata';
+  description: string;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  sourceData: JSONValue;
+  targetData: JSONValue;
+  resolution: string;
+  resolvedBy: UUID;
+  resolvedAt: ISODateString;
 }
 
 export enum WorkspaceType {
@@ -2002,6 +2108,22 @@ export interface RBACPermissions {
 // Integration with Advanced_RBAC_Datagovernance_System SPA
 // ============================================================================
 
+export interface AuditInfo {
+  createdBy: UUID;
+  createdAt: ISODateString;
+  updatedBy?: UUID;
+  updatedAt?: ISODateString;
+  deletedBy?: UUID;
+  deletedAt?: ISODateString;
+  version: number;
+  changeLog: Array<{
+    timestamp: ISODateString;
+    userId: UUID;
+    action: string;
+    details: Record<string, JSONValue>;
+  }>;
+}
+
 export interface RBACUser {
   id: UUID;
   username: string;
@@ -3225,6 +3347,115 @@ export enum CollaborationStatus {
   INACTIVE = "inactive",
   ARCHIVED = "archived",
   LOCKED = "locked",
+}
+
+// Communication and presence types
+export enum CallType {
+  AUDIO = "audio",
+  VIDEO = "video",
+  SCREEN_SHARE = "screen_share",
+  CONFERENCE = "conference",
+}
+
+export enum CallStatus {
+  INCOMING = "incoming",
+  OUTGOING = "outgoing",
+  CONNECTED = "connected",
+  DISCONNECTED = "disconnected",
+  MISSED = "missed",
+  REJECTED = "rejected",
+  BUSY = "busy",
+}
+
+export enum PresenceStatus {
+  ONLINE = "online",
+  AWAY = "away",
+  BUSY = "busy",
+  OFFLINE = "offline",
+  DO_NOT_DISTURB = "do_not_disturb",
+}
+
+export enum ChannelType {
+  TEXT = "text",
+  VOICE = "voice",
+  VIDEO = "video",
+  FILE_SHARING = "file_sharing",
+  ANNOUNCEMENT = "announcement",
+  SUPPORT = "support",
+}
+
+export enum MessageStatus {
+  SENT = "sent",
+  DELIVERED = "delivered",
+  READ = "read",
+  FAILED = "failed",
+  PENDING = "pending",
+}
+
+// Document collaboration types
+export enum DocumentType {
+  REPORT = "report",
+  PROPOSAL = "proposal",
+  CONTRACT = "contract",
+  MANUAL = "manual",
+  SPECIFICATION = "specification",
+  PRESENTATION = "presentation",
+  SPREADSHEET = "spreadsheet",
+  DATABASE = "database",
+  CODE = "code",
+  CONFIGURATION = "configuration",
+  OTHER = "other"
+}
+
+export enum DocumentStatus {
+  DRAFT = "draft",
+  REVIEW = "review",
+  APPROVED = "approved",
+  PUBLISHED = "published",
+  ARCHIVED = "archived",
+  DEPRECATED = "deprecated"
+}
+
+export enum ApprovalStatus {
+  PENDING = "pending",
+  APPROVED = "approved",
+  REJECTED = "rejected",
+  REQUIRES_CHANGES = "requires_changes",
+  CANCELLED = "cancelled"
+}
+
+export enum VersionStatus {
+  CURRENT = "current",
+  DEPRECATED = "deprecated",
+  EXPERIMENTAL = "experimental",
+  STABLE = "stable",
+  BETA = "beta",
+  ALPHA = "alpha"
+}
+
+export enum CommentStatus {
+  ACTIVE = "active",
+  RESOLVED = "resolved",
+  ARCHIVED = "archived",
+  SPAM = "spam"
+}
+
+// Additional collaboration types
+export enum NotificationLevel {
+  INFO = "info",
+  WARNING = "warning",
+  ERROR = "error",
+  SUCCESS = "success",
+  DEBUG = "debug"
+}
+
+export enum ParticipantRole {
+  OWNER = "owner",
+  ADMIN = "admin",
+  MODERATOR = "moderator",
+  CONTRIBUTOR = "contributor",
+  VIEWER = "viewer",
+  GUEST = "guest"
 }
 
 // =============================================================================
@@ -6421,3 +6652,470 @@ export interface ScanStats {
 }
 
 // Note: All enums are already exported via their individual declarations above
+
+// Additional compliance types for comprehensive system integration
+export interface ComplianceCheck {
+  id: string;
+  name: string;
+  description: string;
+  type: 'automated' | 'manual' | 'scheduled';
+  status: 'pending' | 'running' | 'completed' | 'failed';
+  targetData: any;
+  rules: string[];
+  startedAt?: ISODateString;
+  completedAt?: ISODateString;
+  results: ComplianceResult[];
+  metadata: Record<string, any>;
+}
+
+export interface ComplianceCheckRequest {
+  checkId: string;
+  targetData: any;
+  rules: string[];
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  scheduledAt?: ISODateString;
+  metadata?: Record<string, any>;
+}
+
+export interface ComplianceResult {
+  id: string;
+  checkId: string;
+  ruleId: string;
+  status: 'compliant' | 'non_compliant' | 'warning' | 'error';
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  message: string;
+  evidence: any[];
+  detectedAt: ISODateString;
+  remediationSteps?: string[];
+  metadata?: Record<string, any>;
+}
+
+export interface ComplianceStandard {
+  id: string;
+  name: string;
+  version: string;
+  description: string;
+  category: 'privacy' | 'security' | 'quality' | 'regulatory' | 'industry';
+  requirements: ComplianceRequirement[];
+  effectiveDate: ISODateString;
+  expiryDate?: ISODateString;
+  status: 'active' | 'deprecated' | 'draft';
+  metadata?: Record<string, any>;
+}
+
+export interface ComplianceRequirement {
+  id: string;
+  standardId: string;
+  code: string;
+  title: string;
+  description: string;
+  category: string;
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  mandatory: boolean;
+  evidenceRequired: boolean;
+  metadata?: Record<string, any>;
+}
+
+export interface ComplianceRecommendation {
+  id: string;
+  resultId: string;
+  type: 'remediation' | 'prevention' | 'improvement';
+  title: string;
+  description: string;
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  estimatedEffort: string;
+  estimatedCost?: number;
+  benefits: string[];
+  implementationSteps: string[];
+  metadata?: Record<string, any>;
+}
+
+export interface ComplianceAlert {
+  id: string;
+  type: 'violation' | 'warning' | 'info';
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  title: string;
+  description: string;
+  affectedEntities: string[];
+  detectedAt: ISODateString;
+  status: 'new' | 'acknowledged' | 'resolved';
+  assignedTo?: string;
+  dueDate?: ISODateString;
+  metadata?: Record<string, any>;
+}
+
+export interface ComplianceViolation {
+  id: string;
+  ruleId: string;
+  description: string;
+  severity: "low" | "medium" | "high" | "critical";
+  detectedAt: ISODateString;
+  status: "open" | "investigating" | "resolved" | "false_positive";
+  affectedAssets: string[];
+}
+
+// =============================================================================
+// QUICK ACTION TYPES
+// =============================================================================
+
+export interface QuickAction {
+  id: string;
+  name: string;
+  description: string;
+  category: QuickActionCategory;
+  icon: string;
+  component: QuickActionComponent;
+  permissions: string[];
+  context: QuickActionContext;
+  priority: number;
+  isEnabled: boolean;
+  metadata?: Record<string, any>;
+}
+
+export interface QuickActionCategory {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  color: string;
+  priority: number;
+  permissions: string[];
+}
+
+export interface QuickActionContext {
+  workspaceId?: string;
+  userId: string;
+  userRole: string;
+  currentPage?: string;
+  systemState?: Record<string, any>;
+}
+
+export interface QuickActionComponent {
+  name: string;
+  props?: Record<string, any>;
+  onAction?: (result: ActionResult) => void;
+}
+
+export interface SPAContext {
+  id: string;
+  name: string;
+  type: string;
+  state: Record<string, any>;
+  metadata?: Record<string, any>;
+}
+
+export interface ActionResult {
+  success: boolean;
+  data?: any;
+  error?: string;
+  message?: string;
+  metadata?: Record<string, any>;
+}
+
+export interface ComponentRegistry {
+  [key: string]: React.ComponentType<any>;
+}
+
+export interface ContextualAction {
+  id: string;
+  action: QuickAction;
+  context: QuickActionContext;
+  priority: number;
+  estimatedTime: string;
+  risk: 'low' | 'medium' | 'high';
+}
+
+export interface ActionHistory {
+  id: string;
+  actionId: string;
+  userId: string;
+  timestamp: ISODateString;
+  result: ActionResult;
+  context: QuickActionContext;
+  metadata?: Record<string, any>;
+}
+
+export interface ActionAnalytics {
+  totalActions: number;
+  successfulActions: number;
+  failedActions: number;
+  averageExecutionTime: number;
+  mostUsedActions: Array<{ actionId: string; count: number }>;
+  userEngagement: Array<{ userId: string; actionCount: number }>;
+  categoryUsage: Array<{ categoryId: string; usage: number }>;
+}
+
+// =============================================================================
+// SHARE PERMISSION TYPES
+// =============================================================================
+
+export enum SharePermission {
+  VIEW = 'view',
+  READ = 'read',
+  WRITE = 'write',
+  ADMIN = 'admin',
+  OWNER = 'owner'
+}
+
+export interface SharePermissionRecord {
+  id: string;
+  resourceId: string;
+  resourceType: string;
+  userId: string;
+  permission: SharePermission;
+  grantedAt: ISODateString;
+  expiresAt?: ISODateString;
+  grantedBy: string;
+  metadata?: Record<string, any>;
+}
+
+// =============================================================================
+// COLLABORATION AND DOCUMENT TYPES
+// =============================================================================
+
+export interface CollaborationSpace {
+  id: string;
+  name: string;
+  description: string;
+  type: 'workspace' | 'project' | 'team' | 'department';
+  members: CollaborationMember[];
+  permissions: CollaborationPermission[];
+  settings: CollaborationSettings;
+  metadata?: Record<string, any>;
+}
+
+export interface CollaborationMember {
+  id: string;
+  userId: string;
+  role: 'owner' | 'admin' | 'member' | 'viewer';
+  joinedAt: ISODateString;
+  permissions: string[];
+  metadata?: Record<string, any>;
+}
+
+export interface CollaborationPermission {
+  id: string;
+  name: string;
+  description: string;
+  resource: string;
+  actions: string[];
+  grantedTo: string[];
+  grantedAt: ISODateString;
+  expiresAt?: ISODateString;
+  metadata?: Record<string, any>;
+}
+
+export interface CollaborationSettings {
+  allowGuestAccess: boolean;
+  requireApproval: boolean;
+  enableNotifications: boolean;
+  autoArchive: boolean;
+  retentionPeriod: number;
+  metadata?: Record<string, any>;
+}
+
+export interface FileAttachment {
+  id: string;
+  name: string;
+  type: string;
+  size: number;
+  url: string;
+  uploadedBy: string;
+  uploadedAt: ISODateString;
+  metadata?: Record<string, any>;
+}
+
+export interface DocumentCollaborationState {
+  id: string;
+  documentId: string;
+  status: 'draft' | 'review' | 'approved' | 'published' | 'archived';
+  currentVersion: string;
+  collaborators: string[];
+  lastModified: ISODateString;
+  metadata?: Record<string, any>;
+}
+
+export interface DocumentVersion {
+  id: string;
+  documentId: string;
+  version: string;
+  content: string;
+  createdBy: string;
+  createdAt: ISODateString;
+  changes: string[];
+  metadata?: Record<string, any>;
+}
+
+export interface DocumentComment {
+  id: string;
+  documentId: string;
+  userId: string;
+  content: string;
+  timestamp: ISODateString;
+  replies: DocumentComment[];
+  metadata?: Record<string, any>;
+}
+
+export interface DocumentApproval {
+  id: string;
+  documentId: string;
+  approverId: string;
+  status: 'pending' | 'approved' | 'rejected';
+  comments?: string;
+  timestamp: ISODateString;
+  metadata?: Record<string, any>;
+}
+
+export interface DocumentTemplate {
+  id: string;
+  name: string;
+  description: string;
+  content: string;
+  category: string;
+  createdBy: string;
+  createdAt: ISODateString;
+  metadata?: Record<string, any>;
+}
+
+export interface DocumentPermission {
+  id: string;
+  documentId: string;
+  userId: string;
+  permission: 'read' | 'write' | 'comment' | 'approve' | 'admin';
+  grantedAt: ISODateString;
+  expiresAt?: ISODateString;
+  grantedBy: string;
+  metadata?: Record<string, any>;
+}
+
+export interface DocumentMetadata {
+  id: string;
+  documentId: string;
+  title: string;
+  description: string;
+  tags: string[];
+  category: string;
+  author: string;
+  created: ISODateString;
+  modified: ISODateString;
+  version: string;
+  status: string;
+  metadata?: Record<string, any>;
+}
+
+export interface DocumentActivity {
+  id: string;
+  documentId: string;
+  userId: string;
+  action: 'view' | 'edit' | 'comment' | 'approve' | 'share' | 'download';
+  timestamp: ISODateString;
+  details?: Record<string, any>;
+  metadata?: Record<string, any>;
+}
+
+// =============================================================================
+// COMMUNICATION TYPES
+// =============================================================================
+
+export interface CommunicationMode {
+  id: string;
+  name: string;
+  type: 'text' | 'voice' | 'video' | 'screen-share';
+  enabled: boolean;
+  settings: Record<string, any>;
+  metadata?: Record<string, any>;
+}
+
+export interface ConversationType {
+  id: string;
+  name: string;
+  description: string;
+  category: 'direct' | 'group' | 'channel' | 'thread';
+  permissions: string[];
+  metadata?: Record<string, any>;
+}
+
+export interface ThreadStatus {
+  id: string;
+  name: string;
+  description: string;
+  color: string;
+  metadata?: Record<string, any>;
+}
+
+export interface MessageThread {
+  id: string;
+  title: string;
+  participants: string[];
+  messages: any[];
+  status: string;
+  createdAt: ISODateString;
+  updatedAt: ISODateString;
+  metadata?: Record<string, any>;
+}
+
+export interface CommunicationChannel {
+  id: string;
+  name: string;
+  type: 'public' | 'private' | 'direct';
+  description: string;
+  members: string[];
+  permissions: string[];
+  settings: Record<string, any>;
+  metadata?: Record<string, any>;
+}
+
+export interface TeamCommunicationMetrics {
+  totalMessages: number;
+  activeUsers: number;
+  responseTime: number;
+  engagementRate: number;
+  channelUsage: Array<{ channelId: string; messageCount: number }>;
+  userActivity: Array<{ userId: string; messageCount: number }>;
+  metadata?: Record<string, any>;
+}
+
+export interface CommunicationPreferences {
+  id: string;
+  userId: string;
+  notifications: boolean;
+  soundEnabled: boolean;
+  videoEnabled: boolean;
+  screenShareEnabled: boolean;
+  recordingEnabled: boolean;
+  metadata?: Record<string, any>;
+}
+
+export interface CallParticipant {
+  id: string;
+  userId: string;
+  callId: string;
+  status: 'joining' | 'connected' | 'disconnected';
+  audioEnabled: boolean;
+  videoEnabled: boolean;
+  screenShareEnabled: boolean;
+  joinedAt: ISODateString;
+  leftAt?: ISODateString;
+  metadata?: Record<string, any>;
+}
+
+export interface ScreenShareSession {
+  id: string;
+  callId: string;
+  userId: string;
+  startedAt: ISODateString;
+  endedAt?: ISODateString;
+  duration: number;
+  metadata?: Record<string, any>;
+}
+
+export interface RecordingSession {
+  id: string;
+  callId: string;
+  userId: string;
+  startedAt: ISODateString;
+  endedAt?: ISODateString;
+  duration: number;
+  fileUrl?: string;
+  metadata?: Record<string, any>;
+}

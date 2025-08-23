@@ -326,7 +326,7 @@ const SEVERITY_CONFIG = {
   suggestion: { color: 'bg-green-100 text-green-800', icon: CheckCircle },
 };
 
-const ConditionValidator: React.FC<ConditionValidatorProps> = ({
+export const ConditionValidator: React.FC<ConditionValidatorProps> = ({
   condition,
   expression: propExpression,
   onValidationComplete,
@@ -1161,4 +1161,3 @@ const ConditionValidator: React.FC<ConditionValidatorProps> = ({
   );
 };
 
-export default ConditionValidator;

@@ -21,10 +21,10 @@ import {
 } from '../types/racine-core.types';
 
 // Import existing Classifications services for integration
-import { ClassificationAPIService } from '../../classifications/core/api/classificationApi';
-import { AIClassificationAPIService } from '../../classifications/core/api/aiApi';
-import { MLClassificationAPIService } from '../../classifications/core/api/mlApi';
-import { WebSocketAPIService } from '../../classifications/core/api/websocketApi';
+import { ClassificationFrameworkApi, ClassificationRulesApi, BulkOperationsApi, ClassificationResultsApi } from '../../classifications/core/api/classificationApi';
+import { aiApi } from '../../classifications/core/api/aiApi';
+import { mlApi } from '../../classifications/core/api/mlApi';
+import { websocketApi } from '../../classifications/core/api/websocketApi';
 
 // Base API configuration
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1';
@@ -40,10 +40,13 @@ class RacineClassificationsAPIService {
   private headers: HeadersInit;
   
   // Integration with existing SPA services
-  private classificationService: ClassificationAPIService;
-  private aiService: AIClassificationAPIService;
-  private mlService: MLClassificationAPIService;
-  private websocketService: WebSocketAPIService;
+  private classificationFrameworkApi: ClassificationFrameworkApi;
+  private classificationRulesApi: ClassificationRulesApi;
+  private bulkOperationsApi: BulkOperationsApi;
+  private classificationResultsApi: ClassificationResultsApi;
+  private aiService: typeof aiApi;
+  private mlService: typeof mlApi;
+  private websocketService: typeof websocketApi;
 
   constructor() {
     this.baseURL = RACINE_CLASSIFICATIONS_ENDPOINT;
@@ -55,10 +58,13 @@ class RacineClassificationsAPIService {
     };
 
     // Initialize existing SPA service integrations
-    this.classificationService = new ClassificationAPIService();
-    this.aiService = new AIClassificationAPIService();
-    this.mlService = new MLClassificationAPIService();
-    this.websocketService = new WebSocketAPIService();
+    this.classificationFrameworkApi = new ClassificationFrameworkApi();
+    this.classificationRulesApi = new ClassificationRulesApi();
+    this.bulkOperationsApi = new BulkOperationsApi();
+    this.classificationResultsApi = new ClassificationResultsApi();
+    this.aiService = aiApi;
+    this.mlService = mlApi;
+    this.websocketService = websocketApi;
   }
 
   /**

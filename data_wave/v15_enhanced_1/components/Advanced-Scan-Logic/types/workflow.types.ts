@@ -489,3 +489,11 @@ export enum BackoffStrategy {
   RANDOM = 'random',
   CUSTOM = 'custom'
 }
+
+export enum WorkflowPriority {
+  CRITICAL = 'critical',
+  HIGH = 'high',
+  NORMAL = 'normal',
+  LOW = 'low',
+  BACKGROUND = 'background'
+}

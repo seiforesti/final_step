@@ -2,17 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  Activity, AlertCircle, CheckCircle2, Clock, Database, FileText, 
-  Shield, Scan, Users, Zap, Loader2, RefreshCw, AlertTriangle,
-  PlayCircle, PauseCircle, StopCircle, Settings, BarChart3,
-  TrendingUp, TrendingDown, Target, Hash, Star, Filter,
-  Search, Download, Upload, Package, Cpu, Memory,
-  HardDrive, Wifi, Signal, Battery, Globe, Monitor,
-  Code, GitBranch, Layers, Box, Archive, BookOpen,
-  Eye, EyeOff, MoreHorizontal, Trash2, Edit3, Copy,
-  Calendar, Timer, Gauge, ThermometerSun, Radar
-} from 'lucide-react'
+import { Activity, AlertCircle, CheckCircle2, Clock, Database, FileText, Shield, Scan, Users, Zap, Loader2, RefreshCw, AlertTriangle, PlayCircle, PauseCircle, StopCircle, Settings, BarChart3, TrendingUp, TrendingDown, Target, Hash, Star, Filter, Search, Download, Upload, Package, Cpu, HardDrive, Wifi, Signal, Battery, Globe, Monitor, Code, GitBranch, Layers, Box, Archive, BookOpen, Eye, EyeOff, MoreHorizontal, Trash2, Edit3, Copy, Calendar, Timer, Gauge, ThermometerSun, Radar } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'

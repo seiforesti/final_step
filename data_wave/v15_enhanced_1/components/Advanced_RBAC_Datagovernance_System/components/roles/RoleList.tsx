@@ -13,7 +13,6 @@ import {
   TagIcon,
   CalendarIcon,
   ClockIcon,
-  TreePineIcon,
   ShareIcon,
   ChevronDownIcon,
   ChevronRightIcon,
@@ -27,6 +26,7 @@ import {
   FireIcon,
   CogIcon
 } from '@heroicons/react/24/outline';
+import { TreePine } from 'lucide-react';
 import { formatDate, formatRelativeTime } from '../../utils/format.utils';
 import { getRoleColor, buildResourceTree } from '../../utils/rbac.utils';
 import type {
@@ -523,7 +523,7 @@ const RoleTreeView: React.FC<{
           tree.map(renderTreeNode)
         ) : (
           <div className="text-center py-8 text-gray-500">
-            <TreePineIcon className="mx-auto h-12 w-12 mb-2" />
+                            <TreePine className="mx-auto h-12 w-12 mb-2" />
             <p className="text-sm">No role hierarchy found</p>
           </div>
         )}

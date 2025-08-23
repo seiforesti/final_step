@@ -55,76 +55,7 @@ import {
   PolarRadiusAxis,
   Radar,
 } from 'recharts';
-import {
-  Activity,
-  Zap,
-  Brain,
-  Cpu,
-  Network,
-  Database,
-  Monitor,
-  Play,
-  Pause,
-  Stop,
-  RefreshCw,
-  Settings,
-  Filter,
-  Search,
-  Download,
-  Upload,
-  Share2,
-  Copy,
-  Save,
-  Eye,
-  EyeOff,
-  TrendingUp,
-  TrendingDown,
-  BarChart3,
-  PieChart,
-  Target,
-  Award,
-  Clock,
-  Users,
-  Globe,
-  MapPin,
-  Calendar,
-  Flag,
-  Star,
-  Heart,
-  Bookmark,
-  MessageSquare,
-  Bell,
-  AlertTriangle,
-  CheckCircle,
-  XCircle,
-  Info,
-  HelpCircle,
-  Lightbulb,
-  Layers,
-  Grid,
-  List,
-  Table,
-  Plus,
-  Minus,
-  Edit,
-  Trash2,
-  MoreHorizontal,
-  ArrowRight,
-  ArrowLeft,
-  ChevronUp,
-  ChevronDown,
-  Maximize,
-  Minimize,
-  ZoomIn,
-  ZoomOut,
-  RotateCcw,
-  Wifi,
-  WifiOff,
-  Signal,
-  Rss,
-  Radio,
-  Waves,
-} from 'lucide-react';
+import { Activity, Zap, Brain, Cpu, Network, Database, Monitor, Play, Pause, Square, RefreshCw, Settings, Filter, Search, Download, Upload, Share2, Copy, Save, Eye, EyeOff, TrendingUp, TrendingDown, BarChart3, PieChart, Target, Award, Clock, Users, Globe, MapPin, Calendar, Flag, Star, Heart, Bookmark, MessageSquare, Bell, AlertTriangle, CheckCircle, XCircle, Info, HelpCircle, Lightbulb, Layers, Grid, List, Table, Plus, Minus, Edit, Trash2, MoreHorizontal, ArrowRight, ArrowLeft, ChevronUp, ChevronDown, Maximize, Minimize, ZoomIn, ZoomOut, RotateCcw, Wifi, WifiOff, Signal, Rss, Radio, Waves,  } from 'lucide-react';
 import { useClassificationState } from '../core/hooks/useClassificationState';
 import { useAIIntelligence } from '../core/hooks/useAIIntelligence';
 import { aiApi } from '../core/api/aiApi';
@@ -1175,8 +1106,8 @@ const RealTimeIntelligenceStream: React.FC = () => {
                         )}
                         {stream.status !== 'stopped' && (
                           <Button size="sm" variant="outline" onClick={() => handleStopStream(stream.id)}>
-                            <Stop className="h-3 w-3 mr-1" />
-                            Stop
+                                            <Square className="h-3 w-3 mr-1" />
+                Stop
                           </Button>
                         )}
                         <Button size="sm" variant="outline" onClick={() => handleOptimizeStream(stream.id)}>

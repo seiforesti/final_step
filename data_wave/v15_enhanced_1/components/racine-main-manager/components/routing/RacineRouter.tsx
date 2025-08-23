@@ -48,47 +48,7 @@ import React, {
 } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
-import { 
-  ArrowLeft,
-  ArrowRight,
-  Home,
-  ChevronRight,
-  ExternalLink,
-  History,
-  Bookmark,
-  Share2,
-  Copy,
-  RefreshCw,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  Zap,
-  Activity,
-  BarChart3,
-  Settings,
-  HelpCircle,
-  Search,
-  Filter,
-  SortAsc,
-  MoreHorizontal,
-  X,
-  Plus,
-  Database,
-  Tag,
-  Shield,
-  Layers,
-  Users,
-  Building2,
-  Workflow,
-  GitBranch,
-  Bot,
-  TrendingUp,
-  MessageCircle,
-  Radar,
-  Target,
-  PieChart,
-  Bell
-} from 'lucide-react';
+import { ArrowLeft, ArrowRight, Home, ChevronRight, ExternalLink, History, Bookmark, Share2, Copy, RefreshCw, AlertTriangle, CheckCircle, Clock, Zap, Activity, BarChart3, Settings, HelpCircle, Search, Filter, SortAsc, MoreHorizontal, X, Plus, Database, Tag, Shield, Layers, Users, Building2, Workflow, GitBranch, Bot, TrendingUp, MessageCircle, Radar, Target, PieChart, Bell } from 'lucide-react';
 
 // UI Components
 import { Button } from '@/components/ui/button';

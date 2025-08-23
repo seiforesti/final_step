@@ -36,19 +36,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Checkbox } from '@/components/ui/checkbox';
 
-import { 
-  Users, Star, Trophy, Target, Gift, Coins, Award, Medal, Crown,
-  ThumbsUp, ThumbsDown, Heart, Flag, Share2, MessageCircle, Eye,
-  Edit, Trash2, Plus, Search, Filter, MoreHorizontal, RefreshCw,
-  TrendingUp, BarChart3, PieChart, Activity, Zap, Lightbulb,
-  Brain, Sparkles, Wand2, Magic, Calendar, Clock, User, UserCheck,
-  Settings, Download, Upload, ExternalLink, Link, Tag, Hash,
-  FileText, File, Image, Video, Mic, Paperclip, Send, Reply,
-  Forward, Archive, Bookmark, Pin, Bell, Mail, Phone, Globe,
-  Building, MapPin, Verified, Shield, Lock, Unlock, AlertTriangle,
-  CheckCircle, XCircle, Info, HelpCircle, BookOpen, GraduationCap,
-  GamepadIcon, Gamepad2, Dices, Gem, Flame, Lightning
-} from 'lucide-react';
+import { Users, Star, Trophy, Target, Gift, Coins, Award, Medal, Crown, ThumbsUp, ThumbsDown, Heart, Flag, Share2, MessageCircle, Eye, Edit, Trash2, Plus, Search, Filter, MoreHorizontal, RefreshCw, TrendingUp, BarChart3, PieChart, Activity, Zap, Lightbulb, Brain, Sparkles, Wand2, Magic, Calendar, Clock, User, UserCheck, Settings, Download, Upload, ExternalLink, Link, Tag, Hash, FileText, File, Image, Video, Mic, Paperclip, Send, Reply, Forward, Archive, Bookmark, Pin, Bell, Mail, Phone, Globe, Building, MapPin, Verified, Shield, Lock, Unlock, AlertTriangle, CheckCircle, XCircle, Info, HelpCircle, BookOpen, GraduationCap, GamepadIcon, Gamepad2, Dices, Gem, Flame, Lightning } from 'lucide-react';
 
 import { 
   LineChart as RechartsLineChart, Line, AreaChart, Area, BarChart, Bar, 
@@ -61,7 +49,7 @@ import { format, subDays, parseISO, formatDistanceToNow, isToday, isYesterday } 
 import { cn } from '@/lib/utils';
 
 // Import backend services
-import { collaborationService } from '../../services/collaboration.service';
+import { collaborationService } from '../../services';
 import { enterpriseCatalogService } from '../../services/enterprise-catalog.service';
 import { intelligentDiscoveryService } from '../../services/intelligent-discovery.service';
 

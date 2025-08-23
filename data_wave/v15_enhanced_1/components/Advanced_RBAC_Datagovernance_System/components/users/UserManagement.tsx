@@ -2,42 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence, useAnimation } from 'framer-motion';
-import {
-  UserIcon,
-  UsersIcon,
-  PlusIcon,
-  MagnifyingGlassIcon,
-  FunnelIcon,
-  ArrowPathIcon,
-  EllipsisHorizontalIcon,
-  CheckIcon,
-  XMarkIcon,
-  ExclamationTriangleIcon,
-  InformationCircleIcon,
-  ChartBarIcon,
-  DocumentArrowDownIcon,
-  DocumentArrowUpIcon,
-  Cog6ToothIcon,
-  ShieldCheckIcon,
-  ClockIcon,
-  MapPinIcon,
-  DevicePhoneMobileIcon,
-  EnvelopeIcon,
-  CalendarIcon,
-  EyeIcon,
-  PencilIcon,
-  TrashIcon,
-  UserPlusIcon,
-  UserMinusIcon,
-  KeyIcon,
-  BoltIcon,
-  StarIcon,
-  ExclamationCircleIcon,
-  ChevronDownIcon,
-  ChevronRightIcon,
-  ListBulletIcon,
-  Squares2X2Icon
-} from '@heroicons/react/24/outline';
+import { UserIcon, UsersIcon, PlusIcon, MagnifyingGlassIcon, FunnelIcon, ArrowPathIcon, EllipsisHorizontalIcon, CheckIcon, XMarkIcon, ExclamationTriangleIcon, InformationCircleIcon, ChartBarIcon, DocumentArrowDownIcon, DocumentArrowUpIcon, Cog6ToothIcon, ShieldCheckIcon, ClockIcon, MapPinIcon, DevicePhoneMobileIcon, EnvelopeIcon, CalendarIcon, EyeIcon, PencilIcon, TrashIcon, UserPlusIcon, UserMinusIcon, KeyIcon, BoltIcon, StarIcon, ExclamationCircleIcon, ChevronDownIcon, ChevronRightIcon, ListBulletIcon, Squares2X2Icon } from '@heroicons/react/24/outline';
 import { userService } from '../../services/user.service';
 import { useCurrentUser } from '../../hooks/useCurrentUser';
 import { useUsers } from '../../hooks/useUsers';

@@ -22,21 +22,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import {
-  FileText,
-  Download,
-  Calendar,
-  Clock,
-  Users,
-  Settings,
-  Eye,
-  Loader2,
-  AlertTriangle,
-  CheckCircle,
-  FileSpreadsheet,
-  FileCode,
-  FileImage
-} from "lucide-react"
+import { FileText, Download, Calendar, Clock, Users, Settings, Eye, Loader2, AlertTriangle, CheckCircle, FileSpreadsheet, FileCode, FileImage } from 'lucide-react'
 import { useEnterpriseFeatures } from "../hooks/use-enterprise-features"
 import { ComplianceAPIs } from "../services/enterprise-apis"
 import type { ComplianceReport } from "../types"

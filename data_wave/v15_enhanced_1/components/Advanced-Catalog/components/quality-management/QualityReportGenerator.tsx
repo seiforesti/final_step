@@ -113,92 +113,7 @@ import {
   cn 
 } from "@/lib/utils";
 import { format } from "date-fns";
-import { 
-  CalendarIcon,
-  Download,
-  FileText,
-  Filter,
-  MoreHorizontal,
-  Plus,
-  RefreshCw,
-  Settings,
-  Share,
-  Upload,
-  Clock,
-  AlertTriangle,
-  CheckCircle,
-  XCircle,
-  Eye,
-  Edit3,
-  Trash2,
-  Copy,
-  Search,
-  TrendingUp,
-  TrendingDown,
-  BarChart3,
-  PieChart,
-  LineChart,
-  Save,
-  Send,
-  Users,
-  Mail,
-  Printer,
-  ExternalLink,
-  Zap,
-  Target,
-  Layers,
-  Activity,
-  Database,
-  Archive,
-  Globe,
-  Shield,
-  Award,
-  Bookmark,
-  Info,
-  HelpCircle,
-  ChevronDown,
-  ChevronRight,
-  Maximize2,
-  Minimize2,
-  RotateCcw,
-  PlayCircle,
-  StopCircle,
-  PauseCircle,
-  Palette,
-  Layout,
-  Grid3X3,
-  List,
-  MapPin,
-  Tag,
-  Link,
-  Star,
-  Heart,
-  MessageSquare,
-  Bell,
-  Lock,
-  Unlock,
-  Key,
-  UserCheck,
-  UserX,
-  Briefcase,
-  Building,
-  Home,
-  Folder,
-  FolderOpen,
-  File,
-  FileType,
-  Image,
-  Video,
-  Music,
-  Code,
-  Terminal,
-  Cpu,
-  HardDrive,
-  Wifi,
-  WifiOff,
-  Power,
-  PowerOff
-} from 'lucide-react';
+import { CalendarIcon, Download, FileText, Filter, MoreHorizontal, Plus, RefreshCw, Settings, Share, Upload, Clock, AlertTriangle, CheckCircle, XCircle, Eye, Edit3, Trash2, Copy, Search, TrendingUp, TrendingDown, BarChart3, PieChart, LineChart, Save, Send, Users, Mail, Printer, ExternalLink, Zap, Target, Layers, Activity, Database, Archive, Globe, Shield, Award, Bookmark, Info, HelpCircle, ChevronDown, ChevronRight, Maximize2, Minimize2, RotateCcw, PlayCircle, StopCircle, PauseCircle, Palette, Layout, Grid3X3, List, MapPin, Tag, Link, Star, Heart, MessageSquare, Bell, Lock, Unlock, Key, UserCheck, UserX, Briefcase, Building, Home, Folder, FolderOpen, File, FileType, Image, Video, Music, Code, Terminal, Cpu, HardDrive, Wifi, WifiOff, Power, PowerOff } from 'lucide-react';
 import { toast } from 'sonner';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -1361,7 +1276,7 @@ const QualityReportGenerator: React.FC<QualityReportGeneratorProps> = ({
                               onClick={() => handleExportReport(report.id, 'PDF')}
                             >
                               <Download className="h-4 w-4 mr-2" />
-                              Download PDF
+                              ArrowDownTrayIcon PDF
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => setShareDialogState({

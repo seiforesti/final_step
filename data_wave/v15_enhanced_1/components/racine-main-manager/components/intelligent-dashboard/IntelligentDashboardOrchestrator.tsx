@@ -96,58 +96,7 @@ import {
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@/components/ui/context-menu';
 
 // Icons
-import {
-  BarChart3,
-  LineChart,
-  PieChart,
-  Activity,
-  TrendingUp,
-  TrendingDown,
-  Zap,
-  Eye,
-  Settings,
-  Plus,
-  Minus,
-  MoreHorizontal,
-  Refresh,
-  Download,
-  Share,
-  Filter,
-  Search,
-  Bell,
-  AlertTriangle,
-  CheckCircle,
-  XCircle,
-  Clock,
-  Users,
-  Database,
-  Server,
-  Shield,
-  Brain,
-  Target,
-  Layers,
-  Grid,
-  Layout,
-  Maximize2,
-  Minimize2,
-  Move,
-  Copy,
-  Trash2,
-  Edit,
-  Save,
-  Star,
-  Play,
-  Pause,
-  Square,
-  RotateCcw,
-  ExternalLink,
-  Info,
-  HelpCircle,
-  ChevronDown,
-  ChevronUp,
-  ChevronLeft,
-  ChevronRight
-} from 'lucide-react';
+import { BarChart3, LineChart, PieChart, Activity, TrendingUp, TrendingDown, Zap, Eye, Settings, Plus, Minus, MoreHorizontal, RefreshCw, Download, Share, Filter, Search, Bell, AlertTriangle, CheckCircle, XCircle, Clock, Users, Database, Server, Shield, Brain, Target, Layers, Grid, Layout, Maximize2, Minimize2, Move, Copy, Trash2, Edit, Save, Star, Play, Pause, Square, RotateCcw, ExternalLink, Info, HelpCircle, ChevronDown, ChevronUp, ChevronLeft, ChevronRight } from 'lucide-react';
 
 // Custom Hooks and Services
 import { useDashboardAPIs } from '../../hooks/useDashboardAPIs';
@@ -1239,7 +1188,7 @@ export const IntelligentDashboardOrchestrator: React.FC = () => {
           onClick={() => refreshDashboardData()}
           disabled={state.isLoading}
         >
-          <Refresh className={cn("h-4 w-4", state.isLoading && "animate-spin")} />
+          <RefreshCw className={cn("h-4 w-4", state.isLoading && "animate-spin")} />
         </Button>
 
         <DropdownMenu>

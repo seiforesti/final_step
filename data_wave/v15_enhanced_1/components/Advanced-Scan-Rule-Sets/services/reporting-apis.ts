@@ -1244,4 +1244,7 @@ export const ReportingAPIUtils = {
   }
 };
 
+// Export service instance
+export const reportingAPIService = new ReportingAPIService();
+
 export default reportingAPI;

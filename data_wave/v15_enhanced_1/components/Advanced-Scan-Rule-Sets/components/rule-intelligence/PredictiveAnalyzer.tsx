@@ -1,57 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  BarChart3,
-  LineChart,
-  PieChart,
-  Activity,
-  Target,
-  Brain,
-  Zap,
-  Crystal,
-  Search,
-  Filter,
-  Settings,
-  RefreshCw,
-  Play,
-  Pause,
-  Square,
-  Clock,
-  Calendar,
-  ChevronUp,
-  ChevronDown,
-  Minus,
-  Plus,
-  Edit,
-  Trash2,
-  Download,
-  Upload,
-  Save,
-  Copy,
-  MoreHorizontal,
-  ExternalLink,
-  Eye,
-  EyeOff,
-  AlertTriangle,
-  CheckCircle2,
-  XCircle,
-  Info,
-  Lightbulb,
-  Sparkles,
-  Database,
-  Cpu,
-  Memory,
-  Network,
-  Gauge,
-  Layers,
-  GitBranch,
-  ArrowRight,
-  ArrowLeft,
-  ArrowUp,
-  ArrowDown
-} from 'lucide-react';
+import { TrendingUp, TrendingDown, BarChart3, LineChart, PieChart, Activity, Target, Brain, Zap, Diamond, Search, Filter, Settings, RefreshCw, Play, Pause, Square, Clock, Calendar, ChevronUp, ChevronDown, Minus, Plus, Edit, Trash2, Download, Upload, Save, Copy, MoreHorizontal, ExternalLink, Eye, EyeOff, AlertTriangle, CheckCircle2, XCircle, Info, Lightbulb, Sparkles, Database, Cpu, HardDrive, Network, Gauge, Layers, GitBranch, ArrowRight, ArrowLeft, ArrowUp, ArrowDown } from 'lucide-react';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -712,7 +661,7 @@ export const PredictiveAnalyzer: React.FC<PredictiveAnalyzerProps> = ({
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Predictions</CardTitle>
-            <Crystal className="h-4 w-4 text-muted-foreground" />
+            <Diamond className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{analyzerState.totalPredictions}</div>

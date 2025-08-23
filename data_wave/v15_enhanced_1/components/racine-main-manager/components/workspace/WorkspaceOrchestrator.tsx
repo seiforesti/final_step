@@ -29,77 +29,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
-import { 
-  Workspace, 
-  Users, 
-  Settings, 
-  Plus, 
-  Search, 
-  Filter, 
-  MoreHorizontal,
-  Grid3X3,
-  List,
-  Star,
-  Clock,
-  TrendingUp,
-  Shield,
-  Zap,
-  Database,
-  GitBranch,
-  Activity,
-  AlertTriangle,
-  CheckCircle,
-  XCircle,
-  Eye,
-  EyeOff,
-  Share2,
-  Copy,
-  Download,
-  Upload,
-  RefreshCw,
-  Bell,
-  BellOff,
-  Lock,
-  Unlock,
-  Crown,
-  UserPlus,
-  UserMinus,
-  Layers,
-  BarChart3,
-  PieChart,
-  LineChart,
-  Calendar,
-  MapPin,
-  Tag,
-  Bookmark,
-  Archive,
-  Trash2,
-  ExternalLink,
-  ChevronDown,
-  ChevronRight,
-  ChevronLeft,
-  ArrowUpRight,
-  ArrowDownRight,
-  Sparkles,
-  Brain,
-  Target,
-  Rocket,
-  Globe,
-  Building2,
-  Users2,
-  UserCheck,
-  ShieldCheck,
-  Gauge,
-  Timer,
-  Cpu,
-  HardDrive,
-  Network,
-  Wifi,
-  WifiOff,
-  Server,
-  Cloud,
-  CloudOff
-} from 'lucide-react';
+import { Building2, Users, Settings, Plus, Search, Filter, MoreHorizontal, Grid3X3, List, Star, Clock, TrendingUp, Shield, Zap, Database, GitBranch, Activity, AlertTriangle, CheckCircle, XCircle, Eye, EyeOff, Share2, Copy, Download, Upload, RefreshCw, Bell, BellOff, Lock, Unlock, Crown, UserPlus, UserMinus, Layers, BarChart3, PieChart, LineChart, Calendar, MapPin, Tag, Bookmark, Archive, Trash2, ExternalLink, ChevronDown, ChevronRight, ChevronLeft, ArrowUpRight, ArrowDownRight, Sparkles, Brain, Target, Rocket, Globe, Users2, UserCheck, ShieldCheckIcon, Gauge, Timer, Cpu, HardDrive, Network, Wifi, WifiOff, Server, Cloud, CloudOff } from 'lucide-react';
 
 // UI Components
 import { Button } from '@/components/ui/button';
@@ -1149,7 +1079,7 @@ export const WorkspaceOrchestrator: React.FC = () => {
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 flex items-center justify-center">
-                  <Workspace className="w-6 h-6 text-white" />
+                  <Building2 className="w-6 h-6 text-white" />
                 </div>
                 <div>
                   <h1 className="text-2xl font-bold">Workspace Orchestrator</h1>
@@ -1288,7 +1218,7 @@ export const WorkspaceOrchestrator: React.FC = () => {
             <div className="grid grid-cols-6 gap-4">
               <Card className="p-3">
                 <div className="flex items-center gap-2">
-                  <Workspace className="w-4 h-4 text-blue-500" />
+                  <Building2 className="w-4 h-4 text-blue-500" />
                   <div>
                     <div className="text-lg font-semibold">{workspaceStats.total}</div>
                     <div className="text-xs text-muted-foreground">Total</div>
@@ -1391,7 +1321,7 @@ export const WorkspaceOrchestrator: React.FC = () => {
                   className="flex flex-col items-center justify-center h-96 text-center"
                 >
                   <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center mb-4">
-                    <Workspace className="w-12 h-12 text-muted-foreground" />
+                    <Building2 className="w-12 h-12 text-muted-foreground" />
                   </div>
                   <h3 className="text-xl font-semibold mb-2">No Workspaces Found</h3>
                   <p className="text-muted-foreground mb-6 max-w-md">

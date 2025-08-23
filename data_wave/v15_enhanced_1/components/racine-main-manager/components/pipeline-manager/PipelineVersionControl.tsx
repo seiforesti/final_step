@@ -2,72 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  GitBranch, 
-  GitCommit, 
-  GitMerge, 
-  History, 
-  RotateCcw, 
-  Tag, 
-  Clock, 
-  User, 
-  Compare, 
-  Zap, 
-  Settings, 
-  Play, 
-  Pause, 
-  Square, 
-  CheckCircle,
-  XCircle,
-  AlertCircle,
-  Download,
-  Upload,
-  Save,
-  Eye,
-  EyeOff,
-  Plus,
-  Minus,
-  Copy,
-  Trash2,
-  Edit3,
-  Search,
-  Filter,
-  RefreshCw,
-  Maximize,
-  Minimize,
-  ArrowRight,
-  ArrowLeft,
-  ArrowUp,
-  ArrowDown,
-  MoreHorizontal,
-  Info,
-  HelpCircle,
-  Target,
-  Layers,
-  Workflow,
-  Database,
-  BarChart3,
-  TrendingUp,
-  Activity,
-  Shield,
-  Lock,
-  Unlock,
-  Key,
-  Users,
-  Calendar,
-  Hash,
-  Type,
-  BookOpen,
-  Code,
-  FileText,
-  FolderOpen,
-  Star,
-  Heart,
-  ThumbsUp,
-  MessageSquare,
-  Share2,
-  ExternalLink
-} from 'lucide-react';
+import { GitBranch, GitCommit, GitMerge, History, RotateCcw, Tag, Clock, User, GitCompare, Zap, Settings, Play, Pause, Square, CheckCircle, XCircle, AlertCircle, Download, Upload, Save, Eye, EyeOff, Plus, Minus, Copy, Trash2, Edit3, Search, Filter, RefreshCw, Maximize, Minimize, ArrowRight, ArrowLeft, ArrowUp, ArrowDown, MoreHorizontal, Info, HelpCircle, Target, Layers, Workflow, Database, BarChart3, TrendingUp, Activity, Shield, Lock, Unlock, Key, Users, Calendar, Hash, Type, BookOpen, Code, FileText, FolderOpen, Star, Heart, ThumbsUp, MessageSquare, Share2, ExternalLink } from 'lucide-react';
 
 // shadcn/ui Components
 import { Button } from '@/components/ui/button';
@@ -709,8 +644,8 @@ export const PipelineVersionControl: React.FC<PipelineVersionControlProps> = ({
             size="sm"
             onClick={() => setState(prev => ({ ...prev, isDiffMode: !prev.isDiffMode }))}
           >
-            <Compare className="h-4 w-4 mr-2" />
-            Compare Mode
+                            <GitCompare className="h-4 w-4 mr-2" />
+                Compare Mode
           </Button>
         </div>
       </div>
@@ -829,8 +764,8 @@ export const PipelineVersionControl: React.FC<PipelineVersionControlProps> = ({
                           View Details
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => handleComparePipelines(commit as PipelineVersion, state.currentVersion!)}>
-                          <Compare className="h-4 w-4 mr-2" />
-                          Compare with Current
+                                          <GitCompare className="h-4 w-4 mr-2" />
+                Compare with Current
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => handleRollbackVersion(commit as PipelineVersion)}>
                           <RotateCcw className="h-4 w-4 mr-2" />
@@ -1129,7 +1064,7 @@ export const PipelineVersionControl: React.FC<PipelineVersionControlProps> = ({
             {state.isComparison ? (
               <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
             ) : (
-              <Compare className="h-5 w-5 mr-2" />
+              <GitCompare className="h-5 w-5 mr-2" />
             )}
             {state.isComparison ? 'Comparing...' : 'Compare Versions'}
           </Button>

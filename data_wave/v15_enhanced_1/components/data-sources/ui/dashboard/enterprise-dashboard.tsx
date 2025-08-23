@@ -1,19 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react'
-import { 
-  ChartBarIcon, 
-  CogIcon, 
-  DocumentDuplicateIcon,
-  UserGroupIcon,
-  ClockIcon,
-  ExclamationTriangleIcon,
-  CheckCircleIcon,
-  ArrowTrendingUpIcon,
-  BoltIcon,
-  EyeIcon,
-  PlayIcon,
-  PauseIcon,
-  StopIcon
-} from '@heroicons/react/24/outline'
+import { ChartBarIcon, CogIcon, DocumentDuplicateIcon, UserGroupIcon, ClockIcon, ExclamationTriangleIcon, CheckCircleIcon, ArrowTrendingUpIcon, BoltIcon, EyeIcon, PlayIcon, PauseIcon, StopIcon } from '@heroicons/react/24/outline'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Line, Bar, Doughnut, Scatter } from 'react-chartjs-2'
 import {

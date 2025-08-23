@@ -19,22 +19,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef, Suspense } from 'react';
 import { motion, AnimatePresence, useAnimation } from 'framer-motion';
 import { useRouter, usePathname } from 'next/navigation';
-import { 
-  Monitor, 
-  Smartphone, 
-  Tablet, 
-  Layout,
-  Grid,
-  Columns,
-  Maximize2,
-  Minimize2,
-  Settings,
-  Zap,
-  Eye,
-  Accessibility,
-  Palette,
-  RefreshCw
-} from 'lucide-react';
+import { Monitor, Smartphone, Tablet, Layout, Grid, Columns, Maximize2, Minimize2, Settings, Zap, Eye, Accessibility, Palette, RefreshCw } from 'lucide-react';
 
 // UI Components
 import { Button } from '@/components/ui/button';

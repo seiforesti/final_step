@@ -32,47 +32,7 @@ import React, {
   useContext
 } from 'react';
 import { motion, useSpring, useMotionValue, useTransform } from 'framer-motion';
-import { 
-  Monitor,
-  Smartphone,
-  Tablet,
-  Laptop,
-  Tv,
-  RotateCcw,
-  Maximize2,
-  Minimize2,
-  ZoomIn,
-  ZoomOut,
-  Settings,
-  Activity,
-  Brain,
-  Zap,
-  Target,
-  Eye,
-  Accessibility,
-  Gauge,
-  Wifi,
-  WifiOff,
-  Battery,
-  BatteryLow,
-  Signal,
-  SignalHigh,
-  SignalLow,
-  Compass,
-  Navigation,
-  MapPin,
-  Clock,
-  Timer,
-  TrendingUp,
-  TrendingDown,
-  BarChart3,
-  PieChart,
-  LineChart,
-  AlertTriangle,
-  CheckCircle,
-  RefreshCw,
-  Sparkles
-} from 'lucide-react';
+import { Monitor, Smartphone, Tablet, Laptop, Tv, RotateCcw, Maximize2, Minimize2, ZoomIn, ZoomOut, Settings, Activity, Brain, Zap, Target, Eye, Accessibility, Gauge, Wifi, WifiOff, Battery, BatteryLow, Signal, SignalHigh, SignalLow, Compass, Navigation, MapPin, Clock, Timer, TrendingUp, TrendingDown, BarChart3, PieChart, LineChart, AlertTriangle, CheckCircle, RefreshCw, Sparkles } from 'lucide-react';
 
 // Shadcn/UI Components
 import { Button } from '@/components/ui/button';
@@ -524,12 +484,12 @@ const ResponsiveLayoutEngine: React.FC<ResponsiveLayoutEngineProps> = ({
     highContrastMode: false,
     reducedMotion: false,
     touchSupport: {
-      maxTouchPoints: navigator.maxTouchPoints || 0,
-      touchType: 'ontouchstart' in window ? 'coarse' : 'none',
-      gestureSupport: 'GestureEvent' in window,
-      forceTouch: 'webkitForce' in (document.createElement('div') as any),
+      maxTouchPoints: typeof navigator !== 'undefined' ? (navigator.maxTouchPoints || 0) : 0,
+      touchType: typeof window !== 'undefined' && 'ontouchstart' in window ? 'coarse' : 'none',
+      gestureSupport: typeof window !== 'undefined' && 'GestureEvent' in window,
+      forceTouch: typeof document !== 'undefined' && 'webkitForce' in (document.createElement('div') as any),
       stylus: false,
-      multiTouch: (navigator.maxTouchPoints || 0) > 1
+      multiTouch: typeof navigator !== 'undefined' ? ((navigator.maxTouchPoints || 0) > 1) : false
     },
     gestureRecognition: {
       isEnabled: false,

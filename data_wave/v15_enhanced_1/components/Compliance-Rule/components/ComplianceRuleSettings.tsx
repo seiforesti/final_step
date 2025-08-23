@@ -12,11 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { toast } from "sonner"
-import {
-  Settings, Shield, Bell, Database, Users, Lock, Globe,
-  Save, RefreshCw, Download, Upload, AlertTriangle, CheckCircle,
-  Server, Cloud, Boxes, Key, Monitor, Wifi, HardDrive
-} from "lucide-react"
+import { Settings, Shield, Bell, Database, Users, Lock, Globe, Save, RefreshCw, Download, Upload, AlertTriangle, CheckCircle, Server, Cloud, Boxes, Key, Monitor, Wifi, HardDrive } from 'lucide-react'
 
 // Enterprise Integration
 import { ComplianceHooks } from '../hooks/use-enterprise-features'

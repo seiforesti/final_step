@@ -22,18 +22,7 @@ import {
   Legend, ResponsiveContainer, ScatterChart, Scatter, RadarChart, PolarGrid,
   PolarAngleAxis, PolarRadiusAxis, Radar, Treemap
 } from 'recharts';
-import {
-  Workflow, Route, Network, Zap, Brain, Target, Award, Clock,
-  Users, Database, Monitor, Cpu, AlertTriangle, CheckCircle,
-  XCircle, Info, Settings, Search, Filter, Download, Upload,
-  Refresh, Play, Pause, Stop, MoreVertical, Eye, Edit, Trash2,
-  Plus, Minus, ArrowUp, ArrowDown, ArrowRight, Calendar, Globe,
-  Shield, Lock, Unlock, Star, Heart, Bookmark, Share, MessageSquare,
-  Bell, Mail, Phone, Video, Mic, Camera, Image, File, Folder,
-  Archive, Tag, Flag, Map, Navigation, Compass, Layers, Grid,
-  List, Table, Kanban, Timeline, Chart, Activity, TrendingUp,
-  BarChart3, PieChart as PieChartIcon, LineChart as LineChartIcon
-} from 'lucide-react';
+import { Workflow, Route, Network, Zap, Brain, Target, Award, Clock, Users, Database, Monitor, Cpu, AlertTriangle, CheckCircle, XCircle, Info, Settings, Search, Filter, Download, Upload, RefreshCw, Play, Pause, Square, MoreVertical, Eye, Edit, Trash2, Plus, Minus, ArrowUp, ArrowDown, ArrowRight, Calendar, Globe, Shield, Lock, Unlock, Star, Heart, Bookmark, Share, MessageSquare, Bell, Mail, Phone, Video, Mic, Camera, Image, File, Folder, Archive, Tag, Flag, Map, Navigation, Compass, Layers, Grid, List, Table, Kanban, Timeline, Chart, Activity, TrendingUp, BarChart3, PieChart as PieChartIcon, LineChart as LineChartIcon } from 'lucide-react';
 
 // Import custom hooks and utilities
 import { useClassificationState } from '../core/hooks/useClassificationState';
@@ -275,7 +264,7 @@ const STAGE_TYPES = [
   { value: 'processing', label: 'Processing', icon: Cpu },
   { value: 'classification', label: 'Classification', icon: Tag },
   { value: 'validation', label: 'Validation', icon: CheckCircle },
-  { value: 'output', label: 'Output', icon: Download },
+  { value: 'output', label: 'Output', icon: ArrowDownTrayIcon },
   { value: 'notification', label: 'Notification', icon: Bell }
 ] as const;
 

@@ -34,89 +34,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback, useRef, useReducer } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Brain, 
-  Zap, 
-  TrendingUp, 
-  AlertTriangle,
-  Eye,
-  Target,
-  Activity,
-  BarChart3,
-  PieChart,
-  LineChart,
-  Settings,
-  RefreshCw,
-  Filter,
-  Search,
-  Download,
-  Upload,
-  Play,
-  Pause,
-  Square,
-  CheckCircle,
-  XCircle,
-  Clock,
-  Database,
-  Server,
-  Network,
-  Cpu,
-  HardDrive,
-  Memory,
-  Shield,
-  Lock,
-  Unlock,
-  GitBranch,
-  Layers,
-  Box,
-  Grid,
-  List,
-  MoreHorizontal,
-  ChevronDown,
-  ChevronRight,
-  ChevronLeft,
-  ExternalLink,
-  Info,
-  HelpCircle,
-  Star,
-  Bookmark,
-  Share,
-  Copy,
-  Edit,
-  Trash2,
-  Plus,
-  Minus,
-  Maximize,
-  Minimize,
-  RotateCcw,
-  Save,
-  Send,
-  MessageSquare,
-  Users,
-  User,
-  Calendar,
-  MapPin,
-  Globe,
-  Wifi,
-  WifiOff,
-  Signal,
-  Battery,
-  Bluetooth,
-  Volume2,
-  VolumeX,
-  Camera,
-  Video,
-  Image,
-  FileText,
-  File,
-  Folder,
-  FolderOpen,
-  Archive,
-  Package,
-  Layers3,
-  Component,
-  Puzzle
-} from 'lucide-react';
+import { Brain, Zap, TrendingUp, AlertTriangle, Eye, Target, Activity, BarChart3, PieChart, LineChart, Settings, RefreshCw, Filter, Search, Download, Upload, Play, Pause, Square, CheckCircle, XCircle, Clock, Database, Server, Network, Cpu, HardDrive, Shield, Lock, Unlock, GitBranch, Layers, Box, Grid, List, MoreHorizontal, ChevronDown, ChevronRight, ChevronLeft, ExternalLink, Info, HelpCircle, Star, Bookmark, Share, Copy, Edit, Trash2, Plus, Minus, Maximize, Minimize, RotateCcw, Save, Send, MessageSquare, Users, User, Calendar, MapPin, Globe, Wifi, WifiOff, Signal, Battery, Bluetooth, Volume2, VolumeX, Camera, Video, Image, FileText, File, Folder, FolderOpen, Archive, Package, Layers3, Component, Puzzle } from 'lucide-react';
 
 // UI Components
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -1092,7 +1010,7 @@ const ScanIntelligenceEngine: React.FC = () => {
 
       const report = await generateReport(type, parameters);
       
-      // Download the report
+      // ArrowDownTrayIcon the report
       const blob = new Blob([JSON.stringify(report, null, 2)], { 
         type: 'application/json' 
       });
@@ -1580,7 +1498,7 @@ const ScanIntelligenceEngine: React.FC = () => {
               <RechartsTooltip />
               <Legend />
               <Line type="monotone" dataKey="cpu" stroke="#8884d8" name="CPU %" />
-              <Line type="monotone" dataKey="memory" stroke="#82ca9d" name="Memory %" />
+              <Line type="monotone" dataKey="memory" stroke="#82ca9d" name="HardDrive %" />
             </RechartsLineChart>
           </ResponsiveContainer>
         </CardContent>

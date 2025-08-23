@@ -22,7 +22,6 @@ import {
   TagIcon,
   CalendarIcon,
   ClockIcon,
-  TreePineIcon,
   ShareIcon,
   DocumentTextIcon,
   ChartBarIcon,
@@ -33,6 +32,7 @@ import {
   GlobeAltIcon,
   LockClosedIcon
 } from '@heroicons/react/24/outline';
+import { TreePine } from 'lucide-react';
 import { roleService } from '../../services/role.service';
 import { userService } from '../../services/user.service';
 import { useCurrentUser } from '../../hooks/useCurrentUser';
@@ -382,7 +382,7 @@ export const RoleDetails: React.FC<RoleDetailsProps> = ({
           { id: 'overview', name: 'Overview', icon: InformationCircleIcon },
           { id: 'permissions', name: 'Permissions', icon: KeyIcon },
           { id: 'users', name: 'Users', icon: UsersIcon, requiresPermission: canViewUsers },
-          { id: 'hierarchy', name: 'Hierarchy', icon: TreePineIcon },
+          { id: 'hierarchy', name: 'Hierarchy', icon: TreePine },
           { id: 'analytics', name: 'Analytics', icon: ChartBarIcon, requiresPermission: canViewAnalytics },
           { id: 'audit', name: 'Audit', icon: DocumentTextIcon, requiresPermission: canViewAudit }
         ].filter(tab => tab.requiresPermission !== false).map((tab) => {
@@ -773,7 +773,7 @@ export const RoleDetails: React.FC<RoleDetailsProps> = ({
               </div>
             ) : (
               <div className="text-center py-6 text-gray-500">
-                <TreePineIcon className="mx-auto h-8 w-8 mb-2" />
+                <TreePine className="mx-auto h-8 w-8 mb-2" />
                 <p className="text-sm">No parent roles</p>
               </div>
             )}
@@ -808,7 +808,7 @@ export const RoleDetails: React.FC<RoleDetailsProps> = ({
               </div>
             ) : (
               <div className="text-center py-6 text-gray-500">
-                <TreePineIcon className="mx-auto h-8 w-8 mb-2" />
+                <TreePine className="mx-auto h-8 w-8 mb-2" />
                 <p className="text-sm">No child roles</p>
               </div>
             )}

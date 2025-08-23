@@ -2,16 +2,7 @@
 
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Clock, Calendar, Play, Pause, Settings, Zap, Brain, Target,
-  CalendarDays, CalendarCheck, CalendarX, CalendarPlus, Timer,
-  Bell, BellOff, AlertTriangle, CheckCircle, XCircle, RefreshCw,
-  Plus, Minus, X, Edit3, Save, Download, Upload, Eye, EyeOff,
-  MoreHorizontal, Filter, Search, BarChart3, TrendingUp, Activity,
-  Globe, MapPin, Sunrise, Sunset, Moon, Sun, CloudRain, Zap as Lightning,
-  FileText, Package, Users, Shield, Database, Network, HelpCircle,
-  Copy, Share2, Bookmark, History, Lightbulb, Workflow, Bot, Code
-} from 'lucide-react';
+import { Clock, Calendar, Play, Pause, Settings, Zap, Brain, Target, CalendarDays, CalendarCheck, CalendarX, CalendarPlus, Timer, Bell, BellOff, AlertTriangle, CheckCircle, XCircle, RefreshCw, Plus, Minus, X, Edit3, Save, Download, Upload, Eye, EyeOff, MoreHorizontal, Filter, Search, BarChart3, TrendingUp, Activity, Globe, MapPin, Sunrise, Sunset, Moon, Sun, CloudRain, Zap as Lightning, FileText, Package, Users, Shield, Database, Network, HelpCircle, Copy, Share2, Bookmark, History, Lightbulb, Workflow, Bot, Code } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -625,7 +616,7 @@ const JobSchedulingEngine: React.FC<JobSchedulingEngineProps> = ({
   }, [getScheduleTemplates]);
 
   // Generate Execution Preview with Advanced Logic
-  const generateExecutionPreview = useCallback(() => {
+  const generateExecutionPreview = useCallback(async () => {
     if (!schedule.cron_expression) return;
 
     // Enhanced execution preview logic

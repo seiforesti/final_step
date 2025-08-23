@@ -6,6 +6,7 @@
 
 // Export all endpoints
 export * from './endpoints';
+export { SEARCH_ENDPOINTS, QUALITY_ENDPOINTS, DISCOVERY_ENDPOINTS } from './catalog-endpoints';
 export { default as endpoints, ALL_ENDPOINTS } from './endpoints';
 
 // Export all configurations
@@ -15,6 +16,10 @@ export { default as config, ALL_CONFIG } from './config';
 // Export collaboration constants
 export * from './collaboration-constants';
 export { default as collaborationConstants } from './collaboration-constants';
+
+// Export catalog constants
+export * from './catalog-constants';
+export { default as catalogConstants } from './catalog-constants';
 
 // ============================================================================
 // COMMON CONSTANTS

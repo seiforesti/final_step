@@ -25,24 +25,11 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Calendar } from '@/components/ui/calendar';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import {
-  BarChart3, TrendingUp, TrendingDown, Activity, Target, Gauge,
-  Search, Filter, SortAsc, SortDesc, RefreshCw, Download, Upload, Settings,
-  Zap, Star, Award, Crown, Sparkles, Brain, Eye, Lightbulb, AlertTriangle,
-  CheckCircle, XCircle, Info, Clock, Timer, Stopwatch, History, Calendar as CalendarIcon,
-  Users, User, Hash, Database, Layers, Grid3X3, FolderOpen, FileText,
-  Image, Video, Link, Globe, Map, MapPin, Navigation, Building, Flag,
-  ThumbsUp, ThumbsDown, Heart, Share2, Bookmark, Copy, ExternalLink,
-  MoreHorizontal, Edit3, Trash2, Plus, Minus, ChevronUp, ChevronDown,
-  ArrowUp, ArrowDown, ArrowRight, ArrowLeft, Loader2, RotateCcw,
-  Shield, Lock, Unlock, Key, Code, Terminal, Cpu, HardDrive, Server,
-  Wifi, Signal, Battery, Power, Volume2, VolumeX, Mic, MicOff,
-  Play, Pause, SkipForward, SkipBack, FastForward, Rewind
-} from 'lucide-react';
+import { BarChart3, TrendingUp, TrendingDown, Activity, Target, Gauge, Search, Filter, SortAsc, SortDesc, RefreshCw, Download, Upload, Settings, Zap, Star, Award, Crown, Sparkles, Brain, Eye, Lightbulb, AlertTriangle, CheckCircle, XCircle, Info, Clock, Timer, Stopwatch, History, Calendar as CalendarIcon, Users, User, Hash, Database, Layers, Grid3X3, FolderOpen, FileText, Image, Video, Link, Globe, Map, MapPin, Navigation, Building, Flag, ThumbsUp, ThumbsDown, Heart, Share2, Bookmark, Copy, ExternalLink, MoreHorizontal, Edit3, Trash2, Plus, Minus, ChevronUp, ChevronDown, ArrowUp, ArrowDown, ArrowRight, ArrowLeft, Loader2, RotateCcw, Shield, Lock, Unlock, Key, Code, Terminal, Cpu, HardDrive, Server, Wifi, Signal, Battery, Power, Volume2, VolumeX, Mic, MicOff, Play, Pause, SkipForward, SkipBack, FastForward, Rewind } from 'lucide-react';
 import { LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart as RechartsPieChart, Cell, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Legend, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ScatterChart, Scatter, TreemapChart, Treemap, FunnelChart, Funnel, LabelList } from 'recharts';
 import { intelligentDiscoveryService } from '../../services/intelligent-discovery.service';
 import { enterpriseCatalogService } from '../../services/enterprise-catalog.service';
-import { collaborationService } from '../../services/collaboration.service';
+import { collaborationService } from '../../services';
 import { advancedLineageService } from '../../services/advanced-lineage.service';
 
 // Enhanced Type Definitions for Search Results Analyzer
@@ -534,7 +521,7 @@ const SearchResultsAnalyzer: React.FC = () => {
       const report = await intelligentDiscoveryService.generateAnalyticsReport(reportRequest);
       setReports(prev => [report, ...prev]);
       
-      // Download report
+      // ArrowDownTrayIcon report
       const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');

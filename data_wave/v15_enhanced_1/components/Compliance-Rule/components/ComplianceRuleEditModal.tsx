@@ -23,21 +23,7 @@ import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Progress } from "@/components/ui/progress"
-import {
-  Edit,
-  Shield,
-  AlertTriangle,
-  CheckCircle,
-  FileText,
-  Calendar,
-  User,
-  Target,
-  Loader2,
-  Lightbulb,
-  Settings,
-  Activity,
-  BarChart3
-} from "lucide-react"
+import { Edit, Shield, AlertTriangle, CheckCircle, FileText, Calendar, User, Target, Loader2, Lightbulb, Settings, Activity, BarChart3 } from 'lucide-react'
 import { useEnterpriseFeatures } from "../hooks/use-enterprise-features"
 import { ComplianceAPIs } from "../services/enterprise-apis"
 import type { ComplianceRequirement } from "../types"

@@ -2,88 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  Network,
-  Server,
-  Globe,
-  Activity,
-  Cpu,
-  MemoryStick,
-  HardDrive,
-  Gauge,
-  Target,
-  Zap,
-  RefreshCw,
-  BarChart3,
-  PieChart,
-  LineChart,
-  TrendingUp,
-  TrendingDown,
-  Settings,
-  Play,
-  Pause,
-  Stop,
-  RotateCcw,
-  Plus,
-  Minus,
-  Edit,
-  Trash2,
-  Copy,
-  Eye,
-  EyeOff,
-  Search,
-  Filter,
-  Download,
-  Upload,
-  Share2,
-  Clock,
-  Timer,
-  Calendar,
-  Users,
-  User,
-  CheckCircle,
-  AlertTriangle,
-  XCircle,
-  Info,
-  Flag,
-  Star,
-  Shield,
-  Lock,
-  Unlock,
-  Key,
-  Code,
-  FileText,
-  Archive,
-  History,
-  Award,
-  Crown,
-  Hash,
-  Percent,
-  DollarSign,
-  TrendingUpDown,
-  Maximize,
-  Minimize,
-  ArrowUp,
-  ArrowDown,
-  ArrowLeft,
-  ArrowRight,
-  Volume2,
-  VolumeX,
-  Wifi,
-  WifiOff,
-  Signal,
-  Battery,
-  BatteryLow,
-  Thermometer,
-  Monitor,
-  Smartphone,
-  Tablet,
-  Laptop,
-  Desktop,
-  Package,
-  Layers,
-  Database
-} from 'lucide-react'
+import { Network, Server, Globe, Activity, Cpu, MemoryStick, HardDrive, Gauge, Target, Zap, RefreshCw, BarChart3, PieChart, LineChart, TrendingUp, TrendingDown, Settings, Play, Pause, Square, RotateCcw, Plus, Minus, Edit, Trash2, Copy, Eye, EyeOff, Search, Filter, Download, Upload, Share2, Clock, Timer, Calendar, Users, User, CheckCircle, AlertTriangle, XCircle, Info, Flag, Star, Shield, Lock, Unlock, Key, Code, FileText, Archive, History, Award, Crown, Hash, Percent, DollarSign, TrendingUpDown, Maximize, Minimize, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Volume2, VolumeX, Wifi, WifiOff, Signal, Battery, BatteryLow, Thermometer, Monitor, Smartphone, Tablet, Laptop, Desktop, Package, Layers, Database } from 'lucide-react'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -1379,8 +1298,8 @@ export const LoadBalancer: React.FC<{
                   </DropdownMenuItem>
                 ) : (
                   <DropdownMenuItem onClick={() => handleStopLoadBalancer(loadBalancer)}>
-                    <Stop className="h-4 w-4 mr-2" />
-                    Stop
+                    <Square className="h-4 w-4 mr-2" />
+                    Square
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuItem onClick={() => handleRebalance(loadBalancer)}>

@@ -88,64 +88,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { 
-  Shield,
-  ShieldAlert,
-  ShieldCheck,
-  ShieldX,
-  Eye,
-  EyeOff,
-  Play,
-  Pause,
-  Square,
-  RefreshCw,
-  Settings,
-  AlertTriangle,
-  CheckCircle,
-  XCircle,
-  Clock,
-  Zap,
-  Target,
-  Activity,
-  TrendingUp,
-  TrendingDown,
-  BarChart3,
-  PieChart,
-  LineChart,
-  Users,
-  Lock,
-  Unlock,
-  Key,
-  FileText,
-  Download,
-  Upload,
-  Search,
-  Filter,
-  SortAsc,
-  SortDesc,
-  MoreHorizontal,
-  Plus,
-  Minus,
-  Edit,
-  Trash2,
-  Copy,
-  ExternalLink,
-  Mail,
-  Bell,
-  BellOff,
-  Cpu,
-  Database,
-  Network,
-  Server,
-  Cloud,
-  Globe,
-  Wifi,
-  WifiOff,
-  Bug,
-  Skull,
-  Crosshair,
-  Radar
-} from 'lucide-react';
+import { Shield, ShieldAlert, ShieldCheckIcon, ShieldX, Eye, EyeOff, Play, Pause, Square, RefreshCw, Settings, AlertTriangle, CheckCircle, XCircle, Clock, Zap, Target, Activity, TrendingUp, TrendingDown, BarChart3, PieChart, LineChart, Users, Lock, Unlock, Key, FileText, Download, Upload, Search, Filter, SortAsc, SortDesc, MoreHorizontal, Plus, Minus, Edit, Trash2, Copy, ExternalLink, Mail, Bell, BellOff, Cpu, Database, Network, Server, Cloud, Globe, Wifi, WifiOff, Bug, Skull, Crosshair, Radar } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
 import { useSecurityCompliance } from '../../hooks/useSecurityCompliance';
@@ -843,7 +786,7 @@ export const SecurityOrchestrator: React.FC = () => {
               onClick={() => handleRunComplianceCheck('soc2')}
               className="h-20 flex flex-col items-center justify-center space-y-2"
             >
-              <ShieldCheck className="h-6 w-6" />
+              <ShieldCheckIcon className="h-6 w-6" />
               <span className="text-sm">Run Compliance Check</span>
             </Button>
 
@@ -1548,7 +1491,7 @@ export const SecurityOrchestrator: React.FC = () => {
               <span>Threat Intelligence</span>
             </TabsTrigger>
             <TabsTrigger value="compliance" className="flex items-center space-x-2">
-              <ShieldCheck className="h-4 w-4" />
+              <ShieldCheckIcon className="h-4 w-4" />
               <span>Compliance</span>
             </TabsTrigger>
             <TabsTrigger value="settings" className="flex items-center space-x-2">

@@ -17,52 +17,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { 
-  DollarSign,
-  TrendingDown,
-  TrendingUp,
-  Calculator,
-  PieChart,
-  BarChart3,
-  LineChart,
-  Target,
-  Settings,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  Calendar,
-  Download,
-  Upload,
-  Save,
-  Eye,
-  EyeOff,
-  RefreshCw,
-  Play,
-  Pause,
-  Stop,
-  Zap,
-  Shield,
-  Layers,
-  Activity,
-  Server,
-  Database,
-  HardDrive,
-  Cpu,
-  Monitor,
-  Filter,
-  Search,
-  Plus,
-  Minus,
-  Edit,
-  Trash2,
-  Copy,
-  MoreHorizontal,
-  ArrowUpDown,
-  ArrowUp,
-  ArrowDown,
-  Percent,
-  Scale
-} from 'lucide-react';
+import { DollarSign, TrendingDown, TrendingUp, Calculator, PieChart, BarChart3, LineChart, Target, Settings, AlertTriangle, CheckCircle, Clock, Calendar, Download, Upload, Save, Eye, EyeOff, RefreshCw, Play, Pause, Square, Zap, Shield, Layers, Activity, Server, Database, HardDrive, Cpu, Monitor, Filter, Search, Plus, Minus, Edit, Trash2, Copy, MoreHorizontal, ArrowUpDown, ArrowUp, ArrowDown, Percent, Scale } from 'lucide-react';
 import { LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, BarChart, Bar, PieChart as RechartsPieChart, Cell, ComposedChart, Area, AreaChart, ScatterChart, Scatter } from 'recharts';
 import { cn } from '@/lib/utils';
 import { useOptimization } from '../../hooks/useOptimization';

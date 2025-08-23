@@ -28,13 +28,7 @@ import {
   Tooltip, TooltipContent, TooltipProvider, TooltipTrigger
 } from '@/components/ui/tooltip';
 
-import { 
-  Users, UserCheck, Star, MapPin, Calendar, Clock, Mail, Phone, MessageSquare,
-  Video, Mic, FileText, Award, Trophy, Target, Zap, Brain, Lightbulb,
-  Search, Filter, Plus, Edit, MoreHorizontal, RefreshCw, Settings,
-  Network, Globe, Building, GraduationCap, Briefcase, Heart, BookOpen,
-  CheckCircle, XCircle, AlertTriangle, Eye, Send, Link, ExternalLink
-} from 'lucide-react';
+import { Users, UserCheck, Star, MapPin, Calendar, Clock, Mail, Phone, MessageSquare, Video, Mic, FileText, Award, Trophy, Target, Zap, Brain, Lightbulb, Search, Filter, Plus, Edit, MoreHorizontal, RefreshCw, Settings, Network, Globe, Building, GraduationCap, Briefcase, Heart, BookOpen, CheckCircle, XCircle, AlertTriangle, Eye, Send, Link, ExternalLink } from 'lucide-react';
 
 import { 
   LineChart as RechartsLineChart, Line, AreaChart, Area, BarChart, Bar, 
@@ -46,7 +40,7 @@ import { format, subDays, parseISO, formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 // Import backend services
-import { collaborationService } from '../../services/collaboration.service';
+import { collaborationService } from '../../services';
 import { intelligentDiscoveryService } from '../../services/intelligent-discovery.service';
 
 // Import types

@@ -48,58 +48,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import {
-  BarChart3,
-  TrendingUp,
-  TrendingDown,
-  Target,
-  Award,
-  Clock,
-  ArrowUpRight,
-  ArrowDownRight,
-  Activity,
-  Gauge,
-  PieChart,
-  LineChart,
-  RefreshCw,
-  Download,
-  Share,
-  X,
-  Info,
-  AlertTriangle,
-  CheckCircle,
-  Star,
-  Zap,
-  Brain,
-  Sparkles,
-  Filter,
-  Search,
-  Calendar,
-  Settings,
-  Eye,
-  ExternalLink,
-  TrendingUp as TrendUp,
-  BarChart2,
-  Database,
-  Users,
-  Shield,
-  Lock,
-  Unlock,
-  Flag,
-  MapPin,
-  Grid,
-  List,
-  Table,
-  Globe,
-  Network,
-  Layers,
-  BookOpen,
-  Lightbulb,
-  Circle,
-  CheckCircle2,
-  AlertCircle,
-  XCircle,
-} from 'lucide-react';
+import { BarChart3, TrendingUp, TrendingDown, Target, Award, Clock, ArrowUpRight, ArrowDownRight, Activity, Gauge, PieChart, LineChart, RefreshCw, Download, Share, X, Info, AlertTriangle, CheckCircle, Star, Zap, Brain, Sparkles, Filter, Search, Calendar, Settings, Eye, ExternalLink, TrendingUp as TrendUp, BarChart2, Database, Users, Shield, Lock, Unlock, Flag, MapPin, Grid, List, Table, Globe, Network, Layers, BookOpen, Lightbulb, Circle, CheckCircle2, AlertCircle, XCircle,  } from 'lucide-react';
 
 // Import hooks and services
 import { useComplianceRules as useComplianceRule } from '../../../../hooks/useComplianceRules';
@@ -998,3 +947,6 @@ const QuickComplianceMetrics: React.FC<QuickComplianceMetricsProps> = ({
 };
 
 export default QuickComplianceMetrics;
+
+// Named export for backward compatibility
+export { QuickComplianceMetrics };

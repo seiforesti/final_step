@@ -17,20 +17,7 @@ import {
   Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList,
   ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger
 } from '@/components/ui';
-import { 
-  Plus, Save, Download, Upload, Share2, Copy, Trash2, Edit3, 
-  Grid3X3, BarChart3, LineChart, PieChart, Activity, TrendingUp, 
-  Settings, Palette, Layout, Eye, EyeOff, Lock, Unlock, 
-  RotateCcw, RotateCw, ZoomIn, ZoomOut, Maximize2, Minimize2,
-  Search, Filter, SortAsc, SortDesc, Calendar, Clock,
-  Users, Database, Server, Shield, AlertTriangle, CheckCircle,
-  Code, Layers, Move, MousePointer, Hand, Square, Circle,
-  ArrowUp, ArrowDown, ArrowLeft, ArrowRight, MoreVertical,
-  RefreshCw, PlayCircle, PauseCircle, StopCircle, 
-  Folder, FolderOpen, FileText, Image, Video, Music,
-  Star, Heart, Bookmark, Tag, Flag, Bell, Mail,
-  Home, Building, Globe, Map, Navigation, Compass
-} from 'lucide-react';
+import { Plus, Save, Download, Upload, Share2, Copy, Trash2, Edit3, Grid3X3, BarChart3, LineChart, PieChart, Activity, TrendingUp, Settings, Palette, Layout, Eye, EyeOff, Lock, Unlock, RotateCcw, RotateCw, ZoomIn, ZoomOut, Maximize2, Minimize2, Search, Filter, SortAsc, SortDesc, Calendar, Clock, Users, Database, Server, Shield, AlertTriangle, CheckCircle, Code, Layers, Move, MousePointer, Hand, Square, Circle, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, MoreVertical, RefreshCw, PlayCircle, PauseCircle, StopCircle, Folder, FolderOpen, FileText, Image, Video, Music, Star, Heart, Bookmark, Tag, Flag, Bell, Mail, Home, Building, Globe, Map, Navigation, Compass } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { 
   DashboardWidget, WidgetType, DashboardLayout, VisualizationConfig,
@@ -1584,3 +1571,5 @@ export const CustomDashboardBuilder: React.FC<CustomDashboardBuilderProps> = ({
     </TooltipProvider>
   );
 };
+
+export default CustomDashboardBuilder;

@@ -18,80 +18,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { 
-  Cpu, 
-  Memory, 
-  HardDrive, 
-  Network, 
-  Server, 
-  Database, 
-  Settings, 
-  Activity, 
-  TrendingUp, 
-  TrendingDown, 
-  AlertTriangle, 
-  CheckCircle, 
-  XCircle, 
-  Clock, 
-  BarChart3, 
-  PieChart, 
-  LineChart, 
-  RefreshCw, 
-  Zap, 
-  Target, 
-  Play, 
-  Pause, 
-  Square, 
-  SkipForward, 
-  Edit, 
-  Trash2, 
-  Plus, 
-  Minus, 
-  Filter, 
-  Search, 
-  Download, 
-  Upload, 
-  Save, 
-  Eye, 
-  EyeOff, 
-  Maximize, 
-  Minimize, 
-  Info, 
-  AlertCircle, 
-  Calendar, 
-  User, 
-  Users, 
-  Shield, 
-  Lock, 
-  Unlock, 
-  Key, 
-  Globe, 
-  Layers, 
-  Package, 
-  Box, 
-  Archive, 
-  Folder, 
-  FileText, 
-  Star, 
-  Heart, 
-  Bookmark, 
-  Flag, 
-  Bell, 
-  Mail, 
-  Phone, 
-  MessageSquare, 
-  Share, 
-  Link, 
-  ExternalLink, 
-  ChevronDown, 
-  ChevronUp, 
-  ChevronRight, 
-  ChevronLeft, 
-  ArrowUp, 
-  ArrowDown, 
-  ArrowLeft, 
-  ArrowRight 
-} from 'lucide-react';
+import { Cpu, HardDrive, Network, Server, Database, Settings, Activity, TrendingUp, TrendingDown, AlertTriangle, CheckCircle, XCircle, Clock, BarChart3, PieChart, LineChart, RefreshCw, Zap, Target, Play, Pause, Square, SkipForward, Edit, Trash2, Plus, Minus, Filter, Search, Download, Upload, Save, Eye, EyeOff, Maximize, Minimize, Info, AlertCircle, Calendar, User, Users, Shield, Lock, Unlock, Key, Globe, Layers, Package, Box, Archive, Folder, FileText, Star, Heart, Bookmark, Flag, Bell, Mail, Phone, MessageSquare, Share, Link, ExternalLink, ChevronDown, ChevronUp, ChevronRight, ChevronLeft, ArrowUp, ArrowDown, ArrowLeft, ArrowRight } from 'lucide-react';
 import { useOrchestration } from '../../hooks/useOrchestration';
 import { useOptimization } from '../../hooks/useOptimization';
 import { useIntelligence } from '../../hooks/useIntelligence';
@@ -165,7 +92,7 @@ const ResourcePoolCard: React.FC<ResourcePoolCardProps> = ({
   const getResourceIcon = (type: ResourceType) => {
     switch (type) {
       case 'compute': return Cpu;
-      case 'memory': return Memory;
+      case 'memory': return HardDrive;
       case 'storage': return HardDrive;
       case 'network': return Network;
       case 'database': return Database;
@@ -208,7 +135,7 @@ const ResourcePoolCard: React.FC<ResourcePoolCardProps> = ({
           </div>
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span>Memory Usage</span>
+              <span>HardDrive Usage</span>
               <span className={getUtilizationColor(utilization.memory)}>
                 {utilization.memory}%
               </span>
@@ -868,7 +795,7 @@ const ResourceAllocationManager: React.FC<ResourceAllocationManagerProps> = ({
               <SelectContent>
                 <SelectItem value="all">All Types</SelectItem>
                 <SelectItem value="compute">Compute</SelectItem>
-                <SelectItem value="memory">Memory</SelectItem>
+                <SelectItem value="memory">HardDrive</SelectItem>
                 <SelectItem value="storage">Storage</SelectItem>
                 <SelectItem value="network">Network</SelectItem>
                 <SelectItem value="database">Database</SelectItem>
@@ -986,7 +913,7 @@ const ResourceAllocationManager: React.FC<ResourceAllocationManagerProps> = ({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="compute">Compute</SelectItem>
-                    <SelectItem value="memory">Memory</SelectItem>
+                    <SelectItem value="memory">HardDrive</SelectItem>
                     <SelectItem value="storage">Storage</SelectItem>
                     <SelectItem value="network">Network</SelectItem>
                     <SelectItem value="database">Database</SelectItem>

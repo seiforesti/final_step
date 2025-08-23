@@ -19,12 +19,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import {
-  Shield, CheckCircle, XCircle, AlertTriangle, TrendingUp, TrendingDown, 
-  Activity, RefreshCw, Play, Pause, Filter, Search, Calendar, Clock, 
-  BarChart3, Settings, Eye, AlertCircle, Info, ArrowUpRight, ArrowDownRight,
-  Target, Database, Users, Flag, Zap, Star, Circle, X
-} from 'lucide-react';
+import { Shield, CheckCircle, XCircle, AlertTriangle, TrendingUp, TrendingDown, Activity, RefreshCw, Play, Pause, Filter, Search, Calendar, Clock, BarChart3, Settings, Eye, AlertCircle, Info, ArrowUpRight, ArrowDownRight, Target, Database, Users, Flag, Zap, Star, Circle, X } from 'lucide-react';
 
 // Import hooks and services
 import { useComplianceRules as useComplianceRule } from '../../../../hooks/useComplianceRules';
@@ -550,3 +545,6 @@ const QuickComplianceStatus: React.FC<QuickComplianceStatusProps> = ({
 };
 
 export default QuickComplianceStatus;
+
+// Named export for backward compatibility
+export { QuickComplianceStatus };

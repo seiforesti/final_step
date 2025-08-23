@@ -48,22 +48,7 @@ import {
 import { Calendar } from '@/components/ui/calendar';
 import { Checkbox } from '@/components/ui/checkbox';
 
-import { 
-  Shield, UserCheck, Database, FileCheck, AlertTriangle, CheckCircle,
-  XCircle, Clock, Users, Search, Filter, Plus, Edit, Trash2, Eye,
-  Share2, Download, Upload, RefreshCw, MoreHorizontal, Star, Flag,
-  Archive, Bookmark, Tag, Link, GitBranch, Network, Activity, Zap,
-  Target, TrendingUp, BarChart3, PieChart, LineChart, Bell, Mail,
-  Phone, Video, MessageCircle, Send, Paperclip, Image, File, Folder,
-  ChevronDown, ChevronRight, ChevronLeft, ChevronUp, PlayCircle,
-  PauseCircle, StopCircle, SkipForward, ArrowRight, ArrowLeft,
-  ArrowUp, ArrowDown, Copy, Save, ExternalLink, Minimize, Maximize,
-  Grid, List, Layout, Layers, Map, Globe, Settings, Calendar as CalendarIcon,
-  Crown, Award, Briefcase, ClipboardCheck, FileText, BookOpen,
-  UserPlus, Users2, Building, Factory, Server, HardDrive, Cpu,
-  Memory, MonitorSpeaker, Smartphone, Tablet, Laptop, Desktop,
-  CloudUpload, CloudDownload, Cloud, Gauge, Workflow, BrainCircuit
-} from 'lucide-react';
+import { Shield, UserCheck, Database, FileCheck, AlertTriangle, CheckCircle, XCircle, Clock, Users, Search, Filter, Plus, Edit, Trash2, Eye, Share2, Download, Upload, RefreshCw, MoreHorizontal, Star, Flag, Archive, Bookmark, Tag, Link, GitBranch, Network, Activity, Zap, Target, TrendingUp, BarChart3, PieChart, LineChart, Bell, Mail, Phone, Video, MessageCircle, Send, Paperclip, Image, File, Folder, ChevronDown, ChevronRight, ChevronLeft, ChevronUp, PlayCircle, PauseCircle, StopCircle, SkipForward, ArrowRight, ArrowLeft, ArrowUp, ArrowDown, Copy, Save, ExternalLink, Minimize, Maximize, Grid, List, Layout, Layers, Map, Globe, Settings, Calendar as CalendarIcon, Crown, Award, Briefcase, ClipboardCheck, FileText, BookOpen, UserPlus, Users2, Building, Factory, Server, HardDrive, Cpu, MonitorSpeaker, Smartphone, Tablet, Laptop, Desktop, CloudUpload, CloudDownload, Cloud, Gauge, Workflow, BrainCircuit } from 'lucide-react';
 
 import { 
   LineChart as RechartsLineChart, Line, AreaChart, Area, BarChart, Bar, 
@@ -76,7 +61,7 @@ import { format, subDays, parseISO, formatDistanceToNow, isWithinInterval, start
 import { cn } from '@/lib/utils';
 
 // Import backend services
-import { collaborationService } from '../../services/collaboration.service';
+import { collaborationService } from '../../services';
 import { enterpriseCatalogService } from '../../services/enterprise-catalog.service';
 import { catalogQualityService } from '../../services/catalog-quality.service';
 import { intelligentDiscoveryService } from '../../services/intelligent-discovery.service';

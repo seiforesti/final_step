@@ -128,10 +128,10 @@ import { useAuditLogs } from '../../hooks/useAuditLogs';
 import { useRBACWebSocket } from '../../hooks/useRBACWebSocket';
 
 // Components
-import GroupList from './GroupList';
-import GroupDetails from './GroupDetails';
-import GroupCreateEdit from './GroupCreateEdit';
-import GroupMemberManagement from './GroupMemberManagement';
+import { GroupList } from './GroupList';
+import { GroupDetails } from './GroupDetails';
+import { GroupCreateEdit } from './GroupCreateEdit';
+import { GroupMemberManagement } from './GroupMemberManagement';
 
 // Types
 import type { Group } from '../../types/group.types';
@@ -182,7 +182,7 @@ const GROUP_TYPES = [
   { value: 'custom', label: 'Custom', icon: Tag, color: 'bg-purple-100 text-purple-800' },
 ];
 
-const GroupManagement: React.FC<GroupManagementProps> = ({
+export const GroupManagement: React.FC<GroupManagementProps> = ({
   className = ''
 }) => {
   // State Management
@@ -768,4 +768,3 @@ const GroupManagement: React.FC<GroupManagementProps> = ({
   );
 };
 
-export default GroupManagement;

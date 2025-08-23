@@ -797,6 +797,9 @@ class DashboardAPI {
 // Create and export singleton instance
 export const dashboardAPI = new DashboardAPI();
 
+// Export as performanceMonitoringAPI for backward compatibility
+export const performanceMonitoringAPI = dashboardAPI;
+
 // Export class for direct instantiation if needed
 export { DashboardAPI };
 

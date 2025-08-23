@@ -30,19 +30,7 @@ import { LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, X
 import * as d3 from 'd3';
 
 // Icons
-import { 
-  Activity, AlertTriangle, CheckCircle, XCircle, Clock, TrendingUp, TrendingDown, 
-  Zap, Heart, Shield, Eye, Settings, Refresh, Play, Pause, Stop, Download, 
-  Upload, Filter, Search, MoreVertical, MoreHorizontal, Bell, BellOff,
-  Target, Gauge, BarChart3, PieChart as PieChartIcon, LineChart as LineChartIcon,
-  Monitor, Server, Database, Cpu, MemoryStick, HardDrive, Network, Wifi,
-  AlertCircle, Info, Warning, CheckCircle2, X, Plus, Minus, ArrowUp, ArrowDown,
-  ArrowLeft, ArrowRight, RotateCcw, RotateCw, Maximize, Minimize, Expand,
-  Calendar as CalendarIcon, Clock as ClockIcon, Timer, Stopwatch, 
-  Users, User, UserCheck, UserX, Crown, Lock, Unlock, Key,
-  FileText, File, Folder, FolderOpen, Archive, Trash2, Edit3, Copy,
-  Share, ExternalLink, Link, Unlink, Globe, MapPin, Compass, Navigation
-} from 'lucide-react';
+import { Activity, AlertTriangle, CheckCircle, XCircle, Clock, TrendingUp, TrendingDown, Zap, Heart, Shield, Eye, Settings, RefreshCw, Play, Pause, Square, Download, Upload, Filter, Search, MoreVertical, MoreHorizontal, Bell, BellOff, Target, Gauge, BarChart3, PieChart as PieChartIcon, LineChart as LineChartIcon, Monitor, Server, Database, Cpu, MemoryStick, HardDrive, Network, Wifi, AlertCircle, Info, Warning, CheckCircle2, X, Plus, Minus, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, RotateCcw, RotateCw, Maximize, Minimize, Expand, Calendar as CalendarIcon, Clock as ClockIcon, Timer, Users, User, UserCheck, UserX, Crown, Lock, Unlock, Key, FileText, File, Folder, FolderOpen, Archive, Trash2, Edit3, Copy, Share, ExternalLink, Link, Unlink, Globe, MapPin, Compass, Navigation } from 'lucide-react';
 
 // Racine System Hooks
 import { usePipelineManagement } from '../../hooks/usePipelineManagement';
@@ -141,10 +129,10 @@ const HEALTH_STATUS_CONFIG = {
 // Health Monitoring Strategies
 const MONITORING_STRATEGIES = {
   realtime: { interval: 1000, label: 'Real-time', icon: Activity },
-  frequent: { interval: 5000, label: 'Frequent (5s)', icon: Refresh },
+  frequent: { interval: 5000, label: 'Frequent (5s)', icon: RefreshCw },
   normal: { interval: 30000, label: 'Normal (30s)', icon: Clock },
   moderate: { interval: 60000, label: 'Moderate (1m)', icon: Timer },
-  conservative: { interval: 300000, label: 'Conservative (5m)', icon: Stopwatch }
+  conservative: { interval: 300000, label: 'Conservative (5m)', icon: Timer }
 };
 
 // Health Visualization Types

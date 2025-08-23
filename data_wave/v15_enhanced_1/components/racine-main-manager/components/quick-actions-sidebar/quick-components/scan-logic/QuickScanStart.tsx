@@ -30,17 +30,7 @@ import {
 import {
   Alert, AlertDescription, AlertTitle
 } from '@/components/ui/alert';
-import {
-  Play, Pause, StopCircle, Settings, Target, Zap, Brain, 
-  Sparkles, Shield, Database, Table, FileText, Folder,
-  Clock, Calendar, User, Users, Globe, Lock, Unlock,
-  Eye, EyeOff, Search, Filter, RefreshCw, Download,
-  Upload, Save, Copy, Edit, Trash, Plus, Minus, X,
-  CheckCircle, AlertCircle, Info, HelpCircle, Star,
-  Activity, TrendingUp, BarChart3, PieChart, Layers,
-  Network, GitBranch, Route, Workflow, Component,
-  Fingerprint, Radar, Crosshair, Focus, Scan, Bell
-} from 'lucide-react';
+import { Play, Pause, StopCircle, Settings, Target, Zap, Brain, Sparkles, Shield, Database, Table, FileText, Folder, Clock, Calendar, User, Users, Globe, Lock, Unlock, Eye, EyeOff, Search, Filter, RefreshCw, Download, Upload, Save, Copy, Edit, Trash, Plus, Minus, X, CheckCircle, AlertCircle, Info, HelpCircle, Star, Activity, TrendingUp, BarChart3, PieChart, Layers, Network, GitBranch, Route, Workflow, Component, Fingerprint, Radar, Crosshair, Focus, Scan, Bell } from 'lucide-react';
 
 import { useScanLogic } from '../../../../hooks/useScanLogic';
 import { useWorkspaceManagement } from '../../../../hooks/useWorkspaceManagement';

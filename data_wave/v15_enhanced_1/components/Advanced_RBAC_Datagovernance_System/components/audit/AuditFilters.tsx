@@ -1,20 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import {
-  Filter, Search, Calendar, Clock, User, Users, Database, Key, Settings,
-  ChevronDown, ChevronUp, ChevronRight, ChevronLeft, Plus, Minus, X, Check,
-  RefreshCw, Save, Star, StarOff, Bookmark, Eye, EyeOff, Target, Shield,
-  AlertTriangle, Info, CheckCircle2, XCircle, Flag, Tag, Globe, MapPin,
-  Building, Smartphone, Monitor, Server, Wifi, Brain, Zap, Activity,
-  TrendingUp, TrendingDown, BarChart3, PieChart, LineChart, ArrowUpDown,
-  SortAsc, SortDesc, Grid, List, Hash, Type, Calendar as CalendarIcon,
-  Download, Upload, Share, Copy, Edit, Trash2, Archive, MoreHorizontal,
-  FileText, Folder, Lock, Unlock, ShieldCheck, AlertCircle, Lightbulb,
-  HelpCircle, Play, Pause, Square, SkipForward, SkipBack, Volume2, VolumeX,
-  Maximize2, Minimize2, RotateCcw, RotateCw, Repeat, Shuffle, Command,
-  Terminal, Code, Package, Box, Truck, ShoppingCart, CreditCard, DollarSign
-} from 'lucide-react';
+import { Filter, Search, Calendar, Clock, User, Users, Database, Key, Settings, ChevronDown, ChevronUp, ChevronRight, ChevronLeft, Plus, Minus, X, Check, RefreshCw, Save, Star, StarOff, Bookmark, Eye, EyeOff, Target, Shield, AlertTriangle, Info, CheckCircle2, XCircle, Flag, Tag, Globe, MapPin, Building, Smartphone, Monitor, Server, Wifi, Brain, Zap, Activity, TrendingUp, TrendingDown, BarChart3, PieChart, LineChart, ArrowUpDown, SortAsc, SortDesc, Grid, List, Hash, Type, Calendar as CalendarIcon, Download, Upload, Share, Copy, Edit, Trash2, Archive, MoreHorizontal, FileText, Folder, Lock, Unlock, ShieldCheckIcon, AlertCircle, Lightbulb, HelpCircle, Play, Pause, Square, SkipForward, SkipBack, Volume2, VolumeX, Maximize2, Minimize2, RotateCcw, RotateCw, Repeat, Shuffle, Command, Terminal, Code, Package, Box, Truck, ShoppingCart, CreditCard, DollarSign } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -216,7 +203,7 @@ const EVENT_TYPES = [
   { value: 'configuration', label: 'Configuration', icon: Settings, color: 'text-orange-600' },
   { value: 'user_management', label: 'User Management', icon: Users, color: 'text-teal-600' },
   { value: 'system', label: 'System Events', icon: Server, color: 'text-gray-600' },
-  { value: 'security', label: 'Security Events', icon: ShieldCheck, color: 'text-red-600' },
+  { value: 'security', label: 'Security Events', icon: ShieldCheckIcon, color: 'text-red-600' },
   { value: 'compliance', label: 'Compliance', icon: FileText, color: 'text-indigo-600' }
 ];
 

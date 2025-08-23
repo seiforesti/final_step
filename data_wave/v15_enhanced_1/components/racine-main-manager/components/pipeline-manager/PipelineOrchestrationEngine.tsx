@@ -2,15 +2,7 @@
 
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Network, GitBranch, Play, Pause, Stop, RefreshCw, Settings, Target,
-  Activity, BarChart3, TrendingUp, Clock, AlertTriangle, CheckCircle,
-  XCircle, Zap, Database, Search, Shield, Users, Brain, Package,
-  Code, Terminal, FileText, MoreHorizontal, X, Plus, Minus, Eye,
-  EyeOff, Filter, Download, Upload, Save, Copy, Edit3, Trash2,
-  Layers, Route, MapPin, Compass, Navigation, Globe, Monitor,
-  Server, Cloud, Wifi, Link2, Unlink2, Share2, Bell, Volume2
-} from 'lucide-react';
+import { Network, GitBranch, Play, Pause, Square, RefreshCw, Settings, Target, Activity, BarChart3, TrendingUp, Clock, AlertTriangle, CheckCircle, XCircle, Zap, Database, Search, Shield, Users, Brain, Package, Code, Terminal, FileText, MoreHorizontal, X, Plus, Minus, Eye, EyeOff, Filter, Download, Upload, Save, Copy, Edit3, Trash2, Layers, Route, MapPin, Compass, Navigation, Globe, Monitor, Server, Cloud, Wifi, Link2, Unlink2, Share2, Bell, Volume2 } from 'lucide-react';
 
 // UI Components
 import { Button } from '@/components/ui/button';

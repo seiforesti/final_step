@@ -2034,6 +2034,13 @@ export interface TimeoutSettings {
   escalation_targets?: string[]
 }
 
+export interface RetrySettings {
+  max_retries: number
+  retry_delay: number
+  backoff_strategy: 'linear' | 'exponential' | 'constant'
+  retry_conditions: string[]
+}
+
 export interface StepAssignment {
   assignment_type: 'user' | 'role' | 'group' | 'automatic'
   assignee: string
@@ -2097,12 +2104,177 @@ export interface NotificationTemplate {
 }
 
 // ============================================================================
+// ML PIPELINE TYPES (For TrainingPipelineManager)
+// ============================================================================
+
+export interface MLModel {
+  id: string;
+  name: string;
+  version: string;
+  type: 'classification' | 'regression' | 'clustering' | 'custom';
+  status: 'training' | 'ready' | 'deployed' | 'archived' | 'failed';
+  accuracy: number;
+  metadata: {
+    createdAt: string;
+    updatedAt: string;
+    createdBy: string;
+    framework: string;
+    algorithm: string;
+  };
+}
+
+export interface TrainingPipeline {
+  id: string;
+  name: string;
+  stages: PipelineStage[];
+  status: 'draft' | 'running' | 'completed' | 'failed';
+  metadata: {
+    createdAt: string;
+    updatedAt: string;
+    createdBy: string;
+  };
+}
+
+export interface PipelineStage {
+  id: string;
+  name: string;
+  type: 'data_preparation' | 'training' | 'validation' | 'deployment';
+  status: 'pending' | 'running' | 'completed' | 'failed';
+  dependencies: string[];
+}
+
+export interface PipelineTemplate {
+  id: string;
+  name: string;
+  description: string;
+  stages: PipelineStage[];
+  metadata: {
+    createdAt: string;
+    createdBy: string;
+    tags: string[];
+  };
+}
+
+export interface PipelineMetrics {
+  totalPipelines: number;
+  runningPipelines: number;
+  completedPipelines: number;
+  failedPipelines: number;
+  averageExecutionTime: number;
+}
+
+export interface PipelineExecution {
+  id: string;
+  pipelineId: string;
+  status: 'running' | 'completed' | 'failed';
+  startTime: string;
+  endTime?: string;
+  progress: number;
+  logs: string[];
+}
+
+export interface TrainingConfiguration {
+  modelType: string;
+  hyperparameters: HyperparameterConfig;
+  dataset: DatasetInfo;
+  validation: ValidationConfig;
+  deployment: DeploymentConfig;
+}
+
+export interface HyperparameterConfig {
+  learningRate: number;
+  batchSize: number;
+  epochs: number;
+  optimizer: string;
+  lossFunction: string;
+  [key: string]: any;
+}
+
+export interface DatasetInfo {
+  id: string;
+  name: string;
+  size: number;
+  features: string[];
+  targetColumn: string;
+}
+
+export interface ValidationConfig {
+  validationSplit: number;
+  crossValidation: boolean;
+  metrics: string[];
+}
+
+export interface MLNotification {
+  id: string;
+  type: 'training_complete' | 'model_deployed' | 'error' | 'warning';
+  title: string;
+  message: string;
+  severity: 'info' | 'warning' | 'error' | 'critical';
+  read: boolean;
+  metadata: {
+    createdAt: string;
+    userId: string;
+  };
+}
+
+export interface TrainingJobCreate {
+  modelId: string;
+  configuration: TrainingConfiguration;
+}
+
+export interface PipelineOptimization {
+  id: string;
+  pipelineId: string;
+  type: 'performance' | 'resource' | 'cost';
+  status: 'pending' | 'running' | 'completed' | 'failed';
+  recommendations: Array<{
+    action: string;
+    impact: string;
+    effort: string;
+    priority: number;
+  }>;
+}
+
+export interface ResourceAllocation {
+  cpu: number;
+  memory: number;
+  gpu?: number;
+  storage: number;
+  network: number;
+}
+
+// ============================================================================
+// COMPONENT-COMPATIBLE WRAPPER TYPES
+// ============================================================================
+
+// Wrapper interface for TrainingJob that matches component expectations
+export interface TrainingJobWrapper {
+  id: string;
+  name: string;
+  modelId: string;
+  description?: string;
+  status: string;
+  progress: number;
+  startTime?: string;
+  endTime?: string;
+  duration?: number;
+  metrics?: {
+    accuracy: number;
+    loss: number;
+  };
+  updatedAt: string;
+  createdAt: string;
+  logs: string[];
+  configuration: TrainingConfiguration;
+}
+
+// ============================================================================
 // EXPORT ALL TYPES
 // ============================================================================
 
 export type ClassificationType = 'manual' | 'ml' | 'ai' | 'hybrid'
 export type ClassificationVersion = 'v1' | 'v2' | 'v3'
-export type UIComponentSize = 'sm' | 'md' | 'lg' | 'xl'
+export type UIComponentSize = 'sm' | 'md' | 'lg' | 'xl' | 'full'
 export type UIComponentVariant = 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'error'
 export type LoadingState = 'idle' | 'loading' | 'success' | 'error'
 export type ViewMode = 'list' | 'grid' | 'table' | 'chart'

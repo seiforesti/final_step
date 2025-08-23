@@ -22,28 +22,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import {
-  Edit,
-  Trash2,
-  ChevronDown,
-  ChevronUp,
-  Settings,
-  Bell,
-  Ticket,
-  Play,
-  CheckCircle,
-  Webhook,
-  PlusCircle,
-  Loader2,
-  Activity,
-  BarChart3,
-  Clock,
-  Zap,
-  AlertTriangle,
-  TrendingUp,
-  TrendingDown,
-  Minus
-} from "lucide-react"
+import { Edit, Trash2, ChevronDown, ChevronUp, Settings, Bell, Ticket, Play, CheckCircle, Webhook, PlusCircle, Loader2, Activity, BarChart3, Clock, Zap, AlertTriangle, TrendingUp, TrendingDown, Minus } from 'lucide-react'
 import { Separator } from "@/components/ui/separator"
 import { useEnterpriseFeatures } from "../hooks/use-enterprise-features"
 import { ComplianceAPIs } from "../services/enterprise-apis"

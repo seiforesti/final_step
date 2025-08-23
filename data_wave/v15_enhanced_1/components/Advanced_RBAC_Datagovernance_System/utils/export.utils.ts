@@ -978,9 +978,109 @@ export async function importRBACData(
   }
 }
 
+/**
+ * Export users to JSON format
+ */
+export function exportUsersToJSON(
+  users: User[],
+  options: Partial<ExportOptions> = {}
+): string {
+  const { 
+    dateFormat = 'iso',
+    privacy = 'none'
+  } = options;
+  
+  const exportData = users.map(user => {
+    const userData: any = {
+      id: user.id,
+      email: user.email,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      display_name: user.display_name,
+      status: user.status,
+      created_at: formatDate(user.created_at, { format: dateFormat }),
+      updated_at: formatDate(user.updated_at, { format: dateFormat })
+    };
+    
+    if (privacy === 'none') {
+      userData.username = user.username;
+      userData.last_login = formatDate(user.last_login, { format: dateFormat });
+      userData.is_active = user.is_active;
+      userData.is_verified = user.is_verified;
+    }
+    
+    return userData;
+  });
+  
+  return JSON.stringify(exportData, null, 2);
+}
+
+/**
+ * Export users to Excel format (CSV with advanced formatting)
+ */
+export function exportUsersToExcel(
+  users: User[],
+  options: Partial<ExportOptions> = {}
+): string {
+  const { 
+    includeHeaders = true, 
+    dateFormat = 'local',
+    privacy = 'none'
+  } = options;
+  
+  const headers = [
+    'ID',
+    'Email',
+    'First Name',
+    'Last Name',
+    'Display Name',
+    'Status',
+    'Created At',
+    'Updated At'
+  ];
+  
+  if (privacy === 'none') {
+    headers.push('Username', 'Last Login', 'Is Active', 'Is Verified');
+  }
+  
+  const rows = includeHeaders ? [headers.join(',')] : [];
+  
+  users.forEach(user => {
+    const row = [
+      user.id.toString(),
+      `"${user.email || ''}"`,
+      `"${user.first_name || ''}"`,
+      `"${user.last_name || ''}"`,
+      `"${user.display_name || ''}"`,
+      user.status,
+      formatDate(user.created_at, { format: dateFormat }),
+      formatDate(user.updated_at, { format: dateFormat })
+    ];
+    
+    if (privacy === 'none') {
+      row.push(
+        `"${user.username || ''}"`,
+        formatDate(user.last_login, { format: dateFormat }),
+        user.is_active ? 'Yes' : 'No',
+        user.is_verified ? 'Yes' : 'No'
+      );
+    }
+    
+    rows.push(row.join(','));
+  });
+  
+  return rows.join('\n');
+}
+
+// Add lowercase alias for compatibility
+export const exportRolesToCsv = exportRolesToCSV;
+
 export default {
   exportUsersToCSV,
+  exportUsersToJSON,
+  exportUsersToExcel,
   exportRolesToCSV,
+  exportRolesToCsv,
   exportPermissionsToCSV,
   exportAuditLogsToCSV,
   exportAccessRequestsToCSV,

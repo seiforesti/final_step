@@ -11,17 +11,7 @@ import {
   Popover, PopoverContent, PopoverTrigger, Alert, AlertDescription, AlertTitle,
   ResizablePanelGroup, ResizablePanel, ResizableHandle
 } from '@/components/ui';
-import { 
-  BarChart3, PieChart, LineChart, TrendingUp, TrendingDown, Activity, Users, MessageCircle, Clock, Calendar,
-  Target, Award, Trophy, Medal, Crown, Zap, Brain, Lightbulb, Eye, ThumbsUp, Share, Download, Upload, Settings,
-  Filter, Search, RefreshCw, Bell, BellOff, Plus, Edit, Trash2, MoreHorizontal, ChevronDown, ChevronUp, ChevronLeft,
-  ChevronRight, ArrowUp, ArrowDown, ArrowRight, ArrowLeft, X, Check, CheckCircle, AlertTriangle, Info, HelpCircle,
-  Loader2, Star, Heart, Bookmark, Flag, Copy, ExternalLink, FileText, Folder, FolderOpen, Tag, Tags, Globe, Building,
-  Factory, Briefcase, GraduationCap, BookMarked, Library, Database, Server, Cloud, Cpu, Monitor, Smartphone, Tablet,
-  Laptop, MousePointer, Hand, Grab, Move, CornerDownRight, Maximize2, Minimize2, RotateCcw, Play, Pause, StopCircle,
-  SkipForward, SkipBack, Volume2, VolumeX, Mic, MicOff, Camera, CameraOff, Phone, Video, Navigation, Compass, Map,
-  Route, Telescope, Microscope, FlaskConical, Beaker, Atom, Dna, Type, Palette, Layers, Grid, Layout
-} from 'lucide-react';
+import { BarChart3, PieChart, LineChart, TrendingUp, TrendingDown, Activity, Users, MessageCircle, Clock, Calendar, Target, Award, Trophy, Medal, Crown, Zap, Brain, Lightbulb, Eye, ThumbsUp, Share, Download, Upload, Settings, Filter, Search, RefreshCw, Bell, BellOff, Plus, Edit, Trash2, MoreHorizontal, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, ArrowUp, ArrowDown, ArrowRight, ArrowLeft, X, Check, CheckCircle, AlertTriangle, Info, HelpCircle, Loader2, Star, Heart, Bookmark, Flag, Copy, ExternalLink, FileText, Folder, FolderOpen, Tag, Tags, Globe, Building, Factory, Briefcase, GraduationCap, BookMarked, Library, Database, Server, Cloud, Cpu, Monitor, Smartphone, Tablet, Laptop, MousePointer, Hand, Grab, Move, CornerDownRight, Maximize2, Minimize2, RotateCcw, Play, Pause, StopCircle, SkipForward, SkipBack, Volume2, VolumeX, Mic, MicOff, Camera, CameraOff, Phone, Video, Navigation, Compass, Map, Route, Microscope, FlaskConical, Beaker, Atom, Dna, Type, Palette, Layers, Grid, Layout } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCollaboration } from '../../hooks/useCollaboration';
 import { useRacineOrchestration } from '../../hooks/useRacineOrchestration';

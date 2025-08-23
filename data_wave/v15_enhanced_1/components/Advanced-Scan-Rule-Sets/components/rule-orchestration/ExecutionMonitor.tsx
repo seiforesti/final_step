@@ -15,49 +15,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { 
-  Activity, 
-  Play, 
-  Pause, 
-  Square, 
-  RotateCcw,
-  RefreshCw,
-  Eye,
-  EyeOff,
-  AlertTriangle,
-  CheckCircle,
-  XCircle,
-  Clock,
-  TrendingUp,
-  TrendingDown,
-  BarChart3,
-  LineChart,
-  PieChart,
-  Zap,
-  Database,
-  Server,
-  Cpu,
-  Memory,
-  Network,
-  Bell,
-  BellOff,
-  Filter,
-  Search,
-  Download,
-  Settings,
-  MoreHorizontal,
-  ArrowUp,
-  ArrowDown,
-  Target,
-  Shield,
-  Users,
-  Globe,
-  Calendar,
-  Info,
-  Maximize,
-  Minimize,
-  ExternalLink
-} from 'lucide-react';
+import { Activity, Play, Pause, Square, RotateCcw, RefreshCw, Eye, EyeOff, AlertTriangle, CheckCircle, XCircle, Clock, TrendingUp, TrendingDown, BarChart3, LineChart, PieChart, Zap, Database, Server, Cpu, HardDrive, Network, Bell, BellOff, Filter, Search, Download, Settings, MoreHorizontal, ArrowUp, ArrowDown, Target, Shield, Users, Globe, Calendar, Info, Maximize, Minimize, ExternalLink } from 'lucide-react';
 
 // Hooks and Services
 import { useOrchestration } from '../../hooks/useOrchestration';
@@ -435,8 +393,8 @@ const ExecutionMonitor: React.FC<ExecutionMonitorProps> = ({
             
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Memory className="w-4 h-4" />
-                <span className="text-sm">Memory</span>
+                <HardDrive className="w-4 h-4" />
+                <span className="text-sm">HardDrive</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-sm">{systemHealth.memory.usage}%</span>
@@ -851,7 +809,7 @@ const ExecutionMonitor: React.FC<ExecutionMonitorProps> = ({
                         </div>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-sm">Memory Pool</span>
+                        <span className="text-sm">HardDrive Pool</span>
                         <div className="flex items-center gap-2">
                           <span className="text-sm">2.1/4.0 GB</span>
                           <Progress value={52.5} className="w-20" />

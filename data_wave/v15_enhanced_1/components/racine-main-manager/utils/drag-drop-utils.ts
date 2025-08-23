@@ -428,4 +428,23 @@ export const validateComponentPlacement = (
   };
 };
 
+export const calculateSnapToGrid = (
+  position: { x: number; y: number },
+  gridSize: number = 10
+): { x: number; y: number } => {
+  return {
+    x: Math.round(position.x / gridSize) * gridSize,
+    y: Math.round(position.y / gridSize) * gridSize
+  };
+};
+
+export const dragDropUtils = {
+  createDragItem,
+  createDropZone,
+  calculateDragOffset,
+  isDragThresholdMet,
+  validateComponentPlacement,
+  calculateSnapToGrid
+};
+
 export default DragDropManager;

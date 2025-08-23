@@ -23,7 +23,6 @@ import {
   Squares2X2Icon,
   ListBulletIcon,
   TableCellsIcon,
-  TreePineIcon,
   StarIcon,
   BoltIcon,
   SparklesIcon,
@@ -38,6 +37,7 @@ import {
   CalendarIcon,
   FireIcon
 } from '@heroicons/react/24/outline';
+import { TreePine } from 'lucide-react';
 import { roleService } from '../../services/role.service';
 import { userService } from '../../services/user.service';
 import { useCurrentUser } from '../../hooks/useCurrentUser';
@@ -520,7 +520,7 @@ export const RoleManagement: React.FC<RoleManagementProps> = ({
         <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <TreePineIcon className="h-8 w-8 text-orange-600" />
+                              <TreePine className="h-8 w-8 text-orange-600" />
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-500">Hierarchy Depth</p>
@@ -619,7 +619,7 @@ export const RoleManagement: React.FC<RoleManagementProps> = ({
                 className={`p-2 ${viewSettings.mode === 'tree' ? 'bg-blue-100 text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
                 title="Tree view"
               >
-                <TreePineIcon className="h-4 w-4" />
+                <TreePine className="h-4 w-4" />
               </button>
             )}
           </div>
@@ -902,7 +902,7 @@ export const RoleManagement: React.FC<RoleManagementProps> = ({
             className="p-3 bg-purple-600 text-white rounded-full shadow-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
             title="Manage role hierarchy"
           >
-            <TreePineIcon className="h-6 w-6" />
+                            <TreePine className="h-6 w-6" />
           </button>
         )}
 

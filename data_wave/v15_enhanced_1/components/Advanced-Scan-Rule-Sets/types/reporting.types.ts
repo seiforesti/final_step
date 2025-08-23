@@ -1,6 +1,19 @@
 // Advanced Scan Rule Sets - Reporting Types
 // Comprehensive type definitions for analytics, reporting, and visualization
 
+// ============================================================================
+// API ERROR TYPE
+// ============================================================================
+
+export interface APIError {
+  message: string;
+  code: string;
+  status: number;
+  details?: any;
+  timestamp?: string;
+  requestId?: string;
+}
+
 export interface AnalyticsDashboard {
   id: string;
   name: string;
@@ -1032,3 +1045,17 @@ export interface AccessibilityPreferences {
 }
 
 export type ColorBlindnessType = 'none' | 'protanopia' | 'deuteranopia' | 'tritanopia' | 'achromatopsia';
+
+// =============================================================================
+// API ERROR TYPES
+// =============================================================================
+
+export interface APIError {
+  code: string;
+  message: string;
+  details?: any;
+  timestamp?: string;
+  path?: string;
+  method?: string;
+  statusCode?: number;
+}

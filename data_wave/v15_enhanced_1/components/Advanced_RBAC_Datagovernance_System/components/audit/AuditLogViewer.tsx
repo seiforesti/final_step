@@ -1,27 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import {
-  Activity, AlertTriangle, Shield, Eye, EyeOff, Search, Filter, Calendar,
-  Clock, User, Users, Database, Key, Lock, Unlock, Settings, RefreshCw,
-  Download, Upload, Share, MoreHorizontal, ChevronDown, ChevronUp, ChevronRight,
-  ChevronLeft, Play, Pause, Square, SkipForward, SkipBack, Volume2, VolumeX,
-  Zap, Brain, Target, TrendingUp, TrendingDown, BarChart3, PieChart, LineChart,
-  Map, Globe, MapPin, Smartphone, Monitor, Server, Wifi, Bluetooth, Cpu,
-  HardDrive, Network, Router, Fingerprint, ShieldCheck, AlertCircle, Info,
-  CheckCircle2, XCircle, Flag, Tag, Bookmark, Star, StarOff, Heart, MessageSquare,
-  FileText, Image, Video, Headphones, Paperclip, Link, ExternalLink, Copy,
-  Edit, Trash2, Archive, Send, Reply, Forward, Save, Print, Mail, Phone,
-  Building, Home, Car, Plane, Train, Ship, TreePine, Mountain, Sun, Moon,
-  Cloud, CloudRain, Snowflake, Thermometer, Wind, Waves, Flame, Droplets,
-  Lightbulb, BatteryCharging, PowerOff, Wifi as WifiIcon, Signal, Radar,
-  Satellite, Telescope, Microscope, Beaker, Flask, Atom, Dna, Pill, Stethoscope,
-  Timer, Stopwatch, AlarmClock, History, RotateCcw, RotateCw, Repeat, Shuffle,
-  List, Grid, Layers, GitBranch, GitCommit, GitMerge, GitPullRequest, Code,
-  Terminal, Command, Package, Box, Truck, ShoppingCart, CreditCard, DollarSign,
-  Euro, PoundSterling, Coins, Banknote, Wallet, Receipt, Calculator, Scale,
-  Ruler, Scissors, PaintBucket, Palette, Brush, Pen, PenTool, Eraser, Highlighter
-} from 'lucide-react';
+import { Activity, AlertTriangle, Shield, Eye, EyeOff, Search, Filter, Calendar, Clock, User, Users, Database, Key, Lock, Unlock, Settings, RefreshCw, Download, Upload, Share, MoreHorizontal, ChevronDown, ChevronUp, ChevronRight, ChevronLeft, Play, Pause, Square, SkipForward, SkipBack, Volume2, VolumeX, Zap, Brain, Target, TrendingUp, TrendingDown, BarChart3, PieChart, LineChart, Map, Globe, MapPin, Smartphone, Monitor, Server, Wifi, Bluetooth, Cpu, HardDrive, Network, Router, Fingerprint, ShieldCheckIcon, AlertCircle, Info, CheckCircle2, XCircle, Flag, Tag, Bookmark, Star, StarOff, Heart, MessageSquare, FileText, Image, Video, Headphones, Paperclip, Link, ExternalLink, Copy, Edit, Trash2, Archive, Send, Reply, Forward, Save, Print, Mail, Phone, Building, Home, Car, Plane, Train, Ship, TreePine, Mountain, Sun, Moon, Cloud, CloudRain, Snowflake, Thermometer, Wind, Waves, Flame, Droplets, Lightbulb, BatteryCharging, PowerOff, Wifi as WifiIcon, Signal, Radar, Satellite, Microscope, Beaker, Flask, Atom, Dna, Pill, Stethoscope, Timer, Stopwatch, AlarmClock, History, RotateCcw, RotateCw, Repeat, Shuffle, List, Grid, Layers, GitBranch, GitCommit, GitMerge, GitPullRequest, Code, Terminal, Command, Package, Box, Truck, ShoppingCart, CreditCard, DollarSign, Euro, PoundSterling, Coins, Banknote, Wallet, Receipt, Calculator, Scale, Ruler, Scissors, PaintBucket, Palette, Brush, Pen, PenTool, Eraser, Highlighter } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -296,7 +276,7 @@ const AUDIT_EVENT_TYPES = [
   { value: 'configuration', label: 'Configuration', icon: Settings, color: 'text-orange-600' },
   { value: 'user_management', label: 'User Management', icon: Users, color: 'text-teal-600' },
   { value: 'system', label: 'System Events', icon: Server, color: 'text-gray-600' },
-  { value: 'security', label: 'Security Events', icon: ShieldCheck, color: 'text-red-600' },
+  { value: 'security', label: 'Security Events', icon: ShieldCheckIcon, color: 'text-red-600' },
   { value: 'compliance', label: 'Compliance', icon: FileText, color: 'text-indigo-600' }
 ];
 
@@ -310,7 +290,7 @@ const SEVERITY_LEVELS = [
 const THREAT_CATEGORIES = [
   { value: 'brute_force', label: 'Brute Force Attack', severity: 'high', icon: Target },
   { value: 'privilege_escalation', label: 'Privilege Escalation', severity: 'critical', icon: TrendingUp },
-  { value: 'data_exfiltration', label: 'Data Exfiltration', severity: 'critical', icon: Download },
+  { value: 'data_exfiltration', label: 'Data Exfiltration', severity: 'critical', icon: ArrowDownTrayIcon },
   { value: 'suspicious_pattern', label: 'Suspicious Pattern', severity: 'medium', icon: Brain },
   { value: 'anomaly', label: 'Behavioral Anomaly', severity: 'medium', icon: Activity },
   { value: 'compliance_violation', label: 'Compliance Violation', severity: 'high', icon: Flag }

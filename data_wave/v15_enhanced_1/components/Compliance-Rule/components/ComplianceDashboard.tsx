@@ -7,11 +7,7 @@ import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import {
-  BarChart3, TrendingUp, TrendingDown, Shield, AlertTriangle, CheckCircle,
-  Clock, Users, FileText, Activity, Target, Award, Zap, Database,
-  RefreshCw, Filter, Download, Settings
-} from "lucide-react"
+import { BarChart3, TrendingUp, TrendingDown, Shield, AlertTriangle, CheckCircle, Clock, Users, FileText, Activity, Target, Award, Zap, Database, RefreshCw, Filter, Download, Settings } from 'lucide-react'
 
 // Enterprise Integration
 import { ComplianceHooks } from '../hooks/use-enterprise-features'

@@ -25,19 +25,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 
 // Icons from Lucide React
-import {
-  Shield, AlertTriangle, CheckCircle, Clock, Users, FileText, BarChart3, Settings,
-  Search, Filter, Download, Upload, RefreshCw, Plus, Edit, Trash2, Eye, Calendar,
-  TrendingUp, TrendingDown, Activity, Zap, Target, Award, Bell, MessageSquare,
-  ChevronRight, ChevronDown, ExternalLink, Copy, Share2, Bookmark, Star,
-  Play, Pause, Square, SkipForward, Rewind, FastForward, Volume2,
-  Database, Cloud, Server, Lock, Unlock, Key, Fingerprint, Scan,
-  GitBranch, GitCommit, GitMerge, Code, Terminal, Bug, Lightbulb,
-  PieChart, LineChart, BarChart, Gauge, Radar, Map, Globe, Layers,
-  Workflow, Boxes, Package, Truck, Plane, Ship, Train, Car,
-  Home, Building, Factory, Store, Warehouse, Office, School, Hospital,
-  CreditCard, Monitor, Wifi, HardDrive, Cpu, MemoryStick, Network
-} from 'lucide-react'
+import { Shield, AlertTriangle, CheckCircle, Clock, Users, FileText, BarChart3, Settings, Search, Filter, Download, Upload, RefreshCw, Plus, Edit, Trash2, Eye, Calendar, TrendingUp, TrendingDown, Activity, Zap, Target, Award, Bell, MessageSquare, ChevronRight, ChevronDown, ExternalLink, Copy, Share2, Bookmark, Star, Play, Pause, Square, SkipForward, Rewind, FastForward, Volume2, Database, Cloud, Server, Lock, Unlock, Key, Fingerprint, Scan, GitBranch, GitCommit, GitMerge, Code, Terminal, Bug, Lightbulb, PieChart, LineChart, BarChart, Gauge, Radar, Map, Globe, Layers, Workflow, Boxes, Package, Truck, Plane, Ship, Train, Car, Home, Building, Factory, Store, Warehouse, Office, School, Building2, CreditCard, Monitor, Wifi, HardDrive, Cpu, MemoryStick, Network } from 'lucide-react'
 
 // Enterprise Integration
 import { EnterpriseComplianceProvider, useEnterpriseCompliance } from './enterprise-integration'
@@ -63,7 +51,7 @@ import ComplianceIssueList from './components/ComplianceIssueList'
 import { ComplianceRuleCreateModal } from './components/ComplianceRuleCreateModal'
 import { ComplianceRuleEditModal } from './components/ComplianceRuleEditModal'
 import { ComplianceRuleDetails } from './components/ComplianceRuleDetails'
-import { IntegrationCreateModal } from './components/IntegrationCreateModal'
+import IntegrationCreateModal from './components/IntegrationCreateModal'
 import { IntegrationEditModal } from './components/IntegrationEditModal'
 import { ReportCreateModal } from './components/ReportCreateModal'
 import { ReportEditModal } from './components/ReportEditModal'
@@ -680,7 +668,7 @@ const WorkflowOrchestrationPanel: React.FC<{ workflows: any[]; onExecute: (id: s
                       <div className="p-2 bg-primary/10 rounded">
                         {template.category === 'Security' && <Shield className="h-4 w-4 text-primary" />}
                         {template.category === 'Privacy' && <Database className="h-4 w-4 text-primary" />}
-                        {template.category === 'Healthcare' && <Hospital className="h-4 w-4 text-primary" />}
+                        {template.category === 'Healthcare' && <Building2 className="h-4 w-4 text-primary" />}
                         {template.category === 'Financial' && <CreditCard className="h-4 w-4 text-primary" />}
                         {!['Security', 'Privacy', 'Healthcare', 'Financial'].includes(template.category) && 
                           <Workflow className="h-4 w-4 text-primary" />}
