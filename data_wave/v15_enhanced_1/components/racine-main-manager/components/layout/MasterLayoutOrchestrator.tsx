@@ -82,7 +82,7 @@ export interface MasterLayoutOrchestratorProps {
   aspectRatio?: 'auto' | '16:9' | '4:3' | '1:1';
   
   // Event Handlers
-  onLayoutChange?: (layout: LayoutConfiguration) => void;
+  onPreferencesChange?: (layout: LayoutConfiguration) => void;
   onSPASwitch?: (spaType: SPAType) => void;
   onPerformanceAlert?: (metrics: LayoutPerformanceMetrics) => void;
   
@@ -266,7 +266,7 @@ export const MasterLayoutOrchestrator: React.FC<MasterLayoutOrchestratorProps> =
   minWidth = 320,
   maxWidth,
   aspectRatio = 'auto',
-  onLayoutChange,
+  onPreferencesChange,
   onSPASwitch,
   onPerformanceAlert,
   className,
@@ -578,7 +578,7 @@ export const MasterLayoutOrchestrator: React.FC<MasterLayoutOrchestratorProps> =
       }
       
       // Notify parent component
-      onLayoutChange?.(newLayout);
+      onPreferencesChange?.(newLayout);
       
     } catch (error) {
       console.error('Failed to apply layout configuration:', error);
@@ -598,7 +598,7 @@ export const MasterLayoutOrchestrator: React.FC<MasterLayoutOrchestratorProps> =
     enableAnalytics,
     adaptLayoutForSPA,
     adaptLayoutForBreakpoint,
-    onLayoutChange
+    onPreferencesChange
   ]);
 
   // ========================================================================
@@ -928,8 +928,10 @@ export const MasterLayoutOrchestrator: React.FC<MasterLayoutOrchestratorProps> =
         {layoutState.deviceType === 'desktop' && (
           <LayoutPersonalization
             currentLayout={layoutState.activeLayout}
-            userPreferences={userPreferences}
-            onLayoutChange={(newLayout) => {
+            layoutPreferences={userPreferences}
+            userContext={{ id: "user-1", name: "Current User", preferences: userPreferences }}
+            workspaceContext={spaContext ? { id: spaContext.spaType, name: spaContext.spaType } : undefined}
+            onPreferencesChange={async (newLayout) => {
               updateLayoutPrefs(newLayout);
               applyLayoutConfiguration(newLayout.mode || 'default');
             }}
