@@ -1213,18 +1213,25 @@ const LayoutPersonalization: React.FC<LayoutPersonalizationProps> = ({
   // INITIALIZATION
   // =============================================================================
 
+  const initializationRef = useRef(false);
+
   useEffect(() => {
+    // Prevent multiple initializations
+    if (initializationRef.current) return;
+    
     const initializePersonalization = async () => {
       try {
+        initializationRef.current = true;
+        
         // Load user profiles
         const profiles = await getUserProfiles(userContext.id);
         
-        // Get AI recommendations
+        // Get AI recommendations - use initial learning data, not from state
         const recommendations = await getPersonalizationRecommendations({
           userId: userContext.id,
           currentPreferences: layoutPreferences,
           workspaceContext: workspaceContext?.id,
-          usageData: personalizationState.learningData
+          usageData: [] // Use empty array initially to avoid circular dependency
         });
 
         setPersonalizationState(prev => ({
@@ -1235,6 +1242,7 @@ const LayoutPersonalization: React.FC<LayoutPersonalizationProps> = ({
 
       } catch (error) {
         console.error('Error initializing personalization:', error);
+        initializationRef.current = false; // Reset on error to allow retry
       }
     };
 
@@ -1243,7 +1251,6 @@ const LayoutPersonalization: React.FC<LayoutPersonalizationProps> = ({
     userContext.id,
     workspaceContext?.id,
     layoutPreferences,
-    personalizationState.learningData,
     getUserProfiles,
     getPersonalizationRecommendations
   ]);
