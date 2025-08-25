@@ -549,7 +549,7 @@ const LayoutPersonalization: React.FC<LayoutPersonalizationProps> = ({
   } = useAIAssistant(userContext.id, {
     context: 'personalization',
     currentPreferences: personalizationState.activePreferences,
-    usageData: personalizationState.learningData
+    // usageData: personalizationState.learningData
   });
 
   const {
@@ -587,7 +587,6 @@ const LayoutPersonalization: React.FC<LayoutPersonalizationProps> = ({
       // Apply AI optimization
       const optimizedPreferences = await optimizePersonalization({
         preferences,
-        userBehavior: personalizationState.learningData,
         deviceContext: {
           type: window.innerWidth < 768 ? 'mobile' : 'desktop',
           capabilities: navigator.hardwareConcurrency || 4
@@ -648,7 +647,6 @@ const LayoutPersonalization: React.FC<LayoutPersonalizationProps> = ({
   }, [
     userContext.id,
     workspaceContext?.id,
-    personalizationState.learningData,
     personalizationState.syncAcrossDevices,
     optimizePersonalization,
     updateUserPreferences,
@@ -1224,7 +1222,7 @@ const LayoutPersonalization: React.FC<LayoutPersonalizationProps> = ({
           userId: userContext.id,
           currentPreferences: layoutPreferences,
           workspaceContext: workspaceContext?.id,
-          usageData: personalizationState.learningData
+          // usageData: personalizationState.learningData
         });
 
         setPersonalizationState(prev => ({
@@ -1243,7 +1241,6 @@ const LayoutPersonalization: React.FC<LayoutPersonalizationProps> = ({
     userContext.id,
     workspaceContext?.id,
     layoutPreferences,
-    personalizationState.learningData,
     getUserProfiles,
     getPersonalizationRecommendations
   ]);
