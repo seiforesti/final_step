@@ -596,6 +596,7 @@ export type InsightStatus = IntelligenceStatus;
 export type PredictionType = PredictiveModelType;
 export type ModelType = PredictiveModelType;
 
+<<<<<<< HEAD
 // Enum definitions for component compatibility
 export enum InsightCategory {
   PERFORMANCE = 'performance',
@@ -663,6 +664,8 @@ export enum ModelType {
   ONLINE_LEARNING = 'online_learning'
 }
 
+=======
+>>>>>>> 3842dcdabc88f42b5e543242e2677cb4a51464f7
 // Missing enum types
 export enum TimeHorizon {
   SHORT_TERM = 'short_term',

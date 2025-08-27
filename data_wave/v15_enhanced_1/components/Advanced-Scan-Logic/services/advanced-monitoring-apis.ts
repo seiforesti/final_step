@@ -96,6 +96,7 @@ const ENDPOINTS = {
  * Provides comprehensive integration with advanced monitoring backend
  */
 export class AdvancedMonitoringAPIService {
+  [x: string]: any;
   private apiClient: ApiClient;
 
   constructor() {

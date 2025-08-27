@@ -149,7 +149,7 @@ interface UseAIAssistantOptions {
 /**
  * useAIAssistant hook
  */
-export function useAIAssistant(options: UseAIAssistantOptions = {}) {
+export function useAIAssistant(p0: string, p1: { context: string; currentBreakpoint: ResponsiveBreakpoint; deviceType: "desktop" | "tablet" | "mobile"; currentLayout: LayoutConfiguration; }, options: UseAIAssistantOptions = {}) {
   const {
     enableRealTimeUpdates = true,
     enableContextAwareness = true,

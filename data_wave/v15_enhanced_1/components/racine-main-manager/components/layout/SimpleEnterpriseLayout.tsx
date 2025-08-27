@@ -371,3 +371,4 @@ export const SimpleEnterpriseLayout: React.FC<SimpleEnterpriseLayoutProps> = ({
 // ============================================================================
 
 export default SimpleEnterpriseLayout;
+
