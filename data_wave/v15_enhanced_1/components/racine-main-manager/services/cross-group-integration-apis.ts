@@ -218,6 +218,7 @@ export interface SyncOptions {
 class CrossGroupIntegrationAPI {
   private config: IntegrationAPIConfig;
   private authToken: string | null = null;
+  private sessionId: string | null = null;
   private websocket: WebSocket | null = null;
   private eventSubscriptions: Map<UUID, IntegrationEventSubscription> = new Map();
   private syncTimers: Map<string, NodeJS.Timeout> = new Map();
@@ -238,6 +239,13 @@ class CrossGroupIntegrationAPI {
    */
   setAuthToken(token: string): void {
     this.authToken = token;
+  }
+
+  /**
+   * Set session ID for tracking
+   */
+  setSessionId(sessionId: string): void {
+    this.sessionId = sessionId;
   }
 
   /**
@@ -1844,6 +1852,32 @@ class CrossGroupIntegrationAPI {
     } catch (error) {
       console.error('Failed to schedule integration job:', error);
       throw error;
+    }
+  }
+
+  /**
+   * Track navigation and other events for analytics
+   * Maps to: POST /api/racine/integration/analytics/track
+   */
+  async trackEvent(eventType: string, eventData: any): Promise<boolean> {
+    try {
+      const response = await fetch(`${this.config.baseURL}/api/racine/integration/analytics/track`, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify({
+          event_type: eventType,
+          event_data: eventData,
+          timestamp: new Date().toISOString(),
+          session_id: this.sessionId || 'anonymous'
+        })
+      });
+
+      // Return true for successful tracking, false for failed
+      return response.ok;
+    } catch (error) {
+      console.warn('Event tracking failed:', error);
+      // Don't throw - tracking is non-critical
+      return false;
     }
   }
 

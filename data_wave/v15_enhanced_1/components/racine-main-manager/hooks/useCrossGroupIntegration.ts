@@ -862,6 +862,39 @@ export function useCrossGroupIntegration(config: CrossGroupIntegrationHookConfig
       eventHandlersRef.current.clear();
     },
 
+    // Navigation tracking (CRITICAL FIX)
+    trackNavigation: async (navigationData: {
+      action: string;
+      view?: string;
+      path?: string;
+      timestamp: string;
+      user?: string;
+      workspace?: string;
+      from?: string;
+      to?: string;
+    }) => {
+      try {
+        // Track navigation to backend analytics service
+        const trackingResult = await crossGroupIntegrationAPI.trackEvent('navigation', navigationData);
+        
+        // Update local event log
+        updateState({
+          eventLog: [...state.eventLog.slice(-99), {
+            id: Date.now().toString(),
+            type: 'navigation',
+            data: navigationData,
+            timestamp: navigationData.timestamp
+          }]
+        });
+        
+        return trackingResult;
+      } catch (error) {
+        console.warn('Navigation tracking failed:', error);
+        // Don't throw error - tracking is non-critical
+        return false;
+      }
+    },
+
     // Utility operations
     refresh: async () => {
       await checkIntegrationHealth();
@@ -923,8 +956,8 @@ export function useCrossGroupIntegration(config: CrossGroupIntegrationHookConfig
 
   // Memoized return value
   return useMemo(() => ({
-    state,
-    operations,
+    ...state,
+    ...operations,
     config
   }), [state, operations, config]);
 }
