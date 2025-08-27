@@ -704,6 +704,9 @@ export const WORKFLOW_TEMPLATES_REGISTRY = {
 
 export default WORKFLOW_TEMPLATES_REGISTRY;
 
+// Export alias for backward compatibility
+export const WORKFLOW_TEMPLATES = ENTERPRISE_WORKFLOW_TEMPLATES;
+
 // ==========================================
 // FAILURE AND RECOVERY CONFIGURATIONS
 // ==========================================
@@ -820,4 +823,53 @@ export const DEPENDENCY_DEFAULT_CONFIGURATION = {
   governance_policy_enforcement: true,
   audit_dependency_changes: true,
   version_control_enabled: true
+} as const;
+
+// ==========================================
+// FAILURE RECOVERY CONSTANTS
+// ==========================================
+
+export const TEMPLATE_CATEGORIES = {
+  DATA_QUALITY: 'data_quality',
+  SECURITY_COMPLIANCE: 'security_compliance',
+  PERFORMANCE_OPTIMIZATION: 'performance_optimization',
+  SYSTEM_INTEGRATION: 'system_integration',
+  BUSINESS_PROCESS: 'business_process',
+  INFRASTRUCTURE: 'infrastructure',
+  MONITORING_ALERTING: 'monitoring_alerting',
+  DISASTER_RECOVERY: 'disaster_recovery',
+  COMPLIANCE_AUDIT: 'compliance_audit',
+  OPERATIONAL_EXCELLENCE: 'operational_excellence'
+} as const;
+
+export const SEVERITY_LEVELS = {
+  CRITICAL: 'critical',
+  HIGH: 'high',
+  MEDIUM: 'medium',
+  LOW: 'low',
+  INFO: 'info'
+} as const;
+
+export const FAILURE_TYPES = {
+  SYSTEM_FAILURE: 'system_failure',
+  DATA_CORRUPTION: 'data_corruption',
+  NETWORK_TIMEOUT: 'network_timeout',
+  AUTHENTICATION_ERROR: 'authentication_error',
+  AUTHORIZATION_ERROR: 'authorization_error',
+  RESOURCE_EXHAUSTION: 'resource_exhaustion',
+  CONFIGURATION_ERROR: 'configuration_error',
+  INTEGRATION_FAILURE: 'integration_failure',
+  PERFORMANCE_DEGRADATION: 'performance_degradation',
+  COMPLIANCE_VIOLATION: 'compliance_violation'
+} as const;
+
+export const RECOVERY_STRATEGIES = {
+  RETRY: 'retry',
+  FALLBACK: 'fallback',
+  CIRCUIT_BREAKER: 'circuit_breaker',
+  COMPENSATION: 'compensation',
+  ROLLBACK: 'rollback',
+  ESCALATION: 'escalation',
+  AUTOMATIC_RECOVERY: 'automatic_recovery',
+  MANUAL_INTERVENTION: 'manual_intervention'
 } as const;

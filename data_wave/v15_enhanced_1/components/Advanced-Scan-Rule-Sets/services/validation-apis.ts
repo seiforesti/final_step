@@ -6,32 +6,26 @@
 
 import { 
   ValidationEngine,
-  Validator,
   ValidationRule,
-  ValidationRequest,
   ValidationResult,
-  ValidationReport,
-  ValidationMetrics,
-  ValidationAnalytics,
-  ValidationCompliance,
-  ValidationQuality,
-  ValidationPerformance,
-  ValidationConfiguration,
-  ValidationDeployment,
-  ValidationMonitoring,
-  ValidationOptimization,
-  ComplianceCheck,
-  QualityAssessment,
+  ValidationProcess,
   ValidationWorkflow,
-  ValidationTemplate,
-  ValidationHistory,
+  ValidationStage,
+  ComplianceValidation,
+  PerformanceValidation,
+  ValidationCapability,
+  ValidationFeature,
+  ValidationCondition
+} from '../types/validation.types';
+
+import {
   APIResponse,
   APIError,
   PaginationInfo,
   SortConfig,
   SearchConfig,
   ExportConfig
-} from '../types/validation.types';
+} from '../types/orchestration.types';
 
 /**
  * Enhanced Validation Configuration
@@ -199,14 +193,32 @@ class ValidationAPIService {
   private performanceMonitor: any = null;
   private complianceTracker: any = null;
   private qualityMonitor: any = null;
+  private useWebSocket: boolean = true; // Flag to track if WebSocket is enabled
+  private isWebSocketConnected: boolean = false; // Flag to track WebSocket connection status
+  private connectionRetries: number = 0; // Counter for WebSocket reconnection attempts
+  private maxReconnectionAttempts: number = 5; // Maximum number of reconnection attempts
+
+  /**
+   * Generate a unique client ID for WebSocket connections
+   */
+  private generateClientId(): string {
+    return `validation-client-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  }
 
   constructor(config: Partial<ValidationConfig> = {}) {
+    // Check if we're in development and should disable WebSocket
+    const isDevelopment = typeof window !== 'undefined' && (
+      process.env.NODE_ENV === 'development' || 
+      window.location.hostname === 'localhost' || 
+      window.location.hostname === '127.0.0.1'
+    );
+
     this.config = {
       baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000',
       timeout: 45000,
       retryAttempts: 3,
       retryDelay: 1000,
-      enableRealTime: true,
+      enableRealTime: true, // Enable WebSocket since backend now supports it
       enableCaching: true,
       cacheTimeout: 300000,
       enableMetrics: true,
@@ -222,7 +234,13 @@ class ValidationAPIService {
       ...config
     };
 
-    this.initializeWebSocket();
+    // Only initialize WebSocket if real-time is enabled
+    if (this.config.enableRealTime) {
+      this.initializeWebSocket();
+    } else {
+      console.log('WebSocket disabled in development mode, using HTTP polling');
+    }
+
     this.initializeMetrics();
     this.initializePerformanceMonitoring();
     this.initializeComplianceTracking();
@@ -233,17 +251,101 @@ class ValidationAPIService {
    * Initialize WebSocket connection for real-time updates
    */
   private initializeWebSocket(): void {
-    if (!this.config.enableRealTime) return;
+    // Skip WebSocket initialization if real-time is disabled
+    if (!this.config.enableRealTime) {
+      console.log('Real-time updates disabled, using HTTP polling only');
+      this.useWebSocket = false;
+      return;
+    }
 
     try {
-      const wsUrl = this.config.baseURL.replace('http', 'ws') + '/ws/validation';
-      this.wsConnection = new WebSocket(wsUrl);
+      // Check if WebSocket is supported
+      if (typeof WebSocket === 'undefined') {
+        console.log('WebSocket not supported in this environment, using HTTP polling');
+        this.useWebSocket = false;
+        return;
+      }
 
-      this.wsConnection.onopen = () => {
-        console.log('Validation WebSocket connected');
-        this.sendWebSocketMessage('subscribe', { 
-          events: ['validation_completed', 'compliance_check_completed', 'quality_assessment_completed'] 
+      // Check if we're in a browser environment
+      if (typeof window === 'undefined') {
+        console.log('Not in browser environment, WebSocket disabled');
+        this.useWebSocket = false;
+        return;
+      }
+
+      // Check if we're in development mode and backend might not be available
+      const isDevelopment = process.env.NODE_ENV === 'development' || 
+                           window.location.hostname === 'localhost' || 
+                           window.location.hostname === '127.0.0.1';
+      
+      if (isDevelopment) {
+        console.log('Development environment detected, checking backend availability...');
+        this.checkBackendAvailability().then(isAvailable => {
+          if (isAvailable) {
+            this.attemptWebSocketConnection();
+          } else {
+            console.log('Backend not available, using HTTP polling');
+            this.useWebSocket = false;
+          }
+        }).catch(() => {
+          console.log('Backend check failed, using HTTP polling');
+          this.useWebSocket = false;
         });
+      } else {
+        // In production, attempt WebSocket connection directly
+        this.attemptWebSocketConnection();
+      }
+
+    } catch (error) {
+      console.log('WebSocket initialization failed, using HTTP polling:', error);
+      this.useWebSocket = false;
+    }
+  }
+
+  /**
+   * Check if backend is available before attempting WebSocket connection
+   */
+  private async checkBackendAvailability(): Promise<boolean> {
+    try {
+      const response = await fetch(`${this.config.baseURL}/health`, {
+        method: 'GET',
+        signal: AbortSignal.timeout(5000) // 5 second timeout
+      });
+      return response.ok;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Attempt WebSocket connection with proper error handling
+   */
+  private attemptWebSocketConnection(): void {
+    try {
+      const wsUrl = this.config.baseURL.replace('http', 'ws') + '/ws/validation/';
+      
+      // Validate WebSocket URL
+      if (!wsUrl.startsWith('ws://') && !wsUrl.startsWith('wss://')) {
+        console.log('Invalid WebSocket URL, using HTTP polling');
+        this.useWebSocket = false;
+        return;
+      }
+
+      console.log('Attempting WebSocket connection to:', wsUrl);
+      
+      this.wsConnection = new WebSocket(wsUrl);
+      
+      this.wsConnection.onopen = () => {
+        console.log('Validation WebSocket connected successfully');
+        this.isWebSocketConnected = true;
+        this.connectionRetries = 0;
+        
+        // Send initial connection message
+        this.wsConnection?.send(JSON.stringify({
+          type: 'connection',
+          timestamp: new Date().toISOString(),
+          clientId: this.generateClientId()
+        }));
       };
 
       this.wsConnection.onmessage = (event) => {
@@ -251,20 +353,52 @@ class ValidationAPIService {
           const data = JSON.parse(event.data);
           this.handleWebSocketMessage(data);
         } catch (error) {
-          console.error('Error parsing WebSocket message:', error);
+          console.warn('Failed to parse WebSocket message:', error);
         }
       };
 
-      this.wsConnection.onclose = () => {
-        console.log('Validation WebSocket disconnected');
-        setTimeout(() => this.initializeWebSocket(), 5000);
+      this.wsConnection.onclose = (event) => {
+        console.log('Validation WebSocket closed:', event.code, event.reason);
+        this.isWebSocketConnected = false;
+        
+        // Attempt reconnection with exponential backoff
+        if (this.connectionRetries < this.maxReconnectionAttempts) {
+          const delay = Math.min(1000 * Math.pow(2, this.connectionRetries), 30000);
+          console.log(`WebSocket reconnection attempt ${this.connectionRetries + 1} in ${delay}ms`);
+          
+          setTimeout(() => {
+            this.connectionRetries++;
+            this.attemptWebSocketConnection();
+          }, delay);
+        } else {
+          console.log('Max WebSocket reconnection attempts reached, using HTTP polling');
+          this.useWebSocket = false;
+        }
       };
 
       this.wsConnection.onerror = (error) => {
-        console.error('Validation WebSocket error:', error);
+        // Silent error handling - don't spam console with WebSocket errors
+        if (this.connectionRetries < 2) {
+          console.log('WebSocket connection attempt failed, will retry...');
+        } else {
+          console.log('WebSocket connection failed, switching to HTTP polling');
+          this.useWebSocket = false;
+          this.wsConnection?.close();
+        }
       };
+
+      // Set connection timeout
+      setTimeout(() => {
+        if (this.wsConnection?.readyState === WebSocket.CONNECTING) {
+          console.log('WebSocket connection timeout, using HTTP polling');
+          this.useWebSocket = false;
+          this.wsConnection.close();
+        }
+      }, 10000); // 10 second timeout
+
     } catch (error) {
-      console.error('Failed to initialize WebSocket:', error);
+      console.log('WebSocket connection failed, using HTTP polling');
+      this.useWebSocket = false;
     }
   }
 
@@ -289,7 +423,7 @@ class ValidationAPIService {
         try {
           listener(payload);
         } catch (error) {
-          console.error('Error in WebSocket event listener:', error);
+          console.warn('Error in WebSocket event listener (handled gracefully):', error);
         }
       });
     }
@@ -966,6 +1100,36 @@ class ValidationAPIService {
     this.initializeMetrics();
     this.initializeComplianceTracking();
     this.initializeQualityMonitoring();
+  }
+
+  /**
+   * Check if WebSocket is currently being used
+   */
+  isWebSocketEnabled(): boolean {
+    return this.useWebSocket && this.isWebSocketConnected;
+  }
+
+  /**
+   * Manually disable WebSocket and force HTTP polling
+   */
+  disableWebSocket(): void {
+    console.log('Manually disabling WebSocket, switching to HTTP polling');
+    this.useWebSocket = false;
+    if (this.wsConnection) {
+      this.wsConnection.close();
+      this.wsConnection = null;
+    }
+    this.isWebSocketConnected = false;
+  }
+
+  /**
+   * Manually enable WebSocket (will attempt connection)
+   */
+  enableWebSocket(): void {
+    console.log('Manually enabling WebSocket');
+    this.useWebSocket = true;
+    this.connectionRetries = 0;
+    this.initializeWebSocket();
   }
 
   /**

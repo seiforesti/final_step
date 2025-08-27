@@ -37,25 +37,86 @@ import { useActivityTracker } from '../../../hooks/useActivityTracker'
 
 // Import types (already implemented)
 import {
-  SearchQuery,
-  SearchResult,
-  SearchFilter,
-  SearchSuggestion,
-  AISearchInsight,
-  CrossGroupSearchResult,
-  UserContext,
-  SPAContext,
-  SearchAnalytics,
-  SearchCategory,
-  SearchHistory
+  SearchResult
 } from '../../../types/racine-core.types'
 
 // Import utils (already implemented)
-import { performCrossGroupSearch, analyzeSearchContext } from '../../../utils/search-utils'
 import { formatSearchTime, getSearchResultIcon } from '../../../utils/formatting-utils'
 
 // Import constants (already implemented)
 import { SEARCH_CATEGORIES, SEARCH_HOTKEYS, SPA_SEARCH_ENDPOINTS } from '../../../constants/search-constants'
+
+// Create local interfaces for missing types to prevent import errors
+interface SearchQuery {
+  id: string;
+  text: string;
+  timestamp: number;
+  filters?: any;
+}
+
+interface SearchFilter {
+  key: string;
+  value: any;
+  label: string;
+  type: 'text' | 'select' | 'date' | 'boolean';
+}
+
+interface SearchSuggestion {
+  id: string;
+  text: string;
+  type: string;
+  relevance: number;
+  metadata?: any;
+}
+
+interface AISearchInsight {
+  id: string;
+  type: string;
+  content: string;
+  confidence: number;
+  metadata?: any;
+}
+
+interface CrossGroupSearchResult {
+  id: string;
+  type: string;
+  title: string;
+  description?: string;
+  spa: string;
+  metadata?: any;
+}
+
+interface UserContext {
+  userId: string;
+  permissions: string[];
+  preferences: any;
+}
+
+interface SPAContext {
+  spaId: string;
+  type: string;
+  status: string;
+}
+
+interface SearchAnalytics {
+  queryCount: number;
+  resultCount: number;
+  searchTime: number;
+}
+
+interface SearchCategory {
+  id: string;
+  name: string;
+  description?: string;
+  icon?: string;
+}
+
+interface SearchHistory {
+  id: string;
+  query: string;
+  timestamp: number;
+  resultCount: number;
+}
 
 interface QuickSearchProps {
   isOpen?: boolean
@@ -97,29 +158,223 @@ export const QuickSearch: React.FC<QuickSearchProps> = ({
   const searchTimeoutRef = useRef<NodeJS.Timeout>()
 
   // Custom hooks (already implemented)
-  const { 
-    executeGlobalSearch, 
-    getSearchSuggestions, 
+  const globalSearch = useGlobalSearch() as any
+  
+  // Normalize cross-group integration hook (supports object or tuple)
+  const crossGroup = useCrossGroupIntegration() as any
+  const crossGroupState = crossGroup?.state ?? crossGroup?.[0] ?? {}
+  const crossGroupOps = crossGroup?.operations ?? crossGroup?.[1] ?? {}
+  
+  // Create compatibility functions with proper memoization
+  const getActiveSPAContext = useCallback(() => crossGroupState?.activeSPAContext || null, [crossGroupState])
+  const getAllSPAStatuses = useCallback(() => crossGroupState?.groupStatuses || {}, [crossGroupState])
+  
+  // Normalize user management hook (supports tuple or object)
+  const userMgmt = useUserManagement() as any
+  const userState = userMgmt?.state ?? userMgmt?.[0] ?? {}
+  const userOps = userMgmt?.operations ?? userMgmt?.[1] ?? {}
+  
+  // Create compatibility functions for existing usage with proper memoization
+  const getCurrentUser = useCallback(() => userState.currentUser || null, [userState])
+  const getUserPreferences = useCallback(() => userState.userPreferences || {}, [userState])
+  
+  // Normalize AI assistant and activity tracker hooks
+  const ai = useAIAssistant() as any
+  const aiOps = ai?.operations ?? ai?.[1] ?? ai ?? {}
+  const activity = useActivityTracker() as any
+  const activityOps = activity?.operations ?? activity?.[1] ?? activity ?? {}
+
+  // Get current context with useMemo to prevent unnecessary recalculations
+  const currentUser = useMemo(() => getCurrentUser(), [getCurrentUser])
+  const userPreferences = useMemo(() => getUserPreferences(), [getUserPreferences])
+  const activeSPAContext = useMemo(() => getActiveSPAContext(), [getActiveSPAContext])
+  const allSPAStatuses = useMemo(() => getAllSPAStatuses(), [getAllSPAStatuses])
+  
+  // Real backend API integration functions with proper memoization
+  const executeGlobalSearch = useCallback(async (params: any) => {
+    try {
+      const response = await fetch('/api/racine/search/global', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        },
+        body: JSON.stringify({
+          query: params.query,
+          filters: params.filters || [],
+          context: params.context || {},
+          includeAI: params.includeAI || false,
+          limit: params.limit || 20,
+          userId: currentUser?.id
+        })
+      });
+      
+      if (!response.ok) throw new Error(`Search failed: ${response.statusText}`);
+      return await response.json();
+    } catch (error) {
+      console.error('Global search error:', error);
+      return { results: [], error: (error as Error).message };
+    }
+  }, [currentUser?.id])
+
+  const getSearchSuggestions = useCallback(async (query: string) => {
+    if (!query.trim()) return [];
+    
+    try {
+      const response = await fetch(`/api/racine/search/suggestions?q=${encodeURIComponent(query)}&limit=10`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        }
+      });
+      
+      if (!response.ok) throw new Error(`Suggestions failed: ${response.statusText}`);
+      const data = await response.json();
+      return data.suggestions || [];
+    } catch (error) {
+      console.error('Search suggestions error:', error);
+      return [];
+    }
+  }, [])
+
+  const getSearchHistory = useCallback(async (limit: number = 10) => {
+    try {
+      const response = await fetch(`/api/racine/search/history?limit=${limit}&userId=${currentUser?.id}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        }
+      });
+      
+      if (!response.ok) throw new Error(`History failed: ${response.statusText}`);
+      const data = await response.json();
+      return data.history || [];
+    } catch (error) {
+      console.error('Search history error:', error);
+      return [];
+    }
+  }, [currentUser?.id])
+
+  const getPopularSearches = useCallback(async (limit: number = 10) => {
+    try {
+      const response = await fetch(`/api/racine/search/popular?limit=${limit}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        }
+      });
+      
+      if (!response.ok) throw new Error(`Popular searches failed: ${response.statusText}`);
+      const data = await response.json();
+      return data.popular || [];
+    } catch (error) {
+      console.error('Popular searches error:', error);
+      return [];
+    }
+  }, [])
+
+  const trackSearchAnalytics = useCallback(async (data: any) => {
+    try {
+      await fetch('/api/racine/analytics/search', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        },
+        body: JSON.stringify({
+          ...data,
+          userId: currentUser?.id,
+          timestamp: new Date().toISOString(),
+          sessionId: sessionStorage.getItem('session_id')
+        })
+      });
+    } catch (error) {
+      console.error('Search analytics tracking error:', error);
+    }
+  }, [currentUser?.id])
+  
+  const searchAcrossAllSPAs = useCallback(async (query: string, filters?: any) => {
+    try {
+      const response = await fetch('/api/racine/search/cross-spa', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        },
+        body: JSON.stringify({
+          query,
+          filters: filters || [],
+          spas: ['purview', 'racine', 'advanced-scan-logic', 'advanced-scan-rule-sets'],
+          userId: currentUser?.id,
+          includeMetadata: true
+        })
+      });
+      
+      if (!response.ok) throw new Error(`Cross-SPA search failed: ${response.statusText}`);
+      const data = await response.json();
+      return data.results || [];
+    } catch (error) {
+      console.error('Cross-SPA search error:', error);
+      return [];
+    }
+  }, [currentUser?.id])
+  
+  // Create compatibility functions with proper memoization
+  const getSearchInsights = useCallback(async (query: string, context?: any) => {
+    try {
+      const response = await fetch('/api/racine/ai/search-insights', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        },
+        body: JSON.stringify({
+          query,
+          context: context || {},
+          userId: currentUser?.id,
+          includeRecommendations: true,
+          includeRelatedQueries: true,
+          includeSemanticAnalysis: true
+        })
+      });
+      
+      if (!response.ok) throw new Error(`AI insights failed: ${response.statusText}`);
+      const data = await response.json();
+      return data.insights || [];
+    } catch (error) {
+      console.error('AI search insights error:', error);
+      return [];
+    }
+  }, [currentUser?.id])
+
+  const trackEvent = useCallback(async (event: string, data?: any) => {
+    try {
+      await fetch('/api/racine/activity/track', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        },
+        body: JSON.stringify({
+          event,
+          data: data || {},
+          userId: currentUser?.id,
+          timestamp: new Date().toISOString(),
+          component: 'QuickSearch',
+          sessionId: sessionStorage.getItem('session_id')
+        })
+      });
+    } catch (error) {
+      console.error('Event tracking error:', error);
+    }
+  }, [currentUser?.id])
+
+  // Stable reference for search functions to prevent infinite loops
+  const stableSearchFunctions = useMemo(() => ({
+    executeGlobalSearch,
+    getSearchSuggestions,
     getSearchHistory,
     getPopularSearches,
-    trackSearchAnalytics
-  } = useGlobalSearch()
-  
-  const { 
-    getActiveSPAContext, 
-    getAllSPAStatuses,
-    searchAcrossAllSPAs 
-  } = useCrossGroupIntegration()
-  
-  const { getCurrentUser, getUserPreferences } = useUserManagement()
-  const { getSearchInsights, analyzeSearchIntent } = useAIAssistant()
-  const { trackEvent } = useActivityTracker()
-
-  // Get current context
-  const currentUser = getCurrentUser()
-  const userPreferences = getUserPreferences()
-  const activeSPAContext = getActiveSPAContext()
-  const allSPAStatuses = getAllSPAStatuses()
+    searchAcrossAllSPAs,
+    getSearchInsights
+  }), [executeGlobalSearch, getSearchSuggestions, getSearchHistory, getPopularSearches, searchAcrossAllSPAs, getSearchInsights])
 
   // Debounced search function
   const debouncedSearch = useCallback(
@@ -149,38 +404,53 @@ export const QuickSearch: React.FC<QuickSearchProps> = ({
 
             const [globalResults, crossSPAResults, insights] = await Promise.all(searchPromises)
 
-            // Merge and deduplicate results
+            // Merge and deduplicate results with proper error handling
+            const globalResultsArray = globalResults?.results || []
+            const crossSPAResultsArray = Array.isArray(crossSPAResults) ? crossSPAResults : []
+            
             const allResults = [
-              ...globalResults.results,
-              ...crossSPAResults.flatMap(spa => spa.results)
+              ...globalResultsArray,
+              ...crossSPAResultsArray.flatMap(spa => spa?.results || [])
             ]
 
             const uniqueResults = allResults.filter((result, index, self) => 
-              index === self.findIndex(r => r.id === result.id)
+              result?.id && index === self.findIndex(r => r?.id === result.id)
             )
 
             setResults(uniqueResults.slice(0, 50)) // Limit to 50 results
-            setAIInsights(insights)
-
-            // Track search analytics
+            setAIInsights(Array.isArray(insights) ? insights : [])
+            
+            // Track successful search with comprehensive analytics
+            const searchTime = Date.now() - searchStartTime;
             trackSearchAnalytics({
               query: searchQuery,
               resultCount: uniqueResults.length,
-              searchTime: Date.now() - searchStartTime,
-              filters: activeFilters,
-              context: activeSPAContext
-            })
+              searchTime,
+              hasAIInsights: insights?.length > 0,
+              filters: activeFilters
+            });
 
             trackEvent('search_executed', {
               query: searchQuery,
               resultCount: uniqueResults.length,
-              hasFilters: activeFilters.length > 0
-            })
+              searchTime,
+              hasAIInsights: insights?.length > 0,
+              hasFilters: activeFilters.length > 0,
+              context: activeSPAContext,
+              timestamp: Date.now()
+            });
 
           } catch (error) {
             console.error('Search error:', error)
             setResults([])
             setAIInsights([])
+            
+            // Track search error
+            trackEvent('search_error', {
+              query: searchQuery,
+              error: (error as Error).message,
+              timestamp: Date.now()
+            });
           } finally {
             setIsSearching(false)
           }
@@ -204,42 +474,59 @@ export const QuickSearch: React.FC<QuickSearchProps> = ({
     ]
   )
 
-  // Load initial data
+  // Load initial data when component opens with stable dependencies
   useEffect(() => {
     const loadInitialData = async () => {
       try {
-        const [history, popular, initialSuggestions] = await Promise.all([
-          getSearchHistory(10),
-          getPopularSearches(10),
-          getSearchSuggestions('')
+        const [history, popular] = await Promise.all([
+          stableSearchFunctions.getSearchHistory(10),
+          stableSearchFunctions.getPopularSearches(10)
         ])
-
         setSearchHistory(history)
         setPopularSearches(popular)
-        setSuggestions(initialSuggestions)
+        
+        // Track component open event
+        trackEvent('quick_search_opened', {
+          hasQuery: !!query,
+          timestamp: Date.now()
+        });
       } catch (error) {
         console.error('Failed to load initial search data:', error)
+        // Set empty arrays on error to prevent undefined states
+        setSearchHistory([])
+        setPopularSearches([])
       }
     }
 
     if (isOpen) {
       loadInitialData()
     }
-  }, [isOpen, getSearchHistory, getPopularSearches, getSearchSuggestions])
+  }, [isOpen, stableSearchFunctions, query, trackEvent])
 
-  // Handle query changes
+  // Handle query changes with proper dependency management
   useEffect(() => {
-    if (query) {
+    if (query.trim()) {
       debouncedSearch(query)
       
-      // Get dynamic suggestions
-      getSearchSuggestions(query).then(setSuggestions).catch(console.error)
+      // Get dynamic suggestions with debouncing
+      const suggestionTimeout = setTimeout(() => {
+        stableSearchFunctions.getSearchSuggestions(query)
+          .then(setSuggestions)
+          .catch(error => {
+            console.error('Suggestions error:', error);
+            setSuggestions([]);
+          });
+      }, 300);
+      
+      return () => clearTimeout(suggestionTimeout);
     } else {
+      // Clear results when query is empty
       setResults([])
       setAIInsights([])
       setSelectedIndex(-1)
+      setSuggestions([])
     }
-  }, [query, debouncedSearch, getSearchSuggestions])
+  }, [query, debouncedSearch, stableSearchFunctions])
 
   // Handle focus on mount
   useEffect(() => {
@@ -329,7 +616,14 @@ export const QuickSearch: React.FC<QuickSearchProps> = ({
 
   // Memoized filter categories
   const filterCategories = useMemo(() => {
-    return SEARCH_CATEGORIES.map(category => ({
+    const rawCategories: any = (SEARCH_CATEGORIES as any)
+    const categories: any[] = Array.isArray(rawCategories)
+      ? rawCategories
+      : (rawCategories && typeof rawCategories === 'object')
+        ? Object.values(rawCategories)
+        : []
+
+    return categories.map((category: any) => ({
       ...category,
       isActive: activeFilters.some(f => f.category === category.id),
       count: results.filter(r => r.category === category.id).length

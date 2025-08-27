@@ -418,7 +418,7 @@ const createAuthenticationGuard = (): RouteGuard => ({
           allowed: false,
           reason: 'User not authenticated',
           requiresAuth: true,
-          redirectTo: '/auth/login',
+          redirectTo: '/login',
           errorCode: 'AUTH_REQUIRED',
           metadata: {
             executionTime: performance.now() - startTime,
@@ -435,7 +435,7 @@ const createAuthenticationGuard = (): RouteGuard => ({
           allowed: false,
           reason: 'Authentication token missing',
           requiresAuth: true,
-          redirectTo: '/auth/login',
+          redirectTo: '/login',
           errorCode: 'TOKEN_MISSING'
         };
       }
@@ -472,7 +472,7 @@ const createAuthenticationGuard = (): RouteGuard => ({
         allowed: false,
         reason: 'Authentication service unavailable',
         requiresAuth: true,
-        redirectTo: '/auth/login',
+        redirectTo: '/login',
         errorCode: 'AUTH_SERVICE_ERROR'
       };
     }

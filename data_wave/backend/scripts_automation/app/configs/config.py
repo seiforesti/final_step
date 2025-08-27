@@ -25,7 +25,10 @@ OAUTH_CONFIG = {
     "google_client_id": clean_env("GOOGLE_CLIENT_ID"),
     "google_client_secret": clean_env("GOOGLE_CLIENT_SECRET"),
     "google_redirect_uri": clean_env("GOOGLE_REDIRECT_URI", "http://localhost:8000/auth/google/callback"),
+    "google_scopes": clean_env("GOOGLE_SCOPES", "openid email profile"),
     "microsoft_client_id": clean_env("MICROSOFT_CLIENT_ID"),
     "microsoft_client_secret": clean_env("MICROSOFT_CLIENT_SECRET"),
     "microsoft_redirect_uri": clean_env("MICROSOFT_REDIRECT_URI", "http://localhost:8000/auth/microsoft/callback"),
+    "microsoft_scopes": clean_env("MICROSOFT_SCOPES", "openid email profile User.Read"),
+    "microsoft_tenant": clean_env("MICROSOFT_TENANT", "common"),
 }

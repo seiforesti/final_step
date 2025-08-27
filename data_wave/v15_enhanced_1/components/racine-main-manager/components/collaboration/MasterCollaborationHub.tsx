@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Master Collaboration Hub Component
  * ==================================
@@ -28,8 +30,6 @@
  * - Advanced analytics and reporting capabilities
  * - Cross-group integration with all 7 existing SPAs
  */
-
-'use client';
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence, useAnimation } from 'framer-motion';
@@ -170,10 +170,26 @@ interface CollaborationMetrics {
 }
 
 interface MasterCollaborationHubProps {
-  userId: UUID;
-  userRole: string;
+  userId?: UUID;
+  userRole?: string;
   workspaceId?: UUID;
   className?: string;
+  mode?: string;
+  enableRealTimeChat?: boolean;
+  enableSharedTasks?: boolean;
+  enableDocumentManagement?: boolean;
+  enableWorkflowCoAuthoring?: boolean;
+  enableVideoConferencing?: boolean;
+  enableScreenSharing?: boolean;
+  enableFileSharing?: boolean;
+  enableCollaborationAnalytics?: boolean;
+  enablePresenceIndicators?: boolean;
+  enableNotifications?: boolean;
+  showActiveCollaborations?: boolean;
+  showRecentActivity?: boolean;
+  showTaskProgress?: boolean;
+  showQuickActions?: boolean;
+  showParticipantsList?: boolean;
   onSpaceChange?: (spaceId: UUID) => void;
   onSessionStart?: (sessionId: UUID) => void;
   onCollaborationUpdate?: (metrics: CollaborationMetrics) => void;
@@ -188,6 +204,22 @@ export const MasterCollaborationHub: React.FC<MasterCollaborationHubProps> = ({
   userRole,
   workspaceId,
   className,
+  mode = "full-hub",
+  enableRealTimeChat = true,
+  enableSharedTasks = true,
+  enableDocumentManagement = true,
+  enableWorkflowCoAuthoring = true,
+  enableVideoConferencing = true,
+  enableScreenSharing = true,
+  enableFileSharing = true,
+  enableCollaborationAnalytics = true,
+  enablePresenceIndicators = true,
+  enableNotifications = true,
+  showActiveCollaborations = true,
+  showRecentActivity = true,
+  showTaskProgress = true,
+  showQuickActions = true,
+  showParticipantsList = true,
   onSpaceChange,
   onSessionStart,
   onCollaborationUpdate

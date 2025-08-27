@@ -43,8 +43,7 @@ import {
 } from '../../types/orchestration.types';
 
 // Utils
-import { dependencyAnalyzer } from '../../utils/workflow-engine';
-import { graphLayoutAlgorithms } from '../../utils/optimization-algorithms';
+import { dependencyAnalyzer } from '../../../Advanced-Scan-Logic/utils/dependency-resolver';
 
 interface DependencyResolverProps {
   workspaceId?: string;

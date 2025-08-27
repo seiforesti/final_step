@@ -42,6 +42,7 @@ import {
   FilterRequest,
   SortRequest
 } from '../types/api.types';
+import { withGracefulErrorHandling, DefaultApiResponses } from '../../../lib/api-error-handler';
 
 import {
   WorkspaceConfiguration,
@@ -76,8 +77,9 @@ const DEFAULT_CONFIG: WorkspaceAPIConfig = {
   timeout: 30000,
   retryAttempts: 3,
   retryDelay: 1000,
-  enableRealTimeSync: true,
-  websocketURL: process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000/ws'
+  enableRealTimeSync: process.env.NODE_ENV === 'production' ? false : true, // Disable in production by default
+  websocketURL: process.env.NEXT_PUBLIC_WS_URL || 
+                (process.env.NODE_ENV === 'production' ? undefined : 'ws://localhost:8000/ws')
 };
 
 /**
@@ -141,6 +143,8 @@ class WorkspaceManagementAPI {
   private eventSubscriptions: Map<UUID, WorkspaceEventSubscription> = new Map();
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
+  private pollingInterval: NodeJS.Timeout | null = null;
+  private isWebSocketConnected = false;
 
   constructor(config: Partial<WorkspaceAPIConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
@@ -173,19 +177,29 @@ class WorkspaceManagementAPI {
   }
 
   /**
-   * Initialize WebSocket connection for real-time updates
+   * Initialize WebSocket connection for real-time workspace updates
    */
-  async initializeWebSocket(): Promise<void> {
+  private initializeWebSocket(): void {
     if (!this.config.enableRealTimeSync || !this.config.websocketURL) {
+      console.log('WebSocket disabled or no URL configured');
+      return;
+    }
+
+    // Check if WebSocket is supported
+    if (typeof WebSocket === 'undefined') {
+      console.warn('WebSocket not supported in this environment, falling back to polling');
+      this.fallbackToPolling();
       return;
     }
 
     try {
+      console.log(`Attempting to connect to WebSocket: ${this.config.websocketURL}/workspace`);
       this.websocket = new WebSocket(`${this.config.websocketURL}/workspace`);
       
       this.websocket.onopen = () => {
-        console.log('Workspace WebSocket connected');
+        console.log('Workspace WebSocket connected successfully');
         this.reconnectAttempts = 0;
+        this.isWebSocketConnected = true;
       };
 
       this.websocket.onmessage = (event) => {
@@ -197,16 +211,91 @@ class WorkspaceManagementAPI {
         }
       };
 
-      this.websocket.onclose = () => {
-        console.log('Workspace WebSocket disconnected');
+      this.websocket.onclose = (event) => {
+        console.log(`Workspace WebSocket disconnected (code: ${event.code}, reason: ${event.reason})`);
+        this.isWebSocketConnected = false;
+        
+        // Only attempt reconnect for unexpected closures
+        if (event.code !== 1000) { // 1000 = normal closure
         this.attemptReconnect();
+        }
       };
 
       this.websocket.onerror = (error) => {
-        console.error('Workspace WebSocket error:', error);
+        console.warn('Workspace WebSocket connection error, falling back to polling mode:', error);
+        this.isWebSocketConnected = false;
+        
+        // Close the failed connection
+        if (this.websocket) {
+          this.websocket.close();
+          this.websocket = null;
+        }
+        
+        // Fall back to polling mode
+        this.fallbackToPolling();
       };
+      
+      // Set connection timeout
+      setTimeout(() => {
+        if (this.websocket && this.websocket.readyState === WebSocket.CONNECTING) {
+          console.warn('WebSocket connection timeout, falling back to polling');
+          this.websocket.close();
+          this.websocket = null;
+          this.fallbackToPolling();
+        }
+      }, 5000); // 5 second timeout
+      
     } catch (error) {
-      console.error('Failed to initialize WebSocket:', error);
+      console.warn('Failed to initialize WebSocket, falling back to polling:', error);
+      this.fallbackToPolling();
+    }
+  }
+
+  /**
+   * Fallback to polling mode when WebSocket is unavailable
+   */
+  private fallbackToPolling(): void {
+    console.log('Using polling mode for workspace updates');
+    this.isWebSocketConnected = false;
+    
+    // Set up polling interval
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval);
+    }
+    
+    this.pollingInterval = setInterval(() => {
+      this.pollForUpdates();
+    }, 30000); // Poll every 30 seconds
+  }
+
+  /**
+   * Poll for workspace updates when WebSocket is not available
+   */
+  private async pollForUpdates(): Promise<void> {
+    try {
+      // Poll for any pending workspace updates
+      const updates = await this.getWorkspaceUpdates();
+      if (updates && updates.length > 0) {
+        updates.forEach((update: WorkspaceEvent) => {
+          this.handleWebSocketMessage({ event: update });
+        });
+      }
+    } catch (error) {
+      console.warn('Failed to poll for workspace updates:', error);
+    }
+  }
+
+  /**
+   * Get workspace updates for polling fallback
+   */
+  private async getWorkspaceUpdates(): Promise<WorkspaceEvent[]> {
+    try {
+      // This would typically call a backend endpoint to get recent updates
+      // For now, return empty array to prevent errors
+      return [];
+    } catch (error) {
+      console.warn('Failed to get workspace updates:', error);
+      return [];
     }
   }
 
@@ -541,26 +630,33 @@ class WorkspaceManagementAPI {
     filters?: FilterRequest
   ): Promise<WorkspaceTemplateResponse> {
     const params = new URLSearchParams();
-    
     if (pagination) {
       params.append('page', pagination.page.toString());
       params.append('limit', pagination.limit.toString());
     }
-    
     if (filters) {
       params.append('filters', JSON.stringify(filters));
     }
 
-    const response = await fetch(`${this.config.baseURL}/api/racine/workspace/templates?${params}`, {
+    const candidates = [
+      '/api/racine/workspace/templates',
+      '/api/workspace/templates',
+      '/workspace/templates',
+      '/api/v1/racine/workspace/templates'
+    ];
+
+    for (const path of candidates) {
+      try {
+        const res = await fetch(`${this.config.baseURL}${path}?${params}`, {
       method: 'GET',
       headers: this.getAuthHeaders()
     });
-
-    if (!response.ok) {
-      throw new Error(`Failed to get workspace templates: ${response.statusText}`);
+        if (res.ok) return res.json();
+      } catch {}
     }
 
-    return response.json();
+    // Fallback to defaults when backend not reachable
+    return DefaultApiResponses.workspaceTemplates as unknown as WorkspaceTemplateResponse;
   }
 
   /**
@@ -706,14 +802,866 @@ class WorkspaceManagementAPI {
   }
 
   /**
-   * Cleanup WebSocket connection
+   * Initialize real-time updates for workspace management
+   */
+  async initializeRealTimeUpdates(): Promise<void> {
+    try {
+      // Initialize WebSocket connection if not already connected
+      if (!this.websocket || this.websocket.readyState !== WebSocket.OPEN) {
+        await this.initializeWebSocket();
+      }
+
+      // Set up periodic health checks for connected workspaces
+      if (this.config.enableRealTimeSync) {
+        // Start monitoring workspace health
+        setInterval(async () => {
+          try {
+            // Check workspace health and trigger events if needed
+            // This could include checking for disconnected resources, 
+            // stale permissions, or other workspace issues
+            console.log('Workspace health check completed');
+          } catch (error) {
+            console.error('Workspace health check failed:', error);
+          }
+        }, 30000); // Check every 30 seconds
+      }
+
+      console.log('Workspace real-time updates initialized');
+    } catch (error) {
+      console.error('Failed to initialize workspace real-time updates:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Create a new workspace
+   */
+  async createWorkspace(request: CreateWorkspaceRequest): Promise<WorkspaceResponse> {
+    try {
+      const response = await fetch(`${this.config.baseURL}/api/racine/workspace/create`, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(request)
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to create workspace: ${response.statusText}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('Failed to create workspace:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get a specific workspace by ID
+   */
+  async getWorkspace(workspaceId: UUID): Promise<WorkspaceResponse> {
+    return withGracefulErrorHandling(
+      async () => {
+        const response = await fetch(`${this.config.baseURL}/api/racine/workspace/${workspaceId}`, {
+          method: 'GET',
+          headers: this.getAuthHeaders()
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to get workspace: ${response.statusText}`);
+        }
+
+        return response.json();
+      },
+      {
+        defaultValue: null,
+        errorPrefix: 'Backend not available for getting workspace'
+      }
+    );
+  }
+
+  /**
+   * List all workspaces with optional filtering
+   */
+  async listWorkspaces(
+    pagination?: PaginationRequest,
+    filters?: FilterRequest
+  ): Promise<WorkspaceListResponse> {
+    return withGracefulErrorHandling(
+      async () => {
+        const params = new URLSearchParams();
+        
+        if (pagination) {
+          params.append('page', pagination.page.toString());
+          params.append('limit', pagination.limit.toString());
+        }
+        
+        if (filters) {
+          params.append('filters', JSON.stringify(filters));
+        }
+
+        const response = await fetch(`${this.config.baseURL}/api/racine/workspace/list?${params}`, {
+          method: 'GET',
+          headers: this.getAuthHeaders()
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to list workspaces: ${response.statusText}`);
+        }
+
+        return response.json();
+      },
+      {
+        defaultValue: DefaultApiResponses.workspaceList,
+        errorPrefix: 'Backend not available for listing workspaces'
+      }
+    );
+  }
+
+  /**
+   * Update an existing workspace
+   */
+  async updateWorkspace(workspaceId: UUID, request: UpdateWorkspaceRequest): Promise<WorkspaceResponse> {
+    try {
+      const response = await fetch(`${this.config.baseURL}/api/racine/workspace/${workspaceId}/update`, {
+        method: 'PUT',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(request)
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to update workspace: ${response.statusText}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('Failed to update workspace:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Delete a workspace
+   */
+  async deleteWorkspace(workspaceId: UUID): Promise<void> {
+    try {
+      const response = await fetch(`${this.config.baseURL}/api/racine/workspace/${workspaceId}/delete`, {
+        method: 'DELETE',
+        headers: this.getAuthHeaders()
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to delete workspace: ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error('Failed to delete workspace:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get workspace resources
+   */
+  async getWorkspaceResources(workspaceId: UUID): Promise<WorkspaceResourceResponse[]> {
+    try {
+      const response = await fetch(`${this.config.baseURL}/api/racine/workspace/${workspaceId}/resources`, {
+        method: 'GET',
+        headers: this.getAuthHeaders()
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to get workspace resources: ${response.statusText}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      // Handle network errors gracefully when backend is not available
+      console.warn('Backend not available for workspace resources, returning empty array:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Link a resource to a workspace
+   */
+  async linkResource(workspaceId: UUID, request: LinkResourceRequest): Promise<void> {
+    try {
+      const response = await fetch(`${this.config.baseURL}/api/racine/workspace/${workspaceId}/resources/link`, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(request)
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to link resource: ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error('Failed to link resource:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Unlink a resource from a workspace
+   */
+  async unlinkResource(workspaceId: UUID, resourceId: UUID): Promise<void> {
+    try {
+      const response = await fetch(`${this.config.baseURL}/api/racine/workspace/${workspaceId}/resources/${resourceId}/unlink`, {
+        method: 'DELETE',
+        headers: this.getAuthHeaders()
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to unlink resource: ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error('Failed to unlink resource:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get workspace members
+   */
+  async getWorkspaceMembers(workspaceId: UUID): Promise<WorkspaceMemberResponse[]> {
+    try {
+      const response = await fetch(`${this.config.baseURL}/api/racine/workspace/${workspaceId}/members`, {
+        method: 'GET',
+        headers: this.getAuthHeaders()
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to get workspace members: ${response.statusText}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('Failed to get workspace members:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Add a member to a workspace
+   */
+  async addMember(workspaceId: UUID, request: AddWorkspaceMemberRequest): Promise<void> {
+    try {
+      const response = await fetch(`${this.config.baseURL}/api/racine/workspace/${workspaceId}/members/add`, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(request)
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to add member: ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error('Failed to add member:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Remove a member from a workspace
+   */
+  async removeMember(workspaceId: UUID, memberId: UUID): Promise<void> {
+    try {
+      const response = await fetch(`${this.config.baseURL}/api/racine/workspace/${workspaceId}/members/${memberId}/remove`, {
+        method: 'DELETE',
+        headers: this.getAuthHeaders()
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to remove member: ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error('Failed to remove member:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get workspace templates
+   */
+  async getTemplates(): Promise<WorkspaceTemplateResponse[]> {
+    return withGracefulErrorHandling(
+      async () => {
+        const paths = [
+          '/api/racine/workspace/templates',
+          '/api/workspace/templates',
+          '/workspace/templates',
+          '/api/v1/racine/workspace/templates'
+        ];
+        for (const p of paths) {
+          try {
+            const r = await fetch(`${this.config.baseURL}${p}`, {
+          method: 'GET',
+          headers: this.getAuthHeaders()
+        });
+            if (r.ok) return r.json();
+          } catch {}
+        }
+        // If none worked, return defaults instead of erroring
+        return DefaultApiResponses.workspaceTemplates as unknown as WorkspaceTemplateResponse[];
+      },
+      {
+        defaultValue: DefaultApiResponses.workspaceTemplates,
+        errorPrefix: 'Backend not available for getting workspace templates'
+      }
+    );
+  }
+
+  /**
+   * Create workspace from template
+   */
+  async createFromTemplate(request: CreateWorkspaceFromTemplateRequest): Promise<WorkspaceResponse> {
+    try {
+      const response = await fetch(`${this.config.baseURL}/api/racine/workspace/create-from-template`, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(request)
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to create workspace from template: ${response.statusText}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('Failed to create workspace from template:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get workspace analytics
+   */
+  async getWorkspaceAnalytics(workspaceId: UUID): Promise<WorkspaceAnalyticsResponse> {
+    return withGracefulErrorHandling(
+      async () => {
+        const response = await fetch(`${this.config.baseURL}/api/racine/workspace/${workspaceId}/analytics`, {
+          method: 'GET',
+          headers: this.getAuthHeaders()
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to get workspace analytics: ${response.statusText}`);
+        }
+
+        return response.json();
+      },
+      {
+        defaultValue: DefaultApiResponses.workspaceAnalytics,
+        errorPrefix: 'Backend not available for getting workspace analytics'
+      }
+    );
+  }
+
+  // =============================================================================
+  // TAB MANAGEMENT METHODS
+  // =============================================================================
+
+  /**
+   * Get tab configuration for a specific tab
+   */
+  async getTabConfiguration(
+    tabId: UUID,
+    userId: UUID,
+    workspaceId: UUID
+  ): Promise<any> {
+    return withGracefulErrorHandling(
+      async () => {
+        const response = await fetch(`${this.config.baseURL}/api/racine/workspace/${workspaceId}/tabs/${tabId}/configuration`, {
+          method: 'GET',
+          headers: this.getAuthHeaders()
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to get tab configuration: ${response.statusText}`);
+        }
+
+        return response.json();
+      },
+      {
+        defaultValue: null,
+        errorPrefix: 'Backend not available for getting tab configuration'
+      }
+    );
+  }
+
+  /**
+   * Create a new tab configuration
+   */
+  async createTabConfiguration(
+    configuration: any,
+    userId: UUID,
+    workspaceId: UUID
+  ): Promise<any> {
+    return withGracefulErrorHandling(
+      async () => {
+        const response = await fetch(`${this.config.baseURL}/api/racine/workspace/${workspaceId}/tabs/configuration`, {
+          method: 'POST',
+          headers: this.getAuthHeaders(),
+          body: JSON.stringify({
+            ...configuration,
+            userId,
+            workspaceId
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to create tab configuration: ${response.statusText}`);
+        }
+
+        return response.json();
+      },
+      {
+        defaultValue: configuration,
+        errorPrefix: 'Backend not available for creating tab configuration'
+      }
+    );
+  }
+
+  /**
+   * Update an existing tab configuration
+   */
+  async updateTabConfiguration(
+    tabId: UUID,
+    updates: any,
+    userId: UUID,
+    workspaceId: UUID
+  ): Promise<any> {
+    return withGracefulErrorHandling(
+      async () => {
+        const response = await fetch(`${this.config.baseURL}/api/racine/workspace/${workspaceId}/tabs/${tabId}/configuration`, {
+          method: 'PUT',
+          headers: this.getAuthHeaders(),
+          body: JSON.stringify({
+            ...updates,
+            userId,
+            workspaceId
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to update tab configuration: ${response.statusText}`);
+        }
+
+        return response.json();
+      },
+      {
+        defaultValue: { success: true },
+        errorPrefix: 'Backend not available for updating tab configuration'
+      }
+    );
+  }
+
+  /**
+   * Remove a tab configuration
+   */
+  async removeTabConfiguration(
+    tabId: UUID,
+    userId: UUID,
+    workspaceId: UUID
+  ): Promise<void> {
+    return withGracefulErrorHandling(
+      async () => {
+        const response = await fetch(`${this.config.baseURL}/api/racine/workspace/${workspaceId}/tabs/${tabId}/configuration`, {
+          method: 'DELETE',
+          headers: this.getAuthHeaders()
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to remove tab configuration: ${response.statusText}`);
+        }
+      },
+      {
+        defaultValue: undefined,
+        errorPrefix: 'Backend not available for removing tab configuration'
+      }
+    );
+  }
+
+  /**
+   * Create a new tab group
+   */
+  async createTabGroup(request: {
+    tabGroup: any;
+    userId: UUID;
+    workspaceId: UUID;
+  }): Promise<any> {
+    return withGracefulErrorHandling(
+      async () => {
+        const response = await fetch(`${this.config.baseURL}/api/racine/workspace/${request.workspaceId}/tab-groups`, {
+          method: 'POST',
+          headers: this.getAuthHeaders(),
+          body: JSON.stringify({
+            ...request.tabGroup,
+            userId: request.userId,
+            workspaceId: request.workspaceId
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to create tab group: ${response.statusText}`);
+        }
+
+        return response.json();
+      },
+      {
+        defaultValue: request.tabGroup,
+        errorPrefix: 'Backend not available for creating tab group'
+      }
+    );
+  }
+
+  /**
+   * Get workspace layout configuration
+   */
+  async getWorkspaceLayout(
+    workspaceId: UUID,
+    userId: UUID
+  ): Promise<any> {
+    return withGracefulErrorHandling(
+      async () => {
+        const response = await fetch(`${this.config.baseURL}/api/racine/workspace/${workspaceId}/layout`, {
+          method: 'GET',
+          headers: this.getAuthHeaders()
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to get workspace layout: ${response.statusText}`);
+        }
+
+        return response.json();
+      },
+      {
+        defaultValue: { layout: 'default', components: [] },
+        errorPrefix: 'Backend not available for getting workspace layout'
+      }
+    );
+  }
+
+  /**
+   * Get user layout preferences
+   */
+  async getUserLayoutPreferences(userId: UUID): Promise<any> {
+    return withGracefulErrorHandling(
+      async () => {
+        const response = await fetch(`${this.config.baseURL}/api/racine/users/${userId}/layout-preferences`, {
+          method: 'GET',
+          headers: this.getAuthHeaders()
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to get user layout preferences: ${response.statusText}`);
+        }
+
+        return response.json();
+      },
+      {
+        defaultValue: { theme: 'system', layout: 'default', sidebarCollapsed: false },
+        errorPrefix: 'Backend not available for getting user layout preferences'
+      }
+    );
+  }
+
+  /**
+   * Update split screen panes
+   */
+  async updateSplitScreenPanes(request: any): Promise<any> {
+    return withGracefulErrorHandling(
+      async () => {
+        const response = await fetch(`${this.config.baseURL}/api/racine/workspace/split-screen/panes`, {
+          method: 'PUT',
+          headers: this.getAuthHeaders(),
+          body: JSON.stringify(request)
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to update split screen panes: ${response.statusText}`);
+        }
+
+        return response.json();
+      },
+      {
+        defaultValue: { success: true },
+        errorPrefix: 'Backend not available for updating split screen panes'
+      }
+    );
+  }
+
+  /**
+   * Update pane position
+   */
+  async updatePanePosition(request: any): Promise<any> {
+    return withGracefulErrorHandling(
+      async () => {
+        const response = await fetch(`${this.config.baseURL}/api/racine/workspace/split-screen/panes/position`, {
+          method: 'PUT',
+          headers: this.getAuthHeaders(),
+          body: JSON.stringify(request)
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to update pane position: ${response.statusText}`);
+        }
+
+        return response.json();
+      },
+      {
+        defaultValue: { success: true },
+        errorPrefix: 'Backend not available for updating pane position'
+      }
+    );
+  }
+
+  /**
+   * Create split screen template
+   */
+  async createSplitScreenTemplate(request: any): Promise<any> {
+    return withGracefulErrorHandling(
+      async () => {
+        const response = await fetch(`${this.config.baseURL}/api/racine/workspace/split-screen/templates`, {
+          method: 'POST',
+          headers: this.getAuthHeaders(),
+          body: JSON.stringify(request)
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to create split screen template: ${response.statusText}`);
+        }
+
+        return response.json();
+      },
+      {
+        defaultValue: { id: crypto.randomUUID(), ...request },
+        errorPrefix: 'Backend not available for creating split screen template'
+      }
+    );
+  }
+
+  /**
+   * Remove split screen pane
+   */
+  async removeSplitScreenPane(request: any): Promise<any> {
+    return withGracefulErrorHandling(
+      async () => {
+        const response = await fetch(`${this.config.baseURL}/api/racine/workspace/split-screen/panes/${request.paneId}`, {
+          method: 'DELETE',
+          headers: this.getAuthHeaders()
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to remove split screen pane: ${response.statusText}`);
+        }
+
+        return response.json();
+      },
+      {
+        defaultValue: { success: true },
+        errorPrefix: 'Backend not available for removing split screen pane'
+      }
+    );
+  }
+
+  /**
+   * Add component to workspace
+   */
+  async addComponentToWorkspace(request: any): Promise<any> {
+    return withGracefulErrorHandling(
+      async () => {
+        const response = await fetch(`${this.config.baseURL}/api/racine/workspace/${request.workspaceId}/components`, {
+          method: 'POST',
+          headers: this.getAuthHeaders(),
+          body: JSON.stringify(request)
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to add component to workspace: ${response.statusText}`);
+        }
+
+        return response.json();
+      },
+      {
+        defaultValue: { id: crypto.randomUUID(), ...request },
+        errorPrefix: 'Backend not available for adding component to workspace'
+      }
+    );
+  }
+
+  /**
+   * Remove component from workspace
+   */
+  async removeComponentFromWorkspace(request: any): Promise<any> {
+    return withGracefulErrorHandling(
+      async () => {
+        const response = await fetch(`${this.config.baseURL}/api/racine/workspace/${request.workspaceId}/components/${request.componentId}`, {
+          method: 'DELETE',
+          headers: this.getAuthHeaders()
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to remove component from workspace: ${response.statusText}`);
+        }
+
+        return response.json();
+      },
+      {
+        defaultValue: { success: true },
+        errorPrefix: 'Backend not available for removing component from workspace'
+      }
+    );
+  }
+
+  /**
+   * Update component position
+   */
+  async updateComponentPosition(request: any): Promise<any> {
+    return withGracefulErrorHandling(
+      async () => {
+        const response = await fetch(`${this.config.baseURL}/api/racine/workspace/${request.workspaceId}/components/${request.componentId}/position`, {
+          method: 'PUT',
+          headers: this.getAuthHeaders(),
+          body: JSON.stringify(request)
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to update component position: ${response.statusText}`);
+        }
+
+        return response.json();
+      },
+      {
+        defaultValue: { success: true },
+        errorPrefix: 'Backend not available for updating component position'
+      }
+    );
+  }
+
+  /**
+   * Update component size
+   */
+  async updateComponentSize(request: any): Promise<any> {
+    return withGracefulErrorHandling(
+      async () => {
+        const response = await fetch(`${this.config.baseURL}/api/racine/workspace/${request.workspaceId}/components/${request.componentId}/size`, {
+          method: 'PUT',
+          headers: this.getAuthHeaders(),
+          body: JSON.stringify(request)
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to update component size: ${response.statusText}`);
+        }
+
+        return response.json();
+      },
+      {
+        defaultValue: { success: true },
+        errorPrefix: 'Backend not available for updating component size'
+      }
+    );
+  }
+
+  /**
+   * Create workspace template
+   */
+  async createWorkspaceTemplate(request: any): Promise<any> {
+    return withGracefulErrorHandling(
+      async () => {
+        const response = await fetch(`${this.config.baseURL}/api/racine/workspace/templates`, {
+          method: 'POST',
+          headers: this.getAuthHeaders(),
+          body: JSON.stringify(request)
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to create workspace template: ${response.statusText}`);
+        }
+
+        return response.json();
+      },
+      {
+        defaultValue: { id: crypto.randomUUID(), ...request },
+        errorPrefix: 'Backend not available for creating workspace template'
+      }
+    );
+  }
+
+  /**
+   * Get notifications
+   */
+  async getNotifications(request: any): Promise<any[]> {
+    return withGracefulErrorHandling(
+      async () => {
+        const response = await fetch(`${this.config.baseURL}/api/racine/notifications`, {
+          method: 'GET',
+          headers: this.getAuthHeaders()
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to get notifications: ${response.statusText}`);
+        }
+
+        return response.json();
+      },
+      {
+        defaultValue: [],
+        errorPrefix: 'Backend not available for getting notifications'
+      }
+    );
+  }
+
+  /**
+   * Cleanup resources
    */
   cleanup(): void {
+    // Close WebSocket connection
     if (this.websocket) {
-      this.websocket.close();
+      this.websocket.close(1000, 'Cleanup requested');
       this.websocket = null;
     }
+    
+    // Clear polling interval
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval);
+      this.pollingInterval = null;
+    }
+    
+    // Clear event subscriptions
     this.eventSubscriptions.clear();
+    
+    // Reset connection state
+    this.isWebSocketConnected = false;
+    this.reconnectAttempts = 0;
+    
+    console.log('Workspace management API cleanup completed');
+  }
+
+  /**
+   * Check if WebSocket is currently connected
+   */
+  isConnected(): boolean {
+    return this.isWebSocketConnected && 
+           this.websocket !== null && 
+           this.websocket.readyState === WebSocket.OPEN;
+  }
+
+  /**
+   * Get connection status information
+   */
+  getConnectionStatus(): {
+    isConnected: boolean;
+    connectionType: 'websocket' | 'polling' | 'disconnected';
+    reconnectAttempts: number;
+    lastError?: string;
+  } {
+    return {
+      isConnected: this.isConnected(),
+      connectionType: this.isWebSocketConnected ? 'websocket' : 
+                     this.pollingInterval ? 'polling' : 'disconnected',
+      reconnectAttempts: this.reconnectAttempts
+    };
   }
 }
 

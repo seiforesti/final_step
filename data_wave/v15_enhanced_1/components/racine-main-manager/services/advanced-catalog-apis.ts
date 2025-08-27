@@ -21,8 +21,17 @@ import {
   CatalogFilters,
   CatalogStats,
   APIResponse,
-  PaginatedResponse
+  SearchPagination
 } from '../types/racine-core.types';
+
+// Define pagination response interface
+interface PaginatedResponse<T> {
+  items: T[];
+  total: number;
+  page: number;
+  size: number;
+  metadata?: Record<string, any>;
+}
 
 // Import existing Advanced Catalog services for integration
 import { EnterpriseCatalogService } from '../../Advanced-Catalog/services/enterprise-catalog.service';
@@ -59,7 +68,7 @@ class RacineAdvancedCatalogAPIService {
   private profilingService: DataProfilingService;
   private analyticsService: CatalogAnalyticsService;
   private recommendationService: CatalogRecommendationService;
-  private collaborationService: CollaborationService;
+  private collaborationService: typeof collaborationService;
 
   constructor() {
     this.baseURL = RACINE_CATALOG_ENDPOINT;
@@ -80,7 +89,7 @@ class RacineAdvancedCatalogAPIService {
     this.profilingService = new DataProfilingService();
     this.analyticsService = new CatalogAnalyticsService();
     this.recommendationService = new CatalogRecommendationService();
-    this.collaborationService = new CollaborationService();
+    this.collaborationService = collaborationService;
   }
 
   /**
@@ -109,6 +118,7 @@ class RacineAdvancedCatalogAPIService {
     } catch (error) {
       return {
         success: false,
+        data: null as T,
         error: error instanceof Error ? error.message : 'Unknown error',
         message: 'Request failed'
       };
@@ -123,7 +133,7 @@ class RacineAdvancedCatalogAPIService {
    * Get all catalog assets with racine orchestration
    */
   async getAllAssets(filters?: CatalogFilters): Promise<APIResponse<PaginatedResponse<CatalogAsset>>> {
-    const existingResult = await this.catalogService.getAllAssets(filters);
+    const existingResult = await this.catalogService.getAssets(filters);
     const racineResult = await this.makeRequest<PaginatedResponse<CatalogAsset>>('/assets', {
       method: 'POST',
       body: JSON.stringify({ filters, integration: 'advanced-catalog-spa' })

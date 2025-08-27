@@ -763,13 +763,32 @@ const CrossSPACatalogIntegration: React.FC<{
 // Main Component Props
 interface AdvancedCatalogSPAOrchestratorProps {
   workspaceId?: UUID;
-  userId: UUID;
+  userId?: UUID;
   initialView?: 'catalog' | 'lineage' | 'quality';
   enableAI?: boolean;
   enableCollaboration?: boolean;
   enableCrossSPA?: boolean;
   onStateChange?: (state: EnhancedCatalogState) => void;
   onError?: (error: Error) => void;
+  
+  // Additional props for advanced functionality
+  mode?: 'full-spa' | 'basic-spa' | 'catalog-only' | 'lineage-only';
+  enableMetadataManagement?: boolean;
+  enableLineageTracking?: boolean;
+  enableDataDiscovery?: boolean;
+  enableSearchAndFilter?: boolean;
+  enableBusinessGlossary?: boolean;
+  enableQualityMetrics?: boolean;
+  enableUsageAnalytics?: boolean;
+  enableRecommendations?: boolean;
+  enableBulkOperations?: boolean;
+  enableVersionControl?: boolean;
+  enableNotifications?: boolean;
+  showQualityScores?: boolean;
+  showUsageStatistics?: boolean;
+  showLineageGraph?: boolean;
+  showQuickActions?: boolean;
+  showRecentActivity?: boolean;
 }
 
 // Main AdvancedCatalogSPAOrchestrator Component
@@ -781,7 +800,26 @@ export const AdvancedCatalogSPAOrchestrator: React.FC<AdvancedCatalogSPAOrchestr
   enableCollaboration = true,
   enableCrossSPA = true,
   onStateChange,
-  onError
+  onError,
+  
+  // Additional props with defaults
+  mode = 'full-spa',
+  enableMetadataManagement = true,
+  enableLineageTracking = true,
+  enableDataDiscovery = true,
+  enableSearchAndFilter = true,
+  enableBusinessGlossary = true,
+  enableQualityMetrics = true,
+  enableUsageAnalytics = true,
+  enableRecommendations = true,
+  enableBulkOperations = true,
+  enableVersionControl = true,
+  enableNotifications = true,
+  showQualityScores = true,
+  showUsageStatistics = true,
+  showLineageGraph = true,
+  showQuickActions = true,
+  showRecentActivity = true
 }) => {
   // Enhanced State Management
   const [enhancedState, setEnhancedState] = useState<EnhancedCatalogState>({

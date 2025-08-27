@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { BarChart3, TrendingUp, TrendingDown, Activity, Database, RefreshCw, Download, Calendar, Clock, Zap, Target, Gauge, Timer, Signal, Cpu, HardDrive, Network, Users, Eye, Settings, Filter, ArrowUp, ArrowDown, AlertTriangle, CheckCircle2, Info, LineChart, PieChart, BarChart, Area, Layers, Globe, Server } from 'lucide-react'
+import { BarChart3, TrendingUp, TrendingDown, Activity, Database, RefreshCw, Download, Calendar, Clock, Zap, Target, Gauge, Timer, Signal, Cpu, HardDrive, Network, Users, Eye, Settings, Filter, ArrowUp, ArrowDown, AlertTriangle, CheckCircle2, Info, LineChart, PieChart, BarChart, Area, Layers, Globe, Server, Shield } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'

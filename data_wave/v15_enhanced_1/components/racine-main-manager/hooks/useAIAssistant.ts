@@ -23,6 +23,7 @@ import {
   type AIEventHandler,
   type ConversationContext
 } from '../services/ai-assistant-apis';
+import { racineOrchestrationAPI } from '../services/racine-orchestration-apis';
 import {
   RacineAIConversation,
   AIMessage,
@@ -673,6 +674,42 @@ export function useAIAssistant(options: UseAIAssistantOptions = {}) {
   }, [submitLearningData]);
 
   // =============================================================================
+  // PERSONALIZATION RECOMMENDATIONS
+  // =============================================================================
+  
+  const getPersonalizationRecommendations = useCallback(async (request: any): Promise<any[]> => {
+    try {
+      setLoading('recommendations', true);
+      setError('recommendations', null);
+      
+      // Real implementation: Get AI-powered personalization recommendations
+      const recommendations = await racineOrchestrationAPI.getPersonalizationRecommendations({
+        userId: request.userId,
+        context: request.context || 'personalization',
+        currentPreferences: request.currentPreferences || {},
+        usageData: request.usageData || {},
+        deviceContext: request.deviceContext || {},
+        performanceConstraints: request.performanceConstraints || {}
+      });
+      
+      // Update state with new recommendations
+      updateState(prev => ({
+        ...prev,
+        recommendations: [...prev.recommendations, ...recommendations],
+        lastRecommendationUpdate: new Date().toISOString()
+      }));
+      
+      return recommendations;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to get personalization recommendations';
+      setError('recommendations', message);
+      return [];
+    } finally {
+      setLoading('recommendations', false);
+    }
+  }, [setLoading, setError, updateState]);
+  
+  // =============================================================================
   // RETURN HOOK INTERFACE
   // =============================================================================
 
@@ -697,6 +734,7 @@ export function useAIAssistant(options: UseAIAssistantOptions = {}) {
     getRecommendations,
     getCrossGroupInsights,
     suggestWorkflow,
+    getPersonalizationRecommendations,
     
     // Optimization and automation
     optimizeResource,

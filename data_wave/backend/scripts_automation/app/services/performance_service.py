@@ -407,3 +407,73 @@ class PerformanceService:
                 
         except Exception as e:
             logger.error(f"Error creating alert for metric {metric.id}: {str(e)}")
+
+    @staticmethod
+    def get_comprehensive_system_metrics(session: Session) -> Dict[str, Any]:
+        """Get comprehensive system-wide performance metrics"""
+        try:
+            # Get overall system health
+            total_data_sources = session.exec(select(func.count(DataSource.id))).first() or 0
+            
+            # Get recent performance metrics
+            recent_metrics = session.exec(
+                select(PerformanceMetric)
+                .where(PerformanceMetric.measurement_time >= datetime.now() - timedelta(hours=24))
+                .order_by(PerformanceMetric.measurement_time.desc())
+            ).all()
+            
+            # Calculate system-wide statistics
+            if recent_metrics:
+                avg_response_time = statistics.mean([m.value for m in recent_metrics if m.metric_type == MetricType.RESPONSE_TIME])
+                avg_throughput = statistics.mean([m.value for m in recent_metrics if m.metric_type == MetricType.THROUGHPUT])
+                avg_error_rate = statistics.mean([m.value for m in recent_metrics if m.metric_type == MetricType.ERROR_RATE])
+            else:
+                avg_response_time = avg_throughput = avg_error_rate = 0
+            
+            # Get active alerts count
+            active_alerts = session.exec(
+                select(func.count(PerformanceAlert.id))
+                .where(PerformanceAlert.is_active == True)
+            ).first() or 0
+            
+            # Calculate system health score
+            health_score = 100
+            if avg_response_time > 2000:  # > 2 seconds
+                health_score -= 20
+            if avg_error_rate > 5:  # > 5%
+                health_score -= 30
+            if active_alerts > 10:
+                health_score -= 25
+            health_score = max(0, health_score)
+            
+            return {
+                "system_health": {
+                    "overall_score": health_score,
+                    "status": "healthy" if health_score >= 80 else "warning" if health_score >= 60 else "critical"
+                },
+                "data_sources": {
+                    "total_count": total_data_sources,
+                    "active_count": total_data_sources  # Assuming all are active for now
+                },
+                "performance_metrics": {
+                    "average_response_time_ms": round(avg_response_time, 2),
+                    "average_throughput_ops": round(avg_throughput, 2),
+                    "average_error_rate_percent": round(avg_error_rate, 2)
+                },
+                "alerts": {
+                    "active_count": active_alerts,
+                    "critical_count": session.exec(
+                        select(func.count(PerformanceAlert.id))
+                        .where(and_(PerformanceAlert.is_active == True, PerformanceAlert.severity == "high"))
+                    ).first() or 0
+                },
+                "last_updated": datetime.now().isoformat()
+            }
+            
+        except Exception as e:
+            logger.error(f"Error getting comprehensive system metrics: {str(e)}")
+            return {
+                "system_health": {"overall_score": 0, "status": "error"},
+                "error": str(e),
+                "last_updated": datetime.now().isoformat()
+            }

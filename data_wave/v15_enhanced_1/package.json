@@ -7,9 +7,11 @@
     "build:enterprise": "node build-production.js",
     "build:analyze": "ANALYZE=true next build",
     "build:clean": "rm -rf .next && npm run build",
+    "build:optimize": "node scripts/build-optimizer.js && npm run build",
     "dev": "next dev",
     "dev:turbo": "next dev --turbo",
     "dev:memory": "NODE_OPTIONS='--max-old-space-size=4096' next dev",
+    "dev:optimized": "npm run build:optimize && npm run dev:turbo",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "start": "next start",
@@ -18,7 +20,9 @@
     "clean": "rm -rf .next node_modules/.cache .turbo dist build",
     "clean:all": "rm -rf .next node_modules package-lock.json && npm install",
     "optimize": "npm run clean && npm run build:enterprise",
-    "test:build": "npm run build && npm run start:prod"
+    "test:build": "npm run build && npm run start:prod",
+    "resolve-errors": "node scripts/build-optimizer.js",
+    "predev": "npm run resolve-errors"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.0.8",

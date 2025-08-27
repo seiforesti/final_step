@@ -49,8 +49,8 @@ import {
 } from '../../types/intelligence.types';
 
 // Utils
-import { patternAnalyzer } from '../../utils/ai-helpers';
-import { mlModelManager } from '../../utils/ai-engine';
+import { patternAnalyzer } from '../../../Advanced-Scan-Logic/utils/ai-helpers';
+import { mlModelManager } from '../../../Advanced-Scan-Logic/utils/ai-engine';
 import { patternMatcher } from '../../utils/pattern-matcher';
 
 interface IntelligentPatternDetectorProps {

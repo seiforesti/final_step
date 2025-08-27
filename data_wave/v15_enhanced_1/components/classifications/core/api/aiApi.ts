@@ -188,10 +188,44 @@ class AIApiClient {
   }
 
   private initializeWebSocket(): void {
-    const wsUrl = `${process.env.REACT_APP_WS_URL || 'ws://localhost:8000'}/v3/ai/realtime`;
+    // Check if WebSocket is enabled and URL is configured
+    // Disable WebSocket by default to prevent connection errors
+    const enableWebSocket = process.env.NEXT_PUBLIC_ENABLE_AI_WEBSOCKET === 'true';
+    const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000';
+    
+    if (!enableWebSocket) {
+      console.log('AI WebSocket is disabled in configuration');
+      return;
+    }
+    
+    if (!wsUrl) {
+      console.warn('AI WebSocket URL not configured, WebSocket features will be disabled');
+      return;
+    }
+
+    // Only attempt WebSocket connection in browser environment
+    if (typeof window === 'undefined') {
+      console.log('AI WebSocket initialization skipped - not in browser environment');
+      return;
+    }
+    
+    // Check if WebSocket is already connected or connecting
+    if (this.wsConnection && (this.wsConnection.readyState === WebSocket.OPEN || this.wsConnection.readyState === WebSocket.CONNECTING)) {
+      console.log('AI WebSocket already connected or connecting, skipping initialization');
+      return;
+    }
     
     try {
-      this.wsConnection = new WebSocket(wsUrl);
+      const fullWsUrl = `${wsUrl}/v3/ai/realtime`;
+      console.log('Attempting to connect to AI WebSocket:', fullWsUrl);
+      
+      // Validate URL format
+      if (!fullWsUrl.startsWith('ws://') && !fullWsUrl.startsWith('wss://')) {
+        console.warn('Invalid WebSocket URL format:', fullWsUrl);
+        return;
+      }
+      
+      this.wsConnection = new WebSocket(fullWsUrl);
       
       this.wsConnection.onopen = () => {
         console.log('AI WebSocket connected');
@@ -203,7 +237,49 @@ class AIApiClient {
       };
 
       this.wsConnection.onerror = (error) => {
-        console.error('AI WebSocket error:', error);
+        // Handle WebSocket error with better error information
+        let errorMessage = 'Unknown WebSocket error';
+        let errorDetails = {};
+        
+        if (error) {
+          if (typeof error === 'string') {
+            errorMessage = error;
+          } else if (error instanceof Error) {
+            errorMessage = error.message || error.name || 'WebSocket error occurred';
+            errorDetails = {
+              name: error.name,
+              stack: error.stack,
+              message: error.message
+            };
+          } else if (error.message) {
+            errorMessage = error.message;
+            errorDetails = {
+              name: error.name,
+              stack: error.stack,
+              code: error.code,
+              ...error
+            };
+          } else if (error.toString && error.toString() !== '[object Object]') {
+            errorMessage = error.toString();
+          } else {
+            // If error is an empty object or undefined, provide a default message
+            errorMessage = 'AI WebSocket connection failed';
+            errorDetails = { originalError: error };
+          }
+        } else {
+          // If no error object provided, create a default error
+          errorMessage = 'AI WebSocket connection failed - no error details available';
+          errorDetails = { noErrorObject: true };
+        }
+        
+        console.error('AI WebSocket error:', {
+          message: errorMessage,
+          error: error,
+          url: fullWsUrl,
+          readyState: this.wsConnection?.readyState,
+          errorDetails: errorDetails,
+          timestamp: new Date().toISOString()
+        });
       };
     } catch (error) {
       console.error('Failed to initialize AI WebSocket:', error);
@@ -742,7 +818,7 @@ class AIApiClient {
 
 // Default configuration
 const defaultAIApiConfig: AIApiConfig = {
-  baseURL: process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000',
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000',
   timeout: 60000, // 60 seconds for AI operations
   streaming: {
     enabled: true,

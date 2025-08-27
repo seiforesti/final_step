@@ -538,13 +538,30 @@ const ClassificationAnalyticsDashboard: React.FC<{
 // Main Component Props
 interface ClassificationsSPAOrchestratorProps {
   workspaceId?: UUID;
-  userId: UUID;
+  userId?: UUID;
   initialView?: 'manager' | 'analytics' | 'collaboration';
   enableAI?: boolean;
   enableCollaboration?: boolean;
   enableCrossSPA?: boolean;
   onStateChange?: (state: EnhancedClassificationState) => void;
   onError?: (error: Error) => void;
+  
+  // Additional props for advanced functionality
+  mode?: 'full-spa' | 'basic-spa' | 'classifications-only' | 'schema-only';
+  enableSchemaEditor?: boolean;
+  enableLabelManagement?: boolean;
+  enableAutomationRules?: boolean;
+  enableClassificationEngine?: boolean;
+  enableSensitivityMapping?: boolean;
+  enableBulkClassification?: boolean;
+  enableMachineLearning?: boolean;
+  enableCustomClassifiers?: boolean;
+  enableComplianceMapping?: boolean;
+  enableNotifications?: boolean;
+  showClassificationMetrics?: boolean;
+  showAccuracyScores?: boolean;
+  showQuickActions?: boolean;
+  showRecommendations?: boolean;
 }
 
 // Main ClassificationsSPAOrchestrator Component
@@ -556,7 +573,24 @@ export const ClassificationsSPAOrchestrator: React.FC<ClassificationsSPAOrchestr
   enableCollaboration = true,
   enableCrossSPA = true,
   onStateChange,
-  onError
+  onError,
+  
+  // Additional props with defaults
+  mode = 'full-spa',
+  enableSchemaEditor = true,
+  enableLabelManagement = true,
+  enableAutomationRules = true,
+  enableClassificationEngine = true,
+  enableSensitivityMapping = true,
+  enableBulkClassification = true,
+  enableMachineLearning = true,
+  enableCustomClassifiers = true,
+  enableComplianceMapping = true,
+  enableNotifications = true,
+  showClassificationMetrics = true,
+  showAccuracyScores = true,
+  showQuickActions = true,
+  showRecommendations = true
 }) => {
   // Enhanced State Management
   const [enhancedState, setEnhancedState] = useState<EnhancedClassificationState>({

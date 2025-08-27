@@ -96,6 +96,9 @@ export function useRBACState(): RBACSystemContext {
   return context;
 }
 
+// Alias for backward compatibility
+export const useRBAC = useRBACState;
+
 export function useRBACStateManager(): RBACSystemContext {
   // Initialize all sub-hooks
   const auth = useAuth();

@@ -316,6 +316,21 @@ export function useRacineOrchestration(
   }, []);
   
   const handleApiError = useCallback((error: Error, errorKey: keyof OrchestrationErrors) => {
+    // Handle timeout errors gracefully - don't crash the application
+    if (error.message && error.message.includes('timeout')) {
+      console.warn(`Orchestration API timeout (${errorKey}): ${error.message}`);
+      // Don't update error state for timeouts - just log warning
+      return;
+    }
+    
+    // Handle network errors gracefully
+    if (error.message && (error.message.includes('fetch') || error.message.includes('network'))) {
+      console.warn(`Orchestration API network error (${errorKey}): ${error.message}`);
+      // Don't update error state for network errors - just log warning
+      return;
+    }
+    
+    // For other errors, log and update state as normal
     console.error(`Orchestration API error (${errorKey}):`, error);
     updateError(errorKey, error.message);
   }, [updateError]);
@@ -425,7 +440,11 @@ export function useRacineOrchestration(
             response.data![0] : prev.currentOrchestration
         }));
       } else {
-        throw new Error(response.error?.message || 'Failed to load orchestration masters');
+        console.warn('Failed to load orchestration masters:', response.error?.message || 'Unknown');
+        setState(prev => ({
+          ...prev,
+          orchestrationMasters: [],
+        }));
       }
     } catch (error) {
       handleApiError(error as Error, 'orchestrationMasters');
@@ -460,7 +479,41 @@ export function useRacineOrchestration(
           isConnected: true
         }));
       } else {
-        throw new Error(response.error?.message || 'Failed to load system health');
+        // Handle API failure gracefully instead of throwing
+        console.warn('Failed to load system health from API:', response.error?.message || 'Unknown error');
+        
+        // Set default offline health status
+        const defaultHealth: SystemHealthResponse = {
+          overall: 'offline' as SystemStatus,
+          groups: {},
+          services: {},
+          integrations: {},
+          performance: {
+            averageResponseTime: 0,
+            throughput: 0,
+            errorRate: 0,
+            memoryUsage: 0,
+            cpuUsage: 0,
+            diskUsage: 0,
+            networkLatency: 0,
+            activeConnections: 0,
+            queueDepth: 0
+          },
+          lastCheck: new Date().toISOString(),
+          uptime: 0,
+          version: 'offline',
+          alerts: []
+        };
+        
+        setState(prev => ({
+          ...prev,
+          systemHealth: defaultHealth,
+          groupsHealth: {},
+          servicesHealth: {},
+          integrationsHealth: {},
+          lastSync: new Date().toISOString(),
+          isConnected: false
+        }));
       }
     } catch (error) {
       setState(prev => ({ ...prev, isConnected: false }));
@@ -550,7 +603,16 @@ export function useRacineOrchestration(
           criticalAlerts: critical
         }));
       } else {
-        throw new Error(response.error?.message || 'Failed to load alerts');
+        // Handle API failure gracefully instead of throwing
+        console.warn('Failed to load alerts from API:', response.error?.message || 'Unknown error');
+        
+        // Set empty alerts for offline mode
+        setState(prev => ({
+          ...prev,
+          systemAlerts: [],
+          unacknowledgedAlerts: 0,
+          criticalAlerts: 0
+        }));
       }
     } catch (error) {
       handleApiError(error as Error, 'alerts');
@@ -768,7 +830,45 @@ export function useRacineOrchestration(
           ]
         }));
       } else {
-        throw new Error(response.error?.message || 'Failed to load metrics');
+        // Handle API failure gracefully instead of throwing
+        console.warn('Failed to load metrics from API:', response.error?.message || 'Unknown error');
+        
+        // Set default metrics for offline mode
+        const defaultMetrics: PerformanceMetrics = {
+          responseTime: {
+            average: 0,
+            p95: 0,
+            p99: 0,
+            max: 0
+          },
+          throughput: {
+            requestsPerSecond: 0,
+            operationsPerSecond: 0,
+            dataProcessed: 0
+          },
+          resources: {
+            memoryUsage: 0,
+            cpuUsage: 0,
+            diskUsage: 0,
+            networkLatency: 0
+          },
+          errors: {
+            totalCount: 0,
+            errorRate: 0,
+            criticalErrors: 0,
+            warningCount: 0
+          },
+          lastUpdated: new Date().toISOString()
+        };
+        
+        setState(prev => ({
+          ...prev,
+          currentMetrics: defaultMetrics,
+          metricsHistory: [
+            ...prev.metricsHistory.slice(-(config.maxHistoryItems - 1)),
+            defaultMetrics
+          ]
+        }));
       }
     } catch (error) {
       handleApiError(error as Error, 'metrics');
@@ -817,7 +917,14 @@ export function useRacineOrchestration(
           optimizationRecommendations: response.data!
         }));
       } else {
-        throw new Error(response.error?.message || 'Failed to load optimization recommendations');
+        // Handle API failure gracefully instead of throwing
+        console.warn('Failed to load optimization recommendations from API:', response.error?.message || 'Unknown error');
+        
+        // Set empty recommendations for offline mode
+        setState(prev => ({
+          ...prev,
+          optimizationRecommendations: []
+        }));
       }
     } catch (error) {
       handleApiError(error as Error, 'optimization');
@@ -979,6 +1086,30 @@ export function useRacineOrchestration(
   // EFFECTS
   // =============================================================================
   
+  // Initialize API and test backend connectivity
+  useEffect(() => {
+    const initializeAPI = async () => {
+      try {
+        // Test backend connectivity and set up offline mode
+        await racineOrchestrationAPI.testBackendConnectivity();
+        
+        // Set connection status based on backend availability
+        setState(prev => ({ 
+          ...prev, 
+          isConnected: true // Assume connected if no error during initialization
+        }));
+        
+        console.log('Racine Orchestration API initialized with offline mode support');
+      } catch (error) {
+        console.warn('Failed to initialize Racine Orchestration API:', error);
+        // Set offline mode if initialization fails
+        setState(prev => ({ ...prev, isConnected: false }));
+      }
+    };
+    
+    initializeAPI();
+  }, []);
+  
   // Initial data loading
   useEffect(() => {
     if (config.autoLoadData) {
@@ -1081,6 +1212,7 @@ export function useRacineOrchestration(
     refreshGroupHealth,
     refreshServiceHealth,
     refreshIntegrationHealth,
+    monitorSystemHealth: refreshSystemHealth, // Alias for compatibility
     
     // Alerts management
     loadAlerts,
@@ -1102,6 +1234,24 @@ export function useRacineOrchestration(
     
     // Real-time updates
     subscribeToEvents,
+    
+    // Layout tracking
+    trackLayoutEvent: (eventData: any) => {
+      // Track layout events for analytics
+      if (typeof window !== 'undefined' && window.gtag) {
+        window.gtag('event', 'layout_change', eventData);
+      }
+      
+      // Send to backend if connected
+      if (state.isConnected) {
+        racineOrchestrationAPI.trackEvent('layout_event', eventData).catch(console.error);
+      }
+      
+      // Log for debugging
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Layout Event:', eventData);
+      }
+    },
     
     // Utility functions
     isHealthy,

@@ -157,6 +157,16 @@ class RBACApiService {
     config: RequestConfig = {}
   ): Promise<ApiResponse<T>> {
     const url = `${this.baseURL}${endpoint}`;
+    if (process.env.NODE_ENV === 'development') {
+      try {
+        // Minimal client-side tracing for debugging calls from LoginForm/authService
+        console.debug('[RBACApiService] request', {
+          url,
+          method: config.method || HTTP_METHODS.GET,
+          hasBody: !!config.body,
+        });
+      } catch {}
+    }
     
     // Apply request interceptors
     let processedConfig = { ...config };
@@ -194,6 +204,15 @@ class RBACApiService {
 
     try {
       let response = await fetch(url, requestOptions);
+      if (process.env.NODE_ENV === 'development') {
+        try {
+          console.debug('[RBACApiService] response', {
+            url,
+            status: response.status,
+            ok: response.ok,
+          });
+        } catch {}
+      }
       clearTimeout(timeoutId);
 
       // Apply response interceptors

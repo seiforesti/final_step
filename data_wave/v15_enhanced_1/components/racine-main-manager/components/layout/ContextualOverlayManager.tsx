@@ -265,7 +265,7 @@ const ContextualOverlayManager: React.FC<ContextualOverlayManagerProps> = ({
         content,
         context: context || {},
         activeViews,
-        userPreferences: userContext.preferences
+        userPreferences: userContext?.preferences
       });
 
       const overlayConfig: OverlayConfiguration = {
@@ -325,7 +325,7 @@ const ContextualOverlayManager: React.FC<ContextualOverlayManagerProps> = ({
     overlayState.overlayStack,
     getContextualOverlays,
     activeViews,
-    userContext.preferences,
+    userContext?.preferences,
     trackOverlayPerformance
   ]);
 
@@ -738,8 +738,8 @@ const ContextualOverlayManager: React.FC<ContextualOverlayManagerProps> = ({
     const loadNotifications = async () => {
       try {
         const notifications = await workspaceManagementAPI.getNotifications({
-          userId: userContext.id,
-          workspaceId: workspaceContext.id,
+          userId: userContext?.id || 'default',
+          workspaceId: workspaceContext?.id || 'default',
           limit: 50
         });
 
@@ -756,8 +756,10 @@ const ContextualOverlayManager: React.FC<ContextualOverlayManagerProps> = ({
       }
     };
 
-    loadNotifications();
-  }, [userContext.id, workspaceContext.id]);
+    if (userContext?.id && workspaceContext?.id) {
+      loadNotifications();
+    }
+  }, [userContext?.id, workspaceContext?.id]);
 
   // =============================================================================
   // MAIN RENDER

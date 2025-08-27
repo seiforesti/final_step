@@ -1047,6 +1047,19 @@ export interface AccessibilityPreferences {
 export type ColorBlindnessType = 'none' | 'protanopia' | 'deuteranopia' | 'tritanopia' | 'achromatopsia';
 
 // =============================================================================
+// API RESPONSE TYPE
+// =============================================================================
+
+export interface APIResponse<T = any> {
+  success: boolean;
+  data: T;
+  message?: string;
+  error?: string;
+  timestamp: string;
+  requestId: string;
+}
+
+// =============================================================================
 // API ERROR TYPES
 // =============================================================================
 

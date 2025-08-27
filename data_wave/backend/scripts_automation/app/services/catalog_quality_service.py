@@ -1495,16 +1495,8 @@ class CatalogQualityService:
     
     async def _monitoring_loop(self):
         """Background task for continuous quality monitoring"""
-        while True:
+        while getattr(self, '_monitoring_active', False):
             try:
-                from .scheduler import SchedulerService
-                scheduler = SchedulerService()
-                await scheduler.schedule_task(
-                    task_name="quality_monitoring",
-                    delay_seconds=self.config.monitoring_interval,
-                    task_func=self._monitoring_loop
-                )
-                
                 # Get active monitoring configurations
                 async with get_db_session() as session:
                     query = select(QualityMonitoringConfig).where(
@@ -1519,8 +1511,12 @@ class CatalogQualityService:
                             # Execute monitoring logic here
                             await self._check_quality_alerts(session)
                 
+                # Sleep for the monitoring interval instead of infinite loop
+                await asyncio.sleep(self.config.monitoring_interval)
+                
             except Exception as e:
                 logger.error(f"Monitoring loop error: {e}")
+                await asyncio.sleep(60)  # Wait before retrying
     
     def _is_monitoring_due(self, config) -> bool:
         """Check if monitoring is due for a configuration"""
@@ -1539,21 +1535,31 @@ class CatalogQualityService:
     
     async def _cleanup_loop(self):
         """Background task for cleanup operations"""
-        while True:
+        while getattr(self, '_cleanup_active', False):
             try:
-                from .scheduler import SchedulerService
-                scheduler = SchedulerService()
-                await scheduler.schedule_task(
-                    task_name="quality_cleanup",
-                    delay_seconds=3600,
-                    task_func=self._cleanup_loop
-                )
-                
                 # Cleanup old assessments, alerts, etc.
                 await self._cleanup_old_records()
                 
+                # Sleep for 1 hour instead of infinite loop
+                await asyncio.sleep(3600)
+                
             except Exception as e:
                 logger.error(f"Cleanup loop error: {e}")
+                await asyncio.sleep(300)  # Wait 5 minutes before retrying
+
+    def start_monitoring(self):
+        """Start the monitoring and cleanup loops"""
+        self._monitoring_active = True
+        self._cleanup_active = True
+        asyncio.create_task(self._monitoring_loop())
+        asyncio.create_task(self._cleanup_loop())
+        logger.info("Catalog quality monitoring started")
+
+    def stop_monitoring(self):
+        """Stop the monitoring and cleanup loops"""
+        self._monitoring_active = False
+        self._cleanup_active = False
+        logger.info("Catalog quality monitoring stopped")
 
     async def _cleanup_old_records(self):
         """Clean up old quality records to maintain system performance"""
@@ -1564,14 +1570,14 @@ class CatalogQualityService:
             async with get_db_session() as session:
                 # Clean old quality assessments
                 old_assessments_query = delete(QualityAssessment).where(
-                    QualityAssessment.created_at < cutoff_date
+                    QualityAssessment.executed_at < cutoff_date
                 )
                 await session.execute(old_assessments_query)
                 
                 # Clean old quality alerts (older than 30 days)
                 alert_cutoff = datetime.now() - timedelta(days=30)
-                old_alerts_query = delete(QualityAlert).where(
-                    QualityAlert.created_at < alert_cutoff
+                old_alerts_query = delete(QualityMonitoringAlert).where(
+                    QualityMonitoringAlert.created_at < alert_cutoff
                 )
                 await session.execute(old_alerts_query)
                 

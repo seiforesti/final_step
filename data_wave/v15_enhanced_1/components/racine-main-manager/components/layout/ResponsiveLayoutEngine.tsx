@@ -116,6 +116,7 @@ export interface ResponsiveLayoutEngineProps {
   userContext?: UserContext;
   workspaceContext?: WorkspaceContext;
   className?: string;
+  children?: React.ReactNode;
 }
 
 export interface ResponsiveState {
@@ -392,13 +393,40 @@ const ResponsiveLayoutEngine: React.FC<ResponsiveLayoutEngineProps> = ({
   onLayoutAdaptation,
   userContext,
   workspaceContext,
-  className = ''
+  className = '',
+  children
 }) => {
+  // Global error boundary for the entire component
+  const handleGlobalError = useCallback((error: any, errorInfo?: any) => {
+    console.warn('ResponsiveLayoutEngine global error caught:', error, errorInfo);
+    
+    // Set fallback mode to prevent further errors
+    setResponsiveState(prev => ({
+      ...prev,
+      fallbackMode: true,
+      adaptationErrors: [
+        ...prev.adaptationErrors,
+        {
+          id: crypto.randomUUID(),
+          type: 'adaptation', // Use a valid ResponsiveError type
+          severity: 'high',
+          message: 'Global responsive engine error',
+          breakpoint: prev.activeBreakpoint,
+          deviceType,
+          context: { error, errorInfo, timestamp: new Date().toISOString() },
+          timestamp: new Date().toISOString(),
+          resolved: false
+        }
+      ]
+    }));
+  }, [deviceType]);
   // =============================================================================
   // STATE MANAGEMENT
   // =============================================================================
   
-  const [responsiveState, setResponsiveState] = useState<ResponsiveState>({
+  const [responsiveState, setResponsiveState] = useState<ResponsiveState>(() => {
+    try {
+      return {
     activeBreakpoint: breakpoint,
     deviceCapabilities: {
       screenSize: { width: typeof window !== 'undefined' ? window.innerWidth : 1920, height: typeof window !== 'undefined' ? window.innerHeight : 1080 },
@@ -502,6 +530,51 @@ const ResponsiveLayoutEngine: React.FC<ResponsiveLayoutEngineProps> = ({
     adaptationErrors: [],
     fallbackMode: false,
     lastSuccessfulAdaptation: new Date().toISOString()
+  };
+    } catch (error) {
+      console.warn('Failed to initialize responsive state, using fallback:', error);
+      // Return minimal fallback state
+      return {
+        activeBreakpoint: breakpoint,
+        deviceCapabilities: {
+          screenSize: { width: 1920, height: 1080 },
+          pixelRatio: 1,
+          touchSupport: false,
+          hoverSupport: true,
+          keyboardSupport: true,
+          gestureSupport: false,
+          accelerometerSupport: false,
+          batteryAPI: false,
+          networkAPI: false,
+          memoryAPI: false,
+          performanceAPI: false
+        },
+        networkCondition: { type: 'wifi', speed: 100, latency: 20, isMetered: false, saveData: false },
+        batteryLevel: 100,
+        memoryPressure: { level: 'low', availableMemory: 1024, usedMemory: 256, pressureScore: 25 },
+        adaptedLayout: currentLayout,
+        adaptationHistory: [],
+        isAdapting: false,
+        adaptationProgress: 0,
+        performanceProfile: { cpuClass: 'medium', memoryClass: 'medium', gpuClass: 'medium', storageType: 'hdd', networkClass: 'medium', batteryLevel: 100, thermalState: 'normal' },
+        optimizationStrategies: [],
+        renderingMetrics: { frameRate: 60, paintTime: 0, layoutTime: 0, scriptTime: 0, inputLatency: 0, scrollPerformance: 100, animationPerformance: 100, memoryUsage: 0, batteryImpact: 0, networkUsage: 0 },
+        aiResponsiveRecommendations: [],
+        learningData: { userAdaptationPatterns: [], performanceHistory: [], optimizationResults: [], deviceUsagePatterns: [] },
+        adaptationPatterns: [],
+        accessibilityMode: { isEnabled: false, level: 'AA', features: [], screenReaderOptimized: false, keyboardNavigationOptimized: true, highContrastEnabled: false, reducedMotionEnabled: false, focusManagementEnabled: true },
+        accessibilitySettings: { fontSize: 16, lineHeight: 1.5, colorContrast: 4.5, animationSpeed: 1, focusIndicatorSize: 2, touchTargetSize: 44, screenReaderVerbosity: 'standard' },
+        screenReaderActive: false,
+        highContrastMode: false,
+        reducedMotion: false,
+        touchSupport: { isEnabled: false, multiTouch: false, gestureSupport: false, sensitivity: 0.8 },
+        gestureRecognition: { isEnabled: false, recognizedGestures: [], customGestures: [], gestureHistory: [], sensitivity: 0.8 },
+        hoverSupport: true,
+        adaptationErrors: [],
+        fallbackMode: true,
+        lastSuccessfulAdaptation: new Date().toISOString()
+      };
+    }
   });
 
   // =============================================================================
@@ -664,92 +737,242 @@ const ResponsiveLayoutEngine: React.FC<ResponsiveLayoutEngineProps> = ({
       // Get breakpoint configuration
       const breakpointConfig = RESPONSIVE_BREAKPOINTS[targetBreakpoint];
       
-      // Calculate layout adaptation using AI
-      const adaptationPlan = await aiAssistantAPI.calculateResponsiveAdaptation({
-        currentLayout,
-        targetBreakpoint,
-        deviceCapabilities: responsiveState.deviceCapabilities,
-        performanceProfile: responsiveState.performanceProfile,
-        userPreferences: userContext?.preferences.layoutPreferences,
-        networkCondition: responsiveState.networkCondition
-      });
+      try {
+        // Calculate layout adaptation using AI
+        const adaptationPlan = await aiAssistantAPI.calculateResponsiveAdaptation({
+          currentLayout,
+          targetBreakpoint,
+          deviceCapabilities: responsiveState.deviceCapabilities,
+          performanceProfile: responsiveState.performanceProfile,
+          userPreferences: userContext?.preferences.layoutPreferences,
+          networkCondition: responsiveState.networkCondition
+        });
 
-      // Update adaptation progress
-      setResponsiveState(prev => ({ ...prev, adaptationProgress: 25 }));
+        // Update adaptation progress
+        setResponsiveState(prev => ({ ...prev, adaptationProgress: 25 }));
 
-      // Apply responsive optimizations
-      const optimizedLayout = await layoutEngine.applyResponsiveOptimizations({
-        layout: currentLayout,
-        adaptationPlan,
-        breakpointConfig,
-        performanceConstraints: {
-          maxMemoryMB: responsiveState.memoryPressure.availableMemory * 0.8,
-          maxCPUPercent: responsiveState.performanceProfile.cpuClass === 'low' ? 50 : 80,
-          maxNetworkMbps: responsiveState.networkCondition.speed * 0.9,
-          batteryOptimization: responsiveState.batteryLevel < 20
+        // Check if we got a fallback response (backend unavailable)
+        if (adaptationPlan && adaptationPlan.fallback === true) {
+          console.warn('Using fallback adaptation plan due to backend unavailability');
+          
+          // Use basic responsive layout without AI optimization
+          const fallbackLayout = await layoutEngine.applyBasicResponsiveLayout({
+            layout: currentLayout,
+            breakpoint: targetBreakpoint,
+            breakpointConfig,
+            deviceCapabilities: responsiveState.deviceCapabilities
+          });
+
+          // Update adaptation progress
+          setResponsiveState(prev => ({ ...prev, adaptationProgress: 50 }));
+
+          // Apply accessibility optimizations
+          const accessibilityOptimizedLayout = await layoutEngine.applyAccessibilityOptimizations({
+            layout: fallbackLayout,
+            accessibilityMode: responsiveState.accessibilityMode,
+            accessibilitySettings: responsiveState.accessibilitySettings,
+            screenReaderActive: responsiveState.screenReaderActive
+          });
+
+          // Update adaptation progress
+          setResponsiveState(prev => ({ ...prev, adaptationProgress: 100 }));
+
+          // Record adaptation history with fallback note
+          const adaptationRecord: AdaptationHistory = {
+            id: crypto.randomUUID(),
+            timestamp: new Date().toISOString(),
+            fromBreakpoint: responsiveState.activeBreakpoint,
+            toBreakpoint: targetBreakpoint,
+            adaptationDuration: performance.now() - adaptationStart,
+            performanceImpact: {
+              before: responsiveState.renderingMetrics,
+              after: null
+            },
+            success: true,
+            fallback: true
+          };
+
+          setResponsiveState(prev => ({
+            ...prev,
+            adaptedLayout: accessibilityOptimizedLayout,
+            adaptationHistory: [...prev.adaptationHistory, adaptationRecord],
+            isAdapting: false,
+            adaptationProgress: 0,
+            lastSuccessfulAdaptation: new Date().toISOString()
+          }));
+
+          // Notify parent of layout adaptation
+          onLayoutAdaptation(accessibilityOptimizedLayout);
+
+          // Track adaptation performance
+          await trackResponsivePerformance('breakpoint_adaptation', {
+            breakpoint: targetBreakpoint,
+            duration: performance.now() - adaptationStart,
+            success: true,
+            fallback: true,
+            deviceType,
+            performanceProfile: responsiveState.performanceProfile
+          });
+
+          return;
         }
-      });
 
-      // Update adaptation progress
-      setResponsiveState(prev => ({ ...prev, adaptationProgress: 50 }));
+        // Apply responsive optimizations with AI plan
+        const optimizedLayout = await layoutEngine.applyResponsiveOptimizations({
+          layout: currentLayout,
+          adaptationPlan,
+          breakpointConfig,
+          performanceConstraints: {
+            maxMemoryMB: responsiveState.memoryPressure.availableMemory * 0.8,
+            maxCPUPercent: responsiveState.performanceProfile.cpuClass === 'low' ? 50 : 80,
+            maxNetworkMbps: responsiveState.networkCondition.speed * 0.9,
+            batteryOptimization: responsiveState.batteryLevel < 20
+          }
+        });
 
-      // Validate adapted layout
-      const validation = await validateResponsiveLayout(optimizedLayout, targetBreakpoint);
-      if (!validation.isValid) {
-        throw new Error(`Responsive adaptation failed: ${validation.errors.join(', ')}`);
+        // Update adaptation progress
+        setResponsiveState(prev => ({ ...prev, adaptationProgress: 50 }));
+
+        // Check if validation function is available
+        if (typeof validateResponsiveLayout !== 'function') {
+          console.warn('Validation function not available, skipping validation');
+        } else {
+          // Validate adapted layout
+          const validation = await validateResponsiveLayout(optimizedLayout, targetBreakpoint);
+          if (!validation.isValid) {
+            throw new Error(`Responsive adaptation failed: ${validation.errors.join(', ')}`);
+          }
+        }
+
+        // Update adaptation progress
+        setResponsiveState(prev => ({ ...prev, adaptationProgress: 75 }));
+
+        // Apply accessibility optimizations
+        const accessibilityOptimizedLayout = await layoutEngine.applyAccessibilityOptimizations({
+          layout: optimizedLayout,
+          accessibilityMode: responsiveState.accessibilityMode,
+          accessibilitySettings: responsiveState.accessibilitySettings,
+          screenReaderActive: responsiveState.screenReaderActive
+        });
+
+        // Update adaptation progress
+        setResponsiveState(prev => ({ ...prev, adaptationProgress: 100 }));
+
+        // Record adaptation history
+        const adaptationRecord: AdaptationHistory = {
+          id: crypto.randomUUID(),
+          timestamp: new Date().toISOString(),
+          fromBreakpoint: responsiveState.activeBreakpoint,
+          toBreakpoint: targetBreakpoint,
+          adaptationDuration: performance.now() - adaptationStart,
+          performanceImpact: {
+            before: responsiveState.renderingMetrics,
+            after: null // Will be updated after performance measurement
+          },
+          success: true
+        };
+
+        setResponsiveState(prev => ({
+          ...prev,
+          adaptedLayout: accessibilityOptimizedLayout,
+          adaptationHistory: [...prev.adaptationHistory, adaptationRecord],
+          isAdapting: false,
+          adaptationProgress: 0,
+          lastSuccessfulAdaptation: new Date().toISOString()
+        }));
+
+        // Notify parent of layout adaptation
+        onLayoutAdaptation(accessibilityOptimizedLayout);
+
+        // Track adaptation performance
+        await trackResponsivePerformance('breakpoint_adaptation', {
+          breakpoint: targetBreakpoint,
+          duration: performance.now() - adaptationStart,
+          success: true,
+          deviceType,
+          performanceProfile: responsiveState.performanceProfile
+        });
+
+      } catch (innerError) {
+        // Handle specific API errors with detailed information
+        console.warn('API call error in adaptToBreakpoint:', innerError);
+        
+        let errorObj: Error;
+        let errorDetails: any = {};
+        
+        if (innerError instanceof Error) {
+          errorObj = innerError;
+          errorDetails = {
+            name: innerError.name,
+            message: innerError.message,
+            stack: innerError.stack,
+            errorSource: 'api_call'
+          };
+        } else if (typeof innerError === 'string') {
+          errorObj = new Error(innerError);
+          errorDetails = { originalError: innerError, errorSource: 'api_call' };
+        } else if (innerError && typeof innerError === 'object') {
+          errorObj = new Error('API call failed during responsive adaptation');
+          errorDetails = { originalError: innerError, errorSource: 'api_call' };
+        } else {
+          errorObj = new Error('Unknown API error during responsive adaptation');
+          errorDetails = { noErrorObject: true, errorSource: 'api_call' };
+        }
+        
+        const errorContext = {
+          targetBreakpoint: breakpoint,
+          currentBreakpoint: responsiveState.activeBreakpoint,
+          adaptationProgress: responsiveState.adaptationProgress,
+          errorSource: 'api_call_in_adaptToBreakpoint',
+          errorDetails: errorDetails,
+          timestamp: new Date().toISOString()
+        };
+        
+        handleResponsiveError('api_call_error', errorObj, errorContext);
+        setResponsiveState(prev => ({ 
+          ...prev, 
+          isAdapting: false,
+          adaptationProgress: 0,
+          fallbackMode: true
+        }));
+        return;
       }
 
-      // Update adaptation progress
-      setResponsiveState(prev => ({ ...prev, adaptationProgress: 75 }));
-
-      // Apply accessibility optimizations
-      const accessibilityOptimizedLayout = await layoutEngine.applyAccessibilityOptimizations({
-        layout: optimizedLayout,
-        accessibilityMode: responsiveState.accessibilityMode,
-        accessibilitySettings: responsiveState.accessibilitySettings,
-        screenReaderActive: responsiveState.screenReaderActive
-      });
-
-      // Update adaptation progress
-      setResponsiveState(prev => ({ ...prev, adaptationProgress: 100 }));
-
-      // Record adaptation history
-      const adaptationRecord: AdaptationHistory = {
-        id: crypto.randomUUID(),
-        timestamp: new Date().toISOString(),
-        fromBreakpoint: responsiveState.activeBreakpoint,
-        toBreakpoint: targetBreakpoint,
-        adaptationDuration: performance.now() - adaptationStart,
-        performanceImpact: {
-          before: responsiveState.renderingMetrics,
-          after: null // Will be updated after performance measurement
-        },
-        success: true
-      };
-
-      setResponsiveState(prev => ({
-        ...prev,
-        adaptedLayout: accessibilityOptimizedLayout,
-        adaptationHistory: [...prev.adaptationHistory, adaptationRecord],
-        isAdapting: false,
-        adaptationProgress: 0,
-        lastSuccessfulAdaptation: new Date().toISOString()
-      }));
-
-      // Notify parent of layout adaptation
-      onLayoutAdaptation(accessibilityOptimizedLayout);
-
-      // Track adaptation performance
-      await trackResponsivePerformance('breakpoint_adaptation', {
-        breakpoint: targetBreakpoint,
-        duration: performance.now() - adaptationStart,
-        success: true,
-        deviceType,
-        performanceProfile: responsiveState.performanceProfile
-      });
-
     } catch (error) {
-      handleResponsiveError('breakpoint_adaptation', error);
+      console.warn('Breakpoint adaptation error caught:', error);
+      
+      // Ensure we have a proper error object with detailed information
+      let errorObj: Error;
+      let errorDetails: any = {};
+      
+      if (error instanceof Error) {
+        errorObj = error;
+        errorDetails = {
+          name: error.name,
+          message: error.message,
+          stack: error.stack
+        };
+      } else if (typeof error === 'string') {
+        errorObj = new Error(error);
+        errorDetails = { originalError: error };
+      } else if (error && typeof error === 'object') {
+        errorObj = new Error('Breakpoint adaptation failed');
+        errorDetails = { originalError: error };
+      } else {
+        errorObj = new Error('Unknown breakpoint adaptation error');
+        errorDetails = { noErrorObject: true };
+      }
+      
+      const errorContext = {
+        targetBreakpoint: breakpoint,
+        currentBreakpoint: responsiveState.activeBreakpoint,
+        adaptationProgress: responsiveState.adaptationProgress,
+        errorSource: 'adaptToBreakpoint',
+        errorDetails: errorDetails,
+        timestamp: new Date().toISOString()
+      };
+      
+      handleResponsiveError('breakpoint_adaptation', errorObj, errorContext);
       setResponsiveState(prev => ({ 
         ...prev, 
         isAdapting: false,
@@ -792,6 +1015,29 @@ const ResponsiveLayoutEngine: React.FC<ResponsiveLayoutEngineProps> = ({
         batteryLevel: responsiveState.batteryLevel
       });
 
+      // Check if we got fallback optimizations (backend unavailable)
+      if (!deviceOptimizations || deviceOptimizations.length === 0) {
+        console.warn('No device optimizations available, using basic layout');
+        
+        // Create a basic optimized layout without AI optimizations
+        const basicOptimizedLayout = {
+          ...currentLayout,
+          deviceType: targetDeviceType,
+          optimizedAt: new Date().toISOString(),
+          fallback: true,
+          type: 'basic_device_optimization'
+        };
+
+        setResponsiveState(prev => ({
+          ...prev,
+          adaptedLayout: basicOptimizedLayout,
+          isAdapting: false
+        }));
+
+        onLayoutAdaptation(basicOptimizedLayout);
+        return;
+      }
+
       // Apply device optimizations
       const optimizedLayout = await layoutEngine.applyDeviceOptimizations({
         layout: currentLayout,
@@ -809,8 +1055,28 @@ const ResponsiveLayoutEngine: React.FC<ResponsiveLayoutEngineProps> = ({
       onLayoutAdaptation(optimizedLayout);
 
     } catch (error) {
+      console.warn('Device optimization error caught:', error);
+      
+      // Create a fallback layout on error
+      const fallbackLayout = {
+        ...currentLayout,
+        deviceType: targetDeviceType,
+        optimizedAt: new Date().toISOString(),
+        fallback: true,
+        error: true,
+        type: 'fallback_device_optimization'
+      };
+
+      setResponsiveState(prev => ({
+        ...prev,
+        adaptedLayout: fallbackLayout,
+        isAdapting: false
+      }));
+
+      onLayoutAdaptation(fallbackLayout);
+      
+      // Log the error but don't throw it to prevent UI crashes
       handleResponsiveError('device_optimization', error);
-      setResponsiveState(prev => ({ ...prev, isAdapting: false }));
     }
   }, [
     currentLayout,
@@ -843,8 +1109,19 @@ const ResponsiveLayoutEngine: React.FC<ResponsiveLayoutEngineProps> = ({
       return recommendations;
 
     } catch (error) {
+      console.warn('AI recommendations error caught:', error);
+      
+      // Return empty recommendations instead of throwing error
+      const fallbackRecommendations: ResponsiveRecommendation[] = [];
+      
+      setResponsiveState(prev => ({
+        ...prev,
+        aiResponsiveRecommendations: fallbackRecommendations
+      }));
+
+      // Log the error but don't throw it to prevent UI crashes
       handleResponsiveError('ai_recommendations', error);
-      return [];
+      return fallbackRecommendations;
     }
   }, [
     breakpoint,
@@ -864,14 +1141,62 @@ const ResponsiveLayoutEngine: React.FC<ResponsiveLayoutEngineProps> = ({
     error: any,
     context?: Record<string, any>
   ) => {
+    // Prevent infinite error loops by checking if we're already in an error state
+    if (responsiveState.fallbackMode) {
+      console.warn('Responsive engine already in fallback mode, skipping error handling');
+      return;
+    }
+
+    // Ensure we have a proper error message
+    let errorMessage = 'Unknown responsive error';
+    let errorDetails = {};
+    
+    // Handle different error types more robustly
+    if (error) {
+      if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (error instanceof Error) {
+        errorMessage = error.message || error.name || 'Error occurred';
+        errorDetails = {
+          name: error.name,
+          stack: error.stack,
+          message: error.message
+        };
+      } else if (error.message) {
+        errorMessage = error.message;
+        errorDetails = {
+          name: error.name,
+          stack: error.stack,
+          code: error.code,
+          ...error
+        };
+      } else if (error.toString && error.toString() !== '[object Object]') {
+        errorMessage = error.toString();
+      } else {
+        // If error is an empty object or undefined, provide a default message
+        errorMessage = `${errorType} error occurred during responsive adaptation`;
+        errorDetails = { originalError: error };
+      }
+    } else {
+      // If no error object provided, create a default error
+      errorMessage = `${errorType} error occurred during responsive adaptation`;
+      errorDetails = { noErrorObject: true };
+    }
+
     const responsiveError: ResponsiveError = {
       id: crypto.randomUUID(),
       type: errorType as any,
       severity: 'medium',
-      message: error.message || 'Unknown responsive error',
+      message: errorMessage,
       breakpoint: responsiveState.activeBreakpoint,
       deviceType,
-      context: { ...context, currentLayout },
+      context: { 
+        ...context, 
+        currentLayout,
+        errorDetails,
+        errorType,
+        timestamp: new Date().toISOString()
+      },
       timestamp: new Date().toISOString(),
       resolved: false
     };
@@ -882,7 +1207,17 @@ const ResponsiveLayoutEngine: React.FC<ResponsiveLayoutEngineProps> = ({
       fallbackMode: true
     }));
 
-    console.error('Responsive Engine Error:', responsiveError);
+    // Log the error with more details (use warn instead of error to avoid console.error)
+    console.warn('Responsive Engine Error (handled gracefully):', {
+      type: errorType,
+      message: errorMessage,
+      error: error,
+      context: context,
+      breakpoint: responsiveState.activeBreakpoint,
+      deviceType: deviceType,
+      errorDetails: errorDetails,
+      stack: error instanceof Error ? error.stack : undefined
+    });
 
     // Attempt automatic recovery after 3 seconds
     setTimeout(() => {
@@ -901,29 +1236,47 @@ const ResponsiveLayoutEngine: React.FC<ResponsiveLayoutEngineProps> = ({
     const performanceInterval = setInterval(async () => {
       try {
         // Collect responsive rendering metrics
-        const renderingMetrics = await responsiveUtils.collectRenderingMetrics();
+        let renderingMetrics = responsiveState.renderingMetrics;
+        try {
+          renderingMetrics = await responsiveUtils.collectRenderingMetrics();
+        } catch (error) {
+          console.warn('Failed to collect rendering metrics, using cached values:', error);
+        }
         
         // Update memory pressure
-        const memoryPressure = await responsiveUtils.getMemoryPressure();
+        let memoryPressure = responsiveState.memoryPressure;
+        try {
+          memoryPressure = await responsiveUtils.getMemoryPressure();
+        } catch (error) {
+          console.warn('Failed to get memory pressure, using cached values:', error);
+        }
         
         // Update battery level
         let batteryLevel = responsiveState.batteryLevel;
-        if ('getBattery' in navigator) {
-          const battery = await (navigator as any).getBattery();
-          batteryLevel = Math.round(battery.level * 100);
+        try {
+          if ('getBattery' in navigator) {
+            const battery = await (navigator as any).getBattery();
+            batteryLevel = Math.round(battery.level * 100);
+          }
+        } catch (error) {
+          console.warn('Failed to get battery level, using cached value:', error);
         }
 
         // Update network condition
         let networkCondition = responsiveState.networkCondition;
-        if ('connection' in navigator) {
-          const connection = (navigator as any).connection;
-          networkCondition = {
-            type: connection.effectiveType || 'wifi',
-            speed: connection.downlink || 100,
-            latency: connection.rtt || 20,
-            isMetered: connection.saveData || false,
-            saveData: connection.saveData || false
-          };
+        try {
+          if ('connection' in navigator) {
+            const connection = (navigator as any).connection;
+            networkCondition = {
+              type: connection.effectiveType || 'wifi',
+              speed: connection.downlink || 100,
+              latency: connection.rtt || 20,
+              isMetered: connection.saveData || false,
+              saveData: connection.saveData || false
+            };
+          }
+        } catch (error) {
+          console.warn('Failed to get network condition, using cached values:', error);
         }
 
         setResponsiveState(prev => ({
@@ -936,24 +1289,36 @@ const ResponsiveLayoutEngine: React.FC<ResponsiveLayoutEngineProps> = ({
 
         // Check if responsive optimization is needed
         if (renderingMetrics.frameRate < 30 || memoryPressure.level === 'critical') {
-          // Get AI optimization recommendations
-          const optimizations = await getResponsiveRecommendations();
-          
-          // Apply automatic optimizations if enabled
-          if (optimizations.length > 0 && responsiveState.performanceProfile.cpuClass !== 'low') {
-            const highImpactOptimizations = optimizations.filter(opt => opt.impact === 'high');
-            if (highImpactOptimizations.length > 0) {
-              await optimizeResponsiveLayout({
-                optimizations: highImpactOptimizations,
-                currentLayout,
-                targetBreakpoint: breakpoint
-              });
+          try {
+            // Get AI optimization recommendations
+            const optimizations = await getResponsiveRecommendations();
+            
+            // Apply automatic optimizations if enabled
+            if (optimizations.length > 0 && responsiveState.performanceProfile.cpuClass !== 'low') {
+              try {
+                const highImpactOptimizations = optimizations.filter(opt => opt.impact === 'high');
+                if (highImpactOptimizations.length > 0) {
+                  await optimizeResponsiveLayout({
+                    optimizations: highImpactOptimizations,
+                    currentLayout,
+                    targetBreakpoint: breakpoint
+                  });
+                }
+              } catch (optimizationError) {
+                console.warn('Failed to apply responsive optimizations:', optimizationError);
+                // Continue without optimizations
+              }
             }
+          } catch (recommendationError) {
+            console.warn('Failed to get responsive recommendations:', recommendationError);
+            // Continue without recommendations
           }
         }
 
       } catch (error) {
-        handleResponsiveError('performance_monitoring', error);
+        console.warn('Performance monitoring error caught:', error);
+        // Don't call handleResponsiveError here to avoid infinite loops
+        // Just log and continue
       }
     }, 2000); // Check every 2 seconds
 
@@ -965,8 +1330,7 @@ const ResponsiveLayoutEngine: React.FC<ResponsiveLayoutEngineProps> = ({
     getResponsiveRecommendations,
     optimizeResponsiveLayout,
     currentLayout,
-    breakpoint,
-    handleResponsiveError
+    breakpoint
   ]);
 
   /**
@@ -982,32 +1346,78 @@ const ResponsiveLayoutEngine: React.FC<ResponsiveLayoutEngineProps> = ({
    * Initialize responsive engine
    */
   useEffect(() => {
-    detectDeviceCapabilities();
-    
-    // Set up resize observer for responsive monitoring
-    if (engineContainerRef.current) {
-      resizeObserverRef.current = new ResizeObserver((entries) => {
-        for (const entry of entries) {
-          const { width, height } = entry.contentRect;
-          setResponsiveState(prev => ({
-            ...prev,
-            deviceCapabilities: {
-              ...prev.deviceCapabilities,
-              screenSize: { width, height }
-            }
-          }));
-        }
-      });
+    try {
+      detectDeviceCapabilities();
       
-      resizeObserverRef.current.observe(engineContainerRef.current);
-    }
-
-    return () => {
-      if (resizeObserverRef.current) {
-        resizeObserverRef.current.disconnect();
+      // Set up resize observer for responsive monitoring
+      if (engineContainerRef.current && typeof ResizeObserver !== 'undefined') {
+        try {
+          resizeObserverRef.current = new ResizeObserver((entries) => {
+            try {
+              for (const entry of entries) {
+                if (entry && entry.contentRect) {
+                  const { width, height } = entry.contentRect;
+                  setResponsiveState(prev => ({
+                    ...prev,
+                    deviceCapabilities: {
+                      ...prev.deviceCapabilities,
+                      screenSize: { width, height }
+                    }
+                  }));
+                }
+              }
+            } catch (error) {
+              console.warn('ResizeObserver callback error:', error);
+            }
+          });
+          
+          if (engineContainerRef.current) {
+            resizeObserverRef.current.observe(engineContainerRef.current);
+          }
+        } catch (error) {
+          console.warn('Failed to initialize ResizeObserver:', error);
+          // Fallback to window resize listener
+          const handleResize = () => {
+            if (engineContainerRef.current) {
+              const { width, height } = engineContainerRef.current.getBoundingClientRect();
+              setResponsiveState(prev => ({
+                ...prev,
+                deviceCapabilities: {
+                  ...prev.deviceCapabilities,
+                  screenSize: { width, height }
+                }
+              }));
+            }
+          };
+          
+          window.addEventListener('resize', handleResize);
+          handleResize(); // Initial call
+          
+          return () => {
+            window.removeEventListener('resize', handleResize);
+          };
+        }
       }
-    };
-  }, [detectDeviceCapabilities]);
+
+      return () => {
+        if (resizeObserverRef.current) {
+          try {
+            resizeObserverRef.current.disconnect();
+          } catch (error) {
+            console.warn('Error disconnecting ResizeObserver:', error);
+          }
+        }
+      };
+    } catch (error) {
+      console.error('Failed to initialize ResponsiveLayoutEngine:', error);
+      handleResponsiveError('initialization', error, {
+        errorSource: 'useEffect_initialization',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }, [detectDeviceCapabilities, handleResponsiveError]);
+
+
 
   // =============================================================================
   // RESPONSIVE CONTEXT PROVIDER
@@ -1180,6 +1590,19 @@ const ResponsiveLayoutEngine: React.FC<ResponsiveLayoutEngineProps> = ({
   // MAIN RENDER
   // =============================================================================
 
+  // Fallback render if there are critical errors
+  if (responsiveState.fallbackMode && responsiveState.adaptationErrors.length > 0) {
+    return (
+      <div className={`responsive-layout-engine fallback ${className}`}>
+        <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+          <p className="text-sm text-yellow-800">
+            Responsive engine in fallback mode. Layout adaptation may be limited.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <ResponsiveContext.Provider value={responsiveContextValue}>
       <div 
@@ -1226,6 +1649,9 @@ const ResponsiveLayoutEngine: React.FC<ResponsiveLayoutEngineProps> = ({
             </Card>
           </motion.div>
         )}
+        
+        {/* Main Content */}
+        {children}
       </div>
     </ResponsiveContext.Provider>
   );

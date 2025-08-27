@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 
 export interface PerformanceMetrics {
   fps: number;
@@ -23,6 +23,9 @@ export interface PerformanceMetrics {
 }
 
 export function usePerformanceMonitor(options = { enabled: true }) {
+  // Stabilize options to prevent infinite re-renders
+  const stableOptions = useMemo(() => options, [options.enabled]);
+  
   const [metrics, setMetrics] = useState<PerformanceMetrics>({
     fps: 0,
     memoryUsage: {
@@ -44,15 +47,30 @@ export function usePerformanceMonitor(options = { enabled: true }) {
     interactionDelay: 0,
   });
 
+  // Use refs to store observers and intervals to prevent recreation on every render
+  const observersRef = useRef<{
+    longTask: PerformanceObserver | null;
+    network: PerformanceObserver | null;
+    interaction: PerformanceObserver | null;
+  }>({ longTask: null, network: null, interaction: null });
+
+  const intervalsRef = useRef<{
+    memory: NodeJS.Timeout | null;
+    hints: NodeJS.Timeout | null;
+    cpu: NodeJS.Timeout | null;
+  }>({ memory: null, hints: null, cpu: null });
+
+  const animationFrameRef = useRef<number | null>(null);
+
   useEffect(() => {
-    if (!options.enabled) return;
+    if (!stableOptions.enabled) return;
 
     let frameCount = 0;
     let lastTime = performance.now();
     let animationFrameId: number;
 
     // FPS Tracking
-    function measureFPS() {
+    const measureFPS = () => {
       frameCount++;
       const currentTime = performance.now();
       const elapsedTime = currentTime - lastTime;
@@ -64,11 +82,11 @@ export function usePerformanceMonitor(options = { enabled: true }) {
         lastTime = currentTime;
       }
 
-      animationFrameId = requestAnimationFrame(measureFPS);
-    }
+      animationFrameRef.current = requestAnimationFrame(measureFPS);
+    };
 
     // Memory Usage
-    function trackMemory() {
+    const trackMemory = () => {
       if ("memory" in performance) {
         const memory = (performance as any).memory;
         setMetrics((prev) => ({
@@ -80,7 +98,7 @@ export function usePerformanceMonitor(options = { enabled: true }) {
           },
         }));
       }
-    }
+    };
 
     // Long Tasks
     const longTaskObserver = new PerformanceObserver((list) => {
@@ -139,19 +157,23 @@ export function usePerformanceMonitor(options = { enabled: true }) {
 
     // Start monitoring
     try {
-      animationFrameId = requestAnimationFrame(measureFPS);
+      animationFrameRef.current = requestAnimationFrame(measureFPS);
 
-      const memoryInterval = setInterval(trackMemory, 5000);
+      intervalsRef.current.memory = setInterval(trackMemory, 5000);
+
+      observersRef.current.longTask = longTaskObserver;
+      observersRef.current.network = networkObserver;
+      observersRef.current.interaction = interactionObserver;
 
       longTaskObserver.observe({ entryTypes: ["longtask"] });
       networkObserver.observe({ entryTypes: ["resource"] });
       interactionObserver.observe({ entryTypes: ["event"] });
 
-      const hintsInterval = setInterval(countResourceHints, 10000);
+      intervalsRef.current.hints = setInterval(countResourceHints, 10000);
 
       // CPU Usage (experimental)
       if ("cpuUsage" in process) {
-        const cpuInterval = setInterval(() => {
+        intervalsRef.current.cpu = setInterval(() => {
           const usage = (process as any).cpuUsage();
           const total = usage.user + usage.system;
           const cpuPercentage = (total / (process.uptime() * 1000000)) * 100;
@@ -159,29 +181,43 @@ export function usePerformanceMonitor(options = { enabled: true }) {
         }, 5000);
 
         return () => {
-          clearInterval(cpuInterval);
-          clearInterval(memoryInterval);
-          clearInterval(hintsInterval);
-          cancelAnimationFrame(animationFrameId);
-          longTaskObserver.disconnect();
-          networkObserver.disconnect();
-          interactionObserver.disconnect();
+          if (intervalsRef.current.cpu) clearInterval(intervalsRef.current.cpu);
+          if (intervalsRef.current.memory) clearInterval(intervalsRef.current.memory);
+          if (intervalsRef.current.hints) clearInterval(intervalsRef.current.hints);
+          if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+          if (observersRef.current.longTask) observersRef.current.longTask.disconnect();
+          if (observersRef.current.network) observersRef.current.network.disconnect();
+          if (observersRef.current.interaction) observersRef.current.interaction.disconnect();
         };
       }
 
       return () => {
-        clearInterval(memoryInterval);
-        clearInterval(hintsInterval);
-        cancelAnimationFrame(animationFrameId);
-        longTaskObserver.disconnect();
-        networkObserver.disconnect();
-        interactionObserver.disconnect();
+        if (intervalsRef.current.memory) clearInterval(intervalsRef.current.memory);
+        if (intervalsRef.current.hints) clearInterval(intervalsRef.current.hints);
+        if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+        if (observersRef.current.longTask) observersRef.current.longTask.disconnect();
+        if (observersRef.current.network) observersRef.current.network.disconnect();
+        if (observersRef.current.interaction) observersRef.current.interaction.disconnect();
       };
     } catch (error) {
       console.error("Performance monitoring setup failed:", error);
       return () => {};
     }
-  }, [options.enabled]);
+  }, [stableOptions.enabled]);
+
+  // Cleanup effect to reset refs when component unmounts
+  useEffect(() => {
+    return () => {
+      // Clean up any remaining intervals and observers
+      if (intervalsRef.current.memory) clearInterval(intervalsRef.current.memory);
+      if (intervalsRef.current.hints) clearInterval(intervalsRef.current.hints);
+      if (intervalsRef.current.cpu) clearInterval(intervalsRef.current.cpu);
+      if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+      if (observersRef.current.longTask) observersRef.current.longTask.disconnect();
+      if (observersRef.current.network) observersRef.current.network.disconnect();
+      if (observersRef.current.interaction) observersRef.current.interaction.disconnect();
+    };
+  }, []);
 
   return metrics;
 }

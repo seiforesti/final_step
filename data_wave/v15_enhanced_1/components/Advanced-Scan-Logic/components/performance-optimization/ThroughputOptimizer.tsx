@@ -2,7 +2,10 @@
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { TrendingUp, Activity, Zap, Target, Gauge, BarChart3, LineChart, PieChart, Server, Cpu, MemoryStick, Network, Database, RefreshCw, Settings, Play, Pause, Square, RotateCcw, Plus, Minus, ArrowUp, ArrowDown, TrendingDown, Clock, Timer, Calendar, Users, User, CheckCircle, AlertTriangle, XCircle, Info, Flag, Star, Shield, Lock, Unlock, Key, Eye, EyeOff, Search, Filter, Download, Upload, Share2, Edit, Trash2, Copy, Code, FileText, Archive, History, Award, Crown, Hash, Percent, DollarSign, TrendingUpDown, Maximize, Minimize, ArrowLeft, ArrowRight, Volume2, VolumeX, Wifi, WifiOff, Signal, Battery, BatteryLow, Thermometer, Monitor, Smartphone, Tablet, Laptop, Desktop, Package, Layers, Globe } from 'lucide-react'
+import { TrendingUp, Activity, Zap, Target, Gauge, BarChart3, LineChart, PieChart, Server, Cpu, MemoryStick, Network, Database, RefreshCw, Settings, Play, Pause, Square, RotateCcw, Plus, Minus, ArrowUp, ArrowDown, TrendingDown, Clock, Timer, Calendar, Users, User, CheckCircle, AlertTriangle, XCircle, Info, Flag, Star, Shield, Lock, Unlock, Key, Eye, EyeOff, Search, Filter, Download, Upload, Share2, Edit, Trash2, Copy, Code, FileText, Archive, History, Award, Crown, Hash, Percent, DollarSign, Maximize, Minimize, ArrowLeft, ArrowRight, Volume2, VolumeX, Wifi, WifiOff, Signal, Battery, BatteryLow, Thermometer, Monitor, Smartphone, Tablet, Laptop, Package, Layers, Globe } from 'lucide-react'
+
+// Custom icons
+import { TrendingUpDown } from '../../utils/advanced-icons'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'

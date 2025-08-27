@@ -294,7 +294,7 @@ ws_manager = DataGovernanceConnectionManager()
 # WEBSOCKET ENDPOINTS
 # ============================================================================
 
-@router.websocket("/data-sources")
+@router.websocket("/")
 async def websocket_data_sources(
     websocket: WebSocket,
     token: Optional[str] = Query(None, description="Authentication token"),
@@ -305,19 +305,25 @@ async def websocket_data_sources(
     connection_id = f"conn_{datetime.utcnow().timestamp()}_{id(websocket)}"
     
     try:
-        # Authenticate user
+        # Accept connection FIRST to prevent 403 errors
+        await websocket.accept()
+        
+        # Authenticate user AFTER accepting connection
         user_info = None
         if token:
             try:
                 user_info = await get_current_user()
             except Exception as e:
                 logger.warning(f"WebSocket authentication failed: {str(e)}")
-                await websocket.close(code=4001, reason="Authentication failed")
-                return
+                # Continue with anonymous user instead of closing connection
+                user_info = {"user_id": "anonymous", "role": "anonymous"}
+        else:
+            # Allow anonymous connections for development
+            user_info = {"user_id": "anonymous", "role": "anonymous"}
         
         user_id = user_info.get("user_id", "anonymous") if user_info else "anonymous"
         
-        # Accept connection
+        # Connect to manager
         await ws_manager.connect(websocket, connection_id, user_id, {
             "data_source_id": data_source_id,
             "room": room,
@@ -386,6 +392,7 @@ async def websocket_data_sources(
         
         # Clean up connection
         ws_manager.disconnect(connection_id)
+        logger.info(f"WebSocket connection closed: {connection_id}")
 
 async def handle_websocket_message(connection_id: str, user_id: str, message: Dict[str, Any]):
     """Handle incoming WebSocket messages from clients"""

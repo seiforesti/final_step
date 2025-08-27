@@ -108,17 +108,30 @@ export const QuickNotifications: React.FC<QuickNotificationsProps> = ({
     getNotificationSound
   } = useNotificationManager()
   
-  const { 
-    getActiveSPAContext, 
-    getAllSPAStatuses 
-  } = useCrossGroupIntegration()
+  // Normalize cross-group integration hook
+  const crossGroup = useCrossGroupIntegration() as any
+  const crossGroupState = crossGroup?.state ?? crossGroup?.[0] ?? {}
+  const crossGroupOps = crossGroup?.operations ?? crossGroup?.[1] ?? crossGroup ?? {}
+  const getActiveSPAContext = () => crossGroupState?.activeSPAContext || null
+  const getAllSPAStatuses = () => crossGroupState?.groupStatuses || {}
   
-  const { getCurrentUser } = useUserManagement()
-  const { trackEvent } = useActivityTracker()
-  const { 
-    getNotificationPreferences, 
-    updateNotificationPreferences 
-  } = useUserPreferences()
+  // Normalize user management
+  const userHook = useUserManagement() as any
+  const userState = userHook?.state ?? userHook?.[0] ?? {}
+  const userOps = userHook?.operations ?? userHook?.[1] ?? userHook ?? {}
+  const getCurrentUser = () => userOps?.getCurrentUser?.() ?? userState?.currentUser ?? null
+  
+  // Normalize activity tracker
+  const activity = useActivityTracker() as any
+  const activityOps = activity?.operations ?? activity?.[1] ?? activity ?? {}
+  const trackEvent = (event: string, data?: any) => { try { activityOps?.trackEvent?.(event, data) } catch { /* noop */ } }
+  
+  // Normalize user preferences
+  const prefs = useUserPreferences() as any
+  const prefsState = prefs?.state ?? prefs?.[0] ?? {}
+  const prefsOps = prefs?.operations ?? prefs?.[1] ?? prefs ?? {}
+  const getNotificationPreferences = () => prefsOps?.getNotificationPreferences?.() ?? prefsState?.notificationPreferences ?? { soundEnabled: true }
+  const updateNotificationPreferences = async (p: any) => { try { await prefsOps?.updateNotificationPreferences?.(p) } catch { /* noop */ } }
 
   // Get current context
   const currentUser = getCurrentUser()

@@ -24,7 +24,10 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { Activity, AlertTriangle, CheckCircle, Clock, RefreshCw, Settings, Zap, TrendingUp, TrendingDown, Server, Monitor, AlertCircle, Filter, Search, Download, Eye, Edit, Trash2, Plus, X, Check, Info, Copy, MoreHorizontal, Target, Timer, Gauge, LineChart, PieChart, BarChart, Workflow, Brain, Lightbulb, Cpu, Database, GitBranch, HardDrive, Network, Users, Play, Pause, Square, RotateCcw, Layers, Globe, Shield, Bell, BellOff, Calendar, MapPin, Send, UserCheck, UserX, ArrowRight, ArrowUp, ArrowDown, ExternalLink, Link, Unlink, TestTube, FlaskConical, Wrench, Tool, Cog, CircuitBoard, Package, Archive, FileText, Code, Braces, BarChart3, FileSpreadsheet, FilePdf, FileJson, Mail, Share, Bookmark, Star, Printer, Image, Layout, Grid3X3, List, ChevronDown, ChevronUp, Maximize2, Minimize2, ZoomIn, ZoomOut, RotateCw } from 'lucide-react';
+import { Activity, AlertTriangle, CheckCircle, Clock, RefreshCw, Settings, Zap, TrendingUp, TrendingDown, Server, Monitor, AlertCircle, Filter, Search, Download, Eye, Edit, Trash2, Plus, X, Check, Info, Copy, MoreHorizontal, Target, Timer, Gauge, LineChart, PieChart, BarChart, Workflow, Brain, Lightbulb, Cpu, Database, GitBranch, HardDrive, Network, Users, Play, Pause, Square, RotateCcw, Layers, Globe, Shield, Bell, BellOff, Calendar, MapPin, Send, UserCheck, UserX, ArrowRight, ArrowUp, ArrowDown, ExternalLink, Link, Unlink, TestTube, FlaskConical, Wrench, Cog, CircuitBoard, Package, Archive, FileText, Code, Braces, BarChart3, FileSpreadsheet, FileJson, Mail, Share, Bookmark, Star, Printer, Image, Layout, Grid3X3, List, ChevronDown, ChevronUp, Maximize2, Minimize2, ZoomIn, ZoomOut, RotateCw } from 'lucide-react';
+
+// Custom icons
+import { FilePdf } from '../../utils/advanced-icons';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';

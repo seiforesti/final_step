@@ -520,7 +520,7 @@ export const RoleManagement: React.FC<RoleManagementProps> = ({
         <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-                              <TreePine className="h-8 w-8 text-orange-600" />
+              <TreePine className="h-8 w-8 text-orange-600" />
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-500">Hierarchy Depth</p>
@@ -902,7 +902,7 @@ export const RoleManagement: React.FC<RoleManagementProps> = ({
             className="p-3 bg-purple-600 text-white rounded-full shadow-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
             title="Manage role hierarchy"
           >
-                            <TreePine className="h-6 w-6" />
+            <TreePine className="h-6 w-6" />
           </button>
         )}
 

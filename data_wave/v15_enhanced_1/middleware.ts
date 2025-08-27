@@ -80,9 +80,35 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Allow public routes
+  // Allow public routes (special-case root to redirect when authenticated)
   if (PUBLIC_ROUTES.includes(pathname) || pathname === '/') {
-    return NextResponse.next();
+    // Ensure baseline layout cookies exist so MasterLayoutOrchestrator has stable defaults on first render
+    const res = NextResponse.next();
+    const cookieLayout = request.cookies.get('layout:mode')?.value;
+    const cookieTheme = request.cookies.get('theme')?.value;
+    const cookieSidebar = request.cookies.get('sidebar:state')?.value;
+
+    if (!cookieLayout) {
+      res.cookies.set('layout:mode', 'adaptive', { path: '/', sameSite: 'lax' });
+    }
+    if (!cookieTheme) {
+      res.cookies.set('theme', 'system', { path: '/', sameSite: 'lax' });
+    }
+    if (!cookieSidebar) {
+      res.cookies.set('sidebar:state', 'true', { path: '/', sameSite: 'lax' });
+    }
+
+    // If landing on root and already authenticated, route straight to the SPA
+    if (pathname === '/') {
+      const authToken = request.cookies.get('racine_auth_token')?.value;
+      const sessionToken = request.cookies.get('racine_session')?.value;
+      if (authToken || sessionToken) {
+        const url = new URL('/app', request.url);
+        return NextResponse.redirect(url);
+      }
+    }
+
+    return res;
   }
 
   // Get authentication token from cookies

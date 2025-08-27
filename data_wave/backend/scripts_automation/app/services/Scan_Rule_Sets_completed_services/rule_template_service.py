@@ -169,8 +169,8 @@ class TemplateRecommendationEngine:
             # Extract text content
             text_content = doc.text if hasattr(doc, 'text') else str(doc)
             
-            # Use enterprise NLP service for advanced sentiment analysis
-            sentiment_result = await nlp_service.analyze_sentiment(
+            # Use enterprise NLP service for advanced sentiment analysis (synchronous version)
+            sentiment_result = nlp_service.analyze_sentiment_sync(
                 text=text_content,
                 analysis_type="comprehensive",
                 include_confidence=True,

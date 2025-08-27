@@ -18,12 +18,12 @@ const nextConfig = {
     },
     optimizeCss: true,
     optimizePackageImports: [
+      // Icon optimization disabled for compatibility
       '@radix-ui/react-icons',
-      'lucide-react',
       '@heroicons/react',
       'framer-motion',
       'recharts',
-      'd3',
+      'd3'
     ],
     // Advanced memory management
     workerThreads: false,
@@ -152,10 +152,31 @@ const nextConfig = {
   
   // Advanced API routing and proxying
   async rewrites() {
+    const backend = process.env.RACINE_BACKEND_URL || "http://localhost:8000";
     return [
+      // Smart proxy entrypoint (stays in Next, handled by app/api/proxy)
+      {
+        source: "/proxy/:path*",
+        destination: "/api/proxy/:path*",
+      },
+      // Route any API calls through the smart proxy
       {
         source: "/api/:path*",
-        destination: `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/:path*`,
+        destination: "/api/proxy/:path*",
+      },
+      // Health probe through proxy
+      {
+        source: "/health",
+        destination: "/api/proxy/health",
+      },
+      // Map app paths to smart proxy namespaces
+      {
+        source: "/racine/:path*",
+        destination: "/api/proxy/racine/:path*",
+      },
+      {
+        source: "/auth/:path*",
+        destination: "/api/proxy/auth/:path*",
       },
     ];
   },
@@ -177,6 +198,10 @@ const nextConfig = {
           {
             key: 'Referrer-Policy',
             value: 'origin-when-cross-origin',
+          },
+          {
+            key: 'Content-Security-Policy',
+            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com https://cdn.mathpix.com; font-src 'self' https://fonts.gstatic.com https://cdn.mathpix.com; img-src 'self' data: https:; connect-src 'self' http://localhost:8000 https://localhost:8000 ws://localhost:8000 wss://localhost:8000;",
           },
         ],
       },

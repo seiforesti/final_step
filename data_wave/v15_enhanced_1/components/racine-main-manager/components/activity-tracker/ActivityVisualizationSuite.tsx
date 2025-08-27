@@ -352,7 +352,7 @@ const chartTypeConfigs = {
     bestFor: ['patterns', 'intensity', 'matrix-data']
   },
   [ChartType.RADAR]: {
-    icon: Radar,
+    icon: RadarIcon,
     name: 'Radar Chart',
     description: 'Multi-dimensional comparison',
     bestFor: ['multi-dimensional', 'profiles', 'capabilities']

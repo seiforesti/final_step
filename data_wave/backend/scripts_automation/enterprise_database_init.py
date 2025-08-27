@@ -10,10 +10,11 @@ dependency resolution, and comprehensive validation.
 Features:
 - Advanced dependency resolution with topological sorting
 - Comprehensive error handling and retry mechanisms
-- Foreign key constraint management
+- Foreign key constraint management with professional constraint handling
 - Table validation and integrity checks
 - Production-ready logging and monitoring
 - Automatic rollback and recovery mechanisms
+- Professional handling of user-organization constraint relationships
 """
 
 import sys
@@ -63,13 +64,14 @@ class TableInfo:
     retry_count: int = 0
     max_retries: int = 3
     creation_time: Optional[float] = None
+    priority: int = 0  # Higher priority = created earlier
     
     def __post_init__(self):
         if self.dependencies is None:
             self.dependencies = set()
 
 class EnterpriseDatabaseInitializer:
-    """Enterprise-grade database initialization system"""
+    """Enterprise-grade database initialization system with professional constraint handling"""
     
     def __init__(self, database_url: str):
         self.database_url = database_url
@@ -83,6 +85,14 @@ class EnterpriseDatabaseInitializer:
             'existing_tables': 0,
             'failed_tables': 0,
             'skipped_tables': 0
+        }
+        
+        # Professional constraint handling configuration
+        self.constraint_handling = {
+            'disable_foreign_keys_during_creation': True,
+            'enable_foreign_keys_after_creation': True,
+            'handle_circular_dependencies': True,
+            'max_constraint_retries': 5
         }
         
     def initialize_connection(self) -> bool:
@@ -118,41 +128,91 @@ class EnterpriseDatabaseInitializer:
         
         return False
     
-    def register_all_models(self) -> bool:
-        """Register all models with comprehensive error handling"""
+    def disable_foreign_key_constraints(self) -> bool:
+        """Temporarily disable foreign key constraints for safe table creation"""
         try:
-            logger.info("🔧 Starting comprehensive model registration...")
+            logger.info("🔧 Temporarily disabling foreign key constraints...")
+            with self.engine.connect() as conn:
+                # Disable foreign key constraints temporarily
+                conn.execute(text("SET session_replication_role = replica;"))
+                conn.commit()
+            logger.info("✅ Foreign key constraints disabled temporarily")
+            return True
+        except Exception as e:
+            logger.warning(f"⚠️ Could not disable foreign key constraints: {e}")
+            return False
+    
+    def enable_foreign_key_constraints(self) -> bool:
+        """Re-enable foreign key constraints after table creation"""
+        try:
+            logger.info("🔧 Re-enabling foreign key constraints...")
+            with self.engine.connect() as conn:
+                # Re-enable foreign key constraints
+                conn.execute(text("SET session_replication_role = DEFAULT;"))
+                conn.commit()
+            logger.info("✅ Foreign key constraints re-enabled")
+            return True
+        except Exception as e:
+            logger.warning(f"⚠️ Could not re-enable foreign key constraints: {e}")
+            return False
+    
+    def register_all_models(self) -> bool:
+        """Register all models with comprehensive error handling and priority assignment"""
+        try:
+            logger.info("🔧 Starting comprehensive model registration with priority handling...")
             
             # Clear existing metadata to prevent conflicts
             SQLModel.metadata.clear()
             
-            # Core model registration with dependency tracking
-            core_models = [
-                ('auth_models', ['User', 'Role', 'Permission', 'Group']),
-                ('organization_models', ['Organization', 'OrganizationSetting']),
-                ('scan_models', ['DataSource', 'ScanRuleSet', 'Scan', 'ScanResult', 'ScanExecution']),
-                ('schema_models', ['DataTableSchema', 'SchemaVersion']),
-                ('classification_models', ['ClassificationRule', 'ClassificationResult']),
-                ('compliance_models', ['ComplianceRequirement', 'ComplianceValidation']),
-                ('catalog_models', ['CatalogItem', 'CatalogTag']),
-                ('workflow_models', ['Workflow', 'WorkflowExecution']),
-                ('task_models', ['Task', 'TaskExecution']),
-                ('version_models', ['Version', 'VersionChange']),
-                ('tag_models', ['Tag', 'TagAssociation']),
-                ('security_models', ['SecurityPolicy', 'AccessControl']),
-                ('report_models', ['Report', 'ReportTemplate']),
-                ('performance_models', ['PerformanceMetric', 'PerformanceAlert']),
-                ('integration_models', ['Integration', 'IntegrationLog']),
-                ('ml_models', ['MLModel', 'MLExperiment']),
-                ('notification_models', ['Notification', 'NotificationTemplate']),
-                ('email_verification_code', ['EmailVerificationCode']),
-                ('data_lineage_models', ['DataLineage', 'LineageEdge']),
-                ('collaboration_models', ['Collaboration', 'CollaborationMember']),
-                ('backup_models', ['Backup', 'RestoreOperation']),
-                ('access_control_models', ['AccessControl', 'PermissionMatrix'])
+            # Define core models with priority levels (higher number = higher priority)
+            core_models_with_priority = [
+                # Priority 100: Foundation tables (must be created first)
+                (100, 'auth_models', ['User', 'Role', 'Permission', 'Group']),
+                (100, 'organization_models', ['Organization', 'OrganizationSetting']),
+                
+                # Priority 90: Core relationship tables
+                (90, 'user_organization_models', ['UserOrganization', 'OrganizationMember']),
+                
+                # Priority 80: Core business tables
+                (80, 'scan_models', ['DataSource', 'ScanRuleSet', 'Scan', 'ScanResult', 'ScanExecution']),
+                (80, 'schema_models', ['DataTableSchema', 'SchemaVersion']),
+                (80, 'classification_models', ['ClassificationRule', 'ClassificationResult']),
+                
+                # Priority 70: Compliance and governance
+                (70, 'compliance_models', ['ComplianceRequirement', 'ComplianceValidation']),
+                (70, 'catalog_models', ['CatalogItem', 'CatalogTag']),
+                
+                # Priority 60: Workflow and task management
+                (60, 'workflow_models', ['Workflow', 'WorkflowExecution']),
+                (60, 'task_models', ['Task', 'TaskExecution']),
+                
+                # Priority 50: Version and tag management
+                (50, 'version_models', ['Version', 'VersionChange']),
+                (50, 'tag_models', ['Tag', 'TagAssociation']),
+                
+                # Priority 40: Security and access control
+                (40, 'security_models', ['SecurityPolicy', 'AccessControl']),
+                
+                # Priority 30: Reporting and analytics
+                (30, 'report_models', ['Report', 'ReportTemplate']),
+                (30, 'performance_models', ['PerformanceMetric', 'PerformanceAlert']),
+                
+                # Priority 20: Integration and ML
+                (20, 'integration_models', ['Integration', 'IntegrationLog']),
+                (20, 'ml_models', ['MLModel', 'MLExperiment']),
+                
+                # Priority 10: Notifications and utilities
+                (10, 'notification_models', ['Notification', 'NotificationTemplate']),
+                (10, 'email_verification_code', ['EmailVerificationCode']),
+                
+                # Priority 0: Advanced features
+                (0, 'data_lineage_models', ['DataLineage', 'LineageEdge']),
+                (0, 'collaboration_models', ['Collaboration', 'CollaborationMember']),
+                (0, 'backup_models', ['Backup', 'RestoreOperation']),
+                (0, 'access_control_models', ['AccessControl', 'PermissionMatrix'])
             ]
             
-            for module_name, model_names in core_models:
+            for priority, module_name, model_names in core_models_with_priority:
                 try:
                     module = __import__(f"app.models.{module_name}", fromlist=model_names)
                     for model_name in model_names:
@@ -163,28 +223,29 @@ class EnterpriseDatabaseInitializer:
                                 self.tables_info[table_name] = TableInfo(
                                     name=table_name,
                                     model=model,
-                                    dependencies=self._extract_dependencies(model)
+                                    dependencies=self._extract_dependencies(model),
+                                    priority=priority
                                 )
-                                logger.debug(f"✅ Registered model: {model_name} -> {table_name}")
+                                logger.debug(f"✅ Registered model: {model_name} -> {table_name} (priority: {priority})")
                 except ImportError as e:
                     logger.warning(f"⚠️ Failed to import {module_name}: {e}")
                 except Exception as e:
                     logger.error(f"❌ Error registering models from {module_name}: {e}")
             
-            # Racine models registration
-            racine_modules = [
-                'racine_orchestration_models',
-                'racine_workspace_models',
-                'racine_ai_models',
-                'racine_collaboration_models',
-                'racine_pipeline_models',
-                'racine_dashboard_models',
-                'racine_activity_models',
-                'racine_workflow_models',
-                'racine_integration_models'
+            # Racine models registration with priority
+            racine_modules_with_priority = [
+                (80, 'racine_orchestration_models'),
+                (70, 'racine_workspace_models'),
+                (60, 'racine_ai_models'),
+                (50, 'racine_collaboration_models'),
+                (40, 'racine_pipeline_models'),
+                (30, 'racine_dashboard_models'),
+                (20, 'racine_activity_models'),
+                (10, 'racine_workflow_models'),
+                (0, 'racine_integration_models')
             ]
             
-            for racine_module in racine_modules:
+            for priority, racine_module in racine_modules_with_priority:
                 try:
                     module = __import__(f"app.models.racine_models.{racine_module}", fromlist=["*"])
                     for attr_name in dir(module):
@@ -194,30 +255,31 @@ class EnterpriseDatabaseInitializer:
                             self.tables_info[table_name] = TableInfo(
                                 name=table_name,
                                 model=attr,
-                                dependencies=self._extract_dependencies(attr)
+                                dependencies=self._extract_dependencies(attr),
+                                priority=priority
                             )
-                            logger.debug(f"✅ Registered Racine model: {attr.__name__} -> {table_name}")
+                            logger.debug(f"✅ Registered Racine model: {attr.__name__} -> {table_name} (priority: {priority})")
                 except ImportError as e:
                     logger.warning(f"⚠️ Failed to import Racine module {racine_module}: {e}")
                 except Exception as e:
                     logger.error(f"❌ Error registering Racine models from {racine_module}: {e}")
             
-            # Advanced models registration
-            advanced_modules = [
-                ('advanced_scan_rule_models', ['IntelligentScanRule', 'RuleExecutionHistory']),
-                ('ai_ml_models', ['AIPrediction', 'MLModel', 'MLExperiment']),
-                ('analytics_models', ['AnalyticsInsight', 'PerformanceMetric', 'TrendAnalysis']),
-                ('compliance_rule_models', ['ComplianceRule', 'ComplianceRuleDataSourceLink']),
-                ('compliance_extended_models', ['ComplianceFramework', 'ComplianceRisk']),
-                ('catalog_quality_models', ['CatalogQualityRule', 'CatalogUsageLog']),
-                ('catalog_collaboration_models', ['CatalogCollaboration', 'CatalogReview']),
-                ('catalog_intelligence_models', ['CatalogIntelligence', 'CatalogRecommendation']),
-                ('scan_intelligence_models', ['ScanIntelligence', 'ScanOptimization']),
-                ('scan_performance_models', ['ScanPerformance', 'ScanMetrics']),
-                ('scan_workflow_models', ['ScanWorkflow', 'ScanOrchestration'])
+            # Advanced models registration with priority
+            advanced_modules_with_priority = [
+                (60, 'advanced_scan_rule_models', ['IntelligentScanRule', 'RuleExecutionHistory']),
+                (50, 'ai_ml_models', ['AIPrediction', 'MLModel', 'MLExperiment']),
+                (40, 'analytics_models', ['AnalyticsInsight', 'PerformanceMetric', 'TrendAnalysis']),
+                (30, 'compliance_rule_models', ['ComplianceRule', 'ComplianceRuleDataSourceLink']),
+                (20, 'compliance_extended_models', ['ComplianceFramework', 'ComplianceRisk']),
+                (10, 'catalog_quality_models', ['CatalogQualityRule', 'CatalogUsageLog']),
+                (0, 'catalog_collaboration_models', ['CatalogCollaboration', 'CatalogReview']),
+                (0, 'catalog_intelligence_models', ['CatalogIntelligence', 'CatalogRecommendation']),
+                (0, 'scan_intelligence_models', ['ScanIntelligence', 'ScanOptimization']),
+                (0, 'scan_performance_models', ['ScanPerformance', 'ScanMetrics']),
+                (0, 'scan_workflow_models', ['ScanWorkflow', 'ScanOrchestration'])
             ]
             
-            for module_name, model_names in advanced_modules:
+            for priority, module_name, model_names in advanced_modules_with_priority:
                 try:
                     module = __import__(f"app.models.{module_name}", fromlist=model_names)
                     for model_name in model_names:
@@ -228,16 +290,17 @@ class EnterpriseDatabaseInitializer:
                                 self.tables_info[table_name] = TableInfo(
                                     name=table_name,
                                     model=model,
-                                    dependencies=self._extract_dependencies(model)
+                                    dependencies=self._extract_dependencies(model),
+                                    priority=priority
                                 )
-                                logger.debug(f"✅ Registered advanced model: {model_name} -> {table_name}")
+                                logger.debug(f"✅ Registered advanced model: {model_name} -> {table_name} (priority: {priority})")
                 except ImportError as e:
                     logger.warning(f"⚠️ Failed to import advanced module {module_name}: {e}")
                 except Exception as e:
                     logger.error(f"❌ Error registering advanced models from {module_name}: {e}")
             
             self.stats['total_tables'] = len(self.tables_info)
-            logger.info(f"✅ Model registration completed: {self.stats['total_tables']} tables registered")
+            logger.info(f"✅ Model registration completed: {self.stats['total_tables']} tables registered with priority handling")
             return True
             
         except Exception as e:
@@ -246,28 +309,46 @@ class EnterpriseDatabaseInitializer:
             return False
     
     def _extract_dependencies(self, model) -> Set[str]:
-        """Extract foreign key dependencies from a model"""
+        """Extract foreign key dependencies from a model with professional constraint handling"""
         dependencies = set()
         try:
             if hasattr(model, '__table__') and hasattr(model.__table__, 'foreign_keys'):
                 for fk in model.__table__.foreign_keys:
                     if fk.column.table.name != model.__tablename__:
                         dependencies.add(fk.column.table.name)
+                        
+            # Special handling for user-organization relationships
+            if hasattr(model, '__tablename__'):
+                table_name = model.__tablename__
+                if table_name == 'users':
+                    # Users table depends on organizations
+                    dependencies.add('organizations')
+                elif 'organization' in table_name.lower() and table_name != 'organizations':
+                    # Organization-related tables depend on organizations
+                    dependencies.add('organizations')
+                    
         except Exception as e:
             logger.debug(f"⚠️ Could not extract dependencies for {getattr(model, '__name__', 'Unknown')}: {e}")
         return dependencies
     
     def resolve_dependencies(self) -> bool:
-        """Resolve table dependencies using topological sorting"""
+        """Resolve table dependencies using priority-based topological sorting"""
         try:
-            logger.info("🔍 Resolving table dependencies...")
+            logger.info("🔍 Resolving table dependencies with priority handling...")
+            
+            # Sort tables by priority first (higher priority = earlier creation)
+            sorted_tables = sorted(
+                self.tables_info.items(),
+                key=lambda x: (x[1].priority, x[0]),
+                reverse=True  # Higher priority first
+            )
             
             # Build dependency graph
             dependency_graph = {}
-            for table_name, table_info in self.tables_info.items():
+            for table_name, table_info in sorted_tables:
                 dependency_graph[table_name] = table_info.dependencies.copy()
             
-            # Topological sort
+            # Enhanced topological sort with priority consideration
             resolved_order = []
             visited = set()
             temp_visited = set()
@@ -283,6 +364,7 @@ class EnterpriseDatabaseInitializer:
                 
                 temp_visited.add(table_name)
                 
+                # Visit dependencies first
                 for dep in dependency_graph.get(table_name, set()):
                     if dep in dependency_graph:
                         visit(dep)
@@ -291,8 +373,8 @@ class EnterpriseDatabaseInitializer:
                 visited.add(table_name)
                 resolved_order.append(table_name)
             
-            # Visit all tables
-            for table_name in dependency_graph.keys():
+            # Visit all tables in priority order
+            for table_name, _ in sorted_tables:
                 if table_name not in visited:
                     visit(table_name)
             
@@ -310,7 +392,7 @@ class EnterpriseDatabaseInitializer:
                 resolved_order.extend(missing_tables)
             
             self.creation_order = resolved_order
-            logger.info(f"✅ Dependency resolution completed: {len(resolved_order)} tables ordered")
+            logger.info(f"✅ Dependency resolution completed: {len(resolved_order)} tables ordered with priority handling")
             return True
             
         except Exception as e:
@@ -319,24 +401,18 @@ class EnterpriseDatabaseInitializer:
             return False
     
     def create_tables(self) -> bool:
-        """Create all tables with comprehensive error handling"""
+        """Create all tables with professional constraint handling"""
         try:
-            logger.info("🔨 Starting table creation process...")
+            logger.info("🔨 Starting table creation process with professional constraint handling...")
             
-            # Create core tables first
-            core_tables = ['users', 'organizations', 'groups', 'roles', 'permissions']
-            core_tables_created = self._create_core_tables(core_tables)
+            # Step 1: Disable foreign key constraints temporarily
+            if self.constraint_handling['disable_foreign_keys_during_creation']:
+                self.disable_foreign_key_constraints()
             
-            if not core_tables_created:
-                logger.error("❌ Failed to create core tables - cannot proceed")
-                return False
-            
-            # Create remaining tables in dependency order
-            remaining_tables = [name for name in self.creation_order if name not in core_tables]
-            
-            for i, table_name in enumerate(remaining_tables, 1):
+            # Step 2: Create tables in dependency order
+            for i, table_name in enumerate(self.creation_order, 1):
                 try:
-                    logger.info(f"🔨 Processing table {i}/{len(remaining_tables)}: {table_name}")
+                    logger.info(f"🔨 Processing table {i}/{len(self.creation_order)}: {table_name}")
                     
                     if table_name not in self.tables_info:
                         logger.warning(f"⚠️ Table {table_name} not found in tables_info, skipping")
@@ -352,20 +428,24 @@ class EnterpriseDatabaseInitializer:
                     
                     # Progress logging
                     if i % 25 == 0:
-                        logger.info(f"📊 Progress: {i}/{len(remaining_tables)} tables processed")
+                        logger.info(f"📊 Progress: {i}/{len(self.creation_order)} tables processed")
                         
                 except Exception as e:
                     logger.error(f"❌ Error processing table {table_name}: {e}")
                     self.stats['failed_tables'] += 1
                     continue
             
-            # Final validation
+            # Step 3: Re-enable foreign key constraints
+            if self.constraint_handling['enable_foreign_keys_after_creation']:
+                self.enable_foreign_key_constraints()
+            
+            # Step 4: Final validation
             final_validation = self._validate_all_tables()
             if not final_validation:
                 logger.error("❌ Final table validation failed")
                 return False
             
-            logger.info("✅ Table creation process completed successfully")
+            logger.info("✅ Table creation process completed successfully with professional constraint handling")
             return True
             
         except Exception as e:
@@ -373,27 +453,8 @@ class EnterpriseDatabaseInitializer:
             logger.error(traceback.format_exc())
             return False
     
-    def _create_core_tables(self, core_tables: List[str]) -> bool:
-        """Create core tables with enhanced error handling"""
-        logger.info("🔨 Creating core tables...")
-        
-        for table_name in core_tables:
-            if table_name not in self.tables_info:
-                logger.warning(f"⚠️ Core table {table_name} not found in tables_info")
-                continue
-            
-            table_info = self.tables_info[table_name]
-            success = self._create_single_table(table_info, is_core=True)
-            
-            if not success:
-                logger.error(f"❌ Failed to create core table {table_name}")
-                return False
-        
-        logger.info("✅ Core tables created successfully")
-        return True
-    
-    def _create_single_table(self, table_info: TableInfo, is_core: bool = False) -> bool:
-        """Create a single table with retry mechanism and constraint handling"""
+    def _create_single_table(self, table_info: TableInfo) -> bool:
+        """Create a single table with professional constraint handling and retry mechanism"""
         table_name = table_info.name
         
         # Check if table already exists
@@ -403,7 +464,7 @@ class EnterpriseDatabaseInitializer:
             self.stats['existing_tables'] += 1
             return True
         
-        # Retry mechanism
+        # Retry mechanism with constraint handling
         for attempt in range(table_info.max_retries):
             try:
                 logger.debug(f"🔨 Creating table {table_name} (attempt {attempt + 1})")
@@ -430,6 +491,7 @@ class EnterpriseDatabaseInitializer:
                 else:
                     if attempt < table_info.max_retries - 1:
                         logger.warning(f"⚠️ Programming error for table {table_name} (attempt {attempt + 1}): {e}")
+                        time.sleep(1)  # Brief pause before retry
                         continue
                     else:
                         logger.error(f"❌ Programming error creating table {table_name}: {e}")
@@ -440,6 +502,7 @@ class EnterpriseDatabaseInitializer:
             except IntegrityError as e:
                 if attempt < table_info.max_retries - 1:
                     logger.warning(f"⚠️ Integrity error for table {table_name} (attempt {attempt + 1}): {e}")
+                    time.sleep(1)  # Brief pause before retry
                     continue
                 else:
                     logger.error(f"❌ Integrity error creating table {table_name}: {e}")
@@ -450,6 +513,7 @@ class EnterpriseDatabaseInitializer:
             except Exception as e:
                 if attempt < table_info.max_retries - 1:
                     logger.warning(f"⚠️ Unexpected error for table {table_name} (attempt {attempt + 1}): {e}")
+                    time.sleep(1)  # Brief pause before retry
                     continue
                 else:
                     logger.error(f"❌ Unexpected error creating table {table_name}: {e}")
@@ -514,13 +578,15 @@ class EnterpriseDatabaseInitializer:
             'table_details': {},
             'errors': [],
             'warnings': [],
-            'recommendations': []
+            'recommendations': [],
+            'constraint_handling': self.constraint_handling
         }
         
         # Table details
         for table_name, table_info in self.tables_info.items():
             report['table_details'][table_name] = {
                 'status': table_info.status.value,
+                'priority': table_info.priority,
                 'dependencies': list(table_info.dependencies),
                 'error_message': table_info.error_message,
                 'retry_count': table_info.retry_count,
@@ -560,9 +626,9 @@ class EnterpriseDatabaseInitializer:
         return report
     
     def run_initialization(self) -> bool:
-        """Run the complete database initialization process"""
+        """Run the complete database initialization process with professional constraint handling"""
         try:
-            logger.info("🚀 Starting Enterprise Database Initialization...")
+            logger.info("🚀 Starting Enterprise Database Initialization with Professional Constraint Handling...")
             
             # Step 1: Initialize connection
             if not self.initialize_connection():
@@ -595,7 +661,7 @@ class EnterpriseDatabaseInitializer:
             logger.info(f"   Success rate: {success_rate:.1f}%")
             
             if success_rate >= 95:
-                logger.info("🎉 Enterprise Database Initialization completed successfully!")
+                logger.info("🎉 Enterprise Database Initialization completed successfully with professional constraint handling!")
                 return True
             else:
                 logger.warning("⚠️ Database initialization completed with warnings - review report for details")
@@ -610,9 +676,10 @@ def main():
     """Main entry point"""
     try:
         # Configuration
-        database_url = os.getenv('DATABASE_URL', 'postgresql://postgres:postgres@localhost:5432/data_governance')
+        database_url = os.getenv('DATABASE_URL', 'postgresql://app_user:app_password@localhost:5432/data_wave_db')
         
         logger.info("🚀 Enterprise Data Governance Database Initialization System")
+        logger.info("🔧 Professional Constraint Handling Enabled")
         logger.info(f"📊 Database URL: {database_url}")
         
         # Create initializer

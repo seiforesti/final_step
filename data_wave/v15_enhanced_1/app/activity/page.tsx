@@ -33,22 +33,22 @@ export const metadata: Metadata = {
 export default function ActivityPage() {
   return (
     <ActivityTrackingHub 
-      mode="full-tracker"
-      enableRealTimeTracking={true}
-      enableAdvancedFiltering={true}
-      enableCrossGroupCorrelation={true}
-      enableVisualAnalytics={true}
-      enableAuditTrails={true}
-      enableExportCapabilities={true}
-      enableAlertSystem={true}
-      enableComplianceReporting={true}
-      enableUserBehaviorAnalysis={true}
-      enableNotifications={true}
-      showActivityTimeline={true}
-      showHeatmaps={true}
-      showAnomalyDetection={true}
-      showQuickActions={true}
-      showStatistics={true}
+      mode="full-tracker" 
+      enableRealTimeTracking={true} 
+      enableAdvancedFiltering={true} 
+      enableCrossGroupCorrelation={true} 
+      enableVisualAnalytics={true} 
+      enableAuditTrails={true} 
+      enableExportCapabilities={true} 
+      enableAlertSystem={true} 
+      enableComplianceReporting={true} 
+      enableUserBehaviorAnalysis={true} 
+      enableNotifications={true} 
+      showActivityTimeline={true} 
+      showHeatmaps={true} 
+      showAnomalyDetection={true} 
+      showQuickActions={true} 
+      showStatistics={true} 
     />
   );
 }

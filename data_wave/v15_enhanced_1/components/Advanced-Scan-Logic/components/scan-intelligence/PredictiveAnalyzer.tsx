@@ -57,7 +57,7 @@ import {
   ResponsiveContainer, LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, 
   Tooltip as RechartsTooltip, Legend, BarChart as RechartsBarChart, Bar, PieChart as RechartsPieChart, 
   Pie, Cell, AreaChart, Area, ComposedChart, Scatter, ScatterChart, RadarChart, PolarGrid, 
-  PolarAngleAxis, PolarRadiusAxis, Radar, Treemap, Sankey, FunnelChart, Funnel, LabelList,
+  PolarAngleAxis, PolarRadiusAxis, Treemap, Sankey, FunnelChart, Funnel, LabelList,
   ReferenceLine, ReferenceArea, Brush
 } from 'recharts';
 

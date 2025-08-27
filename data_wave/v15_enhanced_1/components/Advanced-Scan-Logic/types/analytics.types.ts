@@ -68,3 +68,102 @@ export enum TimeGranularity {
   WEEK = 'week',
   MONTH = 'month'
 }
+
+// Missing enum types referenced by components
+export enum TrendType {
+  LINEAR = 'linear',
+  EXPONENTIAL = 'exponential',
+  SEASONAL = 'seasonal',
+  CYCLICAL = 'cyclical',
+  RANDOM = 'random',
+  POLYNOMIAL = 'polynomial',
+  LOGARITHMIC = 'logarithmic',
+  POWER = 'power',
+  MOVING_AVERAGE = 'moving_average',
+  WEIGHTED = 'weighted',
+  CUSTOM = 'custom'
+}
+
+export enum StatisticalModel {
+  ARIMA = 'arima',
+  SARIMA = 'sarima',
+  EXPONENTIAL_SMOOTHING = 'exponential_smoothing',
+  HOLT_WINTERS = 'holt_winters',
+  LINEAR_REGRESSION = 'linear_regression',
+  POLYNOMIAL_REGRESSION = 'polynomial_regression',
+  MOVING_AVERAGE = 'moving_average',
+  WEIGHTED_MOVING_AVERAGE = 'weighted_moving_average',
+  SIMPLE_EXPONENTIAL = 'simple_exponential',
+  DOUBLE_EXPONENTIAL = 'double_exponential',
+  TRIPLE_EXPONENTIAL = 'triple_exponential',
+  SEASONAL_DECOMPOSITION = 'seasonal_decomposition'
+}
+
+export enum TrendStrength {
+  VERY_STRONG = 'very_strong',
+  STRONG = 'strong',
+  MODERATE = 'moderate',
+  WEAK = 'weak',
+  VERY_WEAK = 'very_weak',
+  NEGLIGIBLE = 'negligible',
+  INDETERMINATE = 'indeterminate'
+}
+
+// Supporting interfaces for trend analysis
+export interface Trend {
+  id: string;
+  trend_type: TrendType;
+  strength: TrendStrength;
+  direction: TrendDirection;
+  start_date: string;
+  end_date: string;
+  confidence_score: number;
+  statistical_significance: number;
+  model_used: StatisticalModel;
+  parameters: Record<string, any>;
+  forecast_horizon: number;
+  accuracy_metrics: TrendAccuracyMetrics;
+}
+
+export interface TrendAccuracyMetrics {
+  mae: number; // Mean Absolute Error
+  mse: number; // Mean Squared Error
+  rmse: number; // Root Mean Squared Error
+  mape: number; // Mean Absolute Percentage Error
+  r_squared: number; // Coefficient of determination
+}
+
+export interface Forecast {
+  target_date: string;
+  predicted_value: number;
+  confidence_interval: {
+    lower: number;
+    upper: number;
+  };
+  probability: number;
+}
+
+export interface Comparison {
+  baseline_period: TimePeriod;
+  comparison_period: TimePeriod;
+  metrics: ComparisonMetric[];
+  insights: string[];
+}
+
+export interface ComparisonMetric {
+  name: string;
+  baseline_value: number;
+  comparison_value: number;
+  change_absolute: number;
+  change_percentage: number;
+  significance: 'significant' | 'not_significant';
+}
+
+// API Error type for service compatibility
+export interface APIError {
+  code: string;
+  message: string;
+  details?: any;
+  timestamp: string;
+  request_id?: string;
+}

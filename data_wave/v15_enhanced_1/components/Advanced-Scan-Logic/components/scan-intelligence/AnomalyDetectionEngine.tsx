@@ -76,7 +76,6 @@ import {
   PolarGrid, 
   PolarAngleAxis, 
   PolarRadiusAxis, 
-  Radar, 
   Treemap, 
   Sankey, 
   FunnelChart, 

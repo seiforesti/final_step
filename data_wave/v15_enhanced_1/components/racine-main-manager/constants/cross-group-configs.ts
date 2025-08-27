@@ -436,71 +436,147 @@ export const API_ENDPOINTS = {
 } as const;
 
 // ============================================================================
+// COLLABORATION CONFIGURATION
+// ============================================================================
+
+export const COLLABORATION_CONFIG = {
+  REAL_TIME_SYNC: {
+    enabled: true,
+    interval: 1000,
+    maxRetries: 3,
+    timeout: 5000
+  },
+  
+  CONFLICT_RESOLUTION: {
+    strategy: 'last-write-wins',
+    autoResolve: true,
+    notifyOnConflict: true,
+    backupOnConflict: true
+  },
+  
+  SHARING: {
+    allowPublicSharing: false,
+    allowExternalSharing: false,
+    requireApproval: true,
+    expirationEnabled: true,
+    defaultExpirationDays: 30
+  },
+  
+  PERMISSIONS: {
+    read: ['view', 'comment'],
+    write: ['edit', 'delete'],
+    admin: ['share', 'manage', 'delete']
+  }
+};
+
+// ============================================================================
 // PERFORMANCE THRESHOLDS
 // ============================================================================
 
 export const PERFORMANCE_THRESHOLDS = {
   RESPONSE_TIMES: {
-    EXCELLENT: 100,    // ms
-    GOOD: 300,         // ms
-    ACCEPTABLE: 1000,  // ms
-    POOR: 3000,        // ms
-    CRITICAL: 5000     // ms
+    EXCELLENT: 100,
+    GOOD: 300,
+    ACCEPTABLE: 1000,
+    POOR: 3000,
+    CRITICAL: 5000
   },
   
   THROUGHPUT: {
-    HIGH: 1000,        // operations/second
-    MEDIUM: 500,       // operations/second
-    LOW: 100,          // operations/second
-    MINIMAL: 10        // operations/second
+    HIGH: 1000,
+    MEDIUM: 500,
+    LOW: 100,
+    MINIMAL: 10
   },
   
   ERROR_RATES: {
-    EXCELLENT: 0.001,  // 0.1%
-    GOOD: 0.01,        // 1%
-    ACCEPTABLE: 0.05,  // 5%
-    POOR: 0.1,         // 10%
-    CRITICAL: 0.2      // 20%
+    EXCELLENT: 0.001,
+    GOOD: 0.01,
+    ACCEPTABLE: 0.05,
+    POOR: 0.1,
+    CRITICAL: 0.2
   },
   
   RESOURCE_UTILIZATION: {
     CPU: {
-      OPTIMAL: 70,     // %
-      HIGH: 85,        // %
-      CRITICAL: 95     // %
+      WARNING: 70,
+      CRITICAL: 90
     },
     MEMORY: {
-      OPTIMAL: 80,     // %
-      HIGH: 90,        // %
-      CRITICAL: 95     // %
+      WARNING: 80,
+      CRITICAL: 95
     },
-    STORAGE: {
-      OPTIMAL: 70,     // %
-      HIGH: 85,        // %
-      CRITICAL: 95     // %
-    },
-    NETWORK: {
-      OPTIMAL: 60,     // %
-      HIGH: 80,        // %
-      CRITICAL: 90     // %
+    DISK: {
+      WARNING: 85,
+      CRITICAL: 95
     }
   },
   
-  CONCURRENCY: {
-    MAX_CONNECTIONS: 1000,
-    MAX_CONCURRENT_OPERATIONS: 100,
-    MAX_QUEUE_SIZE: 10000,
-    CONNECTION_TIMEOUT: 30000,    // ms
-    OPERATION_TIMEOUT: 300000     // ms
+  NETWORK: {
+    LATENCY: {
+      EXCELLENT: 10,
+      GOOD: 50,
+      ACCEPTABLE: 100,
+      POOR: 300,
+      CRITICAL: 1000
+    },
+    BANDWIDTH: {
+      HIGH: 100,
+      MEDIUM: 50,
+      LOW: 10,
+      MINIMAL: 1
+    }
+  }
+};
+
+// ============================================================================
+// ACCESSIBILITY STANDARDS
+// ============================================================================
+
+export const ACCESSIBILITY_STANDARDS = {
+  WCAG_2_1_AAA: {
+    contrastRatio: 7.0,
+    fontSize: 18,
+    lineHeight: 1.5,
+    focusIndicator: true,
+    keyboardNavigation: true,
+    screenReaderSupport: true
   },
   
-  CACHING: {
-    HIT_RATE_TARGET: 85,          // %
-    TTL_DEFAULT: 3600,            // seconds
-    MAX_CACHE_SIZE: 1073741824,   // bytes (1GB)
-    EVICTION_THRESHOLD: 90        // %
+  KEYBOARD_NAVIGATION: {
+    tabOrder: 'logical',
+    focusTrapping: true,
+    escapeKey: true,
+    arrowKeys: true,
+    enterKey: true,
+    spaceKey: true
+  },
+  
+  SCREEN_READER: {
+    ariaLabels: true,
+    ariaDescribedby: true,
+    ariaLive: true,
+    ariaAtomic: true,
+    roleAttributes: true,
+    semanticHTML: true
+  },
+  
+  VISUAL_ACCESSIBILITY: {
+    highContrast: true,
+    largeText: true,
+    reducedMotion: true,
+    colorBlindness: true,
+    focusIndicators: true
+  },
+  
+  AUDIO_ACCESSIBILITY: {
+    captions: true,
+    transcripts: true,
+    audioDescriptions: true,
+    volumeControl: true,
+    muteOption: true
   }
-} as const;
+};
 
 // ============================================================================
 // LAYOUT PRESETS

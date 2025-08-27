@@ -266,9 +266,11 @@ const createBreadcrumbFromPath = (
     .join(' ');
 
   // Determine group from path
-  const group = SUPPORTED_GROUPS.find(g => 
-    fullPath.includes(g.replace('_', '-'))
-  );
+  const group = SUPPORTED_GROUPS && typeof SUPPORTED_GROUPS === 'object' 
+    ? Object.values(SUPPORTED_GROUPS).find(g => 
+        g && g.id && fullPath.includes(g.id.replace('_', '-'))
+      )?.id
+    : undefined;
 
   // Build path up to current segment
   const pathParts = fullPath.split('/').slice(0, index + 2);
@@ -452,7 +454,7 @@ export const BreadcrumbManagerProvider: React.FC<BreadcrumbManagerProviderProps>
     } finally {
       setIsLoading(false);
     }
-  }, [config, path]);
+  }, [config, pathname]);
 
   const collapseMiddleBreadcrumbs = (
     items: BreadcrumbItem[], 

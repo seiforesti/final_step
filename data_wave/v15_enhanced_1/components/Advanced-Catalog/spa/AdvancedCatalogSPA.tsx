@@ -19,92 +19,9 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
-import {
-  Command,
-  CommandDialog,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandSeparator,
-  CommandShortcut,
-} from "@/components/ui/command";
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuIndicator,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-  NavigationMenuViewport,
-} from "@/components/ui/navigation-menu";
-import {
-  Breadcrumb,
-  BreadcrumbEllipsis,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sidebar,
@@ -122,80 +39,27 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
   SidebarProvider,
-  SidebarRail,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 
-// Advanced UI Components
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuTrigger,
-} from "@/components/ui/context-menu";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
-import {
-  Menubar,
-  MenubarContent,
-  MenubarItem,
-  MenubarMenu,
-  MenubarSeparator,
-  MenubarShortcut,
-  MenubarTrigger,
-} from "@/components/ui/menubar";
-
-// Recharts for Advanced Analytics
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip as RechartsTooltip,
-  ResponsiveContainer,
-  LineChart as RechartsLineChart,
-  Line,
-  PieChart as RechartsPieChart,
-  Pie,
-  Cell,
-  AreaChart,
-  Area,
-  ComposedChart,
-  ScatterChart,
-  Scatter,
-  RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
-  Radar,
-  Treemap
-} from 'recharts';
-
 // Lucide Icons
 import { // Navigation & Layout
-  Layout, Sidebar as SidebarIcon, Menu, MoreHorizontal, MoreVertical, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, ArrowLeft, ArrowRight, ArrowUp, ArrowDown, // Core Features
-  Search, Filter, Settings, Database, FileText, Folder, FolderOpen, Tag, Bookmark, Star, Heart, Eye, EyeOff, // Analytics & Intelligence
-  BarChart3, PieChart as PieChartIcon, TrendingUp, TrendingDown, Activity, Target, Zap, Brain, Sparkles, Lightbulb, Bot, Cpu, // User & Collaboration
-  Users, User, UserPlus, Share, MessageSquare, Bell, BellRing, // Actions & Controls
-  Play, Pause, Square, RefreshCw, Download, Upload, Save, Copy, Edit, Trash2, Plus, Minus, X, Check, // Status & Indicators
-  AlertCircle, CheckCircle, Info, AlertTriangle, Clock, Calendar, Timer, // Advanced Features
-  Workflow, Network, Layers, Globe, Map, Compass, Route, Navigation, MapPin, // System & Technical
-  Server, Shield, Lock, Unlock, Key, Terminal, Code, GitBranch, Hash, // Data & Quality
-  Gauge, BarChart2, LineChart, Percent, DollarSign, Archive, HardDrive, // UI Controls
-  Maximize, Minimize, Expand, Shrink, ToggleLeft, ToggleRight, Sliders, // Communication
-  Mail, Phone, ExternalLink, Link, // Time & Scheduling
-  History, FastForward, Rewind, SkipForward, SkipBack, // Quality & Validation
-  Award, Medal, Trophy, Flag, Verified, // Advanced Analytics
-  Binary, Boxes, Command as CommandIcon, Crosshair, Focus, Scan, ScanLine, // Enterprise Features
-  Building, Building2, Factory, Warehouse, Store, // AI & ML
-  Beaker, FlaskConical, Microscope, TestTube, Atom, // Notifications & Alerts
-  Volume2, VolumeX, Vibrate, // Miscellaneous
-  Puzzle, Wrench, Tool, Cog, Gear, // Additional icons for new components
-  Calculator, BookOpen } from 'lucide-react';
+  Layout, Sidebar as SidebarIcon,
+  Search, Filter, Settings, Database, FileText, Tag, Bookmark, Star, Heart, Eye, // Core Features
+  BarChart3, TrendingUp, Activity, Target, Brain, Sparkles, Lightbulb, Bot, // Analytics
+  Users, User, UserPlus, MessageSquare, Bell, // User & Collaboration 
+  Play, Pause, RefreshCw, Plus, // Actions
+  AlertCircle, CheckCircle, AlertTriangle, // Status
+  Workflow, Network, Layers, Globe, Map, // Advanced Features
+  Shield, Lock, GitBranch, // Security
+  Gauge, BarChart2, LineChart, // Data & Charts
+  BookOpen, 
+  ArrowRight,
+  Calculator,
+  Cog,
+  CommandIcon,
+  Scan,
+  Sheet} from 'lucide-react';
 
 // Hooks and Services
 import { useCatalogAnalytics } from '../hooks/useCatalogAnalytics';
@@ -238,6 +102,26 @@ import {
   DataProfileSummary,
   AssetRecommendation
 } from '../types';
+import { LoadBalancingConfig } from '@/components/Advanced-Scan-Logic/types/coordination.types';
+import { WorkflowOptimization } from '@/components/Advanced-Scan-Rule-Sets/types/collaboration.types';
+import { OrchestrationMetrics, MessageQueue } from '@/components/Advanced-Scan-Rule-Sets/types/orchestration.types';
+import { DataMapping } from '@/components/Compliance-Rule/types';
+import { ComponentStatus } from '@/components/data-sources/core';
+import { RollbackStrategy } from '@/components/data-sources/workflows/bulk-operations';
+import { DataSchema, DataTransformation, RetryPolicy, ConflictResolutionStrategy, EventSubscription, OptimizationGoal } from '@/components/racine-main-manager';
+import { BreadcrumbItem } from '@/components/racine-main-manager/components/routing';
+import { StepCondition, PerformanceOptimization } from '@/components/racine-main-manager/types';
+import { CommandShortcut, SheetContent, SheetHeader, SheetTitle, SheetDescription, DialogHeader, DialogFooter } from '@/components/ui';
+import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbPage, BreadcrumbLink, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
+import { Avatar, AvatarImage, AvatarFallback } from '@radix-ui/react-avatar';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@radix-ui/react-dialog';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@radix-ui/react-select';
+import { Switch } from '@radix-ui/react-switch';
+import { TooltipProvider } from '@radix-ui/react-tooltip';
+import { SharedState } from '@react-three/drei';
+import { CommandDialog, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem, CommandSeparator } from 'cmdk';
+import { Input } from 'postcss';
+import { Label } from 'recharts';
 
 // ============================================================================
 // LAZY LOADED COMPONENTS (FOR PERFORMANCE)

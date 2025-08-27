@@ -140,6 +140,7 @@ export interface ScanRule {
   thresholds: Threshold[];
   conditions: Condition[];
   actions: Action[];
+  pattern: string; // Added missing pattern property
   metadata: RuleMetadata;
   performance_profile: PerformanceProfile;
   test_cases: TestCase[];
@@ -153,6 +154,10 @@ export interface RuleSetMetadata {
   dependencies: string[];
   change_history: ChangeHistoryEntry[];
   usage_statistics: UsageStatistics;
+  status: 'active' | 'inactive' | 'draft' | 'deprecated'; // Added missing status property
+  complexity: 'low' | 'medium' | 'high' | 'critical'; // Added missing complexity property
+  compliance_score: number; // Added missing compliance_score property
+  performance_score: number; // Added missing performance_score property
 }
 
 export interface ExecutionConfiguration {

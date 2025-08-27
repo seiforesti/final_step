@@ -25,5 +25,16 @@ export const {
   getAlerts: fetchPerformanceAlerts,
 } = performanceMonitoringAPI;
 
+// Additional performance monitoring functions
+export const exportPerformanceData = async (targetId: string, format: 'json' | 'csv' | 'excel' = 'json', params?: Record<string, any>) => {
+  const response = await performanceMonitoringAPI.getMetrics(targetId, { ...params, format });
+  return response.data;
+};
+
+export const getPerformanceReport = async (targetId: string, reportType: 'summary' | 'detailed' | 'trend' = 'summary', params?: Record<string, any>) => {
+  const response = await performanceMonitoringAPI.getMetrics(targetId, { ...params, report_type: reportType });
+  return response.data;
+};
+
 
 

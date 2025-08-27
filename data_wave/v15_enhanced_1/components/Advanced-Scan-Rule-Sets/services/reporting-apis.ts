@@ -17,9 +17,10 @@ import {
   AnalyticsEngine,
   ReportingMetrics,
   ExportEngine,
-  APIResponse,
-  APIError
+  APIResponse
 } from '../types/reporting.types';
+
+import { APIError, createAPIError } from '../types/api-error.types';
 
 // Enterprise API Configuration
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1';
@@ -131,20 +132,19 @@ export class ReportingAPIService {
         // Retry logic with exponential backoff
       }
       
-      throw new APIError({
-        code: response.status.toString(),
-        message: errorData.message || response.statusText,
-        details: {
+      throw createAPIError(
+        errorData.message || response.statusText,
+        response.status.toString(),
+        response.status,
+        {
           ...errorData.details,
           requestId,
           reportingContext: errorData.reportingContext,
           dataAvailability: errorData.dataAvailability,
           suggestedActions: errorData.suggestedActions,
-          timestamp: new Date().toISOString(),
           endpoint: response.url
-        },
-        timestamp: new Date().toISOString(),
-      });
+        }
+      );
     }
 
     const data = await response.json();

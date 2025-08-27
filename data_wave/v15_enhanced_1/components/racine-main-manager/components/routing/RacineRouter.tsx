@@ -505,6 +505,11 @@ export const RacineRouter: React.FC<RacineRouterProps> = ({
 
   // Available routes based on permissions
   const availableRoutes = useMemo(() => {
+    // Safety check for userPermissions
+    if (!userPermissions || !Array.isArray(userPermissions)) {
+      return ROUTE_CONFIGS; // Return all routes if permissions are not available
+    }
+    
     return ROUTE_CONFIGS.filter(route => {
       return route.permissions.every(permission => 
         userPermissions.some(userPerm => userPerm.name === permission)
@@ -572,9 +577,10 @@ export const RacineRouter: React.FC<RacineRouterProps> = ({
       }
 
       // Check permissions
-      const hasPermission = route.permissions.every(permission => 
-        userPermissions.some(userPerm => userPerm.name === permission)
-      );
+      const hasPermission = !userPermissions || !Array.isArray(userPermissions) || 
+        route.permissions.every(permission => 
+          userPermissions.some(userPerm => userPerm.name === permission)
+        );
 
       if (!hasPermission) {
         throw new Error(`Insufficient permissions for view: ${view}`);

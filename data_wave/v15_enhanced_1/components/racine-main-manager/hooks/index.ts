@@ -96,7 +96,7 @@ export type {
 } from './useCrossGroupIntegration';
 
 // Data source management hooks
-export { useDataSources } from './useDataSources';
+export { useDataSources, useDataSourceComplianceStatusQuery } from './useDataSources';
 export { useConnectionValidator } from './useConnectionValidator';
 
 // Security management hooks

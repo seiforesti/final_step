@@ -31,21 +31,24 @@ export class AuthService {
   // OAuth authentication
   async initiateGoogleLogin(): Promise<void> {
     if (typeof window !== 'undefined') {
-      window.location.href = `${rbacApiService['baseURL']}${AUTH_ENDPOINTS.GOOGLE_LOGIN}`;
+      const backendBase = (process.env.RACINE_BACKEND_URL || 'http://localhost:8000').replace(/\/$/, '');
+      window.location.href = `${backendBase}${AUTH_ENDPOINTS.GOOGLE_LOGIN}`;
     }
   }
 
   async initiateMicrosoftLogin(): Promise<void> {
     if (typeof window !== 'undefined') {
-      window.location.href = `${rbacApiService['baseURL']}${AUTH_ENDPOINTS.MICROSOFT_LOGIN}`;
+      const backendBase = (process.env.RACINE_BACKEND_URL || 'http://localhost:8000').replace(/\/$/, '');
+      window.location.href = `${backendBase}${AUTH_ENDPOINTS.MICROSOFT_LOGIN}`;
     }
   }
 
   // OAuth popup handling
   async handleOAuthPopup(provider: 'google' | 'microsoft'): Promise<AuthResponse> {
     return new Promise((resolve, reject) => {
+      const backendBase = (process.env.RACINE_BACKEND_URL || 'http://localhost:8000').replace(/\/$/, '');
       const popup = window.open(
-        `${rbacApiService['baseURL']}${provider === 'google' ? AUTH_ENDPOINTS.GOOGLE_LOGIN : AUTH_ENDPOINTS.MICROSOFT_LOGIN}`,
+        `${backendBase}${provider === 'google' ? AUTH_ENDPOINTS.GOOGLE_LOGIN : AUTH_ENDPOINTS.MICROSOFT_LOGIN}`,
         'oauth',
         'width=500,height=600,scrollbars=yes,resizable=yes'
       );
@@ -53,13 +56,29 @@ export class AuthService {
       const checkClosed = setInterval(() => {
         if (popup?.closed) {
           clearInterval(checkClosed);
-          reject(new Error('OAuth popup was closed'));
+          // On close, try to validate session as a fallback (cookie may have been set via proxy)
+          this.checkAuthStatus()
+            .then(({ isAuthenticated, user }) => {
+              if (isAuthenticated) {
+                resolve({ message: 'OAuth success', user } as unknown as AuthResponse);
+              } else {
+                reject(new Error('OAuth popup was closed'));
+              }
+            })
+            .catch(() => reject(new Error('OAuth popup was closed')));
         }
       }, 1000);
 
       // Listen for OAuth success message
       const messageHandler = (event: MessageEvent) => {
-        if (event.origin !== window.location.origin) return;
+        try {
+          const backendBase = (process.env.RACINE_BACKEND_URL || 'http://localhost:8000').replace(/\/$/, '');
+          const backendOrigin = new URL(backendBase).origin;
+          const allowedOrigins = new Set([window.location.origin, backendOrigin]);
+          if (!allowedOrigins.has(event.origin)) return;
+        } catch {
+          if (event.origin !== window.location.origin) return;
+        }
         
         if (event.data.type === 'oauth_success') {
           clearInterval(checkClosed);
@@ -81,7 +100,16 @@ export class AuthService {
         clearInterval(checkClosed);
         popup?.close();
         window.removeEventListener('message', messageHandler);
-        reject(new Error('OAuth timeout'));
+        // On timeout, attempt session validation before failing
+        this.checkAuthStatus()
+          .then(({ isAuthenticated, user }) => {
+            if (isAuthenticated) {
+              resolve({ message: 'OAuth success', user } as unknown as AuthResponse);
+            } else {
+              reject(new Error('OAuth timeout'));
+            }
+          })
+          .catch(() => reject(new Error('OAuth timeout')));
       }, 5 * 60 * 1000);
     });
   }

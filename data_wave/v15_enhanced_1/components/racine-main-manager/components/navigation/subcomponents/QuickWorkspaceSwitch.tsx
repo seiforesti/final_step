@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react'
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Briefcase, Plus, Check, ChevronDown, Settings, Users, Globe, Lock, Unlock, Star, Clock, Copy, Trash2, Edit3, Share2, Archive, ExternalLink, Search, Filter, MoreHorizontal, ChevronRight, Folder, FolderOpen, Building, Shield, Database, FileText, BookOpen, Scan, Activity, Bot, MessageSquare, Workflow, BarChart3, Zap, Hash, Calendar, Eye, EyeOff, UserPlus, LogOut, Download, Upload, RefreshCw, AlertCircle, CheckCircle2, Info, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -95,26 +95,48 @@ export const QuickWorkspaceSwitch: React.FC<QuickWorkspaceSwitchProps> = ({
   const [selectedTemplate, setSelectedTemplate] = useState<WorkspaceTemplate | null>(null)
   const [isCreating, setIsCreating] = useState(false)
 
-  // Custom hooks (already implemented)
-  const { 
-    getCurrentWorkspace,
-    getAllWorkspaces,
-    switchWorkspace,
-    createWorkspace,
-    getFavoriteWorkspaces,
-    addToFavorites,
-    removeFromFavorites,
-    getRecentWorkspaces,
-    getWorkspaceTemplates,
-    getWorkspaceAnalytics,
-    duplicateWorkspace,
-    archiveWorkspace
-  } = useWorkspaceManagement()
-  
-  const { getCurrentUser, getUserPermissions } = useUserManagement()
-  const { getWorkspaceContext } = useCrossGroupIntegration()
-  const { trackEvent } = useActivityTracker()
-  const { getWorkspacePreferences } = useUserPreferences()
+  // Custom hooks (normalized to support tuple or object returns)
+  const workspaceHook = useWorkspaceManagement() as any
+  const workspaceState = workspaceHook?.state ?? workspaceHook?.[0] ?? {}
+  const workspaceOps = workspaceHook?.operations ?? workspaceHook?.[1] ?? workspaceHook ?? {}
+  const getCurrentWorkspace = () => workspaceOps?.getCurrentWorkspace?.() ?? workspaceState?.currentWorkspace ?? null
+  const getAllWorkspaces = async () => {
+    try { return await (workspaceOps?.getAllWorkspaces?.()) ?? [] } catch { return [] }
+  }
+  const switchWorkspace = async (id: string) => { try { return await workspaceOps?.switchWorkspace?.(id) } catch { /* noop */ } }
+  const createWorkspace = async (req: any) => { try { return await workspaceOps?.createWorkspace?.(req) } catch { return { id: '', name: req?.name || 'New Workspace', type: 'general' } }
+  }
+  const getFavoriteWorkspaces = async () => { try { return await (workspaceOps?.getFavoriteWorkspaces?.()) ?? [] } catch { return [] } }
+  const addToFavorites = async (id: string) => { try { await workspaceOps?.addToFavorites?.(id) } catch { /* noop */ } }
+  const removeFromFavorites = async (id: string) => { try { await workspaceOps?.removeFromFavorites?.(id) } catch { /* noop */ } }
+  const getRecentWorkspaces = async (limit: number) => { try { return await (workspaceOps?.getRecentWorkspaces?.(limit)) ?? [] } catch { return [] } }
+  const getWorkspaceTemplates = async () => { try { return await (workspaceOps?.getWorkspaceTemplates?.()) ?? [] } catch { return [] } }
+  const getWorkspaceAnalytics = async () => { try { return await (workspaceOps?.getWorkspaceAnalytics?.()) ?? {} } catch { return {} } }
+  const duplicateWorkspace = async (id: string) => { try { return await workspaceOps?.duplicateWorkspace?.(id) } catch { return null } }
+  const archiveWorkspace = async (id: string) => { try { return await workspaceOps?.archiveWorkspace?.(id) } catch { /* noop */ } }
+
+  const userHook = useUserManagement() as any
+  const userOps = userHook?.operations ?? userHook?.[1] ?? userHook ?? {}
+  const getCurrentUser = () => {
+    try { return userOps?.getCurrentUser?.() ?? null } catch { return null }
+  }
+  const getUserPermissions = () => {
+    try { return userOps?.getUserPermissions?.() ?? {} } catch { return {} }
+  }
+
+  const crossGroupHook = useCrossGroupIntegration() as any
+  const crossGroupOps = crossGroupHook?.operations ?? crossGroupHook?.[1] ?? crossGroupHook ?? {}
+  const getWorkspaceContext = () => {
+    try { return crossGroupOps?.getWorkspaceContext?.() ?? null } catch { return null }
+  }
+
+  const activityHook = useActivityTracker() as any
+  const activityOps = activityHook?.operations ?? activityHook?.[1] ?? activityHook ?? {}
+  const trackEvent = (event: string, data?: any) => { try { activityOps?.trackEvent?.(event, data) } catch { /* noop */ } }
+
+  const prefsHook = useUserPreferences() as any
+  const prefsOps = prefsHook?.operations ?? prefsHook?.[1] ?? prefsHook ?? {}
+  const getWorkspacePreferences = () => { try { return prefsOps?.getWorkspacePreferences?.() ?? { defaultSettings: {} } } catch { return { defaultSettings: {} } } }
 
   // Get current context
   const currentWorkspace = getCurrentWorkspace()
@@ -122,8 +144,11 @@ export const QuickWorkspaceSwitch: React.FC<QuickWorkspaceSwitchProps> = ({
   const userPermissions = getUserPermissions()
   const workspacePreferences = getWorkspacePreferences()
 
-  // Load workspaces
+  // Load workspaces (re-entrancy guarded)
+  const loadingRef = useRef(false)
   const loadWorkspaces = useCallback(async () => {
+    if (loadingRef.current) return
+    loadingRef.current = true
     setIsLoading(true)
     try {
       const [allWorkspaces, recent, favorites] = await Promise.all([
@@ -139,13 +164,16 @@ export const QuickWorkspaceSwitch: React.FC<QuickWorkspaceSwitchProps> = ({
       console.error('Failed to load workspaces:', error)
     } finally {
       setIsLoading(false)
+      loadingRef.current = false
     }
-  }, [getAllWorkspaces, getRecentWorkspaces, getFavoriteWorkspaces, maxRecentWorkspaces])
+  }, [maxRecentWorkspaces])
 
   // Load workspaces on mount
   useEffect(() => {
+    // Run once on mount; internal guard prevents overlaps
     loadWorkspaces()
-  }, [loadWorkspaces])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Handle workspace switch
   const handleWorkspaceSwitch = useCallback(async (workspace: WorkspaceState) => {

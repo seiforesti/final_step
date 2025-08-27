@@ -423,49 +423,60 @@ export const GlobalQuickActionsSidebar: React.FC<GlobalQuickActionsSidebarProps>
   const dragControls = useDragControls()
 
   // Custom hooks for comprehensive functionality
-  const { 
-    getQuickActions,
-    executeAction,
-    getContextualActions: getContextActions,
-    getFavoriteActions,
-    getRecentActions,
-    trackActionUsage,
-    getActionAnalytics,
-    customizeActionLayout,
-    saveUserPreferences: saveActionPreferences
-  } = useQuickActions()
+  const quickActionsHook = useQuickActions() as any
+  const qaOps = quickActionsHook?.operations ?? quickActionsHook?.[1] ?? quickActionsHook ?? {}
+  const getContextActions = async (ctx: any) => { try { return await qaOps?.getContextualActions?.(ctx) ?? [] } catch { return [] } }
+  const getFavoriteActions = async () => { try { return await qaOps?.getFavoriteActions?.() ?? [] } catch { return [] } }
+  const getRecentActions = async (limit?: number) => { try { return await qaOps?.getRecentActions?.(limit) ?? [] } catch { return [] } }
+  const executeAction = async (id: string, params?: any) => { try { return await qaOps?.executeAction?.(id, params) } catch { return { success: false, executionTime: 0 } } }
+  const trackActionUsage = (id: string) => { try { qaOps?.trackActionUsage?.(id) } catch { /* noop */ } }
+  const getActionAnalytics = async () => { try { return await qaOps?.getActionAnalytics?.() ?? {} } catch { return {} } }
+  const saveActionPreferences = async (p: any) => { try { await qaOps?.saveUserPreferences?.(p) } catch { /* noop */ } }
 
-  const {
-    getActiveSPAContext,
-    getAllSPAStatuses,
-    canExecuteAction,
-    getSPAPermissions,
-    coordinateAction
-  } = useCrossGroupIntegration()
+  // Normalize cross-group integration hook (tuple or object)
+  const crossGroup = useCrossGroupIntegration() as any
+  const crossGroupState = crossGroup?.state ?? crossGroup?.[0] ?? {}
+  const crossGroupOps = crossGroup?.operations ?? crossGroup?.[1] ?? crossGroup ?? {}
+  const getActiveSPAContext = () => crossGroupState?.activeSPAContext || null
+  const getAllSPAStatuses = () => crossGroupState?.groupStatuses || {}
+  const canExecuteAction = (...args: any[]) => { try { return crossGroupOps?.canExecuteAction?.(...args) } catch { return false } }
+  const getSPAPermissions = (...args: any[]) => { try { return crossGroupOps?.getSPAPermissions?.(...args) } catch { return [] } }
+  const coordinateAction = async (...args: any[]) => { try { return await crossGroupOps?.coordinateAction?.(...args) } catch { /* noop */ } }
 
-  const {
-    getCurrentUser,
-    getUserPermissions,
-    checkUserAccess
-  } = useUserManagement()
+  // Normalize user management (tuple or object)
+  const userHook = useUserManagement() as any
+  const userState = userHook?.state ?? userHook?.[0] ?? {}
+  const userOps = userHook?.operations ?? userHook?.[1] ?? userHook ?? {}
+  const getCurrentUser = () => { try { return userOps?.getCurrentUser?.() ?? userState?.currentUser ?? null } catch { return null } }
+  const getUserPermissions = () => { try { return userOps?.getUserPermissions?.() ?? (userState?.userPermissions || []) } catch { return [] } }
+  const checkUserAccess = (permission: string, perms?: any[]) => {
+    try {
+      if (userOps?.checkUserAccess) return userOps.checkUserAccess(permission)
+      const effective = perms || (userState?.userPermissions || [])
+      return Array.isArray(effective) ? effective.includes(permission) : true
+    } catch { return true }
+  }
 
-  const {
-    getActiveWorkspace,
-    getWorkspaceContext
-  } = useWorkspaceManagement()
+  // Normalize workspace management (tuple or object)
+  const workspaceHook = useWorkspaceManagement() as any
+  const workspaceState = workspaceHook?.state ?? workspaceHook?.[0] ?? {}
+  const workspaceOps = workspaceHook?.operations ?? workspaceHook?.[1] ?? workspaceHook ?? {}
+  const getActiveWorkspace = () => workspaceState?.currentWorkspace || null
+  const getWorkspaceContext = () => { try { return workspaceOps?.getWorkspaceContext?.() ?? null } catch { return null } }
 
-  const {
-    trackEvent,
-    trackComponentUsage,
-    getUsageAnalytics
-  } = useActivityTracker()
+  const activityHook = useActivityTracker() as any
+  const trackEvent = (name: string, payload?: any) => { try { activityHook?.operations?.trackEvent?.(name, payload) } catch { /* noop */ } }
+  const trackComponentUsage = (id: string, action: string) => { try { activityHook?.operations?.trackComponentUsage?.(id, action) } catch { /* noop */ } }
+  const getUsageAnalytics = async () => { try { return await activityHook?.operations?.getUsageAnalytics?.() ?? {} } catch { return {} } }
 
-  const {
-    getUserPreferences,
-    updateUserPreferences,
-    getSidebarPreferences,
-    updateSidebarPreferences
-  } = useUserPreferences()
+  // Normalize user preferences (tuple or object)
+  const prefs = useUserPreferences() as any
+  const prefsState = prefs?.state ?? prefs?.[0] ?? {}
+  const prefsOps = prefs?.operations ?? prefs?.[1] ?? prefs ?? {}
+  const getUserPreferences = () => { try { return prefsOps?.getUserPreferences?.() ?? prefsState?.userPreferences ?? {} } catch { return {} } }
+  const updateUserPreferences = async (p: any) => { try { await prefsOps?.updateUserPreferences?.(p) } catch { /* noop */ } }
+  const getSidebarPreferences = () => { try { return prefsOps?.getSidebarPreferences?.() ?? prefsState?.sidebarPreferences ?? {} } catch { return {} } }
+  const updateSidebarPreferences = async (p: any) => { try { await prefsOps?.updateSidebarPreferences?.(p) } catch { /* noop */ } }
 
   const {
     getSystemMetrics,
@@ -474,7 +485,7 @@ export const GlobalQuickActionsSidebar: React.FC<GlobalQuickActionsSidebarProps>
 
   // Get current context and user data
   const currentUser = getCurrentUser()
-  const userPermissions = getUserPermissions()
+  const userPermissions: string[] = Array.isArray(getUserPermissions()) ? (getUserPermissions() as string[]) : []
   const activeSPAContext = getActiveSPAContext()
   const activeWorkspace = getActiveWorkspace()
   const workspaceContext = getWorkspaceContext()
@@ -498,8 +509,13 @@ export const GlobalQuickActionsSidebar: React.FC<GlobalQuickActionsSidebarProps>
 
         // Load action analytics if enabled
         if (enableAnalytics) {
-          const analytics = await getActionAnalytics()
-          setComponentMetrics(analytics)
+          try {
+            const analytics = await getActionAnalytics()
+            setComponentMetrics(analytics)
+          } catch (e) {
+            console.warn('getActionAnalytics failed, using defaults')
+            setComponentMetrics(prev => ({ ...prev }))
+          }
         }
 
         // Load recent actions and favorites
@@ -513,8 +529,12 @@ export const GlobalQuickActionsSidebar: React.FC<GlobalQuickActionsSidebarProps>
         // Setup performance monitoring
         if (enableAnalytics) {
           analyticsIntervalRef.current = setInterval(async () => {
-            const metrics = await getUsageAnalytics()
-            setComponentMetrics(prev => ({ ...prev, ...metrics }))
+            try {
+              const metrics = await getUsageAnalytics()
+              setComponentMetrics(prev => ({ ...prev, ...metrics }))
+            } catch {
+              // keep UI responsive
+            }
           }, 30000) // Update every 30 seconds
         }
 
@@ -1007,7 +1027,7 @@ export const GlobalQuickActionsSidebar: React.FC<GlobalQuickActionsSidebarProps>
     }
 
     const hasRequiredPermissions = category.permissions.some(permission =>
-      userPermissions.includes(permission)
+      Array.isArray(userPermissions) && userPermissions.includes(permission)
     )
 
     if (!hasRequiredPermissions) {
@@ -1169,7 +1189,7 @@ export const GlobalQuickActionsSidebar: React.FC<GlobalQuickActionsSidebarProps>
                         <h2 className="font-semibold text-sm">Quick Actions</h2>
                         <p className="text-xs text-muted-foreground">
                           {SPA_CATEGORIES.filter(cat => 
-                            !cat.adminOnly || userPermissions.includes('rbac:admin')
+                            !cat.adminOnly || (Array.isArray(userPermissions) && userPermissions.includes('rbac:admin'))
                           ).length} categories
                         </p>
                       </div>

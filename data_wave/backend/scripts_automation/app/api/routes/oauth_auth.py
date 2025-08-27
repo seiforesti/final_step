@@ -22,11 +22,52 @@ import requests
 from app.configs.config import OAUTH_CONFIG
 from msal import ConfidentialClientApplication
 from fastapi import Query
+from datetime import datetime
 
 router = APIRouter(prefix="/auth", tags=["OAuth Authentication"])
 
-# OAuth state store in-memory for demo; in production use persistent store
-oauth_state_store = {}
+# OAuth state store - using Redis-like persistent storage to survive container restarts
+import redis
+import json
+from typing import Dict, Any
+
+# Try to connect to Redis, fallback to in-memory if not available
+try:
+    redis_client = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
+    redis_client.ping()  # Test connection
+    USE_REDIS = True
+except:
+    USE_REDIS = False
+    oauth_state_store = {}
+
+def set_oauth_state(state: str, data: Any, expire_seconds: int = 300):
+    """Store OAuth state with expiration"""
+    if USE_REDIS:
+        redis_client.setex(f"oauth_state:{state}", expire_seconds, json.dumps(data))
+    else:
+        oauth_state_store[state] = data
+
+def get_oauth_state(state: str) -> Any:
+    """Get OAuth state"""
+    if USE_REDIS:
+        data = redis_client.get(f"oauth_state:{state}")
+        return json.loads(data) if data else None
+    else:
+        return oauth_state_store.get(state)
+
+def delete_oauth_state(state: str):
+    """Delete OAuth state"""
+    if USE_REDIS:
+        redis_client.delete(f"oauth_state:{state}")
+    else:
+        oauth_state_store.pop(state, None)
+
+def check_oauth_state_exists(state: str) -> bool:
+    """Check if OAuth state exists"""
+    if USE_REDIS:
+        return redis_client.exists(f"oauth_state:{state}") > 0
+    else:
+        return state in oauth_state_store
 
 def generate_state_token():
     return ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(32))
@@ -36,12 +77,13 @@ from fastapi.responses import RedirectResponse
 @router.get("/google")
 def google_login():
     state = generate_state_token()
-    oauth_state_store[state] = time.time()
+    set_oauth_state(state, time.time())
+    scopes = OAUTH_CONFIG.get('google_scopes', 'openid email profile')
     google_oauth_url = (
         f"https://accounts.google.com/o/oauth2/auth"
         f"?client_id={OAUTH_CONFIG['google_client_id']}"
         f"&response_type=code"
-        f"&scope=email profile openid"
+        f"&scope={scopes}"
         f"&redirect_uri={OAUTH_CONFIG['google_redirect_uri']}"
         f"&state={state}"
     )
@@ -51,14 +93,16 @@ def google_login():
 async def google_callback(request: Request, code: Optional[str] = None, state: Optional[str] = None, db: Session = Depends(get_db)):
     logger = logging.getLogger("oauth_auth")
     logger.info(f"Google OAuth callback: code={code}, state={state}")
-    if not code or not state or state not in oauth_state_store:
+    if not code or not state or not check_oauth_state_exists(state):
         logger.error("Invalid OAuth callback parameters: missing code or state or invalid state")
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid OAuth callback parameters")
-    if time.time() - oauth_state_store[state] > 300:
-        del oauth_state_store[state]
+    
+    state_data = get_oauth_state(state)
+    if not state_data or time.time() - state_data > 300:
+        delete_oauth_state(state)
         logger.error("OAuth state token expired")
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="OAuth state token expired")
-    del oauth_state_store[state]
+    delete_oauth_state(state)
     import traceback
     try:
         # Exchange code for token
@@ -135,17 +179,27 @@ async def google_callback(request: Request, code: Optional[str] = None, state: O
         print(traceback.format_exc(), file=sys.stderr)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Internal server error during OAuth callback: {e}")
     response = RedirectResponse(url="/popuphandler/oauth_success.html")
-    response.set_cookie(key="session_token", value=session.session_token, httponly=True)
+    # Set cookies for both backend and frontend (localhost domain covers ports 3000 and 8000)
+    try:
+        response.set_cookie(key="session_token", value=session.session_token, httponly=True, samesite="Lax", domain="localhost", path="/")
+        response.set_cookie(key="racine_session", value=session.session_token, httponly=True, samesite="Lax", domain="localhost", path="/")
+        response.set_cookie(key="racine_auth_token", value=session.session_token, httponly=True, samesite="Lax", domain="localhost", path="/")
+    except Exception:
+        # Fallback without cross-port domain
+        response.set_cookie(key="session_token", value=session.session_token, httponly=True, samesite="Lax", path="/")
+        response.set_cookie(key="racine_session", value=session.session_token, httponly=True, samesite="Lax", path="/")
+        response.set_cookie(key="racine_auth_token", value=session.session_token, httponly=True, samesite="Lax", path="/")
     logger.info(f"Set session_token cookie for user {user.email}")
     return response
 
 @router.get("/microsoft")
 def microsoft_login():
     state = generate_state_token()
-    oauth_state_store[state] = time.time()
-    scopes = "openid email profile User.Read"
+    set_oauth_state(state, time.time())
+    scopes = OAUTH_CONFIG.get('microsoft_scopes', 'openid email profile User.Read')
+    tenant = OAUTH_CONFIG.get('microsoft_tenant', 'common')
     microsoft_oauth_url = (
-        f"https://login.microsoftonline.com/common/oauth2/v2.0/authorize"
+        f"https://login.microsoftonline.com/{tenant}/oauth2/v2.0/authorize"
         f"?client_id={OAUTH_CONFIG['microsoft_client_id']}"
         f"&response_type=code"
         f"&scope={scopes}"
@@ -159,21 +213,22 @@ async def microsoft_callback(request: Request, code: Optional[str] = None, state
     logger = logging.getLogger("oauth_auth")
     logger.info(f"Microsoft OAuth callback: code={code}, state={state}")
     
-    if not code or not state or state not in oauth_state_store:
+    if not code or not state or not check_oauth_state_exists(state):
         logger.error("Invalid OAuth callback parameters: missing code or state or invalid state")
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid OAuth callback parameters")
     
-    if time.time() - oauth_state_store[state] > 300:
-        del oauth_state_store[state]
+    state_data = get_oauth_state(state)
+    if not state_data or time.time() - state_data > 300:
+        delete_oauth_state(state)
         logger.error("OAuth state token expired")
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="OAuth state token expired")
     
-    del oauth_state_store[state]
+    delete_oauth_state(state)
     
     try:
         # Exchange code for token
         token_response = requests.post(
-            "https://login.microsoftonline.com/common/oauth2/v2.0/token",
+            f"https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token",
             data={
                 "code": code,
                 "client_id": OAUTH_CONFIG["microsoft_client_id"],
@@ -260,7 +315,14 @@ async def microsoft_callback(request: Request, code: Optional[str] = None, state
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Internal server error during OAuth callback: {e}")
     
     response = RedirectResponse(url="/popuphandler/oauth_success.html")
-    response.set_cookie(key="session_token", value=session.session_token, httponly=True)
+    try:
+        response.set_cookie(key="session_token", value=session.session_token, httponly=True, samesite="Lax", domain="localhost", path="/")
+        response.set_cookie(key="racine_session", value=session.session_token, httponly=True, samesite="Lax", domain="localhost", path="/")
+        response.set_cookie(key="racine_auth_token", value=session.session_token, httponly=True, samesite="Lax", domain="localhost", path="/")
+    except Exception:
+        response.set_cookie(key="session_token", value=session.session_token, httponly=True, samesite="Lax", path="/")
+        response.set_cookie(key="racine_session", value=session.session_token, httponly=True, samesite="Lax", path="/")
+        response.set_cookie(key="racine_auth_token", value=session.session_token, httponly=True, samesite="Lax", path="/")
     logger.info(f"Set session_token cookie for user {user.email}")
     return response
 

@@ -46,7 +46,7 @@ import React, {
 } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter, usePathname } from 'next/navigation';
-import { Search, Command, Zap, Star, Clock, ArrowRight, ArrowUp, ArrowDown, Enter, Escape, Bookmark, History, Filter, Settings, Users, Database, FileText, Layers, Building2, Bot, MessageCircle, Target, PieChart, Workflow, GitBranch, Radar, Shield, Globe, Activity, BarChart3, Home, Plus, Edit, Trash2, Copy, Share2, Download, Upload, Save, RefreshCw, Eye, EyeOff, Lock, Unlock, AlertTriangle, CheckCircle, Info, HelpCircle, ExternalLink, MoreVertical, X, ChevronRight, ChevronLeft, ChevronUp, ChevronDown, Hash, Tag, Calendar, MapPin, Navigation } from 'lucide-react';
+import { Search, Command, Zap, Star, Clock, ArrowRight, ArrowUp, ArrowDown, Bookmark, History, Filter, Settings, Users, Database, FileText, Layers, Building2, Bot, MessageCircle, Target, PieChart, Workflow, GitBranch, Radar, Shield, Globe, Activity, BarChart3, Home, Plus, Edit, Trash2, Copy, Share2, Download, Upload, Save, RefreshCw, Eye, EyeOff, Lock, Unlock, AlertTriangle, CheckCircle, Info, HelpCircle, ExternalLink, MoreVertical, X, ChevronRight, ChevronLeft, ChevronUp, ChevronDown, Hash, Tag, Calendar, MapPin, Navigation, ArrowDownToLine } from 'lucide-react';
 
 // UI Components
 import { Button } from '@/components/ui/button';
@@ -667,7 +667,7 @@ const createDefaultQuickActions = (): QuickAction[] => [
     id: 'action_export_data',
     label: 'Export Data',
     description: 'Export selected data or reports',
-    icon: ArrowDownTrayIcon,
+    icon: ArrowDownToLine,
     keywords: ['export', 'download', 'data', 'report', 'backup'],
     category: 'Data',
     handler: async () => {

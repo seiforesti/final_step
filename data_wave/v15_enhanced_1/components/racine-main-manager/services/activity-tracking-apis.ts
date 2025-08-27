@@ -60,6 +60,7 @@ import {
   SystemActivity,
   ComplianceActivity
 } from '../types/racine-core.types';
+import { withGracefulErrorHandling, DefaultApiResponses } from '../../../lib/api-error-handler';
 
 /**
  * Configuration for the activity tracking API service
@@ -940,6 +941,221 @@ class ActivityTrackingAPI {
 
     if (!response.ok) {
       throw new Error(`Failed to report anomaly: ${response.statusText}`);
+    }
+  }
+
+  // =============================================================================
+  // SESSION ANALYTICS
+  // =============================================================================
+
+  /**
+   * Send session analytics data
+   * Maps to: POST /api/racine/activity/session-analytics
+   */
+  async sendSessionAnalytics(sessionData: {
+    sessionId: string;
+    userId?: string;
+    startTime: string;
+    endTime: string;
+    duration: number;
+    activities: Array<{
+      type: string;
+      timestamp: string;
+      data: any;
+      metadata?: Record<string, any>;
+    }>;
+    navigationPath: string[];
+    performanceMetrics?: {
+      pageLoadTime: number;
+      interactionDelay: number;
+      memoryUsage?: number;
+      cpuUsage?: number;
+    };
+    deviceInfo?: {
+      userAgent: string;
+      screenResolution: string;
+      viewportSize: string;
+      deviceType: string;
+    };
+    locationInfo?: {
+      country?: string;
+      region?: string;
+      city?: string;
+      timezone?: string;
+    };
+  }): Promise<void> {
+    return withGracefulErrorHandling(
+      async () => {
+        const payload = {
+          session_id: sessionData.sessionId,
+          user_id: sessionData.userId,
+          start_time: sessionData.startTime,
+          end_time: sessionData.endTime,
+          duration: sessionData.duration,
+          activities: (sessionData.activities || []).map(activity => ({
+            type: activity.type,
+            timestamp: activity.timestamp,
+            data: activity.data,
+            metadata: activity.metadata
+          })),
+          navigation_path: sessionData.navigationPath,
+          performance_metrics: sessionData.performanceMetrics,
+          device_info: sessionData.deviceInfo,
+          location_info: sessionData.locationInfo
+        };
+
+        const paths = [
+          '/api/racine/activity/session-analytics',
+          '/api/activity/session-analytics',
+          '/activity/session-analytics',
+          '/api/v1/racine/activity/session-analytics'
+        ];
+
+        let sent = false;
+        for (const p of paths) {
+          try {
+            const r = await fetch(`${this.config.baseURL}${p}`, {
+              method: 'POST',
+              headers: this.getAuthHeaders(),
+              body: JSON.stringify(payload)
+            });
+            if (r.ok) { sent = true; break; }
+          } catch {}
+        }
+
+        if (!sent) {
+          console.warn('Session analytics not sent (backend unavailable). Proceeding without blocking.');
+          return;
+        }
+
+        console.log('Session analytics sent successfully');
+      },
+      {
+        defaultValue: undefined,
+        errorPrefix: 'Backend not available for sending session analytics'
+      }
+    );
+  }
+
+  /**
+   * Get session analytics for a specific user or time period
+   * Maps to: GET /api/racine/activity/session-analytics
+   */
+  async getSessionAnalytics(
+    filters?: {
+      userId?: string;
+      startDate?: string;
+      endDate?: string;
+      sessionType?: string;
+    },
+    pagination?: PaginationRequest
+  ): Promise<ActivitySessionResponse[]> {
+    return withGracefulErrorHandling(
+      async () => {
+        const params = new URLSearchParams();
+        
+        if (filters?.userId) params.append('user_id', filters.userId);
+        if (filters?.startDate) params.append('start_date', filters.startDate);
+        if (filters?.endDate) params.append('end_date', filters.endDate);
+        if (filters?.sessionType) params.append('session_type', filters.sessionType);
+        
+        if (pagination) {
+          params.append('page', pagination.page.toString());
+          params.append('limit', pagination.limit.toString());
+        }
+
+        const response = await fetch(`${this.config.baseURL}/api/racine/activity/session-analytics?${params}`, {
+          method: 'GET',
+          headers: this.getAuthHeaders()
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to get session analytics: ${response.statusText}`);
+        }
+
+        return response.json();
+      },
+      {
+        defaultValue: [],
+        errorPrefix: 'Backend not available for getting session analytics'
+      }
+    );
+  }
+
+  /**
+   * Get session performance metrics
+   * Maps to: GET /api/racine/activity/session-performance
+   */
+  async getSessionPerformanceMetrics(
+    sessionId: string
+  ): Promise<{
+    sessionId: string;
+    averagePageLoadTime: number;
+    averageInteractionDelay: number;
+    memoryUsageTrend: number[];
+    cpuUsageTrend: number[];
+    performanceScore: number;
+    recommendations: string[];
+  }> {
+    try {
+      const response = await fetch(`${this.config.baseURL}/api/racine/activity/session-performance/${sessionId}`, {
+        method: 'GET',
+        headers: this.getAuthHeaders()
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to get session performance metrics: ${response.statusText}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('Failed to get session performance metrics:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Track page view activity
+   * Maps to: POST /api/racine/activity/track-page-view
+   */
+  async trackPageView(pageViewData: {
+    url: string;
+    title: string;
+    referrer?: string;
+    userId?: string;
+    sessionId?: string;
+    timestamp: string;
+    loadTime?: number;
+    viewportSize?: string;
+    userAgent?: string;
+    metadata?: Record<string, any>;
+  }): Promise<void> {
+    try {
+      const response = await fetch(`${this.config.baseURL}/api/racine/activity/track-page-view`, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify({
+          url: pageViewData.url,
+          title: pageViewData.title,
+          referrer: pageViewData.referrer,
+          user_id: pageViewData.userId,
+          session_id: pageViewData.sessionId,
+          timestamp: pageViewData.timestamp,
+          load_time: pageViewData.loadTime,
+          viewport_size: pageViewData.viewportSize,
+          user_agent: pageViewData.userAgent,
+          metadata: pageViewData.metadata
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to track page view: ${response.statusText}`);
+      }
+
+      console.log('Page view tracked successfully');
+    } catch (error) {
+      console.error('Failed to track page view:', error);
+      throw error;
     }
   }
 

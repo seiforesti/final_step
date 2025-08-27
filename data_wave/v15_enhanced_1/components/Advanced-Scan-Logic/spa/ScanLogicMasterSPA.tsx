@@ -96,14 +96,16 @@ import { toast } from 'sonner';
 import { useScanRBAC, SCAN_LOGIC_PERMISSIONS, ScanLogicRBACProvider } from '../hooks/use-rbac-integration';
 
 // Advanced Scan Logic Components
-import { AdvancedAnalyticsDashboard } from '../components/advanced-analytics/AdvancedAnalyticsDashboard';
-import { BusinessIntelligence } from '../components/advanced-analytics/BusinessIntelligence';
-import { CustomReportBuilder } from '../components/advanced-analytics/CustomReportBuilder';
-import { DataVisualizationSuite } from '../components/advanced-analytics/DataVisualizationSuite';
-import { MLInsightsGenerator } from '../components/advanced-analytics/MLInsightsGenerator';
-import { PredictiveAnalyticsEngine } from '../components/advanced-analytics/PredictiveAnalyticsEngine';
-import { StatisticalAnalyzer } from '../components/advanced-analytics/StatisticalAnalyzer';
-import { TrendAnalysisEngine } from '../components/advanced-analytics/TrendAnalysisEngine';
+import { 
+  AdvancedAnalyticsDashboard,
+  BusinessIntelligence,
+  CustomReportBuilder,
+  DataVisualizationSuite,
+  MLInsightsGenerator,
+  PredictiveAnalyticsEngine,
+  StatisticalAnalyzer,
+  TrendAnalysisEngine
+} from '../components/advanced-analytics';
 
 import { CacheManager } from '../components/performance-optimization/CacheManager';
 import { EfficiencyAnalyzer } from '../components/performance-optimization/EfficiencyAnalyzer';
@@ -130,14 +132,16 @@ import { MultiSystemCoordinator } from '../components/scan-coordination/MultiSys
 import { ScanPriorityManager } from '../components/scan-coordination/ScanPriorityManager';
 import { SynchronizationEngine } from '../components/scan-coordination/SynchronizationEngine';
 
-import { AnomalyDetectionEngine } from '../components/scan-intelligence/AnomalyDetectionEngine';
-import { BehavioralAnalyzer } from '../components/scan-intelligence/BehavioralAnalyzer';
-import { ContextualIntelligence } from '../components/scan-intelligence/ContextualIntelligence';
-import { PatternRecognitionCenter } from '../components/scan-intelligence/PatternRecognitionCenter';
-import { PredictiveAnalyzer } from '../components/scan-intelligence/PredictiveAnalyzer';
-import { ScanIntelligenceCenter } from '../components/scan-intelligence/ScanIntelligenceCenter';
-import { ScanIntelligenceEngine } from '../components/scan-intelligence/ScanIntelligenceEngine';
-import { ThreatDetectionEngine } from '../components/scan-intelligence/ThreatDetectionEngine';
+import { 
+  AnomalyDetectionEngine,
+  BehavioralAnalyzer,
+  ContextualIntelligence,
+  PatternRecognitionCenter,
+  PredictiveAnalyzer,
+  ScanIntelligenceCenter,
+  ScanIntelligenceEngine,
+  ThreatDetectionEngine
+} from '../components/scan-intelligence';
 
 import { CrossSystemCoordinator } from '../components/scan-orchestration/CrossSystemCoordinator';
 import { ExecutionPipeline } from '../components/scan-orchestration/ExecutionPipeline';

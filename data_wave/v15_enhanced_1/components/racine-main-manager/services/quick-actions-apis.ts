@@ -58,7 +58,7 @@ interface QuickActionsAPIConfig {
  * Default configuration
  */
 const DEFAULT_CONFIG: QuickActionsAPIConfig = {
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000',
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000/proxy',
   timeout: 30000,
   retryAttempts: 3,
   retryDelay: 1000,
@@ -105,6 +105,53 @@ export class QuickActionsAPI {
   private initializeWebSocket() {
     if (!this.config.enableWebSocket || !this.config.websocketURL) return;
 
+    // Check if we're in development mode and backend might not be available
+    const isDevelopment = process.env.NODE_ENV === 'development' || 
+                         (typeof window !== 'undefined' && (
+                           window.location.hostname === 'localhost' || 
+                           window.location.hostname === '127.0.0.1'
+                         ));
+    
+    if (isDevelopment) {
+      console.log('Development environment detected, checking backend availability...');
+      this.checkBackendAvailability().then(isAvailable => {
+        if (isAvailable) {
+          this.attemptWebSocketConnection();
+        } else {
+          console.log('Backend not available, will retry WebSocket connection later');
+          // Schedule a retry after a delay
+          setTimeout(() => this.scheduleReconnect(), 10000);
+        }
+      }).catch(() => {
+        console.log('Backend check failed, will retry WebSocket connection later');
+        setTimeout(() => this.scheduleReconnect(), 10000);
+      });
+      return;
+    }
+
+    // In production, attempt WebSocket connection directly
+    this.attemptWebSocketConnection();
+  }
+
+  /**
+   * Check if backend is available before attempting WebSocket connection
+   */
+  private async checkBackendAvailability(): Promise<boolean> {
+    try {
+      const response = await fetch(`${this.config.baseURL}/health`, {
+        method: 'GET',
+        signal: AbortSignal.timeout(5000) // 5 second timeout
+      });
+      return response.ok;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Attempt WebSocket connection with proper error handling
+   */
+  private attemptWebSocketConnection() {
     try {
       this.ws = new WebSocket(this.config.websocketURL);
       
@@ -119,7 +166,7 @@ export class QuickActionsAPI {
           const data = JSON.parse(event.data);
           this.handleWebSocketMessage(data);
         } catch (error) {
-          console.error('Error parsing WebSocket message:', error);
+          console.warn('Error parsing WebSocket message (handled gracefully):', error);
         }
       };
 
@@ -130,11 +177,26 @@ export class QuickActionsAPI {
       };
 
       this.ws.onerror = (error) => {
-        console.error('Quick Actions WebSocket error:', error);
+        console.warn('Quick Actions WebSocket error (handled gracefully):', error);
         this.emit('error', { error });
+        
+        // Don't immediately disconnect on error, let the connection attempt to recover
+        // Only emit the error event for components to handle
       };
+
+      // Set connection timeout
+      setTimeout(() => {
+        if (this.ws?.readyState === WebSocket.CONNECTING) {
+          console.log('WebSocket connection timeout, will retry later');
+          this.ws.close();
+          this.scheduleReconnect();
+        }
+      }, 10000); // 10 second timeout
+
     } catch (error) {
-      console.error('Failed to initialize Quick Actions WebSocket:', error);
+      console.warn('Failed to initialize Quick Actions WebSocket (will retry):', error);
+      // Schedule a retry instead of giving up
+      this.scheduleReconnect();
     }
   }
 
@@ -143,12 +205,19 @@ export class QuickActionsAPI {
    */
   private scheduleReconnect() {
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-      console.error('Max WebSocket reconnection attempts reached');
+      console.warn('Max WebSocket reconnection attempts reached, will retry later');
+      // Reset attempts after a longer delay and try again
+      setTimeout(() => {
+        this.reconnectAttempts = 0;
+        this.initializeWebSocket();
+      }, 30000); // Wait 30 seconds before trying again
       return;
     }
 
     this.reconnectAttempts++;
     const delay = this.config.retryDelay * Math.pow(2, this.reconnectAttempts - 1);
+    
+    console.log(`Quick Actions WebSocket reconnection attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts} in ${delay}ms`);
     
     setTimeout(() => {
       this.initializeWebSocket();
@@ -241,6 +310,10 @@ export class QuickActionsAPI {
         });
 
         if (!response.ok) {
+          // Graceful handling for upstream gateway errors in dev
+          if ([502, 503, 504].includes(response.status)) {
+            throw new Error(`Gateway ${response.status}: ${response.statusText}`);
+          }
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
 
@@ -257,6 +330,23 @@ export class QuickActionsAPI {
     }
 
     throw lastError || new Error('Request failed after all retry attempts');
+  }
+
+  /**
+   * Usage analytics used by GlobalQuickActionsSidebar
+   */
+  async getUsageAnalytics(): Promise<Record<string, any>> {
+    try {
+      return await this.makeRequest<Record<string, any>>('/api/v1/quick-actions/usage-analytics');
+    } catch (e) {
+      // Provide safe defaults to keep UI responsive
+      return {
+        totalActionsExecuted: 0,
+        favoriteActions: 0,
+        recentExecutions: 0,
+        topCategories: [],
+      };
+    }
   }
 
   // ============================================================================

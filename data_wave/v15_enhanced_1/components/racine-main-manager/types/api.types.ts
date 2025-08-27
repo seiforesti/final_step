@@ -32,9 +32,7 @@ import {
   PerformanceMetrics,
   WorkspaceConfiguration,
   WorkflowDefinition,
-  WorkflowExecution,
   PipelineDefinition,
-  PipelineExecution,
   AIConversation,
   AIMessage,
   AIRecommendation,
@@ -77,22 +75,7 @@ export class APIError extends Error {
   }
 }
 
-export interface ApiResponse<T = any> {
-  success: boolean;
-  data: T;
-  message?: string;
-  errors?: string[];
-  metadata?: {
-    timestamp: string;
-    requestId: string;
-    pagination?: {
-      page: number;
-      limit: number;
-      total: number;
-      totalPages: number;
-    };
-  };
-}
+
 
 export interface PaginationParams {
   page?: number;
@@ -811,7 +794,7 @@ export interface NotificationSettings {
 /**
  * Cross-group workflow execution
  */
-export interface ExecuteWorkflowRequest {
+export interface ExecuteCrossGroupWorkflowRequest {
   workflowDefinition: WorkflowDefinitionInput;
   parameters: Record<string, JSONValue>;
   priority: WorkflowPriority;
@@ -2793,8 +2776,492 @@ export interface IntegrationPerformanceAnalyticsResponse {
   }>;
 }
 
-// Continue with Pipeline API, AI Assistant API, Dashboard API, Collaboration API, Integration API, and User Management API types...
-// Due to length constraints, I'll create additional type files for the remaining APIs
+// ============================================================================
+// TAB MANAGEMENT API TYPES
+// ============================================================================
+
+export interface TabCreateRequest {
+  title: string;
+  viewId: UUID;
+  spaId?: string;
+  groupId?: UUID;
+  position: number;
+  isPinned: boolean;
+  isFavorite: boolean;
+  isClosable: boolean;
+  isDraggable: boolean;
+  isCollaborative: boolean;
+  permissions: string[];
+  metadata: Record<string, any>;
+  state: Record<string, any>;
+  performance: Record<string, any>;
+}
+
+export interface TabUpdateRequest {
+  title?: string;
+  isPinned?: boolean;
+  isFavorite?: boolean;
+  isClosable?: boolean;
+  isDraggable?: boolean;
+  isCollaborative?: boolean;
+  permissions?: string[];
+  metadata?: Record<string, any>;
+  state?: Record<string, any>;
+  performance?: Record<string, any>;
+}
+
+export interface TabGroupRequest {
+  name: string;
+  description?: string;
+  color?: string;
+  icon?: string;
+  tabs: UUID[];
+  isCollapsed?: boolean;
+  isShared?: boolean;
+  permissions?: string[];
+  collaborators?: UUID[];
+  metadata?: Record<string, any>;
+}
+
+export interface TabWorkflowRequest {
+  name: string;
+  description?: string;
+  steps: Array<{
+    type: string;
+    target: UUID;
+    parameters: Record<string, any>;
+    condition?: string;
+    delay?: number;
+    order: number;
+  }>;
+  triggers?: Array<{
+    type: string;
+    condition: string;
+    parameters: Record<string, any>;
+    isActive: boolean;
+  }>;
+  conditions?: Array<{
+    type: string;
+    expression: string;
+    parameters: Record<string, any>;
+  }>;
+  isActive?: boolean;
+  autoExecute?: boolean;
+  permissions?: string[];
+}
+
+export interface TabCollaborationRequest {
+  tabId: UUID;
+  collaborators: Array<{
+    userId: UUID;
+    username: string;
+    avatar?: string;
+    role: string;
+    permissions: string[];
+  }>;
+  permissions?: string[];
+  isRealTime?: boolean;
+  enableCoAuthoring?: boolean;
+  enableComments?: boolean;
+  enableVersioning?: boolean;
+}
+
+// =============================================================================
+// WORKSPACE MANAGEMENT API TYPES
+// =============================================================================
+
+export interface WorkspaceListResponse {
+  workspaces: Array<{
+    id: UUID;
+    name: string;
+    description?: string;
+    type: string;
+    ownerId: UUID;
+    members: Array<{
+      userId: UUID;
+      role: string;
+      permissions: string[];
+    }>;
+    resources: Array<{
+      id: UUID;
+      type: string;
+      name: string;
+      url?: string;
+    }>;
+    settings: Record<string, any>;
+    analytics: Record<string, any>;
+    createdAt: ISODateString;
+    updatedAt: ISODateString;
+  }>;
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
+}
+
+export interface UpdateWorkspaceRequest {
+  name?: string;
+  description?: string;
+  settings?: Record<string, any>;
+  analytics?: Record<string, any>;
+}
+
+export interface WorkspaceResourceResponse {
+  id: UUID;
+  type: string;
+  name: string;
+  url?: string;
+  metadata: Record<string, any>;
+  permissions: string[];
+  createdAt: ISODateString;
+  updatedAt: ISODateString;
+}
+
+export interface WorkspaceMemberResponse {
+  userId: UUID;
+  username: string;
+  email: string;
+  avatar?: string;
+  role: string;
+  permissions: string[];
+  joinedAt: ISODateString;
+  lastActive: ISODateString;
+}
+
+export interface AddWorkspaceMemberRequest {
+  userId: UUID;
+  role: string;
+  permissions: string[];
+}
+
+export interface UpdateWorkspaceMemberRequest {
+  role?: string;
+  permissions?: string[];
+}
+
+export interface WorkspaceTemplateResponse {
+  id: UUID;
+  name: string;
+  description?: string;
+  category: string;
+  tags: string[];
+  template: Record<string, any>;
+  isPublic: boolean;
+  authorId: UUID;
+  usageCount: number;
+  rating: number;
+  createdAt: ISODateString;
+  updatedAt: ISODateString;
+}
+
+export interface CreateWorkspaceFromTemplateRequest {
+  templateId: UUID;
+  name: string;
+  description?: string;
+  settings?: Record<string, any>;
+}
+
+export interface WorkspaceManagementAnalyticsResponse {
+  workspaceId: UUID;
+  metrics: {
+    memberCount: number;
+    resourceCount: number;
+    activityScore: number;
+    collaborationScore: number;
+    performanceScore: number;
+    securityScore: number;
+  };
+  trends: Array<{
+    date: ISODateString;
+    metrics: Record<string, number>;
+  }>;
+  insights: Array<{
+    type: string;
+    title: string;
+    description: string;
+    impact: 'low' | 'medium' | 'high';
+    recommendation: string;
+  }>;
+  lastUpdated: ISODateString;
+}
+
+export interface WorkspaceSecurityResponse {
+  workspaceId: UUID;
+  securityLevel: 'low' | 'medium' | 'high' | 'critical';
+  complianceStatus: {
+    gdpr: boolean;
+    hipaa: boolean;
+    sox: boolean;
+    iso27001: boolean;
+  };
+  accessControls: Array<{
+    resourceId: UUID;
+    resourceType: string;
+    permissions: string[];
+    users: UUID[];
+    groups: UUID[];
+  }>;
+  auditLog: Array<{
+    timestamp: ISODateString;
+    userId: UUID;
+    action: string;
+    resource: string;
+    details: Record<string, any>;
+  }>;
+  lastSecurityReview: ISODateString;
+}
+
+// =============================================================================
+// AI ASSISTANT API TYPES
+// =============================================================================
+
+export interface AIQueryRequest {
+  query: string;
+  context?: Record<string, any>;
+  userId: UUID;
+  sessionId?: UUID;
+  preferences?: Record<string, any>;
+}
+
+export interface AIQueryResponse {
+  id: UUID;
+  query: string;
+  response: string;
+  confidence: number;
+  sources: Array<{
+    id: UUID;
+    type: string;
+    title: string;
+    url?: string;
+    relevance: number;
+  }>;
+  suggestions: Array<{
+    type: string;
+    title: string;
+    description: string;
+    action: Record<string, any>;
+  }>;
+  timestamp: ISODateString;
+}
+
+export interface AIConversationResponse {
+  id: UUID;
+  userId: UUID;
+  title: string;
+  messages: Array<{
+    id: UUID;
+    role: 'user' | 'assistant' | 'system';
+    content: string;
+    timestamp: ISODateString;
+    metadata?: Record<string, any>;
+  }>;
+  context: Record<string, any>;
+  status: 'active' | 'archived' | 'deleted';
+  createdAt: ISODateString;
+  updatedAt: ISODateString;
+}
+
+export interface AIRecommendationResponse {
+  id: UUID;
+  type: string;
+  title: string;
+  description: string;
+  impact: 'low' | 'medium' | 'high' | 'critical';
+  confidence: number;
+  implementation: {
+    steps: string[];
+    estimatedTime: number;
+    complexity: 'low' | 'medium' | 'high';
+    prerequisites: string[];
+  };
+  benefits: {
+    performance: number;
+    usability: number;
+    efficiency: number;
+    cost: number;
+  };
+  timestamp: ISODateString;
+}
+
+export interface AIInsightResponse {
+  id: UUID;
+  type: string;
+  title: string;
+  description: string;
+  data: Record<string, any>;
+  visualization?: {
+    type: string;
+    config: Record<string, any>;
+  };
+  timestamp: ISODateString;
+}
+
+export interface ContextAnalysisRequest {
+  userId: UUID;
+  context: Record<string, any>;
+  analysisType: 'user_behavior' | 'system_performance' | 'workflow_optimization' | 'security';
+  timeRange?: string;
+}
+
+export interface ContextAnalysisResponse {
+  analysisId: UUID;
+  userId: UUID;
+  analysisType: string;
+  insights: Array<{
+    type: string;
+    title: string;
+    description: string;
+    confidence: number;
+    data: Record<string, any>;
+  }>;
+  recommendations: Array<{
+    type: string;
+    title: string;
+    description: string;
+    priority: 'low' | 'medium' | 'high';
+    implementation: Record<string, any>;
+  }>;
+  timestamp: ISODateString;
+}
+
+export interface OptimizationRequest {
+  userId: UUID;
+  target: string;
+  constraints: Record<string, any>;
+  preferences: Record<string, any>;
+  optimizationType: 'performance' | 'usability' | 'efficiency' | 'cost';
+}
+
+export interface OptimizationRecommendationResponse {
+  id: UUID;
+  target: string;
+  optimizationType: string;
+  recommendations: Array<{
+    id: UUID;
+    title: string;
+    description: string;
+    impact: 'low' | 'medium' | 'high' | 'critical';
+    effort: 'low' | 'medium' | 'high';
+    estimatedImprovement: number;
+    implementation: Record<string, any>;
+  }>;
+  summary: {
+    totalRecommendations: number;
+    highImpactCount: number;
+    estimatedTotalImprovement: number;
+    implementationEffort: 'low' | 'medium' | 'high';
+  };
+  timestamp: ISODateString;
+}
+
+export interface AnomalyDetectionRequest {
+  userId: UUID;
+  data: Array<{
+    timestamp: ISODateString;
+    metrics: Record<string, number>;
+    context: Record<string, any>;
+  }>;
+  detectionType: 'performance' | 'security' | 'usage' | 'behavior';
+  sensitivity: 'low' | 'medium' | 'high';
+}
+
+export interface AnomalyDetectionResponse {
+  detectionId: UUID;
+  userId: UUID;
+  detectionType: string;
+  anomalies: Array<{
+    id: UUID;
+    timestamp: ISODateString;
+    severity: 'low' | 'medium' | 'high' | 'critical';
+    description: string;
+    metrics: Record<string, number>;
+    context: Record<string, any>;
+    recommendations: string[];
+  }>;
+  summary: {
+    totalAnomalies: number;
+    criticalCount: number;
+    highCount: number;
+    mediumCount: number;
+    lowCount: number;
+  };
+  timestamp: ISODateString;
+}
+
+export interface CodeGenerationRequest {
+  userId: UUID;
+  prompt: string;
+  language: string;
+  framework?: string;
+  requirements: string[];
+  context?: Record<string, any>;
+}
+
+export interface CodeGenerationResponse {
+  id: UUID;
+  code: string;
+  language: string;
+  framework?: string;
+  explanation: string;
+  tests?: string;
+  documentation?: string;
+  quality: {
+    score: number;
+    issues: Array<{
+      type: string;
+      severity: 'low' | 'medium' | 'high';
+      description: string;
+      suggestion: string;
+    }>;
+  };
+  timestamp: ISODateString;
+}
+
+export interface AILearningUpdateRequest {
+  userId: UUID;
+  interaction: {
+    type: string;
+    data: Record<string, any>;
+    outcome: 'success' | 'failure' | 'partial';
+    feedback?: string;
+  };
+  context: Record<string, any>;
+  timestamp: ISODateString;
+}
+
+// =============================================================================
+// COLLABORATION API TYPES
+// =============================================================================
+
+export interface CollaborationAnalyticsRequest {
+  userId: UUID;
+  workspaceId?: UUID;
+  timeRange: string;
+  metrics: string[];
+}
+
+export interface CollaborationAnalyticsResponse {
+  analyticsId: UUID;
+  userId: UUID;
+  workspaceId?: UUID;
+  timeRange: string;
+  metrics: Record<string, number>;
+  trends: Array<{
+    date: ISODateString;
+    metrics: Record<string, number>;
+  }>;
+  insights: Array<{
+    type: string;
+    title: string;
+    description: string;
+    impact: 'low' | 'medium' | 'high';
+    recommendation: string;
+  }>;
+  timestamp: ISODateString;
+}
 
 export type {
   // Core API response types
@@ -2806,7 +3273,7 @@ export type {
   CreateOrchestrationRequest,
   OrchestrationResponse,
   SystemHealthResponse,
-  ExecuteWorkflowRequest,
+  ExecuteCrossGroupWorkflowRequest,
   WorkflowExecutionResponse,
   OptimizePerformanceRequest,
   PerformanceOptimizationResponse,
@@ -2850,5 +3317,44 @@ export type {
   StartSyncRequest,
   SyncJobResponse,
   IntegrationSystemHealthResponse,
-  IntegrationPerformanceAnalyticsResponse
+  IntegrationPerformanceAnalyticsResponse,
+
+  // Tab Management API types
+  TabCreateRequest,
+  TabUpdateRequest,
+  TabGroupRequest,
+  TabWorkflowRequest,
+  TabCollaborationRequest,
+
+  // Workspace Management API types
+  WorkspaceListResponse,
+  UpdateWorkspaceRequest,
+  WorkspaceResourceResponse,
+  WorkspaceMemberResponse,
+  AddWorkspaceMemberRequest,
+  UpdateWorkspaceMemberRequest,
+  WorkspaceTemplateResponse,
+  CreateWorkspaceFromTemplateRequest,
+  WorkspaceManagementAnalyticsResponse,
+  WorkspaceSecurityResponse,
+
+  // AI Assistant API types
+  AIQueryRequest,
+  AIQueryResponse,
+  AIConversationResponse,
+  AIRecommendationResponse,
+  AIInsightResponse,
+  ContextAnalysisRequest,
+  ContextAnalysisResponse,
+  OptimizationRequest,
+  OptimizationRecommendationResponse,
+  AnomalyDetectionRequest,
+  AnomalyDetectionResponse,
+  CodeGenerationRequest,
+  CodeGenerationResponse,
+  AILearningUpdateRequest,
+
+  // Collaboration API types
+  CollaborationAnalyticsRequest,
+  CollaborationAnalyticsResponse
 };

@@ -71,6 +71,7 @@ import {
   ResourceMapping,
   IntegrationPolicy
 } from '../types/racine-core.types';
+import { withGracefulErrorHandling, DefaultApiResponses } from '../../../lib/api-error-handler';
 
 /**
  * Configuration for the cross-group integration API service
@@ -1149,6 +1150,701 @@ class CrossGroupIntegrationAPI {
     }
 
     return response.json();
+  }
+
+  /**
+   * Check integration health across all groups
+   */
+  async checkIntegrationHealth(): Promise<IntegrationHealthResponse> {
+    return withGracefulErrorHandling(
+      async () => {
+        const candidates = [
+          '/api/racine/integration/health',
+          '/api/integration/health',
+          '/integration/health',
+          '/api/v1/racine/integration/health'
+        ];
+
+        let healthData: any | null = null;
+        let lastStatusText = '';
+        for (const path of candidates) {
+          try {
+            const res = await fetch(`${this.config.baseURL}${path}`, {
+              method: 'GET',
+              headers: this.getAuthHeaders()
+            });
+            if (res.ok) {
+              healthData = await res.json();
+              break;
+            } else {
+              lastStatusText = res.statusText;
+            }
+          } catch (e: any) {
+            lastStatusText = e?.message || 'network_error';
+          }
+        }
+
+        if (!healthData) {
+          // Fallback to platform status as a minimal health signal
+          try {
+            const res = await fetch(`${this.config.baseURL}/api/v1/platform/status`, {
+              method: 'GET',
+              headers: this.getAuthHeaders()
+            });
+            if (res.ok) {
+              const status = await res.json();
+              healthData = {
+                overall_status: 'degraded',
+                group_health: {},
+                integration_status: { platform: status?.platform || 'unknown' },
+                issues: ['Integration health endpoint unavailable'],
+                recommendations: ['Verify backend integration routes'],
+                metrics: {}
+              };
+            }
+          } catch {}
+        }
+
+        if (!healthData) {
+          // Return default here to avoid throwing and noisy console errors
+          return {
+            overallStatus: 'backend_unavailable',
+            groupHealth: {},
+            integrationStatus: {},
+            lastCheck: new Date().toISOString(),
+            issues: [`Failed to check integration health: ${lastStatusText || 'unknown'}`],
+            recommendations: ['Wait for backend to start up', 'Check backend health'],
+            metrics: {}
+          } as IntegrationHealthResponse;
+        }
+        
+        // Return comprehensive health status
+        return {
+          overallStatus: healthData.overall_status || 'unknown',
+          groupHealth: healthData.group_health || {},
+          integrationStatus: healthData.integration_status || {},
+          lastCheck: new Date().toISOString(),
+          issues: healthData.issues || [],
+          recommendations: healthData.recommendations || [],
+          metrics: healthData.metrics || {}
+        };
+      },
+      {
+        defaultValue: {
+          overallStatus: 'backend_unavailable',
+          groupHealth: {},
+          integrationStatus: {},
+          lastCheck: new Date().toISOString(),
+          issues: ['Backend service not available'],
+          recommendations: ['Wait for backend to start up', 'Check backend health'],
+          metrics: {}
+        },
+        errorPrefix: 'Backend not available for integration health check'
+      }
+    );
+  }
+
+  /**
+   * Search across all groups
+   */
+  async searchCrossGroups(request: CrossGroupSearchRequest): Promise<CrossGroupSearchResponse> {
+    return withGracefulErrorHandling(
+      async () => {
+        const response = await fetch(`${this.config.baseURL}/api/racine/integration/search`, {
+          method: 'POST',
+          headers: this.getAuthHeaders(),
+          body: JSON.stringify(request)
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to search across groups: ${response.statusText}`);
+        }
+
+        return response.json();
+      },
+      {
+        defaultValue: { results: [], total: 0, groups: [] },
+        errorPrefix: 'Backend not available for cross-group search'
+      }
+    );
+  }
+
+  /**
+   * Link resources across groups
+   */
+  async linkResources(request: ResourceLinkRequest): Promise<ResourceLinkResponse> {
+    try {
+      const response = await fetch(`${this.config.baseURL}/api/racine/integration/resources/link`, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(request)
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to link resources: ${response.statusText}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('Failed to link resources:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Map dependencies between groups
+   */
+  async mapDependencies(request: DependencyMappingRequest): Promise<DependencyMappingResponse> {
+    try {
+      const response = await fetch(`${this.config.baseURL}/api/racine/integration/dependencies/map`, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(request)
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to map dependencies: ${response.statusText}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('Failed to map dependencies:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Start group synchronization
+   */
+  async startGroupSync(request: GroupSyncRequest): Promise<GroupSyncResponse> {
+    try {
+      const response = await fetch(`${this.config.baseURL}/api/racine/integration/sync/start`, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(request)
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to start group sync: ${response.statusText}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('Failed to start group sync:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Generate cross-group analytics
+   */
+  async generateAnalytics(request: CrossGroupAnalyticsRequest): Promise<CrossGroupAnalyticsResponse> {
+    try {
+      const response = await fetch(`${this.config.baseURL}/api/racine/integration/analytics/generate`, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(request)
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to generate analytics: ${response.statusText}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('Failed to generate analytics:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Link cross-group resource
+   */
+  async linkCrossGroupResource(params: any): Promise<any> {
+    try {
+      const response = await fetch(`${this.config.baseURL}/api/racine/integration/resources/link-cross-group`, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(params)
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to link cross-group resource: ${response.statusText}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('Failed to link cross-group resource:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Unlink cross-group resource
+   */
+  async unlinkCrossGroupResource(resourceId: string, targetGroup: string): Promise<any> {
+    try {
+      const response = await fetch(`${this.config.baseURL}/api/racine/integration/resources/unlink-cross-group`, {
+        method: 'DELETE',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify({ resource_id: resourceId, target_group: targetGroup })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to unlink cross-group resource: ${response.statusText}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('Failed to unlink cross-group resource:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Unlink resources
+   */
+  async unlinkResources(linkId: string): Promise<void> {
+    try {
+      const response = await fetch(`${this.config.baseURL}/api/racine/integration/resources/unlink/${linkId}`, {
+        method: 'DELETE',
+        headers: this.getAuthHeaders()
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to unlink resources: ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error('Failed to unlink resources:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get resource links
+   */
+  async getResourceLinks(resourceId: string): Promise<any[]> {
+    try {
+      const response = await fetch(`${this.config.baseURL}/api/racine/integration/resources/${resourceId}/links`, {
+        method: 'GET',
+        headers: this.getAuthHeaders()
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to get resource links: ${response.statusText}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('Failed to get resource links:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Validate dependencies for a group
+   */
+  async validateDependencies(groupId: string): Promise<any> {
+    try {
+      const response = await fetch(`${this.config.baseURL}/api/racine/integration/dependencies/validate/${groupId}`, {
+        method: 'GET',
+        headers: this.getAuthHeaders()
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to validate dependencies: ${response.statusText}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('Failed to validate dependencies:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Resolve dependency conflicts
+   */
+  async resolveDependencyConflicts(conflicts: any[]): Promise<any> {
+    try {
+      const response = await fetch(`${this.config.baseURL}/api/racine/integration/dependencies/resolve-conflicts`, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify({ conflicts })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to resolve dependency conflicts: ${response.statusText}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('Failed to resolve dependency conflicts:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Monitor sync progress
+   */
+  async monitorSyncProgress(jobId: string): Promise<any> {
+    try {
+      const response = await fetch(`${this.config.baseURL}/api/racine/integration/sync/progress/${jobId}`, {
+        method: 'GET',
+        headers: this.getAuthHeaders()
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to monitor sync progress: ${response.statusText}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('Failed to monitor sync progress:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Cancel sync job
+   */
+  async cancelSync(jobId: string): Promise<any> {
+    try {
+      const response = await fetch(`${this.config.baseURL}/api/racine/integration/sync/cancel/${jobId}`, {
+        method: 'POST',
+        headers: this.getAuthHeaders()
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to cancel sync: ${response.statusText}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('Failed to cancel sync:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get group health status
+   */
+  async getGroupHealth(groupId: string): Promise<any> {
+    try {
+      const response = await fetch(`${this.config.baseURL}/api/racine/integration/groups/${groupId}/health`, {
+        method: 'GET',
+        headers: this.getAuthHeaders()
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to get group health: ${response.statusText}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('Failed to get group health:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get cross-group insights
+   */
+  async getInsights(timeRange: any): Promise<any[]> {
+    try {
+      const response = await fetch(`${this.config.baseURL}/api/racine/integration/insights?time_range=${JSON.stringify(timeRange)}`, {
+        method: 'GET',
+        headers: this.getAuthHeaders()
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to get insights: ${response.statusText}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('Failed to get insights:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get cross-group trends
+   */
+  async getTrends(metric: string): Promise<any[]> {
+    try {
+      const response = await fetch(`${this.config.baseURL}/api/racine/integration/trends?metric=${metric}`, {
+        method: 'GET',
+        headers: this.getAuthHeaders()
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to get trends: ${response.statusText}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('Failed to get trends:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Detect conflicts between groups
+   */
+  async detectConflicts(request: ConflictDetectionRequest): Promise<ConflictDetectionResponse> {
+    try {
+      const response = await fetch(`${this.config.baseURL}/api/racine/integration/conflicts/detect`, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(request)
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to detect conflicts: ${response.statusText}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('Failed to detect conflicts:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Resolve a specific conflict
+   */
+  async resolveConflict(conflictId: string, resolution: any): Promise<any> {
+    try {
+      const response = await fetch(`${this.config.baseURL}/api/racine/integration/conflicts/${conflictId}/resolve`, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(resolution)
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to resolve conflict: ${response.statusText}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('Failed to resolve conflict:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get active conflicts
+   */
+  async getActiveConflicts(): Promise<any[]> {
+    try {
+      const response = await fetch(`${this.config.baseURL}/api/racine/integration/conflicts/active`, {
+        method: 'GET',
+        headers: this.getAuthHeaders()
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to get active conflicts: ${response.statusText}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('Failed to get active conflicts:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Create integration endpoint
+   */
+  async createIntegrationEndpoint(request: CreateIntegrationEndpointRequest): Promise<IntegrationEndpointResponse> {
+    try {
+      const response = await fetch(`${this.config.baseURL}/api/racine/integration/endpoints/create`, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(request)
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to create integration endpoint: ${response.statusText}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('Failed to create integration endpoint:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Test integration endpoint
+   */
+  async testIntegrationEndpoint(endpointId: string): Promise<IntegrationTestResult> {
+    try {
+      const response = await fetch(`${this.config.baseURL}/api/racine/integration/endpoints/${endpointId}/test`, {
+        method: 'POST',
+        headers: this.getAuthHeaders()
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to test integration endpoint: ${response.statusText}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('Failed to test integration endpoint:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get integration endpoints
+   */
+  async getIntegrationEndpoints(): Promise<any[]> {
+    try {
+      const response = await fetch(`${this.config.baseURL}/api/racine/integration/endpoints`, {
+        method: 'GET',
+        headers: this.getAuthHeaders()
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to get integration endpoints: ${response.statusText}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('Failed to get integration endpoints:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Register service
+   */
+  async registerService(request: ServiceRegistrationRequest): Promise<ServiceRegistryResponse> {
+    try {
+      const response = await fetch(`${this.config.baseURL}/api/racine/integration/services/register`, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(request)
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to register service: ${response.statusText}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('Failed to register service:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get registered services
+   */
+  async getRegisteredServices(): Promise<any[]> {
+    try {
+      const response = await fetch(`${this.config.baseURL}/api/racine/integration/services`, {
+        method: 'GET',
+        headers: this.getAuthHeaders()
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to get registered services: ${response.statusText}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('Failed to get registered services:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Send service heartbeat
+   */
+  async sendServiceHeartbeat(serviceId: string): Promise<any> {
+    try {
+      const response = await fetch(`${this.config.baseURL}/api/racine/integration/services/${serviceId}/heartbeat`, {
+        method: 'POST',
+        headers: this.getAuthHeaders()
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to send service heartbeat: ${response.statusText}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('Failed to send service heartbeat:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Create integration job
+   */
+  async createIntegrationJob(request: CreateIntegrationJobRequest): Promise<IntegrationJobResponse> {
+    try {
+      const response = await fetch(`${this.config.baseURL}/api/racine/integration/jobs/create`, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(request)
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to create integration job: ${response.statusText}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('Failed to create integration job:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Execute integration job
+   */
+  async executeIntegrationJob(jobId: string): Promise<IntegrationJobExecutionResponse> {
+    try {
+      const response = await fetch(`${this.config.baseURL}/api/racine/integration/jobs/${jobId}/execute`, {
+        method: 'POST',
+        headers: this.getAuthHeaders()
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to execute integration job: ${response.statusText}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('Failed to execute integration job:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Schedule integration job
+   */
+  async scheduleIntegrationJob(jobId: string, schedule: any): Promise<any> {
+    try {
+      const response = await fetch(`${this.config.baseURL}/api/racine/integration/jobs/${jobId}/schedule`, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(schedule)
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to schedule integration job: ${response.statusText}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('Failed to schedule integration job:', error);
+      throw error;
+    }
   }
 
   /**

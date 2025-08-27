@@ -1689,8 +1689,32 @@ export class ClassificationApi {
   }
 }
 
-// Default export
-export default ClassificationApi
+// ============================================================================
+// EXPORT CONFIGURATION
+// ============================================================================
 
-// Named export for backward compatibility
-export const classificationApi = new ClassificationApi()
+// Ensure both default and named exports are available
+export { ClassificationApi };
+export default ClassificationApi;
+
+// Export the singleton instance
+export const classificationApi = new ClassificationApi();
+
+// Export types for advanced usage
+export type {
+  ApiResponse,
+  ClassificationFramework,
+  ClassificationRule,
+  ClassificationPolicy,
+  BulkOperation,
+  ClassificationResult,
+  PaginationParams,
+  SortParams,
+  FilterParams,
+  SearchParams,
+  ValidationResult,
+  BulkOperationResult,
+  AuditTrailEntry,
+  NotificationSettings,
+  ResourceUsage
+};

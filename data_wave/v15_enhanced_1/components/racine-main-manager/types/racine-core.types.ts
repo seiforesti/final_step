@@ -6797,11 +6797,11 @@ export interface QuickActionComponent {
 }
 
 export interface SPAContext {
-  id: string;
-  name: string;
-  type: string;
-  state: Record<string, any>;
-  metadata?: Record<string, any>;
+  spaType: SPAType;
+  spaId: string;
+  configuration: Record<string, any>;
+  permissions: string[];
+  metadata: Record<string, any>;
 }
 
 export interface ActionResult {
@@ -7118,4 +7118,80 @@ export interface RecordingSession {
   duration: number;
   fileUrl?: string;
   metadata?: Record<string, any>;
+}
+
+// =============================================================================
+// LAYOUT AND RESPONSIVE TYPES
+// =============================================================================
+
+export type ResponsiveBreakpoint = 'mobile' | 'tablet' | 'desktop' | 'wide';
+
+export interface LayoutPreferences {
+  sidebarWidth?: number;
+  sidebarCollapsed?: boolean;
+  headerHeight?: number;
+  contentPadding?: 'compact' | 'normal' | 'spacious';
+  theme?: 'light' | 'dark' | 'system';
+  accessibility?: {
+    screenReaderOptimized?: boolean;
+    highContrast?: boolean;
+    reducedMotion?: boolean;
+  };
+}
+
+export interface LayoutConfiguration {
+  id: string;
+  name: string;
+  type: string;
+  structure: {
+    header: { height: number; fixed: boolean };
+    sidebar: { width: number; collapsible: boolean; position: 'left' | 'right' };
+    content: { padding: number; scrollable: boolean; split?: boolean; grid?: boolean };
+    footer: { height: number; visible: boolean };
+  };
+  responsive?: Record<ResponsiveBreakpoint, any>;
+  performance?: {
+    virtualScrolling?: boolean;
+    lazyLoading?: boolean;
+    memoization?: boolean;
+  };
+}
+
+export interface LayoutPerformanceMetrics {
+  renderTime: number;
+  memoryUsage: number;
+  layoutShifts: number;
+  interactionLatency: number;
+  frameRate: number;
+  bundleSize: number;
+}
+
+export type SPAType = 
+  | 'data-sources'
+  | 'scan-rule-sets'
+  | 'classifications'
+  | 'compliance-rules'
+  | 'advanced-catalog'
+  | 'scan-logic'
+  | 'rbac-system';
+
+export interface SPAContext {
+  spaType: SPAType;
+  spaId: string;
+  configuration: Record<string, any>;
+  permissions: string[];
+  metadata: Record<string, any>;
+}
+
+export interface WorkspaceContext {
+  id: UUID;
+  name: string;
+  type: string;
+  owner: UUID;
+  members: WorkspaceMember[];
+  resources: SharedResource[];
+  configuration: Record<string, any>;
+  permissions: string[];
+  createdAt: ISODateString;
+  updatedAt: ISODateString;
 }

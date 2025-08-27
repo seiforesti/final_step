@@ -31,4 +31,15 @@ export const {
   deleteThroughputOptimizer,
 } = throughputOptimizerAPI as any;
 
+// Additional throughput optimization functions
+export const optimizeThroughput = async (optimizerId: string, optimizationType: 'auto' | 'manual' | 'scheduled', params?: Record<string, any>) => {
+  const response = await throughputOptimizerAPI.updateConfiguration(optimizerId, { optimizationType, ...params });
+  return response.data;
+};
+
+export const getThroughputMetrics = async (optimizerId: string, metricType: 'performance' | 'efficiency' | 'bottleneck' = 'performance', params?: Record<string, any>) => {
+  const response = await throughputOptimizerAPI.getMetrics({ optimizerId, metricType, ...params });
+  return response.data;
+};
+
 

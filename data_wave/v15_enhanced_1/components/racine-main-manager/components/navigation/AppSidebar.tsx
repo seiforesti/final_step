@@ -331,24 +331,59 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
     refreshSPAStatus
   } = useCrossGroupIntegration()
 
-  const {
-    userContext,
-    checkUserAccess,
-    getUserPermissions,
-    hasPermission
-  } = useUserManagement()
+  const userHook = useUserManagement() as any
+  const userOps = userHook?.operations ?? userHook?.[1] ?? userHook ?? {}
+  
+  // Memoize functions to prevent infinite loops
+  const checkUserAccess = useCallback((permission: string) => {
+    try { 
+      return userOps?.checkUserAccess?.(permission) ?? true 
+    } catch { 
+      return true 
+    }
+  }, [userOps])
 
-  const {
-    workspaceState,
-    getWorkspaceContext,
-    switchWorkspace
-  } = useWorkspaceManagement()
+  const workspaceHook = useWorkspaceManagement() as any
+  const workspaceState = workspaceHook?.state ?? workspaceHook?.[0] ?? {}
+  const workspaceOps = workspaceHook?.operations ?? workspaceHook?.[1] ?? workspaceHook ?? {}
+  
+  // Memoize functions to prevent infinite loops
+  const getWorkspaceContext = useCallback(() => { 
+    try { 
+      return workspaceOps?.getWorkspaceContext?.() ?? null 
+    } catch { 
+      return null 
+    } 
+  }, [workspaceOps])
+  
+  const switchWorkspace = useCallback(async (id: string) => { 
+    try { 
+      return await workspaceOps?.switchWorkspace?.(id) 
+    } catch { 
+      /* noop */ 
+    } 
+  }, [workspaceOps])
 
-  const {
-    recentActivities,
-    getRecentNavigationHistory,
-    trackNavigation
-  } = useActivityTracker()
+  // Normalize activity tracker hook (tuple or object)
+  const activityHook = useActivityTracker() as any
+  const activityState = activityHook?.state ?? activityHook?.[0] ?? {}
+  const activityOps = activityHook?.operations ?? activityHook?.[1] ?? activityHook ?? {}
+  // Memoize functions to prevent infinite loops
+  const getRecentNavigationHistory = useCallback(async (limit: number) => { 
+    try { 
+      return await activityOps?.getRecentNavigationHistory?.(limit) ?? [] 
+    } catch { 
+      return [] 
+    } 
+  }, [activityOps])
+  
+  const trackNavigation = useCallback((payload: any) => { 
+    try { 
+      activityOps?.trackNavigation?.(payload) 
+    } catch { 
+      /* noop */ 
+    } 
+  }, [activityOps])
 
   const {
     quickActions,
@@ -362,13 +397,42 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
     getNavigationPatterns
   } = useNavigationAnalytics()
 
-  const {
-    userPreferences,
-    updatePreference,
-    getSidebarPreferences,
-    saveFavoriteItem,
-    removeFavoriteItem
-  } = useUserPreferences()
+  // Normalize user preferences hook (tuple or object)
+  const userPrefsHook = useUserPreferences() as any
+  const userPrefsState = userPrefsHook?.state ?? userPrefsHook?.[0] ?? {}
+  const userPrefsOps = userPrefsHook?.operations ?? userPrefsHook?.[1] ?? userPrefsHook ?? {}
+  // Memoize functions to prevent infinite loops
+  const updatePreference = useCallback((key: string, value: any) => { 
+    try { 
+      userPrefsOps?.updatePreference?.(key, value) 
+    } catch { 
+      /* noop */ 
+    } 
+  }, [userPrefsOps])
+  
+  const getSidebarPreferences = useCallback(async () => { 
+    try { 
+      return await userPrefsOps?.getSidebarPreferences?.() ?? (userPrefsState?.sidebarPreferences || {}) 
+    } catch { 
+      return {} 
+    } 
+  }, [userPrefsOps, userPrefsState?.sidebarPreferences])
+  
+  const saveFavoriteItem = useCallback(async (fav: any) => { 
+    try { 
+      await userPrefsOps?.saveFavoriteItem?.(fav) 
+    } catch { 
+      /* noop */ 
+    } 
+  }, [userPrefsOps])
+  
+  const removeFavoriteItem = useCallback(async (id: string) => { 
+    try { 
+      await userPrefsOps?.removeFavoriteItem?.(id) 
+    } catch { 
+      /* noop */ 
+    } 
+  }, [userPrefsOps])
 
   // Local state
   const [internalCollapsed, setInternalCollapsed] = useState(false)
@@ -765,7 +829,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
     )
   }, [
     currentActiveItem,
-    crossGroupState.groupStatuses,
+    crossGroupState?.groupStatuses,
     favorites,
     hoveredItem,
     isCollapsed,
@@ -1093,10 +1157,10 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
             {!isCollapsed && (
               <div className="space-y-2">
                 {/* Workspace Info */}
-                {workspaceState.currentWorkspace && (
+                {workspaceState?.currentWorkspace && (
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <Globe className="w-3 h-3" />
-                    <span className="truncate">{workspaceState.currentWorkspace.name}</span>
+                    <span className="truncate">{workspaceState?.currentWorkspace?.name}</span>
                   </div>
                 )}
                 

@@ -1806,6 +1806,140 @@ export interface ExpertAvailability {
 }
 
 // =============================================================================
+// MISSING TYPE EXPORTS
+// =============================================================================
+
+export interface CollaborationFeatures {
+  real_time_collaboration: boolean;
+  version_control: boolean;
+  review_workflows: boolean;
+  knowledge_sharing: boolean;
+  team_workspaces: boolean;
+  communication_channels: boolean;
+  analytics_and_reporting: boolean;
+  integration_capabilities: boolean;
+}
+
+export interface TeamWorkspace {
+  workspace_id: string;
+  name: string;
+  description: string;
+  team_members: TeamMember[];
+  projects: CollaborationProject[];
+  resources: WorkspaceResource[];
+  settings: WorkspaceSettings;
+  activity_log: ActivityLogEntry[];
+}
+
+export interface Comment {
+  comment_id: string;
+  content: string;
+  author_id: string;
+  author_name: string;
+  created_at: string;
+  updated_at: string;
+  parent_id?: string;
+  replies: Comment[];
+  attachments: CommentAttachment[];
+  mentions: string[];
+  reactions: CommentReaction[];
+}
+
+export interface CommentAttachment {
+  attachment_id: string;
+  filename: string;
+  file_type: string;
+  file_size: number;
+  url: string;
+  uploaded_at: string;
+}
+
+export interface CommentReaction {
+  user_id: string;
+  reaction_type: 'like' | 'dislike' | 'heart' | 'thumbs_up' | 'thumbs_down';
+  created_at: string;
+}
+
+export interface KnowledgeBase {
+  knowledge_base_id: string;
+  name: string;
+  description: string;
+  articles: KnowledgeArticle[];
+  categories: KnowledgeCategory[];
+  tags: string[];
+  access_permissions: KnowledgeAccessPermission[];
+  search_index: KnowledgeSearchIndex;
+  analytics: KnowledgeAnalytics;
+}
+
+export interface KnowledgeArticle {
+  article_id: string;
+  title: string;
+  content: string;
+  author_id: string;
+  author_name: string;
+  category: string;
+  tags: string[];
+  created_at: string;
+  updated_at: string;
+  version: number;
+  status: 'draft' | 'published' | 'archived';
+  views: number;
+  helpful_votes: number;
+  attachments: KnowledgeArticleAttachment[];
+  related_articles: string[];
+}
+
+export interface KnowledgeCategory {
+  category_id: string;
+  name: string;
+  description: string;
+  parent_category_id?: string;
+  article_count: number;
+  subcategories: KnowledgeCategory[];
+}
+
+export interface KnowledgeAccessPermission {
+  user_id: string;
+  permission_level: 'read' | 'write' | 'admin';
+  granted_at: string;
+  granted_by: string;
+}
+
+export interface KnowledgeSearchIndex {
+  indexed_articles: number;
+  search_terms: string[];
+  last_indexed: string;
+  index_size: number;
+}
+
+export interface KnowledgeAnalytics {
+  total_articles: number;
+  total_views: number;
+  popular_articles: KnowledgeArticle[];
+  search_queries: string[];
+  user_engagement: number;
+}
+
+export interface KnowledgeArticleAttachment {
+  attachment_id: string;
+  filename: string;
+  file_type: string;
+  file_size: number;
+  url: string;
+  uploaded_at: string;
+}
+
+export interface APIResponse<T = any> {
+  success: boolean;
+  data: T;
+  message?: string;
+  error?: string;
+  timestamp: string;
+  requestId: string;
+}
+
+// =============================================================================
 // API ERROR TYPES
 // =============================================================================
 

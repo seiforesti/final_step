@@ -65,6 +65,47 @@ export function getContextTypeColor(type: string): string {
   return generateColor(`context-${type}`);
 }
 
+// Missing color functions referenced by components
+export function getPatternTypeColor(type: string): string {
+  return generateColor(`pattern-${type}`);
+}
+
+export function getSignificanceColor(significance: string): string {
+  switch (significance.toLowerCase()) {
+    case 'very_high':
+    case 'high':
+      return '#ef4444';
+    case 'medium':
+      return '#f59e0b';
+    case 'low':
+      return '#84cc16';
+    case 'very_low':
+      return '#22c55e';
+    default:
+      return '#6b7280';
+  }
+}
+
+export function getTrendColor(trend: string): string {
+  switch (trend.toLowerCase()) {
+    case 'positive':
+    case 'increasing':
+    case 'improving':
+      return '#22c55e';
+    case 'negative':
+    case 'decreasing':
+    case 'declining':
+      return '#ef4444';
+    case 'stable':
+    case 'neutral':
+      return '#6b7280';
+    case 'volatile':
+      return '#f59e0b';
+    default:
+      return '#6b7280';
+  }
+}
+
 function hash(str: string): number {
   let h = 0;
   for (let i = 0; i < str.length; i++) {
@@ -81,6 +122,9 @@ export default {
   getAnomalyTypeColor,
   getRiskColor,
   getContextTypeColor,
+  getPatternTypeColor,
+  getSignificanceColor,
+  getTrendColor,
 };
 
 

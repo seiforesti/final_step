@@ -127,6 +127,8 @@ export interface RacineMainManagerConfig {
   };
 }
 
+// (Export moved to main component export section below to avoid duplication)
+
 /**
  * Default configuration for Racine Main Manager
  */
@@ -153,9 +155,8 @@ export const DEFAULT_RACINE_CONFIG: RacineMainManagerConfig = {
 // MAIN COMPONENT EXPORT
 // ============================================================================
 
-// Export the main RacineMainManagerSPA component
-export { RacineMainManagerSPA, COMPONENT_METRICS } from './RacineMainManagerSPA';
-export { default as RacineMainManagerSPADefault } from './RacineMainManagerSPA';
+// Export the main RacineMainManagerSPA component (single authoritative export)
+export { default as RacineMainManagerSPA, COMPONENT_METRICS } from './RacineMainManagerSPA';
 
 // ============================================================================
 // INTEGRATION VALIDATION

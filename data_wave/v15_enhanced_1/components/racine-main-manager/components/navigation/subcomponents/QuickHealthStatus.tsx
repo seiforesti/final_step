@@ -74,20 +74,32 @@ export const QuickHealthStatus: React.FC<QuickHealthStatusProps> = ({
   const [criticalAlerts, setCriticalAlerts] = useState<SystemAlert[]>([])
 
   // Custom hooks (already implemented)
-  const { 
-    getSystemHealth, 
-    getPerformanceMetrics,
-    getSystemAlerts,
-    subscribeToHealthUpdates
-  } = useRacineOrchestration()
+  // Normalize orchestration hook
+  const orchestration = useRacineOrchestration() as any
+  const orchState = orchestration?.state ?? orchestration?.[0] ?? {}
+  const orchOps = orchestration?.operations ?? orchestration?.[1] ?? orchestration ?? {}
+  const getSystemHealth = useCallback(async () => { try { return await orchOps?.getSystemHealth?.() ?? { overall: 'unknown', services: {} } } catch { return { overall: 'unknown', services: {} } } }, [orchOps])
+  const getPerformanceMetrics = useCallback(async () => { try { return await orchOps?.getPerformanceMetrics?.() ?? null } catch { return null } }, [orchOps])
+  const getSystemAlerts = useCallback(async (p: any) => { try { return await orchOps?.getSystemAlerts?.(p) ?? [] } catch { return [] } }, [orchOps])
+  const subscribeToHealthUpdates = useCallback((handler: any) => { try { return orchOps?.subscribeToHealthUpdates?.(handler) ?? (() => {}) } catch { return () => {} } }, [orchOps])
   
-  const { 
-    getAllSPAStatuses,
-    getIntegrationHealth 
-  } = useCrossGroupIntegration()
+  // Normalize cross-group integration
+  const cross = useCrossGroupIntegration() as any
+  const crossState = cross?.state ?? cross?.[0] ?? {}
+  const crossOps = cross?.operations ?? cross?.[1] ?? cross ?? {}
+  const getAllSPAStatuses = async () => { try { return await crossOps?.getAllSPAStatuses?.() ?? {} } catch { return {} } }
+  const getIntegrationHealth = async () => { try { return await crossOps?.getIntegrationHealth?.() ?? null } catch { return null } }
   
-  const { trackEvent } = useActivityTracker()
-  const { getCurrentUser } = useUserManagement()
+  // Normalize activity tracker hook (tuple or object)
+  const activity = useActivityTracker() as any
+  const activityOps = activity?.operations ?? activity?.[1] ?? activity ?? {}
+  const trackEvent = (event: string, data?: any) => {
+    try { activityOps?.trackEvent?.(event, data) } catch { /* ignore */ }
+  }
+  // Normalize user management hook (tuple or object)
+  const userMgmt = useUserManagement() as any
+  const userState = userMgmt?.state ?? userMgmt?.[0] ?? {}
+  const getCurrentUser = () => userState?.currentUser || null
 
   // Get current user
   const currentUser = getCurrentUser()
@@ -125,25 +137,24 @@ export const QuickHealthStatus: React.FC<QuickHealthStatusProps> = ({
 
   // Auto-refresh health data
   useEffect(() => {
-    loadSystemHealth()
-
+    let cancelled = false
+    ;(async () => { if (!cancelled) await loadSystemHealth() })()
+    let interval: ReturnType<typeof setInterval> | null = null
     if (autoRefresh) {
-      const interval = setInterval(loadSystemHealth, refreshInterval)
-      return () => clearInterval(interval)
+      interval = setInterval(() => { loadSystemHealth() }, refreshInterval)
     }
-  }, [loadSystemHealth, autoRefresh, refreshInterval])
+    return () => { cancelled = true; if (interval) clearInterval(interval) }
+  }, [autoRefresh, refreshInterval])
 
   // Subscribe to real-time health updates
   useEffect(() => {
-    if (autoRefresh) {
-      const unsubscribe = subscribeToHealthUpdates((healthUpdate) => {
-        setSystemHealth(prev => prev ? { ...prev, ...healthUpdate } : null)
-        setLastUpdate(new Date())
-      })
-
-      return unsubscribe
-    }
-  }, [autoRefresh, subscribeToHealthUpdates])
+    if (!autoRefresh) return
+    const unsubscribe = subscribeToHealthUpdates((healthUpdate: any) => {
+      setSystemHealth(prev => prev ? { ...prev, ...healthUpdate } : null)
+      setLastUpdate(new Date())
+    })
+    return unsubscribe
+  }, [autoRefresh])
 
   // Handle health click
   const handleHealthClick = useCallback(() => {

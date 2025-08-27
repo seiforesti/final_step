@@ -208,9 +208,48 @@ type WorkspaceAction =
   | 'optimize';
 
 /**
+ * WorkspaceOrchestrator Props Interface
+ */
+interface WorkspaceOrchestratorProps {
+  mode?: 'full-workspace' | 'basic-workspace' | 'collaboration-only' | 'resource-only';
+  enableMultiWorkspace?: boolean;
+  enableWorkspaceTemplates?: boolean;
+  enableCollaboration?: boolean;
+  enableResourceSharing?: boolean;
+  enableVersionControl?: boolean;
+  enableAccessControl?: boolean;
+  enableWorkspaceAnalytics?: boolean;
+  enableBackupRestore?: boolean;
+  enableNotifications?: boolean;
+  enableBulkOperations?: boolean;
+  showWorkspaceHealth?: boolean;
+  showResourceUsage?: boolean;
+  showCollaborationActivity?: boolean;
+  showQuickActions?: boolean;
+  showRecentActivity?: boolean;
+}
+
+/**
  * Main WorkspaceOrchestrator component
  */
-export const WorkspaceOrchestrator: React.FC = () => {
+export const WorkspaceOrchestrator: React.FC<WorkspaceOrchestratorProps> = ({
+  mode = 'full-workspace',
+  enableMultiWorkspace = true,
+  enableWorkspaceTemplates = true,
+  enableCollaboration = true,
+  enableResourceSharing = true,
+  enableVersionControl = true,
+  enableAccessControl = true,
+  enableWorkspaceAnalytics = true,
+  enableBackupRestore = true,
+  enableNotifications = true,
+  enableBulkOperations = true,
+  showWorkspaceHealth = true,
+  showResourceUsage = true,
+  showCollaborationActivity = true,
+  showQuickActions = true,
+  showRecentActivity = true
+}) => {
   // ============================================================================
   // STATE MANAGEMENT
   // ============================================================================

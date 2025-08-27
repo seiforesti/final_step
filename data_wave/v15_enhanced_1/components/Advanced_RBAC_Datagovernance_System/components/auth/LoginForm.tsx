@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence, useAnimation } from 'framer-motion';
-import { EyeIcon, EyeSlashIcon, ExclamationTriangleIcon, CheckCircleIcon, InformationCircleIcon, ArrowRightIcon, ArrowLeftIcon, UserIcon, KeyIcon, DevicePhoneMobileIcon, EnvelopeIcon, BuildingOfficeIcon, MapPinIcon, CalendarIcon, PhotoIcon, XMarkIcon, SparklesIcon, ShieldCheckIcon, GlobeAltIcon, CpuChipIcon, BoltIcon, LockClosedIcon, ClockIcon, WifiIcon, ComputerDesktopIcon, DeviceTabletIcon, CommandLineIcon, CogIcon, StarIcon, FireIcon, RocketLaunchIcon, AcademicCapIcon } from '@heroicons/react/24/outline';
+import { EyeIcon, EyeSlashIcon, ExclamationTriangleIcon, CheckCircleIcon, InformationCircleIcon, ArrowRightIcon, ArrowLeftIcon, UserIcon, KeyIcon, DevicePhoneMobileIcon, EnvelopeIcon, BuildingOfficeIcon, MapPinIcon, CalendarIcon, PhotoIcon, XMarkIcon, SparklesIcon, ShieldCheckIcon, GlobeAltIcon, CpuChipIcon, BoltIcon, LockClosedIcon, ClockIcon, WifiIcon, ComputerDesktopIcon, DeviceTabletIcon, CommandLineIcon, CogIcon, StarIcon, FireIcon, RocketLaunchIcon, AcademicCapIcon, FingerPrintIcon } from '@heroicons/react/24/outline';
 import { 
   GoogleIcon, 
   MicrosoftIcon, 
@@ -276,7 +276,7 @@ export const LoginForm: React.FC = () => {
   const [securityLevel, setSecurityLevel] = useState<'standard' | 'enhanced' | 'maximum'>('enhanced');
   
   // Enhanced security features state
-  const [securityFeatures] = useState<SecurityFeatures>({
+  const [securityFeatures, setSecurityFeatures] = useState<SecurityFeatures>({
     encryption: true,
     twoFactor: true,
     biometric: false,
@@ -486,7 +486,8 @@ export const LoginForm: React.FC = () => {
 
         const response = await authService.signupWithEmail(signupData);
         
-        if (response.data.requiresMFA) {
+        const requiresMFA = Boolean((response as any)?.data?.requiresMFA || (response as any)?.data?.requires_mfa || (response as any)?.data?.mfa_required);
+        if (requiresMFA) {
           setMfaRequired(true);
           setCurrentStep('mfa');
         } else {
@@ -496,7 +497,8 @@ export const LoginForm: React.FC = () => {
         const loginData: LoginRequest = { email: formState.email };
         const response = await authService.loginWithEmail(loginData);
         
-        if (response.data.requiresMFA) {
+        const requiresMFA = Boolean((response as any)?.data?.requiresMFA || (response as any)?.data?.requires_mfa || (response as any)?.data?.mfa_required);
+        if (requiresMFA) {
           setMfaRequired(true);
           setCurrentStep('mfa');
         } else {
@@ -1144,7 +1146,7 @@ export const LoginForm: React.FC = () => {
               onClick={handleBiometricAuth}
               className="flex items-center justify-center space-x-2 text-sm text-blue-600 hover:text-blue-500 font-medium"
             >
-              <FingerprintIcon className="h-4 w-4" />
+              <FingerPrintIcon className="h-4 w-4" />
               <span>Use Biometric</span>
             </motion.button>
           )}
@@ -1606,9 +1608,9 @@ export const LoginForm: React.FC = () => {
   // ============================================================================
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white via-purple-50 to-indigo-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white via-purple-50 to-indigo-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden z-[9999]">
       {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
         {[...Array(10)].map((_, i) => (
           <motion.div
             key={i}
@@ -1634,8 +1636,8 @@ export const LoginForm: React.FC = () => {
 
       <motion.div
         variants={containerVariants}
-        initial="hidden"
-        animate={controls}
+        initial={false}
+        animate="visible"
         className="sm:mx-auto sm:w-full sm:max-w-lg relative z-10"
       >
         <div className="bg-white/80 backdrop-blur-xl py-10 px-6 shadow-2xl rounded-3xl sm:px-12 border border-gray-200/50 relative overflow-hidden">

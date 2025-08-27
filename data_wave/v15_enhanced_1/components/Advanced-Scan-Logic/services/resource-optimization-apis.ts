@@ -19,5 +19,21 @@ export const {
   predictDemand: predictResourceDemand,
 } = resourceOptimizationAPI;
 
+// Additional resource optimization functions
+export const scaleResourceCapacity = async (resourceId: string, scaleType: 'up' | 'down' | 'auto', capacity: number, params?: Record<string, any>) => {
+  const response = await resourceOptimizationAPI.optimizeAllocation({ resourceId, scaleType, capacity, ...params });
+  return response.data;
+};
+
+export const migrateResources = async (sourceId: string, targetId: string, migrationType: 'full' | 'partial' | 'incremental', params?: Record<string, any>) => {
+  const response = await resourceOptimizationAPI.optimizeAllocation({ sourceId, targetId, migrationType, ...params });
+  return response.data;
+};
+
+export const consolidateResources = async (resourceIds: string[], consolidationType: 'merge' | 'pool' | 'cluster', params?: Record<string, any>) => {
+  const response = await resourceOptimizationAPI.optimizeAllocation({ resourceIds, consolidationType, ...params });
+  return response.data;
+};
+
 
 

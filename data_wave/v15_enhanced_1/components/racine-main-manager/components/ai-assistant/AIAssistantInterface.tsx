@@ -94,6 +94,24 @@ interface AIAssistantInterfaceProps {
   customCapabilities?: AICapability[];
   onRecommendationExecute?: (recommendation: AIRecommendation) => void;
   onWorkflowCreate?: (workflow: CrossGroupWorkflow) => void;
+  
+  // Additional props for advanced functionality
+  mode?: 'full-interface' | 'basic-interface' | 'chat-only' | 'assistant-only';
+  enableNaturalLanguageQueries?: boolean;
+  enableContextAwareness?: boolean;
+  enableProactiveGuidance?: boolean;
+  enableWorkflowAutomation?: boolean;
+  enableAnomalyDetection?: boolean;
+  enablePredictiveAnalytics?: boolean;
+  enableCrossGroupInsights?: boolean;
+  enableSmartRecommendations?: boolean;
+  enableConversationHistory?: boolean;
+  enableNotifications?: boolean;
+  showSystemContext?: boolean;
+  showRecommendations?: boolean;
+  showInsights?: boolean;
+  showQuickActions?: boolean;
+  showConversationHistory?: boolean;
 }
 
 interface ConversationThreadProps {
@@ -169,7 +187,25 @@ export const AIAssistantInterface: React.FC<AIAssistantInterfaceProps> = ({
   initialContext,
   customCapabilities = [],
   onRecommendationExecute,
-  onWorkflowCreate
+  onWorkflowCreate,
+  
+  // Additional props with defaults
+  mode = 'full-interface',
+  enableNaturalLanguageQueries = true,
+  enableContextAwareness = true,
+  enableProactiveGuidance = true,
+  enableWorkflowAutomation = true,
+  enableAnomalyDetection = true,
+  enablePredictiveAnalytics = true,
+  enableCrossGroupInsights = true,
+  enableSmartRecommendations = true,
+  enableConversationHistory = true,
+  enableNotifications = true,
+  showSystemContext = true,
+  showRecommendations = true,
+  showInsights = true,
+  showQuickActions = true,
+  showConversationHistory = true
 }) => {
   // Hooks
   const {

@@ -202,7 +202,8 @@ export interface DashboardHookConfig {
 /**
  * Main intelligent dashboard hook
  */
-export const useIntelligentDashboard = (config: DashboardHookConfig): [DashboardHookState, DashboardHookOperations] => {
+export const useIntelligentDashboard = (config?: Partial<DashboardHookConfig>): [DashboardHookState, DashboardHookOperations] => {
+  const safeConfig = (config || {}) as Partial<DashboardHookConfig>;
   const {
     userId,
     defaultDashboardId,
@@ -212,7 +213,7 @@ export const useIntelligentDashboard = (config: DashboardHookConfig): [Dashboard
     maxAlerts = 100,
     refreshInterval = 60000,
     retryAttempts = 3
-  } = config;
+  } = safeConfig;
 
   // State management
   const [state, setState] = useState<DashboardHookState>({
@@ -907,7 +908,11 @@ export const useIntelligentDashboard = (config: DashboardHookConfig): [Dashboard
 
   const saveUserPreferences = useCallback(async (preferences: Record<string, any>): Promise<void> => {
     try {
-      await dashboardAPI.saveUserPreferences(userId, preferences);
+      if (userId) {
+        await dashboardAPI.saveUserPreferences(userId, preferences);
+      } else {
+        console.warn('saveUserPreferences called without userId; applying locally only');
+      }
       setState(prevState => ({
         ...prevState,
         userPreferences: { ...prevState.userPreferences, ...preferences },
@@ -924,7 +929,11 @@ export const useIntelligentDashboard = (config: DashboardHookConfig): [Dashboard
       const theme = state.availableThemes.find(t => t.id === themeId);
       if (!theme) throw new Error('Theme not found');
 
-      await dashboardAPI.updateUserTheme(userId, themeId);
+      if (userId) {
+        await dashboardAPI.updateUserTheme(userId, themeId);
+      } else {
+        console.warn('changeTheme called without userId; updating UI state only');
+      }
       setState(prevState => ({
         ...prevState,
         currentTheme: theme,
@@ -1001,7 +1010,7 @@ export const useIntelligentDashboard = (config: DashboardHookConfig): [Dashboard
       const [dashboards, themes, preferences] = await Promise.all([
         dashboardAPI.getDashboards(),
         dashboardAPI.getAvailableThemes(),
-        dashboardAPI.getUserPreferences(userId)
+        userId ? dashboardAPI.getUserPreferences(userId) : Promise.resolve({})
       ]);
 
       setState(prevState => ({

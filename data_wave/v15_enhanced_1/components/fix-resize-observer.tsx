@@ -1,36 +1,52 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useRef, useCallback } from "react"
 
-// This component aggressively suppresses the ResizeObserver loop error.
-// It should be rendered once at the root of your application layout.
+// This component suppresses the ResizeObserver loop error without causing re-renders
 export function FixResizeObserver() {
-  useEffect(() => {
-    const originalError = console.error
-    const originalWarn = console.warn
+  const isInitialized = useRef(false)
+  const originalError = useRef<typeof console.error | null>(null)
+  const originalWarn = useRef<typeof console.warn | null>(null)
 
-    // Suppress specific console errors/warnings
+  const suppressResizeObserverErrors = useCallback(() => {
+    if (isInitialized.current) return
+    isInitialized.current = true
+
+    // Store original console methods
+    originalError.current = console.error
+    originalWarn.current = console.warn
+
+    // Override console.error
     console.error = (...args: any[]) => {
-      if (
-        args[0] &&
-        typeof args[0] === "string" &&
-        args[0].includes("ResizeObserver loop completed with undelivered notifications")
-      ) {
+      const message = args[0]
+      if (typeof message === 'string' && 
+          (message.includes('ResizeObserver loop completed with undelivered notifications') ||
+           message.includes('ResizeObserver loop limit exceeded'))) {
         return // Suppress the error
       }
-      originalError.apply(console, args)
+      // Call original method
+      if (originalError.current) {
+        originalError.current.apply(console, args)
+      }
     }
 
+    // Override console.warn
     console.warn = (...args: any[]) => {
-      if (args[0] && typeof args[0] === "string" && args[0].includes("ResizeObserver loop limit exceeded")) {
+      const message = args[0]
+      if (typeof message === 'string' && 
+          message.includes('ResizeObserver loop limit exceeded')) {
         return // Suppress the warning
       }
-      originalWarn.apply(console, args)
+      // Call original method
+      if (originalWarn.current) {
+        originalWarn.current.apply(console, args)
+      }
     }
 
-    // Global error handler for unhandled exceptions
-    const globalErrorHandler = (event: ErrorEvent) => {
-      if (event.message && typeof event.message === "string" && event.message.includes("ResizeObserver loop")) {
+    // Global error handler
+    const handleGlobalError = (event: ErrorEvent) => {
+      if (event.message && typeof event.message === 'string' && 
+          event.message.includes('ResizeObserver loop')) {
         event.stopImmediatePropagation()
         event.preventDefault()
         return false
@@ -39,47 +55,53 @@ export function FixResizeObserver() {
     }
 
     // Global unhandled promise rejection handler
-    const globalRejectionHandler = (event: PromiseRejectionEvent) => {
-      if (
-        event.reason &&
-        typeof event.reason.message === "string" &&
-        event.reason.message.includes("ResizeObserver loop")
-      ) {
+    const handleGlobalRejection = (event: PromiseRejectionEvent) => {
+      if (event.reason && typeof event.reason.message === 'string' && 
+          event.reason.message.includes('ResizeObserver loop')) {
         event.preventDefault()
         return false
       }
       return true
     }
 
-    window.addEventListener("error", globalErrorHandler, { capture: true })
-    window.addEventListener("unhandledrejection", globalRejectionHandler, { capture: true })
+    // Add event listeners
+    window.addEventListener('error', handleGlobalError, { capture: true })
+    window.addEventListener('unhandledrejection', handleGlobalRejection, { capture: true })
 
-    // Fallback for older browsers or different error types
-    const oldOnError = window.onerror
-    window.onerror = (message, source, lineno, colno, error) => {
-      if (typeof message === "string" && message.includes("ResizeObserver loop")) {
-        return true // Suppress the error
+    // Store cleanup function
+    const cleanup = () => {
+      // Restore original console methods
+      if (originalError.current) {
+        console.error = originalError.current
       }
-      if (oldOnError) {
-        return oldOnError(message, source, lineno, colno, error)
+      if (originalWarn.current) {
+        console.warn = originalWarn.current
       }
-      return false
-    }
-
-    return () => {
-      // Restore original console methods on unmount
-      console.error = originalError
-      console.warn = originalWarn
 
       // Remove event listeners
-      window.removeEventListener("error", globalErrorHandler, { capture: true })
-      window.removeEventListener("unhandledrejection", globalRejectionHandler, { capture: true })
-      window.onerror = oldOnError // Restore original onerror
+      window.removeEventListener('error', handleGlobalError, { capture: true })
+      window.removeEventListener('unhandledrejection', handleGlobalRejection, { capture: true })
+      
+      // Reset initialization flag
+      isInitialized.current = false
     }
+
+    // Store cleanup function for later use
+    ;(window as any).__resizeObserverCleanup = cleanup
   }, [])
 
-  return null // This component doesn't render anything visible
+  useEffect(() => {
+    suppressResizeObserverErrors()
+    
+    // Cleanup on unmount
+    return () => {
+      if ((window as any).__resizeObserverCleanup) {
+        ;(window as any).__resizeObserverCleanup()
+      }
+    }
+  }, [suppressResizeObserverErrors])
+
+  return null
 }
 
-// Named export for consistency, though default is also provided
 export default FixResizeObserver

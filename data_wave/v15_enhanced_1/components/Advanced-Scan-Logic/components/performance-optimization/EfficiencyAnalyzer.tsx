@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Target, Zap, TrendingUp, Activity, Gauge, BarChart3, LineChart, PieChart, Award, Cpu, MemoryStick, Network, Database, RefreshCw, Settings, Play, Pause, Square, RotateCcw, Plus, Minus, ArrowUp, ArrowDown, TrendingDown, Clock, Timer, Calendar, Users, User, CheckCircle, AlertTriangle, XCircle, Info, Flag, Star, Shield, Lock, Unlock, Key, Eye, EyeOff, Search, Filter, Download, Upload, Share2, Edit, Trash2, Copy, Code, FileText, Archive, History, Crown, Hash, Percent, DollarSign, TrendingUpDown, Maximize, Minimize, ArrowLeft, ArrowRight, Volume2, VolumeX, Wifi, WifiOff, Signal, Battery, BatteryLow, Thermometer, Monitor, Smartphone, Tablet, Laptop, Desktop, Package, Layers, Globe, Server } from 'lucide-react'
+import { Target, Zap, TrendingUp, Activity, Gauge, BarChart3, LineChart, PieChart, Award, Cpu, MemoryStick, Network, Database, RefreshCw, Settings, Play, Pause, Square, RotateCcw, Plus, Minus, ArrowUp, ArrowDown, TrendingDown, Clock, Timer, Calendar, Users, User, CheckCircle, AlertTriangle, XCircle, Info, Flag, Star, Shield, Lock, Unlock, Key, Eye, EyeOff, Search, Filter, Download, Upload, Share2, Edit, Trash2, Copy, Code, FileText, Archive, History, Crown, Hash, Percent, DollarSign, Maximize, Minimize, ArrowLeft, ArrowRight, Volume2, VolumeX, Wifi, WifiOff, Signal, Battery, BatteryLow, Thermometer, Monitor, Smartphone, Tablet, Laptop, Desktop, Package, Layers, Globe, Server } from 'lucide-react'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -193,11 +193,8 @@ import {
   responseEfficiency,
   utilizationEfficiency,
   capacityEfficiency,
-  scalabilityEfficiency,
   availabilityEfficiency,
-  reliabilityEfficiency,
   stabilityEfficiency,
-  consistencyEfficiency,
   accuracyEfficiency,
   precisionEfficiency,
   qualityEfficiency,
@@ -209,7 +206,6 @@ import {
   valueEfficiency,
   worthEfficiency,
   benefitEfficiency,
-  gainEfficiency,
   savingEfficiency,
   reductionEfficiency,
   eliminationEfficiency,
@@ -256,12 +252,10 @@ import {
   adherenceEfficiency,
   conformanceEfficiency,
   alignmentEfficiency,
-  consistencyEfficiency,
   coherenceEfficiency,
   integrityEfficiency,
   authenticityEfficiency,
   validityEfficiency,
-  reliabilityEfficiency,
   trustworthinessEfficiency,
   credibilityEfficiency,
   dependabilityEfficiency,
@@ -276,7 +270,6 @@ import {
   portabilityEfficiency,
   interoperabilityEfficiency,
   compatibilityEfficiency,
-  extensibilityEfficiency,
   scalabilityEfficiency,
   flexibilityEfficiency,
   adaptabilityEfficiency,
@@ -947,7 +940,7 @@ export const EfficiencyAnalyzer: React.FC<{
     switch (trend) {
       case 'improving': return <TrendingUp className="h-4 w-4" />
       case 'declining': return <TrendingDown className="h-4 w-4" />
-      case 'stable': return <TrendingUpDown className="h-4 w-4" />
+      case 'stable': return <Minus className="h-4 w-4" />
       case 'volatile': return <Activity className="h-4 w-4" />
       default: return <Activity className="h-4 w-4" />
     }

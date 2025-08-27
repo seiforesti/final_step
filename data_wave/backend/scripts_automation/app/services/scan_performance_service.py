@@ -131,26 +131,65 @@ class ScanPerformanceService:
         # Threading
         self.executor = ThreadPoolExecutor(max_workers=10)
         
-        # Background tasks deferred until an event loop is active
-        try:
-            loop = asyncio.get_running_loop()
-            loop.create_task(self._performance_monitoring_loop())
-            loop.create_task(self._bottleneck_detection_loop())
-            loop.create_task(self._optimization_loop())
-            loop.create_task(self._analytics_loop())
-        except RuntimeError:
-            pass
+        # Background task flags
+        self._performance_monitoring_active = False
+        self._bottleneck_detection_active = False
+        self._optimization_active = False
+        self._analytics_active = False
+        
+        # Background tasks deferred until explicitly started
+        self._background_tasks = []
 
     def start(self) -> None:
         """Start background tasks when an event loop exists."""
+        # Only start if explicitly enabled
+        import os
+        if os.getenv('ENABLE_PERFORMANCE_SERVICE', 'false').lower() != 'true':
+            logger.info("Performance service disabled via ENABLE_PERFORMANCE_SERVICE environment variable")
+            return
+            
         try:
             loop = asyncio.get_running_loop()
-            loop.create_task(self._performance_monitoring_loop())
-            loop.create_task(self._bottleneck_detection_loop())
-            loop.create_task(self._optimization_loop())
-            loop.create_task(self._analytics_loop())
-        except RuntimeError:
-            pass
+            if not self._performance_monitoring_active:
+                self._performance_monitoring_active = True
+                task = loop.create_task(self._performance_monitoring_loop())
+                self._background_tasks.append(task)
+                
+            if not self._bottleneck_detection_active:
+                self._bottleneck_detection_active = True
+                task = loop.create_task(self._bottleneck_detection_loop())
+                self._background_tasks.append(task)
+                
+            if not self._optimization_active:
+                self._optimization_active = True
+                task = loop.create_task(self._optimization_loop())
+                self._background_tasks.append(task)
+                
+            if not self._analytics_active:
+                self._analytics_active = True
+                task = loop.create_task(self._analytics_loop())
+                self._background_tasks.append(task)
+                
+            logger.info("Performance monitoring service started successfully")
+        except RuntimeError as e:
+            logger.warning(f"Could not start performance monitoring: {e}")
+        except Exception as e:
+            logger.error(f"Error starting performance monitoring: {e}")
+    
+    def stop(self) -> None:
+        """Stop all background monitoring tasks."""
+        self._performance_monitoring_active = False
+        self._bottleneck_detection_active = False
+        self._optimization_active = False
+        self._analytics_active = False
+        
+        # Cancel all background tasks
+        for task in self._background_tasks:
+            if not task.done():
+                task.cancel()
+        self._background_tasks.clear()
+        
+        logger.info("Performance monitoring service stopped")
     
     def _init_performance_models(self):
         """Initialize ML models for performance analysis"""
@@ -3024,9 +3063,10 @@ class ScanPerformanceService:
     # Background task loops
     async def _performance_monitoring_loop(self):
         """Main performance monitoring loop"""
-        while True:
+        while self._performance_monitoring_active:
             try:
-                await self._schedule_next_monitoring_cycle()
+                # Collect performance metrics
+                await self._collect_performance_metrics()
                 
                 # Collect system metrics
                 await self._collect_system_metrics()
@@ -3037,27 +3077,47 @@ class ScanPerformanceService:
                 # Check system health
                 await self._check_system_health()
                 
+                # Sleep for monitoring interval
+                await asyncio.sleep(self.config.monitoring_interval)
+                
+            except asyncio.CancelledError:
+                logger.info("Performance monitoring loop cancelled")
+                break
             except Exception as e:
                 logger.error(f"Performance monitoring loop error: {e}")
+                # Longer sleep on error to prevent spam
+                await asyncio.sleep(300)  # 5 minutes
+                # Check if we should continue after error
+                if not self._performance_monitoring_active:
+                    break
+    
+    async def _monitoring_loop(self):
+        """Main monitoring loop - alias for _performance_monitoring_loop"""
+        await self._performance_monitoring_loop()
     
     async def _bottleneck_detection_loop(self):
         """Bottleneck detection loop"""
-        while True:
+        while self._bottleneck_detection_active:
             try:
-                await self._schedule_next_optimization_cycle()
-                
                 # Run automated bottleneck detection
                 await self.detect_bottlenecks(MonitoringScope.SYSTEM)
                 
+                # Sleep for optimization interval
+                await asyncio.sleep(self.config.optimization_frequency)
+                
+            except asyncio.CancelledError:
+                logger.info("Bottleneck detection loop cancelled")
+                break
             except Exception as e:
                 logger.error(f"Bottleneck detection loop error: {e}")
+                await asyncio.sleep(300)  # Wait 5 minutes before retrying
+                if not self._bottleneck_detection_active:
+                    break
     
     async def _optimization_loop(self):
         """Performance optimization loop"""
-        while True:
+        while self._optimization_active:
             try:
-                await self._schedule_next_ai_optimization_cycle()
-                
                 if self.config.auto_optimization_enabled:
                     # Identify optimization opportunities
                     await self._identify_optimization_opportunities()
@@ -3065,23 +3125,42 @@ class ScanPerformanceService:
                     # Apply automatic optimizations
                     await self._apply_automatic_optimizations()
                 
+                # Sleep for optimization interval
+                await asyncio.sleep(self.config.optimization_frequency)
+                
+            except asyncio.CancelledError:
+                logger.info("Optimization loop cancelled")
+                break
             except Exception as e:
                 logger.error(f"Optimization loop error: {e}")
+                await asyncio.sleep(600)  # Wait 10 minutes before retrying
+                if not self._optimization_active:
+                    break
     
     async def _analytics_loop(self):
         """Performance analytics and reporting loop"""
-        while True:
+        while self._analytics_active:
             try:
-                await self._schedule_next_reporting_cycle()
-                
                 # Update performance analytics
                 await self._update_performance_analytics()
                 
                 # Generate trend analysis
                 await self._update_trend_analysis()
                 
+                # Generate performance reports
+                await self._generate_performance_reports()
+                
+                # Sleep for analytics interval (longer than monitoring)
+                await asyncio.sleep(self.config.optimization_frequency * 2)
+                
+            except asyncio.CancelledError:
+                logger.info("Analytics loop cancelled")
+                break
             except Exception as e:
                 logger.error(f"Analytics loop error: {e}")
+                await asyncio.sleep(1800)  # Wait 30 minutes before retrying
+                if not self._analytics_active:
+                    break
     
     async def get_performance_insights(self) -> Dict[str, Any]:
         """Get comprehensive performance service insights"""
@@ -3833,3 +3912,27 @@ class ScanPerformanceService:
                 delay_seconds=3600,
                 task_func=self._reporting_loop
             )
+    
+    def start_monitoring(self):
+        """Start all monitoring and optimization loops"""
+        self._performance_monitoring_active = True
+        self._bottleneck_detection_active = True
+        self._optimization_active = True
+        self._analytics_active = True
+        
+        # Start all background loops
+        asyncio.create_task(self._performance_monitoring_loop())
+        asyncio.create_task(self._bottleneck_detection_loop())
+        asyncio.create_task(self._optimization_loop())
+        asyncio.create_task(self._analytics_loop())
+        
+        logger.info("Scan Performance Service monitoring started")
+
+    def stop_monitoring(self):
+        """Stop all monitoring and optimization loops"""
+        self._performance_monitoring_active = False
+        self._bottleneck_detection_active = False
+        self._optimization_active = False
+        self._analytics_active = False
+        
+        logger.info("Scan Performance Service monitoring stopped")

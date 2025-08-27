@@ -587,3 +587,113 @@ export enum TimeGranularity {
   QUARTER = 'quarter',
   YEAR = 'year'
 }
+
+// Type aliases for component compatibility
+export type InsightCategory = IntelligenceCategory;
+export type InsightPriority = ActionItemPriority;
+export type InsightType = IntelligenceInsightType;
+export type InsightStatus = IntelligenceStatus;
+export type PredictionType = PredictiveModelType;
+export type ModelType = PredictiveModelType;
+
+// Enum definitions for component compatibility
+export enum InsightCategory {
+  PERFORMANCE = 'performance',
+  SECURITY = 'security',
+  OPERATIONAL = 'operational',
+  BUSINESS = 'business',
+  TECHNICAL = 'technical',
+  COMPLIANCE = 'compliance',
+  QUALITY = 'quality',
+  EFFICIENCY = 'efficiency',
+  INNOVATION = 'innovation',
+  RISK = 'risk'
+}
+
+export enum InsightPriority {
+  URGENT = 'urgent',
+  HIGH = 'high',
+  MEDIUM = 'medium',
+  LOW = 'low'
+}
+
+export enum InsightType {
+  ANOMALY = 'anomaly',
+  TREND = 'trend',
+  PATTERN = 'pattern',
+  CORRELATION = 'correlation',
+  PREDICTION = 'prediction',
+  RECOMMENDATION = 'recommendation',
+  ALERT = 'alert',
+  INSIGHT = 'insight',
+  FORECAST = 'forecast',
+  OPTIMIZATION = 'optimization'
+}
+
+export enum InsightStatus {
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
+  PENDING = 'pending',
+  PROCESSING = 'processing',
+  COMPLETED = 'completed',
+  FAILED = 'failed',
+  CANCELLED = 'cancelled',
+  ARCHIVED = 'archived'
+}
+
+export enum PredictionType {
+  CLASSIFICATION = 'classification',
+  REGRESSION = 'regression',
+  CLUSTERING = 'clustering',
+  ANOMALY_DETECTION = 'anomaly_detection',
+  FORECASTING = 'forecasting',
+  RECOMMENDATION = 'recommendation',
+  OPTIMIZATION = 'optimization',
+  PATTERN_RECOGNITION = 'pattern_recognition'
+}
+
+export enum ModelType {
+  SUPERVISED = 'supervised',
+  UNSUPERVISED = 'unsupervised',
+  REINFORCEMENT = 'reinforcement',
+  DEEP_LEARNING = 'deep_learning',
+  ENSEMBLE = 'ensemble',
+  TRANSFER_LEARNING = 'transfer_learning',
+  FEDERATED = 'federated',
+  ONLINE_LEARNING = 'online_learning'
+}
+
+// Missing enum types
+export enum TimeHorizon {
+  SHORT_TERM = 'short_term',
+  MEDIUM_TERM = 'medium_term',
+  LONG_TERM = 'long_term',
+  IMMEDIATE = 'immediate',
+  DAILY = 'daily',
+  WEEKLY = 'weekly',
+  MONTHLY = 'monthly',
+  QUARTERLY = 'quarterly',
+  YEARLY = 'yearly'
+}
+
+export enum ModelStatus {
+  DRAFT = 'draft',
+  TRAINING = 'training',
+  VALIDATION = 'validation',
+  DEPLOYED = 'deployed',
+  DEPRECATED = 'deprecated',
+  FAILED = 'failed',
+  ARCHIVED = 'archived',
+  UPDATING = 'updating',
+  TESTING = 'testing',
+  PRODUCTION = 'production'
+}
+
+// API Error type for service compatibility
+export interface APIError {
+  code: string;
+  message: string;
+  details?: any;
+  timestamp: string;
+  request_id?: string;
+}

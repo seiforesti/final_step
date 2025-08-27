@@ -17,13 +17,14 @@ import {
   CollaborationFeatures,
   RuleSetAnalytics,
   APIResponse,
-  APIError,
   PaginationInfo,
   FilterOptions,
   SortConfig,
   SearchConfig,
   ExportConfig
 } from '../types/scan-rules.types';
+
+import { APIError, createAPIError } from '../types/api-error.types';
 
 // Enterprise API Configuration
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1';
@@ -87,17 +88,16 @@ export class ScanRulesAPIService {
         // Retry logic would be implemented here
       }
       
-      throw new APIError({
-        code: response.status.toString(),
-        message: errorData.message || response.statusText,
-        details: {
+      throw createAPIError(
+        errorData.message || response.statusText,
+        response.status.toString(),
+        response.status,
+        {
           ...errorData.details,
           requestId,
-          timestamp: new Date().toISOString(),
           endpoint: response.url
-        },
-        timestamp: new Date().toISOString(),
-      });
+        }
+      );
     }
 
     const data = await response.json();

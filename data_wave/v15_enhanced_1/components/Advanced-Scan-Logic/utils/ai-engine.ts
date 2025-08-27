@@ -433,14 +433,4 @@ export const intelligentOptimizer = {
   }
 };
 
-// ==========================================
-// EXPORT ALL UTILITIES
-// ==========================================
 
-export {
-  mlModelManager,
-  patternRecognizer,
-  predictiveAnalytics,
-  nlpProcessor,
-  intelligentOptimizer
-};

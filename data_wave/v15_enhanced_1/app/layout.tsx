@@ -1,28 +1,29 @@
 /**
  * 🏗️ ROOT LAYOUT - ENTERPRISE DATA GOVERNANCE PLATFORM
-0* ====================================================
+ * ====================================================
  * 
- * Enhanced root layout integrating with the MasterLayoutOrchestrator
+ * Enhanced root layout integrating with the EnterpriseLayoutOrchestrator
  * to provide advanced layout management, theming, and global providers
  * for the Racine Main Manager SPA.
  */
 
 import type React from "react"
-import { Inter } from "next/font/google"
+
 import { cookies } from "next/headers"
 
 import { cn } from "@/lib/utils"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
-import { FixResizeObserver } from "@/components/fix-resize-observer"
-import { MasterLayoutOrchestrator } from "@/components/racine-main-manager/components/layout"
+import { EnterpriseLayoutOrchestrator } from "@/components/racine-main-manager/components/layout"
 import { PerformanceProvider } from "@/components/providers/PerformanceProvider"
 import { TooltipProvider } from "@/components/ui/tooltip"
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { Providers } from "@/components/providers/Providers"
+import { ClientErrorBoundary } from "@/components/error-boundary/ClientErrorBoundary"
 
 import "./globals.css"
 
-const inter = Inter({ subsets: ["latin"] })
+// Use system fonts to avoid Google Fonts build issues
+const fontClass = "font-sans"
 
 export const metadata = {
   title: 'Enterprise Data Governance Platform',
@@ -60,42 +61,79 @@ export default async function RootLayout({
   const defaultOpen = cookieStore.get("sidebar:state")?.value === "true"
   const layoutMode = cookieStore.get("layout:mode")?.value || "adaptive"
   const theme = cookieStore.get("theme")?.value || "system"
+  const isAuthenticated = Boolean(
+    cookieStore.get('racine_auth_token')?.value || cookieStore.get('racine_session')?.value
+  )
 
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={cn("min-h-screen bg-background font-sans antialiased", inter.className)}>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              // Global ResizeObserver error suppression
+              (function() {
+                const originalError = console.error;
+                const originalWarn = console.warn;
+                
+                console.error = function(...args) {
+                  const message = args[0];
+                  if (typeof message === 'string' && 
+                      (message.includes('ResizeObserver loop completed with undelivered notifications') ||
+                       message.includes('ResizeObserver loop limit exceeded'))) {
+                    return; // Suppress the error
+                  }
+                  originalError.apply(console, args);
+                };
+                
+                console.warn = function(...args) {
+                  const message = args[0];
+                  if (typeof message === 'string' && 
+                      message.includes('ResizeObserver loop limit exceeded')) {
+                    return; // Suppress the warning
+                  }
+                  originalWarn.apply(console, args);
+                };
+                
+                // Global error handler
+                window.addEventListener('error', function(event) {
+                  if (event.message && typeof event.message === 'string' && 
+                      event.message.includes('ResizeObserver loop')) {
+                    event.stopImmediatePropagation();
+                    event.preventDefault();
+                    return false;
+                  }
+                  return true;
+                }, { capture: true });
+              })();
+            `
+          }}
+        />
+      </head>
+              <body className={cn("min-h-screen bg-background font-sans antialiased", fontClass)}>
         <ThemeProvider 
           attribute="class" 
           defaultTheme={theme} 
           enableSystem 
           disableTransitionOnChange
         >
-          <QueryClientProvider client={new QueryClient()}>
+          <Providers>
             <PerformanceProvider initialEnabled={true}>
               <TooltipProvider>
-                <FixResizeObserver />
-                <MasterLayoutOrchestrator
-                  currentView={"standard" as any}
-                  layoutMode={layoutMode as any}
-                  spaContext={null}
-                  userPreferences={{
-                    sidebarOpen: defaultOpen,
-                    theme: theme as any,
-                    layout: layoutMode as any
-                  }}
-                  enableResponsive={true}
-                  enableAnalytics={true}
-                  enableAccessibility={true}
-                  enablePerformanceOptimization={true}
-                  theme={theme as any}
-                  className="min-h-screen"
+                <ClientErrorBoundary
+                  enableAutoRecovery={true}
+                  maxRecoveryAttempts={3}
+                  recoveryDelay={5000}
                 >
-                  {children}
-                </MasterLayoutOrchestrator>
+                  {/* Let individual routes decide orchestration. Avoid global wrap to prevent double-orchestration. */}
+                  <div className="min-h-screen">
+                    {children}
+                  </div>
+                </ClientErrorBoundary>
                 <Toaster />
               </TooltipProvider>
             </PerformanceProvider>
-          </QueryClientProvider>
+          </Providers>
         </ThemeProvider>
       </body>
     </html>

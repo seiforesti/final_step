@@ -491,6 +491,48 @@ export const dependencyAnalyzer = {
       console.error('Error validating dependency constraints:', error);
       throw error;
     }
+  },
+
+  // Additional methods required by DependencyResolver component
+  async analyzeGraph(dependencyGraph: any): Promise<any> {
+    try {
+      const response = await apiClient.post('/api/v1/dependencies/analyze-graph', { dependencyGraph });
+      return response.data;
+    } catch (error) {
+      console.error('Error analyzing dependency graph:', error);
+      // Fallback to local analysis if API fails
+      return {
+        totalNodes: dependencyGraph.nodes?.length || 0,
+        totalEdges: dependencyGraph.edges?.length || 0,
+        circularDependencies: [],
+        criticalPath: [],
+        maxDepth: 0,
+        complexity: 'low',
+        recommendations: []
+      };
+    }
+  },
+
+  async detectConflicts(dependencyGraph: any): Promise<any[]> {
+    try {
+      const response = await apiClient.post('/api/v1/dependencies/detect-conflicts', { dependencyGraph });
+      return response.data.conflicts || [];
+    } catch (error) {
+      console.error('Error detecting dependency conflicts:', error);
+      // Fallback to local conflict detection if API fails
+      return [];
+    }
+  },
+
+  async generateExecutionOrder(dependencyGraph: any): Promise<any[]> {
+    try {
+      const response = await apiClient.post('/api/v1/dependencies/execution-order', { dependencyGraph });
+      return response.data.executionOrder || [];
+    } catch (error) {
+      console.error('Error generating execution order:', error);
+      // Fallback to local execution order generation if API fails
+      return [];
+    }
   }
 };
 

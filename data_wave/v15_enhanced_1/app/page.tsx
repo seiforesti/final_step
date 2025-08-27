@@ -37,8 +37,8 @@ import { LoginForm } from "@/components/Advanced_RBAC_Datagovernance_System/comp
 import { RacineMainManagerSPA } from "@/components/racine-main-manager";
 import { authService } from "@/components/Advanced_RBAC_Datagovernance_System/services/auth.service";
 
-// Layout Components - REMOVED: Now handled by MasterLayoutOrchestrator
-// Previous layout components are now orchestrated by MasterLayoutOrchestrator
+// Layout Components - REMOVED: Now handled by EnterpriseLayoutOrchestrator
+// Previous layout components are now orchestrated by EnterpriseLayoutOrchestrator
 
 // UI Components
 import { Button } from "@/components/ui/button";
@@ -107,8 +107,15 @@ export default function MainApp() {
   const checkAuthentication = useCallback(async () => {
     try {
       setAuthState((prev) => ({ ...prev, isLoading: true, error: null }));
+      // Ensure auth check cannot block UI indefinitely
+      const withTimeout = <T,>(p: Promise<T>, ms: number): Promise<T> => {
+        return new Promise((resolve, reject) => {
+          const t = setTimeout(() => reject(new Error('auth_check_timeout')), ms);
+          p.then((v) => { clearTimeout(t); resolve(v); }).catch((e) => { clearTimeout(t); reject(e); });
+        });
+      };
 
-      const { isAuthenticated, user } = await authService.checkAuthStatus();
+      const { isAuthenticated, user } = await withTimeout(authService.checkAuthStatus(), 4000).catch(() => ({ isAuthenticated: false, user: null } as any));
 
       if (isAuthenticated) {
         setAuthState((prev) => ({
@@ -141,14 +148,15 @@ export default function MainApp() {
 
   const checkSystemHealth = useCallback(async () => {
     try {
+      const f = (url: string) => {
+        const c = new AbortController();
+        const id = setTimeout(() => c.abort(), 2500);
+        return fetch(url, { signal: c.signal }).then(r => r.ok).catch(() => false).finally(() => clearTimeout(id));
+      };
       const healthChecks = await Promise.allSettled([
-        // Backend API Health (proxied via Next.js rewrite)
-        fetch("/api/health").then((r) => r.ok),
-        // Database Health
-        fetch("/api/database/health").then((r) => r.ok),
-        // Platform Status (Racine/overall platform)
-        fetch("/api/v1/platform/status").then((r) => r.ok),
-        // WebSocket Health (simplified check)
+        f("/api/health"),
+        f("/api/database/health"),
+        f("/api/v1/platform/status"),
         Promise.resolve(true),
       ]);
 
@@ -212,6 +220,35 @@ export default function MainApp() {
       clearInterval(authInterval);
     };
   }, [checkAuthentication, checkSystemHealth]);
+
+  // Ensure baseline layout cookies exist to stabilize EnterpriseLayoutOrchestrator
+  useEffect(() => {
+    try {
+      if (typeof document === 'undefined') return;
+      const cookieStr = document.cookie || '';
+      const ensureCookie = (name: string, value: string) => {
+        if (!cookieStr.includes(`${name}=`)) {
+          // 30 days expiry
+          const exp = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toUTCString();
+          document.cookie = `${name}=${encodeURIComponent(value)}; path=/; SameSite=Lax; expires=${exp}`;
+        }
+      };
+      ensureCookie('layout:mode', 'adaptive');
+      ensureCookie('theme', 'system');
+      ensureCookie('sidebar:state', 'true');
+    } catch {
+      // no-op: cookies are optional, orchestrator has internal fallbacks
+    }
+  }, []);
+
+  // If unauthenticated after checks, navigate to dedicated /login route
+  useEffect(() => {
+    if (!authState.isLoading && !authState.isAuthenticated) {
+      try {
+        router.replace('/login');
+      } catch {}
+    }
+  }, [authState.isLoading, authState.isAuthenticated, router]);
 
   // ============================================================================
   // EVENT HANDLERS
@@ -417,14 +454,11 @@ export default function MainApp() {
     );
   }
 
-  // Show main application if authenticated
-  // Layout is now handled by MasterLayoutOrchestrator inside RacineMainManagerSPA
-  return (
-    <ErrorBoundary>
-      {renderSystemHealthCheck()}
-      <RacineMainManagerSPA />
-    </ErrorBoundary>
-  );
+  // If authenticated, redirect to dedicated SPA route for clarity
+  try {
+    router.replace('/app');
+  } catch {}
+  return null;
 }
 
 // End of file

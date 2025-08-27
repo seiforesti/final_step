@@ -25,9 +25,10 @@ import {
   RealTimeMetrics,
   OrchestrationOptimization,
   OrchestrationIntegration,
-  APIResponse,
-  APIError
+  APIResponse
 } from '../types/orchestration.types';
+
+import { APIError, createAPIError } from '../types/api-error.types';
 
 // Enterprise API Configuration
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1';
@@ -82,12 +83,12 @@ export class OrchestrationAPIService {
   private async handleResponse<T>(response: Response): Promise<T> {
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new APIError({
-        code: response.status.toString(),
-        message: errorData.message || response.statusText,
-        details: errorData.details || {},
-        timestamp: new Date().toISOString(),
-      });
+      throw createAPIError(
+        errorData.message || response.statusText,
+        response.status.toString(),
+        response.status,
+        errorData.details || {}
+      );
     }
     return response.json();
   }

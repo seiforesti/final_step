@@ -228,6 +228,10 @@ export const useQuickActions = (
       setActionsState(prev => ({ ...prev, isLoading: true, error: null }));
       
       // Load actions from all sources
+      const safeRacineAPI: any = racineOrchestrationAPI as any;
+      const safeCrossAPI: any = crossGroupIntegrationAPI as any;
+      const safeUserAPI: any = userManagementAPI as any;
+
       const [
         coreActions,
         spaActions,
@@ -235,11 +239,11 @@ export const useQuickActions = (
         userPreferences,
         categories
       ] = await Promise.all([
-        racineOrchestrationAPI.getCoreQuickActions(),
-        crossGroupIntegrationAPI.getAllSPAQuickActions(),
-        userManagementAPI.getUserCustomActions(),
-        userManagementAPI.getUserActionPreferences(),
-        racineOrchestrationAPI.getActionCategories()
+        (safeRacineAPI?.getCoreQuickActions?.() ?? Promise.resolve([])),
+        (safeCrossAPI?.getAllSPAQuickActions?.() ?? Promise.resolve([])),
+        (safeUserAPI?.getUserCustomActions?.() ?? Promise.resolve([])),
+        (safeUserAPI?.getUserActionPreferences?.() ?? Promise.resolve({ recentActions: [], favoriteActions: [] })),
+        (safeRacineAPI?.getActionCategories?.() ?? Promise.resolve([]))
       ]);
 
       // Combine and organize actions

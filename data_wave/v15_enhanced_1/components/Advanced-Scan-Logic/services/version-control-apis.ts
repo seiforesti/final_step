@@ -183,6 +183,6 @@ export class VersionControlAPIService {
 export const versionControlAPI = new VersionControlAPIService();
 export default versionControlAPI;
 
-export const { createVersion, updateVersion, deleteVersion } = versionControlAPI as any;
+export const { createVersion, updateVersion, deleteVersion, revertVersion } = versionControlAPI as any;
 
 

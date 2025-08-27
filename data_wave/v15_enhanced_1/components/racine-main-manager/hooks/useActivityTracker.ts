@@ -704,12 +704,20 @@ export function useActivityTracker(options: UseActivityTrackerOptions = {}) {
 
       // Initialize real-time updates
       if (enableRealTimeUpdates) {
-        activityTrackingAPI.initializeRealTimeUpdates();
+        try {
+          (activityTrackingAPI as any)?.initializeRealTimeUpdates?.();
+        } catch (_) { /* noop */ }
 
-        Object.values(ActivityEventType).forEach(eventType => {
-          const id = activityTrackingAPI.subscribeToEvents(eventType, handleActivityEvent);
-          eventSubscriptions.current.push(id);
-        });
+        try {
+          Object.values(ActivityEventType).forEach(eventType => {
+            try {
+              const id = (activityTrackingAPI as any)?.subscribeToEvents?.(eventType, handleActivityEvent);
+              if (id) {
+                eventSubscriptions.current.push(id as any);
+              }
+            } catch (_) { /* noop */ }
+          });
+        } catch (_) { /* noop */ }
       }
 
       // Auto-load activities if enabled
@@ -721,7 +729,7 @@ export function useActivityTracker(options: UseActivityTrackerOptions = {}) {
     return () => {
       // Cleanup subscriptions
       eventSubscriptions.current.forEach(id => {
-        activityTrackingAPI.unsubscribeFromEvents(id);
+        try { (activityTrackingAPI as any)?.unsubscribeFromEvents?.(id); } catch (_) { /* noop */ }
       });
       eventSubscriptions.current = [];
 

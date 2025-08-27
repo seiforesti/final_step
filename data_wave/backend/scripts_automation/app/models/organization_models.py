@@ -152,3 +152,44 @@ if TYPE_CHECKING:
     )
     from .workflow_models import Workflow
     from .scan_models import ScanOrchestrationJob
+
+# Runtime imports to ensure relationship target classes are registered with SQLModel/SQLAlchemy
+# while avoiding hard circular imports. Wrapped in try/except to be resilient at import time.
+try:
+    from .Scan_Rule_Sets_completed_models.analytics_reporting_models import (
+        UsageAnalytics, TrendAnalysis, ROIMetrics,
+        ComplianceFrameworkIntegration, MarketplaceAnalytics, UsageMetrics,
+    )
+except Exception:
+    # Defer resolution; SQLAlchemy will evaluate string-based relationships later if available
+    pass
+
+try:
+    from .auth_models import User  # noqa: F401
+except Exception:
+    pass
+
+try:
+    from .scan_models import DataSource, ScanOrchestrationJob  # noqa: F401
+except Exception:
+    pass
+
+try:
+    from .catalog_models import CatalogItem  # noqa: F401
+except Exception:
+    pass
+
+try:
+    from .compliance_rule_models import ComplianceRule  # noqa: F401
+except Exception:
+    pass
+
+try:
+    from .compliance_requirement_models import ComplianceRequirement  # noqa: F401
+except Exception:
+    pass
+
+try:
+    from .workflow_models import Workflow  # noqa: F401
+except Exception:
+    pass

@@ -35,7 +35,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+import { Switch as SwitchComponent } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -4580,7 +4580,7 @@ export const ScanRuleSetsSPA: React.FC<ScanRuleSetsSPAProps> = ({
 };
 
 // Error Boundary Component
-class ErrorBoundary extends React.Component<
+class ScanRuleSetsErrorBoundary extends React.Component<
   {
     children: React.ReactNode;
     FallbackComponent: React.ComponentType<any>;

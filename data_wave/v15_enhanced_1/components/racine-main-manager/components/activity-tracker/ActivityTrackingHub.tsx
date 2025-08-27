@@ -185,6 +185,28 @@ export enum FilterPanelMode {
 }
 
 /**
+ * Activity tracking hub props interface
+ */
+interface ActivityTrackingHubProps {
+  mode?: 'full-tracker' | 'basic-tracker' | 'audit-only' | 'analytics-only';
+  enableRealTimeTracking?: boolean;
+  enableAdvancedFiltering?: boolean;
+  enableCrossGroupCorrelation?: boolean;
+  enableVisualAnalytics?: boolean;
+  enableAuditTrails?: boolean;
+  enableExportCapabilities?: boolean;
+  enableAlertSystem?: boolean;
+  enableComplianceReporting?: boolean;
+  enableUserBehaviorAnalysis?: boolean;
+  enableNotifications?: boolean;
+  showActivityTimeline?: boolean;
+  showHeatmaps?: boolean;
+  showAnomalyDetection?: boolean;
+  showQuickActions?: boolean;
+  showStatistics?: boolean;
+}
+
+/**
  * Activity tracking hub state interface
  */
 interface ActivityTrackingHubState {
@@ -303,7 +325,24 @@ const activityTypeIcons = {
 /**
  * Main ActivityTrackingHub Component
  */
-export const ActivityTrackingHub: React.FC = () => {
+export const ActivityTrackingHub: React.FC<ActivityTrackingHubProps> = ({
+  mode = 'full-tracker',
+  enableRealTimeTracking = true,
+  enableAdvancedFiltering = true,
+  enableCrossGroupCorrelation = true,
+  enableVisualAnalytics = true,
+  enableAuditTrails = true,
+  enableExportCapabilities = true,
+  enableAlertSystem = true,
+  enableComplianceReporting = true,
+  enableUserBehaviorAnalysis = true,
+  enableNotifications = true,
+  showActivityTimeline = true,
+  showHeatmaps = true,
+  showAnomalyDetection = true,
+  showQuickActions = true,
+  showStatistics = true
+}) => {
   // State Management
   const [state, setState] = useState<ActivityTrackingHubState>(initialState);
   const [searchQuery, setSearchQuery] = useState('');

@@ -927,32 +927,55 @@ class EnterpriseIntegrationService:
         if HAS_NETWORKX:
             self.relationship_graph = nx.DiGraph()
         else:
-            self.relationship_graph = nx.DiGraph()  # Using fallback
+            self.relationship_graph = EnterpriseGraph(directed=True)  # Using fallback
         
         # Initialize integration flows
         self._setup_core_integration_flows()
         
-        # Background tasks (deferred if no running loop)
+        # Background tasks (deferred until start() is called)
         self._deferred_tasks: list = []
-        self._start_task(self._integration_processing_loop())
-        self._start_task(self._health_monitoring_loop())
-        self._start_task(self._metrics_collection_loop())
-        self._start_task(self._data_consistency_check_loop())
+        self._is_running = False
         
         logger.info("Enterprise Integration Service initialized successfully")
 
     def _start_task(self, coro):
-        try:
-            loop = asyncio.get_running_loop()
-            loop.create_task(coro)
-        except RuntimeError:
+        """Defer task creation until service is started"""
+        if self._is_running:
+            try:
+                loop = asyncio.get_running_loop()
+                loop.create_task(coro)
+            except RuntimeError:
+                # Fallback for non-async contexts
+                pass
+        else:
             self._deferred_tasks.append(coro)
 
     async def start(self):
-        if hasattr(self, '_deferred_tasks') and self._deferred_tasks:
+        """Start the service and all background tasks"""
+        if self._is_running:
+            return
+            
+        self._is_running = True
+        
+        # Set active flags for background loops
+        self._integration_active = True
+        self._health_monitoring_active = True
+        self._metrics_collection_active = True
+        self._consistency_check_active = True
+        
+        # Start all deferred background tasks
+        if self._deferred_tasks:
             for coro in self._deferred_tasks:
                 asyncio.create_task(coro)
             self._deferred_tasks.clear()
+        
+        # Start core background loops
+        asyncio.create_task(self._integration_processing_loop())
+        asyncio.create_task(self._health_monitoring_loop())
+        asyncio.create_task(self._metrics_collection_loop())
+        asyncio.create_task(self._data_consistency_check_loop())
+        
+        logger.info("Enterprise Integration Service started successfully")
     
     def _init_group_services(self):
         """Initialize all data governance group services"""
@@ -1563,7 +1586,7 @@ class EnterpriseIntegrationService:
     
     async def _integration_processing_loop(self):
         """Background loop for processing integration events"""
-        while True:
+        while getattr(self, '_integration_active', False):
             try:
                 # Process events from the stream
                 while not self.event_stream.empty():
@@ -1575,19 +1598,16 @@ class EnterpriseIntegrationService:
                     integration_request = self.integration_queue.popleft()
                     await self._process_integration_request(integration_request)
                 
-                # Use real event processing instead of sleep
-                if not self.event_stream.empty():
-                    event_payload = await self.event_stream.get()
-                    await self._process_integration_event(event_payload)
+                # Sleep for a short interval instead of infinite loop
+                await asyncio.sleep(1)
                 
             except Exception as e:
                 logger.error(f"Error in integration processing loop: {e}")
-                # Use exponential backoff instead of fixed sleep
-                await self._handle_integration_error(e)
+                await asyncio.sleep(5)  # Wait before retrying
     
     async def _health_monitoring_loop(self):
         """Background loop for monitoring system health"""
-        while True:
+        while getattr(self, '_health_monitoring_active', False):
             try:
                 # Check health of all group services
                 health_results = await self._check_all_services_health()
@@ -1599,16 +1619,16 @@ class EnterpriseIntegrationService:
                 if self.metrics.system_health_score < 80:
                     await self._trigger_health_alerts(health_results)
                 
-                # Use real health monitoring interval
-                await self._schedule_next_health_check()
+                # Sleep for health monitoring interval (30 seconds)
+                await asyncio.sleep(30)
                 
             except Exception as e:
                 logger.error(f"Error in health monitoring loop: {e}")
-                await self._handle_health_monitoring_error(e)
+                await asyncio.sleep(60)  # Wait before retrying
     
     async def _metrics_collection_loop(self):
         """Background loop for collecting and updating metrics"""
-        while True:
+        while getattr(self, '_metrics_collection_active', False):
             try:
                 # Update integration metrics
                 await self._update_integration_metrics()
@@ -1622,16 +1642,16 @@ class EnterpriseIntegrationService:
                     "metrics": dict(self.metrics.__dict__)
                 })
                 
-                # Use real metrics collection interval
-                await self._schedule_next_metrics_collection()
+                # Sleep for metrics collection interval (60 seconds)
+                await asyncio.sleep(60)
                 
             except Exception as e:
                 logger.error(f"Error in metrics collection loop: {e}")
-                await self._handle_metrics_collection_error(e)
+                await asyncio.sleep(120)  # Wait before retrying
     
     async def _data_consistency_check_loop(self):
         """Background loop for checking data consistency across systems"""
-        while True:
+        while getattr(self, '_consistency_check_active', False):
             try:
                 # Perform data consistency checks
                 consistency_results = await self._check_cross_system_data_consistency()
@@ -1643,12 +1663,12 @@ class EnterpriseIntegrationService:
                 if consistency_results.get("inconsistencies_found", 0) > 0:
                     await self._fix_data_inconsistencies(consistency_results)
                 
-                # Use real consistency check interval
-                await self._schedule_next_consistency_check()
+                # Sleep for consistency check interval (5 minutes)
+                await asyncio.sleep(300)
                 
             except Exception as e:
                 logger.error(f"Error in data consistency check loop: {e}")
-                await self._handle_consistency_check_error(e)
+                await asyncio.sleep(600)  # Wait before retrying
     
     async def get_integration_status(self) -> Dict[str, Any]:
         """Get comprehensive integration status across all systems"""

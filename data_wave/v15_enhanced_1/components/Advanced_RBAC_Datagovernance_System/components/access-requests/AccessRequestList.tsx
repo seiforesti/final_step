@@ -178,7 +178,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { Calendar } from '@/components/ui/calendar';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { DatePickerWithRange } from '@/components/ui/date-picker';
 import { useAccessRequests } from '../../hooks/useAccessRequests';
 import { useCurrentUser } from '../../hooks/useCurrentUser';

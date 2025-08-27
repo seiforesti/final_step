@@ -30,6 +30,16 @@
  * - Analytics and monitoring integration
  */
 
+import React from 'react';
+import RacineRouter from './RacineRouter';
+import { RacineRouterProvider } from './RacineRouterProvider';
+import { RouteGuardsProvider, RouteGuard } from './RouteGuards';
+import RouteMiddleware from './RouteMiddleware';
+import { RouteMiddlewareProvider } from './RouteMiddleware';
+import DeepLinkManagerProvider, { SmartLink } from './DeepLinkManager';
+import BreadcrumbManagerProvider, { BreadcrumbNavigation } from './BreadcrumbManager';
+import QuickNavigationProvider, { QuickNavigationPanel, QuickNavigationTrigger } from './QuickNavigationPanel';
+
 // ============================================================================
 // CORE ROUTING COMPONENTS
 // ============================================================================
@@ -45,7 +55,7 @@ export {
 } from './RacineRouter';
 
 // Route Protection System
-export { default as RouteGuard } from './RouteGuards';
+export { RouteGuard } from './RouteGuards';
 export { 
   useRouteGuards,
   withRouteGuards,
@@ -653,6 +663,8 @@ export const useRouteSpecific = (routePattern: string) => {
 // ============================================================================
 // ROUTING PROVIDERS WRAPPER
 // ============================================================================
+
+// RacineRouterProvider is now imported from './RacineRouterProvider'
 
 /**
  * Master routing provider that wraps all routing functionality

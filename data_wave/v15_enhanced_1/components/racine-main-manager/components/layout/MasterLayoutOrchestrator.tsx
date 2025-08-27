@@ -19,7 +19,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef, Suspense } from 'react';
 import { motion, AnimatePresence, useAnimation } from 'framer-motion';
 import { useRouter, usePathname } from 'next/navigation';
-import { Monitor, Smartphone, Tablet, Layout, Grid, Columns, Maximize2, Minimize2, Settings, Zap, Eye, Accessibility, Palette, RefreshCw } from 'lucide-react';
+import { Monitor, Smartphone, Tablet, Layout, Grid, Columns, Maximize2, Minimize2, Settings, Zap, Eye, Accessibility, Palette, RefreshCw, AlertTriangle } from 'lucide-react';
 
 // UI Components
 import { Button } from '@/components/ui/button';
@@ -274,6 +274,31 @@ export const MasterLayoutOrchestrator: React.FC<MasterLayoutOrchestratorProps> =
   theme = 'system'
 }) => {
   // ========================================================================
+  // SAFE PREFERENCES SETUP
+  // ========================================================================
+  
+  // Ensure userPreferences has fallback values to prevent undefined errors
+  const safeUserPreferences = useMemo(() => {
+    if (!userPreferences) {
+      return {
+        theme: { mode: 'system', colorScheme: 'auto' },
+        layout: { mode: 'default', compact: false },
+        accessibility: { 
+          highContrast: false, 
+          fontSize: 16, 
+          reducedMotion: false,
+          screenReaderOptimized: false 
+        },
+        sidebarWidth: 280,
+        sidebarCollapsed: false,
+        headerHeight: 64,
+        contentPadding: 'normal'
+      };
+    }
+    return userPreferences;
+  }, [userPreferences]);
+
+  // ========================================================================
   // STATE MANAGEMENT
   // ========================================================================
   
@@ -309,14 +334,17 @@ export const MasterLayoutOrchestrator: React.FC<MasterLayoutOrchestratorProps> =
     fallbackLayout: null,
     
     // Accessibility
-    accessibilityMode: userPreferences.accessibility?.screenReaderOptimized || false,
-    screenReaderOptimized: userPreferences.accessibility?.screenReaderOptimized || false,
-    highContrastMode: userPreferences.accessibility?.highContrast || false,
+            accessibilityMode: safeUserPreferences.accessibility?.screenReaderOptimized || false,
+        screenReaderOptimized: safeUserPreferences.accessibility?.screenReaderOptimized || false,
+        highContrastMode: safeUserPreferences.accessibility?.highContrast || false,
     
     // Animation & Transitions
     isTransitioning: false,
     transitionDirection: 'in',
-    animationPreference: userPreferences.accessibility?.reducedMotion ? 'reduced' : 'full'
+    animationPreference: userPreferences.accessibility?.reducedMotion ? 'reduced' : 'full',
+    
+    // Personalization
+    showPersonalization: false
   });
 
   // ========================================================================
@@ -336,6 +364,19 @@ export const MasterLayoutOrchestrator: React.FC<MasterLayoutOrchestratorProps> =
     autoSave: true,
     enableAnalytics: true
   });
+
+  // Ensure theme preferences have fallback values
+  const safeThemePrefs = themePrefs || { mode: 'system', colorScheme: 'auto' };
+  const safeLayoutPrefs = layoutPrefs || { mode: 'default', compact: false };
+  const safeA11yPrefs = a11yPrefs || { highContrast: false, fontSize: 16, reducedMotion: false };
+
+  // Update theme when preferences are loaded
+  useEffect(() => {
+    if (safeThemePrefs?.mode && safeThemePrefs.mode !== theme) {
+      // Update theme if it's different from current
+      console.log(`Theme preference updated: ${theme} -> ${safeThemePrefs.mode}`);
+    }
+  }, [safeThemePrefs?.mode, theme]);
   
   const { 
     monitorSystemHealth,
@@ -344,8 +385,8 @@ export const MasterLayoutOrchestrator: React.FC<MasterLayoutOrchestratorProps> =
   } = useRacineOrchestration();
   
   const {
-    getCurrentWorkspace,
-    getWorkspaceLayout
+    currentWorkspace,
+    workspaces
   } = useWorkspaceManagement();
   
   const {
@@ -355,15 +396,108 @@ export const MasterLayoutOrchestrator: React.FC<MasterLayoutOrchestratorProps> =
     enableRealTimeTracking: enableAnalytics
   });
 
+  // Create userContext and workspaceContext from available data
+  const userContext: UserContext = useMemo(() => ({
+    id: 'current-user', // This should come from authentication
+    username: 'user', // This should come from authentication
+    email: 'user@example.com', // This should come from authentication
+    profile: {
+      id: 'current-user',
+      username: 'user',
+      email: 'user@example.com',
+      firstName: 'User',
+      lastName: 'Name',
+      displayName: 'User Name',
+      timezone: 'UTC',
+      locale: 'en-US',
+      skills: [],
+      interests: [],
+      socialLinks: [],
+      isActive: true,
+      emailVerified: true,
+      twoFactorEnabled: false,
+      lastLogin: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    },
+    roles: [{
+      id: 'user-role',
+      name: 'User',
+      description: 'Standard user role',
+      permissions: [],
+      isSystem: true,
+      isActive: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    }],
+    permissions: {
+      groups: {},
+      workspaces: {},
+      resources: {},
+      system: {
+        canManageUsers: false,
+        canManageSystem: false,
+        canViewAuditLogs: false
+      }
+    },
+            preferences: safeUserPreferences,
+    currentSession: {
+      id: 'session-id',
+      userId: 'current-user',
+      startTime: new Date().toISOString(),
+      lastActivity: new Date().toISOString(),
+      isActive: true,
+      ipAddress: '127.0.0.1',
+      userAgent: 'Mozilla/5.0',
+      deviceInfo: {
+        type: 'desktop',
+        os: 'Windows',
+        browser: 'Chrome'
+      }
+    },
+    workspaces: workspaces.map(w => w.id),
+    recentActivity: []
+  }), [userPreferences, workspaces]);
+
+  const workspaceContext = useMemo(() => ({
+    id: currentWorkspace?.id || 'default-workspace',
+    name: currentWorkspace?.name || 'Default Workspace',
+    type: currentWorkspace?.type || 'default',
+    settings: currentWorkspace?.settings || {},
+    members: currentWorkspace?.members || [],
+    resources: currentWorkspace?.resources || []
+  }), [currentWorkspace]);
+
   // Performance monitoring refs
   const performanceObserver = useRef<PerformanceObserver | null>(null);
   const layoutRef = useRef<HTMLDivElement>(null);
   const renderStartTime = useRef<number>(0);
   const resizeObserver = useRef<ResizeObserver | null>(null);
+  const isMounted = useRef(false);
+  const layoutChangeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Stable view ID to prevent infinite re-renders
+  const stableViewId = useRef<string>(crypto.randomUUID());
+  
+  // Memoized stable active views to prevent TabManager prop changes
+  const stableActiveViews = useMemo(() => [{
+    id: stableViewId.current,
+    title: 'Main View',
+    spaId: spaContext?.spaType || 'data-sources',
+    type: 'primary',
+    isActive: true,
+    isPinned: false,
+    isFavorite: false,
+    hasUnsavedChanges: false,
+    lastAccessed: new Date().toISOString(),
+    created: new Date().toISOString(),
+    metadata: {},
+    performance: { loadTime: 0, memoryUsage: 0, renderTime: 0 }
+  }], [spaContext?.spaType]);
 
-  // ========================================================================
+  // ============================================================================
   // RESPONSIVE BREAKPOINT DETECTION
-  // ========================================================================
+  // ============================================================================
 
   const detectBreakpoint = useCallback(() => {
     if (typeof window === 'undefined') return 'desktop';
@@ -483,11 +617,24 @@ export const MasterLayoutOrchestrator: React.FC<MasterLayoutOrchestratorProps> =
 
   const applyLayoutConfiguration = useCallback(async (
     newLayoutMode: LayoutMode,
-    immediate = false
-  ) => {
+    immediate: boolean = false
+  ): Promise<void> => {
+    // Prevent infinite loops - if already transitioning, don't start another transition
+    if (layoutState.isTransitioning) {
+      console.warn('Layout transition already in progress, skipping duplicate request');
+      return;
+    }
+
+    // Prevent unnecessary layout changes - if it's the same layout, don't change
+    if (layoutState.activeLayout.type === newLayoutMode && !immediate) {
+      return;
+    }
+
     try {
+      // Set transitioning state to prevent loops
       setLayoutState(prev => ({ ...prev, isTransitioning: true }));
       
+      // Record start time for performance tracking
       renderStartTime.current = performance.now();
       
       // Get base layout configuration
@@ -501,33 +648,33 @@ export const MasterLayoutOrchestrator: React.FC<MasterLayoutOrchestratorProps> =
       newLayout = adaptLayoutForBreakpoint(newLayout, layoutState.breakpoint);
       
       // Apply user preferences
-      if (userPreferences) {
+      if (safeUserPreferences) {
         newLayout = {
           ...newLayout,
           structure: {
             ...newLayout.structure,
             sidebar: {
               ...newLayout.structure.sidebar,
-              width: userPreferences.sidebarWidth || newLayout.structure.sidebar.width,
-              collapsible: userPreferences.sidebarCollapsed !== undefined 
-                ? !userPreferences.sidebarCollapsed 
+              width: safeUserPreferences.sidebarWidth || newLayout.structure.sidebar.width,
+              collapsible: safeUserPreferences.sidebarCollapsed !== undefined 
+                ? !safeUserPreferences.sidebarCollapsed 
                 : newLayout.structure.sidebar.collapsible
             },
             header: {
               ...newLayout.structure.header,
-              height: userPreferences.headerHeight || newLayout.structure.header.height
+              height: safeUserPreferences.headerHeight || newLayout.structure.header.height
             },
             content: {
               ...newLayout.structure.content,
-              padding: userPreferences.contentPadding === 'compact' ? 12 :
-                      userPreferences.contentPadding === 'spacious' ? 32 : 24
+              padding: safeUserPreferences.contentPadding === 'compact' ? 12 :
+                      safeUserPreferences.contentPadding === 'spacious' ? 32 : 24
             }
           }
         };
       }
       
       // Animation controls
-      if (!immediate && layoutState.animationPreference !== 'none') {
+      if (!immediate && layoutState.animationPreference !== 'none' && isMounted.current) {
         await animationControls.start({
           opacity: 0,
           scale: 0.98,
@@ -535,16 +682,22 @@ export const MasterLayoutOrchestrator: React.FC<MasterLayoutOrchestratorProps> =
         });
       }
       
-      // Update layout state
+      // Update layout state - combine all updates into one setState call
       setLayoutState(prev => ({
         ...prev,
         activeLayout: newLayout,
         layoutHistory: [prev.activeLayout, ...prev.layoutHistory.slice(0, 9)],
-        currentSPA: spaContext?.spaType || null
+        currentSPA: spaContext?.spaType || null,
+        renderTime: performance.now() - renderStartTime.current,
+        performanceMetrics: {
+          ...prev.performanceMetrics,
+          renderTime: performance.now() - renderStartTime.current
+        },
+        isTransitioning: false
       }));
       
       // Complete animation
-      if (!immediate && layoutState.animationPreference !== 'none') {
+      if (!immediate && layoutState.animationPreference !== 'none' && isMounted.current) {
         await animationControls.start({
           opacity: 1,
           scale: 1,
@@ -552,20 +705,9 @@ export const MasterLayoutOrchestrator: React.FC<MasterLayoutOrchestratorProps> =
         });
       }
       
-      // Track performance
-      const renderTime = performance.now() - renderStartTime.current;
-      setLayoutState(prev => ({
-        ...prev,
-        renderTime,
-        performanceMetrics: {
-          ...prev.performanceMetrics,
-          renderTime
-        },
-        isTransitioning: false
-      }));
-      
-      // Track analytics
-      if (enableAnalytics) {
+      // Track analytics - only if analytics are enabled and not in a loop
+      if (enableAnalytics && !layoutState.isTransitioning) {
+        const renderTime = performance.now() - renderStartTime.current;
         trackLayoutEvent({
           type: 'layout_change',
           from: layoutState.activeLayout.type,
@@ -592,7 +734,7 @@ export const MasterLayoutOrchestrator: React.FC<MasterLayoutOrchestratorProps> =
     layoutState.currentSPA,
     layoutState.breakpoint,
     layoutState.animationPreference,
-    userPreferences,
+    safeUserPreferences,
     spaContext,
     animationControls,
     enableAnalytics,
@@ -673,8 +815,21 @@ export const MasterLayoutOrchestrator: React.FC<MasterLayoutOrchestratorProps> =
   useEffect(() => {
     if (!enableResponsive) return;
     
+    let resizeTimeout: NodeJS.Timeout | null = null;
+    let lastWidth = 0;
+    let lastHeight = 0;
+    const RESIZE_THRESHOLD = 50; // Only trigger layout change if size changes by 50px or more
+    
     const handleResize = () => {
-      detectBreakpoint();
+      // Clear existing timeout
+      if (resizeTimeout) {
+        clearTimeout(resizeTimeout);
+      }
+      
+      // Debounce resize events
+      resizeTimeout = setTimeout(() => {
+        detectBreakpoint();
+      }, 250); // 250ms debounce for window resize
     };
     
     // Set up ResizeObserver for container-based responsive behavior
@@ -683,9 +838,27 @@ export const MasterLayoutOrchestrator: React.FC<MasterLayoutOrchestratorProps> =
         for (const entry of entries) {
           const { width, height } = entry.contentRect;
           
-          // Update layout based on container size
-          if (width !== layoutState.activeLayout.structure.content.width) {
-            applyLayoutConfiguration(layoutMode, true);
+          // Only trigger layout change if size change exceeds threshold
+          const widthDiff = Math.abs(width - lastWidth);
+          const heightDiff = Math.abs(height - lastHeight);
+          
+          if (widthDiff > RESIZE_THRESHOLD || heightDiff > RESIZE_THRESHOLD) {
+            // Update last known dimensions
+            lastWidth = width;
+            lastHeight = height;
+            
+            // Debounce container resize events
+            if (resizeTimeout) {
+              clearTimeout(resizeTimeout);
+            }
+            
+            resizeTimeout = setTimeout(() => {
+              // Only apply layout configuration if not already transitioning
+              if (!layoutState.isTransitioning) {
+                console.log(`Container size changed significantly (${widthDiff}px width, ${heightDiff}px height), adapting layout...`);
+                applyLayoutConfiguration(layoutMode, true);
+              }
+            }, 500); // 500ms debounce for container resize
           }
         }
       });
@@ -695,35 +868,69 @@ export const MasterLayoutOrchestrator: React.FC<MasterLayoutOrchestratorProps> =
     
     // Window resize listener
     window.addEventListener('resize', handleResize);
-    handleResize(); // Initial call
+    
+    // Initial call only once
+    if (layoutRef.current) {
+      const rect = layoutRef.current.getBoundingClientRect();
+      lastWidth = rect.width;
+      lastHeight = rect.height;
+    }
     
     return () => {
       window.removeEventListener('resize', handleResize);
       if (resizeObserver.current) {
         resizeObserver.current.disconnect();
       }
+      if (resizeTimeout) {
+        clearTimeout(resizeTimeout);
+      }
     };
-  }, [enableResponsive, layoutMode, detectBreakpoint, applyLayoutConfiguration]);
+  }, [enableResponsive, layoutMode, detectBreakpoint]); // Remove applyLayoutConfiguration from dependencies to prevent infinite loop
 
   // ========================================================================
   // LAYOUT MODE CHANGES
   // ========================================================================
 
   useEffect(() => {
-    applyLayoutConfiguration(layoutMode);
-  }, [layoutMode, applyLayoutConfiguration]);
+    // Clear any existing timeout
+    if (layoutChangeTimeoutRef.current) {
+      clearTimeout(layoutChangeTimeoutRef.current);
+    }
+
+    // Debounce layout changes to prevent rapid successive changes
+    layoutChangeTimeoutRef.current = setTimeout(() => {
+      // Only apply layout configuration if it's actually different from current
+      if (layoutMode !== layoutState.activeLayout.type) {
+        applyLayoutConfiguration(layoutMode);
+      }
+    }, 100); // 100ms debounce
+
+    return () => {
+      if (layoutChangeTimeoutRef.current) {
+        clearTimeout(layoutChangeTimeoutRef.current);
+      }
+    };
+  }, [layoutMode]); // Remove applyLayoutConfiguration from dependencies to prevent infinite loop
 
   // ========================================================================
   // SPA CONTEXT CHANGES
   // ========================================================================
 
+  // Use ref to track previous spaType to prevent infinite loops
+  const previousSpaTypeRef = useRef<string | null>(null);
+  
   useEffect(() => {
-    if (spaContext?.spaType !== layoutState.currentSPA) {
-      setLayoutState(prev => ({ ...prev, currentSPA: spaContext?.spaType || null }));
-      applyLayoutConfiguration(layoutMode, true);
-      onSPASwitch?.(spaContext?.spaType || 'data-sources');
+    const currentSpaType = spaContext?.spaType || null;
+    if (currentSpaType !== previousSpaTypeRef.current) {
+      previousSpaTypeRef.current = currentSpaType;
+      setLayoutState(prev => ({ ...prev, currentSPA: currentSpaType }));
+      // Only apply layout configuration if not already transitioning
+      if (!layoutState.isTransitioning) {
+        applyLayoutConfiguration(layoutMode, true);
+      }
+      onSPASwitch?.(currentSpaType || 'data-sources');
     }
-  }, [spaContext, layoutState.currentSPA, layoutMode, applyLayoutConfiguration, onSPASwitch]);
+  }, [spaContext?.spaType, layoutMode, onSPASwitch]); // Remove layoutState.currentSPA from dependencies
 
   // ========================================================================
   // PERFORMANCE MONITORING SETUP
@@ -732,7 +939,22 @@ export const MasterLayoutOrchestrator: React.FC<MasterLayoutOrchestratorProps> =
   useEffect(() => {
     const cleanup = setupPerformanceMonitoring();
     return cleanup;
-  }, [setupPerformanceMonitoring]);
+  }, []); // Remove setupPerformanceMonitoring from dependencies to prevent infinite loops
+
+  // ========================================================================
+  // COMPONENT MOUNT STATUS
+  // ========================================================================
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+      // Clean up layout change timeout
+      if (layoutChangeTimeoutRef.current) {
+        clearTimeout(layoutChangeTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // ========================================================================
   // ACCESSIBILITY ENHANCEMENTS
@@ -890,10 +1112,16 @@ export const MasterLayoutOrchestrator: React.FC<MasterLayoutOrchestratorProps> =
           </div>
         }>
           <ResponsiveLayoutEngine
-            layout={layoutState.activeLayout}
             breakpoint={layoutState.breakpoint}
-            spaContext={spaContext}
-            performanceMode={enablePerformanceOptimization}
+            deviceType={layoutState.deviceType}
+            orientation={layoutState.orientation}
+            currentLayout={layoutState.activeLayout}
+            onLayoutAdaptation={(adaptedLayout) => {
+              setLayoutState(prev => ({ ...prev, activeLayout: adaptedLayout }));
+            }}
+            userContext={userContext}
+            workspaceContext={workspaceContext}
+            className=""
           >
             {children}
           </ResponsiveLayoutEngine>
@@ -918,17 +1146,27 @@ export const MasterLayoutOrchestrator: React.FC<MasterLayoutOrchestratorProps> =
         
         {/* Tab Manager */}
         <TabManager
-          tabs={[]}
-          activeTab={null}
-          onTabChange={() => {}}
-          layout={layoutState.activeLayout}
+          activeViews={stableActiveViews}
+          layoutMode={layoutMode}
+          onTabAction={(action, viewId, context) => {
+            // Handle tab actions
+            console.log('Tab action:', action, viewId, context);
+          }}
+          userContext={userContext}
+          workspaceContext={workspaceContext}
+          className=""
         />
         
-        {/* Layout Personalization Panel */}
-        {layoutState.deviceType === 'desktop' && (
+        {/* Layout Personalization Panel - Only show when explicitly enabled */}
+        {layoutState.deviceType === 'desktop' && layoutState.showPersonalization && (
           <LayoutPersonalization
             currentLayout={layoutState.activeLayout}
-            userPreferences={userPreferences}
+            userContext={userContext}
+            workspaceContext={workspaceContext}
+            layoutPreferences={safeUserPreferences}
+            onPreferencesChange={(newPreferences) => {
+              console.log('Preferences changed:', newPreferences);
+            }}
             onLayoutChange={(newLayout) => {
               updateLayoutPrefs(newLayout);
               applyLayoutConfiguration(newLayout.mode || 'default');

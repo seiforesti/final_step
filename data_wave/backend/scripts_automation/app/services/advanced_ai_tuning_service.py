@@ -643,15 +643,15 @@ class AdvancedAITuningService:
                         rule_service = ScanRuleSetService()
                         evaluation_service = RuleEvaluationService()
                         
-                        # Execute rule with suggested parameters
-                        execution_result = await rule_service.execute_rule_with_parameters(
+                        # Execute rule with suggested parameters (synchronous version)
+                        execution_result = rule_service.execute_rule_with_parameters_sync(
                             rule_id=rule_id,
                             parameters=params,
                             session=session
                         )
                         
-                        # Evaluate rule performance
-                        evaluation_metrics = await evaluation_service.evaluate_rule_performance(
+                        # Evaluate rule performance (synchronous version)
+                        evaluation_metrics = evaluation_service.evaluate_rule_performance_sync(
                             rule_id=rule_id,
                             execution_result=execution_result,
                             objectives=objectives

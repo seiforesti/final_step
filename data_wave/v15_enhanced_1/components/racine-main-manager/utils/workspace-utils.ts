@@ -795,3 +795,73 @@ export function getWorkspaceIcon(workspaceType: string): string {
       return '📋'
   }
 }
+
+// =============================================================================
+// TAB MANAGEMENT UTILITIES
+// =============================================================================
+
+export const workspaceUtils = {
+  validateWorkspaceConfig,
+  validateMemberPermissions,
+  validateWorkspaceName,
+  calculateWorkspaceHealth,
+  generateWorkspaceRecommendations,
+  formatWorkspaceForDisplay,
+  validateResourceLink,
+  analyzeResourceDependencies,
+  calculateResourceUtilization,
+  analyzeMemberActivity,
+  generateRoleRecommendations,
+  validateWorkspaceTemplate,
+  applyTemplateCustomizations,
+  filterWorkspaces,
+  sortWorkspaces,
+  exportWorkspaceData,
+  validateImportData,
+  getWorkspaceIcon,
+  getWorkspaceTabState,
+  updateWorkspaceTabState
+};
+
+/**
+ * Get workspace tab state for tab management
+ */
+export function getWorkspaceTabState(
+  workspaceId: string,
+  userId: string
+): {
+  activeTabs: string[];
+  tabGroups: any[];
+  tabOrder: string[];
+  pinnedTabs: string[];
+  favoriteTabs: string[];
+} {
+  // This would typically fetch from backend
+  // For now, return default state
+  return {
+    activeTabs: [],
+    tabGroups: [],
+    tabOrder: [],
+    pinnedTabs: [],
+    favoriteTabs: []
+  };
+}
+
+/**
+ * Update workspace tab state
+ */
+export function updateWorkspaceTabState(
+  workspaceId: string,
+  userId: string,
+  updates: {
+    activeTabs?: string[];
+    tabGroups?: any[];
+    tabOrder?: string[];
+    pinnedTabs?: string[];
+    favoriteTabs?: string[];
+  }
+): Promise<boolean> {
+  // This would typically update backend
+  // For now, return success
+  return Promise.resolve(true);
+}

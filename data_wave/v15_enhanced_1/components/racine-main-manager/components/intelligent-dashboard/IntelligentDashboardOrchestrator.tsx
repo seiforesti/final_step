@@ -283,9 +283,50 @@ const DEFAULT_CONFIG: DashboardOrchestratorConfig = {
 };
 
 /**
+ * Intelligent Dashboard Orchestrator Props Interface
+ */
+interface IntelligentDashboardOrchestratorProps {
+  mode?: 'full-dashboard' | 'basic-dashboard' | 'executive-view' | 'analytics-only';
+  enableRealTimeUpdates?: boolean;
+  enableCustomWidgets?: boolean;
+  enableDrillDownAnalytics?: boolean;
+  enableExportCapabilities?: boolean;
+  enableAlertManagement?: boolean;
+  enablePredictiveAnalytics?: boolean;
+  enableCrossGroupCorrelation?: boolean;
+  enablePerformanceMetrics?: boolean;
+  enableNotifications?: boolean;
+  showSystemHealth?: boolean;
+  showDataQuality?: boolean;
+  showComplianceScores?: boolean;
+  showUsageStatistics?: boolean;
+  showTrendAnalysis?: boolean;
+  showQuickActions?: boolean;
+  autoRefreshInterval?: number;
+}
+
+/**
  * Intelligent Dashboard Orchestrator Component
  */
-export const IntelligentDashboardOrchestrator: React.FC = () => {
+export const IntelligentDashboardOrchestrator: React.FC<IntelligentDashboardOrchestratorProps> = ({
+  mode = 'full-dashboard',
+  enableRealTimeUpdates = true,
+  enableCustomWidgets = true,
+  enableDrillDownAnalytics = true,
+  enableExportCapabilities = true,
+  enableAlertManagement = true,
+  enablePredictiveAnalytics = true,
+  enableCrossGroupCorrelation = true,
+  enablePerformanceMetrics = true,
+  enableNotifications = true,
+  showSystemHealth = true,
+  showDataQuality = true,
+  showComplianceScores = true,
+  showUsageStatistics = true,
+  showTrendAnalysis = true,
+  showQuickActions = true,
+  autoRefreshInterval = 30000
+}) => {
   // Refs
   const dashboardContainerRef = useRef<HTMLDivElement>(null);
   const dragSourceRef = useRef<DragData | null>(null);

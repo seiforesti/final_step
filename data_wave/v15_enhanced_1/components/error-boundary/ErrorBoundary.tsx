@@ -1,102 +1,162 @@
-import React from "react";
-import { AlertTriangle, Home, RefreshCw } from 'lucide-react';
-import { motion } from "framer-motion";
-import { Button } from "../ui/button";
-import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
+"use client";
+
+import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { AlertTriangle, RefreshCw, Home, Settings } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 interface Props {
-  children: React.ReactNode;
+  children: ReactNode;
+  fallback?: ReactNode;
 }
 
 interface State {
   hasError: boolean;
-  error: Error | null;
-  errorInfo: React.ErrorInfo | null;
+  error?: Error;
+  errorInfo?: ErrorInfo;
+  isRecovering: boolean;
 }
 
-export class ErrorBoundary extends React.Component<Props, State> {
+export class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = { hasError: false, error: null, errorInfo: null };
+    this.state = {
+      hasError: false,
+      isRecovering: false,
+    };
   }
 
-  static getDerivedStateFromError(error: Error) {
-    return { hasError: true, error };
+  static getDerivedStateFromError(error: Error): State {
+    return {
+      hasError: true,
+      error,
+      isRecovering: false,
+    };
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error('ErrorBoundary caught an error:', error, errorInfo);
     this.setState({
       error,
       errorInfo,
     });
 
-    // Log error to monitoring service
-    console.error("Error caught by boundary:", error, errorInfo);
+    // Log error to monitoring service in production
+    if (process.env.NODE_ENV === 'production') {
+      // TODO: Send to error monitoring service
+      console.error('Production error:', { error, errorInfo });
+    }
   }
+
+  handleRetry = () => {
+    this.setState({ isRecovering: true });
+    
+    // Clear the error state
+    setTimeout(() => {
+      this.setState({
+        hasError: false,
+        error: undefined,
+        errorInfo: undefined,
+        isRecovering: false,
+      });
+    }, 100);
+  };
+
+  handleGoHome = () => {
+    window.location.href = '/';
+  };
 
   handleReload = () => {
     window.location.reload();
   };
 
-  handleGoHome = () => {
-    window.location.href = "/";
-  };
-
   render() {
     if (this.state.hasError) {
+      if (this.props.fallback) {
+        return this.props.fallback;
+      }
+
       return (
-        <div className="min-h-screen bg-gradient-to-br from-red-50 to-red-100 dark:from-red-950 dark:to-red-900 flex items-center justify-center p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="w-full max-w-lg text-center space-y-6"
-          >
-            <AlertTriangle className="w-16 h-16 mx-auto text-red-500" />
+        <div className="min-h-screen bg-background flex items-center justify-center p-4">
+          <Card className="w-full max-w-2xl">
+            <CardHeader className="text-center">
+              <div className="mx-auto w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mb-4">
+                <AlertTriangle className="w-8 h-8 text-destructive" />
+              </div>
+              <CardTitle className="text-2xl font-bold text-destructive">
+                Application Error
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <Alert>
+                <AlertTriangle className="h-4 w-4" />
+                <AlertTitle>Something went wrong</AlertTitle>
+                <AlertDescription>
+                  The application encountered an unexpected error. This has been logged and our team has been notified.
+                </AlertDescription>
+              </Alert>
 
-            <Alert className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm border-red-200 dark:border-red-800">
-              <AlertTitle className="text-xl font-bold text-red-900 dark:text-red-100">
-                Something went wrong
-              </AlertTitle>
-              <AlertDescription className="mt-4 space-y-4">
-                <p className="text-red-700 dark:text-red-300">
-                  {this.state.error?.message || "An unexpected error occurred"}
-                </p>
-
-                {process.env.NODE_ENV === "development" &&
-                  this.state.errorInfo && (
-                    <div className="mt-4 text-left">
-                      <details className="bg-red-50 dark:bg-red-950 p-4 rounded-lg text-xs font-mono text-red-800 dark:text-red-200 overflow-auto">
-                        <summary className="cursor-pointer">
-                          Stack trace
-                        </summary>
-                        <pre className="mt-2">
-                          {this.state.errorInfo.componentStack}
-                        </pre>
-                      </details>
-                    </div>
+              {process.env.NODE_ENV === 'development' && this.state.error && (
+                <div className="bg-muted p-4 rounded-lg">
+                  <h4 className="font-semibold mb-2">Error Details (Development)</h4>
+                  <pre className="text-sm overflow-auto max-h-32">
+                    {this.state.error.toString()}
+                  </pre>
+                  {this.state.errorInfo && (
+                    <details className="mt-2">
+                      <summary className="cursor-pointer text-sm font-medium">
+                        Stack Trace
+                      </summary>
+                      <pre className="text-xs overflow-auto max-h-32 mt-2">
+                        {this.state.errorInfo.componentStack}
+                      </pre>
+                    </details>
                   )}
-
-                <div className="flex items-center justify-center gap-4 mt-6">
-                  <Button
-                    onClick={this.handleReload}
-                    className="bg-red-600 hover:bg-red-700"
-                  >
-                    <RefreshCw className="w-4 h-4 mr-2" />
-                    Reload Application
-                  </Button>
-
-                  <Button
-                    onClick={this.handleGoHome}
-                    variant="outline"
-                    className="border-red-200 hover:border-red-300 dark:border-red-800 dark:hover:border-red-700"
-                  >
-                    <Home className="w-4 h-4 mr-2" />
-                    Go to Home
-                  </Button>
                 </div>
-              </AlertDescription>
-            </Alert>
-          </motion.div>
+              )}
+
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Button
+                  onClick={this.handleRetry}
+                  disabled={this.state.isRecovering}
+                  className="flex items-center gap-2"
+                >
+                  {this.state.isRecovering ? (
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <RefreshCw className="w-4 h-4" />
+                  )}
+                  {this.state.isRecovering ? 'Recovering...' : 'Try Again'}
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  onClick={this.handleGoHome}
+                  className="flex items-center gap-2"
+                >
+                  <Home className="w-4 h-4" />
+                  Go Home
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  onClick={this.handleReload}
+                  className="flex items-center gap-2"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  Reload Page
+                </Button>
+              </div>
+
+              <div className="text-center text-sm text-muted-foreground">
+                <p>If this problem persists, please contact support.</p>
+                <p className="mt-1">
+                  Error ID: {this.state.error?.name || 'Unknown'} - {new Date().toISOString()}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       );
     }
@@ -104,5 +164,3 @@ export class ErrorBoundary extends React.Component<Props, State> {
     return this.props.children;
   }
 }
-
-export default ErrorBoundary;

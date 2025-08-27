@@ -443,11 +443,30 @@ export const useUserPreferences = (
       
     } catch (error: any) {
       console.error('Failed to load user preferences:', error);
+      
+      // Handle specific error types
+      let errorMessage = 'Failed to load preferences';
+      if (error.message) {
+        if (error.message.includes('timeout')) {
+          errorMessage = 'Preferences loading timed out - using default settings';
+        } else if (error.message.includes('Network error')) {
+          errorMessage = 'Network error - using cached preferences';
+        } else if (error.message.includes('HTTP 5')) {
+          errorMessage = 'Server error - using default preferences';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
+      // Set error state but don't break the app
       setPreferencesState(prev => ({
         ...prev,
-        error: error.message || 'Failed to load preferences',
+        error: errorMessage,
         isLoading: false
       }));
+      
+      // Log the error for debugging but continue with defaults
+      console.warn('Continuing with default preferences due to error:', errorMessage);
     }
   }, [preferencesState.isLoading]);
 

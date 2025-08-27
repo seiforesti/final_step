@@ -10,16 +10,30 @@ import {
 } from './scan-rules.types';
 
 // ============================================================================
-// API ERROR TYPE
-// ============================================================================
+// API RESPONSE TYPE
+// =============================================================================
+
+export interface APIResponse<T = any> {
+  success: boolean;
+  data: T;
+  message?: string;
+  error?: string;
+  timestamp: string;
+  requestId: string;
+}
+
+// =============================================================================
+// API ERROR TYPES
+// =============================================================================
 
 export interface APIError {
-  message: string;
   code: string;
-  status: number;
+  message: string;
   details?: any;
-  timestamp: string;
-  requestId?: string;
+  timestamp?: string;
+  path?: string;
+  method?: string;
+  statusCode?: number;
 }
 
 // ============================================================================
@@ -1512,18 +1526,4 @@ export interface PredictiveAnalyticsMetrics {
   model_drift_rate: number;
   prediction_latency_ms: number;
   model_update_frequency: number;
-}
-
-// =============================================================================
-// API ERROR TYPES
-// =============================================================================
-
-export interface APIError {
-  code: string;
-  message: string;
-  details?: any;
-  timestamp?: string;
-  path?: string;
-  method?: string;
-  statusCode?: number;
 }

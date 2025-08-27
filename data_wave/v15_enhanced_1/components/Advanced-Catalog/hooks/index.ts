@@ -65,6 +65,24 @@ export {
   type ProfilingOperations
 } from './useCatalogProfiling';
 
+// Quality Hooks
+export {
+  useCatalogQuality,
+  type UseCatalogQualityOptions,
+  type QualityState,
+  type QualityFilters,
+  type QualityOperations
+} from './useCatalogQuality';
+
+// Assets Hooks
+export {
+  useCatalogAssets,
+  type UseCatalogAssetsOptions,
+  type AssetsState,
+  type AssetFilters,
+  type AssetsOperations
+} from './useCatalogAssets';
+
 // Collaboration Hooks
 export {
   useCatalogCollaboration,
@@ -94,6 +112,8 @@ export interface CatalogHooks {
   recommendations: typeof useCatalogRecommendations;
   ai: typeof useCatalogAI;
   profiling: typeof useCatalogProfiling;
+  quality: typeof useCatalogQuality;
+  assets: typeof useCatalogAssets;
   collaboration: typeof useCatalogCollaboration;
 }
 
@@ -104,6 +124,8 @@ export interface CatalogHookStates {
   recommendations: RecommendationsState;
   ai: AIState;
   profiling: ProfilingState;
+  quality: QualityState;
+  assets: AssetsState;
   collaboration: CollaborationState;
 }
 
@@ -114,6 +136,8 @@ export interface CatalogHookOperations {
   recommendations: RecommendationOperations;
   ai: AIOperations;
   profiling: ProfilingOperations;
+  quality: QualityOperations;
+  assets: AssetsOperations;
   collaboration: CollaborationOperations;
 }
 
@@ -131,6 +155,8 @@ export const catalogHooks: CatalogHooks = {
   recommendations: useCatalogRecommendations,
   ai: useCatalogAI,
   profiling: useCatalogProfiling,
+  quality: useCatalogQuality,
+  assets: useCatalogAssets,
   collaboration: useCatalogCollaboration
 };
 
@@ -144,6 +170,8 @@ export const CATALOG_HOOK_NAMES = {
   RECOMMENDATIONS: 'recommendations',
   AI: 'ai',
   PROFILING: 'profiling',
+  QUALITY: 'quality',
+  ASSETS: 'assets',
   COLLABORATION: 'collaboration'
 } as const;
 

@@ -31,7 +31,8 @@ import React, {
   useMemo,
   useRef,
   createContext,
-  useContext
+  useContext,
+  memo
 } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Settings, Palette, Layout, Monitor, Smartphone, Tablet, Sun, Moon, Contrast, Type, Zap, Brain, Eye, Accessibility, Save, RefreshCw, Download, Upload, Share2, Copy, Trash2, Plus, Minus, RotateCcw, CheckCircle, AlertTriangle, Info, HelpCircle, Target, Sparkles, Wand2, Activity, BarChart3, Users, Clock, History, Filter, Search, SortAsc, MoreHorizontal, ChevronDown, ChevronRight } from 'lucide-react';
@@ -55,6 +56,7 @@ import { Progress } from '@/components/ui/progress';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
 
 // Racine Type Imports
 import {
@@ -108,7 +110,7 @@ import {
 // =============================================================================
 
 export interface LayoutPersonalizationProps {
-  userContext: UserContext;
+  userContext?: UserContext;
   workspaceContext?: WorkspaceContext;
   currentLayout: LayoutConfiguration;
   layoutPreferences: LayoutPreferences;
@@ -407,6 +409,81 @@ export const usePersonalizationContext = () => {
 };
 
 // =============================================================================
+// STABLE SLIDER WRAPPER (prevents feedback loops)
+// =============================================================================
+
+type StableSliderProps = {
+  value: number;
+  min: number;
+  max: number;
+  step: number;
+  className?: string;
+  onCommit: (value: number) => void;
+};
+
+const StableSlider: React.FC<StableSliderProps> = memo(({ value, min, max, step, className, onCommit }) => {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+  if (!mounted) return null;
+  return (
+    <Slider
+      key={value}
+      defaultValue={[value]}
+      onValueCommit={([next]) => onCommit(next)}
+      min={min}
+      max={max}
+      step={step}
+      className={className}
+    />
+  );
+}, (prev, next) => (
+  prev.value === next.value &&
+  prev.min === next.min &&
+  prev.max === next.max &&
+  prev.step === next.step &&
+  prev.className === next.className
+));
+StableSlider.displayName = 'StableSlider';
+
+// =============================================================================
+// STABLE SWITCH WRAPPER (prevents feedback loops)
+// =============================================================================
+
+type StableSwitchProps = {
+  checked: boolean;
+  onCommit: (checked: boolean) => void;
+  className?: string;
+};
+
+const StableSwitch: React.FC<StableSwitchProps> = memo(({ checked, onCommit, className }) => {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+  if (!mounted) return null;
+  return (
+    <Switch
+      key={checked ? 'on' : 'off'}
+      defaultChecked={checked}
+      onCheckedChange={(next) => onCommit(next)}
+      className={className}
+    />
+  );
+}, (prev, next) => prev.checked === next.checked && prev.className === next.className);
+StableSwitch.displayName = 'StableSwitch';
+
+// =============================================================================
+// STABLE SCROLL AREA WRAPPER
+// =============================================================================
+
+type StableScrollAreaProps = React.PropsWithChildren<{ className?: string }>
+
+const StableScrollArea: React.FC<StableScrollAreaProps> = memo(({ className, children }) => (
+  <div className={cn("relative overflow-auto", className)}>
+    {children}
+  </div>
+));
+StableScrollArea.displayName = 'StableScrollArea';
+
+// =============================================================================
 // LAYOUT PERSONALIZATION COMPONENT
 // =============================================================================
 
@@ -533,20 +610,21 @@ const LayoutPersonalization: React.FC<LayoutPersonalizationProps> = ({
   // HOOKS INTEGRATION
   // =============================================================================
 
+  const [userManagementState, userManagementOperations] = useUserManagement({ userId: userContext?.id });
+  
   const {
-    userManagementState,
     updateUserPreferences,
     getUserProfiles,
     createUserProfile,
     syncUserPreferences
-  } = useUserManagement(userContext.id);
+  } = userManagementOperations;
 
   const {
     aiState,
     getPersonalizationRecommendations,
     analyzeUserBehavior,
     optimizePersonalization
-  } = useAIAssistant(userContext.id, {
+  } = useAIAssistant(userContext?.id || '', {
     context: 'personalization',
     currentPreferences: personalizationState.activePreferences,
     usageData: personalizationState.learningData
@@ -571,7 +649,7 @@ const LayoutPersonalization: React.FC<LayoutPersonalizationProps> = ({
 
       // Validate preferences
       const validation = await validatePreferences(preferences, {
-        userId: userContext.id,
+        userId: userContext?.id,
         workspaceId: workspaceContext?.id,
         deviceCapabilities: {
           screenSize: { width: window.innerWidth, height: window.innerHeight },
@@ -608,7 +686,7 @@ const LayoutPersonalization: React.FC<LayoutPersonalizationProps> = ({
 
       // Save to backend
       await updateUserPreferences({
-        userId: userContext.id,
+        userId: userContext?.id,
         preferences: optimizedPreferences,
         workspaceId: workspaceContext?.id
       });
@@ -619,7 +697,7 @@ const LayoutPersonalization: React.FC<LayoutPersonalizationProps> = ({
       // Sync across devices if enabled
       if (personalizationState.syncAcrossDevices) {
         await syncUserPreferences({
-          userId: userContext.id,
+          userId: userContext?.id,
           preferences: optimizedPreferences,
           deviceId: navigator.userAgent
         });
@@ -646,7 +724,7 @@ const LayoutPersonalization: React.FC<LayoutPersonalizationProps> = ({
       }));
     }
   }, [
-    userContext.id,
+    userContext?.id,
     workspaceContext?.id,
     personalizationState.learningData,
     personalizationState.syncAcrossDevices,
@@ -658,15 +736,44 @@ const LayoutPersonalization: React.FC<LayoutPersonalizationProps> = ({
   ]);
 
   /**
-   * Create new personalization profile
+   * Create a new personalization profile
    */
   const createProfile = useCallback(async (
     profile: Omit<PersonalizationProfile, 'id' | 'createdAt' | 'lastUsed'>
   ) => {
     try {
+      // Generate UUID with fallback
+      const generateId = () => {
+        if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+          return crypto.randomUUID();
+        }
+        // Fallback for older browsers
+        return 'profile_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      };
+
+      // Check if userContext is available
+      if (!userContext?.id) {
+        console.warn('User context not available, creating local profile only');
+        
+        // Create local profile without backend sync
+        const newProfile: PersonalizationProfile = {
+          ...profile,
+          id: generateId(),
+          createdAt: new Date().toISOString(),
+          lastUsed: new Date().toISOString()
+        };
+
+        setPersonalizationState(prev => ({
+          ...prev,
+          profiles: [...prev.profiles, newProfile]
+        }));
+        
+        return;
+      }
+
       const newProfile: PersonalizationProfile = {
         ...profile,
-        id: crypto.randomUUID(),
+        id: generateId(),
         createdAt: new Date().toISOString(),
         lastUsed: new Date().toISOString()
       };
@@ -684,8 +791,30 @@ const LayoutPersonalization: React.FC<LayoutPersonalizationProps> = ({
 
     } catch (error) {
       console.error('Error creating profile:', error);
+      
+      // Even if backend save fails, create local profile
+      const generateId = () => {
+        if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+          return crypto.randomUUID();
+        }
+        return 'profile_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      };
+
+      const newProfile: PersonalizationProfile = {
+        ...profile,
+        id: generateId(),
+        createdAt: new Date().toISOString(),
+        lastUsed: new Date().toISOString()
+      };
+
+      setPersonalizationState(prev => ({
+        ...prev,
+        profiles: [...prev.profiles, newProfile]
+      }));
+      
+      console.log('Created local profile as fallback');
     }
-  }, [userContext.id, createUserProfile]);
+  }, [userContext?.id, createUserProfile]);
 
   /**
    * Switch to different personalization profile
@@ -720,18 +849,18 @@ const LayoutPersonalization: React.FC<LayoutPersonalizationProps> = ({
       <div className="space-y-3">
         <Label className="text-sm font-medium">Theme</Label>
         <div className="grid grid-cols-3 gap-3">
-          {personalizationState.availableThemes.map((theme) => (
+          {(personalizationState.availableThemes || []).map((theme) => (
             <div
               key={theme.id}
               className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                personalizationState.themeConfiguration.mode === theme.id
+                (personalizationState.themeConfiguration?.mode) === theme.id
                   ? 'border-primary bg-primary/10'
                   : 'border-border hover:bg-muted/50'
               }`}
               onClick={() => {
                 setPersonalizationState(prev => ({
                   ...prev,
-                  themeConfiguration: { ...prev.themeConfiguration, mode: theme.id as any }
+                  themeConfiguration: { ...(prev.themeConfiguration || {}), mode: theme.id as any }
                 }));
               }}
             >
@@ -756,14 +885,14 @@ const LayoutPersonalization: React.FC<LayoutPersonalizationProps> = ({
             <div className="flex items-center gap-2">
               <div
                 className="w-8 h-8 rounded border border-border cursor-pointer"
-                style={{ backgroundColor: personalizationState.themeConfiguration.primaryColor }}
+                style={{ backgroundColor: personalizationState.themeConfiguration?.primaryColor || '#4f46e5' }}
               />
               <Input
-                value={personalizationState.themeConfiguration.primaryColor}
+                value={personalizationState.themeConfiguration?.primaryColor || ''}
                 onChange={(e) => {
                   setPersonalizationState(prev => ({
                     ...prev,
-                    themeConfiguration: { ...prev.themeConfiguration, primaryColor: e.target.value }
+                    themeConfiguration: { ...(prev.themeConfiguration || {}), primaryColor: e.target.value }
                   }));
                 }}
                 className="h-8 text-xs"
@@ -776,14 +905,14 @@ const LayoutPersonalization: React.FC<LayoutPersonalizationProps> = ({
             <div className="flex items-center gap-2">
               <div
                 className="w-8 h-8 rounded border border-border cursor-pointer"
-                style={{ backgroundColor: personalizationState.themeConfiguration.accentColor }}
+                style={{ backgroundColor: personalizationState.themeConfiguration?.accentColor || '#22c55e' }}
               />
               <Input
-                value={personalizationState.themeConfiguration.accentColor}
+                value={personalizationState.themeConfiguration?.accentColor || ''}
                 onChange={(e) => {
                   setPersonalizationState(prev => ({
                     ...prev,
-                    themeConfiguration: { ...prev.themeConfiguration, accentColor: e.target.value }
+                    themeConfiguration: { ...(prev.themeConfiguration || {}), accentColor: e.target.value }
                   }));
                 }}
                 className="h-8 text-xs"
@@ -799,32 +928,32 @@ const LayoutPersonalization: React.FC<LayoutPersonalizationProps> = ({
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label className="text-xs">Font Size</Label>
-            <Slider
-              value={[personalizationState.themeConfiguration.fontSize]}
-              onValueChange={([value]) => {
-                setPersonalizationState(prev => ({
+            <StableSlider
+              value={personalizationState.themeConfiguration?.fontSize || 14}
+              onCommit={(value) => setPersonalizationState(prev => (
+                (prev.themeConfiguration?.fontSize) === value ? prev : {
                   ...prev,
-                  themeConfiguration: { ...prev.themeConfiguration, fontSize: value }
-                }));
-              }}
+                  themeConfiguration: { ...(prev.themeConfiguration || {}), fontSize: value }
+                }
+              ))}
               min={12}
               max={20}
               step={1}
               className="w-full"
             />
             <span className="text-xs text-muted-foreground">
-              {personalizationState.themeConfiguration.fontSize}px
+              {(personalizationState.themeConfiguration?.fontSize || 14)}px
             </span>
           </div>
 
           <div className="space-y-2">
             <Label className="text-xs">Font Family</Label>
             <Select
-              value={personalizationState.themeConfiguration.fontFamily}
+              value={personalizationState.themeConfiguration?.fontFamily || 'Inter'}
               onValueChange={(value) => {
                 setPersonalizationState(prev => ({
                   ...prev,
-                  themeConfiguration: { ...prev.themeConfiguration, fontFamily: value }
+                  themeConfiguration: { ...(prev.themeConfiguration || {}), fontFamily: value }
                 }));
               }}
             >
@@ -897,14 +1026,14 @@ const LayoutPersonalization: React.FC<LayoutPersonalizationProps> = ({
 
           <div className="space-y-2">
             <Label className="text-xs">Width</Label>
-            <Slider
-              value={[personalizationState.layoutSettings.sidebarWidth]}
-              onValueChange={([value]) => {
-                setPersonalizationState(prev => ({
+            <StableSlider
+              value={personalizationState.layoutSettings.sidebarWidth}
+              onCommit={(value) => setPersonalizationState(prev => (
+                prev.layoutSettings.sidebarWidth === value ? prev : {
                   ...prev,
                   layoutSettings: { ...prev.layoutSettings, sidebarWidth: value }
-                }));
-              }}
+                }
+              ))}
               min={200}
               max={400}
               step={20}
@@ -923,27 +1052,27 @@ const LayoutPersonalization: React.FC<LayoutPersonalizationProps> = ({
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <Label className="text-xs">Snap to Grid</Label>
-            <Switch
+            <StableSwitch
               checked={personalizationState.layoutSettings.snapToGrid}
-              onCheckedChange={(checked) => {
-                setPersonalizationState(prev => ({
+              onCommit={(checked) => setPersonalizationState(prev => (
+                prev.layoutSettings.snapToGrid === checked ? prev : {
                   ...prev,
                   layoutSettings: { ...prev.layoutSettings, snapToGrid: checked }
-                }));
-              }}
+                }
+              ))}
             />
           </div>
 
           <div className="space-y-2">
             <Label className="text-xs">Grid Size</Label>
-            <Slider
-              value={[personalizationState.layoutSettings.gridSize]}
-              onValueChange={([value]) => {
-                setPersonalizationState(prev => ({
+            <StableSlider
+              value={personalizationState.layoutSettings.gridSize}
+              onCommit={(value) => setPersonalizationState(prev => (
+                prev.layoutSettings.gridSize === value ? prev : {
                   ...prev,
                   layoutSettings: { ...prev.layoutSettings, gridSize: value }
-                }));
-              }}
+                }
+              ))}
               min={10}
               max={50}
               step={5}
@@ -962,27 +1091,27 @@ const LayoutPersonalization: React.FC<LayoutPersonalizationProps> = ({
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Label className="text-xs">Enable Animations</Label>
-            <Switch
+            <StableSwitch
               checked={personalizationState.layoutSettings.animations}
-              onCheckedChange={(checked) => {
-                setPersonalizationState(prev => ({
+              onCommit={(checked) => setPersonalizationState(prev => (
+                prev.layoutSettings.animations === checked ? prev : {
                   ...prev,
                   layoutSettings: { ...prev.layoutSettings, animations: checked }
-                }));
-              }}
+                }
+              ))}
             />
           </div>
 
           <div className="flex items-center justify-between">
             <Label className="text-xs">Enable Transitions</Label>
-            <Switch
+            <StableSwitch
               checked={personalizationState.layoutSettings.transitions}
-              onCheckedChange={(checked) => {
-                setPersonalizationState(prev => ({
+              onCommit={(checked) => setPersonalizationState(prev => (
+                prev.layoutSettings.transitions === checked ? prev : {
                   ...prev,
                   layoutSettings: { ...prev.layoutSettings, transitions: checked }
-                }));
-              }}
+                }
+              ))}
             />
           </div>
         </div>
@@ -998,40 +1127,40 @@ const LayoutPersonalization: React.FC<LayoutPersonalizationProps> = ({
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Label className="text-xs">High Contrast Mode</Label>
-            <Switch
+            <StableSwitch
               checked={personalizationState.accessibilityPreferences.highContrastMode}
-              onCheckedChange={(checked) => {
-                setPersonalizationState(prev => ({
+              onCommit={(checked) => setPersonalizationState(prev => (
+                prev.accessibilityPreferences.highContrastMode === checked ? prev : {
                   ...prev,
                   accessibilityPreferences: { ...prev.accessibilityPreferences, highContrastMode: checked }
-                }));
-              }}
+                }
+              ))}
             />
           </div>
 
           <div className="flex items-center justify-between">
             <Label className="text-xs">Large Text Mode</Label>
-            <Switch
+            <StableSwitch
               checked={personalizationState.accessibilityPreferences.largeTextMode}
-              onCheckedChange={(checked) => {
-                setPersonalizationState(prev => ({
+              onCommit={(checked) => setPersonalizationState(prev => (
+                prev.accessibilityPreferences.largeTextMode === checked ? prev : {
                   ...prev,
                   accessibilityPreferences: { ...prev.accessibilityPreferences, largeTextMode: checked }
-                }));
-              }}
+                }
+              ))}
             />
           </div>
 
           <div className="flex items-center justify-between">
             <Label className="text-xs">Color Blind Friendly</Label>
-            <Switch
+            <StableSwitch
               checked={personalizationState.accessibilityPreferences.colorBlindFriendly}
-              onCheckedChange={(checked) => {
-                setPersonalizationState(prev => ({
+              onCommit={(checked) => setPersonalizationState(prev => (
+                prev.accessibilityPreferences.colorBlindFriendly === checked ? prev : {
                   ...prev,
                   accessibilityPreferences: { ...prev.accessibilityPreferences, colorBlindFriendly: checked }
-                }));
-              }}
+                }
+              ))}
             />
           </div>
         </div>
@@ -1043,27 +1172,27 @@ const LayoutPersonalization: React.FC<LayoutPersonalizationProps> = ({
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Label className="text-xs">Reduced Motion</Label>
-            <Switch
+            <StableSwitch
               checked={personalizationState.accessibilityPreferences.reducedMotionMode}
-              onCheckedChange={(checked) => {
-                setPersonalizationState(prev => ({
+              onCommit={(checked) => setPersonalizationState(prev => (
+                prev.accessibilityPreferences.reducedMotionMode === checked ? prev : {
                   ...prev,
                   accessibilityPreferences: { ...prev.accessibilityPreferences, reducedMotionMode: checked }
-                }));
-              }}
+                }
+              ))}
             />
           </div>
 
           <div className="space-y-2">
             <Label className="text-xs">Touch Target Size</Label>
-            <Slider
-              value={[personalizationState.accessibilityPreferences.touchTargetSize]}
-              onValueChange={([value]) => {
-                setPersonalizationState(prev => ({
+            <StableSlider
+              value={personalizationState.accessibilityPreferences.touchTargetSize}
+              onCommit={(value) => setPersonalizationState(prev => (
+                prev.accessibilityPreferences.touchTargetSize === value ? prev : {
                   ...prev,
                   accessibilityPreferences: { ...prev.accessibilityPreferences, touchTargetSize: value }
-                }));
-              }}
+                }
+              ))}
               min={32}
               max={64}
               step={4}
@@ -1082,27 +1211,27 @@ const LayoutPersonalization: React.FC<LayoutPersonalizationProps> = ({
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Label className="text-xs">Keyboard Navigation Only</Label>
-            <Switch
+            <StableSwitch
               checked={personalizationState.accessibilityPreferences.keyboardNavigationOnly}
-              onCheckedChange={(checked) => {
-                setPersonalizationState(prev => ({
+              onCommit={(checked) => setPersonalizationState(prev => (
+                prev.accessibilityPreferences.keyboardNavigationOnly === checked ? prev : {
                   ...prev,
                   accessibilityPreferences: { ...prev.accessibilityPreferences, keyboardNavigationOnly: checked }
-                }));
-              }}
+                }
+              ))}
             />
           </div>
 
           <div className="flex items-center justify-between">
             <Label className="text-xs">Screen Reader Optimized</Label>
-            <Switch
+            <StableSwitch
               checked={personalizationState.accessibilityPreferences.screenReaderOptimized}
-              onCheckedChange={(checked) => {
-                setPersonalizationState(prev => ({
+              onCommit={(checked) => setPersonalizationState(prev => (
+                prev.accessibilityPreferences.screenReaderOptimized === checked ? prev : {
                   ...prev,
                   accessibilityPreferences: { ...prev.accessibilityPreferences, screenReaderOptimized: checked }
-                }));
-              }}
+                }
+              ))}
             />
           </div>
         </div>
@@ -1120,7 +1249,9 @@ const LayoutPersonalization: React.FC<LayoutPersonalizationProps> = ({
         <Switch
           checked={personalizationState.autoPersonalization}
           onCheckedChange={(checked) => {
-            setPersonalizationState(prev => ({ ...prev, autoPersonalization: checked }));
+            setPersonalizationState(prev => (
+              prev.autoPersonalization === checked ? prev : { ...prev, autoPersonalization: checked }
+            ));
           }}
         />
       </div>
@@ -1217,11 +1348,11 @@ const LayoutPersonalization: React.FC<LayoutPersonalizationProps> = ({
     const initializePersonalization = async () => {
       try {
         // Load user profiles
-        const profiles = await getUserProfiles(userContext.id);
+        const profiles = await getUserProfiles(userContext?.id);
         
         // Get AI recommendations
         const recommendations = await getPersonalizationRecommendations({
-          userId: userContext.id,
+          userId: userContext?.id,
           currentPreferences: layoutPreferences,
           workspaceContext: workspaceContext?.id,
           usageData: personalizationState.learningData
@@ -1240,12 +1371,10 @@ const LayoutPersonalization: React.FC<LayoutPersonalizationProps> = ({
 
     initializePersonalization();
   }, [
-    userContext.id,
+    userContext?.id,
     workspaceContext?.id,
     layoutPreferences,
-    personalizationState.learningData,
-    getUserProfiles,
-    getPersonalizationRecommendations
+    personalizationState.learningData
   ]);
 
   // =============================================================================
@@ -1289,27 +1418,27 @@ const LayoutPersonalization: React.FC<LayoutPersonalizationProps> = ({
                 </TabsList>
 
                 <TabsContent value="layout" className="mt-4">
-                  <ScrollArea className="h-96">
+                  <StableScrollArea className="h-96">
                     {renderLayoutPreferences()}
-                  </ScrollArea>
+                  </StableScrollArea>
                 </TabsContent>
 
                 <TabsContent value="theme" className="mt-4">
-                  <ScrollArea className="h-96">
+                  <StableScrollArea className="h-96">
                     {renderThemeCustomization()}
-                  </ScrollArea>
+                  </StableScrollArea>
                 </TabsContent>
 
                 <TabsContent value="accessibility" className="mt-4">
-                  <ScrollArea className="h-96">
+                  <StableScrollArea className="h-96">
                     {renderAccessibilityPreferences()}
-                  </ScrollArea>
+                  </StableScrollArea>
                 </TabsContent>
 
                 <TabsContent value="ai" className="mt-4">
-                  <ScrollArea className="h-96">
+                  <StableScrollArea className="h-96">
                     {renderAIRecommendations()}
-                  </ScrollArea>
+                  </StableScrollArea>
                 </TabsContent>
               </Tabs>
 

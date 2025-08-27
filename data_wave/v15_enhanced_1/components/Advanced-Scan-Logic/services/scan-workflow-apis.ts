@@ -1626,3 +1626,38 @@ export const applyFailureTemplate = async (templateId: string): Promise<any> => 
     throw error;
   }
 };
+
+// Export the main service class for component compatibility
+export class ScanWorkflowAPIService {
+  static async createWorkflow(workflowData: any): Promise<any> {
+    return createWorkflow(workflowData);
+  }
+  
+  static async executeWorkflow(workflowId: string, parameters?: any): Promise<any> {
+    return executeWorkflow(workflowId, parameters);
+  }
+  
+  static async getWorkflow(workflowId: string): Promise<any> {
+    return getWorkflow(workflowId);
+  }
+  
+  static async updateWorkflow(workflowId: string, updates: any): Promise<any> {
+    return updateWorkflow(workflowId, updates);
+  }
+  
+  static async deleteWorkflow(workflowId: string): Promise<any> {
+    return deleteWorkflow(workflowId);
+  }
+  
+  static async getWorkflowTemplates(): Promise<any> {
+    return getWorkflowTemplates();
+  }
+  
+  static async getWorkflowMetrics(workflowId: string): Promise<any> {
+    return getWorkflowMetrics(workflowId);
+  }
+  
+  static async getWorkflowExecutions(workflowId: string): Promise<any> {
+    return getWorkflowExecutions(workflowId);
+  }
+}

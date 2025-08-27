@@ -523,7 +523,7 @@ const RoleTreeView: React.FC<{
           tree.map(renderTreeNode)
         ) : (
           <div className="text-center py-8 text-gray-500">
-                            <TreePine className="mx-auto h-12 w-12 mb-2" />
+            <TreePine className="mx-auto h-12 w-12 mb-2" />
             <p className="text-sm">No role hierarchy found</p>
           </div>
         )}
