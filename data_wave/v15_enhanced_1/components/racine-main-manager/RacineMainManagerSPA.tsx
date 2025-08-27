@@ -1526,8 +1526,16 @@ export const RacineMainManagerSPA: React.FC = () => {
   ]);
 
   // ============================================================================
-  // HELPER FUNCTIONS
+  // MISSING VARIABLES AND HANDLERS - FIXED
   // ============================================================================
+
+  // Enhanced variables that were missing (some are defined later in the file)
+  const intelligentActiveWorkflows = activeWorkflows || {};
+  const reducedMotion = useReducedMotion();
+  
+  const handleEnhancedViewChange = useCallback((view: ViewMode) => {
+    handleViewChange(view);
+  }, [handleViewChange]);
 
   // ============================================================================
   // HELPER FUNCTIONS
@@ -1556,6 +1564,8 @@ export const RacineMainManagerSPA: React.FC = () => {
       [ViewMode.REPORTS]: "racine-reports",
       [ViewMode.SEARCH]: "racine-search",
       [ViewMode.NOTIFICATIONS]: "racine-notifications",
+      [ViewMode.ACTIVITY]: "racine-activity",
+      [ViewMode.SETTINGS]: "racine-settings"
     } as const;
     return spaMapping[view] || "racine-default";
   }, []);
