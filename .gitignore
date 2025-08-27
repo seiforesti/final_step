@@ -1,0 +1,115 @@
+# Root .gitignore for final_correction repository
+
+# Logs - CRITICAL: These are causing your push failures
+*.log
+*.log.*
+logs/
+data_wave/backend/scripts_automation/app/logs/
+data_wave/backend/scripts_automation/*.log
+data_wave/backend/scripts_automation/app/logs/debug/
+data_wave/backend/scripts_automation/app/logs/errors.log
+data_wave/backend/scripts_automation/database_health_check.log
+data_wave/backend/scripts_automation/enterprise_backend*.log
+
+# Error and build log files
+current_errors.txt
+errors_run_dev.txt
+logs_build.txt
+logs_build_errors.txt
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Next.js
+.next/
+out/
+build/
+dist/
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Large media files
+*.mp4
+*.mov
+*.avi
+*.wmv
+*.flv
+*.webm
+*.mkv
+
+# Archives
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Backup files
+*.backup
+*.bak
+*.old
