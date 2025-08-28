@@ -195,25 +195,13 @@ export const RacineMainManagerSPA: React.FC = () => {
   // STATE MANAGEMENT
   // ============================================================================
 
-  // Core Racine Hooks
+  // 🚀 PERFORMANCE-OPTIMIZED CORE HOOKS WITH LAZY LOADING
+  // Stage 1: Critical hooks only (user & workspace)
   const {
-    orchestrationState,
-    systemHealth,
-    performanceMetrics,
-    isLoading: orchestrationLoading,
-    error: orchestrationError,
-    executeWorkflow,
-    optimizeSystem,
-    refreshSystemHealth,
-  } = useRacineOrchestration();
-
-  // Defer orchestration boot until after first paint in dev to reduce mount congestion
-  const orchestrationBootRef = useRef(false);
-  useEffect(() => {
-    if (orchestrationBootRef.current) return;
-    orchestrationBootRef.current = true;
-    // No-op placeholder to potentially trigger an initial lightweight ping later if needed.
-  }, []);
+    currentUser,
+    userPermissions,
+    isLoading: userLoading,
+  } = useUserManagement();
 
   const {
     workspaces,
@@ -223,32 +211,112 @@ export const RacineMainManagerSPA: React.FC = () => {
     isLoading: workspaceLoading,
   } = useWorkspaceManagement();
 
+  // Stage 2: Lazy-loaded orchestration (after user is loaded)
+  const [enableOrchestration, setEnableOrchestration] = useState(false);
+  useEffect(() => {
+    if (currentUser && !userLoading) {
+      // Only load orchestration after user is ready
+      const timer = setTimeout(() => setEnableOrchestration(true), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [currentUser, userLoading]);
+
+  const orchestrationHookResult = enableOrchestration ? useRacineOrchestration() : {
+    orchestrationState: null,
+    systemHealth: null,
+    performanceMetrics: null,
+    isLoading: false,
+    error: null,
+    executeWorkflow: () => Promise.resolve(),
+    optimizeSystem: () => Promise.resolve(),
+    refreshSystemHealth: () => Promise.resolve(),
+  };
+
   const {
-    currentUser,
-    userPermissions,
-    isLoading: userLoading,
-  } = useUserManagement();
+    orchestrationState,
+    systemHealth,
+    performanceMetrics,
+    isLoading: orchestrationLoading,
+    error: orchestrationError,
+    executeWorkflow,
+    optimizeSystem,
+    refreshSystemHealth,
+  } = orchestrationHookResult;
 
-  const { integrationStatus, crossGroupMetrics, coordinateIntegration } =
-    useCrossGroupIntegration();
+  // Stage 3: Lazily load secondary hooks (after orchestration is stable)
+  const [enableSecondaryHooks, setEnableSecondaryHooks] = useState(false);
+  useEffect(() => {
+    if (enableOrchestration && !orchestrationLoading) {
+      const timer = setTimeout(() => setEnableSecondaryHooks(true), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [enableOrchestration, orchestrationLoading]);
 
-  const { activities, trackActivity, getActivitySummary } =
-    useActivityTracking();
+  // Only initialize secondary hooks when system is stable
+  const integrationHookResult = enableSecondaryHooks ? useCrossGroupIntegration() : {
+    integrationStatus: null,
+    crossGroupMetrics: null,
+    coordinateIntegration: () => Promise.resolve(),
+  };
+  const { integrationStatus, crossGroupMetrics, coordinateIntegration } = integrationHookResult;
 
-  const { dashboards, kpiMetrics, createDashboard } = useIntelligentDashboard();
+  const activityHookResult = enableSecondaryHooks ? useActivityTracking() : {
+    activities: [],
+    trackActivity: () => Promise.resolve(),
+    getActivitySummary: () => Promise.resolve({}),
+  };
+  const { activities, trackActivity, getActivitySummary } = activityHookResult;
 
-  const { aiAssistant, recommendations, insights, askAI } = useAIAssistant();
+  const dashboardHookResult = enableSecondaryHooks ? useIntelligentDashboard() : {
+    dashboards: [],
+    kpiMetrics: {},
+    createDashboard: () => Promise.resolve(),
+  };
+  const { dashboards, kpiMetrics, createDashboard } = dashboardHookResult;
 
-  const { workflows, activeJobs, executeJob } = useJobWorkflow();
+  const aiHookResult = enableSecondaryHooks ? useAIAssistant() : {
+    aiAssistant: null,
+    recommendations: [],
+    insights: [],
+    askAI: () => Promise.resolve(""),
+  };
+  const { aiAssistant, recommendations, insights, askAI } = aiHookResult;
 
-  const { pipelines, activePipelines, executePipeline } =
-    usePipelineManagement();
+  const workflowHookResult = enableSecondaryHooks ? useJobWorkflow() : {
+    workflows: [],
+    activeJobs: [],
+    executeJob: () => Promise.resolve(),
+  };
+  const { workflows, activeJobs, executeJob } = workflowHookResult;
 
-  const { collaborationSessions, teamActivity } = useCollaboration();
+  const pipelineHookResult = enableSecondaryHooks ? usePipelineManagement() : {
+    pipelines: [],
+    activePipelines: {},
+    executePipeline: () => Promise.resolve(),
+  };
+  const { pipelines, activePipelines, executePipeline } = pipelineHookResult;
 
-  const { systemPerformance, resourceUsage, alerts } =
-    usePerformanceMonitoring();
+  const collaborationHookResult = enableSecondaryHooks ? useCollaboration() : {
+    collaborationSessions: [],
+    teamActivity: [],
+  };
+  const { collaborationSessions, teamActivity } = collaborationHookResult;
 
+  const performanceHookResult = enableSecondaryHooks ? usePerformanceMonitoring() : {
+    systemPerformance: null,
+    resourceUsage: null,
+    alerts: [],
+  };
+  const { systemPerformance, resourceUsage, alerts } = performanceHookResult;
+
+  const notificationHookResult = enableSecondaryHooks ? useNotificationManager() : {
+    notificationEngine: null,
+    recentNotifications: [],
+    sendNotification: () => Promise.resolve(),
+    createTemplate: () => Promise.resolve(),
+    testTemplate: () => Promise.resolve(),
+    subscribeToNotifications: () => () => {},
+  };
   const {
     notificationEngine,
     recentNotifications: recentNotificationsFromEngine,
@@ -256,54 +324,111 @@ export const RacineMainManagerSPA: React.FC = () => {
     createTemplate: createNotificationTemplate,
     testTemplate: testNotificationTemplate,
     subscribeToNotifications,
-  } = useNotificationManager();
+  } = notificationHookResult;
 
   // ============================================================================
-  // ADVANCED ANALYTICS AND INTELLIGENCE
+  // ADVANCED ANALYTICS AND INTELLIGENCE - LAZY LOADED
   // ============================================================================
 
-  // Advanced Analytics
+  // Stage 4: Advanced analytics hooks (after all core systems are stable)
+  const [enableAdvancedHooks, setEnableAdvancedHooks] = useState(false);
+  useEffect(() => {
+    if (enableSecondaryHooks && currentUser) {
+      const timer = setTimeout(() => setEnableAdvancedHooks(true), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [enableSecondaryHooks, currentUser]);
+
+  // Advanced Analytics (lazy loaded)
+  const analyticsHookResult = enableAdvancedHooks ? useAdvancedAnalytics() : {
+    analyticsData: null,
+    isLoading: false,
+    error: null,
+    refreshAnalytics: () => Promise.resolve(),
+    setRefreshInterval: () => {},
+  };
   const {
     analyticsData,
     isLoading: analyticsLoading,
     setRefreshInterval: setAnalyticsRefreshInterval,
-  } = useAdvancedAnalytics();
+  } = analyticsHookResult;
 
-  // System Intelligence
+  // System Intelligence (lazy loaded)
+  const intelligenceHookResult = enableAdvancedHooks ? useSystemIntelligence() : {
+    intelligence: null,
+    isLoading: false,
+    error: null,
+    enableAnomalyDetection: () => Promise.resolve(),
+    triggerOptimization: () => Promise.resolve(),
+    refreshIntelligence: () => Promise.resolve(),
+  };
   const {
     intelligence,
     isLoading: intelligenceLoading,
     enableAnomalyDetection,
     triggerOptimization,
-  } = useSystemIntelligence();
+  } = intelligenceHookResult;
 
-  // Intelligent Automation
+  // Intelligent Automation (lazy loaded)
+  const automationHookResult = enableAdvancedHooks ? useIntelligentAutomation() : {
+    automationRules: [],
+    activeExecutions: [],
+    executionHistory: [],
+    isLoading: false,
+    error: null,
+    createAutomationRule: () => Promise.resolve({} as any),
+    executeRule: () => Promise.resolve({} as any),
+    pauseExecution: () => Promise.resolve(),
+    refreshAutomation: () => Promise.resolve(),
+  };
   const {
     automationRules,
     activeExecutions,
     createAutomationRule,
     executeRule,
     pauseExecution,
-  } = useIntelligentAutomation();
+  } = automationHookResult;
 
-  // Cost Optimization
+  // Cost Optimization (lazy loaded)
+  const costHookResult = enableAdvancedHooks ? useCostOptimization() : {
+    costData: null,
+    implementOptimization: () => Promise.resolve(),
+    createBudget: () => Promise.resolve(),
+    generateCostReport: () => Promise.resolve(),
+  };
   const {
     costData,
     implementOptimization,
     createBudget,
     generateCostReport,
-  } = useCostOptimization();
+  } = costHookResult;
 
-  // Advanced Monitoring
+  // Advanced Monitoring (lazy loaded)
+  const monitoringHookResult = enableAdvancedHooks ? useAdvancedMonitoring() : {
+    monitoringConfig: null,
+    activeAlerts: [],
+    createAlertRule: () => Promise.resolve(),
+    testAlertChannel: () => Promise.resolve(),
+    acknowledgeAlert: () => Promise.resolve(),
+  };
   const {
     monitoringConfig,
     activeAlerts,
     createAlertRule,
     testAlertChannel,
     acknowledgeAlert,
-  } = useAdvancedMonitoring();
+  } = monitoringHookResult;
 
-  // Enterprise Security
+  // Enterprise Security (lazy loaded)
+  const securityHookResult = enableAdvancedHooks ? useEnterpriseSecurity() : {
+    securityConfig: null,
+    auditLogs: [],
+    securityAlerts: [],
+    complianceStatus: {},
+    performSecurityScan: () => Promise.resolve(),
+    generateComplianceReport: () => Promise.resolve(),
+    resolveViolation: () => Promise.resolve(),
+  };
   const {
     securityConfig,
     auditLogs,
@@ -312,7 +437,7 @@ export const RacineMainManagerSPA: React.FC = () => {
     performSecurityScan,
     generateComplianceReport,
     resolveViolation,
-  } = useEnterpriseSecurity();
+  } = securityHookResult;
 
   // ============================================================================
   // LOCAL STATE
@@ -328,34 +453,55 @@ export const RacineMainManagerSPA: React.FC = () => {
   const [notifications, setNotifications] = useState<any[]>([]);
   const [systemAlerts, setSystemAlerts] = useState<any[]>([]);
 
-  // Animation and interaction state
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  // 🚀 OPTIMIZED Animation and interaction state
+  const [mousePosition, setMousePosition] = useState({ x: 50, y: 50 });
   const lastMouseUpdateRef = useRef<number>(0);
-
-  // Bounded startup grace period to avoid indefinite spinner when backend is slow/unavailable
-  const [bootGraceElapsed, setBootGraceElapsed] = useState(false);
-  useEffect(() => {
-    const timerId = setTimeout(() => setBootGraceElapsed(true), 10000);
-    return () => clearTimeout(timerId);
+  
+  // Throttled mouse tracking to prevent excessive re-renders
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    const now = Date.now();
+    if (now - lastMouseUpdateRef.current < 100) return; // Throttle to 10fps
+    lastMouseUpdateRef.current = now;
+    
+    const x = (e.clientX / window.innerWidth) * 100;
+    const y = (e.clientY / window.innerHeight) * 100;
+    setMousePosition({ x, y });
   }, []);
 
+  useEffect(() => {
+    if (!reducedMotion && performanceMode !== "standard") {
+      window.addEventListener('mousemove', handleMouseMove, { passive: true });
+      return () => window.removeEventListener('mousemove', handleMouseMove);
+    }
+  }, [handleMouseMove, reducedMotion, performanceMode]);
+
+  // 🚀 OPTIMIZED LOADING STATE - Progressive Loading with Immediate UI
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+  
+  // Progressive loading stages
+  useEffect(() => {
+    // Stage 1: Show UI immediately when user/workspace is ready
+    if (currentUser && !userLoading && !initialLoadComplete) {
+      setInitialLoadComplete(true);
+    }
+  }, [currentUser, userLoading, initialLoadComplete]);
+
+  // Quick loading check - only block for essential user data
   const showLoading = useMemo(
-    () =>
-      (orchestrationLoading ||
-        userLoading ||
-        workspaceLoading ||
-        analyticsLoading ||
-        intelligenceLoading) &&
-      !bootGraceElapsed,
-    [
-      orchestrationLoading,
-      userLoading,
-      workspaceLoading,
-      analyticsLoading,
-      intelligenceLoading,
-      bootGraceElapsed,
-    ]
+    () => userLoading && !initialLoadComplete,
+    [userLoading, initialLoadComplete]
   );
+
+  // Progressive enhancement indicator
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  useEffect(() => {
+    let progress = 0;
+    if (currentUser) progress += 25;
+    if (activeWorkspace) progress += 25;
+    if (enableOrchestration) progress += 25;
+    if (enableAdvancedHooks) progress += 25;
+    setLoadingProgress(progress);
+  }, [currentUser, activeWorkspace, enableOrchestration, enableAdvancedHooks]);
 
   const [hoveredNode, setHoveredNode] = useState<string | null>(null);
   const [schemaAnimationEnabled, setSchemaAnimationEnabled] = useState(true);
@@ -383,109 +529,96 @@ export const RacineMainManagerSPA: React.FC = () => {
   // COMPUTED VALUES AND MEMOS
   // ============================================================================
 
-  // Data Governance Schema Nodes
-  const dataGovernanceNodes = useMemo<DataGovernanceNode[]>(
-    () => [
+  // 🚀 OPTIMIZED Data Governance Schema Nodes - Stable References
+  const dataGovernanceNodes = useMemo<DataGovernanceNode[]>(() => {
+    // Only update when integration data actually changes
+    const baseNodes = [
       {
         id: "data-sources",
         name: "Data Sources",
-        type: "core",
+        type: "core" as const,
         position: { x: 200, y: 150 },
         connections: ["scan-logic", "catalog", "compliance"],
-        status: integrationStatus?.groups?.["data-sources"]?.status || SystemStatus.HEALTHY,
-        metrics: {
-          health: integrationStatus?.groups?.["data-sources"]?.health || 95,
-          performance: crossGroupMetrics?.performance?.["data-sources"] || 88,
-          activity: activities.filter((a) => a.resourceType === "data-source").length,
-        },
         icon: Database,
         color: "#3B82F6",
       },
       {
         id: "scan-rule-sets",
         name: "Scan Rules",
-        type: "core",
+        type: "core" as const,
         position: { x: 400, y: 100 },
         connections: ["data-sources", "scan-logic", "compliance"],
-        status: integrationStatus?.groups?.["scan-rule-sets"]?.status || SystemStatus.HEALTHY,
-        metrics: {
-          health: integrationStatus?.groups?.["scan-rule-sets"]?.health || 92,
-          performance: crossGroupMetrics?.performance?.["scan-rule-sets"] || 85,
-          activity: activities.filter((a) => a.resourceType === "scan-rule").length,
-        },
         icon: Shield,
         color: "#10B981",
       },
       {
         id: "classifications",
         name: "Classifications",
-        type: "core",
+        type: "core" as const,
         position: { x: 600, y: 150 },
         connections: ["catalog", "compliance", "ai-engine"],
-        status: integrationStatus?.groups?.["classifications"]?.status || SystemStatus.HEALTHY,
-        metrics: {
-          health: integrationStatus?.groups?.["classifications"]?.health || 90,
-          performance: crossGroupMetrics?.performance?.["classifications"] || 87,
-          activity: activities.filter((a) => a.resourceType === "classification").length,
-        },
         icon: Database,
         color: "#8B5CF6",
       },
       {
         id: "compliance",
         name: "Compliance",
-        type: "core",
+        type: "core" as const,
         position: { x: 500, y: 300 },
         connections: ["data-sources", "classifications", "audit"],
-        status: integrationStatus?.groups?.["compliance-rule"]?.status || SystemStatus.HEALTHY,
-        metrics: {
-          health: integrationStatus?.groups?.["compliance-rule"]?.health || 94,
-          performance: crossGroupMetrics?.performance?.["compliance-rule"] || 91,
-          activity: activities.filter((a) => a.resourceType === "compliance").length,
-        },
         icon: CheckCircle,
         color: "#F59E0B",
       },
       {
         id: "catalog",
         name: "Data Catalog",
-        type: "core",
+        type: "core" as const,
         position: { x: 300, y: 250 },
         connections: ["data-sources", "classifications", "lineage"],
-        status: integrationStatus?.groups?.["advanced-catalog"]?.status || SystemStatus.HEALTHY,
-        metrics: {
-          health: integrationStatus?.groups?.["advanced-catalog"]?.health || 93,
-          performance: crossGroupMetrics?.performance?.["advanced-catalog"] || 89,
-          activity: activities.filter((a) => a.resourceType === "catalog").length,
-        },
         icon: Database,
         color: "#EC4899",
       },
-      // Add remaining nodes...
-    ],
-    [integrationStatus, crossGroupMetrics, activities]
-  );
+    ];
 
-  // System Overview Metrics
+    // Add dynamic data only when available
+    return baseNodes.map(node => ({
+      ...node,
+      status: integrationStatus?.groups?.[node.id]?.status || SystemStatus.HEALTHY,
+      metrics: {
+        health: integrationStatus?.groups?.[node.id]?.health || 95,
+        performance: crossGroupMetrics?.performance?.[node.id] || 88,
+        activity: Math.min(activities.length, 10), // Prevent excessive filtering
+      },
+    }));
+  }, [
+    // Only re-compute when these specific values change
+    integrationStatus?.groups,
+    crossGroupMetrics?.performance,
+    activities.length, // Use length instead of full array to prevent constant re-computation
+  ]);
+
+  // 🚀 OPTIMIZED System Overview Metrics - Reduced Dependencies
   const systemOverview = useMemo<SystemOverview>(
     () => ({
       totalAssets: crossGroupMetrics?.totalAssets || 0,
-      activeWorkflows: Object.keys(orchestrationState?.activeWorkflows || {}).length,
-      activePipelines: Object.keys(activePipelines || {}).length,
-      systemHealth: systemHealth?.performance?.score || 0,
-      complianceScore: crossGroupMetrics?.compliance?.overallScore || 0,
-      performanceScore: performanceMetrics?.throughput?.operationsPerSecond || 0,
+      activeWorkflows: orchestrationState?.activeWorkflows ? Object.keys(orchestrationState.activeWorkflows).length : 0,
+      activePipelines: activePipelines ? Object.keys(activePipelines).length : 0,
+      systemHealth: systemHealth?.performance?.score || 95,
+      complianceScore: crossGroupMetrics?.compliance?.overallScore || 92,
+      performanceScore: performanceMetrics?.throughput?.operationsPerSecond || 100,
       collaborationActivity: collaborationSessions?.length || 0,
-      aiInsights: insights.length,
+      aiInsights: insights?.length || 0,
     }),
     [
-      crossGroupMetrics,
-      orchestrationState,
-      activePipelines,
-      systemHealth,
-      performanceMetrics,
-      collaborationSessions,
-      insights,
+      // Only track essential metrics that actually change
+      crossGroupMetrics?.totalAssets,
+      crossGroupMetrics?.compliance?.overallScore,
+      systemHealth?.performance?.score,
+      orchestrationState?.activeWorkflows,
+      Object.keys(activePipelines || {}).length,
+      performanceMetrics?.throughput?.operationsPerSecond,
+      collaborationSessions?.length,
+      insights?.length,
     ]
   );
 
@@ -571,50 +704,87 @@ export const RacineMainManagerSPA: React.FC = () => {
       case ViewMode.DASHBOARD:
         return (
           <div className="space-y-8">
-            {/* System Schema Visualization */}
+                                        {/* System Schema Visualization - With Error Boundary */}
+                            <motion.section
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              className="space-y-4"
+                            >
+                              <div className="flex items-center justify-between">
+                                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                                  Data Governance Architecture
+                                </h2>
+                                <div className="flex items-center gap-2">
+                                  <Badge variant="outline" className="bg-white/50 dark:bg-gray-900/50">
+                                    Live System Map
+                                  </Badge>
+                                  <Badge
+                                    variant={systemHealth?.overall === SystemStatus.HEALTHY ? "default" : "destructive"}
+                                    className="bg-white/50 dark:bg-gray-900/50"
+                                  >
+                                    {systemHealth?.overall || "Initializing"}
+                                  </Badge>
+                                  {loadingProgress < 100 && (
+                                    <Badge variant="secondary" className="bg-blue-50 dark:bg-blue-950">
+                                      Loading {loadingProgress}%
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
+                              {dataGovernanceNodes.length > 0 ? (
+                                <DataGovernanceSchema
+                                  nodes={dataGovernanceNodes}
+                                  systemOverview={systemOverview}
+                                  onNodeClick={(nodeId) => console.log("Node clicked:", nodeId)}
+                                  onRefresh={refreshSystemHealth}
+                                />
+                              ) : (
+                                <div className="flex items-center justify-center h-64 bg-gray-50 dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
+                                  <div className="text-center space-y-2">
+                                    <div className="w-8 h-8 mx-auto border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
+                                    <p className="text-gray-600 dark:text-gray-400">
+                                      Initializing data governance schema...
+                                    </p>
+                                  </div>
+                                </div>
+                              )}
+                            </motion.section>
+
+            {/* Advanced Metrics Visualization - Progressive Loading */}
             <motion.section
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="space-y-4"
+              transition={{ delay: 0.2 }}
             >
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                  Data Governance Architecture
-                </h2>
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="bg-white/50 dark:bg-gray-900/50">
-                    Live System Map
-                  </Badge>
-                  <Badge
-                    variant={systemHealth?.overall === SystemStatus.HEALTHY ? "default" : "destructive"}
-                    className="bg-white/50 dark:bg-gray-900/50"
-                  >
-                    {systemHealth?.overall || "Unknown"}
-                  </Badge>
-                </div>
-              </div>
-              <DataGovernanceSchema
-                nodes={dataGovernanceNodes}
-                systemOverview={systemOverview}
-                onNodeClick={(nodeId) => console.log("Node clicked:", nodeId)}
-                onRefresh={refreshSystemHealth}
-              />
-            </motion.section>
-
-            {/* Advanced Metrics Visualization */}
-            {analyticsData && (
-              <motion.section
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-              >
+              {analyticsData ? (
                 <AdvancedMetricsVisualization
                   metrics={analyticsData}
                   timeRange="Last 24 hours"
                   onDrillDown={(metric) => console.log("Drill down:", metric)}
                 />
-              </motion.section>
-            )}
+              ) : enableAdvancedHooks ? (
+                <div className="flex items-center justify-center h-48 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                  <div className="text-center space-y-2">
+                    <div className="w-6 h-6 mx-auto border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
+                    <p className="text-gray-600 dark:text-gray-400 text-sm">
+                      Loading advanced analytics...
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center h-48 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/50 dark:to-purple-950/50 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <div className="text-center space-y-2">
+                    <Sparkles className="w-8 h-8 mx-auto text-blue-500" />
+                    <p className="text-blue-700 dark:text-blue-300 font-medium">
+                      Advanced Analytics Available Soon
+                    </p>
+                    <p className="text-blue-600 dark:text-blue-400 text-sm">
+                      Initializing advanced features...
+                    </p>
+                  </div>
+                </div>
+              )}
+            </motion.section>
 
             {/* Activity Overview */}
             <motion.section
@@ -699,50 +869,110 @@ export const RacineMainManagerSPA: React.FC = () => {
         );
 
       case ViewMode.WORKSPACE:
-        return <WorkspaceOrchestrator />;
+        return (
+          <Suspense fallback={<div className="flex items-center justify-center h-64"><div className="animate-spin w-8 h-8 border-2 border-blue-500/30 border-t-blue-500 rounded-full" /></div>}>
+            <WorkspaceOrchestrator />
+          </Suspense>
+        );
 
       case ViewMode.WORKFLOWS:
-        return <JobWorkflowBuilder />;
+        return (
+          <Suspense fallback={<div className="flex items-center justify-center h-64"><div className="animate-spin w-8 h-8 border-2 border-blue-500/30 border-t-blue-500 rounded-full" /></div>}>
+            <JobWorkflowBuilder />
+          </Suspense>
+        );
 
       case ViewMode.PIPELINES:
-        return <PipelineDesigner />;
+        return (
+          <Suspense fallback={<div className="flex items-center justify-center h-64"><div className="animate-spin w-8 h-8 border-2 border-blue-500/30 border-t-blue-500 rounded-full" /></div>}>
+            <PipelineDesigner />
+          </Suspense>
+        );
 
       case ViewMode.AI_ASSISTANT:
-        return <AIAssistantInterface />;
+        return (
+          <Suspense fallback={<div className="flex items-center justify-center h-64"><div className="animate-spin w-8 h-8 border-2 border-blue-500/30 border-t-blue-500 rounded-full" /></div>}>
+            <AIAssistantInterface />
+          </Suspense>
+        );
 
       case ViewMode.ACTIVITY:
-        return <ActivityTrackingHub />;
+        return (
+          <Suspense fallback={<div className="flex items-center justify-center h-64"><div className="animate-spin w-8 h-8 border-2 border-blue-500/30 border-t-blue-500 rounded-full" /></div>}>
+            <ActivityTrackingHub />
+          </Suspense>
+        );
 
       case ViewMode.COLLABORATION:
-        return <MasterCollaborationHub />;
+        return (
+          <Suspense fallback={<div className="flex items-center justify-center h-64"><div className="animate-spin w-8 h-8 border-2 border-blue-500/30 border-t-blue-500 rounded-full" /></div>}>
+            <MasterCollaborationHub />
+          </Suspense>
+        );
 
       case ViewMode.SETTINGS:
-        return <UserProfileManager />;
+        return (
+          <Suspense fallback={<div className="flex items-center justify-center h-64"><div className="animate-spin w-8 h-8 border-2 border-blue-500/30 border-t-blue-500 rounded-full" /></div>}>
+            <UserProfileManager />
+          </Suspense>
+        );
 
-      // Group SPA views
+      // Group SPA views - Wrapped in Suspense
       case ViewMode.DATA_SOURCES:
-        return <DataSourcesSPAOrchestrator />;
+        return (
+          <Suspense fallback={<div className="flex items-center justify-center h-64"><div className="animate-spin w-8 h-8 border-2 border-blue-500/30 border-t-blue-500 rounded-full" /></div>}>
+            <DataSourcesSPAOrchestrator />
+          </Suspense>
+        );
 
       case ViewMode.SCAN_RULE_SETS:
-        return <ScanRuleSetsSPAOrchestrator />;
+        return (
+          <Suspense fallback={<div className="flex items-center justify-center h-64"><div className="animate-spin w-8 h-8 border-2 border-blue-500/30 border-t-blue-500 rounded-full" /></div>}>
+            <ScanRuleSetsSPAOrchestrator />
+          </Suspense>
+        );
 
       case ViewMode.CLASSIFICATIONS:
-        return <ClassificationsSPAOrchestrator />;
+        return (
+          <Suspense fallback={<div className="flex items-center justify-center h-64"><div className="animate-spin w-8 h-8 border-2 border-blue-500/30 border-t-blue-500 rounded-full" /></div>}>
+            <ClassificationsSPAOrchestrator />
+          </Suspense>
+        );
 
       case ViewMode.COMPLIANCE_RULES:
-        return <ComplianceRuleSPAOrchestrator />;
+        return (
+          <Suspense fallback={<div className="flex items-center justify-center h-64"><div className="animate-spin w-8 h-8 border-2 border-blue-500/30 border-t-blue-500 rounded-full" /></div>}>
+            <ComplianceRuleSPAOrchestrator />
+          </Suspense>
+        );
 
       case ViewMode.ADVANCED_CATALOG:
-        return <AdvancedCatalogSPAOrchestrator />;
+        return (
+          <Suspense fallback={<div className="flex items-center justify-center h-64"><div className="animate-spin w-8 h-8 border-2 border-blue-500/30 border-t-blue-500 rounded-full" /></div>}>
+            <AdvancedCatalogSPAOrchestrator />
+          </Suspense>
+        );
 
       case ViewMode.SCAN_LOGIC:
-        return <ScanLogicSPAOrchestrator />;
+        return (
+          <Suspense fallback={<div className="flex items-center justify-center h-64"><div className="animate-spin w-8 h-8 border-2 border-blue-500/30 border-t-blue-500 rounded-full" /></div>}>
+            <ScanLogicSPAOrchestrator />
+          </Suspense>
+        );
 
       case ViewMode.RBAC_SYSTEM:
-        return <RBACSystemSPAOrchestrator />;
+        return (
+          <Suspense fallback={<div className="flex items-center justify-center h-64"><div className="animate-spin w-8 h-8 border-2 border-blue-500/30 border-t-blue-500 rounded-full" /></div>}>
+            <RBACSystemSPAOrchestrator />
+          </Suspense>
+        );
 
       default:
-        return <IntelligentDashboardOrchestrator />;
+        return (
+          <Suspense fallback={<div className="flex items-center justify-center h-64"><div className="animate-spin w-8 h-8 border-2 border-blue-500/30 border-t-blue-500 rounded-full" /></div>}>
+            <IntelligentDashboardOrchestrator />
+          </Suspense>
+        );
     }
   }, [
     currentView,
@@ -796,7 +1026,7 @@ export const RacineMainManagerSPA: React.FC = () => {
                   maxHistoryItems={50}
                 >
                   <TooltipProvider>
-                    {/* Loading State */}
+                    {/* Fast Loading State - Only for Critical User Data */}
                     {showLoading && (
                       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30 dark:from-gray-900 dark:via-blue-950/30 dark:to-purple-950/30 flex items-center justify-center">
                         <motion.div
@@ -806,21 +1036,51 @@ export const RacineMainManagerSPA: React.FC = () => {
                         >
                           <motion.div
                             animate={{ rotate: 360 }}
-                            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                            className="w-20 h-20 mx-auto"
+                            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                            className="w-16 h-16 mx-auto"
                           >
                             <div className="w-full h-full border-4 border-blue-500/30 border-t-blue-500 rounded-full" />
                           </motion.div>
-                          <div className="space-y-3">
-                            <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
-                              Initializing Enterprise Data Governance Platform
+                          <div className="space-y-2">
+                            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                              Authenticating User
                             </h2>
-                            <p className="text-gray-600 dark:text-gray-400 max-w-md">
-                              Loading advanced analytics, AI intelligence, security systems, and cross-group integrations...
+                            <p className="text-gray-600 dark:text-gray-400 text-sm">
+                              Just a moment while we verify your credentials...
                             </p>
                           </div>
                         </motion.div>
                       </div>
+                    )}
+
+                    {/* Progressive Loading Indicator - Non-blocking */}
+                    {!showLoading && loadingProgress < 100 && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -50 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 rounded-lg px-4 py-2 shadow-lg"
+                      >
+                        <div className="flex items-center gap-3">
+                          <motion.div
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                            className="w-4 h-4"
+                          >
+                            <div className="w-full h-full border-2 border-blue-500/30 border-t-blue-500 rounded-full" />
+                          </motion.div>
+                          <span className="text-sm text-gray-700 dark:text-gray-300">
+                            Loading advanced features... {loadingProgress}%
+                          </span>
+                          <div className="w-20 h-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                            <motion.div
+                              className="h-full bg-blue-500"
+                              initial={{ width: 0 }}
+                              animate={{ width: `${loadingProgress}%` }}
+                              transition={{ duration: 0.5 }}
+                            />
+                          </div>
+                        </div>
+                      </motion.div>
                     )}
 
                     {/* Error State */}
