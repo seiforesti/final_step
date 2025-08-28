@@ -28,7 +28,7 @@ import type {
 } from '../../../../types/racine-core.types';
 
 import { useClassifications } from '../../../../hooks/useClassifications';
-import { useWorkspaceManagement } from '../../../../hooks/useWorkspaceManagement';
+import { useWorkspaceManagement } from '../hooks/optimized/useOptimizedWorkspaceManagement';
 
 interface QuickClassificationMetricsProps {
   isVisible?: boolean;

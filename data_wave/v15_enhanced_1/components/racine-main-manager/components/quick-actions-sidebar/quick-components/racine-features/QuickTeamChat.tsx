@@ -74,10 +74,10 @@ import { Switch } from '@/components/ui/switch';
 import { MessageSquare, Users, Send, Plus, Search, Filter, Settings, Phone, Video, Paperclip, Smile, Mic, MicOff, Camera, CameraOff, Share, Edit, Trash, Reply, Forward, Star, Pin, Copy, Download, Upload, X, Check, CheckCheck, Clock, AlertCircle, Info, MoreHorizontal, ChevronDown, ChevronRight, ArrowRight, ArrowLeft, Maximize2, Minimize2, Volume2, VolumeX, Bell, BellOff, Hash, AtSign, Eye, EyeOff, Lock, Unlock, Globe, Zap, Activity, TrendingUp, BarChart3, PieChart, Calendar, Clock3, UserPlus, UserMinus, Shield, ShieldCheckIcon, FileText, Image, FileVideo, FileAudio, File, Link, ExternalLink, Workflow, GitBranch, Target, Flag, Bookmark, Tag, Archive, RefreshCw, Download as DownloadIcon, Upload as UploadIcon, Save, Share2, Heart, ThumbsUp, ThumbsDown, Laugh, Angry, Frown,  } from 'lucide-react';
 
 // Racine hooks and services
-import { useWorkspaceManagement } from '@/components/racine-main-manager/hooks/useWorkspaceManagement';
-import { useUserManagement } from '@/components/racine-main-manager/hooks/useUserManagement';
+import { useWorkspaceManagement } from '../hooks/optimized/useOptimizedWorkspaceManagement';
+import { useUserManagement } from '../hooks/optimized/useOptimizedUserManagement';
 import { useAIAssistant } from '@/components/racine-main-manager/hooks/useAIAssistant';
-import { useCrossGroupIntegration } from '@/components/racine-main-manager/hooks/useCrossGroupIntegration';
+import { useCrossGroupIntegration } from '../hooks/optimized/useOptimizedCrossGroupIntegration';
 import { useActivityTracking } from '@/components/racine-main-manager/hooks/useActivityTracking';
 import { useCollaboration } from '@/components/racine-main-manager/hooks/useCollaboration';
 

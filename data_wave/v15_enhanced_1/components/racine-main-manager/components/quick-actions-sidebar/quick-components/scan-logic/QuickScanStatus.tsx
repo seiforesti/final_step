@@ -32,10 +32,10 @@ import {
 import { Activity, Play, Pause, StopCircle, Clock, CheckCircle, AlertTriangle, X, RefreshCw, Database, Shield, Target, Eye, BarChart3, Zap, Brain, Sparkles, Search, Filter, Download, Settings, Info, TrendingUp, TrendingDown, Calendar, User, Users, Globe, FileText, Table, Network, Layers, GitBranch, Route, Workflow, Component, Fingerprint, Radar, Focus, Scan, Plus, Minus, Edit, Trash, Copy, Share, ExternalLink, MoreHorizontal, ChevronDown, ChevronRight, Maximize, Minimize } from 'lucide-react';
 
 import { useScanLogic } from '../../../../hooks/useScanLogic';
-import { useWorkspaceManagement } from '../../../../hooks/useWorkspaceManagement';
-import { useUserManagement } from '../../../../hooks/useUserManagement';
+import { useWorkspaceManagement } from '../hooks/optimized/useOptimizedWorkspaceManagement';
+import { useUserManagement } from '../hooks/optimized/useOptimizedUserManagement';
 import { useAIAssistant } from '../../../../hooks/useAIAssistant';
-import { useCrossGroupIntegration } from '../../../../hooks/useCrossGroupIntegration';
+import { useCrossGroupIntegration } from '../hooks/optimized/useOptimizedCrossGroupIntegration';
 import { useActivityTracking } from '../../../../hooks/useActivityTracking';
 
 interface ScanExecution {

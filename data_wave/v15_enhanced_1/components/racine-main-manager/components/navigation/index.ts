@@ -49,10 +49,11 @@ export {
   NavbarSystemStatus
 } from './AppNavbar';
 
-// Adaptive Sidebar
-export { default as AppSidebar } from './AppSidebar';
+// Enterprise Adaptive Sidebar
+export { default as AppSidebar } from './EnterpriseAppSidebar';
+export { EnterpriseAppSidebar as AppSidebar } from './EnterpriseAppSidebar';
 export { 
-  AppSidebar,
+  EnterpriseAppSidebar,
   useSidebarState,
   useSidebarConfiguration,
   useSidebarAnalytics,
@@ -62,7 +63,7 @@ export {
   SidebarCollapsibleSection,
   SidebarSearchFilter,
   SidebarCustomization
-} from './AppSidebar';
+} from './EnterpriseAppSidebar';
 
 // Contextual Breadcrumbs
 export { default as ContextualBreadcrumbs } from './ContextualBreadcrumbs';
@@ -884,6 +885,7 @@ export default {
   
   // Components
   AppNavbar,
+  EnterpriseAppSidebar,
   AppSidebar,
   ContextualBreadcrumbs,
   GlobalSearchInterface,

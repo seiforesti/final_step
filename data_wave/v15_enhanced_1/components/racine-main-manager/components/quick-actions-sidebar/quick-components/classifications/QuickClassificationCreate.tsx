@@ -38,8 +38,8 @@ import type {
 } from '../../../../types/racine-core.types';
 
 import { useClassifications } from '../../../../hooks/useClassifications';
-import { useWorkspaceManagement } from '../../../../hooks/useWorkspaceManagement';
-import { useUserManagement } from '../../../../hooks/useUserManagement';
+import { useWorkspaceManagement } from '../hooks/optimized/useOptimizedWorkspaceManagement';
+import { useUserManagement } from '../hooks/optimized/useOptimizedUserManagement';
 import { useAIAssistant } from '../../../../hooks/useAIAssistant';
 
 interface QuickClassificationCreateProps {

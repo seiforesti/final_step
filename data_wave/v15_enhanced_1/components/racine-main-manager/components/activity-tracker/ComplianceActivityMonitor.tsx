@@ -81,7 +81,7 @@ import {
 } from 'recharts';
 
 // Hooks and Services
-import { useActivityTracker } from '../../hooks/useActivityTracker';
+import { useActivityTracker } from '../hooks/optimized/useOptimizedActivityTracker';
 import { complianceActivityAPI } from '../../services/compliance-activity-apis';
 
 // Types

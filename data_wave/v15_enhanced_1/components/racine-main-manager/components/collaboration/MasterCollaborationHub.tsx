@@ -64,9 +64,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 // Backend Integration
 import { useCollaboration } from '../../hooks/useCollaboration';
 import { useRacineOrchestration } from '../../hooks/useRacineOrchestration';
-import { useCrossGroupIntegration } from '../../hooks/useCrossGroupIntegration';
-import { useUserManagement } from '../../hooks/useUserManagement';
-import { useWorkspaceManagement } from '../../hooks/useWorkspaceManagement';
+import { useCrossGroupIntegration } from '../hooks/optimized/useOptimizedCrossGroupIntegration';
+import { useUserManagement } from '../hooks/optimized/useOptimizedUserManagement';
+import { useWorkspaceManagement } from '../hooks/optimized/useOptimizedWorkspaceManagement';
 
 // Types
 import {

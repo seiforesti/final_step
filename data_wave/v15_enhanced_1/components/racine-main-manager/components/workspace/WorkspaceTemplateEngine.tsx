@@ -121,10 +121,10 @@ import { toast } from '@/components/ui/use-toast';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 
 // Backend Integration
-import { useWorkspaceManagement } from '../../hooks/useWorkspaceManagement';
+import { useWorkspaceManagement } from '../hooks/optimized/useOptimizedWorkspaceManagement';
 import { useRacineOrchestration } from '../../hooks/useRacineOrchestration';
-import { useCrossGroupIntegration } from '../../hooks/useCrossGroupIntegration';
-import { useUserManagement } from '../../hooks/useUserManagement';
+import { useCrossGroupIntegration } from '../hooks/optimized/useOptimizedCrossGroupIntegration';
+import { useUserManagement } from '../hooks/optimized/useOptimizedUserManagement';
 import { useAIAssistant } from '../../hooks/useAIAssistant';
 import { useJobWorkflowSpace } from '../../hooks/useJobWorkflowSpace';
 import { usePipelineManagement } from '../../hooks/usePipelineManagement';

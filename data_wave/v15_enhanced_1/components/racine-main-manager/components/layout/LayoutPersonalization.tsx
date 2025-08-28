@@ -78,7 +78,7 @@ import { aiAssistantAPI } from '../../services/ai-assistant-apis';
 import { workspaceManagementAPI } from '../../services/workspace-management-apis';
 
 // Racine Hook Imports
-import { useUserManagement } from '../../hooks/useUserManagement';
+import { useUserManagement } from '../hooks/optimized/useOptimizedUserManagement';
 import { useAIAssistant } from '../../hooks/useAIAssistant';
 import { usePerformanceMonitor } from '../../hooks/usePerformanceMonitor';
 

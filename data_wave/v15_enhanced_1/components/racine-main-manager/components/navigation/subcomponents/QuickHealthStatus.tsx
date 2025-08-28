@@ -24,9 +24,9 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 
 // Import racine foundation layers (already implemented)
 import { useRacineOrchestration } from '../../../hooks/useRacineOrchestration'
-import { useCrossGroupIntegration } from '../../../hooks/useCrossGroupIntegration'
-import { useActivityTracker } from '../../../hooks/useActivityTracker'
-import { useUserManagement } from '../../../hooks/useUserManagement'
+import { useCrossGroupIntegration } from '../hooks/optimized/useOptimizedCrossGroupIntegration'
+import { useActivityTracker } from '../hooks/optimized/useOptimizedActivityTracker'
+import { useUserManagement } from '../hooks/optimized/useOptimizedUserManagement'
 
 // Import types (already implemented)
 import {

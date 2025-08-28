@@ -25,10 +25,10 @@ import { Textarea } from '@/components/ui/textarea';
 // Racine System Imports
 import { useAIAssistant } from '../../hooks/useAIAssistant';
 import { useRacineOrchestration } from '../../hooks/useRacineOrchestration';
-import { useCrossGroupIntegration } from '../../hooks/useCrossGroupIntegration';
-import { useUserManagement } from '../../hooks/useUserManagement';
-import { useWorkspaceManagement } from '../../hooks/useWorkspaceManagement';
-import { useActivityTracker } from '../../hooks/useActivityTracker';
+import { useCrossGroupIntegration } from '../hooks/optimized/useOptimizedCrossGroupIntegration';
+import { useUserManagement } from '../hooks/optimized/useOptimizedUserManagement';
+import { useWorkspaceManagement } from '../hooks/optimized/useOptimizedWorkspaceManagement';
+import { useActivityTracker } from '../hooks/optimized/useOptimizedActivityTracker';
 import { useCollaboration } from '../../hooks/useCollaboration';
 
 // Types

@@ -31,10 +31,10 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { cn } from '@/lib/utils';
 
 // Racine Integration
-import { useUserPreferences } from '../../hooks/useUserPreferences';
+import { useUserPreferences } from '../hooks/optimized/useOptimizedUserPreferences';
 import { useRacineOrchestration } from '../../hooks/useRacineOrchestration';
-import { useWorkspaceManagement } from '../../hooks/useWorkspaceManagement';
-import { useNavigationAnalytics } from '../../hooks/useNavigationAnalytics';
+import { useWorkspaceManagement } from '../hooks/optimized/useOptimizedWorkspaceManagement';
+import { useNavigationAnalytics } from '../hooks/optimized/useOptimizedNavigationAnalytics';
 
 // Type Definitions
 import {

@@ -43,10 +43,10 @@ import type {
 } from '../../../types/racine-core.types';
 
 import { useScanRuleSets } from '../../../../hooks/useScanRuleSets';
-import { useWorkspaceManagement } from '../../../../hooks/useWorkspaceManagement';
-import { useUserManagement } from '../../../../hooks/useUserManagement';
+import { useWorkspaceManagement } from '../hooks/optimized/useOptimizedWorkspaceManagement';
+import { useUserManagement } from '../hooks/optimized/useOptimizedUserManagement';
 import { useAIAssistant } from '../../../../hooks/useAIAssistant';
-import { useCrossGroupIntegration } from '../../../../hooks/useCrossGroupIntegration';
+import { useCrossGroupIntegration } from '../hooks/optimized/useOptimizedCrossGroupIntegration';
 
 // Component props interface
 interface QuickRuleCreateProps {

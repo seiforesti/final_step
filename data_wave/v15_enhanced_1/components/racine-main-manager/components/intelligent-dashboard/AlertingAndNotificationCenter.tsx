@@ -35,7 +35,7 @@ import {
 import { useDashboardAPIs } from '../../hooks/useDashboardAPIs';
 import { useRealtimeUpdates } from '../../hooks/useRealtimeUpdates';
 import { useRacineOrchestration } from '../../hooks/useRacineOrchestration';
-import { useCrossGroupIntegration } from '../../hooks/useCrossGroupIntegration';
+import { useCrossGroupIntegration } from '../hooks/optimized/useOptimizedCrossGroupIntegration';
 import { useAIAssistant } from '../../hooks/useAIAssistant';
 
 // Enhanced interfaces for alerting system

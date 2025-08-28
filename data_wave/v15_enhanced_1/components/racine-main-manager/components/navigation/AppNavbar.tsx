@@ -32,13 +32,13 @@ import { Progress } from '@/components/ui/progress'
 
 // Import racine foundation layers (already implemented)
 import { useRacineOrchestration } from '../../hooks/useRacineOrchestration'
-import { useUserManagement } from '../../hooks/useUserManagement'
-import { useWorkspaceManagement } from '../../hooks/useWorkspaceManagement'
-import { useCrossGroupIntegration } from '../../hooks/useCrossGroupIntegration'
-import { useActivityTracker } from '../../hooks/useActivityTracker'
+import { useUserManagement } from '../hooks/optimized/useOptimizedUserManagement'
+import { useWorkspaceManagement } from '../hooks/optimized/useOptimizedWorkspaceManagement'
+import { useCrossGroupIntegration } from '../hooks/optimized/useOptimizedCrossGroupIntegration'
+import { useActivityTracker } from '../hooks/optimized/useOptimizedActivityTracker'
 import { useNotificationManager } from '../../hooks/useNotificationManager'
 import { useGlobalSearch } from '../../hooks/useGlobalSearch'
-import { useQuickActions } from '../../hooks/useQuickActions'
+import { useQuickActions } from '../hooks/optimized/useOptimizedQuickActions'
 
 // Router Integration - ENHANCED: Complete routing integration
 import { useRacineRouter } from '../routing/RacineRouter'

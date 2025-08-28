@@ -67,10 +67,10 @@ import { Activity, Clock, Filter, Search, Download, Upload, FileText, Users, Shi
 
 // Racine Hooks
 import { useActivityTracking } from '@/components/racine-main-manager/hooks/useActivityTracking';
-import { useWorkspaceManagement } from '@/components/racine-main-manager/hooks/useWorkspaceManagement';
-import { useUserManagement } from '@/components/racine-main-manager/hooks/useUserManagement';
+import { useWorkspaceManagement } from '../hooks/optimized/useOptimizedWorkspaceManagement';
+import { useUserManagement } from '../hooks/optimized/useOptimizedUserManagement';
 import { useAIAssistant } from '@/components/racine-main-manager/hooks/useAIAssistant';
-import { useCrossGroupIntegration } from '@/components/racine-main-manager/hooks/useCrossGroupIntegration';
+import { useCrossGroupIntegration } from '../hooks/optimized/useOptimizedCrossGroupIntegration';
 
 // SPA Integration Hooks (wired to Racine orchestrator hooks)
 import { useDataSources } from '@/components/racine-main-manager/hooks/useDataSources';

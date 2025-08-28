@@ -87,10 +87,10 @@ import { crossGroupIntegrationAPI } from '../../services/cross-group-integration
 import { performanceMonitoringAPI } from '../../services/performance-monitoring-apis';
 
 // Racine Hook Imports
-import { useWorkspaceManagement } from '../../hooks/useWorkspaceManagement';
+import { useWorkspaceManagement } from '../hooks/optimized/useOptimizedWorkspaceManagement';
 import { useCollaboration } from '../../hooks/useCollaboration';
 import { useAIAssistant } from '../../hooks/useAIAssistant';
-import { useCrossGroupIntegration } from '../../hooks/useCrossGroupIntegration';
+import { useCrossGroupIntegration } from '../hooks/optimized/useOptimizedCrossGroupIntegration';
 import { usePerformanceMonitor } from '../../hooks/usePerformanceMonitor';
 
 // Racine Utility Imports

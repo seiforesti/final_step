@@ -21,10 +21,10 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { UserPlus, Users, Shield, Mail, Phone, Calendar, Globe, Building, Department, Key, Lock, Unlock, Eye, EyeOff, Check, X, AlertTriangle, Info, RefreshCw, Save, Zap, Brain, Sparkles, Target, Activity, Settings, Star } from 'lucide-react';
 
 import { useRBACSystem as useRBAC } from '../../../../hooks/useRBACSystem';
-import { useWorkspaceManagement } from '../../../../hooks/useWorkspaceManagement';
-import { useUserManagement } from '../../../../hooks/useUserManagement';
+import { useWorkspaceManagement } from '../hooks/optimized/useOptimizedWorkspaceManagement';
+import { useUserManagement } from '../hooks/optimized/useOptimizedUserManagement';
 import { useAIAssistant } from '../../../../hooks/useAIAssistant';
-import { useCrossGroupIntegration } from '../../../../hooks/useCrossGroupIntegration';
+import { useCrossGroupIntegration } from '../hooks/optimized/useOptimizedCrossGroupIntegration';
 import { useActivityTracking } from '../../../../hooks/useActivityTracking';
 
 interface QuickUserCreateProps {

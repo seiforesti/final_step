@@ -66,9 +66,9 @@ import { Brain, Send, Mic, MicOff, Volume2, VolumeX, Copy, Download, Share, More
 
 // Import hooks and services
 import { useAIAssistant } from '../../../../hooks/useAIAssistant';
-import { useWorkspaceManagement } from '../../../../hooks/useWorkspaceManagement';
-import { useUserManagement } from '../../../../hooks/useUserManagement';
-import { useCrossGroupIntegration } from '../../../../hooks/useCrossGroupIntegration';
+import { useWorkspaceManagement } from '../hooks/optimized/useOptimizedWorkspaceManagement';
+import { useUserManagement } from '../hooks/optimized/useOptimizedUserManagement';
+import { useCrossGroupIntegration } from '../hooks/optimized/useOptimizedCrossGroupIntegration';
 import { useActivityTracking } from '../../../../hooks/useActivityTracking';
 import { usePipelineManager } from '../../../../hooks/usePipelineManager';
 import { useJobWorkflow } from '../../../../hooks/useJobWorkflow';

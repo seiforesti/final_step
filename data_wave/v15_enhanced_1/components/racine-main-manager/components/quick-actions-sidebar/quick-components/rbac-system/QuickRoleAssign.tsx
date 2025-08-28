@@ -32,10 +32,10 @@ import {
 import { Search, UserPlus, Crown, Users, X, Check, AlertTriangle, Eye, Brain, Sparkles, Activity, TrendingUp, BarChart3, Target, Clock, Calendar, User, Globe, Database, Settings, RefreshCw, Download, Upload, Save, Copy, Edit, Trash, Plus, Minus, Info, HelpCircle, Star, Flag, Zap, Network, Layers, GitBranch, Route, Workflow, Component, Fingerprint, Shield, Key, Lock, Unlock, Filter, SortAsc, ChevronDown, ChevronRight, MoreHorizontal } from 'lucide-react';
 
 import { useRBACSystem as useRBAC } from '../../../../hooks/useRBACSystem';
-import { useWorkspaceManagement } from '../../../../hooks/useWorkspaceManagement';
-import { useUserManagement } from '../../../../hooks/useUserManagement';
+import { useWorkspaceManagement } from '../hooks/optimized/useOptimizedWorkspaceManagement';
+import { useUserManagement } from '../hooks/optimized/useOptimizedUserManagement';
 import { useAIAssistant } from '../../../../hooks/useAIAssistant';
-import { useCrossGroupIntegration } from '../../../../hooks/useCrossGroupIntegration';
+import { useCrossGroupIntegration } from '../hooks/optimized/useOptimizedCrossGroupIntegration';
 import { useActivityTracking } from '../../../../hooks/useActivityTracking';
 
 interface User {

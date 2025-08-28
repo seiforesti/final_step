@@ -101,10 +101,10 @@ import { BarChart3, LineChart, PieChart, Activity, TrendingUp, TrendingDown, Zap
 // Custom Hooks and Services
 import { useDashboardAPIs } from '../../hooks/useDashboardAPIs';
 import { useRacineOrchestration } from '../../hooks/useRacineOrchestration';
-import { useCrossGroupIntegration } from '../../hooks/useCrossGroupIntegration';
+import { useCrossGroupIntegration } from '../hooks/optimized/useOptimizedCrossGroupIntegration';
 import { useAIAssistant } from '../../hooks/useAIAssistant';
-import { useWorkspaceManagement } from '../../hooks/useWorkspaceManagement';
-import { useUserManagement } from '../../hooks/useUserManagement';
+import { useWorkspaceManagement } from '../hooks/optimized/useOptimizedWorkspaceManagement';
+import { useUserManagement } from '../hooks/optimized/useOptimizedUserManagement';
 import { useActivityTracking } from '../../hooks/useActivityTracking';
 import { useRealtimeUpdates } from '../../hooks/useRealtimeUpdates';
 

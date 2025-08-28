@@ -34,7 +34,7 @@ import type {
 } from '../../../types/racine-core.types';
 
 import { useScanRuleSets } from '../../../../hooks/useScanRuleSets';
-import { useWorkspaceManagement } from '../../../../hooks/useWorkspaceManagement';
+import { useWorkspaceManagement } from '../hooks/optimized/useOptimizedWorkspaceManagement';
 import { useDataSources } from '../../../../hooks/useDataSources';
 
 interface QuickRuleTestProps {

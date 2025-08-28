@@ -44,12 +44,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 // Import racine foundation layers (already implemented)
 import { useGlobalSearch } from '../../hooks/useGlobalSearch'
 import { useRacineOrchestration } from '../../hooks/useRacineOrchestration'
-import { useCrossGroupIntegration } from '../../hooks/useCrossGroupIntegration'
-import { useUserManagement } from '../../hooks/useUserManagement'
-import { useActivityTracker } from '../../hooks/useActivityTracker'
+import { useCrossGroupIntegration } from '../hooks/optimized/useOptimizedCrossGroupIntegration'
+import { useUserManagement } from '../hooks/optimized/useOptimizedUserManagement'
+import { useActivityTracker } from '../hooks/optimized/useOptimizedActivityTracker'
 import { useAIAssistant } from '../../hooks/useAIAssistant'
 import { useSearchAnalytics } from '../../hooks/useSearchAnalytics'
-import { useUserPreferences } from '../../hooks/useUserPreferences'
+import { useUserPreferences } from '../hooks/optimized/useOptimizedUserPreferences'
 
 // Import types (already implemented)
 import {

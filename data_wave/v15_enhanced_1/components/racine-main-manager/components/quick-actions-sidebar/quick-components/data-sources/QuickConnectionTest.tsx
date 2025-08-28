@@ -21,8 +21,8 @@ import { Textarea } from '@/components/ui/textarea'
 // Import foundation layers (100% backend integration)
 import { useDataSources } from '../../../../hooks/useDataSources'
 import { useConnectionValidator } from '../../../../hooks/useConnectionValidator'
-import { useUserManagement } from '../../../../hooks/useUserManagement'
-import { useActivityTracker } from '../../../../hooks/useActivityTracker'
+import { useUserManagement } from '../hooks/optimized/useOptimizedUserManagement'
+import { useActivityTracker } from '../hooks/optimized/useOptimizedActivityTracker'
 import { useNotificationManager } from '../../../../hooks/useNotificationManager'
 import { useRacineOrchestration } from '../../../../hooks/useRacineOrchestration'
 
