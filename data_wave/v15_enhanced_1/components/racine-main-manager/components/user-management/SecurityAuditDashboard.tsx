@@ -174,9 +174,9 @@ import {
 } from 'recharts';
 
 // Racine hooks and services
-import { useUserManagement } from '../../hooks/useUserManagement';
+import { useUserManagement } from '../hooks/optimized/useOptimizedUserManagement';
 import { useRBACSystem } from '../../hooks/useRBACSystem';
-import { useWorkspaceManagement } from '../../hooks/useWorkspaceManagement';
+import { useWorkspaceManagement } from '../hooks/optimized/useOptimizedWorkspaceManagement';
 import { useSecurityAudit } from '../../hooks/useSecurityAudit';
 
 // Racine types

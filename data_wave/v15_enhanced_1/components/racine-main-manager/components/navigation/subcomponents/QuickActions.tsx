@@ -28,11 +28,11 @@ import {
 import { Separator } from '@/components/ui/separator'
 
 // Import racine foundation layers (already implemented)
-import { useQuickActions } from '../../../hooks/useQuickActions'
-import { useCrossGroupIntegration } from '../../../hooks/useCrossGroupIntegration'
-import { useUserManagement } from '../../../hooks/useUserManagement'
-import { useActivityTracker } from '../../../hooks/useActivityTracker'
-import { useWorkspaceManagement } from '../../../hooks/useWorkspaceManagement'
+import { useQuickActions } from '../hooks/optimized/useOptimizedQuickActions'
+import { useCrossGroupIntegration } from '../hooks/optimized/useOptimizedCrossGroupIntegration'
+import { useUserManagement } from '../hooks/optimized/useOptimizedUserManagement'
+import { useActivityTracker } from '../hooks/optimized/useOptimizedActivityTracker'
+import { useWorkspaceManagement } from '../hooks/optimized/useOptimizedWorkspaceManagement'
 
 // Import types (already implemented)
 import {

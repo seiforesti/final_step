@@ -115,8 +115,8 @@ import { aiAssistantAPI } from "../../services/ai-assistant-apis";
 
 // Racine Hook Imports
 import { useRacineOrchestration } from "../../hooks/useRacineOrchestration";
-import { useWorkspaceManagement } from "../../hooks/useWorkspaceManagement";
-import { useCrossGroupIntegration } from "../../hooks/useCrossGroupIntegration";
+import { useWorkspaceManagement } from '../hooks/optimized/useOptimizedWorkspaceManagement';
+import { useCrossGroupIntegration } from '../hooks/optimized/useOptimizedCrossGroupIntegration';
 import { useAIAssistant } from "../../hooks/useAIAssistant";
 import { useLayoutManager } from "../../hooks/useLayoutManager";
 import { usePerformanceMonitor } from "../../hooks/usePerformanceMonitor";

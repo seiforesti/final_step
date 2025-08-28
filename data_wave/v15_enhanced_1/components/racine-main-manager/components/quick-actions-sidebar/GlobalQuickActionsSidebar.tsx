@@ -72,12 +72,12 @@ import {
 } from '@/components/ui/collapsible'
 
 // Import racine foundation layers (already implemented)
-import { useQuickActions } from '../../hooks/useQuickActions'
-import { useCrossGroupIntegration } from '../../hooks/useCrossGroupIntegration'
-import { useUserManagement } from '../../hooks/useUserManagement'
-import { useWorkspaceManagement } from '../../hooks/useWorkspaceManagement'
-import { useActivityTracker } from '../../hooks/useActivityTracker'
-import { useUserPreferences } from '../../hooks/useUserPreferences'
+import { useQuickActions } from '../hooks/optimized/useOptimizedQuickActions'
+import { useCrossGroupIntegration } from '../hooks/optimized/useOptimizedCrossGroupIntegration'
+import { useUserManagement } from '../hooks/optimized/useOptimizedUserManagement'
+import { useWorkspaceManagement } from '../hooks/optimized/useOptimizedWorkspaceManagement'
+import { useActivityTracker } from '../hooks/optimized/useOptimizedActivityTracker'
+import { useUserPreferences } from '../hooks/optimized/useOptimizedUserPreferences'
 import { useRacineOrchestration } from '../../hooks/useRacineOrchestration'
 
 // Import types (already implemented)
@@ -351,7 +351,7 @@ interface GlobalQuickActionsSidebarProps {
   onActionExecute?: (action: QuickAction, result: ActionResult) => void
 }
 
-export const GlobalQuickActionsSidebar: React.FC<GlobalQuickActionsSidebarProps> = ({
+export const GlobalQuickActionsSidebar: React.FC<EnterpriseQuickActionsSidebarProps> = ({
   isOpen,
   onToggle,
   currentContext = 'global',

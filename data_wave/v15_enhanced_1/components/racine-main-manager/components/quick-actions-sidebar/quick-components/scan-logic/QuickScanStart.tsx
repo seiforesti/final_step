@@ -33,10 +33,10 @@ import {
 import { Play, Pause, StopCircle, Settings, Target, Zap, Brain, Sparkles, Shield, Database, Table, FileText, Folder, Clock, Calendar, User, Users, Globe, Lock, Unlock, Eye, EyeOff, Search, Filter, RefreshCw, Download, Upload, Save, Copy, Edit, Trash, Plus, Minus, X, CheckCircle, AlertCircle, Info, HelpCircle, Star, Activity, TrendingUp, BarChart3, PieChart, Layers, Network, GitBranch, Route, Workflow, Component, Fingerprint, Radar, Crosshair, Focus, Scan, Bell } from 'lucide-react';
 
 import { useScanLogic } from '../../../../hooks/useScanLogic';
-import { useWorkspaceManagement } from '../../../../hooks/useWorkspaceManagement';
-import { useUserManagement } from '../../../../hooks/useUserManagement';
+import { useWorkspaceManagement } from '../hooks/optimized/useOptimizedWorkspaceManagement';
+import { useUserManagement } from '../hooks/optimized/useOptimizedUserManagement';
 import { useAIAssistant } from '../../../../hooks/useAIAssistant';
-import { useCrossGroupIntegration } from '../../../../hooks/useCrossGroupIntegration';
+import { useCrossGroupIntegration } from '../hooks/optimized/useOptimizedCrossGroupIntegration';
 import { useActivityTracking } from '../../../../hooks/useActivityTracking';
 import { useDataSources } from '../../../../hooks/useDataSources';
 import { useScanRuleSets } from '../../../../hooks/useScanRuleSets';

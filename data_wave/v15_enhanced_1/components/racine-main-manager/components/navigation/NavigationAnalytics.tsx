@@ -43,10 +43,10 @@ import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
 // Import racine foundation layers (already implemented)
-import { useNavigationAnalytics } from '../../hooks/useNavigationAnalytics'
-import { useCrossGroupIntegration } from '../../hooks/useCrossGroupIntegration'
-import { useUserManagement } from '../../hooks/useUserManagement'
-import { useActivityTracker } from '../../hooks/useActivityTracker'
+import { useNavigationAnalytics } from '../hooks/optimized/useOptimizedNavigationAnalytics'
+import { useCrossGroupIntegration } from '../hooks/optimized/useOptimizedCrossGroupIntegration'
+import { useUserManagement } from '../hooks/optimized/useOptimizedUserManagement'
+import { useActivityTracker } from '../hooks/optimized/useOptimizedActivityTracker'
 import { useAIAssistant } from '../../hooks/useAIAssistant'
 import { useRacineOrchestration } from '../../hooks/useRacineOrchestration'
 

@@ -37,10 +37,10 @@ import {
 import { GitBranch, Database, Table, BarChart3, FileText, Network, Layers, ArrowRight, ArrowLeft, Target, Search, Filter, RefreshCw, Download, Share, Eye, Settings, X, Maximize, Minimize, ZoomIn, ZoomOut, RotateCw, Play, Pause, AlertTriangle, Info, CheckCircle, Loader2, Clock, User, Tag, Zap, Brain, Sparkles, Activity, TrendingUp, Globe, Shield, Lock, Unlock, ExternalLink, Copy, Edit, Trash, Plus, Minus, MoreHorizontal, ChevronDown, ChevronRight, ChevronUp, MousePointer, Move, Square, Circle, Triangle, Star, Heart, Bookmark, Flag, Calendar, MapPin, Workflow, LinkIcon, Route, TreePine, Boxes, Component, Layers3, Binary, Code, Terminal } from 'lucide-react';
 
 import { useAdvancedCatalog } from '../../../../hooks/useAdvancedCatalog';
-import { useWorkspaceManagement } from '../../../../hooks/useWorkspaceManagement';
-import { useUserManagement } from '../../../../hooks/useUserManagement';
+import { useWorkspaceManagement } from '../hooks/optimized/useOptimizedWorkspaceManagement';
+import { useUserManagement } from '../hooks/optimized/useOptimizedUserManagement';
 import { useAIAssistant } from '../../../../hooks/useAIAssistant';
-import { useCrossGroupIntegration } from '../../../../hooks/useCrossGroupIntegration';
+import { useCrossGroupIntegration } from '../hooks/optimized/useOptimizedCrossGroupIntegration';
 import { useActivityTracking } from '../../../../hooks/useActivityTracking';
 import { usePipelineManagement } from '../../../../hooks/usePipelineManagement';
 

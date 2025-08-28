@@ -49,7 +49,7 @@ import {
 } from '../../../types/racine-core.types';
 
 // Racine Hook Imports
-import { useWorkspaceManagement } from '../../../hooks/useWorkspaceManagement';
+import { useWorkspaceManagement } from '../hooks/optimized/useOptimizedWorkspaceManagement';
 import { useCollaboration } from '../../../hooks/useCollaboration';
 import { useAIAssistant } from '../../../hooks/useAIAssistant';
 

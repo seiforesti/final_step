@@ -28,7 +28,7 @@ import type {
 } from '../../../types/racine-core.types';
 
 import { useScanRuleSets } from '../../../../hooks/useScanRuleSets';
-import { useWorkspaceManagement } from '../../../../hooks/useWorkspaceManagement';
+import { useWorkspaceManagement } from '../hooks/optimized/useOptimizedWorkspaceManagement';
 
 interface QuickRuleStatusProps {
   isVisible?: boolean;

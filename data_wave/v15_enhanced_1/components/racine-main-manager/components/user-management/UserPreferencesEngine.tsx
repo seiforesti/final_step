@@ -185,9 +185,9 @@ import { toast } from 'sonner';
 import { HexColorPicker, HexColorInput } from 'react-colorful';
 
 // Racine hooks and services
-import { useUserManagement } from '../../hooks/useUserManagement';
+import { useUserManagement } from '../hooks/optimized/useOptimizedUserManagement';
 import { useRBACSystem } from '../../hooks/useRBACSystem';
-import { useWorkspaceManagement } from '../../hooks/useWorkspaceManagement';
+import { useWorkspaceManagement } from '../hooks/optimized/useOptimizedWorkspaceManagement';
 import { useThemeEngine } from '../../hooks/useThemeEngine';
 
 // Racine types

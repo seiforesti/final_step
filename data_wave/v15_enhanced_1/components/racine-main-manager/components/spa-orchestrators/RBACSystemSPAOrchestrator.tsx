@@ -106,12 +106,12 @@ import { rbacAPI } from '../../services/rbac-apis';
 import { collaborationAPI } from '../../services/collaboration-apis';
 
 // Hooks
-import { useCrossGroupIntegration } from '../../hooks/useCrossGroupIntegration';
+import { useCrossGroupIntegration } from '../hooks/optimized/useOptimizedCrossGroupIntegration';
 import { useRacineOrchestration } from '../../hooks/useRacineOrchestration';
 import { useAIAssistant } from '../../hooks/useAIAssistant';
-import { useWorkspaceManagement } from '../../hooks/useWorkspaceManagement';
+import { useWorkspaceManagement } from '../hooks/optimized/useOptimizedWorkspaceManagement';
 import { useCollaboration } from '../../hooks/useCollaboration';
-import { useActivityTracker } from '../../hooks/useActivityTracker';
+import { useActivityTracker } from '../hooks/optimized/useOptimizedActivityTracker';
 
 // Enhanced RBAC State Interface
 interface EnhancedRBACState {

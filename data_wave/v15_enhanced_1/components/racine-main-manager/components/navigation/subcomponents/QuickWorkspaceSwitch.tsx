@@ -40,11 +40,11 @@ import { Separator } from '@/components/ui/separator'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
 // Import racine foundation layers (already implemented)
-import { useWorkspaceManagement } from '../../../hooks/useWorkspaceManagement'
-import { useUserManagement } from '../../../hooks/useUserManagement'
-import { useCrossGroupIntegration } from '../../../hooks/useCrossGroupIntegration'
-import { useActivityTracker } from '../../../hooks/useActivityTracker'
-import { useUserPreferences } from '../../../hooks/useUserPreferences'
+import { useWorkspaceManagement } from '../hooks/optimized/useOptimizedWorkspaceManagement'
+import { useUserManagement } from '../hooks/optimized/useOptimizedUserManagement'
+import { useCrossGroupIntegration } from '../hooks/optimized/useOptimizedCrossGroupIntegration'
+import { useActivityTracker } from '../hooks/optimized/useOptimizedActivityTracker'
+import { useUserPreferences } from '../hooks/optimized/useOptimizedUserPreferences'
 
 // Import types (already implemented)
 import {

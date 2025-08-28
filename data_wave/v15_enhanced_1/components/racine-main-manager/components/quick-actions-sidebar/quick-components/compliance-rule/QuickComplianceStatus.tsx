@@ -23,8 +23,8 @@ import { Shield, CheckCircle, XCircle, AlertTriangle, TrendingUp, TrendingDown, 
 
 // Import hooks and services
 import { useComplianceRules as useComplianceRule } from '../../../../hooks/useComplianceRules';
-import { useWorkspaceManagement } from '../../../../hooks/useWorkspaceManagement';
-import { useUserManagement } from '../../../../hooks/useUserManagement';
+import { useWorkspaceManagement } from '../hooks/optimized/useOptimizedWorkspaceManagement';
+import { useUserManagement } from '../hooks/optimized/useOptimizedUserManagement';
 import { useActivityTracking } from '../../../../hooks/useActivityTracking';
 
 // Import types

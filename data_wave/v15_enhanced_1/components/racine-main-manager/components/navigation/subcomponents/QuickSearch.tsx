@@ -30,10 +30,10 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 
 // Import racine foundation layers (already implemented)
 import { useGlobalSearch } from '../../../hooks/useGlobalSearch'
-import { useCrossGroupIntegration } from '../../../hooks/useCrossGroupIntegration'
-import { useUserManagement } from '../../../hooks/useUserManagement'
+import { useCrossGroupIntegration } from '../hooks/optimized/useOptimizedCrossGroupIntegration'
+import { useUserManagement } from '../hooks/optimized/useOptimizedUserManagement'
 import { useAIAssistant } from '../../../hooks/useAIAssistant'
-import { useActivityTracker } from '../../../hooks/useActivityTracker'
+import { useActivityTracker } from '../hooks/optimized/useOptimizedActivityTracker'
 
 // Import types (already implemented)
 import {

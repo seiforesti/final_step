@@ -54,11 +54,11 @@ import { Checkbox } from '@/components/ui/checkbox'
 
 // Import racine foundation layers (already implemented)
 import { useNotificationManager } from '../../hooks/useNotificationManager'
-import { useCrossGroupIntegration } from '../../hooks/useCrossGroupIntegration'
-import { useUserManagement } from '../../hooks/useUserManagement'
-import { useActivityTracker } from '../../hooks/useActivityTracker'
+import { useCrossGroupIntegration } from '../hooks/optimized/useOptimizedCrossGroupIntegration'
+import { useUserManagement } from '../hooks/optimized/useOptimizedUserManagement'
+import { useActivityTracker } from '../hooks/optimized/useOptimizedActivityTracker'
 import { useRealTimeSubscriptions } from '../../hooks/useRealTimeSubscriptions'
-import { useUserPreferences } from '../../hooks/useUserPreferences'
+import { useUserPreferences } from '../hooks/optimized/useOptimizedUserPreferences'
 import { useNotificationAnalytics } from '../../hooks/useNotificationAnalytics'
 
 // Import types (already implemented)

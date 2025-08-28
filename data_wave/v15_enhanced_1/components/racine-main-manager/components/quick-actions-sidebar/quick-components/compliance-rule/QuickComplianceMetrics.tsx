@@ -52,8 +52,8 @@ import { BarChart3, TrendingUp, TrendingDown, Target, Award, Clock, ArrowUpRight
 
 // Import hooks and services
 import { useComplianceRules as useComplianceRule } from '../../../../hooks/useComplianceRules';
-import { useWorkspaceManagement } from '../../../../hooks/useWorkspaceManagement';
-import { useUserManagement } from '../../../../hooks/useUserManagement';
+import { useWorkspaceManagement } from '../hooks/optimized/useOptimizedWorkspaceManagement';
+import { useUserManagement } from '../hooks/optimized/useOptimizedUserManagement';
 import { useAIAssistant } from '../../../../hooks/useAIAssistant';
 import { useActivityTracking } from '../../../../hooks/useActivityTracking';
 

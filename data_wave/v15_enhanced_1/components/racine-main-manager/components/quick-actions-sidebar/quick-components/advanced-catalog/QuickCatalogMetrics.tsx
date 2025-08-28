@@ -16,7 +16,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { BarChart3, TrendingUp, TrendingDown, Target, Award, Clock, ArrowUpRight, ArrowDownRight, Activity, Gauge, PieChart, RefreshCw, Download, X, Database, Eye, Search, Users, Heart } from 'lucide-react';
 
 import { useAdvancedCatalog } from '../../../../hooks/useAdvancedCatalog';
-import { useWorkspaceManagement } from '../../../../hooks/useWorkspaceManagement';
+import { useWorkspaceManagement } from '../hooks/optimized/useOptimizedWorkspaceManagement';
 
 interface QuickCatalogMetricsProps {
   isVisible: boolean;

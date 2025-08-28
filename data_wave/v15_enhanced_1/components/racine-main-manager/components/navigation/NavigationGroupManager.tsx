@@ -100,12 +100,12 @@ import {
 } from '../../types/racine-core.types';
 
 // Racine Hooks
-import { useWorkspaceManagement } from '../../hooks/useWorkspaceManagement';
-import { useUserManagement } from '../../hooks/useUserManagement';
-import { useCrossGroupIntegration } from '../../hooks/useCrossGroupIntegration';
+import { useWorkspaceManagement } from '../hooks/optimized/useOptimizedWorkspaceManagement';
+import { useUserManagement } from '../hooks/optimized/useOptimizedUserManagement';
+import { useCrossGroupIntegration } from '../hooks/optimized/useOptimizedCrossGroupIntegration';
 import { useRacineOrchestration } from '../../hooks/useRacineOrchestration';
-import { useUserPreferences } from '../../hooks/useUserPreferences';
-import { useNavigationAnalytics } from '../../hooks/useNavigationAnalytics';
+import { useUserPreferences } from '../hooks/optimized/useOptimizedUserPreferences';
+import { useNavigationAnalytics } from '../hooks/optimized/useOptimizedNavigationAnalytics';
 
 // Router Integration
 import { useRacineRouter } from '../routing/RacineRouter';

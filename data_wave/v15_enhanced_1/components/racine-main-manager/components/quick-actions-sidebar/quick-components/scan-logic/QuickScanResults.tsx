@@ -28,8 +28,8 @@ import {
 import { Search, Filter, Download, RefreshCw, Eye, EyeOff, X, BarChart3, PieChart, TrendingUp, TrendingDown, AlertCircle, CheckCircle, XCircle, Clock, Calendar, User, Database, Table, FileText, Shield, Target, Zap, Brain, Sparkles, Activity, Settings, Info, HelpCircle, Star, Flag, ChevronDown, ChevronRight, MoreHorizontal, Copy, Edit, Trash, Plus, Minus, ExternalLink, Share, Save, Grid, List, SortAsc, SortDesc, Maximize, Minimize } from 'lucide-react';
 
 import { useScanLogic } from '../../../../hooks/useScanLogic';
-import { useWorkspaceManagement } from '../../../../hooks/useWorkspaceManagement';
-import { useUserManagement } from '../../../../hooks/useUserManagement';
+import { useWorkspaceManagement } from '../hooks/optimized/useOptimizedWorkspaceManagement';
+import { useUserManagement } from '../hooks/optimized/useOptimizedUserManagement';
 import { useAIAssistant } from '../../../../hooks/useAIAssistant';
 import { useActivityTracking } from '../../../../hooks/useActivityTracking';
 

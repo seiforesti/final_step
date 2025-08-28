@@ -128,8 +128,12 @@ import {
 
 // Navigation Components
 import { AppNavbar } from './components/navigation/AppNavbar';
-import { AppSidebar } from './components/navigation/AppSidebar';
-import { GlobalQuickActionsSidebar } from './components/quick-actions-sidebar/GlobalQuickActionsSidebar';
+import { EnterpriseAppSidebar } from './components/navigation/EnterpriseAppSidebar';
+import { EnterpriseSidebarErrorBoundary } from "./components/error-boundaries/EnterpriseSidebarErrorBoundary";
+import { EnterpriseQuickActionsErrorBoundary } from "./components/error-boundaries/EnterpriseQuickActionsErrorBoundary";
+import { EnterpriseQuickActionsSidebar } from './components/quick-actions-sidebar/EnterpriseQuickActionsSidebar';
+import { EnterpriseSidebarErrorBoundary } from "./components/error-boundaries/EnterpriseSidebarErrorBoundary";
+import { EnterpriseQuickActionsErrorBoundary } from "./components/error-boundaries/EnterpriseQuickActionsErrorBoundary";
 
 // Core Racine Components  
 import { AIAssistantInterface } from './components/ai-assistant/AIAssistantInterface';
@@ -1274,7 +1278,7 @@ export const RacineMainManagerSPA: React.FC = () => {
         {/* Main Layout */}
         <div className="flex h-screen pt-16">
           {/* Main Sidebar */}
-          <AppSidebar
+          <EnterpriseAppSidebar
             collapsed={sidebarCollapsed}
             onCollapse={setSidebarCollapsed}
             currentView={currentView}
@@ -1312,7 +1316,7 @@ export const RacineMainManagerSPA: React.FC = () => {
         </div>
 
         {/* Global Quick Actions Sidebar */}
-        <GlobalQuickActionsSidebar
+        <EnterpriseQuickActionsSidebar
           isOpen={quickActionsSidebarOpen}
           onClose={() => setQuickActionsSidebarOpen(false)}
           context={quickActionsContext}
@@ -7069,7 +7073,7 @@ const EnhancedRacineMainManagerSPA: React.FC = () => {
           {/* Enhanced Main Layout */}
           <div className="flex h-screen pt-16">
             {/* Enhanced Main Sidebar */}
-            <AppSidebar
+            <EnterpriseAppSidebar
               collapsed={sidebarCollapsed}
               onCollapse={setSidebarCollapsed}
               currentView={enhancedCurrentView}
@@ -7107,7 +7111,7 @@ const EnhancedRacineMainManagerSPA: React.FC = () => {
           </div>
 
         {/* Enhanced Global Quick Actions Sidebar */}
-        <GlobalQuickActionsSidebar
+        <EnterpriseQuickActionsSidebar
           isOpen={quickActionsSidebarOpen}
           onClose={() => setQuickActionsSidebarOpen(false)}
           context={quickActionsContext}

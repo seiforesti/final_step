@@ -30,7 +30,7 @@ import type {
 } from '../../../../types/racine-core.types';
 
 import { useClassifications } from '../../../../hooks/useClassifications';
-import { useCrossGroupIntegration } from '../../../../hooks/useCrossGroupIntegration';
+import { useCrossGroupIntegration } from '../hooks/optimized/useOptimizedCrossGroupIntegration';
 
 interface QuickClassificationApplyProps {
   isVisible?: boolean;

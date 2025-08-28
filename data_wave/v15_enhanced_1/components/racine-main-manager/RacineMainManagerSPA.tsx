@@ -144,8 +144,10 @@ import {
   QuickNavigationPanel,
 } from "./components/routing";
 import { AppNavbar } from "./components/navigation/AppNavbar";
-import { AppSidebar } from "./components/navigation/AppSidebar";
-import { GlobalQuickActionsSidebar } from "./components/quick-actions-sidebar/GlobalQuickActionsSidebar";
+import { EnterpriseAppSidebar } from "./components/navigation/EnterpriseAppSidebar";
+import { EnterpriseQuickActionsSidebar } from "./components/quick-actions-sidebar/EnterpriseQuickActionsSidebar";
+import { EnterpriseSidebarErrorBoundary } from "./components/error-boundaries/EnterpriseSidebarErrorBoundary";
+import { EnterpriseQuickActionsErrorBoundary } from "./components/error-boundaries/EnterpriseQuickActionsErrorBoundary";
 
 // Core Racine Components
 import { AIAssistantInterface } from "./components/ai-assistant/AIAssistantInterface";
@@ -1146,19 +1148,21 @@ export const RacineMainManagerSPA: React.FC = () => {
 
                         {/* Main Layout */}
                         <div className="flex h-screen pt-16">
-                          {/* Main Sidebar */}
-                          <AppSidebar
-                            collapsed={sidebarCollapsed}
-                            onCollapse={setSidebarCollapsed}
-                            currentView={currentView}
-                            onViewChange={handleViewChange}
-                            workspaces={workspaces}
-                            activeWorkspace={activeWorkspace}
-                            onWorkspaceSwitch={handleWorkspaceSwitch}
-                            systemHealth={systemHealth}
-                            userPermissions={userPermissions}
-                            onQuickAction={handleQuickAction}
-                          />
+                          {/* Enterprise Main Sidebar with Error Boundary */}
+                          <EnterpriseSidebarErrorBoundary 
+                            componentName="MainAppSidebar"
+                            enableDetailedErrorReporting={true}
+                            enableAutoRecovery={true}
+                            autoRecoveryTimeout={3000}
+                          >
+                            <EnterpriseAppSidebar
+                              onQuickActionsTrigger={() => setQuickActionsSidebarOpen(!quickActionsSidebarOpen)}
+                              isQuickActionsSidebarOpen={quickActionsSidebarOpen}
+                              isCollapsed={sidebarCollapsed}
+                              onCollapsedChange={setSidebarCollapsed}
+                              className="z-30"
+                            />
+                          </EnterpriseSidebarErrorBoundary>
 
                           {/* Main Content Area */}
                           <main className={cn("flex-1 transition-all duration-300 ease-in-out", sidebarCollapsed ? "ml-16" : "ml-64")}>
@@ -1181,13 +1185,33 @@ export const RacineMainManagerSPA: React.FC = () => {
                           </main>
                         </div>
 
-                        {/* Global Quick Actions Sidebar */}
-                        <GlobalQuickActionsSidebar
-                          isOpen={quickActionsSidebarOpen}
-                          onClose={() => setQuickActionsSidebarOpen(false)}
-                          context={quickActionsContext}
-                          onAction={handleQuickAction}
-                        />
+                        {/* Enterprise Quick Actions Sidebar with Error Boundary */}
+                        <EnterpriseQuickActionsErrorBoundary
+                          componentName="MainQuickActionsSidebar"
+                          enableDetailedErrorReporting={true}
+                          enableAutoRecovery={true}
+                          enableQuickRecovery={true}
+                          autoRecoveryTimeout={2000}
+                        >
+                          <EnterpriseQuickActionsSidebar
+                            isOpen={quickActionsSidebarOpen}
+                            onToggle={() => setQuickActionsSidebarOpen(!quickActionsSidebarOpen)}
+                            currentContext={quickActionsContext}
+                            position="right"
+                            mode="overlay"
+                            enableCustomization={true}
+                            enableContextualActions={true}
+                            enableAnalytics={true}
+                            sidebarWidth={400}
+                            compactMode={false}
+                            autoHide={false}
+                            persistLayout={true}
+                            enableSearch={true}
+                            enableFiltering={true}
+                            showComponentMetrics={true}
+                            className="z-40"
+                          />
+                        </EnterpriseQuickActionsErrorBoundary>
 
                         {/* AI Assistant Interface */}
                         <AnimatePresence>

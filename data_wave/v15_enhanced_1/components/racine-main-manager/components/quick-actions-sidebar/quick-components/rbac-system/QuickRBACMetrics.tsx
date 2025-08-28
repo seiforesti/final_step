@@ -29,10 +29,10 @@ import {
 import { Shield, BarChart3, PieChart, TrendingUp, TrendingDown, Users, Crown, Key, Lock, Unlock, Eye, EyeOff, Activity, Target, Brain, Sparkles, AlertTriangle, CheckCircle, XCircle, Clock, Calendar, User, Globe, Database, Settings, RefreshCw, Download, Search, Filter, Info, HelpCircle, Star, Flag, Zap, Network, Layers, GitBranch, Route, Workflow, Component, X, Plus, Minus, Edit, Trash, Copy, Share, ExternalLink, MoreHorizontal } from 'lucide-react';
 
 import { useRBACSystem as useRBAC } from '../../../../hooks/useRBACSystem';
-import { useWorkspaceManagement } from '../../../../hooks/useWorkspaceManagement';
-import { useUserManagement } from '../../../../hooks/useUserManagement';
+import { useWorkspaceManagement } from '../hooks/optimized/useOptimizedWorkspaceManagement';
+import { useUserManagement } from '../hooks/optimized/useOptimizedUserManagement';
 import { useAIAssistant } from '../../../../hooks/useAIAssistant';
-import { useCrossGroupIntegration } from '../../../../hooks/useCrossGroupIntegration';
+import { useCrossGroupIntegration } from '../hooks/optimized/useOptimizedCrossGroupIntegration';
 import { useActivityTracking } from '../../../../hooks/useActivityTracking';
 
 interface RBACMetrics {

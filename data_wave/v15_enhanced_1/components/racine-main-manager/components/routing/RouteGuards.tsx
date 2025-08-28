@@ -180,8 +180,12 @@ import { Gantt } from '@/components/ui/gantt';
 
 // Racine Components
 import { AppNavbar } from './components/navigation/AppNavbar';
-import { AppSidebar } from './components/navigation/AppSidebar';
-import { GlobalQuickActionsSidebar } from './components/quick-actions-sidebar/GlobalQuickActionsSidebar';
+import { EnterpriseAppSidebar } from './components/navigation/EnterpriseAppSidebar';
+import { EnterpriseSidebarErrorBoundary } from "./components/error-boundaries/EnterpriseSidebarErrorBoundary";
+import { EnterpriseQuickActionsErrorBoundary } from "./components/error-boundaries/EnterpriseQuickActionsErrorBoundary";
+import { EnterpriseQuickActionsSidebar } from './components/quick-actions-sidebar/EnterpriseQuickActionsSidebar';
+import { EnterpriseSidebarErrorBoundary } from "./components/error-boundaries/EnterpriseSidebarErrorBoundary";
+import { EnterpriseQuickActionsErrorBoundary } from "./components/error-boundaries/EnterpriseQuickActionsErrorBoundary";
 import { AIAssistantInterface } from './components/ai-assistant/AIAssistantInterface';
 import { IntelligentDashboardOrchestrator } from './components/intelligent-dashboard/IntelligentDashboardOrchestrator';
 import { ActivityTrackingHub } from './components/activity-tracker/ActivityTrackingHub';

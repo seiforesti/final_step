@@ -39,13 +39,13 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 // Import racine foundation layers (already implemented)
-import { useQuickActions } from '../../hooks/useQuickActions'
-import { useCrossGroupIntegration } from '../../hooks/useCrossGroupIntegration'
-import { useUserManagement } from '../../hooks/useUserManagement'
-import { useWorkspaceManagement } from '../../hooks/useWorkspaceManagement'
-import { useActivityTracker } from '../../hooks/useActivityTracker'
+import { useQuickActions } from '../hooks/optimized/useOptimizedQuickActions'
+import { useCrossGroupIntegration } from '../hooks/optimized/useOptimizedCrossGroupIntegration'
+import { useUserManagement } from '../hooks/optimized/useOptimizedUserManagement'
+import { useWorkspaceManagement } from '../hooks/optimized/useOptimizedWorkspaceManagement'
+import { useActivityTracker } from '../hooks/optimized/useOptimizedActivityTracker'
 import { useAIAssistant } from '../../hooks/useAIAssistant'
-import { useUserPreferences } from '../../hooks/useUserPreferences'
+import { useUserPreferences } from '../hooks/optimized/useOptimizedUserPreferences'
 import { useRacineOrchestration } from '../../hooks/useRacineOrchestration'
 
 // Import types (already implemented)

@@ -59,10 +59,10 @@ import { FileText, FolderOpen, Plus, Search, Filter, Download, Upload, Share, Ed
 import { cn } from '@/lib/utils';
 import { useCollaboration } from '../../hooks/useCollaboration';
 import { useRacineOrchestration } from '../../hooks/useRacineOrchestration';
-import { useCrossGroupIntegration } from '../../hooks/useCrossGroupIntegration';
-import { useUserManagement } from '../../hooks/useUserManagement';
-import { useWorkspaceManagement } from '../../hooks/useWorkspaceManagement';
-import { useActivityTracker } from '../../hooks/useActivityTracker';
+import { useCrossGroupIntegration } from '../hooks/optimized/useOptimizedCrossGroupIntegration';
+import { useUserManagement } from '../hooks/optimized/useOptimizedUserManagement';
+import { useWorkspaceManagement } from '../hooks/optimized/useOptimizedWorkspaceManagement';
+import { useActivityTracker } from '../hooks/optimized/useOptimizedActivityTracker';
 import { useJobWorkflow } from '../../hooks/useJobWorkflow';
 import { usePipelineManager } from '../../hooks/usePipelineManager';
 import { useAIAssistant } from '../../hooks/useAIAssistant';

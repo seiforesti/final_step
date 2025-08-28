@@ -67,8 +67,8 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/componen
 // Backend Integration
 import { useCollaboration } from '../../hooks/useCollaboration';
 import { useRacineOrchestration } from '../../hooks/useRacineOrchestration';
-import { useCrossGroupIntegration } from '../../hooks/useCrossGroupIntegration';
-import { useUserManagement } from '../../hooks/useUserManagement';
+import { useCrossGroupIntegration } from '../hooks/optimized/useOptimizedCrossGroupIntegration';
+import { useUserManagement } from '../hooks/optimized/useOptimizedUserManagement';
 
 // Services
 import { collaborationAPI, CoAuthoringOperation, OperationType } from '../../services/collaboration-apis';

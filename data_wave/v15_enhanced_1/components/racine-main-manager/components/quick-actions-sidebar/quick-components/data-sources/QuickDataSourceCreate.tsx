@@ -23,9 +23,9 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 // Import foundation layers (100% backend integration)
 import { useDataSources } from '../../../../hooks/useDataSources'
 import { useConnectionValidator } from '../../../../hooks/useConnectionValidator'
-import { useUserManagement } from '../../../../hooks/useUserManagement'
-import { useWorkspaceManagement } from '../../../../hooks/useWorkspaceManagement'
-import { useActivityTracker } from '../../../../hooks/useActivityTracker'
+import { useUserManagement } from '../hooks/optimized/useOptimizedUserManagement'
+import { useWorkspaceManagement } from '../hooks/optimized/useOptimizedWorkspaceManagement'
+import { useActivityTracker } from '../hooks/optimized/useOptimizedActivityTracker'
 import { useNotificationManager } from '../../../../hooks/useNotificationManager'
 import { useSecurityManager } from '../../../../hooks/useSecurityManager'
 

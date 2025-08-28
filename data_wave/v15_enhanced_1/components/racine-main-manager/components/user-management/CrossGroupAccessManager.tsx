@@ -200,10 +200,10 @@ import {
 } from 'recharts';
 
 // Racine hooks and services
-import { useUserManagement } from '../../hooks/useUserManagement';
+import { useUserManagement } from '../hooks/optimized/useOptimizedUserManagement';
 import { useRBACSystem } from '../../hooks/useRBACSystem';
-import { useWorkspaceManagement } from '../../hooks/useWorkspaceManagement';
-import { useCrossGroupIntegration } from '../../hooks/useCrossGroupIntegration';
+import { useWorkspaceManagement } from '../hooks/optimized/useOptimizedWorkspaceManagement';
+import { useCrossGroupIntegration } from '../hooks/optimized/useOptimizedCrossGroupIntegration';
 
 // Racine types
 import {

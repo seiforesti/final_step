@@ -31,10 +31,10 @@ import { LineChart, BarChart, AreaChart, PieChart as RechartsPieChart, Responsiv
 // Racine System Imports
 import { useJobWorkflow } from '../../hooks/useJobWorkflow';
 import { useRacineOrchestration } from '../../hooks/useRacineOrchestration';
-import { useCrossGroupIntegration } from '../../hooks/useCrossGroupIntegration';
-import { useUserManagement } from '../../hooks/useUserManagement';
-import { useWorkspaceManagement } from '../../hooks/useWorkspaceManagement';
-import { useActivityTracker } from '../../hooks/useActivityTracker';
+import { useCrossGroupIntegration } from '../hooks/optimized/useOptimizedCrossGroupIntegration';
+import { useUserManagement } from '../hooks/optimized/useOptimizedUserManagement';
+import { useWorkspaceManagement } from '../hooks/optimized/useOptimizedWorkspaceManagement';
+import { useActivityTracker } from '../hooks/optimized/useOptimizedActivityTracker';
 import { useAIAssistant } from '../../hooks/useAIAssistant';
 
 // Backend Integration Utilities

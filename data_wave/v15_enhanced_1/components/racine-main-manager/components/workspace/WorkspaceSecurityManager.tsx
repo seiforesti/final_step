@@ -25,11 +25,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
-import { useWorkspaceManagement } from '../../hooks/useWorkspaceManagement'
+import { useWorkspaceManagement } from '../hooks/optimized/useOptimizedWorkspaceManagement'
 import { useRacineOrchestration } from '../../hooks/useRacineOrchestration'
-import { useUserManagement } from '../../hooks/useUserManagement'
+import { useUserManagement } from '../hooks/optimized/useOptimizedUserManagement'
 import { useAIAssistant } from '../../hooks/useAIAssistant'
-import { useCrossGroupIntegration } from '../../hooks/useCrossGroupIntegration'
+import { useCrossGroupIntegration } from '../hooks/optimized/useOptimizedCrossGroupIntegration'
 
 import { 
   activityTrackingAPI, 

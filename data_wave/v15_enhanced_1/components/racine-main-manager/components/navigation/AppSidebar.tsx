@@ -41,13 +41,13 @@ import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
 // Import racine foundation layers (already implemented)
-import { useCrossGroupIntegration } from '../../hooks/useCrossGroupIntegration'
-import { useUserManagement } from '../../hooks/useUserManagement'
-import { useWorkspaceManagement } from '../../hooks/useWorkspaceManagement'
-import { useActivityTracker } from '../../hooks/useActivityTracker'
-import { useQuickActions } from '../../hooks/useQuickActions'
-import { useNavigationAnalytics } from '../../hooks/useNavigationAnalytics'
-import { useUserPreferences } from '../../hooks/useUserPreferences'
+import { useCrossGroupIntegration } from '../hooks/optimized/useOptimizedCrossGroupIntegration'
+import { useUserManagement } from '../hooks/optimized/useOptimizedUserManagement'
+import { useWorkspaceManagement } from '../hooks/optimized/useOptimizedWorkspaceManagement'
+import { useActivityTracker } from '../hooks/optimized/useOptimizedActivityTracker'
+import { useQuickActions } from '../hooks/optimized/useOptimizedQuickActions'
+import { useNavigationAnalytics } from '../hooks/optimized/useOptimizedNavigationAnalytics'
+import { useUserPreferences } from '../hooks/optimized/useOptimizedUserPreferences'
 
 // Router Integration - ENHANCED: Complete routing integration
 import { useRacineRouter } from '../routing/RacineRouter'
@@ -314,7 +314,7 @@ interface AppSidebarProps {
   onCollapsedChange?: (collapsed: boolean) => void
 }
 
-export const AppSidebar: React.FC<AppSidebarProps> = ({
+export const AppSidebar: React.FC<EnterpriseAppSidebarProps> = ({
   className,
   onQuickActionsTrigger,
   isQuickActionsSidebarOpen = false,
