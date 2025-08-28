@@ -21,6 +21,9 @@ export * from './workspace-configs';
 // Integration configuration constants
 export * from './integration-configs';
 
+// System constants and configurations
+export * from './system-constants';
+
 // Re-export main constants for convenience
 export {
   SUPPORTED_GROUPS,

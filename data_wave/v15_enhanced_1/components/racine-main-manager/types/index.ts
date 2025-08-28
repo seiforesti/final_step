@@ -12,6 +12,21 @@ export * from './racine-core.types';
 // API request/response types
 export * from './api.types';
 
+// Advanced analytics and intelligence types
+export * from './advanced-analytics.types';
+
+// Cost optimization and budget management types
+export * from './cost-optimization.types';
+
+// Enterprise security and compliance types
+export * from './enterprise-security.types';
+
+// Collaboration and reporting types
+export * from './collaboration-reporting.types';
+
+// Streaming and integration types
+export * from './streaming-integration.types';
+
 // Re-export commonly used types for convenience
 export type {
   UUID,
