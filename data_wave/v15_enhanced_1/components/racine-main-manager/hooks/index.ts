@@ -55,6 +55,24 @@ export type {
   ContextAwareAIHookConfig
 } from './useContextAwareAI';
 
+// Advanced analytics hooks
+export { useAdvancedAnalytics } from './useAdvancedAnalytics';
+
+// System intelligence hooks
+export { useSystemIntelligence } from './useSystemIntelligence';
+
+// Intelligent automation hooks
+export { useIntelligentAutomation } from './useIntelligentAutomation';
+
+// Cost optimization hooks
+export { useCostOptimization } from './useCostOptimization';
+
+// Advanced monitoring hooks
+export { useAdvancedMonitoring } from './useAdvancedMonitoring';
+
+// Enterprise security hooks
+export { useEnterpriseSecurity } from './useEnterpriseSecurity';
+
 // Activity tracking hooks
 export { useActivityTracker } from './useActivityTracker';
 export type {
