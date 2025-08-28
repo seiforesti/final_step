@@ -20,6 +20,7 @@ import BasicTables from "./pages/Tables/BasicTables";
 import FormElements from "./pages/Forms/FormElements";
 import Blank from "./pages/Blank";
 import AppLayout from "./layout/AppLayout";
+import OptimizedAppLayout from "./layout/OptimizedAppLayout";
 import { ScrollToTop } from "./components/common/ScrollToTop";
 import HomePursight from "./pages/Dashboard/HomePursight";
 import { ModalProvider } from "./pages/fenetresModales/ModalContext";
@@ -35,6 +36,7 @@ import { RBACContext } from "./hooks/useRBAC";
 import DataSourceConnectPage from "./pages/datasource/DataSourceConnectPage";
 import DataMapDesignerPage from "./pages/datamap/DataMapDesignerPage";
 import MainPage from "./pages/NXCI_DataGovernance/MainPage";
+import OptimizedMainManager from "./pages/OptimizedMainManager";
 
 // AuthRoute component for protected routes (fixes React hook rules)
 type AuthRouteProps = Readonly<{
@@ -58,12 +60,17 @@ export default function App() {
           <RBACProvider>
             <ScrollToTop />
             <Routes>
-              {/* Dashboard Layout and Protected Routes */}
-              <Route element={<AppLayout />}>
-                {/* New Data Governance Routes */}
+              {/* Optimized Dashboard Layout and Protected Routes */}
+              <Route element={<OptimizedAppLayout />}>
+                {/* Main manager route for /app - the critical freezing route */}
+                <Route
+                  path="/app/*"
+                  element={<AuthRoute element={<OptimizedMainManager />} />}
+                />
+                {/* New Data Governance Routes with optimized manager */}
                 <Route
                   path="/data-governance/*"
-                  element={<AuthRoute element={<MainPage />} />}
+                  element={<AuthRoute element={<OptimizedMainManager />} />}
                 />
                 {/* Home and other dashboard routes */}
                 <Route index path="/" element={<HomePursight />} />
@@ -86,6 +93,12 @@ export default function App() {
                 <Route path="/videos" element={<Videos />} />
                 <Route path="/line-chart" element={<LineChart />} />
                 <Route path="/bar-chart" element={<BarChart />} />
+              </Route>
+              
+              {/* Fallback routes using legacy layout for non-critical pages */}
+              <Route element={<AppLayout />}>
+                {/* Legacy routes that don't need optimization */}
+                <Route path="/legacy/*" element={<AuthRoute element={<MainPage />} />} />
               </Route>
 
               {/* Auth Layout */}
