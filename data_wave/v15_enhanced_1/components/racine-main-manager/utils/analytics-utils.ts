@@ -303,6 +303,3 @@ export function trackUserActivity(
     return Promise.resolve();
   }
 }
-
-
-

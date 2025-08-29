@@ -22,4 +22,3 @@ export type {
   TeamMember,
   DocumentVersion
 } from '../../types/racine-core.types';
-

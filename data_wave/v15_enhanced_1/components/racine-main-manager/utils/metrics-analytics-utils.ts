@@ -96,5 +96,3 @@ export function generateMetricReport(input: {
 	})
 	return { window: input.window, summary }
 }
-
-

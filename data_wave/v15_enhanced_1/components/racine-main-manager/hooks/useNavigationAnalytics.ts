@@ -774,6 +774,16 @@ export const useNavigationAnalytics = (
     trackPageView,
     trackUserAction,
     trackSPAInteraction,
+
+    // Sidebar usage aggregator expected by navigation components
+    trackSidebarUsage: (data: any) => {
+      try {
+        // Reuse generic tracking pipeline
+        trackUserAction('sidebar_usage', 'navigation_sidebar', data);
+      } catch (error: any) {
+        console.warn('Failed to track sidebar usage:', error?.message || error);
+      }
+    },
     
     // Analytics Queries
     getRouteAnalytics: async (route: string, timeRange?) => {

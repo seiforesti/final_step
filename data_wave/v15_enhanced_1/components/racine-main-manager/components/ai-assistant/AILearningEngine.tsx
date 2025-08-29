@@ -230,7 +230,7 @@ export const AILearningEngine: React.FC<AILearningEngineProps> = ({
     workspace: activeWorkspace,
     activeSPA: activeSPAContext?.activeSPA || null,
     systemHealth,
-    recentActivities: recentActivities.slice(0, 100),
+    recentActivities: (recentActivities || []).slice(0, 100),
     userPermissions,
     workspaceContext: {
       id: activeWorkspace?.id || '',

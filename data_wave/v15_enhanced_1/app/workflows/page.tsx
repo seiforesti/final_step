@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { Metadata } from 'next';
-import { JobWorkflowBuilder } from '@/components/racine-main-manager/components/job-workflow-space';
+import { JobWorkflowBuilder } from '../../components/racine-main-manager/components/job-workflow-space';
 
 // ============================================================================
 // METADATA

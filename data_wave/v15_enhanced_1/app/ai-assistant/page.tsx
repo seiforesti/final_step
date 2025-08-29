@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { Metadata } from 'next';
-import { AIAssistantInterface } from '@/components/racine-main-manager/components/ai-assistant';
+import { AIAssistantInterface } from '../../components/racine-main-manager/components/ai-assistant';
 
 // ============================================================================
 // METADATA

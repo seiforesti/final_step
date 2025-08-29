@@ -222,7 +222,7 @@ export const CrossGroupInsightsEngine: React.FC<CrossGroupInsightsEngineProps> =
     workspace: activeWorkspace,
     activeSPA: activeSPAContext?.activeSPA || null,
     systemHealth,
-    recentActivities: recentActivities.slice(0, 20),
+    recentActivities: (recentActivities || []).slice(0, 20),
     userPermissions,
     workspaceContext: {
       id: activeWorkspace?.id || '',

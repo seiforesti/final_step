@@ -370,4 +370,3 @@ export function useSecurityAudit(userId?: string) {
     refetchMetrics: securityMetricsQuery.refetch,
   };
 }
-

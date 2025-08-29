@@ -596,76 +596,355 @@ export type InsightStatus = IntelligenceStatus;
 export type PredictionType = PredictiveModelType;
 export type ModelType = PredictiveModelType;
 
-<<<<<<< HEAD
-// Enum definitions for component compatibility
-export enum InsightCategory {
-  PERFORMANCE = 'performance',
-  SECURITY = 'security',
-  OPERATIONAL = 'operational',
-  BUSINESS = 'business',
-  TECHNICAL = 'technical',
-  COMPLIANCE = 'compliance',
-  QUALITY = 'quality',
-  EFFICIENCY = 'efficiency',
-  INNOVATION = 'innovation',
-  RISK = 'risk'
+// Additional types needed for PredictiveAnalyticsEngine
+export interface PredictiveAnalyticsConfig {
+  defaultTimeHorizon: TimeHorizon;
+  autoRetraining: boolean;
+  confidenceThreshold: number;
+  maxModels: number;
+  predictionRefreshInterval: number;
+  enableRealTimePredictions: boolean;
+  enableAnomalyDetection: boolean;
+  enableUncertaintyQuantification: boolean;
+  enableExplainability: boolean;
+  modelSelectionStrategy: string;
+  ensembleMethod: string;
+  featureSelectionMethod: string;
+  validationMethod: string;
+  hyperParameterOptimization: boolean;
+  earlyStoppingEnabled: boolean;
+  modelPersistence: boolean;
+  predictionCaching: boolean;
+  alertThresholds: {
+    accuracy: number;
+    drift: number;
+    performance: number;
+  };
 }
 
-export enum InsightPriority {
-  URGENT = 'urgent',
-  HIGH = 'high',
-  MEDIUM = 'medium',
-  LOW = 'low'
+export interface PredictionModel {
+  id: string;
+  name: string;
+  modelType: ModelType;
+  algorithm: string;
+  version: string;
+  status: ModelStatus;
+  accuracy: number;
+  lastTrained: string;
+  nextTrainingScheduled: string;
+  features: string[];
+  hyperParameters: Record<string, any>;
+  performanceMetrics: {
+    accuracy: number;
+    precision: number;
+    recall: number;
+    f1Score: number;
+    mse: number;
+    mae: number;
+  };
 }
 
-export enum InsightType {
-  ANOMALY = 'anomaly',
-  TREND = 'trend',
-  PATTERN = 'pattern',
-  CORRELATION = 'correlation',
-  PREDICTION = 'prediction',
-  RECOMMENDATION = 'recommendation',
-  ALERT = 'alert',
-  INSIGHT = 'insight',
-  FORECAST = 'forecast',
-  OPTIMIZATION = 'optimization'
+export interface ForecastResult {
+  id: string;
+  modelId: string;
+  predictionType: PredictionType;
+  targetVariable: string;
+  predictedValue: number;
+  confidenceInterval: {
+    lower: number;
+    upper: number;
+  };
+  confidence: number;
+  timestamp: string;
+  horizon: TimeHorizon;
+  features: Record<string, number>;
+  uncertainty: number;
+  trend: 'increasing' | 'decreasing' | 'stable';
+  seasonality: boolean;
+  anomalyScore: number;
 }
 
-export enum InsightStatus {
-  ACTIVE = 'active',
-  INACTIVE = 'inactive',
-  PENDING = 'pending',
-  PROCESSING = 'processing',
-  COMPLETED = 'completed',
-  FAILED = 'failed',
-  CANCELLED = 'cancelled',
-  ARCHIVED = 'archived'
+export interface ModelAccuracy {
+  overall: number;
+  byCategory: Record<string, number>;
+  byTimePeriod: Record<string, number>;
+  trend: 'improving' | 'declining' | 'stable';
+  lastUpdated: string;
 }
 
-export enum PredictionType {
-  CLASSIFICATION = 'classification',
-  REGRESSION = 'regression',
-  CLUSTERING = 'clustering',
-  ANOMALY_DETECTION = 'anomaly_detection',
-  FORECASTING = 'forecasting',
-  RECOMMENDATION = 'recommendation',
-  OPTIMIZATION = 'optimization',
-  PATTERN_RECOGNITION = 'pattern_recognition'
+export interface FeatureImportance {
+  feature: string;
+  importance: number;
+  rank: number;
+  category: string;
+  description: string;
 }
 
-export enum ModelType {
-  SUPERVISED = 'supervised',
-  UNSUPERVISED = 'unsupervised',
-  REINFORCEMENT = 'reinforcement',
-  DEEP_LEARNING = 'deep_learning',
-  ENSEMBLE = 'ensemble',
-  TRANSFER_LEARNING = 'transfer_learning',
-  FEDERATED = 'federated',
-  ONLINE_LEARNING = 'online_learning'
+export interface PredictionInsight {
+  id: string;
+  type: 'optimization' | 'risk' | 'opportunity' | 'anomaly';
+  title: string;
+  description: string;
+  confidence: number;
+  impact: 'high' | 'medium' | 'low';
+  category: string;
+  recommendations: string[];
+  timestamp: string;
+  modelId: string;
+  data: Record<string, any>;
 }
 
-=======
->>>>>>> 3842dcdabc88f42b5e543242e2677cb4a51464f7
+export interface ForecastTrend {
+  direction: 'up' | 'down' | 'stable';
+  magnitude: number;
+  confidence: number;
+  seasonality: boolean;
+  cyclicality: boolean;
+  breakpoints: string[];
+}
+
+export interface AnomalyPrediction {
+  id: string;
+  timestamp: string;
+  anomalyScore: number;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  type: string;
+  description: string;
+  affectedMetrics: string[];
+  confidence: number;
+}
+
+export interface ResourcePrediction {
+  id: string;
+  resourceType: string;
+  metric: string;
+  predictedValue: number;
+  currentValue: number;
+  trend: 'increasing' | 'decreasing' | 'stable';
+  confidence: number;
+  timestamp: string;
+  recommendations: string[];
+}
+
+export interface PerformancePrediction {
+  id: string;
+  metric: string;
+  predictedValue: number;
+  baseline: number;
+  improvement: number;
+  confidence: number;
+  timestamp: string;
+  factors: string[];
+}
+
+export interface CapacityPrediction {
+  id: string;
+  resourceType: string;
+  currentUtilization: number;
+  predictedUtilization: number;
+  capacityLimit: number;
+  timeToCapacity: number;
+  confidence: number;
+  recommendations: string[];
+}
+
+export interface RiskPrediction {
+  id: string;
+  riskType: string;
+  probability: number;
+  impact: 'low' | 'medium' | 'high' | 'critical';
+  description: string;
+  mitigationStrategies: string[];
+  confidence: number;
+  timestamp: string;
+}
+
+export interface CostPrediction {
+  id: string;
+  costCategory: string;
+  currentCost: number;
+  predictedCost: number;
+  variance: number;
+  confidence: number;
+  timestamp: string;
+  factors: string[];
+}
+
+export interface QualityPrediction {
+  id: string;
+  qualityMetric: string;
+  currentScore: number;
+  predictedScore: number;
+  trend: 'improving' | 'declining' | 'stable';
+  confidence: number;
+  timestamp: string;
+  recommendations: string[];
+}
+
+export interface CompliancePrediction {
+  id: string;
+  complianceArea: string;
+  currentStatus: string;
+  predictedStatus: string;
+  riskLevel: 'low' | 'medium' | 'high';
+  confidence: number;
+  timestamp: string;
+  requirements: string[];
+}
+
+export interface SecurityPrediction {
+  id: string;
+  threatType: string;
+  probability: number;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  description: string;
+  mitigationStrategies: string[];
+  confidence: number;
+  timestamp: string;
+}
+
+export interface BusinessPrediction {
+  id: string;
+  businessMetric: string;
+  currentValue: number;
+  predictedValue: number;
+  trend: 'positive' | 'negative' | 'neutral';
+  confidence: number;
+  timestamp: string;
+  businessImpact: string;
+}
+
+export interface ValidationMetrics {
+  accuracy: number;
+  precision: number;
+  recall: number;
+  f1Score: number;
+  auc: number;
+  mse: number;
+  mae: number;
+  r2Score: number;
+}
+
+export interface TrainingProgress {
+  currentEpoch: number;
+  totalEpochs: number;
+  currentLoss: number;
+  validationLoss: number;
+  accuracy: number;
+  status: 'training' | 'validating' | 'completed' | 'failed';
+  estimatedTimeRemaining: number;
+  currentBatch: number;
+  totalBatches: number;
+}
+
+export interface HyperParameters {
+  learningRate: number;
+  maxDepth: number;
+  nEstimators: number;
+  regularization: number;
+  batchSize: number;
+  epochs: number;
+}
+
+export interface ModelComparison {
+  modelId: string;
+  name: string;
+  accuracy: number;
+  performance: number;
+  trainingTime: number;
+  inferenceTime: number;
+  resourceUsage: number;
+  complexity: number;
+  interpretability: number;
+}
+
+export interface AutomationSuggestion {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  estimatedTimeSaved: number;
+  implementationEffort: 'low' | 'medium' | 'high';
+  priority: 'low' | 'medium' | 'high';
+  confidence: number;
+  prerequisites: string[];
+  steps: string[];
+}
+
+export interface WorkflowRecommendation {
+  id: string;
+  name: string;
+  description: string;
+  steps: WorkflowStep[];
+  involvedSPAs: string[];
+  estimatedDuration: number;
+  complexity: 'simple' | 'moderate' | 'complex';
+  priority: 'low' | 'medium' | 'high';
+  businessValue: number;
+}
+
+export interface WorkflowStep {
+  id: string;
+  name: string;
+  description: string;
+  type: 'action' | 'decision' | 'wait' | 'integration';
+  order: number;
+  dependencies: string[];
+  estimatedDuration: number;
+  requiredResources: string[];
+  outputs: string[];
+}
+
+// Supporting interfaces for existing types
+export interface BusinessContext {
+  businessUnit: string;
+  project: string;
+  priority: string;
+  impact: string;
+  stakeholders: string[];
+}
+
+export interface TechnicalContext {
+  system: string;
+  component: string;
+  version: string;
+  environment: string;
+  dependencies: string[];
+}
+
+export interface PatternOccurrence {
+  timestamp: string;
+  frequency: number;
+  context: Record<string, any>;
+}
+
+export interface RelatedPattern {
+  patternId: string;
+  relationship: string;
+  strength: number;
+}
+
+export interface PatternBusinessImpact {
+  area: string;
+  severity: string;
+  description: string;
+  metrics: Record<string, number>;
+}
+
+export interface PatternRecommendation {
+  action: string;
+  priority: string;
+  effort: string;
+  expectedOutcome: string;
+}
+
+export interface PatternValidationStatus {
+  status: 'pending' | 'validated' | 'rejected';
+  confidence: number;
+  reviewer: string;
+  notes: string;
+}
+
 // Missing enum types
 export enum TimeHorizon {
   SHORT_TERM = 'short_term',

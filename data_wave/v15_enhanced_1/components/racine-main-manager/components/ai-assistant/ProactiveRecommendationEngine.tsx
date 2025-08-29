@@ -224,7 +224,7 @@ export const ProactiveRecommendationEngine: React.FC<ProactiveRecommendationEngi
     activeSPA: activeSPAContext?.activeSPA || null,
     systemHealth,
     userBehavior: userBehaviorData,
-    recentActivities: recentActivities.slice(0, 20),
+    recentActivities: (recentActivities || []).slice(0, 20),
     spaStatus: getAllSPAStatus(),
     workspaceMetrics,
     timestamp: new Date(),

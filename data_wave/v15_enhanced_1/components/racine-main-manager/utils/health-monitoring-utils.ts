@@ -63,5 +63,3 @@ export function generateHealthReport(input: {
 		issues: classifyHealthIssues({ cpuUsage: 100 - avg, memoryUsage: 100 - avg }),
 	}
 }
-
-

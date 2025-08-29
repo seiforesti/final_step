@@ -855,8 +855,11 @@ export const MasterLayoutOrchestrator: React.FC<MasterLayoutOrchestratorProps> =
             resizeTimeout = setTimeout(() => {
               // Only apply layout configuration if not already transitioning
               if (!layoutState.isTransitioning) {
+                const label = `applyLayoutConfiguration[resize]:${layoutMode}`;
+                console.time(label);
                 console.log(`Container size changed significantly (${widthDiff}px width, ${heightDiff}px height), adapting layout...`);
                 applyLayoutConfiguration(layoutMode, true);
+                console.timeEnd(label);
               }
             }, 500); // 500ms debounce for container resize
           }

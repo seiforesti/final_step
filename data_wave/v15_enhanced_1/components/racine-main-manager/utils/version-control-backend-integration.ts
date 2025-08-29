@@ -501,4 +501,3 @@ export async function rollbackPipelineVersion(
     };
   }
 }
-

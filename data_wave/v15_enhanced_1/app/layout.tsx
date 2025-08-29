@@ -11,14 +11,14 @@ import type React from "react"
 
 import { cookies } from "next/headers"
 
-import { cn } from "@/lib/utils"
-import { ThemeProvider } from "@/components/theme-provider"
-import { Toaster } from "@/components/ui/toaster"
-import { EnterpriseLayoutOrchestrator } from "@/components/racine-main-manager/components/layout"
-import { PerformanceProvider } from "@/components/providers/PerformanceProvider"
-import { TooltipProvider } from "@/components/ui/tooltip"
-import { Providers } from "@/components/providers/Providers"
-import { ClientErrorBoundary } from "@/components/error-boundary/ClientErrorBoundary"
+import { cn } from "../components/racine-main-manager/utils/cn"
+import { ThemeProvider } from "../components/theme-provider"
+import { Toaster } from "../components/ui/toaster"
+import { EnterpriseLayoutOrchestrator } from "../components/racine-main-manager/components/layout"
+import { PerformanceProvider } from "../components/providers/PerformanceProvider"
+import { TooltipProvider } from "../components/ui/tooltip"
+import { Providers } from "../components/providers/Providers"
+import { ClientErrorBoundary } from "../components/error-boundary/ClientErrorBoundary"
 
 import "./globals.css"
 

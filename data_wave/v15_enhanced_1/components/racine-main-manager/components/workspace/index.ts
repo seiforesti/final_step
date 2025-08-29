@@ -8,16 +8,14 @@ export { default as WorkspaceOrchestrator } from './WorkspaceOrchestrator';
 export { default as CrossGroupResourceLinker } from './CrossGroupResourceLinker';
 export { default as WorkspaceTemplateEngine } from './WorkspaceTemplateEngine';
 export { default as WorkspaceSecurityManager } from './WorkspaceSecurityManager';
-export { default as WorkspaceAnalytics } from './WorkspaceAnalytics';
+export { WorkspaceAnalytics } from './WorkspaceAnalytics';
 export { default as ProjectManager } from './ProjectManager';
 export { default as CollaborativeWorkspaces } from './CollaborativeWorkspaces';
 
 // Re-export types and utilities
 export type { 
-  Workspace, 
+  RacineWorkspace, 
   WorkspaceTemplate, 
-  Project,
-  WorkspaceSecurity,
-  ResourceLink
+  WorkspaceSecuritySettings,
+  CrossGroupResource
 } from '../../types/racine-core.types';
-

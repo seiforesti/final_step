@@ -244,7 +244,7 @@ export const AnomalyDetectionAssistant: React.FC<AnomalyDetectionAssistantProps>
     workspace: activeWorkspace,
     activeSPA: activeSPAContext?.activeSPA || null,
     systemHealth,
-    recentActivities: recentActivities.slice(0, 50),
+    recentActivities: (recentActivities || []).slice(0, 50),
     userPermissions,
     workspaceContext: {
       id: activeWorkspace?.id || '',

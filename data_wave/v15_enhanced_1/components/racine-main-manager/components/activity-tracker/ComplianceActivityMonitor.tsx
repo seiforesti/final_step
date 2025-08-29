@@ -26,7 +26,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence, useAnimation } from 'framer-motion';
-import { FixedSizeList as List } from 'react-window';
+
 
 // UI Components
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -59,7 +59,7 @@ import {
   AreaChart,
   ScatterChart,
   RadarChart,
-  TreeMap,
+  Treemap,
   Cell,
   XAxis,
   YAxis,
@@ -91,20 +91,12 @@ import {
   ComplianceViolation,
   ComplianceRule,
   ComplianceStatus,
-  ComplianceRisk,
-  RiskLevel,
-  ComplianceFramework,
   AuditTrail,
   ComplianceMetrics,
   ComplianceAlert,
-  ComplianceDashboard,
   ComplianceReport,
-  ComplianceInvestigation,
-  RacineActivity,
   ActivityFilter,
-  UserRole,
-  CrossGroupActivity,
-  SystemActivity
+  UserRole
 } from '../../types/racine-core.types';
 
 // ================================================================================
@@ -126,22 +118,22 @@ interface ComplianceMonitorState {
   violations: ComplianceViolation[];
   rules: ComplianceRule[];
   alerts: ComplianceAlert[];
-  investigations: ComplianceInvestigation[];
+  investigations: any[]; // Using any for now since type doesn't exist
   metrics: ComplianceMetrics | null;
-  dashboard: ComplianceDashboard | null;
+  dashboard: any | null; // Using any for now since type doesn't exist
   
   // UI State
   currentView: ComplianceViewMode;
   selectedViolation: ComplianceViolation | null;
   selectedRule: ComplianceRule | null;
-  selectedFramework: ComplianceFramework | null;
+  selectedFramework: string | null; // Using string instead of non-existent type
   
   // Filters
   activeFilters: ComplianceFilter[];
   filterPanelOpen: boolean;
   dateRange: DateRange;
-  riskLevelFilter: RiskLevel[];
-  frameworkFilter: ComplianceFramework[];
+  riskLevelFilter: string[]; // Using string[] instead of non-existent type
+  frameworkFilter: string[]; // Using string[] instead of non-existent type
   statusFilter: ComplianceStatus[];
   
   // Search
@@ -285,7 +277,7 @@ const VIEW_MODES = [
 
 const LAYOUT_MODES = [
   { value: 'grid', label: 'Grid View', icon: BarChart3 },
-  { value: 'list', label: 'List View', icon: List },
+  { value: 'list', label: 'List View', icon: BarChart3 }, // Using BarChart3 instead of List
   { value: 'dashboard', label: 'Dashboard', icon: Monitor },
   { value: 'timeline', label: 'Timeline', icon: Clock },
   { value: 'investigation', label: 'Investigation', icon: Search }

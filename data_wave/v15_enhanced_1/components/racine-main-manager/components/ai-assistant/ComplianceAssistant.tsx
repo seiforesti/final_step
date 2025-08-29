@@ -225,7 +225,7 @@ export const ComplianceAssistant: React.FC<ComplianceAssistantProps> = ({
     workspace: activeWorkspace,
     activeSPA: activeSPAContext?.activeSPA || null,
     systemHealth,
-    recentActivities: recentActivities.slice(0, 30),
+    recentActivities: (recentActivities || []).slice(0, 30),
     userPermissions,
     workspaceContext: {
       id: activeWorkspace?.id || '',

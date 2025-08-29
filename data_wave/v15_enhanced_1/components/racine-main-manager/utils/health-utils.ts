@@ -49,5 +49,3 @@ export function formatHealthMetric(metric: HealthMetric | number | undefined, un
 	}
 	return `${value}${unit}`
 }
-
-

@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { Metadata } from 'next';
-import { WorkspaceOrchestrator } from '@/components/racine-main-manager/components/workspace';
+import { WorkspaceOrchestrator } from '../../components/racine-main-manager/components/workspace';
 
 // ============================================================================
 // METADATA

@@ -453,5 +453,3 @@ export function useNotifications(
     exportNotifications
   };
 }
-
-

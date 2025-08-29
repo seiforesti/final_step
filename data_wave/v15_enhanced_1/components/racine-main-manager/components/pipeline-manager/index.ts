@@ -25,4 +25,3 @@ export type {
   PipelineStep,
   PipelineTrigger
 } from '../../types/racine-core.types';
-

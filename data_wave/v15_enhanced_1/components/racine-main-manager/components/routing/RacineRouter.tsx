@@ -94,6 +94,7 @@ import { useWorkspaceManagement } from '../../hooks/useWorkspaceManagement';
 import { useUserManagement } from '../../hooks/useUserManagement';
 import { useCrossGroupIntegration } from '../../hooks/useCrossGroupIntegration';
 import { useRacineOrchestration } from '../../hooks/useRacineOrchestration';
+import { useNavigationAnalytics } from '../../hooks/useNavigationAnalytics';
 
 // Utilities
 import { cn } from '../../utils/ui-utils';
@@ -480,9 +481,13 @@ export const RacineRouter: React.FC<RacineRouterProps> = ({
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const { currentUser } = useUserManagement();
-  const { activeWorkspace } = useWorkspaceManagement();
-  const { trackNavigation } = useCrossGroupIntegration();
+  const [userState, userOperations] = useUserManagement();
+  const workspaceManagement = useWorkspaceManagement();
+  const navigationAnalytics = useNavigationAnalytics();
+  
+  const currentUser = userState.currentUser;
+  const activeWorkspace = workspaceManagement.currentWorkspace;
+  const trackNavigation = navigationAnalytics.trackNavigation;
 
   // Routing State
   const [navigationHistory, setNavigationHistory] = useState<NavigationHistoryItem[]>([]);
@@ -595,13 +600,15 @@ export const RacineRouter: React.FC<RacineRouterProps> = ({
 
       // Track navigation start
       if (enableAnalytics) {
-        await trackNavigation({
-          action: 'navigation_start',
-          from: currentView,
-          to: view,
-          path: targetPath,
-          timestamp: new Date().toISOString()
-        });
+        await trackNavigation(
+          currentView,
+          view,
+          {
+            action: 'navigation_start',
+            path: targetPath,
+            timestamp: new Date().toISOString()
+          }
+        );
       }
 
       // Update view (this will trigger the route change)
@@ -966,14 +973,17 @@ export const RacineRouter: React.FC<RacineRouterProps> = ({
 
     const trackRouteVisit = async () => {
       try {
-        await trackNavigation({
-          action: 'route_visit',
-          view: currentView,
-          path: currentRoute.path,
-          timestamp: new Date().toISOString(),
-          user: currentUser?.id,
-          workspace: activeWorkspace?.id
-        });
+        await trackNavigation(
+          currentView,
+          currentRoute.path,
+          {
+            action: 'route_visit',
+            view: currentView,
+            timestamp: new Date().toISOString(),
+            user: currentUser?.id,
+            workspace: activeWorkspace?.id
+          }
+        );
       } catch (error) {
         console.error('Route analytics tracking failed:', error);
       }

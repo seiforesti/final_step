@@ -21,8 +21,8 @@ import {
   GitBranch,
   Bot
 } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
+import { Card, CardContent } from '../components/ui/card';
+import { Progress } from '../components/ui/progress';
 
 // ============================================================================
 // LOADING CONTEXT DETECTION

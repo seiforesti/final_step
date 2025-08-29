@@ -24,7 +24,7 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { motion, AnimatePresence, useAnimation, useInView } from 'framer-motion';
 import { FixedSizeList as List } from 'react-window';
-import { Activity, Play, Pause, Square, RefreshCcw, Filter, Search, Download, Settings, Eye, EyeOff, AlertTriangle, Clock, Users, Database, Workflow, FileText, Zap, TrendingUp, ChevronDown, ChevronUp, ChevronRight, MoreHorizontal, Bell, CheckCircle, XCircle, AlertCircle, Info, Hash, Globe, MapPin, Clock3, User, Building, Lock, Unlock, Target, Layers, GitBranch, Network, Radar, Cpu, HardDrive, Gauge, PieChart, LineChart, BarChart, Heatmap, Grid3X3, List as ListIcon, Table, Calendar as CalendarIcon, Archive, Star, Bookmark, Share, ExternalLink, Copy, Edit, Save, Maximize2, Minimize2, VolumeX, Volume2, Wifi, WifiOff, RotateCw, FastForward, Rewind, SkipBack, SkipForward, Timer, Crosshair, Focus, ZoomIn, ZoomOut, Move, MousePointer, Shuffle, Repeat, Pause as PauseIcon, Play as PlayIcon, Shield } from 'lucide-react';
+import { Activity, Play, Pause, Square, RefreshCcw, Filter, Search, Download, Settings, Eye, EyeOff, AlertTriangle, Clock, Users, Database, Workflow, FileText, Zap, TrendingUp, ChevronDown, ChevronUp, ChevronRight, MoreHorizontal, Bell, CheckCircle, XCircle, AlertCircle, Info, Hash, Globe, MapPin, Clock3, User, Building, Lock, Unlock, Target, Layers, GitBranch, Network, Radar, Cpu, HardDrive, Gauge, PieChart, LineChart, BarChart, Grid3X3, List as ListIcon, Table, Calendar as CalendarIcon, Archive, Star, Bookmark, Share, ExternalLink, Copy, Edit, Save, Maximize2, Minimize2, VolumeX, Volume2, Wifi, WifiOff, RotateCw, FastForward, Rewind, SkipBack, SkipForward, Timer, Crosshair, Focus, ZoomIn, ZoomOut, Move, MousePointer, Shuffle, Repeat, Pause as PauseIcon, Play as PlayIcon, Shield } from 'lucide-react';
 
 // UI Components
 import { Button } from '@/components/ui/button';
@@ -115,29 +115,23 @@ import { useRacineOrchestration } from '../../hooks/useRacineOrchestration';
 
 // Types
 import {
-  RacineActivity,
+  ActivityRecord,
   ActivityFilter,
   ActivityType,
   ActivitySeverity,
-  ActivityAnomaly,
-  ActivityCorrelation,
   UUID,
   UserRole,
-  WorkspaceContext,
-  CrossGroupActivity,
-  SystemActivity,
-  UserActivity,
-  ComplianceActivity
+  WorkspaceContext
 } from '../../types/racine-core.types';
 import {
-  ActivitySearchRequest,
+  ActivityReportRequest,
   PaginationRequest,
   FilterRequest
 } from '../../types/api.types';
 
 // Utils
 import { formatDateTime, formatDuration, formatBytes, formatNumber } from '../../utils/formatting-utils';
-import { validatePermissions, checkAccess } from '../../utils/security-utils';
+import { validateAPIKeyPermissions } from '../../utils/security-utils';
 import { cn } from '@/lib/utils';
 
 /**
@@ -200,8 +194,8 @@ interface RealTimeActivityStreamProps {
   enableSearch?: boolean;
   enableExport?: boolean;
   className?: string;
-  onActivitySelect?: (activity: RacineActivity) => void;
-  onBulkSelect?: (activities: RacineActivity[]) => void;
+  onActivitySelect?: (activity: ActivityRecord) => void;
+  onBulkSelect?: (activities: ActivityRecord[]) => void;
 }
 
 /**
@@ -222,8 +216,8 @@ interface StreamState {
   updateInterval: number;
   
   // Activity Data
-  activities: RacineActivity[];
-  filteredActivities: RacineActivity[];
+  activities: ActivityRecord[];
+  filteredActivities: ActivityRecord[];
   selectedActivities: Set<UUID>;
   highlightedActivity: UUID | null;
   
@@ -271,7 +265,7 @@ interface ActivityNotification {
   id: UUID;
   type: 'anomaly' | 'correlation' | 'error' | 'warning' | 'info';
   message: string;
-  activity?: RacineActivity;
+  activity?: ActivityRecord;
   timestamp: Date;
   dismissed: boolean;
 }
@@ -572,7 +566,7 @@ export const RealTimeActivityStream: React.FC<RealTimeActivityStreamProps> = ({
   }, [allowSelection, state.filteredActivities, refreshData]);
   
   // Event Handlers
-  const handleStreamActivity = useCallback((activity: RacineActivity) => {
+  const handleStreamActivity = useCallback((activity: ActivityRecord) => {
     setState(prev => {
       const newActivities = [activity, ...prev.activities].slice(0, maxItems);
       
@@ -627,7 +621,7 @@ export const RealTimeActivityStream: React.FC<RealTimeActivityStreamProps> = ({
     }
   }, [state.isStreaming, startStreaming, stopStreaming]);
   
-  const handleActivitySelect = useCallback((activity: RacineActivity, multiSelect: boolean = false) => {
+  const handleActivitySelect = useCallback((activity: ActivityRecord, multiSelect: boolean = false) => {
     if (!allowSelection) return;
     
     setState(prev => {
@@ -813,7 +807,7 @@ export const RealTimeActivityStream: React.FC<RealTimeActivityStreamProps> = ({
         }
         acc[key].push(activity);
         return acc;
-      }, {} as Record<string, RacineActivity[]>);
+      }, {} as Record<string, ActivityRecord[]>);
       
       // Flatten grouped activities with headers
       activities = Object.entries(grouped).flatMap(([groupKey, groupActivities]) => [
@@ -825,7 +819,7 @@ export const RealTimeActivityStream: React.FC<RealTimeActivityStreamProps> = ({
           description: `${groupKey} (${groupActivities.length} activities)`,
           userId: '',
           metadata: { isGroupHeader: true, groupKey, groupCount: groupActivities.length }
-        } as RacineActivity,
+        } as ActivityRecord,
         ...groupActivities
       ]);
     }
@@ -1089,7 +1083,7 @@ export const RealTimeActivityStream: React.FC<RealTimeActivityStreamProps> = ({
     </div>
   );
   
-  const renderActivityCard = useCallback((activity: RacineActivity, index: number) => {
+  const renderActivityCard = useCallback((activity: ActivityRecord, index: number) => {
     const isSelected = state.selectedActivities.has(activity.id);
     const isHighlighted = state.highlightedActivity === activity.id;
     const isGroupHeader = activity.metadata?.isGroupHeader;

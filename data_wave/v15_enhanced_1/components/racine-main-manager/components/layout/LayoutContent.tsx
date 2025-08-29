@@ -981,11 +981,53 @@ const LayoutContent: React.FC<LayoutContentProps> = ({
       }
     };
 
-    window.addEventListener("resize", handleResize);
-    handleResize(); // Initial check
+    // Track current values locally to avoid effect resubscription loops
+    let currentBreakpoint = layoutState.breakpoint;
+    let currentOrientation = layoutState.orientation;
 
-    return () => window.removeEventListener("resize", handleResize);
-  }, [layoutState.breakpoint, layoutState.orientation, handleBreakpointChange]);
+    // Debounce resize handling to reduce update thrash during window drag
+    let debounceTimeout: ReturnType<typeof setTimeout> | null = null;
+
+    const debouncedResize = () => {
+      if (debounceTimeout) clearTimeout(debounceTimeout);
+      debounceTimeout = setTimeout(() => {
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+
+        let newBreakpoint: ResponsiveBreakpoint;
+        if (width < RESPONSIVE_BREAKPOINTS.mobile) {
+          newBreakpoint = "mobile";
+        } else if (width < RESPONSIVE_BREAKPOINTS.tablet) {
+          newBreakpoint = "tablet";
+        } else if (width < RESPONSIVE_BREAKPOINTS.desktop) {
+          newBreakpoint = "desktop";
+        } else {
+          newBreakpoint = "ultrawide";
+        }
+
+        const newOrientation = width > height ? "landscape" : "portrait";
+
+        // Only propagate changes when values actually differ
+        if (newBreakpoint !== currentBreakpoint) {
+          currentBreakpoint = newBreakpoint;
+          handleBreakpointChange(newBreakpoint);
+        }
+
+        if (newOrientation !== currentOrientation) {
+          currentOrientation = newOrientation;
+          setLayoutState((prev) => ({ ...prev, orientation: newOrientation }));
+        }
+      }, 250);
+    };
+
+    window.addEventListener("resize", debouncedResize);
+    debouncedResize(); // Initial check
+
+    return () => {
+      window.removeEventListener("resize", debouncedResize);
+      if (debounceTimeout) clearTimeout(debounceTimeout);
+    };
+  }, [handleBreakpointChange]);
 
   // =============================================================================
   // SPA RENDERING WITH ERROR BOUNDARIES

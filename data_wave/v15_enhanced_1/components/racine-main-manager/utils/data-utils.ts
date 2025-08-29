@@ -25,5 +25,3 @@ export function sortNotifications<T extends { [key: string]: any }>(items: T[], 
 	})
 	return order === 'desc' ? sorted.reverse() : sorted
 }
-
-

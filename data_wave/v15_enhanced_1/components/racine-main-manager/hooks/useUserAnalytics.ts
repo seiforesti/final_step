@@ -440,4 +440,3 @@ export function useUserAnalytics(userId?: string) {
     refetchSpecificUser: specificUserQuery.refetch,
   };
 }
-

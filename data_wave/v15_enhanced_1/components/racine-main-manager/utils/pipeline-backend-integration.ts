@@ -1704,4 +1704,3 @@ export async function getResourceMetrics(
     };
   }
 }
-

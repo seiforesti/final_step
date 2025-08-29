@@ -326,5 +326,3 @@ export function playNotificationSound(sound: string): void {
     console.error('Failed to play notification sound:', error);
   }
 }
-
-

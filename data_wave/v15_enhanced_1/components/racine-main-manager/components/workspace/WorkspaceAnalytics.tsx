@@ -139,7 +139,7 @@ import {
   WorkspaceMember,
   WorkspaceResource,
   WorkspaceSettings,
-  WorkspaceAnalytics,
+  WorkspaceAnalytics as WorkspaceAnalyticsType,
   WorkspaceTemplate,
   WorkspaceSecuritySettings,
   CrossGroupResource,
@@ -2167,5 +2167,3 @@ export const WorkspaceAnalytics: React.FC = () => {
     </TooltipProvider>
   );
 };
-
-export default WorkspaceAnalytics;

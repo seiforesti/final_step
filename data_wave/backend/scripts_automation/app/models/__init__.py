@@ -77,7 +77,7 @@ from . import (
 )
 
 # Import specific models for easy access
-from .auth_models import User, Role, Permission
+from .auth_models import User, Role, Permission, Session
 from .scan_models import Scan, ScanResult, DataSource
 from .compliance_rule_models import ComplianceRule
 from .compliance_models import ComplianceValidation
@@ -102,7 +102,7 @@ from .racine_models import (
 
 __all__ = [
     # Core Models
-    "User", "Role", "Permission",
+    "User", "Role", "Permission", "Session",
     "Scan", "ScanResult", "DataSource",
     "ComplianceRule", "ComplianceValidation",
     "ClassificationRule", "DataClassification",

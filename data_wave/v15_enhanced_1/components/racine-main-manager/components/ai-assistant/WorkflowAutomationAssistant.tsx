@@ -226,7 +226,7 @@ export const WorkflowAutomationAssistant: React.FC<WorkflowAutomationAssistantPr
     workspace: activeWorkspace,
     activeSPA: activeSPAContext?.activeSPA || null,
     systemHealth,
-    recentActivities: recentActivities.slice(0, 10),
+    recentActivities: (recentActivities || []).slice(0, 10),
     userPermissions,
     workspaceContext: {
       id: activeWorkspace?.id || '',

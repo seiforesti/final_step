@@ -238,7 +238,7 @@ export const ContextAwareAssistant: React.FC<ContextAwareAssistantProps> = ({
       workspace: activeWorkspace,
       activeSPA: activeSPAContext?.activeSPA || null,
       systemHealth,
-      recentActivities: recentActivities.slice(0, 20),
+      recentActivities: (recentActivities || []).slice(0, 20),
       activeCollaborations,
       userPermissions,
       workspaceContext,

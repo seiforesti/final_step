@@ -86,6 +86,14 @@ export enum ViewMode {
   ADVANCED_CATALOG = "advanced_catalog",
   SCAN_LOGIC = "scan_logic",
   RBAC_SYSTEM = "rbac_system",
+  // Additional routing views
+  ANALYTICS = "analytics",
+  MONITORING = "monitoring",
+  STREAMING = "streaming",
+  COST_OPTIMIZATION = "cost_optimization",
+  REPORTS = "reports",
+  SEARCH = "search",
+  NOTIFICATIONS = "notifications",
 }
 
 // Basic user role enumeration used by activity tracker and audit components

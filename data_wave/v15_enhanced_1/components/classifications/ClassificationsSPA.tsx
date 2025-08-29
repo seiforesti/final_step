@@ -4219,7 +4219,7 @@ const ClassificationsSPAInternal: React.FC<ClassificationsSPAProps> = ({
         results: results,
         query: query,
         userContext: {
-          recentActivity: state.recentActivities.slice(0, 10),
+          recentActivity: (state.recentActivities || []).slice(0, 10),
           preferences: state.userPreferences,
           currentView: state.currentView.id
         },

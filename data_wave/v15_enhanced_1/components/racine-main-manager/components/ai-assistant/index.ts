@@ -26,4 +26,3 @@ export type {
   AIAssistantAction,
   AIAssistantInsight
 } from '../../utils/ai-assistant-utils';
-

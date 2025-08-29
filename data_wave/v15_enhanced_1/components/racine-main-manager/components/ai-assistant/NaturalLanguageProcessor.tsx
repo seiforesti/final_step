@@ -55,7 +55,8 @@ import {
   ConfidenceScore,
   ProcessingMode,
   LanguageSupport,
-  NLPCapability
+  NLPCapability,
+  NLPTrainingData
 } from '../../types/ai-assistant.types';
 
 import {
@@ -131,7 +132,7 @@ interface LanguageModelsPanelProps {
   models: NLPModel[];
   activeModel: string;
   onModelSelect: (modelId: string) => void;
-  onModelTrain: (modelId: string, trainingData: TrainingData) => void;
+  onModelTrain: (modelId: string, trainingData: NLPTrainingData) => void;
   onModelEvaluate: (modelId: string) => void;
 }
 

@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { Metadata } from 'next';
-import { PipelineDesigner } from '@/components/racine-main-manager/components/pipeline-manager';
+import { PipelineDesigner } from '../../components/racine-main-manager/components/pipeline-manager';
 
 // ============================================================================
 // METADATA

@@ -4,31 +4,31 @@ import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, Bell, Settings, User, ChevronDown, Menu, X, Activity, AlertTriangle, CheckCircle, Clock, Home, Database, Shield, FileText, BookOpen, Scan, Users, Workflow, BarChart3, Bot, MessageSquare, Zap, Globe, Command, Plus, Star, History, Filter, ArrowRight, ExternalLink, RefreshCw } from 'lucide-react'
-import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { DropdownMenu } from '@/components/ui/dropdown-menu'
-import { DropdownMenuContent } from '@/components/ui/dropdown-menu'
-import { DropdownMenuItem } from '@/components/ui/dropdown-menu'
-import { DropdownMenuLabel } from '@/components/ui/dropdown-menu'
-import { DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
-import { DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { DropdownMenuShortcut } from '@/components/ui/dropdown-menu'
+import { cn } from '../../utils/cn'
+import { Button } from '../ui/button'
+import { Input } from '../ui/input'
+import { Badge } from '../ui/badge'
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
+import { DropdownMenu } from '../ui/dropdown-menu'
+import { DropdownMenuContent } from '../ui/dropdown-menu'
+import { DropdownMenuItem } from '../ui/dropdown-menu'
+import { DropdownMenuLabel } from '../ui/dropdown-menu'
+import { DropdownMenuSeparator } from '../ui/dropdown-menu'
+import { DropdownMenuTrigger } from '../ui/dropdown-menu'
+import { DropdownMenuShortcut } from '../ui/dropdown-menu'
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip'
+} from '../ui/tooltip'
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@/components/ui/popover'
-import { Separator } from '@/components/ui/separator'
-import { Progress } from '@/components/ui/progress'
+} from '../ui/popover'
+import { Separator } from '../ui/separator'
+import { Progress } from '../ui/progress'
 
 // Import racine foundation layers (already implemented)
 import { useRacineOrchestration } from '../../hooks/useRacineOrchestration'

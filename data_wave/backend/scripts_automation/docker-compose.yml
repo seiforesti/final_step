@@ -58,9 +58,6 @@ services:
       start_period: 40s
     command: >
       sh -c "
-        echo 'Installing spaCy models...' &&
-        /opt/venv/bin/python -m spacy download en_core_web_sm &&
-        /opt/venv/bin/python -m spacy download en_core_web_md &&
         echo 'Starting backend service...' &&
         uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
       "

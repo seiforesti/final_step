@@ -314,4 +314,3 @@ export const getComponentStats = () => {
 
 // Default export for registry; named functions are already exported above
 export default componentLibrary;
-

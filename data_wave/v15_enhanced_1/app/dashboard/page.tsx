@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { Metadata } from 'next';
-import { IntelligentDashboardOrchestrator } from '@/components/racine-main-manager/components/dashboard';
+import { IntelligentDashboardOrchestrator } from '../../components/racine-main-manager/components/dashboard';
 
 // ============================================================================
 // METADATA
