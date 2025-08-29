@@ -1,17 +1,7 @@
-"use client";
+"use client"
 
-import React from "react";
-import {
-  useState,
-  useEffect,
-  useCallback,
-  useMemo,
-  useRef,
-  useDeferredValue,
-  useTransition,
-} from "react";
-import { useRouter, usePathname } from "next/navigation";
-import { motion } from "framer-motion";
+import React, { useState, useCallback, useMemo } from "react"
+import { motion } from "framer-motion"
 import {
   ChevronLeft,
   ChevronRight,
@@ -28,1331 +18,498 @@ import {
   Bot,
   MessageSquare,
   Settings,
-  Clock,
   Search,
-  MoreHorizontal,
-  Pin,
-  Unlink as Unpin,
-  ExternalLink,
-  ChevronDown,
-  Heart,
-  Globe,
-  ArrowRight,
+  Home,
+  GitBranch,
   Target,
-  Trash2,
-  Copy,
-  RefreshCw,
-} from "lucide-react";
-import { cn } from "../../utils/cn";
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
-// ErrorBoundary for sidebar resilience
-class SidebarErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
-  constructor(props: any) {
-    super(props);
-    this.state = { hasError: false };
-  }
-  static getDerivedStateFromError() {
-    return { hasError: true };
-  }
-  componentDidCatch(error: any, info: any) {
-    // Optionally log error
-    if (typeof window !== "undefined") {
-      // eslint-disable-next-line no-console
-      console.error("Sidebar error:", error, info);
-    }
-  }
-  render() {
-    if (this.state.hasError) {
-      return <div className="p-4 text-red-500">Sidebar failed to load. Please refresh.</div>;
-    }
-    return this.props.children;
-  }
-}
-import { Badge } from "../ui/badge";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "../ui/tooltip";
+  Network,
+  Brain,
+  AlertCircle,
+  CheckCircle,
+  ExternalLink,
+  Pin,
+  Star,
+} from "lucide-react"
+
+import { cn } from "../../utils/cn"
+import { Button } from "../ui/button"
+import { Input } from "../ui/input"
+import { Badge } from "../ui/badge"
+import { Separator } from "../ui/separator"
+import { ScrollArea } from "../ui/scroll-area"
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip"
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
-import { Collapsible, CollapsibleContent } from "../ui/collapsible";
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuTrigger,
-  ContextMenuSeparator,
-  ContextMenuShortcut,
-} from "../ui/context-menu";
-import { ScrollArea } from "../ui/scroll-area";
+} from "../ui/dropdown-menu"
 
-// Import racine foundation layers (already implemented)
-import { useCrossGroupIntegration } from "../../hooks/useCrossGroupIntegration";
-import { useUserManagement } from "../../hooks/useUserManagement";
-import { useWorkspaceManagement } from "../../hooks/useWorkspaceManagement";
-import { useActivityTracker } from "../../hooks/useActivityTracker";
-import { useQuickActions } from "../../hooks/useQuickActions";
-import { useNavigationAnalytics } from "../../hooks/useNavigationAnalytics";
-import { useUserPreferences } from "../../hooks/useUserPreferences";
+// Import types
+import type { ViewModeEnum } from "../../RacineMainManagerSPA"
+import type { SystemHealth, User, Workspace } from "../../types/racine-core.types"
 
-// Import types (already implemented)
-// Local lightweight types to avoid heavy imports and keep UI snappy
-type FavoriteItem = {
-  id: string;
-  type: "spa" | "racine";
-  key: string;
-  name: string;
-  route: string;
-  icon: any;
-  color: string;
-  addedAt: Date;
-};
-type NavigationItem = {
-  id?: string;
-  type: "spa" | "racine";
-  key: string;
-  route: string;
-};
-import {
-  getHealthStatusColor,
-  getStatusIcon,
-} from "../../utils/navigation-utils";
+interface NavigationItem {
+  id: ViewModeEnum
+  label: string
+  icon: React.ComponentType<{ className?: string }>
+  description: string
+  badge?: string
+  isNew?: boolean
+  isProfessional?: boolean
+  group: 'core' | 'governance' | 'management' | 'tools'
+}
 
-// Import constants (already implemented)
-import {
-  DEFAULT_SIDEBAR_WIDTH,
-  COLLAPSED_SIDEBAR_WIDTH,
-} from "../../constants/cross-group-configs";
-
-// Existing SPA metadata with enhanced information
-const EXISTING_SPA_METADATA = {
-  "data-sources": {
-    name: "Data Sources",
-    icon: Database,
-    description: "Manage and monitor data source connections",
-    shortDescription: "Data connections & monitoring",
-    color: "bg-blue-500",
-    textColor: "text-blue-600",
-    category: "Data Management",
-    route: "/v15_enhanced_1/components/data-sources",
-    keywords: ["database", "connection", "source", "data"],
-    estimatedComplexity: "high",
-    lastUpdated: new Date("2024-01-15"),
-    status: "stable",
-    team: "Data Platform",
+const navigationItems: NavigationItem[] = [
+  // Core Features
+  {
+    id: "dashboard" as ViewModeEnum,
+    label: "Dashboard",
+    icon: Home,
+    description: "Intelligent overview and metrics",
+    group: 'core',
+    isProfessional: true
   },
-  "scan-rule-sets": {
-    name: "Scan Rule Sets",
-    icon: Shield,
-    description: "Configure and manage advanced scanning rules",
-    shortDescription: "Scanning rules & policies",
-    color: "bg-purple-500",
-    textColor: "text-purple-600",
-    category: "Security & Compliance",
-    route: "/v15_enhanced_1/components/Advanced-Scan-Rule-Sets",
-    keywords: ["scan", "rules", "security", "policy"],
-    estimatedComplexity: "high",
-    lastUpdated: new Date("2024-01-14"),
-    status: "stable",
-    team: "Security",
-  },
-  classifications: {
-    name: "Classifications",
-    icon: FileText,
-    description: "Data classification and intelligent tagging",
-    shortDescription: "Data classification & tagging",
-    color: "bg-green-500",
-    textColor: "text-green-600",
-    category: "Data Governance",
-    route: "/v15_enhanced_1/components/classifications",
-    keywords: ["classification", "tags", "metadata", "labels"],
-    estimatedComplexity: "medium",
-    lastUpdated: new Date("2024-01-13"),
-    status: "stable",
-    team: "Governance",
-  },
-  "compliance-rule": {
-    name: "Compliance Rules",
-    icon: BookOpen,
-    description: "Compliance policies and audit management",
-    shortDescription: "Compliance & audit rules",
-    color: "bg-orange-500",
-    textColor: "text-orange-600",
-    category: "Security & Compliance",
-    route: "/v15_enhanced_1/components/Compliance-Rule",
-    keywords: ["compliance", "audit", "policy", "regulation"],
-    estimatedComplexity: "high",
-    lastUpdated: new Date("2024-01-12"),
-    status: "stable",
-    team: "Compliance",
-  },
-  "advanced-catalog": {
-    name: "Advanced Catalog",
-    icon: Scan,
-    description: "Data catalog and metadata management",
-    shortDescription: "Data catalog & metadata",
-    color: "bg-teal-500",
-    textColor: "text-teal-600",
-    category: "Data Management",
-    route: "/v15_enhanced_1/components/Advanced-Catalog",
-    keywords: ["catalog", "metadata", "discovery", "lineage"],
-    estimatedComplexity: "high",
-    lastUpdated: new Date("2024-01-11"),
-    status: "stable",
-    team: "Data Platform",
-  },
-  "scan-logic": {
-    name: "Scan Logic",
-    icon: Activity,
-    description: "Advanced scanning and processing logic",
-    shortDescription: "Scan orchestration & logic",
-    color: "bg-indigo-500",
-    textColor: "text-indigo-600",
-    category: "Processing",
-    route: "/v15_enhanced_1/components/Advanced-Scan-Logic",
-    keywords: ["scan", "logic", "processing", "orchestration"],
-    estimatedComplexity: "high",
-    lastUpdated: new Date("2024-01-10"),
-    status: "stable",
-    team: "Engineering",
-  },
-  "rbac-system": {
-    name: "RBAC System",
-    icon: Users,
-    description: "Role-based access control management",
-    shortDescription: "User & permission management",
-    color: "bg-red-500",
-    textColor: "text-red-600",
-    category: "Security & Compliance",
-    route: "/v15_enhanced_1/components/Advanced_RBAC_Datagovernance_System",
-    keywords: ["rbac", "users", "roles", "permissions"],
-    estimatedComplexity: "high",
-    lastUpdated: new Date("2024-01-09"),
-    status: "stable",
-    team: "Security",
-    adminOnly: true,
-  },
-} as const;
-
-// Racine feature metadata
-const RACINE_FEATURE_METADATA = {
-  dashboard: {
-    name: "Global Dashboard",
-    icon: BarChart3,
-    description: "Cross-SPA analytics and insights",
-    shortDescription: "Global insights & KPIs",
-    color: "bg-cyan-500",
-    textColor: "text-cyan-600",
-    category: "Analytics",
-    route: "/racine/dashboard",
-    keywords: ["dashboard", "analytics", "kpi", "metrics"],
-    isRacineFeature: true,
-  },
-  workspace: {
-    name: "Workspace Manager",
-    icon: Globe,
-    description: "Multi-workspace orchestration",
-    shortDescription: "Workspace management",
-    color: "bg-emerald-500",
-    textColor: "text-emerald-600",
-    category: "Management",
-    route: "/racine/workspace",
-    keywords: ["workspace", "project", "team", "collaboration"],
-    isRacineFeature: true,
-  },
-  workflows: {
-    name: "Job Workflows",
+  {
+    id: "workflows" as ViewModeEnum,
+    label: "Workflows",
     icon: Workflow,
-    description: "Databricks-style workflow builder",
-    shortDescription: "Workflow automation",
-    color: "bg-violet-500",
-    textColor: "text-violet-600",
-    category: "Automation",
-    route: "/racine/job-workflow-space",
-    keywords: ["workflow", "automation", "jobs", "pipeline"],
-    isRacineFeature: true,
+    description: "Data governance workflows",
+    group: 'core',
+    isProfessional: true,
+    isNew: true
   },
-  pipelines: {
-    name: "Pipeline Manager",
-    icon: Zap,
-    description: "Advanced pipeline management",
-    shortDescription: "Data pipelines",
-    color: "bg-yellow-500",
-    textColor: "text-yellow-600",
-    category: "Processing",
-    route: "/racine/pipeline-manager",
-    keywords: ["pipeline", "etl", "processing", "data"],
-    isRacineFeature: true,
+  {
+    id: "pipelines" as ViewModeEnum,
+    label: "Pipelines",
+    icon: GitBranch,
+    description: "Data processing pipelines",
+    group: 'core',
+    isProfessional: true,
+    isNew: true
   },
-  ai: {
-    name: "AI Assistant",
-    icon: Bot,
-    description: "Context-aware AI assistance",
-    shortDescription: "AI-powered help",
-    color: "bg-pink-500",
-    textColor: "text-pink-600",
-    category: "AI & ML",
-    route: "/racine/ai-assistant",
-    keywords: ["ai", "assistant", "help", "automation"],
-    isRacineFeature: true,
+  {
+    id: "activity" as ViewModeEnum,
+    label: "Activity",
+    icon: Activity,
+    description: "Real-time activity tracking",
+    group: 'core',
+    isProfessional: true,
+    isNew: true
   },
-  activity: {
-    name: "Activity Tracker",
-    icon: Clock,
-    description: "Historic activities and audit trails",
-    shortDescription: "Activity monitoring",
-    color: "bg-slate-500",
-    textColor: "text-slate-600",
-    category: "Monitoring",
-    route: "/racine/activity-tracker",
-    keywords: ["activity", "audit", "history", "tracking"],
-    isRacineFeature: true,
+  // Data Governance
+  {
+    id: "data-sources" as ViewModeEnum,
+    label: "Data Sources",
+    icon: Database,
+    description: "Manage data connections",
+    group: 'governance'
   },
-  analytics: {
-    name: "Intelligent Dashboard",
+  {
+    id: "scan-rule-sets" as ViewModeEnum,
+    label: "Scan Rules",
+    icon: Scan,
+    description: "Configure scanning rules",
+    group: 'governance'
+  },
+  {
+    id: "classifications" as ViewModeEnum,
+    label: "Classifications",
+    icon: FileText,
+    description: "Data classification system",
+    group: 'governance'
+  },
+  {
+    id: "compliance-rule" as ViewModeEnum,
+    label: "Compliance",
+    icon: Shield,
+    description: "Compliance management",
+    group: 'governance'
+  },
+  {
+    id: "advanced-catalog" as ViewModeEnum,
+    label: "Data Catalog",
+    icon: BookOpen,
+    description: "Advanced data catalog",
+    group: 'governance'
+  },
+  {
+    id: "scan-logic" as ViewModeEnum,
+    label: "Scan Logic",
     icon: Target,
-    description: "Custom dashboard builder",
-    shortDescription: "Custom dashboards",
-    color: "bg-lime-500",
-    textColor: "text-lime-600",
-    category: "Analytics",
-    route: "/racine/intelligent-dashboard",
-    keywords: ["dashboard", "custom", "widgets", "reports"],
-    isRacineFeature: true,
+    description: "Advanced scanning logic",
+    group: 'governance'
   },
-  collaboration: {
-    name: "Collaboration Hub",
+  // Management
+  {
+    id: "rbac-system" as ViewModeEnum,
+    label: "RBAC",
+    icon: Users,
+    description: "Role-based access control",
+    group: 'management'
+  },
+  {
+    id: "collaboration" as ViewModeEnum,
+    label: "Collaboration",
     icon: MessageSquare,
-    description: "Team collaboration center",
-    shortDescription: "Team collaboration",
-    color: "bg-amber-500",
-    textColor: "text-amber-600",
-    category: "Collaboration",
-    route: "/racine/collaboration",
-    keywords: ["collaboration", "team", "chat", "sharing"],
-    isRacineFeature: true,
+    description: "Team collaboration space",
+    group: 'management',
+    isProfessional: true,
+    isNew: true
   },
-  settings: {
-    name: "User Settings",
-    icon: Settings,
-    description: "Profile and preferences management",
-    shortDescription: "User preferences",
-    color: "bg-gray-500",
-    textColor: "text-gray-600",
-    category: "Settings",
-    route: "/racine/user-management",
-    keywords: ["settings", "profile", "preferences", "user"],
-    isRacineFeature: true,
+  // Tools
+  {
+    id: "ai-assistant" as ViewModeEnum,
+    label: "AI Assistant",
+    icon: Brain,
+    description: "Intelligent AI assistant",
+    group: 'tools',
+    isProfessional: true,
+    isNew: true
   },
-} as const;
+  {
+    id: "data-governance" as ViewModeEnum,
+    label: "Schema View",
+    icon: Network,
+    description: "Data governance schema",
+    group: 'tools'
+  },
+]
 
-// Safe icon renderer to avoid heavy typing on dynamic icon components
-const IconRenderer: React.FC<{ icon: any; className?: string }> = ({
-  icon,
-  className,
-}) => {
-  const Comp = icon as React.ComponentType<any> | undefined;
-  if (!Comp) return null;
-  return <Comp className={className} />;
-};
+const groupLabels = {
+  core: "Core Features",
+  governance: "Data Governance", 
+  management: "Management",
+  tools: "Tools & Analytics"
+}
 
 interface AppSidebarProps {
-  className?: string;
-  onQuickActionsTrigger?: () => void;
-  isQuickActionsSidebarOpen?: boolean;
-  isCollapsed?: boolean;
-  onCollapsedChange?: (collapsed: boolean) => void;
+  collapsed: boolean
+  onToggle: () => void
+  currentView: ViewModeEnum
+  onViewChange: (view: ViewModeEnum) => void
+  onQuickActionsToggle: () => void
+  systemHealth?: SystemHealth
+  currentUser?: User
+  currentWorkspace?: Workspace
 }
 
 export const AppSidebar: React.FC<AppSidebarProps> = ({
-  className,
-  onQuickActionsTrigger,
-  isQuickActionsSidebarOpen = false,
-  isCollapsed: externalCollapsed,
-  onCollapsedChange,
+  collapsed,
+  onToggle,
+  currentView,
+  onViewChange,
+  onQuickActionsToggle,
+  systemHealth,
+  currentUser,
+  currentWorkspace
 }) => {
-  // Core state management using foundation hooks
-  const {
-    crossGroupState,
-  coordinateNavigation: coordinateSPANavigation,
-  refreshSPAStatus,
-  } = useCrossGroupIntegration();
+  const [searchQuery, setSearchQuery] = useState("")
+  const [pinnedItems, setPinnedItems] = useState<Set<ViewModeEnum>>(new Set())
 
-  const userHook = useUserManagement() as any;
-  const userOps = userHook?.operations ?? userHook?.[1] ?? userHook ?? {};
+  // Filter navigation items based on search
+  const filteredItems = useMemo(() => {
+    if (!searchQuery) return navigationItems
+    
+    return navigationItems.filter(item =>
+      item.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.description.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+  }, [searchQuery])
 
-  // Memoize functions to prevent infinite loops
-  const checkUserAccess = useCallback(
-    (permission: string) => {
-      try {
-        return userOps?.checkUserAccess?.(permission) ?? true;
-      } catch {
-        return true;
+  // Group filtered items
+  const groupedItems = useMemo(() => {
+    const groups: Record<string, NavigationItem[]> = {}
+    
+    filteredItems.forEach(item => {
+      if (!groups[item.group]) {
+        groups[item.group] = []
       }
-    },
-    [userOps]
-  );
-
-  const workspaceHook = useWorkspaceManagement() as any;
-  const workspaceState = workspaceHook?.state ?? workspaceHook?.[0] ?? {};
-  // Removed unused workspaceOps
-
-  // Memoize functions to prevent infinite loops
-  // ...existing code...
-
-  // Normalize activity tracker hook (tuple or object)
-  const activityHook = useActivityTracker() as any;
-  const activityOps =
-    activityHook?.operations ?? activityHook?.[1] ?? activityHook ?? {};
-  // Memoize functions to prevent infinite loops
-  const getRecentNavigationHistory = useCallback(
-    async (limit: number) => {
-      try {
-        return (await activityOps?.getRecentNavigationHistory?.(limit)) ?? [];
-      } catch {
-        return [];
-      }
-    },
-    [activityOps]
-  );
-
-  const trackNavigation = useCallback(
-    (payload: any) => {
-      try {
-        activityOps?.trackNavigation?.(payload);
-      } catch {
-        /* noop */
-      }
-    },
-    [activityOps]
-  );
-
-  // Removed unused quickActionsApi
-  // ...existing code...
-
-  const navigationAnalytics = useNavigationAnalytics() as any;
-  const trackSidebarUsage =
-    navigationAnalytics?.trackSidebarUsage || (() => {});
-
-  // Normalize user preferences hook (tuple or object)
-  const userPrefsHook = useUserPreferences() as any;
-  const userPrefsState = userPrefsHook?.state ?? userPrefsHook?.[0] ?? {};
-  const userPrefsOps =
-    userPrefsHook?.operations ?? userPrefsHook?.[1] ?? userPrefsHook ?? {};
-  // Memoize functions to prevent infinite loops
-  const updatePreference = useCallback(
-    (key: string, value: any) => {
-      try {
-        userPrefsOps?.updatePreference?.(key, value);
-      } catch {
-        /* noop */
-      }
-    },
-    [userPrefsOps]
-  );
-
-  const getSidebarPreferences = useCallback(async () => {
-    try {
-      return (
-        (await userPrefsOps?.getSidebarPreferences?.()) ??
-        (userPrefsState?.sidebarPreferences || {})
-      );
-    } catch {
-      return {};
-    }
-  }, [userPrefsOps, userPrefsState?.sidebarPreferences]);
-
-  const saveFavoriteItem = useCallback(
-    async (fav: any) => {
-      try {
-        await userPrefsOps?.saveFavoriteItem?.(fav);
-      } catch {
-        /* noop */
-      }
-    },
-    [userPrefsOps]
-  );
-
-  const removeFavoriteItem = useCallback(
-    async (id: string) => {
-      try {
-        await userPrefsOps?.removeFavoriteItem?.(id);
-      } catch {
-        /* noop */
-      }
-    },
-    [userPrefsOps]
-  );
-
-  // Local state
-  const [internalCollapsed, setInternalCollapsed] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-  const deferredSearchQuery = useDeferredValue(debouncedSearch);
-  // Debounce search input to avoid UI freezes
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedSearch(searchQuery);
-    }, 180); // Fast debounce for snappy UX
-    return () => clearTimeout(handler);
-  }, [searchQuery]);
-  const [, startTransition] = useTransition();
-  const [expandedSections, setExpandedSections] = useState<
-    Record<string, boolean>
-  >({
-    spas: true,
-    racine: true,
-    favorites: true,
-    recent: false,
-  });
-  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
-  const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
-  const [recentItems, setRecentItems] = useState<NavigationItem[]>([]);
-  const [isPinned, setIsPinned] = useState(false);
-
-  // Refs
-  const sidebarRef = useRef<HTMLDivElement>(null);
-  const router = useRouter();
-  const pathname = usePathname();
-
-  // Determine if sidebar is collapsed
-  const isCollapsed = externalCollapsed ?? internalCollapsed;
-
-  // Handle collapsed state change
-  const handleCollapsedChange = useCallback(
-    (collapsed: boolean) => {
-      if (onCollapsedChange) {
-        onCollapsedChange(collapsed);
-      } else {
-        setInternalCollapsed(collapsed);
-      }
-    },
-    [onCollapsedChange]
-  );
-
-  // Load user preferences and favorites
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        const sidebarPrefs = await getSidebarPreferences();
-        if (!mounted) return;
-        setIsPinned(!!sidebarPrefs.isPinned);
-        setExpandedSections(
-          sidebarPrefs.expandedSections || {
-            spas: true,
-            racine: true,
-            favorites: true,
-            recent: false,
-          }
-        );
-        setFavorites(Array.isArray(sidebarPrefs.favorites) ? sidebarPrefs.favorites : []);
-      } catch (error) {
-        if (typeof window !== "undefined") {
-          // eslint-disable-next-line no-console
-          console.error("Failed to load user preferences:", error);
-        }
-      }
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  // Load recent navigation history without blocking UI
-  useEffect(() => {
-    let mounted = true;
-    // Use requestIdleCallback if available, else setTimeout
-    const loader = async () => {
-      try {
-        const recent = await getRecentNavigationHistory(10);
-        if (mounted) setRecentItems(Array.isArray(recent) ? recent : []);
-      } catch (error) {
-        if (typeof window !== "undefined") {
-          // eslint-disable-next-line no-console
-          console.error("Failed to load recent items:", error);
-        }
-      }
-    };
-    if (typeof (window as any).requestIdleCallback === "function") {
-      (window as any).requestIdleCallback(() => loader());
-    } else {
-      setTimeout(() => loader(), 0);
-    }
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  // Get current active item
-  const currentActiveItem = useMemo(() => {
-    // Check existing SPAs
-    for (const [spaKey, metadata] of Object.entries(EXISTING_SPA_METADATA)) {
-      if (pathname.startsWith(metadata.route)) {
-        return { type: "spa", key: spaKey, metadata };
-      }
-    }
-
-    // Check Racine features
-    for (const [featureKey, metadata] of Object.entries(
-      RACINE_FEATURE_METADATA
-    )) {
-      if (pathname.startsWith(metadata.route)) {
-        return { type: "racine", key: featureKey, metadata };
-      }
-    }
-
-    return null;
-  }, [pathname]);
-
-  // Filter SPAs based on permissions
-  const accessibleSPAs = useMemo(() => {
-    return Object.entries(EXISTING_SPA_METADATA).filter(
-      ([spaKey, metadata]) => {
-        // Hide RBAC for non-admin users
-        if ((metadata as any).adminOnly && !checkUserAccess("rbac:admin")) {
-          return false;
-        }
-
-        // Check general SPA access
-        return checkUserAccess(`spa:${spaKey}`);
-      }
-    );
-  }, [checkUserAccess]);
-
-  // Filter items based on search
-  const filteredSPAs = useMemo(() => {
-    if (!deferredSearchQuery) return accessibleSPAs;
-    const query = deferredSearchQuery.toLowerCase();
-    return accessibleSPAs.filter(([spaKey, metadata]) => {
-      return (
-        metadata.name.toLowerCase().includes(query) ||
-        metadata.description.toLowerCase().includes(query) ||
-        metadata.category.toLowerCase().includes(query)
-      );
-    });
-  }, [accessibleSPAs, deferredSearchQuery]);
-
-  const filteredRacineFeatures = useMemo(() => {
-    if (!deferredSearchQuery) return Object.entries(RACINE_FEATURE_METADATA);
-    const query = deferredSearchQuery.toLowerCase();
-    return Object.entries(RACINE_FEATURE_METADATA).filter(
-      ([featureKey, metadata]) => {
-        return (
-          metadata.name.toLowerCase().includes(query) ||
-          metadata.description.toLowerCase().includes(query) ||
-          metadata.category.toLowerCase().includes(query)
-        );
-      }
-    );
-  }, [deferredSearchQuery]);
+      groups[item.group].push(item)
+    })
+    
+    return groups
+  }, [filteredItems])
 
   // Handle navigation
-  const handleNavigation = useCallback(
-    (type: "spa" | "racine", key: string, metadata: any) => {
-      startTransition(() => {
-        try {
-          trackNavigation({
-            type,
-            key,
-            destination: metadata.route,
-            source: "sidebar",
-            timestamp: new Date(),
-          });
+  const handleNavigation = useCallback((viewId: ViewModeEnum) => {
+    onViewChange(viewId)
+  }, [onViewChange])
 
-          trackSidebarUsage({
-            action: "navigation",
-            item: key,
-            category: type,
-            timestamp: new Date(),
-          });
-
-          if (type === "spa") {
-            // Fire and forget to avoid blocking the UI
-            Promise.resolve(
-              coordinateSPANavigation(key, {
-                preserveContext: true,
-                updateHistory: true,
-                trackAnalytics: true,
-              })
-            ).catch(() => {});
-          }
-
-          router.push(metadata.route);
-        } catch (error) {
-          console.error("Navigation error:", error);
-        }
-      });
-    },
-    [
-      coordinateSPANavigation,
-      router,
-      trackNavigation,
-      trackSidebarUsage,
-      startTransition,
-    ]
-  );
-
-  // Handle Quick Actions trigger
-  const handleQuickActionsTrigger = useCallback(
-    (spaKey?: string, context?: any) => {
-      if (onQuickActionsTrigger) {
-        onQuickActionsTrigger();
+  // Handle pin toggle
+  const handlePinToggle = useCallback((itemId: ViewModeEnum, event: React.MouseEvent) => {
+    event.stopPropagation()
+    setPinnedItems(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(itemId)) {
+        newSet.delete(itemId)
+      } else {
+        newSet.add(itemId)
       }
+      return newSet
+    })
+  }, [])
 
-      // Track quick actions usage
-      trackSidebarUsage({
-        action: "quick_actions_trigger",
-        item: spaKey || "general",
-        context,
-        timestamp: new Date(),
-      });
-    },
-    [onQuickActionsTrigger, trackSidebarUsage]
-  );
+  // Get system health indicator
+  const getHealthIndicator = () => {
+    if (!systemHealth) return null
+    
+    const isHealthy = systemHealth.overall === 'healthy'
+    return isHealthy ? (
+      <CheckCircle className="h-3 w-3 text-green-500" />
+    ) : (
+      <AlertCircle className="h-3 w-3 text-yellow-500" />
+    )
+  }
 
-  // Handle favorites
-  const handleToggleFavorite = useCallback(
-    async (type: "spa" | "racine", key: string, metadata: any) => {
-      try {
-        const existingFavorite = favorites.find(
-          (fav) => fav.key === key && fav.type === type
-        );
+  // Render navigation item
+  const renderNavigationItem = useCallback((item: NavigationItem) => {
+    const isActive = currentView === item.id
+    const isPinned = pinnedItems.has(item.id)
+    const Icon = item.icon
 
-        if (existingFavorite) {
-          await removeFavoriteItem(existingFavorite.id);
-          setFavorites((prev) =>
-            prev.filter((fav) => fav.id !== existingFavorite.id)
-          );
-        } else {
-          const newFavorite: FavoriteItem = {
-            id: `${type}_${key}_${Date.now()}`,
-            type,
-            key,
-            name: metadata.name,
-            route: metadata.route,
-            icon: metadata.icon,
-            color: metadata.color,
-            addedAt: new Date(),
-          };
-
-          await saveFavoriteItem(newFavorite);
-          setFavorites((prev) => [...prev, newFavorite]);
-        }
-      } catch (error) {
-        console.error("Failed to toggle favorite:", error);
-      }
-    },
-    [favorites, saveFavoriteItem, removeFavoriteItem]
-  );
-
-  // Toggle expanded sections
-  const toggleSection = useCallback(
-    (section: string) => {
-      setExpandedSections((prev) => {
-        const newState = { ...prev, [section]: !prev[section] };
-
-        // Save to user preferences
-        updatePreference("sidebarExpandedSections", newState);
-
-        return newState;
-      });
-    },
-    [updatePreference]
-  );
-
-  // Render sidebar item
-  const renderSidebarItem = useCallback(
-    (
-      type: "spa" | "racine",
-      key: string,
-      metadata: any,
-      options: {
-        showStatus?: boolean;
-        showQuickActions?: boolean;
-        showDescription?: boolean;
-        isFavorite?: boolean;
-        isRecent?: boolean;
-      } = {}
-    ) => {
-      const {
-        showStatus = true,
-        showQuickActions = true,
-        showDescription = false,
-        isFavorite = false,
-        isRecent = false,
-      } = options;
-
-      const isActive =
-        currentActiveItem?.key === key && currentActiveItem?.type === type;
-      const status =
-        type === "spa"
-          ? crossGroupState.groupStatuses?.[key] || "unknown"
-          : "healthy";
-      const StatusIcon = getStatusIcon(status);
-      const statusColor = getHealthStatusColor(status);
-      const isFav = favorites.some(
-        (fav) => fav.key === key && fav.type === type
-      );
-  // ...existing code...
-
-      return (
-        <ContextMenu key={`${type}_${key}`}>
-          <ContextMenuTrigger>
-            <button
-              type="button"
-              className={cn(
-                "group relative flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-all duration-200",
-                "hover:bg-muted/50 focus:bg-muted/50",
-                isActive &&
-                  "bg-primary/10 border border-primary/20 text-primary",
-                isCollapsed && "justify-center px-2"
+    const content = (
+      <Button
+        variant={isActive ? "secondary" : "ghost"}
+        size="sm"
+        className={cn(
+          "w-full justify-start relative group transition-all duration-200",
+          isActive && "bg-accent text-accent-foreground shadow-sm",
+          !collapsed ? "px-3" : "px-2",
+          "hover:bg-accent/80"
+        )}
+        onClick={() => handleNavigation(item.id)}
+      >
+        <Icon className={cn("h-4 w-4 flex-shrink-0", !collapsed && "mr-3")} />
+        
+        {!collapsed && (
+          <>
+            <span className="flex-1 text-left truncate">{item.label}</span>
+            
+            <div className="flex items-center gap-1 ml-2">
+              {item.isNew && (
+                <Badge variant="secondary" className="h-4 px-1 text-xs">
+                  New
+                </Badge>
               )}
-              onClick={() => handleNavigation(type, key, metadata)}
-            >
-              {/* Icon and status */}
-              <div className="relative flex-shrink-0">
-                <div
-                  className={cn(
-                    "w-8 h-8 rounded-lg flex items-center justify-center",
-                    isActive
-                      ? "bg-primary text-primary-foreground"
-                      : metadata.color
-                  )}
-                >
-                  <IconRenderer
-                    icon={metadata.icon}
-                    className="w-4 h-4 text-white"
-                  />
-                </div>
-
-                {/* Status indicator for SPAs */}
-                {showStatus && type === "spa" && !isCollapsed && (
-                  <div className="absolute -bottom-1 -right-1">
-                    <IconRenderer
-                      icon={StatusIcon}
-                      className={cn("w-3 h-3", statusColor)}
-                    />
-                  </div>
-                )}
-              </div>
-
-              {/* Content */}
-              {!isCollapsed && (
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1 min-w-0">
-                      <h4
-                        className={cn(
-                          "font-medium text-sm truncate",
-                          isActive && "text-primary"
-                        )}
-                      >
-                        {metadata.name}
-                      </h4>
-                      {showDescription && (
-                        <p className="text-xs text-muted-foreground truncate">
-                          {metadata.shortDescription}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Badges and indicators */}
-                    <div className="flex items-center gap-1 ml-2">
-                      {isFav && (
-                        <Heart className="w-3 h-3 text-pink-500 fill-current" />
-                      )}
-                      {isRecent && (
-                        <Clock className="w-3 h-3 text-muted-foreground" />
-                      )}
-                      {metadata.adminOnly && (
-                        <Shield className="w-3 h-3 text-orange-500" />
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Category and status */}
-                  <div className="flex items-center justify-between mt-1">
-                    <Badge variant="outline" className="text-xs">
-                      {metadata.category}
-                    </Badge>
-                    {showStatus && type === "spa" && (
-                      <span className={cn("text-xs", statusColor)}>
-                        {status}
-                      </span>
-                    )}
-                  </div>
-                </div>
+              {item.isProfessional && (
+                <Star className="h-3 w-3 text-amber-500" />
               )}
-
-              {/* Quick actions trigger */}
-              {showQuickActions && !isCollapsed && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={cn(
-                    "h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity",
-                    isQuickActionsSidebarOpen &&
-                      "opacity-100 bg-primary/10 text-primary"
-                  )}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleQuickActionsTrigger(key, { type, metadata });
-                  }}
-                >
-                  <ArrowRight className="w-3 h-3" />
-                </Button>
+              {item.badge && (
+                <Badge variant="outline" className="h-4 px-1 text-xs">
+                  {item.badge}
+                </Badge>
               )}
-            </button>
-          </ContextMenuTrigger>
-
-          {/* Context menu */}
-          <ContextMenuContent>
-            <ContextMenuItem
-              onClick={() => handleNavigation(type, key, metadata)}
-            >
-              <ExternalLink className="w-4 h-4 mr-2" />
-              Open
-              <ContextMenuShortcut>Enter</ContextMenuShortcut>
-            </ContextMenuItem>
-
-            <ContextMenuItem
-              onClick={() => handleToggleFavorite(type, key, metadata)}
-            >
-              {isFav ? (
-                <>
-                  <Heart className="w-4 h-4 mr-2 fill-current" />
-                  Remove from Favorites
-                </>
-              ) : (
-                <>
-                  <Heart className="w-4 h-4 mr-2" />
-                  Add to Favorites
-                </>
-              )}
-            </ContextMenuItem>
-
-            {showQuickActions && (
-              <ContextMenuItem
-                onClick={() =>
-                  handleQuickActionsTrigger(key, { type, metadata })
-                }
-              >
-                <Zap className="w-4 h-4 mr-2" />
-                Quick Actions
-                <ContextMenuShortcut>⌘.</ContextMenuShortcut>
-              </ContextMenuItem>
-            )}
-
-            <ContextMenuSeparator />
-
-            <ContextMenuItem
-              onClick={() => {
-                navigator.clipboard.writeText(metadata.route);
-              }}
-            >
-              <Copy className="w-4 h-4 mr-2" />
-              Copy Link
-            </ContextMenuItem>
-
-            <ContextMenuItem
-              onClick={() => {
-                // Open in new tab
-                window.open(metadata.route, "_blank");
-              }}
-            >
-              <ExternalLink className="w-4 h-4 mr-2" />
-              Open in New Tab
-            </ContextMenuItem>
-          </ContextMenuContent>
-        </ContextMenu>
-      );
-    },
-    [
-      currentActiveItem,
-      crossGroupState?.groupStatuses,
-      favorites,
-      hoveredItem,
-      isCollapsed,
-      isQuickActionsSidebarOpen,
-      handleNavigation,
-      handleQuickActionsTrigger,
-      handleToggleFavorite,
-    ]
-  );
-
-  // Render section header
-  const renderSectionHeader = useCallback(
-    (
-      title: string,
-      sectionKey: string,
-      options: {
-        icon?: React.ComponentType<any>;
-        count?: number;
-        collapsible?: boolean;
-        actions?: React.ReactNode;
-      } = {}
-    ) => {
-      const { icon: Icon, count, collapsible = true, actions } = options;
-      const isExpanded = expandedSections[sectionKey];
-
-      if (isCollapsed && collapsible) {
-        return (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="px-3 py-2 flex justify-center">
-                {Icon && <Icon className="w-4 h-4 text-muted-foreground" />}
-              </div>
-            </TooltipTrigger>
-            <TooltipContent side="right">
-              <p>{title}</p>
-            </TooltipContent>
-          </Tooltip>
-        );
-      }
-
-      return (
-        <div className="px-3 py-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              {collapsible ? (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 w-6 p-0"
-                  onClick={() => toggleSection(sectionKey)}
-                >
-                  <ChevronDown
-                    className={cn(
-                      "w-3 h-3 transition-transform",
-                      isExpanded && "rotate-180"
-                    )}
-                  />
-                </Button>
-              ) : (
-                Icon && <Icon className="w-4 h-4 text-muted-foreground" />
-              )}
-
-              <h3 className="text-sm font-medium text-muted-foreground">
-                {title}
-                {count !== undefined && (
-                  <span className="ml-2 text-xs">({count})</span>
-                )}
-              </h3>
-            </div>
-
-            {actions && (
-              <div className="flex items-center gap-1">{actions}</div>
-            )}
-          </div>
-        </div>
-      );
-    },
-    [isCollapsed, expandedSections, toggleSection]
-  );
-
-  return (
-    <SidebarErrorBoundary>
-      <TooltipProvider>
-        <motion.aside
-          ref={sidebarRef}
-          initial={{ x: -280, opacity: 0 }}
-          animate={{
-            x: 0,
-            opacity: 1,
-            width: isCollapsed ? COLLAPSED_SIDEBAR_WIDTH : DEFAULT_SIDEBAR_WIDTH,
-          }}
-          className={cn(
-            "fixed left-0 top-16 bottom-0 z-40",
-            "bg-background/95 backdrop-blur-sm border-r border-border/50",
-            "supports-[backdrop-filter]:bg-background/80",
-            className
-          )}
-          onMouseEnter={() => {
-            if (!isPinned && isCollapsed) {
-              handleCollapsedChange(false);
-            }
-          }}
-          onMouseLeave={() => {
-            if (!isPinned && !isCollapsed) {
-              handleCollapsedChange(true);
-            }
-          }}
-        >
-          <div className="h-full flex flex-col">
-            {/* Header */}
-            <div className="flex items-center justify-between p-3 border-b border-border/50">
-              {!isCollapsed && (
-                <div className="flex items-center gap-2">
-                  <h2 className="font-semibold text-sm">Navigation</h2>
-                  <Badge variant="outline" className="text-xs">
-                    {accessibleSPAs.length +
-                      Object.keys(RACINE_FEATURE_METADATA).length}
-                  </Badge>
-                </div>
-              )}
-
-              <div className="flex items-center gap-1">
-                {/* Pin/Unpin */}
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-6 w-6 p-0"
-                      onClick={() => {
-                        setIsPinned((prev) => {
-                          updatePreference("sidebarPinned", !prev);
-                          return !prev;
-                        });
-                      }}
-                    >
-                      {isPinned ? (
-                        <Unpin className="w-3 h-3" />
-                      ) : (
-                        <Pin className="w-3 h-3" />
-                      )}
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>{isPinned ? "Unpin sidebar" : "Pin sidebar"}</p>
-                  </TooltipContent>
-                </Tooltip>
-
-                {/* Collapse/Expand */}
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-6 w-6 p-0"
-                      onClick={() => handleCollapsedChange(!isCollapsed)}
-                    >
-                      {isCollapsed ? (
-                        <ChevronRight className="w-3 h-3" />
-                      ) : (
-                        <ChevronLeft className="w-3 h-3" />
-                      )}
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>{isCollapsed ? "Expand sidebar" : "Collapse sidebar"}</p>
-                  </TooltipContent>
-                </Tooltip>
-              </div>
-            </div>
-
-            {/* Search */}
-            {!isCollapsed && (
-              <div className="p-3 border-b border-border/50">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-3 h-3 text-muted-foreground" />
-                  <Input
-                    placeholder="Search navigation..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9 h-8 text-sm"
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Navigation Content */}
-            <ScrollArea className="flex-1">
-              <div className="p-1 space-y-4">
-                {/* Favorites Section */}
-                {favorites.length > 0 && (
-                  <div>
-                    {renderSectionHeader("Favorites", "favorites", {
-                      icon: Heart,
-                      count: favorites.length,
-                      actions: (
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-6 w-6 p-0"
-                            >
-                              <MoreHorizontal className="w-3 h-3" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => setFavorites([])}>
-                              <Trash2 className="w-4 h-4 mr-2" />
-                              Clear All
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      ),
-                    })}
-
-                    <Collapsible open={expandedSections.favorites}>
-                      <CollapsibleContent className="space-y-1">
-                        {favorites.map((favorite) => {
-                          const metadata =
-                            favorite.type === "spa"
-                              ? EXISTING_SPA_METADATA[
-                                  favorite.key as keyof typeof EXISTING_SPA_METADATA
-                                ]
-                              : RACINE_FEATURE_METADATA[
-                                  favorite.key as keyof typeof RACINE_FEATURE_METADATA
-                                ];
-
-                          if (!metadata) return null;
-
-                          return renderSidebarItem(
-                            favorite.type,
-                            favorite.key,
-                            metadata,
-                            { isFavorite: true }
-                          );
-                        })}
-                      </CollapsibleContent>
-                    </Collapsible>
-                  </div>
-                )}
-
-                {/* Data Governance SPAs Section */}
-                <div>
-                  {renderSectionHeader("Data Governance SPAs", "spas", {
-                    icon: Database,
-                    count: filteredSPAs.length,
-                    actions: (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 w-6 p-0"
-                        onClick={() => refreshSPAStatus()}
-                      >
-                        <RefreshCw className="w-3 h-3" />
-                      </Button>
-                    ),
-                  })}
-
-                  <Collapsible open={expandedSections.spas}>
-                    <CollapsibleContent className="space-y-1">
-                      {filteredSPAs.map(([spaKey, metadata]) =>
-                        renderSidebarItem("spa", spaKey, metadata, {
-                          showStatus: true,
-                          showQuickActions: true,
-                          showDescription: !isCollapsed,
-                        })
-                      )}
-                    </CollapsibleContent>
-                  </Collapsible>
-                </div>
-
-                {/* Racine Features Section */}
-                <div>
-                  {renderSectionHeader("Racine Features", "racine", {
-                    icon: Workflow,
-                    count: filteredRacineFeatures.length,
-                  })}
-
-                  <Collapsible open={expandedSections.racine}>
-                    <CollapsibleContent className="space-y-1">
-                      {filteredRacineFeatures.map(([featureKey, metadata]) =>
-                        renderSidebarItem("racine", featureKey, metadata, {
-                          showStatus: false,
-                          showQuickActions: true,
-                          showDescription: !isCollapsed,
-                        })
-                      )}
-                    </CollapsibleContent>
-                  </Collapsible>
-                </div>
-
-                {/* Recent Activity Section */}
-                {recentItems.length > 0 && (
-                  <div>
-                    {renderSectionHeader("Recently Visited", "recent", {
-                      icon: Clock,
-                      count: recentItems.length,
-                    })}
-
-                    <Collapsible open={expandedSections.recent}>
-                      <CollapsibleContent className="space-y-1">
-                        {recentItems.slice(0, 5).map((item) => {
-                          const metadata =
-                            item.type === "spa"
-                              ? EXISTING_SPA_METADATA[
-                                  item.key as keyof typeof EXISTING_SPA_METADATA
-                                ]
-                              : RACINE_FEATURE_METADATA[
-                                  item.key as keyof typeof RACINE_FEATURE_METADATA
-                                ];
-
-                          if (!metadata) return null;
-
-                          return renderSidebarItem(
-                            item.type,
-                            item.key,
-                            metadata,
-                            {
-                              isRecent: true,
-                              showQuickActions: false,
-                              showDescription: false,
-                            }
-                          );
-                        })}
-                      </CollapsibleContent>
-                    </Collapsible>
-                  </div>
-                )}
-              </div>
-            </ScrollArea>
-
-            {/* Footer */}
-            <div className="p-3 border-t border-border/50">
-              {!isCollapsed && (
-                <div className="space-y-2">
-                  {/* Workspace Info */}
-                  {workspaceState?.currentWorkspace && (
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <Globe className="w-3 h-3" />
-                      <span className="truncate">
-                        {workspaceState?.currentWorkspace?.name}
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Quick Stats */}
-                  <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <span>{filteredSPAs.length} SPAs</span>
-                    <span>{filteredRacineFeatures.length} Features</span>
-                  </div>
-                </div>
-              )}
-
-              {/* Global Quick Actions Trigger */}
+              
               <Button
-                variant="outline"
+                variant="ghost"
                 size="sm"
                 className={cn(
-                  "w-full mt-2 justify-start",
-                  isCollapsed && "px-2",
-                  isQuickActionsSidebarOpen &&
-                    "bg-primary/10 text-primary border-primary/30"
+                  "h-5 w-5 p-0 opacity-0 group-hover:opacity-100 transition-opacity",
+                  isPinned && "opacity-100"
                 )}
-                onClick={() => handleQuickActionsTrigger()}
+                onClick={(e) => handlePinToggle(item.id, e)}
               >
-                <Zap className="w-3 h-3" />
-                {!isCollapsed && <span className="ml-2">Quick Actions</span>}
+                <Pin className={cn("h-3 w-3", isPinned && "text-blue-500")} />
               </Button>
             </div>
-          </div>
-        </motion.aside>
-      </TooltipProvider>
-    </SidebarErrorBoundary>
-  );
-};
+          </>
+        )}
+      </Button>
+    )
 
-export default AppSidebar;
+    if (collapsed) {
+      return (
+        <Tooltip key={item.id}>
+          <TooltipTrigger asChild>
+            {content}
+          </TooltipTrigger>
+          <TooltipContent side="right" className="max-w-xs">
+            <div>
+              <p className="font-medium">{item.label}</p>
+              <p className="text-xs text-muted-foreground">{item.description}</p>
+              {item.isProfessional && (
+                <Badge variant="outline" className="mt-1 text-xs">
+                  Professional
+                </Badge>
+              )}
+            </div>
+          </TooltipContent>
+        </Tooltip>
+      )
+    }
+
+    return <div key={item.id}>{content}</div>
+  }, [currentView, collapsed, pinnedItems, handleNavigation, handlePinToggle])
+
+  return (
+    <motion.aside
+      initial={false}
+      animate={{ width: collapsed ? 60 : 280 }}
+      transition={{ duration: 0.2, ease: "easeInOut" }}
+      className="flex flex-col bg-background border-r border-border h-full"
+    >
+      {/* Header */}
+      <div className="p-3 border-b border-border">
+        <div className="flex items-center justify-between">
+          {!collapsed && (
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                <Database className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <h2 className="font-semibold text-sm">Racine Platform</h2>
+                <p className="text-xs text-muted-foreground">Enterprise Data Gov</p>
+              </div>
+            </div>
+          )}
+          
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onToggle}
+            className="h-8 w-8 p-0"
+          >
+            {collapsed ? (
+              <ChevronRight className="h-4 w-4" />
+            ) : (
+              <ChevronLeft className="h-4 w-4" />
+            )}
+          </Button>
+        </div>
+
+        {/* Search */}
+        {!collapsed && (
+          <div className="mt-3">
+            <div className="relative">
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search features..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-8 h-8"
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Navigation */}
+      <ScrollArea className="flex-1 px-3 py-2">
+        <div className="space-y-4">
+          {Object.entries(groupedItems).map(([groupKey, items]) => (
+            <div key={groupKey}>
+              {!collapsed && (
+                <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2 px-2">
+                  {groupLabels[groupKey as keyof typeof groupLabels]}
+                </h3>
+              )}
+              
+              <div className="space-y-1">
+                {items.map(renderNavigationItem)}
+              </div>
+              
+              {!collapsed && <Separator className="my-3" />}
+            </div>
+          ))}
+        </div>
+      </ScrollArea>
+
+      {/* Footer */}
+      <div className="p-3 border-t border-border">
+        {!collapsed && (
+          <div className="space-y-3">
+            {/* Workspace Info */}
+            {currentWorkspace && (
+              <div className="p-2 bg-accent/50 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium truncate">{currentWorkspace.name}</p>
+                    <p className="text-xs text-muted-foreground">Workspace</p>
+                  </div>
+                  {getHealthIndicator()}
+                </div>
+              </div>
+            )}
+
+            {/* User Info */}
+            {currentUser && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="w-full p-2 h-auto">
+                    <div className="flex items-center gap-2 w-full">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={currentUser.avatar} />
+                        <AvatarFallback>
+                          {currentUser.name?.charAt(0) || currentUser.email?.charAt(0) || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 text-left min-w-0">
+                        <p className="text-sm font-medium truncate">
+                          {currentUser.name || currentUser.email}
+                        </p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {currentUser.role}
+                        </p>
+                      </div>
+                    </div>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuItem onClick={() => handleNavigation("settings" as ViewModeEnum)}>
+                    <Settings className="h-4 w-4 mr-2" />
+                    Settings
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={onQuickActionsToggle}>
+                    <Zap className="h-4 w-4 mr-2" />
+                    Quick Actions
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Documentation
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </div>
+        )}
+
+        {collapsed && (
+          <div className="flex flex-col gap-2">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="sm" onClick={onQuickActionsToggle}>
+                  <Zap className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="right">Quick Actions</TooltipContent>
+            </Tooltip>
+
+            {currentUser && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="sm">
+                    <Avatar className="h-6 w-6">
+                      <AvatarImage src={currentUser.avatar} />
+                      <AvatarFallback className="text-xs">
+                        {currentUser.name?.charAt(0) || 'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="right">
+                  {currentUser.name || currentUser.email}
+                </TooltipContent>
+              </Tooltip>
+            )}
+          </div>
+        )}
+      </div>
+    </motion.aside>
+  )
+}
+
+export default AppSidebar
