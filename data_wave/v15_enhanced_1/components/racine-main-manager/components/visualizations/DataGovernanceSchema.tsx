@@ -1,889 +1,459 @@
-/**
- * Enhanced Data Governance Schema Visualization Component
- * ======================================================
- *
- * Advanced interactive visualization of the Racine data governance architecture
- * featuring 3D effects, particle systems, real-time metrics, and modern animations.
- * Represents the complete system ecosystem with intelligent node positioning and
- * dynamic connection routing.
- */
+"use client"
 
-import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
-import { motion, useAnimation, useMotionValue, useTransform, AnimatePresence } from 'framer-motion';
+import React, { useState, useCallback, useMemo } from "react"
+import { motion, AnimatePresence } from "framer-motion"
 import {
-  Bot,
-  Building2,
-  CheckCircle,
   Database,
-  Heart,
-  Network,
-  Pause,
-  Play,
-  Radar,
-  RefreshCw,
   Shield,
-  Target,
-  Zap,
-  Cpu,
-  Cloud,
-  Lock,
-  Activity,
-  TrendingUp,
-  AlertTriangle,
-  Settings,
-  Users,
   FileText,
-  BarChart3,
-  Globe,
-  Server,
-  Workflow,
-  Brain,
-  Eye,
-  Filter,
-  Layers,
+  BookOpen,
+  Scan,
+  Users,
   GitBranch,
-  Code,
-  Palette,
-  Sparkles,
-  Star,
-  Circle,
-  Square,
-  Triangle,
-  Hexagon,
-  Octagon,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
+  Target,
+  Network,
+  Layers,
+  Eye,
+  Settings,
+  Filter,
+  Search,
+  ZoomIn,
+  ZoomOut,
+  Download,
+  CheckCircle,
+  AlertTriangle,
+  XCircle,
+  Clock,
+  BarChart3,
+} from "lucide-react"
+
+import { cn } from "../../utils/cn"
+import { Button } from "../ui/button"
+import { Input } from "../ui/input"
+import { Badge } from "../ui/badge"
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card"
+import { Progress } from "../ui/progress"
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
-import { cn } from '../../utils/ui-utils';
-import { DataGovernanceNode, SystemOverview } from '../../types/advanced-analytics.types';
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu"
 
-interface EnhancedDataGovernanceSchemaProps {
-  nodes: DataGovernanceNode[];
-  systemOverview: SystemOverview;
-  onNodeClick?: (nodeId: string) => void;
-  onRefresh?: () => void;
-  className?: string;
-  showParticles?: boolean;
-  show3DEffects?: boolean;
-  autoRotate?: boolean;
+interface SchemaNode {
+  id: string
+  type: 'data-source' | 'scan-rule' | 'classification' | 'compliance' | 'catalog' | 'workflow' | 'pipeline' | 'user-group'
+  name: string
+  description: string
+  status: 'healthy' | 'warning' | 'error' | 'inactive'
+  category: 'data' | 'governance' | 'process' | 'security' | 'management'
+  metadata: {
+    count?: number
+    complianceScore?: number
+    criticality?: 'low' | 'medium' | 'high' | 'critical'
+  }
 }
 
-interface Particle {
-  id: string;
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  life: number;
-  maxLife: number;
-  color: string;
-  size: number;
+const mockNodes: SchemaNode[] = [
+  {
+    id: "ds-1",
+    type: "data-source",
+    name: "Customer Database", 
+    description: "Primary customer data repository",
+    status: "healthy",
+    category: "data",
+    metadata: { count: 2500000, complianceScore: 98, criticality: "critical" }
+  },
+  {
+    id: "ds-2",
+    type: "data-source", 
+    name: "Payment Gateway",
+    description: "Financial transaction data",
+    status: "warning",
+    category: "data",
+    metadata: { count: 850000, complianceScore: 94, criticality: "critical" }
+  },
+  {
+    id: "cl-1",
+    type: "classification",
+    name: "PII Classification",
+    description: "Personal identifiable information",
+    status: "healthy",
+    category: "governance",
+    metadata: { count: 15, criticality: "critical" }
+  },
+  {
+    id: "cr-1",
+    type: "compliance",
+    name: "GDPR Compliance",
+    description: "European data protection regulation", 
+    status: "healthy",
+    category: "security",
+    metadata: { count: 25, complianceScore: 96, criticality: "critical" }
+  },
+  {
+    id: "wf-1",
+    type: "workflow",
+    name: "Data Quality Check",
+    description: "Automated data validation",
+    status: "healthy",
+    category: "process",
+    metadata: { count: 150, criticality: "high" }
+  },
+  {
+    id: "pl-1", 
+    type: "pipeline",
+    name: "Customer ETL",
+    description: "Extract, transform, load customer data",
+    status: "healthy",
+    category: "process",
+    metadata: { count: 89, criticality: "high" }
+  }
+]
+
+const nodeTypeIcons = {
+  "data-source": Database,
+  "scan-rule": Scan,
+  "classification": FileText,
+  "compliance": Shield,
+  "catalog": BookOpen,
+  "workflow": GitBranch,
+  "pipeline": Layers,
+  "user-group": Users
 }
 
-interface ConnectionPath {
-  id: string;
-  source: string;
-  target: string;
-  strength: number;
-  type: 'data' | 'control' | 'monitoring' | 'ai';
-  animated: boolean;
+const statusColors = {
+  healthy: "border-green-500 bg-green-50 text-green-700",
+  warning: "border-yellow-500 bg-yellow-50 text-yellow-700", 
+  error: "border-red-500 bg-red-50 text-red-700",
+  inactive: "border-gray-300 bg-gray-50 text-gray-500"
 }
 
-export const DataGovernanceSchema: React.FC<EnhancedDataGovernanceSchemaProps> = ({
-  nodes,
-  systemOverview,
-  onNodeClick,
-  onRefresh,
-  className,
-  showParticles = true,
-  show3DEffects = true,
-  autoRotate = true,
-}) => {
-  const [hoveredNode, setHoveredNode] = useState<string | null>(null);
-  const [selectedNode, setSelectedNode] = useState<string | null>(null);
-  const [animationEnabled, setAnimationEnabled] = useState(true);
-  const [particles, setParticles] = useState<Particle[]>([]);
-  const [mousePosition, setMousePosition] = useState({ x: 50, y: 50 });
-  const [viewMode, setViewMode] = useState<'overview' | 'detailed' | 'technical'>('overview');
-  const [connectionPaths, setConnectionPaths] = useState<ConnectionPath[]>([]);
-  const [localShowParticles, setLocalShowParticles] = useState(showParticles ?? true);
-  
-  const containerRef = useRef<HTMLDivElement>(null);
-  const svgRef = useRef<SVGSVGElement>(null);
-  
-  const schemaAnimation = useAnimation();
-  const pulseAnimation = useAnimation();
-  const particleAnimation = useAnimation();
-  const rotationAnimation = useAnimation();
-  
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-  const rotateX = useTransform(mouseY, [-300, 300], [15, -15]);
-  const rotateY = useTransform(mouseX, [-300, 300], [-15, 15]);
+const statusIcons = {
+  healthy: CheckCircle,
+  warning: AlertTriangle,
+  error: XCircle,
+  inactive: Clock
+}
 
-  // Enhanced icon mapping with more system components
-  const iconMap = {
-    'data-sources': Database,
-    'scan-rule-sets': Shield,
-    'classifications': Target,
-    'compliance': CheckCircle,
-    'catalog': Building2,
-    'scan-logic': Radar,
-    'ai-engine': Bot,
-    'orchestration': Network,
-    'processing': Cpu,
-    'storage': Server,
-    'analytics': BarChart3,
-    'security': Lock,
-    'monitoring': Activity,
-    'workflow': Workflow,
-    'intelligence': Brain,
-    'visualization': Eye,
-    'filtering': Filter,
-    'layers': Layers,
-    'versioning': GitBranch,
-    'development': Code,
-    'theming': Palette,
-    'enhancement': Sparkles,
-    'performance': Zap,
-    'cloud': Cloud,
-    'users': Users,
-    'documents': FileText,
-    'global': Globe,
-    'trending': TrendingUp,
-    'alerts': AlertTriangle,
-    'settings': Settings,
-  };
+export const DataGovernanceSchema: React.FC = () => {
+  const [nodes, setNodes] = useState<SchemaNode[]>(mockNodes)
+  const [selectedNode, setSelectedNode] = useState<SchemaNode | null>(null)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [selectedCategory, setSelectedCategory] = useState<string>("all")
 
-  // Enhanced node shapes for different types
-  const shapeMap = {
-    'core': 'circle',
-    'integration': 'square',
-    'ai': 'hexagon',
-    'monitoring': 'triangle',
-    'processing': 'octagon',
-    'storage': 'circle',
-    'analytics': 'square',
-    'security': 'triangle',
-    'workflow': 'hexagon',
-    'intelligence': 'star',
-  };
+  // Filter nodes
+  const filteredNodes = useMemo(() => {
+    return nodes.filter(node => {
+      const matchesSearch = node.name.toLowerCase().includes(searchQuery.toLowerCase())
+      const matchesCategory = selectedCategory === "all" || node.category === selectedCategory
+      return matchesSearch && matchesCategory
+    })
+  }, [nodes, searchQuery, selectedCategory])
 
-  // Generate enhanced connection paths
-  useEffect(() => {
-    const paths: ConnectionPath[] = [];
-    nodes.forEach((node) => {
-      node.connections.forEach((connectionId) => {
-        const targetNode = nodes.find((n) => n.id === connectionId);
-        if (targetNode) {
-          paths.push({
-            id: `${node.id}-${connectionId}`,
-            source: node.id,
-            target: connectionId,
-            strength: Math.random() * 0.8 + 0.2,
-            type: ['data', 'control', 'monitoring', 'ai'][Math.floor(Math.random() * 4)] as any,
-            animated: Math.random() > 0.5,
-          });
-        }
-      });
-    });
-    setConnectionPaths(paths);
-  }, [nodes]);
-
-  // Particle system
-  useEffect(() => {
-    if (!localShowParticles) return;
-
-    const generateParticle = (): Particle => ({
-      id: Math.random().toString(36).substr(2, 9),
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      vx: (Math.random() - 0.5) * 2,
-      vy: (Math.random() - 0.5) * 2,
-      life: 1,
-      maxLife: Math.random() * 100 + 50,
-      color: `hsl(${Math.random() * 360}, 70%, 60%)`,
-      size: Math.random() * 3 + 1,
-    });
-
-    const initialParticles = Array.from({ length: 50 }, generateParticle);
-    setParticles(initialParticles);
-
-    const interval = setInterval(() => {
-      setParticles((current) => {
-        const updated = current
-          .map((particle) => ({
-            ...particle,
-            x: particle.x + particle.vx,
-            y: particle.y + particle.vy,
-            life: particle.life - 1,
-          }))
-          .filter((particle) => particle.life > 0);
-
-        // Add new particles
-        if (updated.length < 50) {
-          updated.push(generateParticle());
-        }
-
-        return updated;
-      });
-    }, 50);
-
-    return () => clearInterval(interval);
-  }, [localShowParticles]);
-
-  // Mouse tracking for 3D effects
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (!containerRef.current) return;
+  // Calculate stats
+  const stats = useMemo(() => {
+    const total = nodes.length
+    const healthy = nodes.filter(n => n.status === 'healthy').length
+    const warnings = nodes.filter(n => n.status === 'warning').length
+    const errors = nodes.filter(n => n.status === 'error').length
     
-    const rect = containerRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left - rect.width / 2;
-    const y = e.clientY - rect.top - rect.height / 2;
-    
-    mouseX.set(x);
-    mouseY.set(y);
-    
-    const percentX = ((e.clientX - rect.left) / rect.width) * 100;
-    const percentY = ((e.clientY - rect.top) / rect.height) * 100;
-    setMousePosition({ x: percentX, y: percentY });
-  }, [mouseX, mouseY]);
-
-  // Animation controls
-  useEffect(() => {
-    if (animationEnabled) {
-      schemaAnimation.start({
-        rotate: 360,
-        transition: { duration: 120, repeat: Infinity, ease: "linear" },
-      });
-      
-      if (autoRotate) {
-        rotationAnimation.start({
-          rotateY: [0, 360],
-          transition: { duration: 60, repeat: Infinity, ease: "linear" },
-        });
-      }
-    } else {
-      schemaAnimation.stop();
-      rotationAnimation.stop();
+    return {
+      total,
+      healthy,
+      warnings,
+      errors,
+      healthScore: Math.round((healthy / total) * 100)
     }
-  }, [animationEnabled, autoRotate, schemaAnimation, rotationAnimation]);
+  }, [nodes])
 
-  useEffect(() => {
-    pulseAnimation.start({
-      scale: [1, 1.05, 1],
-      transition: { duration: 2, repeat: Infinity, ease: "easeInOut" },
-    });
-  }, [pulseAnimation]);
-
-  const systemHealthStatus = useMemo(() => {
-    const avgHealth = nodes.reduce((sum, node) => sum + node.metrics.health, 0) / nodes.length;
-    if (avgHealth >= 90) return { status: 'optimal', color: 'text-emerald-500', bg: 'bg-emerald-500/20' };
-    if (avgHealth >= 70) return { status: 'healthy', color: 'text-green-500', bg: 'bg-green-500/20' };
-    if (avgHealth >= 50) return { status: 'degraded', color: 'text-yellow-500', bg: 'bg-yellow-500/20' };
-    return { status: 'critical', color: 'text-red-500', bg: 'bg-red-500/20' };
-  }, [nodes]);
-
-  const renderNodeShape = (node: DataGovernanceNode, isHovered: boolean) => {
-    const shape = shapeMap[node.type as keyof typeof shapeMap] || 'circle';
-    const size = isHovered ? 40 : 30;
+  // Render node card
+  const renderNodeCard = useCallback((node: SchemaNode) => {
+    const NodeIcon = nodeTypeIcons[node.type]
+    const StatusIcon = statusIcons[node.status]
     
-    switch (shape) {
-      case 'square':
-        return (
-          <motion.rect
-            x={node.position.x - size / 2}
-            y={node.position.y - size / 2}
-            width={size}
-            height={size}
-            rx={4}
-            fill={`url(#gradient-${node.id})`}
-            stroke={node.color}
-            strokeWidth={isHovered ? 3 : 2}
-            animate={{
-              width: size,
-              height: size,
-              strokeWidth: isHovered ? 3 : 2,
-            }}
-            transition={{ duration: 0.3 }}
-          />
-        );
-      case 'triangle':
-        return (
-          <motion.polygon
-            points={`${node.position.x},${node.position.y - size / 2} ${node.position.x - size / 2},${node.position.y + size / 2} ${node.position.x + size / 2},${node.position.y + size / 2}`}
-            fill={`url(#gradient-${node.id})`}
-            stroke={node.color}
-            strokeWidth={isHovered ? 3 : 2}
-            animate={{
-              strokeWidth: isHovered ? 3 : 2,
-            }}
-            transition={{ duration: 0.3 }}
-          />
-        );
-      case 'hexagon':
-        const hexPoints = [];
-        for (let i = 0; i < 6; i++) {
-          const angle = (i * Math.PI) / 3;
-          const x = node.position.x + size * Math.cos(angle);
-          const y = node.position.y + size * Math.sin(angle);
-          hexPoints.push(`${x},${y}`);
-        }
-        return (
-          <motion.polygon
-            points={hexPoints.join(' ')}
-            fill={`url(#gradient-${node.id})`}
-            stroke={node.color}
-            strokeWidth={isHovered ? 3 : 2}
-            animate={{
-              strokeWidth: isHovered ? 3 : 2,
-            }}
-            transition={{ duration: 0.3 }}
-          />
-        );
-      case 'star':
-        const starPoints = [];
-        for (let i = 0; i < 10; i++) {
-          const angle = (i * Math.PI) / 5;
-          const radius = i % 2 === 0 ? size : size * 0.5;
-          const x = node.position.x + radius * Math.cos(angle);
-          const y = node.position.y + radius * Math.sin(angle);
-          starPoints.push(`${x},${y}`);
-        }
-        return (
-          <motion.polygon
-            points={starPoints.join(' ')}
-            fill={`url(#gradient-${node.id})`}
-            stroke={node.color}
-            strokeWidth={isHovered ? 3 : 2}
-            animate={{
-              strokeWidth: isHovered ? 3 : 2,
-            }}
-            transition={{ duration: 0.3 }}
-          />
-        );
-      default:
-        return (
-          <motion.circle
-            cx={node.position.x}
-            cy={node.position.y}
-            r={size / 2}
-            fill={`url(#gradient-${node.id})`}
-            stroke={node.color}
-            strokeWidth={isHovered ? 3 : 2}
-            animate={{
-              r: size / 2,
-              strokeWidth: isHovered ? 3 : 2,
-            }}
-            transition={{ duration: 0.3 }}
-          />
-        );
-    }
-  };
+    return (
+      <Card 
+        key={node.id}
+        className={cn(
+          "cursor-pointer transition-all duration-200 hover:shadow-md",
+          selectedNode?.id === node.id && "ring-2 ring-primary",
+          statusColors[node.status]
+        )}
+        onClick={() => setSelectedNode(node)}
+      >
+        <CardHeader className="pb-3">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-accent rounded-lg">
+              <NodeIcon className="h-5 w-5" />
+            </div>
+            <div className="flex-1">
+              <CardTitle className="text-sm">{node.name}</CardTitle>
+              <div className="flex items-center gap-2 mt-1">
+                <StatusIcon className="h-3 w-3" />
+                <Badge variant="outline" className="text-xs">
+                  {node.type.replace('-', ' ')}
+                </Badge>
+              </div>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <p className="text-xs text-muted-foreground mb-3 line-clamp-2">
+            {node.description}
+          </p>
+          
+          {/* Metadata */}
+          <div className="space-y-2">
+            {node.metadata.count && (
+              <div className="flex justify-between text-xs">
+                <span className="text-muted-foreground">Items:</span>
+                <span className="font-medium">{node.metadata.count.toLocaleString()}</span>
+              </div>
+            )}
+            {node.metadata.complianceScore && (
+              <div className="space-y-1">
+                <div className="flex justify-between text-xs">
+                  <span className="text-muted-foreground">Compliance:</span>
+                  <span className="font-medium">{node.metadata.complianceScore}%</span>
+                </div>
+                <Progress value={node.metadata.complianceScore} className="h-1" />
+              </div>
+            )}
+            {node.metadata.criticality && (
+              <div className="flex justify-between text-xs">
+                <span className="text-muted-foreground">Criticality:</span>
+                <Badge variant="outline" className={cn(
+                  "text-xs",
+                  node.metadata.criticality === 'critical' && "text-red-600",
+                  node.metadata.criticality === 'high' && "text-orange-600",
+                  node.metadata.criticality === 'medium' && "text-yellow-600",
+                  node.metadata.criticality === 'low' && "text-gray-600"
+                )}>
+                  {node.metadata.criticality}
+                </Badge>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }, [selectedNode])
 
   return (
-    <TooltipProvider>
-      <div 
-        ref={containerRef}
-        className={cn(
-          'relative w-full h-[600px] bg-gradient-to-br from-slate-50 via-blue-50/30 to-purple-50/30 dark:from-slate-950 dark:via-blue-950/20 dark:to-purple-950/20 rounded-2xl overflow-hidden border border-slate-200/50 dark:border-slate-800/50 shadow-2xl',
-          className
-        )}
-        onMouseMove={handleMouseMove}
-        style={{
-          perspective: '1000px',
-          transformStyle: 'preserve-3d',
-        }}
-      >
-        {/* 3D Background Effects */}
-        {show3DEffects && (
-          <motion.div
-            className="absolute inset-0"
-            style={{
-              rotateX,
-              rotateY,
-              transformStyle: 'preserve-3d',
-            }}
-            animate={rotationAnimation}
-          >
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-purple-500/5 to-pink-500/5" />
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.1),transparent_50%)]" />
-          </motion.div>
-        )}
-
-        {/* Interactive Background */}
-        <motion.div
-          className="absolute inset-0"
-          animate={schemaAnimation}
-          style={{
-            background: `radial-gradient(circle at ${mousePosition.x}% ${mousePosition.y}%, rgba(59, 130, 246, 0.15) 0%, transparent 60%)`,
-          }}
-        />
-
-        {/* Particle System */}
-        {localShowParticles && (
-          <div className="absolute inset-0 overflow-hidden">
-            {particles.map((particle) => (
-              <motion.div
-                key={particle.id}
-                className="absolute w-1 h-1 rounded-full"
-                style={{
-                  left: `${particle.x}%`,
-                  top: `${particle.y}%`,
-                  backgroundColor: particle.color,
-                  width: `${particle.size}px`,
-                  height: `${particle.size}px`,
-                  opacity: particle.life / particle.maxLife,
-                }}
-                animate={{
-                  scale: [0, 1, 0],
-                  opacity: [0, particle.life / particle.maxLife, 0],
-                }}
-                transition={{
-                  duration: particle.maxLife / 100,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              />
-            ))}
+    <div className="flex flex-col h-full bg-background">
+      {/* Header */}
+      <div className="p-6 border-b border-border">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h1 className="text-2xl font-bold">Data Governance Schema</h1>
+            <p className="text-muted-foreground">
+              Comprehensive overview of your data governance architecture
+            </p>
           </div>
-        )}
-
-        {/* SVG Visualization */}
-        <svg
-          ref={svgRef}
-          className="absolute inset-0 w-full h-full"
-          viewBox="0 0 800 600"
-          preserveAspectRatio="xMidYMid meet"
-        >
-          {/* Enhanced Connection Lines */}
-          {connectionPaths.map((path) => {
-            const sourceNode = nodes.find(n => n.id === path.source);
-            const targetNode = nodes.find(n => n.id === path.target);
-            
-            if (!sourceNode || !targetNode) return null;
-
-            const isHovered = hoveredNode === path.source || hoveredNode === path.target;
-            const isSelected = selectedNode === path.source || selectedNode === path.target;
-
-            return (
-              <motion.g key={path.id}>
-                {/* Connection Path */}
-                <motion.line
-                  x1={sourceNode.position.x}
-                  y1={sourceNode.position.y}
-                  x2={targetNode.position.x}
-                  y2={targetNode.position.y}
-                  stroke={
-                    isHovered || isSelected
-                      ? sourceNode.color
-                      : path.type === 'data'
-                      ? '#3B82F6'
-                      : path.type === 'control'
-                      ? '#10B981'
-                      : path.type === 'monitoring'
-                      ? '#F59E0B'
-                      : '#8B5CF6'
-                  }
-                  strokeWidth={isHovered || isSelected ? 4 : 2}
-                  strokeOpacity={isHovered || isSelected ? 0.9 : 0.4}
-                  strokeDasharray={path.animated ? "8,4" : "none"}
-                  initial={{ pathLength: 0, opacity: 0 }}
-                  animate={{
-                    pathLength: 1,
-                    opacity: isHovered || isSelected ? 0.9 : 0.4,
-                    strokeDashoffset: path.animated ? [0, -12] : 0,
-                  }}
-                  transition={{
-                    pathLength: { duration: 2, delay: Math.random() * 2 },
-                    strokeDashoffset: { duration: 1, repeat: Infinity, ease: "linear" },
-                  }}
-                />
-
-                {/* Data Flow Particles */}
-                {path.animated && (isHovered || isSelected) && (
-                  <motion.circle
-                    r="3"
-                    fill={sourceNode.color}
-                    initial={{ opacity: 0 }}
-                    animate={{
-                      opacity: [0, 1, 0],
-                      x: [sourceNode.position.x, targetNode.position.x],
-                      y: [sourceNode.position.y, targetNode.position.y],
-                    }}
-                    transition={{
-                      duration: 2,
-                      repeat: Infinity,
-                      delay: Math.random() * 2,
-                      ease: "easeInOut",
-                    }}
-                  />
-                )}
-              </motion.g>
-            );
-          })}
-
-          {/* Enhanced Nodes */}
-          {nodes.map((node, index) => {
-            const NodeIcon = iconMap[node.id as keyof typeof iconMap] || Database;
-            const isHovered = hoveredNode === node.id;
-            const isSelected = selectedNode === node.id;
-            
-            return (
-              <motion.g
-                key={node.id}
-                initial={{ scale: 0, opacity: 0, y: 50 }}
-                animate={{ 
-                  scale: 1, 
-                  opacity: 1, 
-                  y: 0,
-                  filter: isHovered ? "drop-shadow(0 0 20px rgba(59, 130, 246, 0.5))" : "none",
-                }}
-                transition={{ 
-                  delay: index * 0.1, 
-                  duration: 0.8, 
-                  type: "spring",
-                  stiffness: 100,
-                }}
-                onHoverStart={() => setHoveredNode(node.id)}
-                onHoverEnd={() => setHoveredNode(null)}
-                onClick={() => {
-                  setSelectedNode(node.id);
-                  onNodeClick?.(node.id);
-                }}
-                style={{ cursor: "pointer" }}
-              >
-                {/* Node Shadow */}
-                <motion.circle
-                  cx={node.position.x + 2}
-                  cy={node.position.y + 2}
-                  r={isHovered ? 45 : 35}
-                  fill="rgba(0,0,0,0.1)"
-                  animate={{
-                    r: isHovered ? 45 : 35,
-                  }}
-                  transition={{ duration: 0.3 }}
-                />
-
-                {/* Node Shape */}
-                {renderNodeShape(node, isHovered)}
-
-                {/* Health Ring */}
-                <motion.circle
-                  cx={node.position.x}
-                  cy={node.position.y}
-                  r={isHovered ? 50 : 40}
-                  fill="none"
-                  stroke={
-                    node.metrics.health > 90
-                      ? "#10B981"
-                      : node.metrics.health > 70
-                      ? "#F59E0B"
-                      : "#EF4444"
-                  }
-                  strokeWidth={3}
-                  strokeOpacity={0.6}
-                  strokeDasharray={`${(node.metrics.health / 100) * 251} 251`}
-                  strokeDashoffset={-63}
-                  transform={`rotate(-90 ${node.position.x} ${node.position.y})`}
-                  animate={{
-                    strokeDasharray: `${(node.metrics.health / 100) * 251} 251`,
-                    rotate: [0, 360],
-                  }}
-                  transition={{
-                    strokeDasharray: { duration: 1 },
-                    rotate: { duration: 10, repeat: Infinity, ease: "linear" },
-                  }}
-                />
-
-                {/* Activity Pulse */}
-                {node.metrics.activity > 0 && (
-                  <motion.circle
-                    cx={node.position.x}
-                    cy={node.position.y}
-                    r={30}
-                    fill="none"
-                    stroke={node.color}
-                    strokeWidth={2}
-                    strokeOpacity={0.3}
-                    animate={{
-                      r: [30, 60, 30],
-                      strokeOpacity: [0.3, 0, 0.3],
-                    }}
-                    transition={{
-                      duration: 3,
-                      repeat: Infinity,
-                      delay: Math.random() * 2,
-                    }}
-                  />
-                )}
-
-                {/* Node Icon */}
-                <foreignObject
-                  x={node.position.x - 15}
-                  y={node.position.y - 15}
-                  width={30}
-                  height={30}
-                >
-                  <div className="flex items-center justify-center w-full h-full">
-                    <motion.div
-                      animate={{
-                        scale: isHovered ? 1.2 : 1,
-                        rotate: isHovered ? [0, 360] : 0,
-                      }}
-                      transition={{
-                        scale: { duration: 0.3 },
-                        rotate: { duration: 2, repeat: Infinity, ease: "linear" },
-                      }}
-                    >
-                      <NodeIcon className="w-6 h-6 text-white drop-shadow-lg" />
-                    </motion.div>
-                  </div>
-                </foreignObject>
-
-                {/* Node Label */}
-                <motion.text
-                  x={node.position.x}
-                  y={node.position.y + (isHovered ? 60 : 50)}
-                  textAnchor="middle"
-                  className="text-sm font-semibold fill-current text-slate-700 dark:text-slate-300"
-                  style={{
-                    filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.2))",
-                    fontSize: isHovered ? "14px" : "12px",
-                  }}
-                  animate={{
-                    fontSize: isHovered ? "14px" : "12px",
-                    y: node.position.y + (isHovered ? 60 : 50),
-                  }}
-                  transition={{ duration: 0.3 }}
-                >
-                  {node.name}
-                </motion.text>
-
-                {/* Enhanced Metrics Tooltip */}
-                {isHovered && (
-                  <foreignObject
-                    x={node.position.x + 60}
-                    y={node.position.y - 40}
-                    width={200}
-                    height={120}
-                  >
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.8, x: -20 }}
-                      animate={{ opacity: 1, scale: 1, x: 0 }}
-                      exit={{ opacity: 0, scale: 0.8, x: -20 }}
-                      className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-xl p-4 border border-slate-200/50 dark:border-slate-700/50 shadow-2xl"
-                    >
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-2">
-                          <NodeIcon className="w-4 h-4 text-slate-600 dark:text-slate-400" />
-                          <span className="font-semibold text-slate-900 dark:text-slate-100">
-                            {node.name}
-                          </span>
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <div className="flex justify-between items-center">
-                            <span className="text-xs text-slate-600 dark:text-slate-400">Health</span>
-                            <div className="flex items-center gap-1">
-                              <div className="w-2 h-2 rounded-full bg-green-500" />
-                              <span className="text-xs font-medium">{node.metrics.health}%</span>
-                            </div>
-                          </div>
-                          
-                          <div className="flex justify-between items-center">
-                            <span className="text-xs text-slate-600 dark:text-slate-400">Performance</span>
-                            <div className="flex items-center gap-1">
-                              <div className="w-2 h-2 rounded-full bg-blue-500" />
-                              <span className="text-xs font-medium">{node.metrics.performance}%</span>
-                            </div>
-                          </div>
-                          
-                          <div className="flex justify-between items-center">
-                            <span className="text-xs text-slate-600 dark:text-slate-400">Activity</span>
-                            <div className="flex items-center gap-1">
-                              <div className="w-2 h-2 rounded-full bg-purple-500" />
-                              <span className="text-xs font-medium">{node.metrics.activity}</span>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <div className="pt-2 border-t border-slate-200/50 dark:border-slate-700/50">
-                          <Badge 
-                            variant="outline" 
-                            className={cn(
-                              "text-xs",
-                              node.status === 'healthy' ? 'border-green-500 text-green-600' :
-                              node.status === 'degraded' ? 'border-yellow-500 text-yellow-600' :
-                              'border-red-500 text-red-600'
-                            )}
-                          >
-                            {node.status}
-                          </Badge>
-                        </div>
-                      </div>
-                    </motion.div>
-                  </foreignObject>
-                )}
-              </motion.g>
-            );
-          })}
-
-          {/* Enhanced Gradient Definitions */}
-          <defs>
-            {nodes.map((node) => (
-              <radialGradient key={`gradient-${node.id}`} id={`gradient-${node.id}`}>
-                <stop offset="0%" stopColor={node.color} stopOpacity={0.9} />
-                <stop offset="70%" stopColor={node.color} stopOpacity={0.6} />
-                <stop offset="100%" stopColor={node.color} stopOpacity={0.3} />
-              </radialGradient>
-            ))}
-            
-            {/* Glow Effects */}
-            {nodes.map((node) => (
-              <filter key={`glow-${node.id}`} id={`glow-${node.id}`}>
-                <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-                <feMerge> 
-                  <feMergeNode in="coloredBlur"/>
-                  <feMergeNode in="SourceGraphic"/>
-                </feMerge>
-              </filter>
-            ))}
-          </defs>
-        </svg>
-
-        {/* Enhanced Controls Panel */}
-        <div className="absolute top-4 right-4 flex items-center gap-2">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setAnimationEnabled(!animationEnabled)}
-                className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm border-slate-200/50 dark:border-slate-700/50"
-              >
-                {animationEnabled ? (
-                  <Pause className="w-4 h-4" />
-                ) : (
-                  <Play className="w-4 h-4" />
-                )}
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              {animationEnabled ? "Pause Animations" : "Resume Animations"}
-            </TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onRefresh}
-                className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm border-slate-200/50 dark:border-slate-700/50"
-              >
-                <RefreshCw className="w-4 h-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Refresh System Health</TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                                 onClick={() => setLocalShowParticles(!localShowParticles)}
-                className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm border-slate-200/50 dark:border-slate-700/50"
-              >
-                <Sparkles className="w-4 h-4" />
-              </Button>
-            </TooltipTrigger>
-                         <TooltipContent>
-               {localShowParticles ? "Hide Particles" : "Show Particles"}
-             </TooltipContent>
-          </Tooltip>
+          
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm">
+              <Download className="h-4 w-4 mr-2" />
+              Export
+            </Button>
+            <Button variant="outline" size="sm">
+              <Settings className="h-4 w-4 mr-2" />
+              Configure
+            </Button>
+          </div>
         </div>
 
-        {/* Enhanced System Status */}
-        <motion.div
-          className="absolute top-4 left-4 flex items-center gap-3"
-          animate={pulseAnimation}
-        >
-          <div className={cn(
-            "flex items-center gap-2 px-3 py-2 rounded-full backdrop-blur-sm border",
-            systemHealthStatus.bg,
-            "border-slate-200/50 dark:border-slate-700/50"
-          )}>
-            <Heart className={cn("w-5 h-5", systemHealthStatus.color)} fill="currentColor" />
-            <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-              System: {systemHealthStatus.status}
-            </span>
-          </div>
-        </motion.div>
-
-        {/* Enhanced System Stats */}
-        <div className="absolute bottom-4 left-4 right-4">
-          <Card className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm border-slate-200/50 dark:border-slate-700/50">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-6">
-                  <div className="flex items-center gap-2">
-                    <Database className="w-4 h-4 text-blue-500" />
-                    <span className="text-sm font-medium">{systemOverview.totalAssets} Assets</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Workflow className="w-4 h-4 text-green-500" />
-                    <span className="text-sm font-medium">{systemOverview.activeWorkflows} Workflows</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Activity className="w-4 h-4 text-purple-500" />
-                    <span className="text-sm font-medium">{systemOverview.activePipelines} Pipelines</span>
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-6">
-                  <div className="flex items-center gap-2">
-                    <Heart className="w-4 h-4 text-red-500" />
-                    <span className="text-sm font-medium">{systemOverview.systemHealth}% Health</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Brain className="w-4 h-4 text-indigo-500" />
-                    <span className="text-sm font-medium">{systemOverview.aiInsights} AI Insights</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-emerald-500" />
-                    <span className="text-sm font-medium">{systemOverview.complianceScore}% Compliance</span>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
+        {/* Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
+          <Card className="p-3">
+            <div className="text-center">
+              <p className="text-xl font-bold">{stats.total}</p>
+              <p className="text-xs text-muted-foreground">Total Components</p>
+            </div>
+          </Card>
+          <Card className="p-3">
+            <div className="text-center">
+              <p className="text-xl font-bold text-green-600">{stats.healthy}</p>
+              <p className="text-xs text-muted-foreground">Healthy</p>
+            </div>
+          </Card>
+          <Card className="p-3">
+            <div className="text-center">
+              <p className="text-xl font-bold text-yellow-600">{stats.warnings}</p>
+              <p className="text-xs text-muted-foreground">Warnings</p>
+            </div>
+          </Card>
+          <Card className="p-3">
+            <div className="text-center">
+              <p className="text-xl font-bold text-red-600">{stats.errors}</p>
+              <p className="text-xs text-muted-foreground">Errors</p>
+            </div>
+          </Card>
+          <Card className="p-3">
+            <div className="text-center">
+              <p className="text-xl font-bold">{stats.healthScore}%</p>
+              <p className="text-xs text-muted-foreground">Health Score</p>
+            </div>
           </Card>
         </div>
-
-        {/* View Mode Selector */}
-        <div className="absolute top-4 left-1/2 transform -translate-x-1/2">
-          <div className="flex items-center gap-1 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm rounded-lg p-1 border border-slate-200/50 dark:border-slate-700/50">
-            {(['overview', 'detailed', 'technical'] as const).map((mode) => (
-              <Button
-                key={mode}
-                variant={viewMode === mode ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setViewMode(mode)}
-                className="text-xs capitalize"
-              >
-                {mode}
-              </Button>
-            ))}
+        
+        {/* Controls */}
+        <div className="flex gap-3">
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search components..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9"
+            />
           </div>
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                <Filter className="h-4 w-4 mr-2" />
+                Category: {selectedCategory === 'all' ? 'All' : selectedCategory}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onClick={() => setSelectedCategory('all')}>
+                All Categories
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSelectedCategory('data')}>
+                Data
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSelectedCategory('governance')}>
+                Governance
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSelectedCategory('process')}>
+                Process
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSelectedCategory('security')}>
+                Security
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSelectedCategory('management')}>
+                Management
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
-    </TooltipProvider>
-  );
-};
+
+      {/* Content */}
+      <div className="flex-1 p-6 overflow-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {filteredNodes.map(renderNodeCard)}
+        </div>
+        
+        {filteredNodes.length === 0 && (
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <Network className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+              <h3 className="font-medium mb-1">No components found</h3>
+              <p className="text-sm text-muted-foreground">
+                Try adjusting your search or filters
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Selected Node Details */}
+      <AnimatePresence>
+        {selectedNode && (
+          <motion.div
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            className="border-t border-border bg-background p-6"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold">Component Details</h3>
+              <Button variant="ghost" size="sm" onClick={() => setSelectedNode(null)}>
+                ×
+              </Button>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm">Information</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2 text-sm">
+                    <div>
+                      <span className="text-muted-foreground">Name:</span>
+                      <span className="ml-2 font-medium">{selectedNode.name}</span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Type:</span>
+                      <span className="ml-2 font-medium">{selectedNode.type}</span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Status:</span>
+                      <span className="ml-2 font-medium capitalize">{selectedNode.status}</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm">Metrics</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2 text-sm">
+                    {selectedNode.metadata.count && (
+                      <div>
+                        <span className="text-muted-foreground">Items:</span>
+                        <span className="ml-2 font-medium">{selectedNode.metadata.count.toLocaleString()}</span>
+                      </div>
+                    )}
+                    {selectedNode.metadata.complianceScore && (
+                      <div>
+                        <span className="text-muted-foreground">Compliance:</span>
+                        <span className="ml-2 font-medium">{selectedNode.metadata.complianceScore}%</span>
+                      </div>
+                    )}
+                    {selectedNode.metadata.criticality && (
+                      <div>
+                        <span className="text-muted-foreground">Criticality:</span>
+                        <span className="ml-2 font-medium capitalize">{selectedNode.metadata.criticality}</span>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm">Actions</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <Button size="sm" variant="outline" className="w-full">
+                      <Eye className="h-3 w-3 mr-2" />
+                      View Details
+                    </Button>
+                    <Button size="sm" variant="outline" className="w-full">
+                      <Settings className="h-3 w-3 mr-2" />
+                      Configure
+                    </Button>
+                    <Button size="sm" variant="outline" className="w-full">
+                      <BarChart3 className="h-3 w-3 mr-2" />
+                      Analytics
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
+
+export default DataGovernanceSchema
