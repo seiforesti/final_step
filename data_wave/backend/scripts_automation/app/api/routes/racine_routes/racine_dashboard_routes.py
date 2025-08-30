@@ -262,7 +262,7 @@ async def delete_dashboard(
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.get("/", response_model=List[DashboardResponse])
+@router.get("/list", response_model=List[DashboardResponse])
 async def list_user_dashboards(
     workspace_id: Optional[str] = Query(None),
     dashboard_type: Optional[DashboardType] = Query(None),

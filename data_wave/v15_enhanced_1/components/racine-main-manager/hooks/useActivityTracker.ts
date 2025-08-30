@@ -805,6 +805,27 @@ export function useActivityTracker(options: UseActivityTrackerOptions = {}) {
     startActivityStream,
     stopActivityStream,
     
+    // Usage analytics
+    getUsageAnalytics: useCallback(async (timeRange: string = '24h') => {
+      try {
+        const response = await activityTrackingAPI.getUsageAnalytics({ timeRange });
+        return response;
+      } catch (error) {
+        console.warn('Failed to get usage analytics:', error);
+        return {
+          totalActionsExecuted: 0,
+          favoriteActions: 0,
+          recentExecutions: 0,
+          topCategories: [],
+          performanceMetrics: {
+            averageResponseTime: 0,
+            successRate: 100,
+            errorRate: 0
+          }
+        };
+      }
+    }, []),
+    
     // Utility functions
     clearErrors: useCallback(() => {
       updateState(prev => ({

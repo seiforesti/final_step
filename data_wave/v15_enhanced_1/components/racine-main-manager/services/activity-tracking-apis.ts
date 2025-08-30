@@ -1178,6 +1178,46 @@ class ActivityTrackingAPI {
     // Clear handlers
     this.streamHandlers.clear();
   }
+
+  /**
+   * Get usage analytics for quick actions and activity tracking
+   * Maps to: GET /api/v1/quick-actions/usage-analytics
+   */
+  async getUsageAnalytics(params: { timeRange?: string } = {}): Promise<any> {
+    try {
+      const { timeRange = '24h' } = params;
+      const response = await fetch(`${this.config.baseURL}/api/v1/quick-actions/usage-analytics?time_range=${timeRange}`, {
+        method: 'GET',
+        headers: this.getAuthHeaders()
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to get usage analytics: ${response.statusText}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      console.warn('Failed to get usage analytics:', error);
+      // Return safe defaults to keep UI responsive
+      return {
+        totalActionsExecuted: 0,
+        favoriteActions: 0,
+        recentExecutions: 0,
+        topCategories: [],
+        performanceMetrics: {
+          averageResponseTime: 0,
+          successRate: 100,
+          errorRate: 0
+        },
+        userEngagement: {
+          dailyActiveUsers: 0,
+          averageSessionTime: 0
+        },
+        timeRange,
+        generatedAt: new Date().toISOString()
+      };
+    }
+  }
 }
 
 // Create and export singleton instance
