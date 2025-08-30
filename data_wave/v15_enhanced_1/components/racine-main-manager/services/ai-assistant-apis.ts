@@ -463,7 +463,7 @@ class AIAssistantAPI {
 
   /**
    * Get context-aware recommendations
-   * Maps to: GET /api/racine/ai-assistant/recommendations
+   * Maps to: POST /api/racine/ai/recommendations
    */
   async getRecommendations(
     userId: UUID,
@@ -482,7 +482,7 @@ class AIAssistantAPI {
           return { recommendations: [] };
         }
 
-        const response = await fetch(`${this.config.baseURL}/api/racine/ai-assistant/recommendations?${params}`, {
+        const response = await fetch(`${this.config.baseURL}/api/racine/ai/recommendations?${params}`, {
           method: 'POST',
           headers: this.getAuthHeaders(),
           body: JSON.stringify({

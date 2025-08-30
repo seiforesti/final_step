@@ -670,6 +670,9 @@ export const useNotificationManager = (options: UseNotificationManagerOptions = 
     // Operations
     ...operations,
     
+    // Real-time notifications
+    subscribeToUpdates: subscribeToNotifications,
+    
     // Utility functions
     refetchNotifications,
     refetchSettings,
