@@ -151,13 +151,147 @@ export const RacineMainManagerSPA: React.FC = () => {
 
   const { currentUser = null, userPermissions = [], isLoading: userLoading = false } = user
 
-  // Initialize system
+  // Initialize system - set to true immediately since we're already mounted
   useEffect(() => {
-    const initTimer = setTimeout(() => {
-      setIsInitialized(true)
-    }, 1000)
-    return () => clearTimeout(initTimer)
+    setIsInitialized(true)
   }, [])
+
+  // Listen for custom navigation events from the sidebar and handle URL parameters
+  useEffect(() => {
+    console.log('[Racine] Setting up navigation event listeners...')
+    
+    const handleViewChange = (event: Event) => {
+      const customEvent = event as CustomEvent<{ view: string }>
+      const { view } = customEvent.detail
+      console.log('[Racine] Received view change event:', view)
+      
+      // Map the view parameter to ViewMode enum values
+      const viewModeMap: Record<string, ViewMode> = {
+        'data_sources': ViewMode.DATA_SOURCES,
+        'scan_rule_sets': ViewMode.SCAN_RULE_SETS,
+        'classifications': ViewMode.CLASSIFICATIONS,
+        'compliance_rules': ViewMode.COMPLIANCE_RULES,
+        'advanced_catalog': ViewMode.ADVANCED_CATALOG,
+        'scan_logic': ViewMode.SCAN_LOGIC,
+        'rbac_system': ViewMode.RBAC_SYSTEM,
+        'dashboard': ViewMode.DASHBOARD,
+        'workspace': ViewMode.WORKSPACE,
+        'workflows': ViewMode.WORKFLOWS,
+        'pipelines': ViewMode.PIPELINES,
+        'ai_assistant': ViewMode.AI_ASSISTANT,
+        'activity': ViewMode.ACTIVITY,
+        'collaboration': ViewMode.COLLABORATION,
+        'settings': ViewMode.SETTINGS,
+        'analytics': ViewMode.ANALYTICS,
+        'monitoring': ViewMode.MONITORING,
+        'streaming': ViewMode.STREAMING,
+        'cost_optimization': ViewMode.COST_OPTIMIZATION,
+        'reports': ViewMode.REPORTS,
+        'search': ViewMode.SEARCH,
+        'notifications': ViewMode.NOTIFICATIONS,
+      }
+      
+      const newViewMode = viewModeMap[view]
+      if (newViewMode) {
+        console.log('[Racine] Changing view to:', newViewMode, 'from current view:', currentView)
+        setCurrentView(newViewMode)
+        
+        // Force a re-render to ensure the view change is processed
+        console.log('[Racine] View change processed, new view:', newViewMode)
+        
+        // Also update the URL to ensure consistency
+        const newUrl = new URL(window.location.href)
+        newUrl.searchParams.set('view', view)
+        window.history.pushState({}, '', newUrl.toString())
+        console.log('[Racine] URL updated to:', newUrl.toString())
+      } else {
+        console.warn('[Racine] Unknown view mode:', view)
+      }
+    }
+
+    // Handle URL parameters for direct navigation
+    const handleUrlParams = () => {
+      if (typeof window !== 'undefined') {
+        const urlParams = new URLSearchParams(window.location.search)
+        const viewParam = urlParams.get('view')
+        
+        console.log('[Racine] handleUrlParams called, viewParam:', viewParam, 'currentView:', currentView)
+        
+        if (viewParam) {
+          console.log('[Racine] URL view parameter detected:', viewParam)
+          const viewModeMap: Record<string, ViewMode> = {
+            'data_sources': ViewMode.DATA_SOURCES,
+            'scan_rule_sets': ViewMode.SCAN_RULE_SETS,
+            'classifications': ViewMode.CLASSIFICATIONS,
+            'compliance_rules': ViewMode.COMPLIANCE_RULES,
+            'advanced_catalog': ViewMode.ADVANCED_CATALOG,
+            'scan_logic': ViewMode.SCAN_LOGIC,
+            'rbac_system': ViewMode.RBAC_SYSTEM,
+            'dashboard': ViewMode.DASHBOARD,
+            'workspace': ViewMode.WORKSPACE,
+            'workflows': ViewMode.WORKFLOWS,
+            'pipelines': ViewMode.PIPELINES,
+            'ai_assistant': ViewMode.AI_ASSISTANT,
+            'activity': ViewMode.ACTIVITY,
+            'collaboration': ViewMode.COLLABORATION,
+            'settings': ViewMode.SETTINGS,
+            'analytics': ViewMode.ANALYTICS,
+            'monitoring': ViewMode.MONITORING,
+            'streaming': ViewMode.STREAMING,
+            'cost_optimization': ViewMode.COST_OPTIMIZATION,
+            'reports': ViewMode.REPORTS,
+            'search': ViewMode.SEARCH,
+            'notifications': ViewMode.NOTIFICATIONS,
+          }
+          
+          const newViewMode = viewModeMap[viewParam]
+          console.log('[Racine] Mapped view mode:', viewParam, '->', newViewMode)
+          
+          if (newViewMode && newViewMode !== currentView) {
+            console.log('[Racine] Setting view from URL parameter:', newViewMode, 'from current view:', currentView)
+            setCurrentView(newViewMode)
+          } else if (newViewMode === currentView) {
+            console.log('[Racine] View already matches URL parameter:', newViewMode)
+          } else {
+            console.warn('[Racine] Invalid view parameter or mapping failed:', viewParam, '->', newViewMode)
+          }
+        } else {
+          console.log('[Racine] No view parameter in URL')
+        }
+      }
+    }
+
+    // Add event listener for custom navigation events
+    console.log('[Racine] Adding event listener for racine-view-change');
+    window.addEventListener('racine-view-change', handleViewChange as EventListener)
+    
+    // Also listen for the event on document for better compatibility
+    document.addEventListener('racine-view-change', handleViewChange as EventListener)
+    
+    // Handle initial URL parameters
+    console.log('[Racine] Handling initial URL parameters');
+    handleUrlParams()
+    
+    // Listen for popstate events (back/forward navigation)
+    console.log('[Racine] Adding popstate event listener');
+    window.addEventListener('popstate', handleUrlParams)
+    
+    console.log('[Racine] Navigation event listeners setup complete');
+    
+    return () => {
+      console.log('[Racine] Cleaning up navigation event listeners');
+      window.removeEventListener('racine-view-change', handleViewChange as EventListener)
+      document.removeEventListener('racine-view-change', handleViewChange as EventListener)
+      window.removeEventListener('popstate', handleUrlParams)
+    }
+  }, []) // Removed currentView dependency to prevent re-initialization
+
+  // Monitor currentView changes for debugging
+  useEffect(() => {
+    console.log('[Racine] currentView changed to:', currentView)
+    console.log('[Racine] Component should re-render with new view')
+    console.log('[Racine] View change timestamp:', new Date().toISOString())
+  }, [currentView])
 
   // Global error handling
   useEffect(() => {
@@ -451,7 +585,13 @@ export const RacineMainManagerSPA: React.FC = () => {
         <div className="relative min-h-screen bg-gradient-to-br from-black via-gray-900 to-black">
           <RacineMainLayout
             currentView={currentView}
-            onViewChange={setCurrentView}
+            onViewChange={(view) => {
+              console.log('[SPA] onViewChange called with ViewMode:', view);
+              console.log('[SPA] Current view before change:', currentView);
+              console.log('[SPA] Setting new view to:', view);
+              setCurrentView(view);
+              console.log('[SPA] View change completed');
+            }}
             sidebarCollapsed={sidebarCollapsed}
             onSidebarCollapse={setSidebarCollapsed}
             currentUser={currentUser}
@@ -604,7 +744,7 @@ export const RacineMainManagerSPA: React.FC = () => {
                       </div>
                     }>
                       {React.createElement(
-                        React.lazy(() => import("./components/ai-assistant/AIAssistantInterface").then(module => ({ default: module.AIAssistantInterface }))),
+                        React.lazy(() => import("./components/ai-assistant/AIAssistantInterface")),
                         {
                           className: "h-full w-full border-0",
                           onClose: () => setAIAssistantOpen(false),

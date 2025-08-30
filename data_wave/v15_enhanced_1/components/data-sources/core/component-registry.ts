@@ -687,16 +687,20 @@ export class ComponentRegistry extends EventEmitter {
     }
 
     // Validate dependencies
-    for (const dep of definition.dependencies) {
-      if (!dep.id || !dep.type) {
-        throw new Error('Component dependency must have id and type')
+    if (definition.dependencies && Array.isArray(definition.dependencies)) {
+      for (const dep of definition.dependencies) {
+        if (!dep.id || !dep.type) {
+          throw new Error('Component dependency must have id and type')
+        }
       }
     }
 
     // Validate capabilities
-    for (const cap of definition.capabilities) {
-      if (!cap.id || !cap.name || !cap.type) {
-        throw new Error('Component capability must have id, name, and type')
+    if (definition.capabilities && Array.isArray(definition.capabilities)) {
+      for (const cap of definition.capabilities) {
+        if (!cap.id || !cap.name || !cap.type) {
+          throw new Error('Component capability must have id, name, and type')
+        }
       }
     }
   }
@@ -715,12 +719,14 @@ export class ComponentRegistry extends EventEmitter {
     this.categoryIndex.get(definition.category)!.push(definition)
 
     // Capability index
-    for (const capability of definition.capabilities) {
-      const key = capability.type
-      if (!this.capabilityIndex.has(key)) {
-        this.capabilityIndex.set(key, [])
+    if (definition.capabilities && Array.isArray(definition.capabilities)) {
+      for (const capability of definition.capabilities) {
+        const key = capability.type
+        if (!this.capabilityIndex.has(key)) {
+          this.capabilityIndex.set(key, [])
+        }
+        this.capabilityIndex.get(key)!.push(definition)
       }
-      this.capabilityIndex.get(key)!.push(definition)
     }
   }
 

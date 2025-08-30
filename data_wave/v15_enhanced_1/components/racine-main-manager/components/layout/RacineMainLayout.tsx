@@ -7,14 +7,14 @@ import { OptimizedAnimationProvider } from "../animations/OptimizedAnimationProv
 import { EnterpriseErrorBoundary } from "../error-boundaries/EnterpriseErrorBoundary"
 
 import { AppNavbar } from "../navigation/AppNavbar"
-import { AdvancedAppSidebar as AdvancedNavigationSidebar } from "../navigation/AdvancedAppSidebar"
-import { EnterpriseQuickActionsSidebar as AdvancedQuickActionsSidebar } from "../quick-actions-sidebar/EnterpriseQuickActionsSidebar"
+import { AdvancedNavigationSidebar } from "../navigation/AdvancedNavigationSidebar"
+import {  AdvancedQuickActionsSidebar } from "../quick-actions-sidebar/AdvancedQuickActionsSidebar"
 import { AIAssistantModal } from "../modals/AIAssistantModal"
 import { FloatingActionMenu } from "../ui/FloatingActionMenu"
 import { MainContentRenderer } from "./MainContentRenderer"
 import { SystemStatusIndicator } from "./SystemStatusIndicator"
 
-import type { ViewMode, SystemHealth, QuickActionContext } from "../../types/racine-core.types"
+import { ViewMode, SystemHealth, QuickActionContext } from "../../types/racine-core.types"
 
 interface RacineMainLayoutProps {
   // Navigation props
@@ -148,6 +148,28 @@ export const RacineMainLayout: React.FC<RacineMainLayoutProps> = ({
                 collapsed={sidebarCollapsed}
                 onCollapsedChange={onSidebarCollapse}
                 onQuickActionsTrigger={() => onQuickActionsSidebarToggle(true)}
+                onViewChange={(view) => {
+                  console.log('[Layout] onViewChange called with view:', view);
+                  console.log('[Layout] onViewChange prop type:', typeof onViewChange);
+                  
+                  // Convert string view to ViewMode - the string IS the ViewMode value
+                  const newViewMode = view as ViewMode
+                  console.log('[Layout] View string directly as ViewMode:', view)
+                  console.log('[Layout] ViewMode.DATA_SOURCES value:', ViewMode.DATA_SOURCES);
+                  console.log('[Layout] ViewMode enum values:', Object.values(ViewMode));
+                  
+                  if (newViewMode) {
+                    console.log('[Layout] Using view string directly as ViewMode:', view)
+                    try {
+                      onViewChange(newViewMode)
+                      console.log('[Layout] onViewChange called successfully with ViewMode:', newViewMode)
+                    } catch (error) {
+                      console.error('[Layout] Error calling onViewChange:', error)
+                    }
+                  } else {
+                    console.warn('[Layout] Invalid view string:', view)
+                  }
+                }}
               />
 
               <main
@@ -155,22 +177,18 @@ export const RacineMainLayout: React.FC<RacineMainLayoutProps> = ({
               >
                 <div className="h-full overflow-auto">
                   <div className="container mx-auto p-6 space-y-6">
-                    <AnimatePresence mode="wait">
-                      <motion.div
-                        key={currentView}
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -20 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <MainContentRenderer
-                          currentView={currentView}
-                          systemOverview={systemOverview}
-                          dataGovernanceNodes={dataGovernanceNodes}
-                          performanceMode={performanceMode}
-                        />
-                      </motion.div>
-                    </AnimatePresence>
+                    <motion.div
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <MainContentRenderer
+                        currentView={currentView}
+                        systemOverview={systemOverview}
+                        dataGovernanceNodes={dataGovernanceNodes}
+                        performanceMode={performanceMode}
+                      />
+                    </motion.div>
                   </div>
                 </div>
               </main>

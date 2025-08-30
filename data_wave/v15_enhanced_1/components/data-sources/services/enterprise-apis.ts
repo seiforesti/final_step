@@ -39,7 +39,7 @@ import {
 // EXTENDED API CONFIGURATION
 // ============================================================================
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000/proxy'
 
 const enterpriseApi = axios.create({
   baseURL: API_BASE_URL,
@@ -221,10 +221,35 @@ export interface ComplianceFramework {
 }
 
 // Security APIs
-export const getSecurityAudit = async (data_source_id: number): Promise<SecurityAuditResponse> => {
-  const { data } = await enterpriseApi.get(`/security/audit/${data_source_id}`)
-  return data
-}
+export const getSecurityAudit = async (dataSourceId: number): Promise<any> => {
+  const { data } = await enterpriseApi.get(`/security/audit/${dataSourceId}`);
+  return data;
+};
+
+export const getSecurityScans = async (): Promise<any[]> => {
+  const { data } = await enterpriseApi.get('/security/scans');
+  return data;
+};
+
+export const getComplianceChecks = async (): Promise<any[]> => {
+  const { data } = await enterpriseApi.get('/security/compliance/checks');
+  return data;
+};
+
+export const getThreatDetection = async (): Promise<any[]> => {
+  const { data } = await enterpriseApi.get('/security/threat-detection');
+  return data;
+};
+
+export const getSecurityAnalytics = async (): Promise<any> => {
+  const { data } = await enterpriseApi.get('/security/analytics/dashboard');
+  return data;
+};
+
+export const getRiskAssessment = async (): Promise<any> => {
+  const { data } = await enterpriseApi.get('/security/reports/risk-assessment');
+  return data;
+};
 
 export const createSecurityScan = async (request: SecurityAuditRequest): Promise<SecurityScan> => {
   const { data } = await enterpriseApi.post('/security/scans', request)
@@ -438,7 +463,7 @@ export interface TaskStats {
 // Task APIs
 export const getScheduledTasks = async (data_source_id?: number): Promise<TaskResponse[]> => {
   const params = data_source_id ? `?data_source_id=${data_source_id}` : ''
-  const { data } = await enterpriseApi.get(`/tasks${params}`)
+  const { data } = await enterpriseApi.get(`/scan/tasks${params}`)  // Fixed: should be /scan/tasks
   return data
 }
 
@@ -459,7 +484,7 @@ export const executeTask = async (task_id: number, triggered_by: string): Promis
 
 export const getTaskStats = async (data_source_id?: number): Promise<TaskStats> => {
   const params = data_source_id ? `?data_source_id=${data_source_id}` : ''
-  const { data } = await enterpriseApi.get(`/tasks/stats${params}`)
+  const { data } = await enterpriseApi.get(`/scan/tasks/stats${params}`)  // Fixed: should be /scan/tasks/stats
   return data
 }
 
@@ -486,7 +511,7 @@ export interface NotificationResponse {
 // Notification APIs
 export const getNotifications = async (user_id?: string): Promise<NotificationResponse[]> => {
   const params = user_id ? `?user_id=${user_id}` : ''
-  const { data } = await enterpriseApi.get(`/notifications${params}`)
+  const { data } = await enterpriseApi.get(`/scan/notifications${params}`)  // Fixed: should be /scan/notifications
   return data
 }
 
@@ -534,7 +559,7 @@ export interface IntegrationStats {
 // Integration APIs
 export const getIntegrations = async (data_source_id?: number): Promise<IntegrationResponse[]> => {
   const params = data_source_id ? `?data_source_id=${data_source_id}` : ''
-  const { data } = await enterpriseApi.get(`/integrations${params}`)
+  const { data } = await enterpriseApi.get(`/scan/integrations${params}`)  // Fixed: should be /scan/integrations
   return data
 }
 
@@ -598,7 +623,7 @@ export interface ReportStats {
 // Report APIs
 export const getReports = async (data_source_id?: number): Promise<ReportResponse[]> => {
   const params = data_source_id ? `?data_source_id=${data_source_id}` : ''
-  const { data } = await enterpriseApi.get(`/reports${params}`)
+  const { data } = await enterpriseApi.get(`/scan/reports${params}`)  // Fixed: should be /scan/reports
   return data
 }
 
@@ -614,7 +639,7 @@ export const generateReport = async (report_id: number, user_id: string): Promis
 
 export const getReportStats = async (data_source_id?: number): Promise<ReportStats> => {
   const params = data_source_id ? `?data_source_id=${data_source_id}` : ''
-  const { data } = await enterpriseApi.get(`/reports/stats${params}`)
+  const { data } = await enterpriseApi.get(`/scan/reports/stats${params}`)  // Fixed: should be /scan/reports/stats
   return data
 }
 
@@ -665,7 +690,7 @@ export interface VersionStats {
 
 // Version APIs
 export const getVersionHistory = async (data_source_id: number): Promise<VersionResponse[]> => {
-  const { data } = await enterpriseApi.get(`/versions/${data_source_id}`)
+  const { data } = await enterpriseApi.get(`/scan/versions/${data_source_id}`)  // Fixed: should be /scan/versions
   return data
 }
 
@@ -1004,12 +1029,12 @@ export const useActivateVersionMutation = () => {
 // ============================================================================
 
 // User and Workspace Hooks (linking to backend user management)
-export const useUserQuery = (options = {}) => {
+export const useUserQuery = (options?: UseQueryOptions<User>) => {
   return useQuery({
-    queryKey: ['current-user'],
+    queryKey: ['user'],
     queryFn: async () => {
       // This would connect to your user management system
-      const { data } = await enterpriseApi.get('/auth/me')
+      const { data } = await enterpriseApi.get('/rbac/me')  // Fixed: was '/auth/me'
       return data
     },
     ...options,
@@ -1020,7 +1045,7 @@ export const useWorkspaceQuery = (workspace_id?: string, options = {}) => {
   return useQuery({
     queryKey: ['workspace', workspace_id],
     queryFn: async () => {
-      const { data } = await enterpriseApi.get(`/workspaces/${workspace_id || 'current'}`)
+      const { data } = await enterpriseApi.get(`/collaboration/workspaces/${workspace_id || 'current'}`)
       return data
     },
     ...options,
@@ -1033,7 +1058,7 @@ export const useAuditLogsQuery = (data_source_id?: number, options = {}) => {
     queryKey: ['audit-logs', data_source_id],
     queryFn: async () => {
       const params = data_source_id ? `?data_source_id=${data_source_id}` : ''
-      const { data } = await enterpriseApi.get(`/audit/logs${params}`)
+      const { data } = await enterpriseApi.get(`/sensitivity-labels/rbac/audit-logs${params}`)
       return data
     },
     ...options,
@@ -1041,12 +1066,11 @@ export const useAuditLogsQuery = (data_source_id?: number, options = {}) => {
 }
 
 // User Permissions Hook
-export const useUserPermissionsQuery = (user_id?: string, options = {}) => {
+export const useUserPermissionsQuery = (options?: UseQueryOptions<Permission[]>) => {
   return useQuery({
-    queryKey: ['user-permissions', user_id],
+    queryKey: ['user-permissions'],
     queryFn: async () => {
-      const params = user_id ? `?user_id=${user_id}` : ''
-      const { data } = await enterpriseApi.get(`/auth/permissions${params}`)
+      const { data } = await enterpriseApi.get('/rbac/permissions')  // Fixed: was '/auth/permissions'
       return data
     },
     ...options,
@@ -1058,7 +1082,7 @@ export const useSystemHealthQuery = (options = {}) => {
   return useQuery({
     queryKey: ['system-health'],
     queryFn: async () => {
-      const { data } = await enterpriseApi.get('/health/system')
+      const { data } = await enterpriseApi.get('/scan/health/system')  // Fixed: should be /scan/health/system
       return data
     },
     refetchInterval: 30000, // Refresh every 30 seconds
@@ -1265,46 +1289,20 @@ export interface SessionParticipant {
 }
 
 // Collaboration API functions
-export const getCollaborationWorkspaces = async (filters?: {
-  user_id?: string
-  workspace_type?: string
-}): Promise<CollaborationWorkspace[]> => {
-  const params = new URLSearchParams()
-  if (filters?.user_id) params.append('user_id', filters.user_id)
-  if (filters?.workspace_type) params.append('workspace_type', filters.workspace_type)
-  
-  const { data } = await enterpriseApi.get(`/collaboration/workspaces?${params.toString()}`)
-  return data.data || data
-}
+export const getCollaborationWorkspaces = async (): Promise<any[]> => {
+  const { data } = await enterpriseApi.get('/collaboration/workspaces');
+  return data;
+};
 
-export const createCollaborationWorkspace = async (workspaceData: {
-  name: string
-  description?: string
-  type: string
-  settings?: any
-}): Promise<CollaborationWorkspace> => {
-  const { data } = await enterpriseApi.post('/collaboration/workspaces', workspaceData)
-  return data.data || data
-}
+export const getWorkspaceDocuments = async (workspaceId: number): Promise<any[]> => {
+  const { data } = await enterpriseApi.get(`/collaboration/workspaces/${workspaceId}/documents`);
+  return data;
+};
 
-export const getSharedDocuments = async (workspaceId: string, filters?: {
-  document_type?: string
-}): Promise<SharedDocument[]> => {
-  const params = new URLSearchParams()
-  if (filters?.document_type) params.append('document_type', filters.document_type)
-  
-  const { data } = await enterpriseApi.get(`/collaboration/workspaces/${workspaceId}/documents?${params.toString()}`)
-  return data.data || data
-}
-
-export const createSharedDocument = async (workspaceId: string, documentData: {
-  title: string
-  type: string
-  content: any
-}): Promise<SharedDocument> => {
-  const { data } = await enterpriseApi.post(`/collaboration/workspaces/${workspaceId}/documents`, documentData)
-  return data.data || data
-}
+export const inviteToWorkspace = async (workspaceId: number, invitationData: any): Promise<any> => {
+  const { data } = await enterpriseApi.post(`/collaboration/workspaces/${workspaceId}/invite`, invitationData);
+  return data;
+};
 
 export const getActiveCollaborationSessions = async (filters?: {
   workspace_id?: string
@@ -1327,15 +1325,6 @@ export const addDocumentComment = async (documentId: string, commentData: {
 
 export const getDocumentComments = async (documentId: string): Promise<DocumentComment[]> => {
   const { data } = await enterpriseApi.get(`/collaboration/documents/${documentId}/comments`)
-  return data.data || data
-}
-
-export const inviteToWorkspace = async (workspaceId: string, invitationData: {
-  email: string
-  role: string
-  message?: string
-}): Promise<any> => {
-  const { data } = await enterpriseApi.post(`/collaboration/workspaces/${workspaceId}/invite`, invitationData)
   return data.data || data
 }
 
@@ -1903,21 +1892,7 @@ export const createEnhancedSecurityScan = async (scanRequest: {
   return data.data || data
 }
 
-export const getSecurityScans = async (filters?: {
-  data_source_id?: number
-  scan_type?: string
-  status?: string
-  days?: number
-}): Promise<any[]> => {
-  const params = new URLSearchParams()
-  if (filters?.data_source_id) params.append('data_source_id', filters.data_source_id.toString())
-  if (filters?.scan_type) params.append('scan_type', filters.scan_type)
-  if (filters?.status) params.append('status', filters.status)
-  if (filters?.days) params.append('days', filters.days.toString())
-  
-  const { data } = await enterpriseApi.get(`/security/scans?${params.toString()}`)
-  return data.data || data
-}
+
 
 export const getVulnerabilityAssessments = async (filters?: {
   severity?: string
@@ -1967,19 +1942,7 @@ export const createSecurityIncident = async (incidentData: {
   return data.data || data
 }
 
-export const getComplianceChecks = async (filters?: {
-  framework?: string
-  data_source_id?: number
-  status?: string
-}): Promise<ComplianceCheck[]> => {
-  const params = new URLSearchParams()
-  if (filters?.framework) params.append('framework', filters.framework)
-  if (filters?.data_source_id) params.append('data_source_id', filters.data_source_id.toString())
-  if (filters?.status) params.append('status', filters.status)
-  
-  const { data } = await enterpriseApi.get(`/security/compliance/checks?${params.toString()}`)
-  return data.data || data
-}
+
 
 export const runComplianceCheck = async (checkRequest: {
   framework: string
@@ -1990,19 +1953,7 @@ export const runComplianceCheck = async (checkRequest: {
   return data.data || data
 }
 
-export const getThreatDetection = async (filters?: {
-  threat_type?: string
-  severity?: string
-  days?: number
-}): Promise<ThreatDetection[]> => {
-  const params = new URLSearchParams()
-  if (filters?.threat_type) params.append('threat_type', filters.threat_type)
-  if (filters?.severity) params.append('severity', filters.severity)
-  if (filters?.days) params.append('days', filters.days.toString())
-  
-  const { data } = await enterpriseApi.get(`/security/threat-detection?${params.toString()}`)
-  return data.data || data
-}
+
 
 export const getSecurityAnalyticsDashboard = async (time_range: string = '7d'): Promise<SecurityAnalyticsDashboard> => {
   const { data } = await enterpriseApi.get(`/security/analytics/dashboard?time_range=${time_range}`)
@@ -2046,6 +1997,12 @@ export const useCollaborationWorkspacesQuery = (filters?: {
     refetchInterval: 60000, // 1 minute
     ...options,
   })
+}
+
+// Create collaboration workspace function
+const createCollaborationWorkspace = async (workspaceData: any) => {
+  const response = await enterpriseApi.post('/collaboration/workspaces', workspaceData)
+  return response.data
 }
 
 export const useCreateCollaborationWorkspaceMutation = () => {

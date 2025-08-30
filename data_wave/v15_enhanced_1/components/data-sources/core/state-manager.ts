@@ -308,7 +308,8 @@ export class StateManager extends EventEmitter {
       
       // Check for conflicts
       if (this.definitions.has(definition.id)) {
-        throw new Error(`State ${definition.id} is already defined`)
+        console.warn(`State ${definition.id} is already defined, skipping duplicate definition`)
+        return
       }
 
       // Store definition

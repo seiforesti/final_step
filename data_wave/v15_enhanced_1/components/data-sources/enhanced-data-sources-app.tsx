@@ -1048,22 +1048,18 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
   // ADVANCED WORKFLOW ACTIONS INITIALIZATION
   // ========================================================================
   
-  useEffect(() => {
-    const actions = createAdvancedWorkflowActions({
-      mutations: {
-        createSecurityScan: createSecurityScanMutation,
-        runComplianceCheck: runComplianceCheckMutation,
-        startMonitoring: startMonitoringMutation,
-        createWorkspace: createWorkspaceMutation,
-        createWorkflow: createWorkflowMutation,
-        createThreshold: createThresholdMutation,
-        createDocument: createDocumentMutation,
-        createBulkOperation: createBulkOperationMutation,
-        startSecurityMonitoring: startSecurityMonitoringMutation
-      }
-    })
-    setWorkflowActions(actions)
-  }, [
+  // Memoize mutations to prevent infinite re-renders
+  const mutations = useMemo(() => ({
+    createSecurityScan: createSecurityScanMutation,
+    runComplianceCheck: runComplianceCheckMutation,
+    startMonitoring: startMonitoringMutation,
+    createWorkspace: createWorkspaceMutation,
+    createWorkflow: createWorkflowMutation,
+    createThreshold: createThresholdMutation,
+    createDocument: createDocumentMutation,
+    createBulkOperation: createBulkOperationMutation,
+    startSecurityMonitoring: startSecurityMonitoringMutation
+  }), [
     createSecurityScanMutation,
     runComplianceCheckMutation,
     startMonitoringMutation,
@@ -1074,6 +1070,11 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
     createBulkOperationMutation,
     startSecurityMonitoringMutation
   ])
+  
+  useEffect(() => {
+    const actions = createAdvancedWorkflowActions({ mutations })
+    setWorkflowActions(actions)
+  }, []) // Remove mutations dependency to prevent infinite loop
 
   // ========================================================================
   // ADVANCED COMPONENT USAGE TRACKING & AI INSIGHTS
@@ -1085,13 +1086,6 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
         ...prev,
         [componentId]: (prev[componentId] || 0) + 1
       }
-      
-      // Update orchestration metrics
-      setOrchestrationMetrics(prevMetrics => ({
-        ...prevMetrics,
-        activeComponents: Object.keys(newStats).length,
-        userEngagement: Object.values(newStats).reduce((a, b) => a + b, 0)
-      }))
       
       return newStats
     })
@@ -1216,7 +1210,7 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
         timestamp: new Date()
       }])
     }
-  }, [workflowActions, selectedDataSource, dataSources, createSecurityScanMutation, runComplianceCheckMutation, startMonitoringMutation, createWorkspaceMutation, createWorkflowMutation, createThresholdMutation, createDocumentMutation, createBulkOperationMutation, startSecurityMonitoringMutation])
+  }, [selectedDataSource, dataSources, createSecurityScanMutation, runComplianceCheckMutation, startMonitoringMutation, createWorkspaceMutation, createWorkflowMutation, createThresholdMutation, createDocumentMutation, createBulkOperationMutation, startSecurityMonitoringMutation])
 
   // ========================================================================
   // REAL-TIME UPDATES AND EVENT HANDLING - DATABRICKS-LEVEL ORCHESTRATION
@@ -1324,7 +1318,7 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
         )
       })
     }
-  }, [enterprise.core, autoRefresh, enterpriseFeatures])
+  }, [enterprise?.core, autoRefresh]) // Remove enterpriseFeatures to prevent infinite loop
 
   // ========================================================================
   // AUTO-SELECTION LOGIC
@@ -1334,9 +1328,8 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
     if (dataSources && dataSources.length > 0 && !selectedDataSource) {
       const defaultDataSource = dataSources.find(ds => ds.status === 'active') || dataSources[0]
       setSelectedDataSource(defaultDataSource)
-      enterprise.setSelectedDataSource(defaultDataSource)
     }
-  }, [dataSources, selectedDataSource, enterprise])
+  }, [dataSources, selectedDataSource])
 
   // ========================================================================
   // DATABRICKS-LEVEL FEATURES INITIALIZATION
@@ -1392,7 +1385,7 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
       setLayout(userWorkspaceProfile.preferredLayout as keyof typeof enterpriseLayoutConfigurations)
       setPinnedComponents(userWorkspaceProfile.favoriteComponents)
     }
-  }, [enterpriseFeatures, userWorkspaceProfile])
+  }, [userWorkspaceProfile]) // Remove enterpriseFeatures to prevent infinite loop
 
   // ========================================================================
   // ADVANCED COMPONENT LIFECYCLE TRACKING
@@ -1427,7 +1420,7 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
         setSmartRecommendations(prev => [...prev, ...newRecommendations].slice(-10))
       }
     }
-  }, [componentUsageStats, pinnedComponents, enterpriseFeatures.intelligentRecommendations])
+    }, [componentUsageStats, pinnedComponents]) // Remove enterpriseFeatures.intelligentRecommendations to prevent infinite loop
 
   // ========================================================================
   // KEYBOARD SHORTCUTS WITH ENTERPRISE FEATURES

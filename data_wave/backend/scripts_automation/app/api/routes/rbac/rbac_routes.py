@@ -31,7 +31,7 @@ from app.models.auth_models import ConditionTemplate
 from sqlalchemy import func
 
 # Pydantic model for role update
-from sensitivity_labeling.websocket_manager import manager
+# Removed circular import: from sensitivity_labeling.websocket_manager import manager
 import asyncio
 
 class RoleUpdate(BaseModel):
@@ -148,9 +148,11 @@ def create_condition_template(template: ConditionTemplateCreate, db: Session = D
         try:
             loop = asyncio.get_event_loop()
             if loop.is_running():
-                asyncio.ensure_future(manager.broadcast({"type": "rbac_event", "event": "condition_template_created", "template_id": obj.id}))
+                # asyncio.ensure_future(manager.broadcast({"type": "rbac_event", "event": "condition_template_created", "template_id": obj.id}))
+                pass
             else:
-                loop.run_until_complete(manager.broadcast({"type": "rbac_event", "event": "condition_template_created", "template_id": obj.id}))
+                # loop.run_until_complete(manager.broadcast({"type": "rbac_event", "event": "condition_template_created", "template_id": obj.id}))
+                pass
         except Exception as e:
             print(f"Broadcast error: {e}")
     background_tasks = BackgroundTasks()
@@ -189,9 +191,11 @@ def update_condition_template(template_id: int, update: ConditionTemplateUpdate,
         try:
             loop = asyncio.get_event_loop()
             if loop.is_running():
-                asyncio.ensure_future(manager.broadcast({"type": "rbac_event", "event": "condition_template_updated", "template_id": obj.id}))
+                # asyncio.ensure_future(manager.broadcast({"type": "rbac_event", "event": "condition_template_updated", "template_id": obj.id}))
+                pass
             else:
-                loop.run_until_complete(manager.broadcast({"type": "rbac_event", "event": "condition_template_updated", "template_id": obj.id}))
+                # loop.run_until_complete(manager.broadcast({"type": "rbac_event", "event": "condition_template_updated", "template_id": obj.id}))
+                pass
         except Exception as e:
             print(f"Broadcast error: {e}")
     background_tasks = BackgroundTasks()
@@ -212,9 +216,11 @@ def delete_condition_template(template_id: int, db: Session = Depends(get_db), c
         try:
             loop = asyncio.get_event_loop()
             if loop.is_running():
-                asyncio.ensure_future(manager.broadcast({"type": "rbac_event", "event": "condition_template_deleted", "template_id": template_id}))
+                # asyncio.ensure_future(manager.broadcast({"type": "rbac_event", "event": "condition_template_deleted", "template_id": template_id}))
+                pass
             else:
-                loop.run_until_complete(manager.broadcast({"type": "rbac_event", "event": "condition_template_deleted", "template_id": template_id}))
+                # loop.run_until_complete(manager.broadcast({"type": "rbac_event", "event": "condition_template_deleted", "template_id": template_id}))
+                pass
         except Exception as e:
             print(f"Broadcast error: {e}")
     background_tasks = BackgroundTasks()
@@ -1426,11 +1432,12 @@ def permission_diff(
     )
 # Utility to broadcast RBAC events
 async def broadcast_rbac_event(event_type: str, data: dict):
-    await manager.broadcast({
-        "type": "rbac_event",
-        "event": event_type,
-        "data": data,
-    })
+    # await manager.broadcast({
+    #     "type": "rbac_event",
+    #     "event": event_type,
+    #     "data": data,
+    # })
+    pass  # Temporarily disabled due to circular import
 
 
 # --- Prebuilt Condition Template Helpers ---

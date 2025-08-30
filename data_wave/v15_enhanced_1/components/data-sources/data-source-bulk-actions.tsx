@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Play, Pause, Trash2, Settings, Download, Upload, RefreshCw, CheckCircle, AlertTriangle, Info, X, Database, Edit, Copy, Tag, Shield, Monitor, Activity, Archive, Layers,  } from 'lucide-react'
+import { Play, Pause, Trash2, Settings, Download, Upload, RefreshCw, CheckCircle, AlertTriangle, Info, X, Database, Edit, Copy, Tag, Shield, Monitor, Activity, Archive, Layers, ArrowDownToLine } from 'lucide-react'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -134,7 +134,7 @@ const bulkOperations: BulkOperation[] = [
     id: "export-config",
     name: "Export Configuration",
     description: "Export configuration for selected data sources",
-    icon: ArrowDownTrayIcon,
+    icon: ArrowDownToLine,
     color: "text-indigo-600",
     requiresConfirmation: false,
     fields: [
@@ -399,9 +399,9 @@ export function DataSourceBulkActions({
                     <div className="flex items-center space-x-2">
                       <Database className="h-4 w-4" />
                       <span className="font-medium">{ds.name}</span>
-                      <Badge variant="outline">{ds.type}</Badge>
+                      <Badge variant="outline">{ds.source_type}</Badge>
                     </div>
-                    <Badge variant={ds.status === "connected" ? "default" : "secondary"}>
+                    <Badge variant={ds.status === "active" ? "default" : "secondary"}>
                       {ds.status}
                     </Badge>
                   </div>
@@ -444,7 +444,7 @@ export function DataSourceBulkActions({
                             </Badge>
                           )}
                         </div>
-                        <Checkbox checked={isSelected} readOnly />
+                        <Checkbox checked={isSelected} disabled />
                       </div>
                     </div>
                   )

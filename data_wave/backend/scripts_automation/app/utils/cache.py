@@ -138,14 +138,22 @@ class EnterpriseCache:
         self._cleanup_task = None
         self._monitoring_task = None
         
-        # Start background tasks
+        # Start background tasks (deferred to avoid startup issues)
+        self._background_tasks_started = False
         if self.enable_monitoring:
-            self._start_background_tasks()
+            # Don't start background tasks during initialization
+            # They will be started when explicitly requested
+            pass
     
     def _start_background_tasks(self):
         """Start background monitoring and cleanup tasks."""
+        if self._background_tasks_started:
+            return
+            
+        self._background_tasks_started = True
+        
         def cleanup_loop():
-            while True:
+            while self._background_tasks_started:
                 try:
                     self._cleanup_expired_keys()
                     self._optimize_l1_cache()
@@ -155,7 +163,7 @@ class EnterpriseCache:
                     time.sleep(60)
         
         def monitoring_loop():
-            while True:
+            while self._background_tasks_started:
                 try:
                     self._collect_metrics()
                     self._analyze_performance()
@@ -169,6 +177,18 @@ class EnterpriseCache:
         
         cleanup_thread.start()
         monitoring_thread.start()
+        
+        logger.info("Cache background tasks started")
+    
+    def start_background_tasks(self):
+        """Explicitly start background tasks when needed."""
+        if not self._background_tasks_started:
+            self._start_background_tasks()
+    
+    def stop_background_tasks(self):
+        """Stop background tasks."""
+        self._background_tasks_started = False
+        logger.info("Cache background tasks stopped")
     
     def configure_key_pattern(self, pattern: str, config: CacheConfig):
         """Configure cache behavior for specific key patterns."""

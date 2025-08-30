@@ -147,7 +147,7 @@ def get_current_user(session_token: str = Cookie(None), db: Session = Depends(ge
     return {
         "id": user.id,
         "email": user.email,
-        "username": user.username,
+        "username": getattr(user, "display_name", user.email),  # Use display_name or fallback to email
         "role": user.role,
         "department": getattr(user, "department", None),
         "region": getattr(user, "region", None)

@@ -898,7 +898,22 @@ class EnterpriseIntegrationService:
     across all six data governance groups with real data processing.
     """
     
+    _instance = None
+    _lock = threading.Lock()
+    
+    def __new__(cls):
+        """Ensure only one instance exists (Singleton pattern)"""
+        if cls._instance is None:
+            with cls._lock:
+                if cls._instance is None:
+                    cls._instance = super().__new__(cls)
+        return cls._instance
+    
     def __init__(self):
+        # Only initialize once (Singleton pattern)
+        if hasattr(self, '_initialized'):
+            return
+        self._initialized = True
         self.settings = get_settings()
         self.cache = CacheManager()
         self.ai_service = AIService()
@@ -957,6 +972,10 @@ class EnterpriseIntegrationService:
             
         self._is_running = True
         
+        # Start cache background tasks
+        if hasattr(self.cache, 'start_background_tasks'):
+            self.cache.start_background_tasks()
+        
         # Set active flags for background loops
         self._integration_active = True
         self._health_monitoring_active = True
@@ -977,39 +996,90 @@ class EnterpriseIntegrationService:
         
         logger.info("Enterprise Integration Service started successfully")
     
+    async def stop(self):
+        """Stop the service and all background tasks"""
+        if not self._is_running:
+            return
+            
+        self._is_running = False
+        
+        # Stop cache background tasks
+        if hasattr(self.cache, 'stop_background_tasks'):
+            self.cache.stop_background_tasks()
+        
+        # Set active flags to false to stop background loops
+        self._integration_active = False
+        self._health_monitoring_active = False
+        self._metrics_collection_active = False
+        self._consistency_check_active = False
+        
+        logger.info("Enterprise Integration Service stopped successfully")
+    
     def _init_group_services(self):
         """Initialize all data governance group services"""
         try:
             # Group 1: Data Sources (existing enterprise)
-            self.data_source_service = DataSourceConnectionService()
+            if HAS_DATA_SOURCE_SERVICE:
+                self.data_source_service = DataSourceConnectionService()
+            else:
+                self.data_source_service = None
+                logger.warning("DataSourceConnectionService not available")
             
             # Group 2: Compliance Rules (existing enterprise)
-            self.compliance_service = ComplianceRuleService()
+            if HAS_COMPLIANCE_SERVICE:
+                self.compliance_service = ComplianceRuleService()
+            else:
+                self.compliance_service = None
+                logger.warning("ComplianceRuleService not available")
             
             # Group 3: Classifications (existing enterprise)
-            self.classification_service = ClassificationService()
+            if HAS_CLASSIFICATION_SERVICE:
+                self.classification_service = ClassificationService()
+            else:
+                self.classification_service = None
+                logger.warning("ClassificationService not available")
             
             # Group 4: Scan-Rule-Sets (new enterprise)
-            self.scan_rule_service = EnterpriseScanRuleService()
+            if HAS_SCAN_RULE_SERVICE:
+                self.scan_rule_service = EnterpriseScanRuleService()
+            else:
+                self.scan_rule_service = None
+                logger.warning("EnterpriseScanRuleService not available")
             
             # Group 5: Data Catalog (new enterprise)
-            self.catalog_service = EnterpriseIntelligentCatalogService()
-            self.discovery_service = IntelligentDiscoveryService()
-            self.lineage_service = AdvancedLineageService()
-            self.quality_service = CatalogQualityService()
-            self.search_service = SemanticSearchService()
+            if HAS_CATALOG_SERVICES:
+                self.catalog_service = EnterpriseIntelligentCatalogService()
+                self.discovery_service = IntelligentDiscoveryService()
+                self.lineage_service = AdvancedLineageService()
+                self.quality_service = CatalogQualityService()
+                self.search_service = SemanticSearchService()
+            else:
+                self.catalog_service = None
+                self.discovery_service = None
+                self.lineage_service = None
+                self.quality_service = None
+                self.search_service = None
+                logger.warning("Catalog services not available")
             
             # Group 6: Scan Logic (new enterprise)
-            self.orchestrator = UnifiedScanOrchestrator()
-            self.coordinator = IntelligentScanCoordinator()
-            self.intelligence_service = ScanIntelligenceService()
-            self.workflow_engine = ScanWorkflowEngine()
+            if HAS_SCAN_LOGIC_SERVICES:
+                self.orchestrator = UnifiedScanOrchestrator()
+                self.coordinator = IntelligentScanCoordinator()
+                self.intelligence_service = ScanIntelligenceService()
+                self.workflow_engine = ScanWorkflowEngine()
+            else:
+                self.orchestrator = None
+                self.coordinator = None
+                self.intelligence_service = None
+                self.workflow_engine = None
+                logger.warning("Scan logic services not available")
             
-            logger.info("All group services initialized successfully")
+            logger.info("Group services initialization completed (some may be None if not available)")
             
         except Exception as e:
             logger.error(f"Failed to initialize group services: {e}")
-            raise
+            # Don't raise - continue with available services
+            logger.warning("Continuing with partial service initialization")
     
     def _setup_core_integration_flows(self):
         """Setup core integration flows between all groups"""

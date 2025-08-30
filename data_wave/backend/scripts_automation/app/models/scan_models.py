@@ -105,6 +105,7 @@ class DiscoveryStatus(str, Enum):
 
 class DataSource(SQLModel, table=True):
     """Enhanced model for registered data sources."""
+    __tablename__ = "datasource"
     id: Optional[int] = Field(default=None, primary_key=True)
     name: str = Field(index=True)
     description: Optional[str] = None
@@ -334,6 +335,7 @@ class ScanRuleSet(SQLModel, table=True):
 
 class Scan(SQLModel, table=True):
     """Model for scan operations"""
+    __tablename__ = "scan"
     id: Optional[int] = Field(default=None, primary_key=True)
     scan_id: str = Field(unique=True)
     name: str
@@ -356,6 +358,7 @@ class Scan(SQLModel, table=True):
 
 class ScanResult(SQLModel, table=True):
     """Model for storing scan results."""
+    __tablename__ = "scanresult"
     id: Optional[int] = Field(default=None, primary_key=True)
     scan_id: int = Field(foreign_key="scan.id", index=True)
     schema_name: str
@@ -404,6 +407,7 @@ class CustomScanRuleUpdate(SQLModel):
 
 class ScanSchedule(SQLModel, table=True):
     """Model for scheduling recurring scans."""
+    __tablename__ = "scanschedule"
     id: Optional[int] = Field(default=None, primary_key=True)
     name: str = Field(index=True)
     description: Optional[str] = None
@@ -1274,6 +1278,7 @@ class ScanExecution(SQLModel, table=True):
     This model tracks the execution of individual scan rules and provides
     comprehensive monitoring, analytics, and audit capabilities.
     """
+    __tablename__ = "scanexecution"
     id: Optional[int] = Field(default=None, primary_key=True)
     execution_id: str = Field(unique=True, index=True, default_factory=lambda: str(uuid.uuid4()))
     

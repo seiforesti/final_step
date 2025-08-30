@@ -20,6 +20,15 @@ const IntelligentDashboardOrchestrator = lazy(
   () => import("../intelligent-dashboard/IntelligentDashboardOrchestrator"),
 )
 
+// Data Governance SPAs - Lazy imports
+const DataSourcesSPA = lazy(() => import("../../../data-sources/enhanced-data-sources-app"))
+const ScanRuleSetsSPA = lazy(() => import("../../../Advanced-Scan-Rule-Sets/spa/ScanRuleSetsSPA"))
+const ClassificationsSPA = lazy(() => import("../../../classifications/ClassificationsSPA"))
+const ComplianceRulesSPA = lazy(() => import("../../../Compliance-Rule/enhanced-compliance-rule-app"))
+const AdvancedCatalogSPA = lazy(() => import("../../../Advanced-Catalog/spa/AdvancedCatalogSPA"))
+const ScanLogicSPA = lazy(() => import("../../../Advanced-Scan-Logic/spa/ScanLogicMasterSPA"))
+const RBACSystemSPA = lazy(() => import("../../../Advanced_RBAC_Datagovernance_System/RBACSystemSPA"))
+
 interface MainContentRendererProps {
   currentView: ViewMode
   systemOverview: any
@@ -39,16 +48,15 @@ export const MainContentRenderer: React.FC<MainContentRendererProps> = ({
         fallback={
           <EnterpriseLoadingState
             type={type as any}
-            message={`Loading ${currentView.toLowerCase().replace("_", " ")}...`}
-            showProgress={true}
-            progress={75}
+            message="Loading..."
+            showProgress={false}
           />
         }
       >
         {children}
       </Suspense>
     ),
-    [currentView],
+    [], // Removed currentView dependency to prevent re-creation
   )
 
   const renderDashboardOverview = useCallback(
@@ -168,6 +176,56 @@ export const MainContentRenderer: React.FC<MainContentRendererProps> = ({
       return (
         <SuspenseWrapper type="security">
           <UserProfileManager />
+        </SuspenseWrapper>
+      )
+
+    // Data Governance SPAs - New cases
+    case ViewMode.DATA_SOURCES:
+      return (
+        <SuspenseWrapper type="data">
+          <DataSourcesSPA />
+        </SuspenseWrapper>
+      )
+
+    case ViewMode.SCAN_RULE_SETS:
+      return (
+        <SuspenseWrapper type="security">
+          <ScanRuleSetsSPA />
+        </SuspenseWrapper>
+      )
+
+    case ViewMode.CLASSIFICATIONS:
+      return (
+        <SuspenseWrapper type="governance">
+          <ClassificationsSPA />
+        </SuspenseWrapper>
+      )
+
+    case ViewMode.COMPLIANCE_RULES:
+      return (
+        <SuspenseWrapper type="compliance">
+          <ComplianceRulesSPA />
+        </SuspenseWrapper>
+      )
+
+    case ViewMode.ADVANCED_CATALOG:
+      return (
+        <SuspenseWrapper type="catalog">
+          <AdvancedCatalogSPA />
+        </SuspenseWrapper>
+      )
+
+    case ViewMode.SCAN_LOGIC:
+      return (
+        <SuspenseWrapper type="processing">
+          <ScanLogicSPA />
+        </SuspenseWrapper>
+      )
+
+    case ViewMode.RBAC_SYSTEM:
+      return (
+        <SuspenseWrapper type="security">
+          <RBACSystemSPA />
         </SuspenseWrapper>
       )
 

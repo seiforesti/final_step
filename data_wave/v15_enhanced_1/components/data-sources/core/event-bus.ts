@@ -413,7 +413,8 @@ export class EventBus extends EventEmitter {
     // Also process immediately when events are published
     this.on('event:published', () => {
       if (!this.isProcessing) {
-        setImmediate(() => this.processQueue())
+        // Use setTimeout with 0 delay as browser-compatible alternative to setImmediate
+        setTimeout(() => this.processQueue(), 0)
       }
     })
   }

@@ -174,11 +174,12 @@ class DataSourceService:
         include_all: bool = False
     ) -> List[DataSource]:
         """Get all data sources with RBAC filtering."""
-        query = select(DataSource)
+        # Use SQLAlchemy query instead of SQLModel select
+        query = session.query(DataSource)
         
         # Apply RBAC filtering unless explicitly requested to include all (for admin users)
         if current_user and not include_all:
-            query = query.where(
+            query = query.filter(
                 or_(
                     DataSource.created_by == current_user,
                     DataSource.owner == current_user,
@@ -189,20 +190,15 @@ class DataSourceService:
         # Order by most recent first
         query = query.order_by(desc(DataSource.created_at))
         
-        result = session.exec(query).all()
+        result = query.all()
         return cast(List[DataSource], result)
     
     @staticmethod
     def get_data_source_by_name(session: Session, name: str) -> Optional[DataSource]:
         """Get a data source by name."""
-        result = session.exec(select(DataSource).where(DataSource.name == name)).first()
+        # Use SQLAlchemy query instead of SQLModel select
+        result = session.query(DataSource).filter(DataSource.name == name).first()
         return cast(Optional[DataSource], result)
-    
-    @staticmethod
-    def get_all_data_sources(session: Session) -> List[DataSource]:
-        """Get all data sources."""
-        results = session.exec(select(DataSource)).all()
-        return list(results)  # Convert Sequence to List
     
     @staticmethod
     def update_data_source(

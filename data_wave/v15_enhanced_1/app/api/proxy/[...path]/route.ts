@@ -20,7 +20,7 @@ const ENTERPRISE_API_MAPPINGS: Record<string, string[]> = {
   '/compliance/': ['/api/compliance/', '/compliance/', '/api/v1/compliance/'],
   
   // Scan & Discovery Services
-  '/scan/': ['/api/scan/', '/scan/', '/api/v1/scan/', '/api/scanning/'],
+  '/scan/': ['/scan/', '/api/scan/', '/api/v1/scan/', '/api/scanning/'],
   '/discovery/': ['/api/discovery/', '/discovery/', '/api/v1/discovery/', '/api/data-discovery/'],
   '/classification/': ['/api/classification/', '/classification/', '/api/v1/classification/', '/api/classify/'],
   
@@ -41,7 +41,7 @@ const ENTERPRISE_API_MAPPINGS: Record<string, string[]> = {
   '/lineage/': ['/api/lineage/', '/lineage/', '/api/v1/lineage/', '/api/advanced-lineage/'],
   
   // Security & Performance
-  '/security/': ['/api/security/', '/security/', '/api/v1/security/'],
+  '/security/': ['/security/', '/api/security/', '/api/v1/security/'],
   '/performance/': ['/api/performance/', '/performance/', '/api/v1/performance/', '/api/scan-performance/'],
   '/monitoring/': ['/api/monitoring/', '/monitoring/', '/api/v1/monitoring/', '/api/advanced-monitoring/'],
   

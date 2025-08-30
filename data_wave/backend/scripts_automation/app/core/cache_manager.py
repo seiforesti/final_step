@@ -102,8 +102,10 @@ class EnterpriseCacheManager:
         self._setup_default_policies()
         self._initialize_cache_instances()
         
-        # Start background tasks
-        self._start_monitoring_tasks()
+        # Start background tasks (deferred to avoid startup issues)
+        self._background_tasks_started = False
+        # Don't start background tasks during initialization
+        # They will be started when explicitly requested
     
     def _setup_default_policies(self):
         """Setup default cache policies for different regions."""
@@ -235,8 +237,13 @@ class EnterpriseCacheManager:
     
     def _start_monitoring_tasks(self):
         """Start background monitoring and optimization tasks."""
+        if self._background_tasks_started:
+            return
+            
+        self._background_tasks_started = True
+        
         def monitoring_loop():
-            while True:
+            while self._background_tasks_started:
                 try:
                     self._collect_metrics()
                     self._analyze_performance()
@@ -247,7 +254,7 @@ class EnterpriseCacheManager:
                     time.sleep(30)
         
         def cleanup_loop():
-            while True:
+            while self._background_tasks_started:
                 try:
                     self._cleanup_expired_data()
                     self._rebalance_cache_sizes()
@@ -262,7 +269,17 @@ class EnterpriseCacheManager:
         monitoring_thread.start()
         cleanup_thread.start()
         
-        logger.info("Started cache monitoring and cleanup tasks")
+        logger.info("Cache background tasks started")
+    
+    def start_background_tasks(self):
+        """Explicitly start background tasks when needed."""
+        if not self._background_tasks_started:
+            self._start_monitoring_tasks()
+    
+    def stop_background_tasks(self):
+        """Stop background tasks."""
+        self._background_tasks_started = False
+        logger.info("Cache background tasks stopped")
     
     async def get(
         self,
@@ -836,5 +853,12 @@ async def cache_clear_region(region: CacheRegion) -> bool:
     manager = get_cache_manager()
     return await manager.clear_region(region)
 
-# Export cache manager for direct access
-cache_manager = get_cache_manager()
+# Export cache manager for direct access (lazy initialization)
+cache_manager = None
+
+def _get_lazy_cache_manager():
+    """Lazy initialization of cache manager to avoid import-time instantiation."""
+    global cache_manager
+    if cache_manager is None:
+        cache_manager = get_cache_manager()
+    return cache_manager

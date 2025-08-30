@@ -71,7 +71,7 @@ const NAVIGATION_ITEMS = [
     id: "data-sources",
     name: "Data Sources",
     icon: Database,
-    route: "/v15_enhanced_1/components/data-sources",
+    route: "/app?view=data_sources",  
     color: "bg-blue-500",
     category: "Data Management",
     status: "active",
@@ -80,7 +80,7 @@ const NAVIGATION_ITEMS = [
     id: "scan-rule-sets",
     name: "Scan Rule Sets",
     icon: Shield,
-    route: "/v15_enhanced_1/components/Advanced-Scan-Rule-Sets",
+    route: "/app?view=scan_rule_sets",
     color: "bg-purple-500",
     category: "Security",
     status: "active",
@@ -89,7 +89,7 @@ const NAVIGATION_ITEMS = [
     id: "classifications",
     name: "Classifications",
     icon: FileText,
-    route: "/v15_enhanced_1/components/classifications",
+    route: "/app?view=classifications",
     color: "bg-green-500",
     category: "Governance",
     status: "active",
@@ -98,7 +98,7 @@ const NAVIGATION_ITEMS = [
     id: "compliance-rule",
     name: "Compliance Rules",
     icon: BookOpen,
-    route: "/v15_enhanced_1/components/Compliance-Rule",
+    route: "/app?view=compliance_rules",
     color: "bg-orange-500",
     category: "Compliance",
     status: "active",
@@ -107,7 +107,7 @@ const NAVIGATION_ITEMS = [
     id: "advanced-catalog",
     name: "Advanced Catalog",
     icon: Scan,
-    route: "/v15_enhanced_1/components/Advanced-Catalog",
+    route: "/app?view=advanced_catalog",
     color: "bg-teal-500",
     category: "Data Management",
     status: "active",
@@ -116,7 +116,7 @@ const NAVIGATION_ITEMS = [
     id: "scan-logic",
     name: "Scan Logic",
     icon: Activity,
-    route: "/v15_enhanced_1/components/Advanced-Scan-Logic",
+    route: "/app?view=scan_logic",
     color: "bg-indigo-500",
     category: "Processing",
     status: "active",
@@ -125,20 +125,20 @@ const NAVIGATION_ITEMS = [
     id: "rbac-system",
     name: "RBAC System",
     icon: Users,
-    route: "/v15_enhanced_1/components/Advanced_RBAC_Datagovernance_System",
+    route: "/app?view=rbac_system",
     color: "bg-red-500",
     category: "Security",
     status: "active",
     adminOnly: true,
   },
-] as const;
+];
 
 const RACINE_FEATURES = [
   {
     id: "dashboard",
     name: "Global Dashboard",
     icon: BarChart3,
-    route: "/racine/dashboard",
+    route: "/app?view=dashboard",
     color: "bg-cyan-500",
     category: "Analytics",
   },
@@ -146,7 +146,7 @@ const RACINE_FEATURES = [
     id: "workspace",
     name: "Workspace Manager",
     icon: Globe,
-    route: "/racine/workspace",
+    route: "/app?view=workspace",
     color: "bg-emerald-500",
     category: "Management",
   },
@@ -154,7 +154,7 @@ const RACINE_FEATURES = [
     id: "workflows",
     name: "Job Workflows",
     icon: Workflow,
-    route: "/racine/job-workflow-space",
+    route: "/app?view=workflows",
     color: "bg-violet-500",
     category: "Automation",
   },
@@ -162,7 +162,7 @@ const RACINE_FEATURES = [
     id: "pipelines",
     name: "Pipeline Manager",
     icon: Zap,
-    route: "/racine/pipeline-manager",
+    route: "/app?view=pipelines",
     color: "bg-yellow-500",
     category: "Processing",
   },
@@ -170,19 +170,46 @@ const RACINE_FEATURES = [
     id: "ai",
     name: "AI Assistant",
     icon: Bot,
-    route: "/racine/ai-assistant",
+    route: "/app?view=ai_assistant",
     color: "bg-pink-500",
     category: "AI & ML",
+  },
+  {
+    id: "activity",
+    name: "Activity Tracker",
+    icon: Clock,
+    route: "/app?view=activity",
+    color: "bg-slate-500",
+    category: "Monitoring",
   },
   {
     id: "analytics",
     name: "Intelligent Dashboard",
     icon: Target,
-    route: "/racine/intelligent-dashboard",
+    route: "/app?view=analytics",
     color: "bg-lime-500",
     category: "Analytics",
   },
-] as const;
+  {
+    id: "collaboration",
+    name: "Collaboration Hub",
+    icon: MessageSquare,
+    route: "/app?view=collaboration",
+    color: "bg-amber-500",
+    category: "Collaboration",
+  },
+  {
+    id: "settings",
+    name: "User Settings",
+    icon: Settings,
+    route: "/app?view=settings",
+    color: "bg-gray-500",
+    category: "Settings",
+  },
+];
+
+// Create union type for navigation items
+type NavigationItem = typeof NAVIGATION_ITEMS[0] | typeof RACINE_FEATURES[0];
 
 // **STATUS ICONS - STABLE MAPPING**
 const STATUS_ICONS = {
@@ -205,6 +232,7 @@ interface AdvancedNavigationSidebarProps {
   onToggleCollapse?: () => void;
   onQuickActionsTrigger?: () => void;
   onNavigate?: (route: string) => void;
+  onViewChange?: (view: string) => void; // Add direct view change prop
   className?: string;
 }
 
@@ -217,6 +245,7 @@ export const AdvancedNavigationSidebar: React.FC<
   onCollapsedChange,
   onToggleCollapse,
   onNavigate,
+  onViewChange,
 }) => {
   // **MINIMAL STATE MANAGEMENT - PREVENT INFINITE LOOPS**
   const [internalCollapsed, setInternalCollapsed] = useState(false);
@@ -374,10 +403,58 @@ export const AdvancedNavigationSidebar: React.FC<
         return updated;
       });
 
+      // Extract view parameter from route for ViewMode-based routing
+      try {
+        const url = new URL(route, window.location.origin);
+        const viewParam = url.searchParams.get('view');
+        
+        if (viewParam) {
+          // For ViewMode-based routing, update the URL and trigger view change
+          const newUrl = new URL(window.location.href);
+          newUrl.searchParams.set('view', viewParam);
+          
+          // Update URL without full navigation
+          window.history.pushState({}, '', newUrl.toString());
+          
+          console.log('[Navigation] onViewChange prop available:', !!onViewChange);
+          console.log('[Navigation] onViewChange prop type:', typeof onViewChange);
+          
+          // Use direct prop communication if available (more reliable than custom events)
+          if (onViewChange) {
+            console.log('[Navigation] Using direct onViewChange prop:', viewParam);
+            try {
+              onViewChange(viewParam);
+              console.log('[Navigation] onViewChange called successfully');
+            } catch (error) {
+              console.error('[Navigation] Error calling onViewChange:', error);
+            }
+          } else {
+            // Fallback to custom event
+            console.log('[Navigation] Dispatching view change event:', viewParam);
+            const customEvent = new CustomEvent('racine-view-change', {
+              detail: { view: viewParam }
+            });
+            console.log('[Navigation] Event created:', customEvent);
+            window.dispatchEvent(customEvent);
+            console.log('[Navigation] Event dispatched');
+          }
+          
+          // Log successful navigation
+          console.log('[Navigation] Navigation completed successfully for view:', viewParam);
+        } else {
+          // Fallback to direct navigation
+          router.push(route);
+        }
+      } catch (error) {
+        console.error("Navigation error:", error);
+        // Fallback to direct navigation
+        router.push(route);
+      }
+
       // Navigate using onNavigate prop if provided
       onNavigate?.(route);
     },
-    [onNavigate]
+    [onNavigate, router]
   );
 
   const handleSearchChange = useCallback((value: string) => {
@@ -474,7 +551,7 @@ export const AdvancedNavigationSidebar: React.FC<
   // **RENDER NAVIGATION ITEM - STABLE COMPONENT**
   const renderNavigationItem = useCallback(
     (
-      item: (typeof NAVIGATION_ITEMS)[0] | (typeof RACINE_FEATURES)[0],
+      item: NavigationItem,
       type: "spa" | "racine"
     ) => {
       const isActive = activeItem?.id === item.id;
@@ -579,6 +656,7 @@ export const AdvancedNavigationSidebar: React.FC<
       isCollapsed,
       handleNavigate,
       handleQuickActionsTrigger,
+      spaStatuses,
     ]
   );
 
@@ -779,7 +857,7 @@ export const AdvancedNavigationSidebar: React.FC<
                         const item = [
                           ...NAVIGATION_ITEMS,
                           ...RACINE_FEATURES,
-                        ].find((i) => i.id === favoriteId);
+                        ].find((i) => i.id === favoriteId) as NavigationItem | undefined;
                         if (!item) return null;
                         const type = NAVIGATION_ITEMS.some(
                           (i) => i.id === favoriteId

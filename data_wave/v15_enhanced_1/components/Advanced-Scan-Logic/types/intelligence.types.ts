@@ -593,8 +593,49 @@ export type InsightCategory = IntelligenceCategory;
 export type InsightPriority = ActionItemPriority;
 export type InsightType = IntelligenceInsightType;
 export type InsightStatus = IntelligenceStatus;
-export type PredictionType = PredictiveModelType;
-export type ModelType = PredictiveModelType;
+
+// Explicit exports for predictive analytics compatibility
+// Note: ModelType and PredictionType are now exported as enums below
+
+// Additional type aliases for predictive analytics
+export type ConfidenceLevel = 'low' | 'medium' | 'high' | 'very_high';
+
+// Explicit enum exports for better compatibility
+export enum ModelType {
+  CLASSIFICATION = 'classification',
+  REGRESSION = 'regression',
+  TIME_SERIES = 'time_series',
+  CLUSTERING = 'clustering',
+  REINFORCEMENT_LEARNING = 'reinforcement_learning',
+  ENSEMBLE = 'ensemble',
+  DEEP_LEARNING = 'deep_learning',
+  NEURAL_NETWORK = 'neural_network',
+  DECISION_TREE = 'decision_tree',
+  RANDOM_FOREST = 'random_forest',
+  GRADIENT_BOOSTING = 'gradient_boosting',
+  SVM = 'svm',
+  NAIVE_BAYES = 'naive_bayes',
+  LINEAR_MODEL = 'linear_model',
+  LOGISTIC_REGRESSION = 'logistic_regression'
+}
+
+export enum PredictionType {
+  CLASSIFICATION = 'classification',
+  REGRESSION = 'regression',
+  TIME_SERIES = 'time_series',
+  CLUSTERING = 'clustering',
+  REINFORCEMENT_LEARNING = 'reinforcement_learning',
+  ENSEMBLE = 'ensemble',
+  DEEP_LEARNING = 'deep_learning',
+  NEURAL_NETWORK = 'neural_network',
+  DECISION_TREE = 'decision_tree',
+  RANDOM_FOREST = 'random_forest',
+  GRADIENT_BOOSTING = 'gradient_boosting',
+  SVM = 'svm',
+  NAIVE_BAYES = 'naive_bayes',
+  LINEAR_MODEL = 'linear_model',
+  LOGISTIC_REGRESSION = 'logistic_regression'
+}
 
 // Additional types needed for PredictiveAnalyticsEngine
 export interface PredictiveAnalyticsConfig {
@@ -978,4 +1019,421 @@ export interface APIError {
   details?: any;
   timestamp: string;
   request_id?: string;
+}
+
+export interface StrategicInsight {
+  strategic_area: string;
+  current_position: string;
+  target_position: string;
+  strategic_actions: string[];
+  success_metrics: string[];
+}
+
+// =============================================================================
+// ML INSIGHTS TYPES FOR COMPONENT COMPATIBILITY
+// =============================================================================
+
+/**
+ * ML Insight interface for advanced analytics components
+ */
+export interface MLInsight {
+  id: string;
+  scan_id: string;
+  title: string;
+  description: string;
+  insight_type: InsightType;
+  category: InsightCategory;
+  priority: InsightPriority;
+  status: InsightStatus;
+  confidence_score: number;
+  severity: string;
+  recommendation: string;
+  impact_assessment: ImpactAssessment;
+  evidence: IntelligenceEvidence[];
+  metadata: IntelligenceMetadata;
+  tags: string[];
+  created_at: string;
+  updated_at: string;
+  resolved_at?: string;
+  feedback: IntelligenceFeedback[];
+  related_insights: string[];
+  action_items: IntelligenceActionItem[];
+  business_context: BusinessContext;
+  technical_context: TechnicalContext;
+  validation_status: string;
+  accuracy_score?: number;
+  reliability_score?: number;
+}
+
+/**
+ * Insight Type enum for ML insights
+ */
+export enum InsightType {
+  ANOMALY_DETECTION = 'anomaly_detection',
+  PATTERN_RECOGNITION = 'pattern_recognition',
+  TREND_ANALYSIS = 'trend_analysis',
+  PREDICTIVE_ANALYSIS = 'predictive_analysis',
+  CORRELATION_ANALYSIS = 'correlation_analysis',
+  BEHAVIORAL_ANALYSIS = 'behavioral_analysis',
+  PERFORMANCE_ANALYSIS = 'performance_analysis',
+  SECURITY_ANALYSIS = 'security_analysis',
+  QUALITY_ANALYSIS = 'quality_analysis',
+  COMPLIANCE_ANALYSIS = 'compliance_analysis',
+  RISK_ANALYSIS = 'risk_analysis',
+  OPTIMIZATION_OPPORTUNITY = 'optimization_opportunity',
+  RESOURCE_ANALYSIS = 'resource_analysis',
+  COST_ANALYSIS = 'cost_analysis',
+  CAPACITY_ANALYSIS = 'capacity_analysis',
+  EFFICIENCY_ANALYSIS = 'efficiency_analysis'
+}
+
+/**
+ * Insight Category enum for ML insights
+ */
+export enum InsightCategory {
+  DATA_QUALITY = 'data_quality',
+  SECURITY = 'security',
+  PERFORMANCE = 'performance',
+  COMPLIANCE = 'compliance',
+  OPERATIONS = 'operations',
+  BUSINESS = 'business',
+  TECHNICAL = 'technical',
+  FINANCIAL = 'financial',
+  STRATEGIC = 'strategic',
+  TACTICAL = 'tactical'
+}
+
+/**
+ * Insight Priority enum for ML insights
+ */
+export enum InsightPriority {
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+  CRITICAL = 'critical'
+}
+
+/**
+ * Insight Status enum for ML insights
+ */
+export enum InsightStatus {
+  NEW = 'new',
+  ACKNOWLEDGED = 'acknowledged',
+  INVESTIGATING = 'investigating',
+  IN_PROGRESS = 'in_progress',
+  RESOLVED = 'resolved',
+  DISMISSED = 'dismissed',
+  ESCALATED = 'escalated',
+  ARCHIVED = 'archived',
+  VALIDATED = 'validated',
+  ACTIVE = 'active'
+}
+
+/**
+ * Additional types for ML insights compatibility
+ */
+export interface RecommendationEngine {
+  id: string;
+  name: string;
+  type: string;
+  algorithm: string;
+  confidence: number;
+  recommendations: string[];
+}
+
+export interface CorrelationAnalysis {
+  id: string;
+  correlation_type: string;
+  strength: number;
+  significance: number;
+  variables: string[];
+  analysis: string;
+}
+
+export interface TrendAnalysisResult {
+  id: string;
+  trend_type: string;
+  direction: string;
+  magnitude: number;
+  confidence: number;
+  period: string;
+  analysis: string;
+}
+
+export interface ClusteringAnalysis {
+  id: string;
+  cluster_count: number;
+  algorithm: string;
+  silhouette_score: number;
+  clusters: any[];
+  insights: string[];
+}
+
+export interface FeatureImportanceResult {
+  id: string;
+  features: Array<{
+    name: string;
+    importance: number;
+    rank: number;
+  }>;
+  model_type: string;
+  analysis_date: string;
+}
+
+export interface ModelExplanation {
+  id: string;
+  model_id: string;
+  explanation_type: string;
+  features: string[];
+  coefficients: number[];
+  interpretation: string;
+}
+
+export interface BusinessImpactAnalysis {
+  id: string;
+  impact_area: string;
+  severity: string;
+  financial_impact: number;
+  operational_impact: string;
+  strategic_impact: string;
+}
+
+export interface ActionableInsight {
+  id: string;
+  insight_id: string;
+  action: string;
+  priority: string;
+  effort: string;
+  expected_outcome: string;
+  timeline: string;
+}
+
+export interface InsightValidation {
+  id: string;
+  insight_id: string;
+  validator: string;
+  validation_date: string;
+  confidence: number;
+  notes: string;
+  status: string;
+}
+
+export interface InsightFeedback {
+  id: string;
+  insight_id: string;
+  user_id: string;
+  rating: number;
+  comment: string;
+  timestamp: string;
+}
+
+export interface AutomatedRecommendation {
+  id: string;
+  insight_id: string;
+  recommendation: string;
+  confidence: number;
+  implementation_steps: string[];
+  expected_benefits: string[];
+}
+
+export interface IntelligentAlert {
+  id: string;
+  alert_type: string;
+  severity: string;
+  message: string;
+  timestamp: string;
+  actions: string[];
+}
+
+export interface CrossSystemCorrelation {
+  id: string;
+  systems: string[];
+  correlation_type: string;
+  strength: number;
+  insights: string[];
+}
+
+export interface PredictiveInsight {
+  id: string;
+  prediction_type: string;
+  confidence: number;
+  timeframe: string;
+  factors: string[];
+  recommendations: string[];
+}
+
+export interface OptimizationOpportunity {
+  id: string;
+  area: string;
+  current_state: string;
+  target_state: string;
+  effort_required: string;
+  expected_benefits: string[];
+}
+
+export interface RiskAssessment {
+  id: string;
+  risk_type: string;
+  probability: number;
+  impact: string;
+  mitigation_strategies: string[];
+  monitoring_requirements: string[];
+}
+
+export interface PerformanceInsight {
+  id: string;
+  metric: string;
+  current_value: number;
+  target_value: number;
+  trend: string;
+  recommendations: string[];
+}
+
+export interface QualityInsight {
+  id: string;
+  quality_dimension: string;
+  score: number;
+  issues: string[];
+  improvement_actions: string[];
+}
+
+export interface CostInsight {
+  id: string;
+  cost_category: string;
+  current_cost: number;
+  projected_cost: number;
+  savings_opportunities: string[];
+  optimization_recommendations: string[];
+}
+
+export interface SecurityInsight {
+  id: string;
+  security_concern: string;
+  risk_level: string;
+  affected_assets: string[];
+  remediation_steps: string[];
+  monitoring_requirements: string[];
+}
+
+export interface ComplianceInsight {
+  id: string;
+  compliance_requirement: string;
+  current_status: string;
+  gaps: string[];
+  remediation_actions: string[];
+  deadline: string;
+}
+
+export interface OperationalInsight {
+  operational_area: string;
+  current_efficiency: number;
+  improvement_opportunities: string[];
+  best_practices: string[];
+}
+
+// =============================================================================
+// ADDITIONAL TYPES FOR RULE DESIGNER COMPONENTS
+// =============================================================================
+
+/**
+ * AI Test Generation interface for rule testing framework
+ */
+export interface AITestGeneration {
+  id: string;
+  rule_id: string;
+  test_type: string;
+  generation_strategy: string;
+  test_cases: TestCase[];
+  coverage_metrics: CoverageMetrics;
+  confidence_score: number;
+  created_at: string;
+  status: string;
+}
+
+/**
+ * AI Test Optimization interface for rule testing framework
+ */
+export interface AITestOptimization {
+  id: string;
+  test_suite_id: string;
+  optimization_algorithm: string;
+  current_coverage: number;
+  target_coverage: number;
+  optimization_results: OptimizationResult[];
+  performance_improvements: PerformanceImprovement[];
+  created_at: string;
+}
+
+/**
+ * Test Insights interface for rule testing framework
+ */
+export interface TestInsights {
+  id: string;
+  test_run_id: string;
+  insight_type: string;
+  description: string;
+  confidence: number;
+  recommendations: string[];
+  created_at: string;
+}
+
+/**
+ * AI Insight interface for rule template library
+ */
+export interface AIInsight {
+  id: string;
+  insight_type: string;
+  title: string;
+  description: string;
+  confidence_score: number;
+  category: string;
+  priority: string;
+  recommendations: string[];
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * Pattern Suggestion interface for rule template library
+ */
+export interface PatternSuggestion {
+  id: string;
+  pattern_name: string;
+  pattern_type: string;
+  description: string;
+  use_cases: string[];
+  implementation_guidance: string;
+  confidence_score: number;
+  created_at: string;
+}
+
+// Supporting interfaces for the above types
+export interface TestCase {
+  id: string;
+  name: string;
+  description: string;
+  input_data: any;
+  expected_output: any;
+  priority: string;
+}
+
+export interface CoverageMetrics {
+  line_coverage: number;
+  branch_coverage: number;
+  function_coverage: number;
+  statement_coverage: number;
+}
+
+export interface OptimizationResult {
+  metric: string;
+  before_value: number;
+  after_value: number;
+  improvement_percentage: number;
+}
+
+export interface PerformanceImprovement {
+  area: string;
+  improvement_type: string;
+  magnitude: number;
+  description: string;
 }

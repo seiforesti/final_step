@@ -8,6 +8,7 @@ from app.models.integration_models import (
 )
 from app.models.scan_models import DataSource
 import logging
+from sqlalchemy import func
 
 logger = logging.getLogger(__name__)
 
@@ -185,10 +186,14 @@ class IntegrationService:
             return False
     
     @staticmethod
-    def get_integration_stats(session: Session, data_source_id: int) -> IntegrationStats:
-        """Get integration statistics for a data source"""
+    def get_integration_stats(session: Session, data_source_id: Optional[int] = None) -> IntegrationStats:
+        """Get integration statistics for a data source or all integrations if data_source_id is None"""
         try:
-            statement = select(Integration).where(Integration.data_source_id == data_source_id)
+            if data_source_id is not None:
+                statement = select(Integration).where(Integration.data_source_id == data_source_id)
+            else:
+                statement = select(Integration)
+            
             integrations = session.exec(statement).all()
             
             total_integrations = len(integrations)
@@ -214,7 +219,8 @@ class IntegrationService:
                 last_sync_time=last_sync_time
             )
         except Exception as e:
-            logger.error(f"Error getting integration stats for data source {data_source_id}: {str(e)}")
+            scope = f"data source {data_source_id}" if data_source_id is not None else "all integrations"
+            logger.error(f"Error getting integration stats for {scope}: {str(e)}")
             return IntegrationStats(
                 total_integrations=0,
                 active_integrations=0,
@@ -298,3 +304,76 @@ class IntegrationService:
         except Exception as e:
             logger.error(f"Error getting integration logs for {integration_id}: {str(e)}")
             return []
+
+    @staticmethod
+    def get_all_integrations(
+        session: Session, 
+        user_id: str = None,
+        status: Optional[IntegrationStatus] = None,
+        type: Optional[IntegrationType] = None,
+        provider: Optional[str] = None,
+        limit: int = 50,
+        offset: int = 0
+    ) -> Dict[str, Any]:
+        """Get all integrations with filtering and pagination"""
+        try:
+            # Build query with filters
+            query = select(Integration)
+            
+            # Apply filters
+            if status:
+                query = query.where(Integration.status == status)
+            if type:
+                query = query.where(Integration.type == type)
+            if provider:
+                query = query.where(Integration.provider == provider)
+            
+            # Get total count for pagination
+            count_query = select(func.count(Integration.id))
+            if status:
+                count_query = count_query.where(Integration.status == status)
+            if type:
+                count_query = count_query.where(Integration.type == type)
+            if provider:
+                count_query = count_query.where(Integration.provider == provider)
+            
+            total_count = session.exec(count_query).first() or 0
+            
+            # Apply pagination and ordering
+            query = query.order_by(Integration.created_at.desc()).offset(offset).limit(limit)
+            integrations = session.exec(query).all()
+            
+            # Convert to response models
+            integration_responses = [IntegrationResponse.from_orm(integration) for integration in integrations]
+            
+            # Get integration stats
+            stats = IntegrationService.get_integration_stats(session, None)  # None for all data sources
+            
+            return {
+                "integrations": integration_responses,
+                "total": total_count,
+                "page": (offset // limit) + 1,
+                "limit": limit,
+                "has_more": (offset + limit) < total_count,
+                "stats": {
+                    "total_integrations": stats.total_integrations,
+                    "active_integrations": stats.active_integrations,
+                    "error_integrations": stats.error_integrations,
+                    "avg_success_rate": stats.avg_success_rate
+                }
+            }
+        except Exception as e:
+            logger.error(f"Error getting all integrations: {str(e)}")
+            return {
+                "integrations": [],
+                "total": 0,
+                "page": 1,
+                "limit": limit,
+                "has_more": False,
+                "stats": {
+                    "total_integrations": 0,
+                    "active_integrations": 0,
+                    "error_integrations": 0,
+                    "avg_success_rate": 0.0
+                }
+            }

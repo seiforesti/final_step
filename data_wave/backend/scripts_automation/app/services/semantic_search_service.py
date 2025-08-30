@@ -114,14 +114,8 @@ class SemanticSearchService:
         # Threading
         self.executor = ThreadPoolExecutor(max_workers=8)
         
-        # Background tasks are started only when an event loop is available
-        try:
-            loop = asyncio.get_running_loop()
-            loop.create_task(self._index_optimization_loop())
-            loop.create_task(self._search_analytics_loop())
-            loop.create_task(self._model_update_loop())
-        except RuntimeError:
-            pass
+        # Background tasks are deferred to avoid startup issues
+        # They will be started when explicitly requested via start() method
 
     def start(self) -> None:
         """Start background optimization tasks when an event loop exists."""

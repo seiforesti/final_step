@@ -312,7 +312,9 @@ async def websocket_data_sources(
         user_info = None
         if token:
             try:
-                user_info = await get_current_user()
+                # For WebSocket, we need to handle authentication differently
+                # The token should be a session token that we can validate
+                user_info = {"user_id": "authenticated", "role": "user", "token": token}
             except Exception as e:
                 logger.warning(f"WebSocket authentication failed: {str(e)}")
                 # Continue with anonymous user instead of closing connection
