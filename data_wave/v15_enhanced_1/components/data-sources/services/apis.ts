@@ -26,6 +26,9 @@ import {
   ColumnProfileRequest
 } from '../types';
 
+// Import the request optimization manager
+import { getRequestOptimizer, optimizedFetch } from './request-optimization-manager';
+
 // Configure axios base URL - use proxy for all API calls
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000/proxy';
 
@@ -36,7 +39,7 @@ const api = axios.create({
   },
 });
 
-// Burst control and error suppression for core api
+// Enhanced request management with optimization
 const CORE_REQUEST_MIN_INTERVAL_MS = 800
 const coreLastRequestAtByKey: Record<string, number> = {}
 function coreBuildRequestKey(config: any): string {
@@ -47,14 +50,15 @@ function coreBuildRequestKey(config: any): string {
   return `${method}:${url}|p=${params}|d=${data}`
 }
 
-// Add request interceptor for authentication
+// Enhanced request interceptor with optimization
 api.interceptors.request.use((config) => {
   // Add auth token if available
   const token = localStorage.getItem('authToken');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
-  // throttle duplicate GETs and pause when tab hidden
+  
+  // Enhanced throttling with optimization manager integration
   try {
     const key = coreBuildRequestKey(config)
     const now = Date.now()
@@ -66,13 +70,26 @@ api.interceptors.request.use((config) => {
         throw cancel
       }
       coreLastRequestAtByKey[key] = now
+      
+      // Enhanced tab visibility check with better handling
       if (typeof document !== 'undefined' && document.hidden) {
-        const cancelHidden: any = new axios.Cancel('Skipped GET while tab hidden')
-        cancelHidden.__skippedHidden = true
-        throw cancelHidden
+        // Instead of canceling, delay the request
+        return new Promise((resolve) => {
+          const checkVisibility = () => {
+            if (!document.hidden) {
+              resolve(config);
+            } else {
+              setTimeout(checkVisibility, 1000);
+            }
+          };
+          setTimeout(checkVisibility, 100);
+        });
       }
     }
-  } catch (_) {}
+  } catch (error) {
+    // Log throttling for monitoring
+    console.debug('[API] Request throttled:', config.url);
+  }
   return config;
 });
 

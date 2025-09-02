@@ -178,9 +178,9 @@ def pool_monitor():
 pool_monitor_thread = threading.Thread(target=pool_monitor, daemon=True)
 pool_monitor_thread.start()
 
-# Concurrency control and circuit breaker with centralized config
+# Enhanced concurrency control and circuit breaker with optimized config
 try:
-    from app.db_config import DB_CONFIG
+    from app.db_config_optimized import DB_CONFIG, rate_limiter, health_monitor
     _max_concurrent_db_requests = DB_CONFIG["max_concurrent_requests"]
     _db_semaphore = threading.BoundedSemaphore(value=max(1, _max_concurrent_db_requests))
     _failure_window_seconds = DB_CONFIG["failure_window_seconds"]
@@ -188,15 +188,32 @@ try:
     _circuit_open_seconds = DB_CONFIG["circuit_open_seconds"]
     _recent_failures = []
     _circuit_open_until = 0.0
+    _rate_limiter = rate_limiter
+    _health_monitor = health_monitor
 except ImportError:
-    # Fallback values
-    _max_concurrent_db_requests = 6
-    _db_semaphore = threading.BoundedSemaphore(value=6)
-    _failure_window_seconds = 30
-    _failure_threshold = 5
-    _circuit_open_seconds = 15
-    _recent_failures = []
-    _circuit_open_until = 0.0
+    # Fallback to original config if optimized not available
+    try:
+        from app.db_config import DB_CONFIG
+        _max_concurrent_db_requests = DB_CONFIG["max_concurrent_requests"]
+        _db_semaphore = threading.BoundedSemaphore(value=max(1, _max_concurrent_db_requests))
+        _failure_window_seconds = DB_CONFIG["failure_window_seconds"]
+        _failure_threshold = DB_CONFIG["failure_threshold"]
+        _circuit_open_seconds = DB_CONFIG["circuit_open_seconds"]
+        _recent_failures = []
+        _circuit_open_until = 0.0
+        _rate_limiter = None
+        _health_monitor = None
+    except ImportError:
+        # Ultimate fallback values
+        _max_concurrent_db_requests = 8
+        _db_semaphore = threading.BoundedSemaphore(value=8)
+        _failure_window_seconds = 30
+        _failure_threshold = 5
+        _circuit_open_seconds = 15
+        _recent_failures = []
+        _circuit_open_until = 0.0
+        _rate_limiter = None
+        _health_monitor = None
 
 def _record_failure_and_maybe_open_circuit() -> None:
     global _circuit_open_until
@@ -321,25 +338,38 @@ async def init_async_db(max_retries: int = 10, backoff_seconds: float = 1.0) -> 
 def get_db() -> Generator[Session, None, None]:
     """FastAPI dependency that yields a per-request database session and ensures close.
 
-    Reuses a single session per request across dependencies via ContextVar to avoid
-    multiple concurrent checkouts that saturate the pool.
+    Enhanced with rate limiting, health monitoring, and intelligent circuit breaker.
     """
+    # Rate limiting check
+    if _rate_limiter and not _rate_limiter.can_proceed():
+        logger.warning("Rate limiter rejected DB request")
+        raise RuntimeError("rate_limit_exceeded")
+
     # Circuit breaker check
     if _circuit_is_open():
         logger.warning("Circuit breaker is open; rejecting DB request.")
         raise RuntimeError("database_unavailable")
 
-    # Check connection pool health before getting a session
-    if engine.pool.checkedout() >= engine.pool.size() + engine.pool.overflow():
-        logger.warning("Connection pool is at capacity; rejecting additional work until a slot frees up.")
+    # Enhanced connection pool health check
+    if _health_monitor:
+        health_data = _health_monitor.check_pool_health(engine)
+        if health_data["status"] == "critical":
+            logger.warning(f"Connection pool in critical state: {health_data['utilization_percent']}% utilization")
+            if _health_monitor.should_trigger_maintenance(health_data):
+                logger.info("Triggering pool maintenance due to critical state")
+                cleanup_connection_pool()
+    
+    # Check connection pool capacity with improved logic
+    pool = engine.pool
+    if pool.checkedout() >= (pool.size() + pool.overflow()) * 0.9:  # 90% threshold
+        logger.warning("Connection pool near capacity; rejecting additional work.")
         raise RuntimeError("database_unavailable")
 
-    # Try to acquire concurrency token quickly
+    # Try to acquire concurrency token with optimized config
     try:
-        from app.db_config import DB_CONFIG
-        semaphore_timeout = DB_CONFIG["semaphore_timeout"]
-    except ImportError:
-        semaphore_timeout = float(os.getenv("DB_SEMAPHORE_TIMEOUT", "0.05"))
+        semaphore_timeout = DB_CONFIG.get("semaphore_timeout", 0.1)
+    except (NameError, AttributeError):
+        semaphore_timeout = float(os.getenv("DB_SEMAPHORE_TIMEOUT", "0.1"))
     
     acquired = _db_semaphore.acquire(timeout=semaphore_timeout)
     if not acquired:
