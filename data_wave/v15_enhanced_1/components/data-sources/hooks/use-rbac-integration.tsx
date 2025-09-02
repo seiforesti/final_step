@@ -208,21 +208,33 @@ export function useRBACIntegration() {
     error: null
   })
 
-  // Current user query
+  // Current user query with optimized settings
   const { data: currentUser, isLoading: userLoading, error: userError } = useQuery({
     queryKey: ['rbac', 'currentUser'],
     queryFn: rbacApiFunctions.getCurrentUser,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    retry: 2,
-    refetchOnWindowFocus: false
+    staleTime: 10 * 60 * 1000, // 10 minutes - longer cache for user data
+    gcTime: 15 * 60 * 1000, // 15 minutes cache time
+    retry: (failureCount, error) => {
+      // Don't retry on 401/403 errors
+      if (error?.response?.status === 401 || error?.response?.status === 403) {
+        return false;
+      }
+      return failureCount < 2;
+    },
+    refetchOnWindowFocus: false,
+    refetchOnMount: false, // Don't refetch on every mount
+    refetchInterval: 15 * 60 * 1000, // Refetch every 15 minutes
   })
 
-  // User permissions query
+  // User permissions query with debouncing
   const { data: userPermissions, isLoading: permissionsLoading } = useQuery({
     queryKey: ['rbac', 'permissions', currentUser?.id],
     queryFn: () => currentUser ? rbacApiFunctions.getUserEffectivePermissions(currentUser.id) : Promise.resolve([]),
     enabled: !!currentUser?.id,
-    staleTime: 5 * 60 * 1000
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 15 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   })
 
   // Update RBAC state when data changes
