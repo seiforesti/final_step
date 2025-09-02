@@ -10,7 +10,7 @@ router = APIRouter()
 # type: "workspace" | "schema" | "server" | "database" | "table" | "folder"
 def build_catalog_tree(session: Session) -> List[Dict[str, Any]]:
     # Query all schema entries
-    entries = session.exec(select(DataTableSchema)).all()
+    entries = session.execute(select(DataTableSchema)).all()
     if not entries:
         return []
 

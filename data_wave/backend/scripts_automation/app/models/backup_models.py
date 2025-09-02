@@ -53,6 +53,9 @@ class BackupOperation(SQLModel, table=True):
     backup_location: Optional[str] = None
     compression_ratio: Optional[float] = None
     
+    # Background task tracking
+    background_task_id: Optional[str] = None
+    
     # Metadata
     backup_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
     
@@ -204,6 +207,7 @@ class BackupScheduleCreate(SQLModel):
     cron_expression: str
     retention_days: int = 30
     max_backups: int = 10
+    is_enabled: bool = True
 
 
 # Update Models

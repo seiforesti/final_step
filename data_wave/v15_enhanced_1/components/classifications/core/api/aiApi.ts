@@ -818,7 +818,7 @@ class AIApiClient {
 
 // Default configuration
 const defaultAIApiConfig: AIApiConfig = {
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000',
+        baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000/proxy',
   timeout: 60000, // 60 seconds for AI operations
   streaming: {
     enabled: true,

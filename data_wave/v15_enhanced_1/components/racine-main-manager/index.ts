@@ -133,7 +133,7 @@ export interface RacineMainManagerConfig {
  * Default configuration for Racine Main Manager
  */
 export const DEFAULT_RACINE_CONFIG: RacineMainManagerConfig = {
-  apiBaseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000',
+      apiBaseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000/proxy',
   enableRealTimeUpdates: true,
   enableWebSocket: true,
   enableCaching: true,

@@ -318,7 +318,7 @@ async def get_report_template(
     try:
         # This would query ComplianceReportTemplate by template_id
         
-        template = session.exec(
+        template = session.execute(
             select(ComplianceReportTemplate).where(
                 ComplianceReportTemplate.template_id == template_type,
                 ComplianceReportTemplate.is_active == True
@@ -359,7 +359,7 @@ async def get_certifications(
         # Query certifications from database
         from app.models.compliance_extended_models import ComplianceCertification
         
-        certifications_query = session.exec(
+        certifications_query = session.execute(
             select(ComplianceCertification).where(
                 ComplianceCertification.entity_type == entity_type,
                 ComplianceCertification.entity_id == entity_id,

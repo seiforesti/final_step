@@ -40,7 +40,7 @@ class ComplianceRuleInitService:
                 for template in templates:
                     try:
                         # Check if rule already exists
-                        existing_rules = session.exec(
+                        existing_rules = session.execute(
                             select(ComplianceRule).where(
                                 ComplianceRule.name == template["name"]
                             )
@@ -127,7 +127,7 @@ class ComplianceRuleInitService:
             data_sources = DataSourceService.get_all_data_sources(session)
             
             # Get all compliance rules
-            rules = session.exec(select(ComplianceRule)).all()
+            rules = session.execute(select(ComplianceRule)).all()
             
             linked_count = 0
             link_details = []
@@ -263,10 +263,10 @@ class ComplianceRuleInitService:
         """Create scan rule set integrations for compliance rules"""
         try:
             # **INTERCONNECTED: Get existing scan rule sets**
-            scan_rule_sets = session.exec(select(ScanRuleSet)).all()
+            scan_rule_sets = session.execute(select(ScanRuleSet)).all()
             
             # Get compliance rules that need scan integration
-            rules = session.exec(
+            rules = session.execute(
                 select(ComplianceRule).where(
                     ComplianceRule.auto_scan_on_evaluation == True
                 )
@@ -361,7 +361,7 @@ class ComplianceRuleInitService:
         """Get the current status of the compliance system"""
         try:
             # Count rules by framework
-            rules = session.exec(select(ComplianceRule)).all()
+            rules = session.execute(select(ComplianceRule)).all()
             framework_counts = {}
             
             for rule in rules:

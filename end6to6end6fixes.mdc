@@ -1,0 +1,389 @@
+# END6TO6END6FIXES - Comprehensive Data Sources API Integration & Enhancement Tasks
+
+## CRITICAL ISSUE ANALYSIS
+Based on frontend logs analysis, the main issues are:
+1. **Backend API endpoints returning 502 Bad Gateway errors**
+2. **Missing API endpoints that frontend is calling**
+3. **Proxy routing issues between frontend and backend**
+4. **Data sources SPA stuck on "loading security context initializing rbac permission"**
+
+## TASK 1: BACKEND API ENDPOINT IMPLEMENTATION & FIXES
+
+### 1.1 Racine Orchestration API Endpoints (CRITICAL)
+**Status**: Missing endpoints causing 502 errors
+**Priority**: CRITICAL
+
+#### 1.1.1 Implement Missing Orchestration Endpoints
+- [ ] **GET /api/racine/orchestration/masters** - List orchestration masters
+- [ ] **GET /api/racine/orchestration/health** - System health status
+- [ ] **GET /api/racine/orchestration/alerts** - System alerts
+- [ ] **GET /api/racine/orchestration/metrics** - System metrics
+- [ ] **GET /api/racine/orchestration/recommendations** - Optimization recommendations
+
+#### 1.1.2 Fix Existing Orchestration Routes
+- [ ] Update `racine_orchestration_routes.py` to include missing endpoints
+- [ ] Implement proper error handling for 502 responses
+- [ ] Add health check endpoint with real backend status
+- [ ] Implement metrics collection from actual services
+- [ ] Add alerts system integration
+
+### 1.2 Notification API Endpoints (CRITICAL)
+**Status**: Missing endpoints causing offline mode fallback
+**Priority**: CRITICAL
+
+#### 1.2.1 Implement Notification Endpoints
+- [ ] **GET /api/v1/notifications** - Get user notifications
+- [ ] **GET /api/v1/notifications/settings** - Get notification settings
+- [ ] **POST /api/v1/notifications/mark-read** - Mark notifications as read
+- [ ] **POST /api/v1/notifications/settings** - Update notification settings
+
+#### 1.2.2 Create Notification Service
+- [ ] Implement `NotificationService` class
+- [ ] Add database models for notifications
+- [ ] Create notification routes file
+- [ ] Integrate with existing user system
+
+### 1.3 Workspace API Endpoints (CRITICAL)
+**Status**: Missing endpoints causing 502 errors
+**Priority**: CRITICAL
+
+#### 1.3.1 Implement Workspace Endpoints
+- [ ] **GET /api/racine/workspace/list** - List workspaces
+- [ ] **GET /api/racine/workspace/templates** - Get workspace templates
+- [ ] **POST /api/racine/workspace/create** - Create workspace
+- [ ] **PUT /api/racine/workspace/{id}** - Update workspace
+- [ ] **DELETE /api/racine/workspace/{id}** - Delete workspace
+
+#### 1.3.2 Fix Workspace Integration
+- [ ] Update `racine_workspace_routes.py` with missing endpoints
+- [ ] Implement workspace service integration
+- [ ] Add proper error handling
+- [ ] Integrate with user permissions
+
+### 1.4 Scan Tasks API Endpoints (CRITICAL)
+**Status**: Missing endpoints causing 502 errors
+**Priority**: CRITICAL
+
+#### 1.4.1 Implement Scan Task Endpoints
+- [ ] **GET /scan/tasks** - List scan tasks
+- [ ] **POST /scan/tasks** - Create scan task
+- [ ] **GET /scan/tasks/{id}** - Get task details
+- [ ] **PUT /scan/tasks/{id}** - Update task
+- [ ] **DELETE /scan/tasks/{id}** - Delete task
+
+#### 1.4.2 Create Scan Task Service
+- [ ] Implement `ScanTaskService` class
+- [ ] Add database models for scan tasks
+- [ ] Create scan task routes
+- [ ] Integrate with existing scan system
+
+### 1.5 Integration Health API Endpoints (CRITICAL)
+**Status**: Missing endpoints causing 502 errors
+**Priority**: CRITICAL
+
+#### 1.5.1 Implement Integration Health Endpoints
+- [ ] **GET /api/racine/integration/health** - Integration health status
+- [ ] **GET /api/racine/integration/status** - Integration status
+- [ ] **POST /api/racine/integration/test** - Test integration
+- [ ] **GET /api/racine/integration/metrics** - Integration metrics
+
+## TASK 2: PROXY ROUTING FIXES
+
+### 2.1 Fix Proxy Route Configuration
+**Status**: Proxy not correctly routing API calls
+**Priority**: CRITICAL
+
+#### 2.1.1 Update Proxy Route Mappings
+- [ ] Fix `/api/racine/orchestration/*` routing in `route.ts`
+- [ ] Add `/api/v1/notifications/*` routing
+- [ ] Add `/api/racine/workspace/*` routing
+- [ ] Add `/scan/tasks/*` routing
+- [ ] Add `/api/racine/integration/*` routing
+
+#### 2.1.2 Enhance Proxy Error Handling
+- [ ] Improve 502 error handling in proxy
+- [ ] Add retry logic for failed requests
+- [ ] Implement proper fallback responses
+- [ ] Add request logging for debugging
+
+### 2.2 Backend Service Discovery
+**Status**: Backend services not properly discovered
+**Priority**: HIGH
+
+#### 2.2.1 Implement Service Registry
+- [ ] Create service registry endpoint
+- [ ] Add health checks for all services
+- [ ] Implement service discovery logic
+- [ ] Add service status monitoring
+
+## TASK 3: DATA SOURCES COMPONENT ENHANCEMENT
+
+### 3.1 Enhanced Data Sources App Fixes
+**Status**: Component has errors and missing features
+**Priority**: CRITICAL
+
+#### 3.1.1 Fix Enhanced Data Sources App
+- [ ] Fix `enhanced-data-sources-app.tsx` import errors
+- [ ] Implement missing API integrations
+- [ ] Add proper error boundaries
+- [ ] Fix component rendering issues
+- [ ] Add loading states and error handling
+
+#### 3.1.2 Implement Missing Features
+- [ ] Add real-time data source monitoring
+- [ ] Implement advanced filtering and search
+- [ ] Add bulk operations support
+- [ ] Implement data source templates
+- [ ] Add performance analytics
+
+### 3.2 Data Source Components Enhancement
+**Status**: Individual components need fixes and improvements
+**Priority**: HIGH
+
+#### 3.2.1 Fix Core Data Source Components
+- [ ] **data-source-list.tsx** - Fix rendering and API integration
+- [ ] **data-source-grid.tsx** - Enhance grid functionality
+- [ ] **data-source-filters.tsx** - Improve filtering logic
+- [ ] **data-source-details.tsx** - Add comprehensive details view
+- [ ] **data-source-edit-modal.tsx** - Fix edit functionality
+
+#### 3.2.2 Enhance Advanced Components
+- [ ] **data-source-monitoring.tsx** - Add real-time monitoring
+- [ ] **data-source-performance-view.tsx** - Implement performance metrics
+- [ ] **data-source-security-view.tsx** - Add security features
+- [ ] **data-source-compliance-view.tsx** - Implement compliance checks
+- [ ] **data-source-quality-analytics.tsx** - Add quality metrics
+
+#### 3.2.3 Fix Integration Components
+- [ ] **data-source-integrations.tsx** - Fix integration management
+- [ ] **data-source-backup-restore.tsx** - Implement backup/restore
+- [ ] **data-source-version-history.tsx** - Add version control
+- [ ] **data-source-tags-manager.tsx** - Implement tag management
+- [ ] **data-source-bulk-actions.tsx** - Add bulk operations
+
+### 3.3 Data Source Services Enhancement
+**Status**: Services need real implementation
+**Priority**: HIGH
+
+#### 3.3.1 Implement Data Source Services
+- [ ] **data-source-scheduler.tsx** - Add scheduling functionality
+- [ ] **data-source-reports.tsx** - Implement reporting system
+- [ ] **data-source-notifications.tsx** - Add notification system
+- [ ] **data-source-access-control.tsx** - Implement access control
+- [ ] **data-source-discovery.tsx** - Add discovery features
+
+#### 3.3.2 Advanced Data Source Features
+- [ ] **data-source-catalog.tsx** - Implement catalog integration
+- [ ] **data-source-cloud-config.tsx** - Add cloud configuration
+- [ ] **data-source-workspace-management.tsx** - Implement workspace features
+- [ ] **data-source-growth-analytics.tsx** - Add growth analytics
+- [ ] **data-source-connection-test-modal.tsx** - Implement connection testing
+
+## TASK 4: BACKEND SERVICE IMPLEMENTATION
+
+### 4.1 Missing Backend Services
+**Status**: Services referenced but not implemented
+**Priority**: CRITICAL
+
+#### 4.1.1 Implement Core Services
+- [ ] **RacineOrchestrationService** - Complete implementation
+- [ ] **NotificationService** - Create from scratch
+- [ ] **WorkspaceService** - Enhance existing service
+- [ ] **ScanTaskService** - Create new service
+- [ ] **IntegrationHealthService** - Create new service
+
+#### 4.1.2 Database Models
+- [ ] **Notification models** - Create notification tables
+- [ ] **Workspace models** - Enhance workspace models
+- [ ] **ScanTask models** - Create scan task models
+- [ ] **Integration models** - Create integration models
+- [ ] **Health models** - Create health monitoring models
+
+### 4.2 Service Integration
+**Status**: Services not properly integrated
+**Priority**: HIGH
+
+#### 4.2.1 Service Communication
+- [ ] Implement inter-service communication
+- [ ] Add service health monitoring
+- [ ] Implement service discovery
+- [ ] Add service metrics collection
+- [ ] Implement service error handling
+
+## TASK 5: FRONTEND-BACKEND INTEGRATION
+
+### 5.1 API Client Fixes
+**Status**: API clients calling wrong endpoints
+**Priority**: CRITICAL
+
+#### 5.1.1 Fix API Client Calls
+- [ ] Update `racine-orchestration-apis.ts` with correct endpoints
+- [ ] Fix `getSavedSearches` method implementation
+- [ ] Add proper error handling in API clients
+- [ ] Implement retry logic for failed requests
+- [ ] Add request/response logging
+
+#### 5.1.2 API Response Handling
+- [ ] Implement proper response parsing
+- [ ] Add type safety for API responses
+- [ ] Handle different response formats
+- [ ] Add response caching
+- [ ] Implement optimistic updates
+
+### 5.2 Authentication & Authorization
+**Status**: RBAC permission issues
+**Priority**: CRITICAL
+
+#### 5.2.1 Fix RBAC Integration
+- [ ] Implement proper RBAC checks
+- [ ] Add permission validation
+- [ ] Fix security context initialization
+- [ ] Add role-based access control
+- [ ] Implement user session management
+
+#### 5.2.2 Security Enhancements
+- [ ] Add API key authentication
+- [ ] Implement JWT token validation
+- [ ] Add request signing
+- [ ] Implement rate limiting
+- [ ] Add security headers
+
+## TASK 6: PERFORMANCE & RELIABILITY
+
+### 6.1 Performance Optimization
+**Status**: Performance issues causing timeouts
+**Priority**: HIGH
+
+#### 6.1.1 Backend Performance
+- [ ] Implement database query optimization
+- [ ] Add connection pooling
+- [ ] Implement caching strategies
+- [ ] Add async processing
+- [ ] Optimize API response times
+
+#### 6.1.2 Frontend Performance
+- [ ] Implement lazy loading
+- [ ] Add component memoization
+- [ ] Optimize bundle size
+- [ ] Add virtual scrolling
+- [ ] Implement progressive loading
+
+### 6.2 Error Handling & Recovery
+**Status**: Poor error handling causing crashes
+**Priority**: HIGH
+
+#### 6.2.1 Comprehensive Error Handling
+- [ ] Add global error boundaries
+- [ ] Implement graceful degradation
+- [ ] Add error reporting
+- [ ] Implement automatic retry
+- [ ] Add user-friendly error messages
+
+#### 6.2.2 Monitoring & Logging
+- [ ] Add comprehensive logging
+- [ ] Implement performance monitoring
+- [ ] Add error tracking
+- [ ] Implement health checks
+- [ ] Add alerting system
+
+## TASK 7: TESTING & VALIDATION
+
+### 7.1 API Testing
+**Status**: APIs not properly tested
+**Priority**: MEDIUM
+
+#### 7.1.1 End-to-End Testing
+- [ ] Create API integration tests
+- [ ] Add frontend-backend integration tests
+- [ ] Implement load testing
+- [ ] Add security testing
+- [ ] Create performance benchmarks
+
+#### 7.1.2 Component Testing
+- [ ] Add unit tests for components
+- [ ] Implement integration tests
+- [ ] Add visual regression tests
+- [ ] Create accessibility tests
+- [ ] Add cross-browser testing
+
+## TASK 8: DOCUMENTATION & DEPLOYMENT
+
+### 8.1 Documentation
+**Status**: Missing documentation
+**Priority**: MEDIUM
+
+#### 8.1.1 API Documentation
+- [ ] Create comprehensive API docs
+- [ ] Add code documentation
+- [ ] Create deployment guides
+- [ ] Add troubleshooting guides
+- [ ] Create user manuals
+
+### 8.2 Deployment
+**Status**: Deployment issues
+**Priority**: MEDIUM
+
+#### 8.2.1 Production Deployment
+- [ ] Fix container configuration
+- [ ] Add environment variables
+- [ ] Implement CI/CD pipeline
+- [ ] Add monitoring setup
+- [ ] Create backup strategies
+
+## IMPLEMENTATION PRIORITY ORDER
+
+### PHASE 1: CRITICAL FIXES (Immediate)
+1. Fix proxy routing in `route.ts`
+2. Implement missing backend API endpoints
+3. Fix `enhanced-data-sources-app.tsx`
+4. Implement RBAC permission fixes
+5. Add proper error handling
+
+### PHASE 2: CORE FUNCTIONALITY (Week 1)
+1. Complete data source components
+2. Implement all missing services
+3. Fix API client integration
+4. Add comprehensive testing
+5. Implement monitoring
+
+### PHASE 3: ENHANCEMENTS (Week 2)
+1. Add advanced features
+2. Optimize performance
+3. Enhance security
+4. Add documentation
+5. Deploy to production
+
+## SUCCESS CRITERIA
+
+### Technical Criteria
+- [ ] All API endpoints return 200 responses
+- [ ] No 502 Bad Gateway errors
+- [ ] Data sources SPA loads completely
+- [ ] All components render without errors
+- [ ] RBAC permissions work correctly
+
+### Functional Criteria
+- [ ] Users can access data sources
+- [ ] All data source features work
+- [ ] Real-time monitoring functions
+- [ ] Notifications work properly
+- [ ] Workspace management functions
+
+### Performance Criteria
+- [ ] Page load time < 3 seconds
+- [ ] API response time < 1 second
+- [ ] No memory leaks
+- [ ] Smooth user interactions
+- [ ] Reliable error recovery
+
+## NOTES
+- Use existing backend services and models where possible
+- Implement real logic, not mock data
+- Ensure 100% integration between frontend and backend
+- Focus on production-ready implementation
+- Maintain backward compatibility
+- Add comprehensive logging for debugging
+description:
+globs:
+alwaysApply: true
+---

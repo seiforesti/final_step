@@ -73,7 +73,7 @@ interface PermissionCheckOptions {
 }
 
 // API Configuration
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000/proxy'
 
 const rbacApi = axios.create({
   baseURL: `${API_BASE_URL}/rbac`,
@@ -135,7 +135,7 @@ const rbacApiFunctions = {
   },
 
   getUserEffectivePermissions: async (userId: number): Promise<any[]> => {
-    const response = await rbacApi.get(`/users/${userId}/effective-permissions`)
+    const response = await rbacApi.get(`/user/permissions`)
     return response.data
   },
 

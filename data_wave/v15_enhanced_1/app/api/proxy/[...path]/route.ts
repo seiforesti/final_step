@@ -1,57 +1,568 @@
 import { NextResponse } from 'next/server';
 
 const BACKEND_BASE = process.env.RACINE_BACKEND_URL || 'http://localhost:8000';
-// Keep proxy snappy in development to avoid UI hangs when backend is slow/unavailable
 const DEFAULT_TIMEOUT_MS = process.env.NODE_ENV === 'development' ? 8000 : 20000;
 const MAX_RETRIES = process.env.NODE_ENV === 'development' ? 1 : 3;
 const RETRY_DELAY_MS = 1000;
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'OPTIONS' | 'HEAD';
 
-// Enterprise API endpoint mappings for advanced backend integration
-const ENTERPRISE_API_MAPPINGS: Record<string, string[]> = {
-  // Authentication & Authorization
-  '/auth/': ['/auth/', '/api/auth/', '/api/v1/auth/'],
-  '/oauth/': ['/oauth/', '/auth/', '/api/auth/', '/api/oauth/'],
-  
-  // Core Data Governance APIs
-  '/racine/': ['/api/racine/', '/racine/', '/api/v1/racine/'],
-  '/governance/': ['/api/governance/', '/governance/', '/api/v1/governance/'],
-  '/compliance/': ['/api/compliance/', '/compliance/', '/api/v1/compliance/'],
-  
-  // Scan & Discovery Services
-  '/scan/': ['/scan/', '/api/scan/', '/api/v1/scan/', '/api/scanning/'],
-  '/discovery/': ['/api/discovery/', '/discovery/', '/api/v1/discovery/', '/api/data-discovery/'],
-  '/classification/': ['/api/classification/', '/classification/', '/api/v1/classification/', '/api/classify/'],
-  
-  // Analytics & Reporting
-  '/analytics/': ['/api/analytics/', '/analytics/', '/api/v1/analytics/', '/api/enterprise-analytics/'],
-  '/reports/': ['/api/reports/', '/reports/', '/api/v1/reports/', '/api/reporting/'],
-  '/metrics/': ['/api/metrics/', '/metrics/', '/api/v1/metrics/', '/api/ml-metrics/'],
-  
-  // Workflow & Orchestration
-  '/workflows/': ['/api/workflows/', '/workflows/', '/api/v1/workflows/', '/api/workflow/'],
-  '/orchestration/': ['/api/orchestration/', '/orchestration/', '/api/v1/orchestration/', '/api/scan-orchestration/'],
-  '/integration/': ['/api/integration/', '/integration/', '/api/v1/integration/', '/api/enterprise-integration/'],
-  
-  // Advanced Services
-  '/ai/': ['/api/ai/', '/ai/', '/api/v1/ai/', '/api/ai-explainability/'],
-  '/ml/': ['/api/ml/', '/ml/', '/api/v1/ml/', '/api/machine-learning/'],
-  '/search/': ['/api/search/', '/search/', '/api/v1/search/', '/api/semantic-search/'],
-  '/lineage/': ['/api/lineage/', '/lineage/', '/api/v1/lineage/', '/api/advanced-lineage/'],
-  
-  // Security & Performance
-  '/security/': ['/security/', '/api/security/', '/api/v1/security/'],
-  '/performance/': ['/api/performance/', '/performance/', '/api/v1/performance/', '/api/scan-performance/'],
-  '/monitoring/': ['/api/monitoring/', '/monitoring/', '/api/v1/monitoring/', '/api/advanced-monitoring/'],
-  
-  // Collaboration & Management
-  '/collaboration/': ['/api/collaboration/', '/collaboration/', '/api/v1/collaboration/'],
-  '/workspace/': ['/api/workspace/', '/workspace/', '/api/v1/workspace/', '/api/workspaces/'],
-  '/catalog/': ['/api/catalog/', '/catalog/', '/api/v1/catalog/', '/api/enterprise-catalog/'],
-};
+// ============================================================================
+// INTELLIGENT API MAPPING SYSTEM
+// ============================================================================
+// This system maps frontend API calls to the correct backend routes
+// based on the actual backend route structure from main.py
 
-// Performance monitoring for enterprise-grade reliability
+interface ApiMapping {
+  frontendPattern: RegExp;
+  backendPath: string;
+  description: string;
+}
+
+// Comprehensive API mappings based on actual backend routes
+const API_MAPPINGS: ApiMapping[] = [
+  // ============================================================================
+  // DATA SOURCE APIs - Mapped to scan_routes.py (prefix: /scan)
+  // ============================================================================
+  {
+    frontendPattern: /^\/scan\/data-sources\/?$/,
+    backendPath: '/scan/data-sources',
+    description: 'Data sources CRUD operations'
+  },
+  {
+    frontendPattern: /^\/scan\/data-sources\/(\d+)\/?$/,
+    backendPath: '/scan/data-sources/$1',
+    description: 'Individual data source operations'
+  },
+  {
+    frontendPattern: /^\/scan\/data-sources\/(\d+)\/stats\/?$/,
+    backendPath: '/scan/data-sources/$1/stats',
+    description: 'Data source statistics'
+  },
+  {
+    frontendPattern: /^\/scan\/data-sources\/(\d+)\/health\/?$/,
+    backendPath: '/scan/data-sources/$1/health',
+    description: 'Data source health check'
+  },
+  {
+    frontendPattern: /^\/scan\/data-sources\/(\d+)\/scan\/?$/,
+    backendPath: '/scan/data-sources/$1/scan',
+    description: 'Start data source scan'
+  },
+  {
+    frontendPattern: /^\/scan\/data-sources\/(\d+)\/toggle-favorite\/?$/,
+    backendPath: '/scan/data-sources/$1/toggle-favorite',
+    description: 'Toggle data source favorite'
+  },
+  {
+    frontendPattern: /^\/scan\/data-sources\/(\d+)\/toggle-monitoring\/?$/,
+    backendPath: '/scan/data-sources/$1/toggle-monitoring',
+    description: 'Toggle data source monitoring'
+  },
+  {
+    frontendPattern: /^\/scan\/data-sources\/(\d+)\/toggle-backup\/?$/,
+    backendPath: '/scan/data-sources/$1/toggle-backup',
+    description: 'Toggle data source backup'
+  },
+  {
+    frontendPattern: /^\/scan\/data-sources\/(\d+)\/validate\/?$/,
+    backendPath: '/scan/data-sources/$1/validate',
+    description: 'Validate data source'
+  },
+  {
+    frontendPattern: /^\/scan\/data-sources\/favorites\/?$/,
+    backendPath: '/scan/data-sources/favorites',
+    description: 'Get favorite data sources'
+  },
+  {
+    frontendPattern: /^\/scan\/data-sources\/enums\/?$/,
+    backendPath: '/scan/data-sources/enums',
+    description: 'Get data source enums'
+  },
+  {
+    frontendPattern: /^\/scan\/data-sources\/bulk-update\/?$/,
+    backendPath: '/scan/data-sources/bulk-update',
+    description: 'Bulk update data sources'
+  },
+  {
+    frontendPattern: /^\/scan\/data-sources\/bulk-delete\/?$/,
+    backendPath: '/scan/data-sources/bulk-delete',
+    description: 'Bulk delete data sources'
+  },
+  {
+    frontendPattern: /^\/scan\/schedules\/?$/,
+    backendPath: '/scan/schedules',
+    description: 'Get scan schedules'
+  },
+
+  // ============================================================================
+  // DATA DISCOVERY APIs - Mapped to data_discovery_routes.py (prefix: /data-discovery)
+  // ============================================================================
+  {
+    frontendPattern: /^\/data-discovery\/data-sources\/(\d+)\/test-connection\/?$/,
+    backendPath: '/data-discovery/data-sources/$1/test-connection',
+    description: 'Test data source connection'
+  },
+  {
+    frontendPattern: /^\/data-discovery\/data-sources\/(\d+)\/discover-schema\/?$/,
+    backendPath: '/data-discovery/data-sources/$1/discover-schema',
+    description: 'Discover data source schema'
+  },
+  {
+    frontendPattern: /^\/data-discovery\/data-sources\/(\d+)\/discovery-history\/?$/,
+    backendPath: '/data-discovery/data-sources/$1/discovery-history',
+    description: 'Get discovery history'
+  },
+  {
+    frontendPattern: /^\/data-discovery\/data-sources\/(\d+)\/preview-table\/?$/,
+    backendPath: '/data-discovery/data-sources/$1/preview-table',
+    description: 'Preview table data'
+  },
+  {
+    frontendPattern: /^\/data-discovery\/data-sources\/profile-column\/?$/,
+    backendPath: '/data-discovery/data-sources/profile-column',
+    description: 'Profile column data'
+  },
+  {
+    frontendPattern: /^\/data-discovery\/data-sources\/(\d+)\/workspaces\/?$/,
+    backendPath: '/data-discovery/data-sources/$1/workspaces',
+    description: 'Get data source workspaces'
+  },
+  {
+    frontendPattern: /^\/data-discovery\/data-sources\/(\d+)\/save-workspace\/?$/,
+    backendPath: '/data-discovery/data-sources/$1/save-workspace',
+    description: 'Save workspace'
+  },
+
+  // ============================================================================
+  // RACINE APIs - Mapped to racine_routes.py (prefix: /racine)
+  // ============================================================================
+  {
+    frontendPattern: /^\/racine\/orchestration\/?$/,
+    backendPath: '/racine/orchestration',
+    description: 'Racine orchestration operations'
+  },
+  {
+    frontendPattern: /^\/racine\/orchestration\/([^\/]+)\/?$/,
+    backendPath: '/racine/orchestration/$1',
+    description: 'Individual orchestration operations'
+  },
+  {
+    frontendPattern: /^\/racine\/workspace\/?$/,
+    backendPath: '/racine/workspace',
+    description: 'Racine workspace operations'
+  },
+  {
+    frontendPattern: /^\/racine\/workspace\/([^\/]+)\/?$/,
+    backendPath: '/racine/workspace/$1',
+    description: 'Individual workspace operations'
+  },
+  {
+    frontendPattern: /^\/racine\/collaboration\/?$/,
+    backendPath: '/racine/collaboration',
+    description: 'Racine collaboration operations'
+  },
+  {
+    frontendPattern: /^\/racine\/dashboard\/?$/,
+    backendPath: '/racine/dashboard',
+    description: 'Racine dashboard operations'
+  },
+  {
+    frontendPattern: /^\/racine\/activity\/?$/,
+    backendPath: '/racine/activity',
+    description: 'Racine activity operations'
+  },
+  {
+    frontendPattern: /^\/racine\/ai\/?$/,
+    backendPath: '/racine/ai',
+    description: 'Racine AI operations'
+  },
+  {
+    frontendPattern: /^\/racine\/integration\/?$/,
+    backendPath: '/racine/integration',
+    description: 'Racine integration operations'
+  },
+  {
+    frontendPattern: /^\/racine\/pipeline\/?$/,
+    backendPath: '/racine/pipeline',
+    description: 'Racine pipeline operations'
+  },
+  {
+    frontendPattern: /^\/racine\/workflow\/?$/,
+    backendPath: '/racine/workflow',
+    description: 'Racine workflow operations'
+  },
+
+  // ============================================================================
+  // NOTIFICATION APIs - Mapped to notification_routes.py
+  // ============================================================================
+  {
+    frontendPattern: /^\/scan\/notifications\/?$/,
+    backendPath: '/scan/notifications',
+    description: 'Get notifications'
+  },
+
+  // ============================================================================
+  // PERFORMANCE APIs - Mapped to performance_routes.py
+  // ============================================================================
+  {
+    frontendPattern: /^\/performance\/metrics\/?$/,
+    backendPath: '/performance/metrics',
+    description: 'Get performance metrics'
+  },
+  {
+    frontendPattern: /^\/performance\/alerts\/?$/,
+    backendPath: '/performance/alerts',
+    description: 'Get performance alerts'
+  },
+  {
+    frontendPattern: /^\/performance\/trends\/?$/,
+    backendPath: '/performance/trends',
+    description: 'Get performance trends'
+  },
+  {
+    frontendPattern: /^\/performance\/recommendations\/?$/,
+    backendPath: '/performance/recommendations',
+    description: 'Get performance recommendations'
+  },
+  {
+    frontendPattern: /^\/performance\/thresholds\/?$/,
+    backendPath: '/performance/thresholds',
+    description: 'Get performance thresholds'
+  },
+
+  // ============================================================================
+  // SECURITY APIs - Mapped to security_routes.py
+  // ============================================================================
+  {
+    frontendPattern: /^\/security\/vulnerabilities\/?$/,
+    backendPath: '/security/vulnerabilities',
+    description: 'Get security vulnerabilities'
+  },
+  {
+    frontendPattern: /^\/security\/incidents\/?$/,
+    backendPath: '/security/incidents',
+    description: 'Get security incidents'
+  },
+  {
+    frontendPattern: /^\/security\/threats\/?$/,
+    backendPath: '/security/threats',
+    description: 'Get security threats'
+  },
+  {
+    frontendPattern: /^\/security\/compliance\/?$/,
+    backendPath: '/security/compliance',
+    description: 'Get security compliance'
+  },
+  {
+    frontendPattern: /^\/security\/analytics\/?$/,
+    backendPath: '/security/analytics',
+    description: 'Get security analytics'
+  },
+
+  // ============================================================================
+  // BACKUP APIs - Mapped to backup_routes.py
+  // ============================================================================
+  {
+    frontendPattern: /^\/backups\/?$/,
+    backendPath: '/backups',
+    description: 'Backup operations'
+  },
+  {
+    frontendPattern: /^\/backups\/schedules\/?$/,
+    backendPath: '/backups/schedules',
+    description: 'Backup schedules'
+  },
+  {
+    frontendPattern: /^\/restores\/?$/,
+    backendPath: '/restores',
+    description: 'Restore operations'
+  },
+
+  // ============================================================================
+  // TASK APIs - Mapped to various task-related routes
+  // ============================================================================
+  {
+    frontendPattern: /^\/tasks\/?$/,
+    backendPath: '/tasks',
+    description: 'Task operations'
+  },
+  {
+    frontendPattern: /^\/tasks\/stats\/?$/,
+    backendPath: '/tasks/stats',
+    description: 'Task statistics'
+  },
+
+  // ============================================================================
+  // INTEGRATION APIs - Mapped to integration_routes.py
+  // ============================================================================
+  {
+    frontendPattern: /^\/integrations\/?$/,
+    backendPath: '/integrations',
+    description: 'Integration operations'
+  },
+
+  // ============================================================================
+  // REPORT APIs - Mapped to report_routes.py
+  // ============================================================================
+  {
+    frontendPattern: /^\/reports\/?$/,
+    backendPath: '/reports',
+    description: 'Report operations'
+  },
+  {
+    frontendPattern: /^\/reports\/stats\/?$/,
+    backendPath: '/reports/stats',
+    description: 'Report statistics'
+  },
+
+  // ============================================================================
+  // VERSION APIs - Mapped to version_routes.py
+  // ============================================================================
+  {
+    frontendPattern: /^\/versions\/?$/,
+    backendPath: '/versions',
+    description: 'Version operations'
+  },
+
+  // ============================================================================
+  // HEALTH APIs - System health endpoints
+  // ============================================================================
+  {
+    frontendPattern: /^\/health\/?$/,
+    backendPath: '/health',
+    description: 'System health check'
+  },
+  {
+    frontendPattern: /^\/system\/health\/?$/,
+    backendPath: '/system/health',
+    description: 'System health status'
+  },
+
+  // ============================================================================
+  // AUTH APIs - Mapped to auth_routes.py
+  // ============================================================================
+  {
+    frontendPattern: /^\/auth\/me\/?$/,
+    backendPath: '/auth/me',
+    description: 'Get current user'
+  },
+  {
+    frontendPattern: /^\/auth\/login\/?$/,
+    backendPath: '/auth/login',
+    description: 'User login'
+  },
+  {
+    frontendPattern: /^\/auth\/logout\/?$/,
+    backendPath: '/auth/logout',
+    description: 'User logout'
+  },
+
+  // ============================================================================
+  // RBAC APIs - Mapped to rbac routes
+  // ============================================================================
+  {
+    frontendPattern: /^\/rbac\/permissions\/?$/,
+    backendPath: '/rbac/permissions',
+    description: 'Get user permissions'
+  },
+  {
+    frontendPattern: /^\/rbac\/roles\/?$/,
+    backendPath: '/rbac/roles',
+    description: 'Get roles'
+  },
+
+  // ============================================================================
+  // WORKFLOW APIs - Mapped to workflow_routes.py
+  // ============================================================================
+  {
+    frontendPattern: /^\/workflow\/designer\/workflows\/?$/,
+    backendPath: '/workflow/designer/workflows',
+    description: 'Workflow designer operations'
+  },
+  {
+    frontendPattern: /^\/workflow\/executions\/?$/,
+    backendPath: '/workflow/executions',
+    description: 'Workflow executions'
+  },
+  {
+    frontendPattern: /^\/workflow\/approvals\/workflows\/?$/,
+    backendPath: '/workflow/approvals/workflows',
+    description: 'Workflow approvals'
+  },
+  {
+    frontendPattern: /^\/workflow\/approvals\/pending\/?$/,
+    backendPath: '/workflow/approvals/pending',
+    description: 'Pending workflow approvals'
+  },
+  {
+    frontendPattern: /^\/workflow\/bulk-operations\/?$/,
+    backendPath: '/workflow/bulk-operations',
+    description: 'Workflow bulk operations'
+  },
+  {
+    frontendPattern: /^\/workflow\/templates\/?$/,
+    backendPath: '/workflow/templates',
+    description: 'Workflow templates'
+  },
+
+  // ============================================================================
+  // COLLABORATION APIs - Mapped to collaboration_routes.py
+  // ============================================================================
+  {
+    frontendPattern: /^\/collaboration\/sessions\/?$/,
+    backendPath: '/collaboration/sessions',
+    description: 'Collaboration sessions'
+  },
+  {
+    frontendPattern: /^\/collaboration\/documents\/?$/,
+    backendPath: '/collaboration/documents',
+    description: 'Collaboration documents'
+  },
+  {
+    frontendPattern: /^\/collaboration\/workspaces\/?$/,
+    backendPath: '/collaboration/workspaces',
+    description: 'Collaboration workspaces'
+  },
+
+  // ============================================================================
+  // SENSITIVITY LABELS APIs - Mapped to sensitivity_labeling
+  // ============================================================================
+  {
+    frontendPattern: /^\/sensitivity-labels\/rbac\/audit-logs\/?$/,
+    backendPath: '/sensitivity-labels/rbac/audit-logs',
+    description: 'Audit logs'
+  },
+
+  // ============================================================================
+  // CATALOG APIs - Mapped to catalog routes
+  // ============================================================================
+  {
+    frontendPattern: /^\/scan\/catalog\/?$/,
+    backendPath: '/scan/catalog',
+    description: 'Data catalog operations'
+  },
+
+  // ============================================================================
+  // FALLBACK MAPPINGS - For APIs that don't match specific patterns
+  // ============================================================================
+  {
+    frontendPattern: /^\/api\/(.+)$/,
+    backendPath: '/api/$1',
+    description: 'Generic API fallback'
+  },
+  {
+    frontendPattern: /^\/scan\/(.+)$/,
+    backendPath: '/scan/$1',
+    description: 'Generic scan API fallback'
+  },
+  {
+    frontendPattern: /^\/data-discovery\/(.+)$/,
+    backendPath: '/data-discovery/$1',
+    description: 'Generic data discovery API fallback'
+  },
+  {
+    frontendPattern: /^\/racine\/(.+)$/,
+    backendPath: '/racine/$1',
+    description: 'Generic racine API fallback'
+  },
+  {
+    frontendPattern: /^\/performance\/(.+)$/,
+    backendPath: '/performance/$1',
+    description: 'Generic performance API fallback'
+  },
+  {
+    frontendPattern: /^\/security\/(.+)$/,
+    backendPath: '/security/$1',
+    description: 'Generic security API fallback'
+  },
+  {
+    frontendPattern: /^\/workflow\/(.+)$/,
+    backendPath: '/workflow/$1',
+    description: 'Generic workflow API fallback'
+  },
+  {
+    frontendPattern: /^\/collaboration\/(.+)$/,
+    backendPath: '/collaboration/$1',
+    description: 'Generic collaboration API fallback'
+  },
+  {
+    frontendPattern: /^\/auth\/(.+)$/,
+    backendPath: '/auth/$1',
+    description: 'Generic auth API fallback'
+  },
+  {
+    frontendPattern: /^\/rbac\/(.+)$/,
+    backendPath: '/rbac/$1',
+    description: 'Generic RBAC API fallback'
+  },
+  {
+    frontendPattern: /^\/backups\/(.+)$/,
+    backendPath: '/backups/$1',
+    description: 'Generic backup API fallback'
+  },
+  {
+    frontendPattern: /^\/restores\/(.+)$/,
+    backendPath: '/restores/$1',
+    description: 'Generic restore API fallback'
+  },
+  {
+    frontendPattern: /^\/tasks\/(.+)$/,
+    backendPath: '/tasks/$1',
+    description: 'Generic task API fallback'
+  },
+  {
+    frontendPattern: /^\/integrations\/(.+)$/,
+    backendPath: '/integrations/$1',
+    description: 'Generic integration API fallback'
+  },
+  {
+    frontendPattern: /^\/reports\/(.+)$/,
+    backendPath: '/reports/$1',
+    description: 'Generic report API fallback'
+  },
+  {
+    frontendPattern: /^\/versions\/(.+)$/,
+    backendPath: '/versions/$1',
+    description: 'Generic version API fallback'
+  },
+  {
+    frontendPattern: /^\/sensitivity-labels\/(.+)$/,
+    backendPath: '/sensitivity-labels/$1',
+    description: 'Generic sensitivity labels API fallback'
+  },
+];
+
+// ============================================================================
+// INTELLIGENT API MAPPING FUNCTION
+// ============================================================================
+function mapFrontendToBackend(frontendPath: string): { backendPath: string; description: string } | null {
+  // Remove leading slash for pattern matching
+  const cleanPath = frontendPath.startsWith('/') ? frontendPath.slice(1) : frontendPath;
+  
+  // Try to find a matching pattern
+  for (const mapping of API_MAPPINGS) {
+    const match = cleanPath.match(mapping.frontendPattern);
+    if (match) {
+      // Replace placeholders in backend path
+      let backendPath = mapping.backendPath;
+      for (let i = 1; i < match.length; i++) {
+        backendPath = backendPath.replace(`$${i}`, match[i]);
+      }
+      
+      return {
+        backendPath: `/${backendPath}`,
+        description: mapping.description
+      };
+    }
+  }
+  
+  return null;
+}
+
+// ============================================================================
+// PROXY PERFORMANCE MONITOR
+// ============================================================================
 class ProxyPerformanceMonitor {
   private static instance: ProxyPerformanceMonitor;
   private requestCount = 0;
@@ -70,10 +581,10 @@ class ProxyPerformanceMonitor {
     this.requestCount++;
     if (isError) this.errorCount++;
     
-    // Update rolling average
+    // Update average response time
     this.avgResponseTime = (this.avgResponseTime * (this.requestCount - 1) + responseTime) / this.requestCount;
     
-    // Reset metrics every hour for fresh statistics
+    // Reset every hour
     if (Date.now() - this.lastResetTime > 3600000) {
       this.reset();
     }
@@ -83,8 +594,8 @@ class ProxyPerformanceMonitor {
     return {
       requestCount: this.requestCount,
       errorCount: this.errorCount,
-      errorRate: this.requestCount > 0 ? (this.errorCount / this.requestCount) * 100 : 0,
-      avgResponseTime: this.avgResponseTime,
+      successRate: this.requestCount > 0 ? ((this.requestCount - this.errorCount) / this.requestCount) * 100 : 100,
+      avgResponseTime: Math.round(this.avgResponseTime),
       uptime: Date.now() - this.lastResetTime
     };
   }
@@ -97,269 +608,171 @@ class ProxyPerformanceMonitor {
   }
 }
 
+// ============================================================================
+// MAIN PROXY FUNCTION
+// ============================================================================
 async function proxy(request: Request, ctx: { params: Promise<{ path: string[] }> | { path: string[] } }) {
   const startTime = Date.now();
   const monitor = ProxyPerformanceMonitor.getInstance();
-  const method = (request.method || 'GET').toUpperCase() as HttpMethod;
-  const search = new URL(request.url).search;
   
-  // Next.js (App Router) may provide params as a Promise
-  const awaited = (typeof (ctx.params as any)?.then === 'function')
-    ? await (ctx.params as Promise<{ path: string[] }>)
-    : (ctx.params as { path: string[] });
-  const rawPath = '/' + (awaited?.path?.join('/') || '');
-
-  // Special-case OAuth initiations/callbacks: issue a browser redirect directly
-  // to the backend to avoid fetch timeouts/aborts and preserve cross-origin flow.
-  if (request.method === 'GET') {
-    const oauthMatch = rawPath.match(/^\/(?:api\/)?auth\/(google|microsoft)(?:\/callback)?$/);
-    if (oauthMatch) {
-      const normalized = rawPath.startsWith('/api/') ? rawPath.replace('/api/', '/') : rawPath;
-      const target = `${BACKEND_BASE}${normalized}${search}`.replace(/\/\/+/, '/');
-      return NextResponse.redirect(target, { status: 307 });
+  try {
+    // Get the path from the request
+    const params = await ctx.params;
+    const pathSegments = params.path || [];
+    const frontendPath = `/${pathSegments.join('/')}`;
+    
+    // Map frontend path to backend path
+    const mapping = mapFrontendToBackend(frontendPath);
+    
+    if (!mapping) {
+      console.warn(`❌ No mapping found for frontend path: ${frontendPath}`);
+      monitor.recordRequest(Date.now() - startTime, true);
+      return NextResponse.json(
+        { 
+          error: 'API endpoint not found', 
+          frontendPath,
+          availableMappings: API_MAPPINGS.length,
+          suggestion: 'Check API_MAPPINGS in proxy route for available endpoints'
+        },
+        { status: 404 }
+      );
     }
-  }
-
-  // Build candidate backend paths with enterprise mappings and heuristics
-  const candidates = buildEnterpriseAwareCandidatePaths(rawPath)
-    .map((p: string) => `${BACKEND_BASE}${p}${search}`)
-    .slice(0, 12); // increased for enterprise coverage
-
-  // Copy headers (omit host-related headers that can break fetch)
-  const incomingHeaders = new Headers(request.headers);
-  incomingHeaders.delete('host');
-  incomingHeaders.delete('connection');
-  incomingHeaders.delete('content-length');
-
-  // Prepare body for non-GET/HEAD
-  let body: BodyInit | undefined = undefined;
-  if (!['GET', 'HEAD'].includes(method)) {
-    // Attempt to pass body as is; if no body, keep undefined
-    try {
-      const contentType = incomingHeaders.get('content-type') || '';
-      if (contentType.includes('application/json')) {
-        const json = await request.json().catch(() => undefined);
-        body = json !== undefined ? JSON.stringify(json) : undefined;
-      } else if (contentType.includes('multipart/form-data')) {
-        const formData = await request.formData().catch(() => undefined);
-        if (formData) {
-          const fd = new FormData();
-          for (const [k, v] of formData.entries()) {
-            // v can be string or File
-            // @ts-ignore - FormDataEntryValue is acceptable
-            fd.append(k, v);
-          }
-          body = fd;
-          // Let fetch set proper boundaries
-          incomingHeaders.delete('content-type');
-        }
-      } else if (contentType.includes('application/x-www-form-urlencoded')) {
-        const text = await request.text().catch(() => undefined);
-        body = text;
-      } else {
-        const arrayBuffer = await request.arrayBuffer().catch(() => undefined);
-        body = arrayBuffer;
+    
+    // Build the backend URL
+    const backendUrl = `${BACKEND_BASE}${mapping.backendPath}`;
+    
+    // Get request method and headers
+    const method = request.method as HttpMethod;
+    const headers = new Headers(request.headers);
+    
+    // Remove host header to avoid conflicts
+    headers.delete('host');
+    
+    // Prepare request body
+    let body: BodyInit | undefined;
+    if (method !== 'GET' && method !== 'HEAD') {
+      try {
+        body = await request.text();
+      } catch (error) {
+        console.warn('Failed to read request body:', error);
       }
-    } catch {
-      // Ignore body errors; proceed without body
-      body = undefined;
     }
-  }
-
-  // Try candidates with retry logic and performance monitoring
-  let lastError: unknown = null;
-  let attempt = 0;
-  
-  for (const url of candidates) {
-    for (let retry = 0; retry < MAX_RETRIES; retry++) {
+    
+    // Add query parameters if present
+    const url = new URL(request.url);
+    const searchParams = url.searchParams.toString();
+    const finalBackendUrl = searchParams ? `${backendUrl}?${searchParams}` : backendUrl;
+    
+    console.log(`🔄 ${method} ${frontendPath} → ${finalBackendUrl} (${mapping.description})`);
+    
+    // Make the request to backend with retry logic
+    let lastError: Error | null = null;
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
       try {
         const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT_MS);
-        const res = await fetch(url, {
+        const timeoutId = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT_MS);
+        
+        const response = await fetch(finalBackendUrl, {
           method,
-          headers: incomingHeaders,
+          headers,
           body,
-          signal: controller.signal
+          signal: controller.signal,
         });
-        clearTimeout(timer);
-
+        
+        clearTimeout(timeoutId);
+        
+        // Clone the response to read it
+        const responseClone = response.clone();
+        const responseText = await responseClone.text();
+        
+        // Log response details
         const responseTime = Date.now() - startTime;
+        const statusEmoji = response.ok ? '✅' : '❌';
+        console.log(`${statusEmoji} ${method} ${frontendPath} → ${response.status} (${responseTime}ms)`);
         
-        if (res.ok || (res.status >= 300 && res.status < 400)) {
-          // Record successful request
-          monitor.recordRequest(responseTime, false);
-          
-          // Stream back response with headers and status
-          const respHeaders = new Headers(res.headers);
-          // Remove hop-by-hop headers
-          respHeaders.delete('transfer-encoding');
-          respHeaders.delete('connection');
-          
-          // Add performance headers for monitoring
-          if (process.env.NODE_ENV === 'development') {
-            respHeaders.set('X-Proxy-Response-Time', responseTime.toString());
-            respHeaders.set('X-Proxy-Attempt', (attempt + 1).toString());
-            respHeaders.set('X-Proxy-Retry', retry.toString());
-          }
-          
-          return new Response(res.body, {
-            status: res.status,
-            statusText: res.statusText,
-            headers: respHeaders
-          });
-        }
-
-        // For 404, try next candidate; for 4xx/5xx else, retry or continue
-        lastError = new Error(`HTTP ${res.status}: ${res.statusText}`);
+        // Record metrics
+        monitor.recordRequest(responseTime, !response.ok);
         
-        if (res.status === 404) {
-          break; // Try next candidate
-        }
+        // Return the response
+        return new NextResponse(responseText, {
+          status: response.status,
+          statusText: response.statusText,
+          headers: response.headers,
+        });
         
-        // For server errors, retry with delay
-        if (res.status >= 500 && retry < MAX_RETRIES - 1) {
-          await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS * (retry + 1)));
-          continue;
-        }
+      } catch (error) {
+        lastError = error as Error;
+        console.warn(`⚠️ Attempt ${attempt}/${MAX_RETRIES} failed for ${finalBackendUrl}:`, error);
         
-      } catch (err) {
-        lastError = err;
-        
-        // Retry on network errors
-        if (retry < MAX_RETRIES - 1) {
-          await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS * (retry + 1)));
-          continue;
+        if (attempt < MAX_RETRIES) {
+          await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS * attempt));
         }
       }
     }
-    attempt++;
+    
+    // All retries failed
+    const responseTime = Date.now() - startTime;
+    monitor.recordRequest(responseTime, true);
+    
+    console.error(`❌ All ${MAX_RETRIES} attempts failed for ${finalBackendUrl}:`, lastError);
+    
+    return NextResponse.json(
+      {
+        error: 'Backend service unavailable',
+        frontendPath,
+        backendPath: mapping.backendPath,
+        attempts: MAX_RETRIES,
+        lastError: lastError?.message,
+        responseTime
+      },
+      { status: 503 }
+    );
+    
+  } catch (error) {
+    const responseTime = Date.now() - startTime;
+    monitor.recordRequest(responseTime, true);
+    
+    console.error('❌ Proxy error:', error);
+    
+    return NextResponse.json(
+      {
+        error: 'Internal proxy error',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        responseTime
+      },
+      { status: 500 }
+    );
   }
-
-  // Record failed request
-  const responseTime = Date.now() - startTime;
-  monitor.recordRequest(responseTime, true);
-
-  // If all fail, return last error with 502 (with diagnostics in dev)
-  const message = lastError instanceof Error ? lastError.message : 'Upstream request failed';
-  if (process.env.NODE_ENV === 'development') {
-    console.warn('[SmartProxy] All candidates failed for', rawPath, '\nTried:', candidates);
-    console.warn('[SmartProxy] Last error:', message);
-    console.warn('[SmartProxy] Performance metrics:', monitor.getMetrics());
-  }
-  return NextResponse.json({ 
-    success: false, 
-    error: message,
-    ...(process.env.NODE_ENV === 'development' && { 
-      candidates: candidates.length,
-      responseTime,
-      metrics: monitor.getMetrics()
-    })
-  }, { status: 502 });
 }
 
-function buildEnterpriseAwareCandidatePaths(rawPath: string): string[] {
-  const paths = new Set<string>();
-
-  const add = (p: string) => {
-    // Normalize double slashes
-    const norm = p.replace(/\/+/g, '/').replace(/\/$/, '');
-    paths.add(norm || '/');
-  };
-
-  // Enterprise API mappings first (highest priority)
-  for (const [pattern, mappings] of Object.entries(ENTERPRISE_API_MAPPINGS)) {
-    if (rawPath.startsWith(pattern) || rawPath.includes(pattern.slice(1, -1))) {
-      mappings.forEach(mapping => {
-        const mappedPath = rawPath.replace(pattern, mapping);
-        add(mappedPath);
-        // Also try with remaining path appended
-        if (rawPath.startsWith(pattern)) {
-          const remaining = rawPath.substring(pattern.length);
-          add(`${mapping}${remaining}`);
-        }
-      });
-    }
-  }
-
-  // As-is path
-  add(rawPath);
-
-  // Standard API prefixing
-  if (!rawPath.startsWith('/api/')) {
-    add(`/api${rawPath.startsWith('/') ? '' : '/'}${rawPath}`);
-  }
-
-  // Remove duplicate /api
-  if (rawPath.startsWith('/api/api/')) {
-    add(rawPath.replace('/api/api/', '/api/'));
-  }
-
-  // Version variants
-  const withApi = rawPath.startsWith('/api/') ? rawPath : `/api${rawPath.startsWith('/') ? '' : '/'}${rawPath}`;
-  add(withApi.replace('/api/', '/api/v1/'));
-
-  // Namespace adjustments for core services
-  if (rawPath.startsWith('/racine/')) {
-    add(`/api/racine${rawPath.substring('/racine'.length)}`);
-  }
-  if (rawPath.startsWith('/auth/')) {
-    add(`/api/auth${rawPath.substring('/auth'.length)}`);
-  }
-  if (rawPath.startsWith('/api/racine/')) {
-    add(`/api/${rawPath.substring('/api/racine/'.length)}`);
-  }
-
-  // Pluralization variants
-  const segments = rawPath.split('/');
-  const lastSegment = segments[segments.length - 1] || '';
-  if (lastSegment && !lastSegment.endsWith('s')) {
-    segments[segments.length - 1] = `${lastSegment}s`;
-    const pluralPath = segments.join('/');
-    add(pluralPath);
-    if (!pluralPath.startsWith('/api/')) {
-      add(`/api${pluralPath.startsWith('/') ? '' : '/'}${pluralPath}`);
-    }
-  }
-
-  // Environment-based custom mappings
-  try {
-    const mappingEnv = process.env.SMART_PROXY_REWRITE;
-    if (mappingEnv) {
-      const mapping = JSON.parse(mappingEnv) as Record<string, string>;
-      Object.entries(mapping).forEach(([fromPrefix, toPrefix]) => {
-        if (rawPath.startsWith(fromPrefix)) {
-          const rest = rawPath.substring(fromPrefix.length);
-          add(`${toPrefix}${rest}`);
-        }
-      });
-    }
-  } catch {
-    // Ignore invalid JSON
-  }
-
-  return Array.from(paths);
-}
-
+// ============================================================================
+// HTTP METHOD HANDLERS
+// ============================================================================
 export async function GET(request: Request, ctx: { params: { path: string[] } }) {
   return proxy(request, ctx);
 }
+
 export async function POST(request: Request, ctx: { params: { path: string[] } }) {
   return proxy(request, ctx);
 }
+
 export async function PUT(request: Request, ctx: { params: { path: string[] } }) {
   return proxy(request, ctx);
 }
+
 export async function PATCH(request: Request, ctx: { params: { path: string[] } }) {
   return proxy(request, ctx);
 }
+
 export async function DELETE(request: Request, ctx: { params: { path: string[] } }) {
   return proxy(request, ctx);
 }
+
 export async function OPTIONS(request: Request, ctx: { params: { path: string[] } }) {
   return proxy(request, ctx);
 }
+
 export async function HEAD(request: Request, ctx: { params: { path: string[] } }) {
   return proxy(request, ctx);
 }
-
 

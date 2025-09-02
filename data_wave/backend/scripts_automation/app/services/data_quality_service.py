@@ -42,7 +42,7 @@ class DataQualityService:
                     .where(IntelligentDataAsset.table_name == table_name)
                     .where(IntelligentDataAsset.data_source_id == data_source_id)
                 )
-                asset = session.exec(asset_stmt).first()
+                asset = session.execute(asset_stmt).scalars().first()
 
                 if not asset:
                     return {
@@ -58,7 +58,7 @@ class DataQualityService:
                     .where(DataQualityAssessment.asset_id == asset.id)
                     .order_by(DataQualityAssessment.assessment_date.desc())
                 )
-                assessments = session.exec(assess_stmt).all() or []
+                assessments = session.execute(assess_stmt).scalars().all() or []
                 recent = assessments[:5]
 
                 # Use live fields when present; otherwise, derive from latest assessment
@@ -115,7 +115,7 @@ class DataQualityService:
         """
         try:
             with get_session() as session:
-                assets = session.exec(
+                assets = session.execute(
                     select(IntelligentDataAsset).where(IntelligentDataAsset.data_source_id == data_source_id)
                 ).all() or []
 

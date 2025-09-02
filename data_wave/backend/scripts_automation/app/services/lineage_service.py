@@ -48,7 +48,7 @@ class LineageService:
                 DataSource, Scan.data_source_id == DataSource.id
             )
             
-            results = session.exec(stmt).all()
+            results = session.execute(stmt).scalars().all()
             
             # Build lineage graph
             nodes = []

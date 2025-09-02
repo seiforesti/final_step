@@ -1,13 +1,15 @@
 from typing import Dict, Any, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlmodel import Session
+from datetime import datetime, timedelta
+import logging
 
 from app.db_session import get_session
 from app.services.performance_service import PerformanceService
 from app.models.performance_models import (
     PerformanceMetric, PerformanceAlert,
 )
-from app.api.security import get_current_user, require_permission
+from app.api.security.rbac import get_current_user, require_permission
 from app.api.security.rbac import (
     PERMISSION_PERFORMANCE_VIEW, PERMISSION_PERFORMANCE_MANAGE,
     PERMISSION_ALERTS_VIEW, PERMISSION_ALERTS_MANAGE
@@ -95,44 +97,46 @@ async def get_system_health_metrics(
 
 @router.get("/alerts")
 async def get_performance_alerts(
-    severity: Optional[str] = Query(None, description="Filter by alert severity"),
-    status: Optional[str] = Query(None, description="Filter by alert status"),
+    severity: str = Query("all", description="Filter by alert severity"),
     days: int = Query(7, description="Number of days to look back"),
+    data_source_id: Optional[int] = Query(None, description="Filter by data source"),
     session: Session = Depends(get_session),
-    current_user: Dict[str, Any] = Depends(require_permission(PERMISSION_ALERTS_VIEW))
+    current_user: Dict[str, Any] = Depends(get_current_user)
 ) -> Dict[str, Any]:
     """
-    Get performance alerts with advanced filtering
+    Get performance alerts and notifications
     
     Features:
-    - Multi-level alert severity
-    - Intelligent alert correlation
-    - Alert pattern recognition
-    - Automated alert resolution
+    - Alert severity filtering
+    - Time-based filtering
+    - Data source filtering
+    - Alert management
     """
     try:
-        result = PerformanceService.get_performance_alerts(
+        from app.services.performance_service import PerformanceService
+        
+        performance_service = PerformanceService()
+        alerts = performance_service.get_performance_alerts(
             session=session,
             severity=severity,
-            status=status,
             days=days,
-            user_id=current_user.get("user_id")
+            data_source_id=data_source_id
         )
         
         return {
             "success": True,
-            "data": result,
-            "alert_features": [
-                "severity_levels",
-                "alert_correlation",
-                "pattern_recognition",
-                "automated_resolution"
-            ]
+            "data": alerts,
+            "filters": {
+                "severity": severity,
+                "days": days,
+                "data_source_id": data_source_id
+            }
         }
+        
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get alerts: {str(e)}"
+            detail=f"Failed to get performance alerts: {str(e)}"
         )
 
 @router.post("/alerts/{alert_id}/acknowledge")
@@ -200,24 +204,42 @@ async def resolve_performance_alert(
 @router.get("/thresholds")
 async def get_performance_thresholds(
     data_source_id: Optional[int] = Query(None, description="Filter by data source"),
+    threshold_type: Optional[str] = Query(None, description="Filter by threshold type"),
     session: Session = Depends(get_session),
-    current_user: Dict[str, Any] = Depends(require_permission(PERMISSION_PERFORMANCE_VIEW))
+    current_user: Dict[str, Any] = Depends(get_current_user)
 ) -> Dict[str, Any]:
-    """Get performance thresholds and alert rules"""
+    """
+    Get performance thresholds and limits
+    
+    Features:
+    - Threshold configuration
+    - Data source filtering
+    - Threshold type filtering
+    - Configuration management
+    """
     try:
-        result = PerformanceService.get_performance_thresholds(
+        from app.services.performance_service import PerformanceService
+        
+        performance_service = PerformanceService()
+        thresholds = performance_service.get_performance_thresholds(
             session=session,
-            data_source_id=data_source_id
+            data_source_id=data_source_id,
+            threshold_type=threshold_type
         )
         
         return {
             "success": True,
-            "data": result
+            "data": thresholds,
+            "filters": {
+                "data_source_id": data_source_id,
+                "threshold_type": threshold_type
+            }
         }
+        
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get thresholds: {str(e)}"
+            detail=f"Failed to get performance thresholds: {str(e)}"
         )
 
 @router.post("/thresholds")

@@ -9,7 +9,7 @@ import React, { useState, useEffect, Suspense, useCallback, useMemo, createConte
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import { Toaster } from "sonner"
-import { Database, Settings, Activity, TrendingUp, Users, Shield, Cloud, Search, BarChart3, Eye, Zap, Target, Bell, Menu, X, ChevronLeft, ChevronRight, Plus, Filter, Download, Upload, RefreshCw, HelpCircle, User, LogOut, Monitor, Palette, Globe, Lock, Building, FileText, MessageSquare, Star, Grid, List, Layers, GitBranch, Workflow, Calendar, Clock, AlertTriangle, CheckCircle, Info, Play, Pause, Square, Edit, Trash2, Copy, Share2, ExternalLink, MoreHorizontal, ChevronDown, ChevronUp, Maximize2, Minimize2, PanelLeftOpen, PanelRightOpen, SplitSquareHorizontal, Layout, Command, Cpu, HardDrive, Network, Gauge, LineChart, PieChart, AreaChart, TestTube, Beaker, Microscope, Cog, Wrench, Package, Server, CircuitBoard, Boxes, Archive, FolderOpen, Folder, File, Code2, Terminal, Bug, Sparkles, Rocket, Flame, Lightbulb, Brain, Bot, Radar, Crosshair, Focus, Scan, SearchX, ScanLine, Binary, Hash, Type, Key, ShieldCheckIcon, UserCheck, Crown, Badge as BadgeIcon, Award, Medal, Trophy, Flag, Bookmark, Heart, ThumbsUp, Smile, Frown, AlertCircle, XCircle, Wifi, WifiOff, Signal, SignalHigh, SignalLow, SignalMedium, Route, Map, MapPin, Navigation, Compass, TreePine, Workflow as WorkflowIcon, Camera, Video, Mic, MicOff, Maximize, Minimize, RotateCcw, RotateCw, ZoomIn, ZoomOut, Expand, Shrink, Move, Resize, PinIcon, UnpinIcon, Bookmark as BookmarkIcon, Tag, Tags, Hash as HashIcon, Percent, DollarSign, Euro, Pound } from 'lucide-react'
+import { Database, Settings, Activity, TrendingUp, Users, Shield, Cloud, Search, BarChart3, Eye, Zap, Target, Bell, Menu, X, ChevronLeft, ChevronRight, Plus, Filter, Download, Upload, RefreshCw, HelpCircle, User, LogOut, Monitor, Palette, Globe, Lock, Building, FileText, MessageSquare, Star, Grid, List, Layers, GitBranch, Workflow, Calendar, Clock, AlertTriangle, CheckCircle, Info, Play, Pause, Square, Edit, Trash2, Copy, Share2, ExternalLink, MoreHorizontal, ChevronDown, ChevronUp, Maximize2, Minimize2, PanelLeftOpen, PanelRightOpen, SplitSquareHorizontal, Layout, Command, Cpu, HardDrive, Network, Gauge, LineChart, PieChart, AreaChart, TestTube, Beaker, Microscope, Cog, Wrench, Package, Server, CircuitBoard, Boxes, Archive, FolderOpen, Folder, File, Code2, Terminal, Bug, Sparkles, Rocket, Flame, Lightbulb, Brain, Bot, Radar, Crosshair, Focus, Scan, SearchX, ScanLine, Binary, Hash, Type, Key, ShieldCheckIcon, UserCheck, Crown, Badge as BadgeIcon, Award, Medal, Trophy, Flag, Bookmark, Heart, ThumbsUp, Smile, Frown, AlertCircle, XCircle, Wifi, WifiOff, Signal, SignalHigh, SignalLow, SignalMedium, Route, Map, MapPin, Navigation, Compass, TreePine, Workflow as WorkflowIcon, Camera, Video, Mic, MicOff, Maximize, Minimize, RotateCcw, RotateCw, ZoomIn, ZoomOut, Expand, Shrink, Move, PinIcon, Bookmark as BookmarkIcon, Tag, Tags, Hash as HashIcon, Percent, DollarSign, Euro, ArrowDown } from 'lucide-react'
 
 // Import shadcn/ui components
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -46,8 +46,12 @@ import {
   EnterpriseIntegrationProvider, 
   useEnterpriseContext,
   createEnterpriseEvent,
-  getSystemHealthScore 
+  getSystemHealthScore,
+  createEnterpriseQueryClient
 } from './enterprise-integration'
+
+// Import graceful error handling
+import { GracefulErrorBoundary } from './components/graceful-error-boundary'
 
 // Import enterprise hooks
 import {
@@ -142,16 +146,17 @@ import {
   useRunComplianceCheckMutation,
   useStartSecurityMonitoringMutation,
 } from './services/enterprise-apis'
+import { useCreateDataSourceMutation } from './services/apis'
 
 // Import three-phase architecture
-import { CoreComponentRegistry } from './core/component-registry'
-import { EnterpriseEventBus } from './core/event-bus'
+import { ComponentRegistry } from './core/component-registry'
+import { eventBus } from './core/event-bus'
 import { StateManager } from './core/state-manager'
 import { WorkflowEngine } from './core/workflow-engine'
 import { CorrelationEngine } from './analytics/correlation-engine'
-import { RealtimeCollaboration } from './collaboration/realtime-collaboration'
+import { realTimeCollaborationManager } from './collaboration/realtime-collaboration'
 import { ApprovalSystem } from './workflows/approval-system'
-import { BulkOperations } from './workflows/bulk-operations'
+import { bulkOperationsManager } from './workflows/bulk-operations'
 
 // Import ALL existing data-sources components
 import { DataSourceList } from "./data-source-list"
@@ -182,20 +187,20 @@ import { CollaborationStudio } from "./ui/collaboration/collaboration-studio"
 import { AnalyticsWorkbench } from "./ui/analytics/analytics-workbench"
 import { WorkflowDesigner } from "./ui/workflow/workflow-designer"
 
-// Import remaining components with enterprise features
-const DataSourceComplianceView = React.lazy(() => import("./data-source-compliance-view"))
-const DataSourceSecurityView = React.lazy(() => import("./data-source-security-view"))
-const DataSourcePerformanceView = React.lazy(() => import("./data-source-performance-view"))
-const DataSourceScanResults = React.lazy(() => import("./data-source-scan-results"))
-const DataSourceTagsManager = React.lazy(() => import("./data-source-tags-manager"))
-const DataSourceVersionHistory = React.lazy(() => import("./data-source-version-history"))
-const DataSourceBackupRestore = React.lazy(() => import("./data-source-backup-restore"))
-const DataSourceAccessControl = React.lazy(() => import("./data-source-access-control"))
-const DataSourceNotifications = React.lazy(() => import("./data-source-notifications"))
-const DataSourceReports = React.lazy(() => import("./data-source-reports"))
-const DataSourceScheduler = React.lazy(() => import("./data-source-scheduler"))
-const DataSourceIntegrations = React.lazy(() => import("./data-source-integrations"))
-const DataSourceCatalog = React.lazy(() => import("./data-source-catalog"))
+// Import remaining components with enterprise features - FIXED DEFAULT EXPORTS
+const DataSourceComplianceView = React.lazy(() => import("./data-source-compliance-view").then(module => ({ default: module.DataSourceComplianceView })))
+const DataSourceSecurityView = React.lazy(() => import("./data-source-security-view").then(module => ({ default: module.DataSourceSecurityView })))
+const DataSourcePerformanceView = React.lazy(() => import("./data-source-performance-view").then(module => ({ default: module.DataSourcePerformanceView })))
+const DataSourceScanResults = React.lazy(() => import("./data-source-scan-results").then(module => ({ default: module.DataSourceScanResults })))
+const DataSourceTagsManager = React.lazy(() => import("./data-source-tags-manager").then(module => ({ default: module.DataSourceTagsManager })))
+const DataSourceVersionHistory = React.lazy(() => import("./data-source-version-history").then(module => ({ default: module.DataSourceVersionHistory })))
+const DataSourceBackupRestore = React.lazy(() => import("./data-source-backup-restore").then(module => ({ default: module.DataSourceBackupRestore })))
+const DataSourceAccessControl = React.lazy(() => import("./data-source-access-control").then(module => ({ default: module.DataSourceAccessControl })))
+const DataSourceNotifications = React.lazy(() => import("./data-source-notifications").then(module => ({ default: module.DataSourceNotifications })))
+const DataSourceReports = React.lazy(() => import("./data-source-reports").then(module => ({ default: module.DataSourceReports })))
+const DataSourceScheduler = React.lazy(() => import("./data-source-scheduler").then(module => ({ default: module.DataSourceScheduler })))
+const DataSourceIntegrations = React.lazy(() => import("./data-source-integrations").then(module => ({ default: module.DataSourceIntegrations })))
+const DataSourceCatalog = React.lazy(() => import("./data-source-catalog").then(module => ({ default: module.DataSourceCatalog })))
 
 // Import types and services
 import { DataSource, ViewMode } from "./types"
@@ -468,7 +473,7 @@ const createAdvancedWorkflowActions = (context: any): WorkflowAction[] => [
     label: "Adaptive Workspace Configuration",
     description: "ML-powered workspace adaptation based on usage patterns and context",
     icon: Sparkles,
-    category: "workspace",
+    category: "workflow",
     priority: "high",
     shortcut: "⌘+Shift+A",
     enabled: true,
@@ -536,48 +541,7 @@ const createAdvancedWorkflowActions = (context: any): WorkflowAction[] => [
 // ENHANCED QUERY CLIENT CONFIGURATION
 // ============================================================================
 
-const createEnterpriseQueryClient = () => new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 10 * 60 * 1000, // 10 minutes (was cacheTime)
-      refetchOnWindowFocus: false,
-      retry: (failureCount, error: any) => {
-        // Don't retry on 4xx errors (client errors)
-        if (error?.response?.status >= 400 && error?.response?.status < 500) {
-          return false
-        }
-        return failureCount < 3
-      },
-      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-      onError: (error: any) => {
-        console.error('Query error:', error)
-        // Global error handling with enterprise event bus
-        if (window.enterpriseEventBus) {
-          window.enterpriseEventBus.emit('query:error', {
-            error: error.message,
-            timestamp: new Date(),
-            component: 'data-sources-app'
-          })
-        }
-      }
-    },
-    mutations: {
-      retry: 2,
-      onError: (error: any) => {
-        console.error('Mutation error:', error)
-        // Global mutation error handling
-        if (window.enterpriseEventBus) {
-          window.enterpriseEventBus.emit('mutation:error', {
-            error: error.message,
-            timestamp: new Date(),
-            component: 'data-sources-app'
-          })
-        }
-      }
-    },
-  },
-})
+// Using createEnterpriseQueryClient from enterprise-integration.tsx
 
 // ============================================================================
 // ENHANCED NAVIGATION STRUCTURE WITH ENTERPRISE FEATURES
@@ -739,6 +703,8 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
     enableNotifications: true
   })
 
+  // Additional enterprise feature hooks for comprehensive functionality - will be initialized after dataSourceId
+
   // ========================================================================
   // RBAC INTEGRATION - ENTERPRISE SECURITY
   // ========================================================================
@@ -783,8 +749,21 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
   // RBAC-FILTERED NAVIGATION
   // ========================================================================
   
+  const safeDataSourcePermissions = useMemo(() => ({
+    canView: true,
+    canEdit: false,
+    canCreate: false,
+    canDelete: false,
+    canGenerateReports: false,
+    canViewDiscovery: true,
+    canTestConnection: true,
+    canManageBackup: false,
+    canViewPerformance: true,
+    ...(dataSourcePermissions || {})
+  }), [dataSourcePermissions])
+  
   const getFilteredNavigation = useCallback(() => {
-    if (rbacLoading || !currentUser) return {}
+    if (!currentUser) return {}
     
     const filtered: any = {}
     
@@ -792,37 +771,37 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
       const filteredItems = category.items.filter((item: any) => {
         // Map navigation items to required permissions
         switch (item.id) {
-                  case 'dashboard':
-        case 'ai-dashboard':
-        case 'overview':
-        case 'grid':
-        case 'list':
-        case 'details':
-          return dataSourcePermissions.canView
+          case 'dashboard':
+          case 'ai-dashboard':
+          case 'overview':
+          case 'grid':
+          case 'list':
+          case 'details':
+            return safeDataSourcePermissions.canView
           case 'monitoring':
           case 'dashboard-monitoring':
           case 'performance':
-            return dataSourcePermissions.canViewMonitoring
+            return safeDataSourcePermissions.canViewPerformance
           case 'quality':
           case 'growth':
           case 'analytics-workbench':
-            return dataSourcePermissions.canViewAnalytics
+            return safeDataSourcePermissions.canView
           case 'discovery':
           case 'discovery-workspace':
           case 'schema-discovery':
           case 'data-lineage':
           case 'scan-results':
-            return dataSourcePermissions.canViewDiscovery
+            return safeDataSourcePermissions.canViewDiscovery
           case 'compliance':
             return hasPermission('compliance.view')
           case 'security':
             return hasPermission('security.view')
           case 'cloud-config':
-            return dataSourcePermissions.canEdit
+            return safeDataSourcePermissions.canEdit
           case 'access-control':
             return hasPermission('rbac.manage')
           case 'tags':
-            return dataSourcePermissions.canEdit
+            return safeDataSourcePermissions.canEdit
           case 'scheduler':
             return hasPermission('workflows.manage')
           case 'workflow-designer':
@@ -834,23 +813,23 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
           case 'notifications':
             return true // Everyone can view notifications
           case 'reports':
-            return dataSourcePermissions.canGenerateReports
+            return safeDataSourcePermissions.canGenerateReports
           case 'version-history':
-            return dataSourcePermissions.canView
+            return safeDataSourcePermissions.canView
           case 'backup-restore':
-            return dataSourcePermissions.canManageBackup
+            return safeDataSourcePermissions.canManageBackup
           case 'bulk-actions':
-            return dataSourcePermissions.canBulkEdit
+            return safeDataSourcePermissions.canEdit
           case 'integrations':
             return hasPermission('integrations.manage')
           case 'catalog':
-            return dataSourcePermissions.canViewCatalog
+            return safeDataSourcePermissions.canView
           case 'connection-test':
-            return dataSourcePermissions.canTestConnection
+            return safeDataSourcePermissions.canTestConnection
           case 'filters':
-            return dataSourcePermissions.canView
+            return safeDataSourcePermissions.canView
           default:
-            return dataSourcePermissions.canView
+            return safeDataSourcePermissions.canView
         }
       })
       
@@ -860,8 +839,8 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
     })
     
     return filtered
-  }, [rbacLoading, currentUser, dataSourcePermissions, hasPermission])
-
+  }, [currentUser, safeDataSourcePermissions, hasPermission])
+  
   const filteredNavigation = useMemo(() => getFilteredNavigation(), [getFilteredNavigation])
 
   // ========================================================================
@@ -891,6 +870,14 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
     intelligentCaching: true,
     dynamicScaling: true
   })
+
+  // ========================================================================
+  // ERROR BOUNDARY STATE - GRACEFUL DEGRADATION
+  // ========================================================================
+  
+  const [apiErrors, setApiErrors] = useState<Record<string, any>>({})
+  const [isRecovering, setIsRecovering] = useState(false)
+  const [fallbackMode, setFallbackMode] = useState(false)
   
   const [notifications, setNotifications] = useState<any[]>([])
   const [systemAlerts, setSystemAlerts] = useState<any[]>([])
@@ -947,75 +934,183 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
   // COMPREHENSIVE BACKEND DATA INTEGRATION - ALL ENTERPRISE APIs
   // ========================================================================
   
-  // Core Data Sources Integration
-  const { data: dataSources, isLoading: dataSourcesLoading, error: dataSourcesError, refetch: refetchDataSources } = useDataSourcesQuery({
-    refetchInterval: autoRefresh ? refreshInterval * 1000 : false,
-  })
-  const { data: user, isLoading: userLoading } = useUserQuery()
-  const { data: userNotifications } = useNotificationsQuery()
-  const { data: workspace } = useWorkspaceQuery()
-  const { data: metrics } = useDataSourceMetricsQuery(selectedDataSource?.id)
+  // Core Data Sources Integration - WITH PROPER ERROR HANDLING
+  const { data: dataSources, isLoading: dataSourcesLoading, error: dataSourcesError, refetch: refetchDataSources } = useDataSourcesQuery()
+  // Create datasource mutation (real backend)
+  const createDataSourceMutation = useCreateDataSourceMutation()
+
   
-  // Core data source backend integrations
-  const { data: dataSourceHealth } = useDataSourceHealthQuery(selectedDataSource?.id)
-  const { data: connectionPoolStats } = useConnectionPoolStatsQuery(selectedDataSource?.id)
-  const { data: discoveryHistory } = useDiscoveryHistoryQuery(selectedDataSource?.id)
-  const { data: scanResults } = useScanResultsQuery(selectedDataSource?.id)
-  const { data: qualityMetrics } = useQualityMetricsQuery(selectedDataSource?.id)
-  const { data: growthMetrics } = useGrowthMetricsQuery(selectedDataSource?.id)
-  const { data: schemaDiscoveryData } = useSchemaDiscoveryQuery(selectedDataSource?.id)
-  const { data: dataLineage } = useDataLineageQuery(selectedDataSource?.id)
-  const { data: backupStatus } = useBackupStatusQuery(selectedDataSource?.id)
-  const { data: scheduledTasks } = useScheduledTasksQuery()
-  const { data: auditLogs } = useAuditLogsQuery()
-  const { data: userPermissions } = useUserPermissionsQuery()
-  const { data: dataCatalog } = useDataCatalogQuery()
+  // Core User and Workspace Integration - WITH ERROR BOUNDARIES
+  const { data: user, isLoading: userLoading, error: userError } = useUserQuery()
+  const { data: userNotifications, error: notificationsError } = useNotificationsQuery()
+  const { data: workspace, error: workspaceError } = useWorkspaceQuery()
+  const { data: metrics, error: metricsError } = useDataSourceMetricsQuery(selectedDataSource?.id)
+  
+  // Core data source backend integrations - WITH ERROR BOUNDARIES
+  const { data: dataSourceHealth, error: healthError } = useDataSourceHealthQuery(selectedDataSource?.id || 0)
+  const { data: connectionPoolStats, error: poolError } = useConnectionPoolStatsQuery(selectedDataSource?.id || 0)
+  const { data: discoveryHistory, error: discoveryError } = useDiscoveryHistoryQuery(selectedDataSource?.id || 0)
+  const { data: scanResults, error: scanError } = useScanResultsQuery(selectedDataSource?.id || 0)
+  // Memoize data source ID to prevent unnecessary re-renders
+  const dataSourceId = useMemo(() => selectedDataSource?.id, [selectedDataSource?.id])
+  const workspaceId = useMemo(() => workspace?.id, [workspace?.id])
+
+  // Additional enterprise feature hooks for comprehensive functionality
+  const monitoringFeatures = useMonitoringFeatures(dataSourceId)
+  const securityFeatures = useSecurityFeatures(dataSourceId)
+  const operationsFeatures = useOperationsFeatures(dataSourceId)
+  const collaborationFeatures = useCollaborationFeatures('data-sources-app', dataSourceId)
+  const workflowIntegration = useWorkflowIntegration('data-sources-app', dataSourceId)
+  const analyticsIntegration = useAnalyticsIntegration('data-sources-app', dataSourceId)
+  
+  const { data: qualityMetrics, error: qualityError } = useQualityMetricsQuery(dataSourceId || 0, {
+    enabled: !!dataSourceId
+  })
+  const { data: growthMetrics, error: growthError } = useGrowthMetricsQuery(dataSourceId || 0, {
+    enabled: !!dataSourceId
+  })
+  const { data: schemaDiscoveryData, error: schemaError } = useSchemaDiscoveryQuery(dataSourceId, {
+    enabled: !!dataSourceId
+  })
+  const { data: dataLineage, error: lineageError } = useDataLineageQuery(dataSourceId, {
+    enabled: !!dataSourceId
+  })
+  const { data: backupStatus, error: backupError } = useBackupStatusQuery(dataSourceId, {
+    enabled: !!dataSourceId
+  })
+  // Gate queries by visibility and required identifiers to reduce backend pressure
+  const isVisible = typeof document !== 'undefined' ? !document.hidden : true
+  
+  const { data: scheduledTasks, error: tasksError } = useScheduledTasksQuery(dataSourceId, {
+    enabled: !!dataSourceId && isVisible,
+    refetchInterval: isVisible ? 30000 : false // Only refetch every 30 seconds when visible
+  })
+  const { data: auditLogs, error: auditError } = useAuditLogsQuery(dataSourceId, {
+    enabled: !!dataSourceId && isVisible,
+    refetchInterval: isVisible ? 60000 : false // Only refetch every minute when visible
+  })
+  const { data: userPermissions, error: permissionsError } = useUserPermissionsQuery({
+    enabled: true,
+    refetchInterval: 300000 // Only refetch every 5 minutes
+  })
+  const { data: dataCatalog, error: catalogError } = useDataCatalogQuery({
+    enabled: isVisible,
+    refetchInterval: isVisible ? 600000 : false // Only refetch every 10 minutes when visible
+  })
 
   // =====================================================================================
   // NEW ENTERPRISE APIs - REAL BACKEND INTEGRATION (NO MOCK DATA)
   // =====================================================================================
   
   // COLLABORATION APIs
-  const { data: collaborationWorkspaces } = useCollaborationWorkspacesQuery()
-  const { data: activeCollaborationSessions } = useActiveCollaborationSessionsQuery()
+  const { data: collaborationWorkspaces } = useCollaborationWorkspacesQuery({
+    enabled: true,
+    refetchInterval: 60000 // Only refetch every minute
+  })
+  const { data: activeCollaborationSessions } = useActiveCollaborationSessionsQuery({
+    enabled: true,
+    refetchInterval: 30000 // Only refetch every 30 seconds
+  })
   const { data: sharedDocuments } = useSharedDocumentsQuery(
-    selectedDataSource?.id?.toString() || '', 
-    { document_type: 'all' }
+    dataSourceId?.toString() || '', 
+    { document_type: 'all' },
+    {
+      enabled: !!dataSourceId,
+      refetchInterval: 120000 // Only refetch every 2 minutes
+    }
   )
-  const { data: documentComments } = useDocumentCommentsQuery('')
-  const { data: workspaceActivity } = useWorkspaceActivityQuery(workspace?.id?.toString() || '', 7)
+  // Only fetch comments when a document is selected
+  const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null)
+  const { data: documentComments } = useDocumentCommentsQuery(selectedDocumentId || '', {
+    enabled: !!selectedDocumentId && isVisible,
+    refetchInterval: isVisible ? 300000 : false // Only refetch every 5 minutes when visible
+  })
+  const { data: workspaceActivity } = useWorkspaceActivityQuery(workspaceId?.toString() || '', 7, {
+    enabled: !!workspaceId,
+    refetchInterval: 300000 // Only refetch every 5 minutes
+  })
   
   // WORKFLOW APIs
-  const { data: workflowDefinitions } = useWorkflowDefinitionsQuery()
+  const { data: workflowDefinitions } = useWorkflowDefinitionsQuery({
+    enabled: true,
+    refetchInterval: 300000 // Only refetch every 5 minutes
+  })
   const { data: workflowExecutions } = useWorkflowExecutionsQuery({ days: 7 })
   const { data: pendingApprovals } = usePendingApprovalsQuery()
   const { data: workflowTemplates } = useWorkflowTemplatesQuery()
   const { data: bulkOperationStatus } = useBulkOperationStatusQuery('')
   
   // ENHANCED PERFORMANCE APIs
-  const { data: systemHealth } = useSystemHealthQuery(true) // Enhanced with detailed metrics
+  const { data: systemHealth } = useSystemHealthQuery({
+    enabled: isVisible,
+    refetchInterval: isVisible ? 30000 : false
+  })
   const { data: enhancedPerformanceMetrics } = useEnhancedPerformanceMetricsQuery(
-    selectedDataSource?.id || 0,
-    { time_range: '24h', metric_types: ['cpu', 'memory', 'io', 'network'] }
+    dataSourceId || 0,
+    { time_range: '24h', metric_types: ['cpu', 'memory', 'io', 'network'] },
+    {
+      enabled: !!dataSourceId,
+      refetchInterval: 60000 // Only refetch every minute
+    }
   )
-  const { data: performanceAlerts } = usePerformanceAlertsQuery({ severity: 'all', days: 7 })
-  const { data: performanceTrends } = usePerformanceTrendsQuery(selectedDataSource?.id, '30d')
-  const { data: optimizationRecommendations } = useOptimizationRecommendationsQuery(selectedDataSource?.id)
-  const { data: performanceSummaryReport } = usePerformanceSummaryReportQuery({ time_range: '7d' })
-  const { data: performanceThresholds } = usePerformanceThresholdsQuery(selectedDataSource?.id)
+  const { data: performanceAlerts } = usePerformanceAlertsQuery({ severity: 'all', days: 7 }, {
+    enabled: true,
+    refetchInterval: 30000 // Only refetch every 30 seconds
+  })
+  const { data: performanceTrends } = usePerformanceTrendsQuery(dataSourceId, '30d', {
+    enabled: !!dataSourceId,
+    refetchInterval: 300000 // Only refetch every 5 minutes
+  })
+  const { data: optimizationRecommendations } = useOptimizationRecommendationsQuery(dataSourceId, {
+    enabled: !!dataSourceId,
+    refetchInterval: 600000 // Only refetch every 10 minutes
+  })
+  const { data: performanceSummaryReport } = usePerformanceSummaryReportQuery({ time_range: '7d' }, {
+    enabled: true,
+    refetchInterval: 600000 // Only refetch every 10 minutes
+  })
+  const { data: performanceThresholds } = usePerformanceThresholdsQuery(dataSourceId, {
+    enabled: !!dataSourceId,
+    refetchInterval: 600000 // Only refetch every 10 minutes
+  })
   
   // ENHANCED SECURITY APIs
   const { data: enhancedSecurityAudit } = useEnhancedSecurityAuditQuery(
-    selectedDataSource?.id || 0,
-    { include_vulnerabilities: true, include_compliance: true }
+    dataSourceId || 0,
+    { include_vulnerabilities: true, include_compliance: true },
+    {
+      enabled: !!dataSourceId,
+      refetchInterval: 300000 // Only refetch every 5 minutes
+    }
   )
-  const { data: vulnerabilityAssessments } = useVulnerabilityAssessmentsQuery({ severity: 'all' })
-  const { data: securityIncidents } = useSecurityIncidentsQuery({ days: 30 })
-  const { data: complianceChecks } = useComplianceChecksQuery()
-  const { data: threatDetection } = useThreatDetectionQuery({ days: 7 })
-  const { data: securityAnalyticsDashboard } = useSecurityAnalyticsDashboardQuery('7d')
-  const { data: riskAssessmentReport } = useRiskAssessmentReportQuery()
-  const { data: securityScans } = useSecurityScansQuery({ days: 30 })
+  const { data: vulnerabilityAssessments } = useVulnerabilityAssessmentsQuery({ severity: 'all' }, {
+    enabled: true,
+    refetchInterval: 300000 // Only refetch every 5 minutes
+  })
+  const { data: securityIncidents } = useSecurityIncidentsQuery({ days: 30 }, {
+    enabled: true,
+    refetchInterval: 60000 // Only refetch every minute
+  })
+  const { data: complianceChecks } = useComplianceChecksQuery({
+    enabled: true,
+    refetchInterval: 600000 // Only refetch every 10 minutes
+  })
+  const { data: threatDetection } = useThreatDetectionQuery({ days: 7 }, {
+    enabled: true,
+    refetchInterval: 120000 // Only refetch every 2 minutes
+  })
+  const { data: securityAnalyticsDashboard } = useSecurityAnalyticsDashboardQuery('7d', {
+    enabled: true,
+    refetchInterval: 300000 // Only refetch every 5 minutes
+  })
+  const { data: riskAssessmentReport } = useRiskAssessmentReportQuery({
+    enabled: true,
+    refetchInterval: 600000 // Only refetch every 10 minutes
+  })
+  const { data: securityScans } = useSecurityScansQuery({ days: 30 }, {
+    enabled: true,
+    refetchInterval: 300000 // Only refetch every 5 minutes
+  })
 
   // Mutation hooks for enterprise actions
   const createWorkspaceMutation = useCreateCollaborationWorkspaceMutation()
@@ -1040,6 +1135,51 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
 
   // Consolidated loading state
   const loading = dataSourcesLoading || userLoading
+
+  // Error aggregation for graceful degradation
+  const allErrors = {
+    dataSources: dataSourcesError,
+    user: userError,
+    notifications: notificationsError,
+    workspace: workspaceError,
+    metrics: metricsError,
+    health: healthError,
+    pool: poolError,
+    discovery: discoveryError,
+    scan: scanError,
+    quality: qualityError,
+    growth: growthError,
+    schema: schemaError,
+    lineage: lineageError,
+    backup: backupError,
+    tasks: tasksError,
+    audit: auditError,
+    permissions: permissionsError,
+    catalog: catalogError
+  }
+
+  // Check if we should enter fallback mode
+  const criticalErrors = Object.values(allErrors).filter(error => 
+    error && (
+      (error.response && (error.response.status === 500 || error.response.status === 502 || error.response.status === 503)) ||
+      (error.status === 500 || error.status === 502 || error.status === 503)
+    )
+  )
+
+  useEffect(() => {
+    if (criticalErrors.length > 3) {
+      setFallbackMode(true)
+      setNotifications(prev => [...prev.slice(-9), {
+        id: Math.random().toString(36),
+        type: 'warning',
+        title: 'Fallback Mode Activated',
+        message: 'Multiple API failures detected. Running in fallback mode with limited functionality.',
+        timestamp: new Date()
+      }])
+    } else if (criticalErrors.length === 0) {
+      setFallbackMode(false)
+    }
+  }, [criticalErrors.length])
 
   // Legacy enterprise context data for backward compatibility
   const { backendData } = enterprise || { backendData: { dataSources, loading } }
@@ -1096,6 +1236,11 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
     }
   }, [enterpriseFeatures.realTimeInsights])
 
+  // ========================================================================
+  // ENHANCED ENTERPRISE FEATURES IMPLEMENTATION
+  // ========================================================================
+  
+  // AI Insights Generation
   const generateUsageInsights = useCallback((componentId: string) => {
     // Simulate AI-powered usage insights
     setTimeout(() => {
@@ -1117,27 +1262,18 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
     }, 1000)
   }, [])
 
-  const handleViewChange = useCallback((newView: string) => {
-    setActiveView(newView)
-    trackComponentUsage(newView)
-    
-    // Generate contextual actions for the new view
-    if (enterpriseFeatures.contextAwareActions) {
-      generateContextualActions(newView)
-    }
-  }, [trackComponentUsage, enterpriseFeatures.contextAwareActions])
-
+  // Contextual Actions Generation
   const generateContextualActions = useCallback((componentId: string) => {
     const contextActions = {
       'enterprise-dashboard': [
         { id: 'customize_dashboard', label: 'Customize Dashboard', icon: Settings },
-        { id: 'export_insights', label: 'Export Insights', icon: ArrowDownTrayIcon },
+        { id: 'export_insights', label: 'Export Insights', icon: ArrowDown },
         { id: 'schedule_report', label: 'Schedule Report', icon: Calendar }
       ],
       'analytics-workbench': [
         { id: 'run_analysis', label: 'Run Analysis', icon: Play },
         { id: 'share_notebook', label: 'Share Notebook', icon: Share2 },
-        { id: 'export_model', label: 'Export Model', icon: ArrowDownTrayIcon }
+        { id: 'export_model', label: 'Export Model', icon: Download }
       ],
       'security': [
         { id: 'run_scan', label: 'Run Security Scan', icon: Scan },
@@ -1153,20 +1289,17 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
     
     setContextualActions(prev => ({
       ...prev,
-      [componentId]: contextActions[componentId] || []
+      [componentId]: contextActions[componentId as keyof typeof contextActions] || []
     }))
   }, [])
 
-  // ========================================================================
-  // ADVANCED WORKFLOW ACTION HANDLER
-  // ========================================================================
-  
+  // Enhanced Workflow Action Handler
   const executeWorkflowAction = useCallback(async (actionId: string) => {
     const action = workflowActions.find(a => a.id === actionId)
     if (!action || !action.enabled) return
 
     try {
-      setNotifications(prev => [...prev, {
+      setNotifications(prev => [...prev.slice(-9), {
         id: Date.now().toString(),
         type: 'info',
         title: 'Action Started',
@@ -1212,16 +1345,197 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
     }
   }, [selectedDataSource, dataSources, createSecurityScanMutation, runComplianceCheckMutation, startMonitoringMutation, createWorkspaceMutation, createWorkflowMutation, createThresholdMutation, createDocumentMutation, createBulkOperationMutation, startSecurityMonitoringMutation])
 
+  // REMOVED DUPLICATE generateUsageInsights function
+
+  const handleViewChange = useCallback((newView: string) => {
+    setActiveView(newView)
+    trackComponentUsage(newView)
+    
+    // Generate contextual actions for the new view
+    if (enterpriseFeatures.contextAwareActions) {
+      generateContextualActions(newView)
+    }
+  }, [trackComponentUsage, enterpriseFeatures.contextAwareActions])
+
+  // REMOVED DUPLICATE generateContextualActions function
+
+  // ========================================================================
+  // ADVANCED WORKFLOW ACTION HANDLER - REMOVED DUPLICATE
+  // ========================================================================
+
   // ========================================================================
   // REAL-TIME UPDATES AND EVENT HANDLING - DATABRICKS-LEVEL ORCHESTRATION
   // ========================================================================
+  
+  // Graceful error recovery mechanism
+  const handleGracefulErrorRecovery = useCallback(async (errorEvent: any) => {
+    console.log('Attempting graceful error recovery:', errorEvent)
+    
+    // Implement automatic retry for recoverable errors
+    if (errorEvent.canRetry && errorEvent.retryAfter) {
+      setTimeout(() => {
+        console.log('Auto-retrying failed operation...')
+        refetchDataSources()
+      }, errorEvent.retryAfter)
+    }
+    
+    // Show user-friendly notification
+    setNotifications(prev => [...prev.slice(-9), {
+      id: Math.random().toString(36),
+      type: 'warning',
+      title: 'Connection Issue Detected',
+      message: 'The system is working to resolve the issue automatically.',
+      timestamp: new Date()
+    }])
+  }, [refetchDataSources])
+
+  // ========================================================================
+  // ENHANCED ENTERPRISE MONITORING AND ANALYTICS
+  // ========================================================================
+  
+  // Real-time system health monitoring
+  const [systemMetrics, setSystemMetrics] = useState({
+    cpu: 0,
+    memory: 0,
+    disk: 0,
+    network: 0,
+    activeConnections: 0,
+    responseTime: 0
+  })
+
+  // Performance optimization monitoring
+  const [performanceMetrics, setPerformanceMetrics] = useState({
+    queryExecutionTime: 0,
+    cacheHitRate: 0,
+    throughput: 0,
+    errorRate: 0,
+    userSatisfaction: 0
+  })
+
+  // AI-powered insights and recommendations
+  const [aiRecommendations, setAiRecommendations] = useState<any[]>([])
+  const [predictiveAnalytics, setPredictiveAnalytics] = useState<any[]>([])
+
+  // Enhanced monitoring effects
+  useEffect(() => {
+    if (enterpriseFeatures.advancedMonitoring) {
+      const interval = setInterval(() => {
+        // Simulate real-time metrics updates
+        setSystemMetrics(prev => ({
+          cpu: Math.random() * 100,
+          memory: Math.random() * 100,
+          disk: Math.random() * 100,
+          network: Math.random() * 100,
+          activeConnections: Math.floor(Math.random() * 1000),
+          responseTime: Math.random() * 1000
+        }))
+
+        setPerformanceMetrics(prev => ({
+          queryExecutionTime: Math.random() * 5000,
+          cacheHitRate: Math.random() * 100,
+          throughput: Math.random() * 10000,
+          errorRate: Math.random() * 5,
+          userSatisfaction: Math.random() * 100
+        }))
+      }, 5000)
+
+      return () => clearInterval(interval)
+    }
+  }, [enterpriseFeatures.advancedMonitoring])
+
+  // AI insights generation
+  useEffect(() => {
+    if (enterpriseFeatures.aiInsightsEnabled && systemMetrics.cpu > 80) {
+      const recommendation = {
+        id: Math.random().toString(36),
+        type: 'performance',
+        title: 'High CPU Usage Detected',
+        message: 'System CPU usage is above 80%. Consider scaling resources or optimizing queries.',
+        priority: 'high',
+        actionable: true,
+        suggestions: [
+          'Scale compute resources',
+          'Optimize database queries',
+          'Enable query caching'
+        ],
+        timestamp: new Date()
+      }
+      
+      setAiRecommendations(prev => [...prev.slice(-4), recommendation])
+    }
+  }, [systemMetrics.cpu, enterpriseFeatures.aiInsightsEnabled])
+  
+  // Server connectivity check
+  const [serverDown, setServerDown] = useState(false)
+  const [serverCheckCount, setServerCheckCount] = useState(0)
+  
+  const checkServerConnectivity = useCallback(async () => {
+    try {
+      // Try multiple health check endpoints
+      const healthEndpoints = [
+        '/health',
+        '/proxy/health',
+        '/api/racine/integration/health',
+        '/proxy/api/racine/integration/health'
+      ]
+      
+      let response = null
+      let workingEndpoint = null
+      
+      for (const endpoint of healthEndpoints) {
+        try {
+          response = await fetch(endpoint, { 
+            method: 'GET',
+            signal: AbortSignal.timeout(3000) // 3 second timeout per endpoint
+          })
+          
+          if (response.ok) {
+            workingEndpoint = endpoint
+            break
+          }
+        } catch (e) {
+          console.warn(`Health check failed for ${endpoint}:`, e)
+          continue
+        }
+      }
+      
+      if (response && response.ok) {
+        console.log(`Server connectivity confirmed via ${workingEndpoint}`)
+        setServerDown(false)
+        setServerCheckCount(0)
+        return true
+      } else {
+        throw new Error(`All health check endpoints failed`)
+      }
+    } catch (error) {
+      console.warn('Server connectivity check failed:', error)
+      setServerCheckCount(prev => prev + 1)
+      
+      // If we've failed 3 times, consider the server down
+      if (serverCheckCount >= 2) {
+        setServerDown(true)
+      }
+      
+      return false
+    }
+  }, [serverCheckCount])
+  
+  // Check server connectivity on mount and when errors occur
+  useEffect(() => {
+    checkServerConnectivity()
+    
+    // Set up periodic connectivity check
+    const interval = setInterval(checkServerConnectivity, 30000) // Check every 30 seconds
+    
+    return () => clearInterval(interval)
+  }, [checkServerConnectivity])
   
   useEffect(() => {
     if (enterprise.core?.eventBus) {
       const eventBus = enterprise.core.eventBus
 
       // Handle real-time data updates
-      eventBus.subscribe('backend:data:updated', (event) => {
+      eventBus.subscribe('backend:data:updated', async (event) => {
         // Refresh relevant data
         if (autoRefresh) {
           console.log('Real-time data update received:', event.payload)
@@ -1235,7 +1549,7 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
       })
 
       // Advanced AI orchestration events
-      eventBus.subscribe('ai:orchestration:started', (event) => {
+      eventBus.subscribe('ai:orchestration:started', async (event) => {
         setNotifications(prev => [...prev.slice(-9), {
           id: Math.random().toString(36),
           type: 'info',
@@ -1245,7 +1559,7 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
         }])
       })
 
-      eventBus.subscribe('workspace:adaptation:completed', (event) => {
+      eventBus.subscribe('workspace:adaptation:completed', async (event) => {
         setUserWorkspaceProfile(prev => ({
           ...prev,
           ...event.payload.adaptations
@@ -1261,7 +1575,7 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
       })
 
       // Component correlation insights
-      eventBus.subscribe('component:correlation:detected', (event) => {
+      eventBus.subscribe('component:correlation:detected', async (event) => {
         setComponentCorrelations(prev => ({
           ...prev,
           [event.payload.sourceComponent]: event.payload.correlatedComponents
@@ -1269,7 +1583,7 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
       })
 
       // Handle analytics insights
-      eventBus.subscribe('analytics:insight:generated', (event) => {
+      eventBus.subscribe('analytics:insight:generated', async (event) => {
         if (enterpriseFeatures.aiInsightsEnabled) {
           setNotifications(prev => [...prev.slice(-9), {
             id: Math.random().toString(36),
@@ -1283,7 +1597,7 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
       })
 
       // Handle system alerts
-      eventBus.subscribe('monitoring:alert:triggered', (event) => {
+      eventBus.subscribe('monitoring:alert:triggered', async (event) => {
         setSystemAlerts(prev => [...prev.slice(-19), {
           id: Math.random().toString(36),
           type: event.payload.severity,
@@ -1294,22 +1608,22 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
       })
 
       // Handle collaboration events
-      eventBus.subscribe('collaboration:session:started', (event) => {
+      eventBus.subscribe('collaboration:session:started', async (event) => {
         setCollaborationSessions(prev => [...prev, event.payload])
       })
 
-      eventBus.subscribe('collaboration:session:ended', (event) => {
+      eventBus.subscribe('collaboration:session:ended', async (event) => {
         setCollaborationSessions(prev => 
           prev.filter(session => session.id !== event.payload.sessionId)
         )
       })
 
       // Handle workflow events
-      eventBus.subscribe('workflow:created', (event) => {
+      eventBus.subscribe('workflow:created', async (event) => {
         setActiveWorkflows(prev => [...prev, event.payload])
       })
 
-      eventBus.subscribe('workflow:completed', (event) => {
+      eventBus.subscribe('workflow:completed', async (event) => {
         setActiveWorkflows(prev => 
           prev.map(wf => wf.id === event.payload.workflowId 
             ? { ...wf, status: 'completed', completedAt: new Date() }
@@ -1317,8 +1631,13 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
           )
         )
       })
+      
+      // Handle graceful error recovery events
+      eventBus.subscribe('api:mutation:graceful_error', handleGracefulErrorRecovery)
+      eventBus.subscribe('catalog:discovery:graceful_error', handleGracefulErrorRecovery)
+      eventBus.subscribe('error:boundary:caught', handleGracefulErrorRecovery)
     }
-  }, [enterprise?.core, autoRefresh]) // Remove enterpriseFeatures to prevent infinite loop
+  }, [enterprise?.core, autoRefresh, handleGracefulErrorRecovery]) // Remove enterpriseFeatures to prevent infinite loop
 
   // ========================================================================
   // AUTO-SELECTION LOGIC
@@ -1423,6 +1742,105 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
     }, [componentUsageStats, pinnedComponents]) // Remove enterpriseFeatures.intelligentRecommendations to prevent infinite loop
 
   // ========================================================================
+  // GLOBAL ERROR HANDLING - ENTERPRISE-GRADE ERROR RECOVERY
+  // ========================================================================
+  
+  useEffect(() => {
+    // Global error handler for unhandled errors
+    const handleGlobalError = (event: ErrorEvent) => {
+      console.error('Global error caught:', event.error)
+      
+      // Emit error event for telemetry with safety check
+      try {
+        if (typeof window !== 'undefined' && window.enterpriseEventBus && typeof window.enterpriseEventBus.emit === 'function') {
+          window.enterpriseEventBus.emit('global:error:caught', {
+            error: event.error?.message || 'Unknown error',
+            filename: event.filename,
+            lineno: event.lineno,
+            colno: event.colno,
+            timestamp: new Date()
+          })
+        }
+      } catch (telemetryError) {
+        console.warn('Failed to emit telemetry event:', telemetryError)
+      }
+      
+      // Don't crash the app, just log the error
+      event.preventDefault()
+    }
+    
+    // Global unhandled promise rejection handler
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      console.error('Unhandled promise rejection:', event.reason)
+      
+      // Emit error event for telemetry with safety check
+      try {
+        if (typeof window !== 'undefined' && window.enterpriseEventBus && typeof window.enterpriseEventBus.emit === 'function') {
+          window.enterpriseEventBus.emit('global:promise:rejected', {
+            error: event.reason?.message || 'Unknown promise rejection',
+            timestamp: new Date()
+          })
+        }
+      } catch (telemetryError) {
+        console.warn('Failed to emit telemetry event:', telemetryError)
+      }
+      
+      // Don't crash the app, just log the error
+      event.preventDefault()
+    }
+    
+    // Handle 502 errors specifically
+    const handle502Error = (error: any) => {
+      if (error?.message?.includes('502') || error?.message?.includes('Bad Gateway')) {
+        console.warn('502 Bad Gateway detected - server is down')
+        
+        // Show user-friendly message and reload option with safety check
+        try {
+          if (typeof window !== 'undefined' && window.enterpriseEventBus && typeof window.enterpriseEventBus.emit === 'function') {
+            window.enterpriseEventBus.emit('server:down', {
+              error: error.message,
+              timestamp: new Date()
+            })
+          }
+        } catch (telemetryError) {
+          console.warn('Failed to emit telemetry event:', telemetryError)
+        }
+        
+        // Prevent the error from crashing the app
+        return true
+      }
+      return false
+    }
+    
+    // Override console.error to catch 502 errors
+    const originalConsoleError = console.error
+    console.error = (...args) => {
+      // Check if any of the args contain 502 errors
+      const has502Error = args.some(arg => 
+        typeof arg === 'string' && arg.includes('502') ||
+        (arg && typeof arg === 'object' && arg.message && arg.message.includes('502'))
+      )
+      
+      if (has502Error) {
+        console.warn('502 error detected - server connectivity issue')
+        // Don't prevent the error from being logged, but handle it gracefully
+      }
+      
+      originalConsoleError.apply(console, args)
+    }
+    
+    // Add global error handlers
+    window.addEventListener('error', handleGlobalError)
+    window.addEventListener('unhandledrejection', handleUnhandledRejection)
+    
+    return () => {
+      window.removeEventListener('error', handleGlobalError)
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection)
+      console.error = originalConsoleError
+    }
+  }, [])
+  
+  // ========================================================================
   // KEYBOARD SHORTCUTS WITH ENTERPRISE FEATURES
   // ========================================================================
   
@@ -1515,136 +1933,274 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
     switch (activeView) {
       // Enterprise components
       case "enterprise-dashboard":
-        return <EnterpriseDashboard {...commonProps} />
+        return <EnterpriseDashboard />
       case "analytics-workbench":
-        return <AnalyticsWorkbench {...commonProps} />
+        return <AnalyticsWorkbench />
       case "collaboration-studio":
-        return <CollaborationStudio {...commonProps} />
+        return <CollaborationStudio />
       case "workflow-designer":
-        return <WorkflowDesigner {...commonProps} />
+        return <WorkflowDesigner />
 
       // Core components
       case "overview":
-        return <DataSourceDetails {...commonProps} />
+        return <DataSourceDetails 
+          dataSourceId={selectedDataSource?.id || 0}
+          onEdit={() => Promise.resolve()}
+          onDelete={() => Promise.resolve()}
+          onTestConnection={() => Promise.resolve()}
+          onStartScan={() => Promise.resolve()}
+        />
       case "grid":
         return <DataSourceGrid {...commonProps} />
       case "list":
-        return <DataSourceList {...commonProps} />
+        return <DataSourceList />
       case "details":
-        return <DataSourceDetails {...commonProps} />
+        return <DataSourceDetails 
+          dataSourceId={selectedDataSource?.id || 0}
+          onEdit={() => Promise.resolve()}
+          onDelete={() => Promise.resolve()}
+          onTestConnection={() => Promise.resolve()}
+          onStartScan={() => Promise.resolve()}
+        />
 
       // Monitoring components
       case "monitoring":
-        return <DataSourceMonitoring {...commonProps} />
+        return selectedDataSource ? (
+          <DataSourceMonitoring dataSource={selectedDataSource} />
+        ) : (
+          <div className="p-8 text-center">
+            <p className="text-muted-foreground">Select a data source to view monitoring</p>
+          </div>
+        )
       case "dashboard-monitoring":
-        return <DataSourceMonitoringDashboard {...commonProps} />
+        return selectedDataSource ? (
+          <DataSourceMonitoringDashboard dataSource={selectedDataSource} />
+        ) : (
+          <div className="p-8 text-center">
+            <p className="text-muted-foreground">Select a data source to view monitoring dashboard</p>
+          </div>
+        )
       case "performance":
-        return (
+        return selectedDataSource ? (
           <Suspense fallback={<ComponentLoader />}>
-            <DataSourcePerformanceView {...commonProps} />
+            <DataSourcePerformanceView dataSource={selectedDataSource} />
           </Suspense>
+        ) : (
+          <div className="p-8 text-center">
+            <p className="text-muted-foreground">Select a data source to view performance</p>
+          </div>
         )
       case "quality":
-        return <DataSourceQualityAnalytics {...commonProps} />
+        return selectedDataSource ? (
+          <DataSourceQualityAnalytics dataSource={selectedDataSource} />
+        ) : (
+          <div className="p-8 text-center">
+            <p className="text-muted-foreground">Select a data source to view quality analytics</p>
+          </div>
+        )
       case "growth":
-        return <DataSourceGrowthAnalytics {...commonProps} />
+        return selectedDataSource ? (
+          <DataSourceGrowthAnalytics dataSource={selectedDataSource} />
+        ) : (
+          <div className="p-8 text-center">
+            <p className="text-muted-foreground">Select a data source to view growth analytics</p>
+          </div>
+        )
 
       // Discovery components
       case "discovery":
-        return <DataSourceDiscovery {...commonProps} />
+        return selectedDataSource ? (
+          <DataSourceDiscovery dataSource={selectedDataSource} />
+        ) : (
+          <div className="p-8 text-center">
+            <p className="text-muted-foreground">Select a data source to view discovery</p>
+          </div>
+        )
       case "discovery-workspace":
-        return <DataDiscoveryWorkspace {...commonProps} />
+        return selectedDataSource ? (
+          <DataDiscoveryWorkspace 
+            dataSource={selectedDataSource} 
+            isOpen={true} 
+            onClose={() => {}} 
+          />
+        ) : (
+          <div className="p-8 text-center">
+            <p className="text-muted-foreground">Select a data source to view discovery workspace</p>
+          </div>
+        )
       case "schema-discovery":
-        return <SchemaDiscovery {...commonProps} />
+        return selectedDataSource ? (
+          <SchemaDiscovery 
+            dataSourceId={selectedDataSource.id} 
+            dataSourceName={selectedDataSource.name} 
+            onSelectionChange={() => {}} 
+            onClose={() => {}} 
+          />
+        ) : (
+          <div className="p-8 text-center">
+            <p className="text-muted-foreground">Select a data source to view schema discovery</p>
+          </div>
+        )
       case "data-lineage":
-        return <DataLineageGraph {...commonProps} />
+        return selectedDataSource ? (
+          <DataLineageGraph />
+        ) : (
+          <div className="p-8 text-center">
+            <p className="text-muted-foreground">Select a data source to view data lineage</p>
+          </div>
+        )
       case "scan-results":
-        return (
+        return selectedDataSource ? (
           <Suspense fallback={<ComponentLoader />}>
-            <DataSourceScanResults {...commonProps} />
+            <DataSourceScanResults {...commonProps} dataSourceId={selectedDataSource.id} />
           </Suspense>
+        ) : (
+          <div className="p-8 text-center">
+            <p className="text-muted-foreground">Select a data source to view scan results</p>
+          </div>
         )
       case "compliance":
-        return (
+        return selectedDataSource ? (
           <Suspense fallback={<ComponentLoader />}>
-            <DataSourceComplianceView {...commonProps} />
+            <DataSourceComplianceView {...commonProps} dataSource={selectedDataSource} />
           </Suspense>
+        ) : (
+          <div className="p-8 text-center">
+            <p className="text-muted-foreground">Select a data source to view compliance</p>
+          </div>
         )
       case "security":
-        return (
+        return selectedDataSource ? (
           <Suspense fallback={<ComponentLoader />}>
-            <DataSourceSecurityView {...commonProps} />
+            <DataSourceSecurityView {...commonProps} dataSource={selectedDataSource} />
           </Suspense>
+        ) : (
+          <div className="p-8 text-center">
+            <p className="text-muted-foreground">Select a data source to view security</p>
+          </div>
         )
 
       // Management components
       case "cloud-config":
-        return <DataSourceCloudConfig {...commonProps} />
+        return selectedDataSource ? (
+          <DataSourceCloudConfig {...commonProps} dataSource={selectedDataSource} />
+        ) : (
+          <div className="p-8 text-center">
+            <p className="text-muted-foreground">Select a data source to configure cloud settings</p>
+          </div>
+        )
       case "access-control":
-        return (
+        return selectedDataSource ? (
           <Suspense fallback={<ComponentLoader />}>
-            <DataSourceAccessControl {...commonProps} />
+            <DataSourceAccessControl {...commonProps} dataSource={selectedDataSource} />
           </Suspense>
+        ) : (
+          <div className="p-8 text-center">
+            <p className="text-muted-foreground">Select a data source to manage access control</p>
+          </div>
         )
       case "tags":
-        return (
+        return selectedDataSource ? (
           <Suspense fallback={<ComponentLoader />}>
-            <DataSourceTagsManager {...commonProps} />
+            <DataSourceTagsManager 
+              dataSourceId={selectedDataSource.id} 
+              onClose={() => {}} 
+            />
           </Suspense>
+        ) : (
+          <div className="p-8 text-center">
+            <p className="text-muted-foreground">Select a data source to manage tags</p>
+          </div>
         )
       case "scheduler":
-        return (
+        return selectedDataSource ? (
           <Suspense fallback={<ComponentLoader />}>
-            <DataSourceScheduler {...commonProps} />
+            <DataSourceScheduler {...commonProps} dataSource={selectedDataSource} />
           </Suspense>
+        ) : (
+          <div className="p-8 text-center">
+            <p className="text-muted-foreground">Select a data source to manage scheduling</p>
+          </div>
         )
 
       // Collaboration components
       case "workspaces":
-        return <DataSourceWorkspaceManagement {...commonProps} />
+        return selectedDataSource ? (
+          <DataSourceWorkspaceManagement {...commonProps} dataSource={selectedDataSource} />
+        ) : (
+          <div className="p-8 text-center">
+            <p className="text-muted-foreground">Select a data source to manage workspaces</p>
+          </div>
+        )
       case "notifications":
         return (
           <Suspense fallback={<ComponentLoader />}>
-            <DataSourceNotifications {...commonProps} />
+            <DataSourceNotifications />
           </Suspense>
         )
       case "reports":
-        return (
+        return selectedDataSource ? (
           <Suspense fallback={<ComponentLoader />}>
-            <DataSourceReports {...commonProps} />
+            <DataSourceReports {...commonProps} dataSource={selectedDataSource} />
           </Suspense>
+        ) : (
+          <div className="p-8 text-center">
+            <p className="text-muted-foreground">Select a data source to view reports</p>
+          </div>
         )
       case "version-history":
-        return (
+        return selectedDataSource ? (
           <Suspense fallback={<ComponentLoader />}>
-            <DataSourceVersionHistory {...commonProps} />
+            <DataSourceVersionHistory {...commonProps} dataSource={selectedDataSource} />
           </Suspense>
+        ) : (
+          <div className="p-8 text-center">
+            <p className="text-muted-foreground">Select a data source to view version history</p>
+          </div>
         )
 
       // Operations components
       case "backup-restore":
-        return (
+        return selectedDataSource ? (
           <Suspense fallback={<ComponentLoader />}>
-            <DataSourceBackupRestore {...commonProps} />
+            <DataSourceBackupRestore {...commonProps} dataSourceId={selectedDataSource.id} />
           </Suspense>
+        ) : (
+          <div className="p-8 text-center">
+            <p className="text-muted-foreground">Select a data source to manage backup and restore</p>
+          </div>
         )
       case "bulk-actions":
-        return <DataSourceBulkActions {...commonProps} />
-      case "integrations":
         return (
+          <DataSourceBulkActions 
+            open={modals.bulk} 
+            onClose={() => setModals(prev => ({ ...prev, bulk: false }))} 
+            selectedItems={selectedItems}
+          />
+        )
+      case "integrations":
+        return selectedDataSource ? (
           <Suspense fallback={<ComponentLoader />}>
-            <DataSourceIntegrations {...commonProps} />
+            <DataSourceIntegrations {...commonProps} dataSourceId={selectedDataSource.id} />
           </Suspense>
+        ) : (
+          <div className="p-8 text-center">
+            <p className="text-muted-foreground">Select a data source to manage integrations</p>
+          </div>
         )
       case "catalog":
-        return (
+        return selectedDataSource ? (
           <Suspense fallback={<ComponentLoader />}>
-            <DataSourceCatalog {...commonProps} />
+            <DataSourceCatalog {...commonProps} dataSourceId={selectedDataSource.id} />
           </Suspense>
+        ) : (
+          <div className="p-8 text-center">
+            <p className="text-muted-foreground">Select a data source to view catalog</p>
+          </div>
         )
 
       default:
-        return <EnterpriseDashboard {...commonProps} />
+        return <EnterpriseDashboard />
     }
   }, [activeView, selectedDataSource, searchQuery, filters, viewMode, mainFeatures])
 
@@ -1724,8 +2280,20 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
   // MAIN RENDER
   // ========================================================================
   
-  // Handle RBAC loading state
-  if (rbacLoading) {
+  // Handle RBAC loading state with timeout
+  const [rbacTimeout, setRbacTimeout] = useState(false)
+  
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (rbacLoading) {
+        setRbacTimeout(true)
+      }
+    }, 10000) // 10 second timeout
+    
+    return () => clearTimeout(timer)
+  }, [rbacLoading])
+  
+  if (rbacLoading && !rbacTimeout) {
     return (
       <TooltipProvider>
         <div className={`min-h-screen bg-background ${className}`}>
@@ -1737,6 +2305,39 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
                 <p className="text-gray-500">Initializing RBAC permissions...</p>
               </div>
             </div>
+          </div>
+        </div>
+      </TooltipProvider>
+    )
+  }
+  
+  // Handle RBAC timeout
+  if (rbacTimeout) {
+    return (
+      <TooltipProvider>
+        <div className={`min-h-screen bg-background ${className}`}>
+          <div className="flex items-center justify-center h-screen">
+            <Alert className="max-w-md">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>Security Context Timeout</AlertTitle>
+              <AlertDescription>
+                The security context is taking longer than expected to load. This may be due to backend connectivity issues.
+                <br />
+                <div className="mt-4 space-y-2">
+                  <Button 
+                    onClick={() => {
+                      setRbacTimeout(false)
+                      window.location.reload()
+                    }} 
+                    className="w-full"
+                    variant="default"
+                  >
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Reload Page
+                  </Button>
+                </div>
+              </AlertDescription>
+            </Alert>
           </div>
         </div>
       </TooltipProvider>
@@ -1755,7 +2356,7 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
               <AlertDescription>
                 Failed to load security permissions. Please refresh the page or contact your administrator.
                 <br />
-                <small className="text-gray-500 mt-2 block">{rbacError.message}</small>
+                <small className="text-gray-500 mt-2 block">{rbacError}</small>
               </AlertDescription>
             </Alert>
           </div>
@@ -1764,6 +2365,145 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
     )
   }
 
+  // Handle API errors gracefully
+  if (dataSourcesError) {
+    // Check if it's a graceful error that can be handled
+    const isGracefulError = (dataSourcesError as any)?.isGraceful
+    const canRetry = (dataSourcesError as any)?.canRetry !== false
+    
+    // Check if it's a 502 Bad Gateway error (server down)
+    const isServerDown = dataSourcesError.message?.includes('502') || 
+                        dataSourcesError.message?.includes('Bad Gateway') ||
+                        dataSourcesError.message?.includes('Request failed with status code 502')
+    
+    return (
+      <TooltipProvider>
+        <div className={`min-h-screen bg-background ${className}`}>
+          <div className="flex items-center justify-center h-screen">
+            <Alert className="max-w-md">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>
+                {isServerDown ? 'Server Unavailable' : 
+                 isGracefulError ? 'Connection Issue Detected' : 'API Connection Error'}
+              </AlertTitle>
+              <AlertDescription>
+                {isServerDown 
+                  ? 'The backend server is currently unavailable. This is likely a temporary issue.'
+                  : isGracefulError 
+                    ? 'The system detected a connection issue and is working to resolve it automatically.'
+                    : 'Unable to connect to data sources. The system will attempt to reconnect automatically.'
+                }
+                <br />
+                <small className="text-gray-500 mt-2 block">
+                  Error: {dataSourcesError.message || 'Unknown error'}
+                </small>
+                <div className="mt-4 space-y-2">
+                  {canRetry && !isServerDown && (
+                    <Button 
+                      onClick={() => refetchDataSources()} 
+                      className="w-full"
+                      variant="outline"
+                    >
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Retry Connection
+                    </Button>
+                  )}
+                  <Button 
+                    onClick={() => window.location.reload()} 
+                    className="w-full"
+                    variant="default"
+                  >
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Reload Page
+                  </Button>
+                </div>
+              </AlertDescription>
+            </Alert>
+          </div>
+        </div>
+      </TooltipProvider>
+    )
+  }
+
+  // Handle fallback mode
+  if (fallbackMode) {
+    return (
+      <TooltipProvider>
+        <div className={`min-h-screen bg-background ${className}`}>
+          <div className="flex items-center justify-center h-screen">
+            <Alert className="max-w-md">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>Fallback Mode Active</AlertTitle>
+              <AlertDescription>
+                Multiple API failures detected. The system is running in fallback mode with limited functionality.
+                <br />
+                <div className="mt-4 space-y-2">
+                  <Button 
+                    onClick={() => {
+                      setFallbackMode(false)
+                      refetchDataSources()
+                    }} 
+                    className="w-full"
+                    variant="outline"
+                  >
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Retry APIs
+                  </Button>
+                  <Button 
+                    onClick={() => window.location.reload()} 
+                    className="w-full"
+                    variant="default"
+                  >
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Reload Page
+                  </Button>
+                </div>
+              </AlertDescription>
+            </Alert>
+          </div>
+        </div>
+      </TooltipProvider>
+    )
+  }
+
+  // Handle server down state
+  if (serverDown) {
+    return (
+      <TooltipProvider>
+        <div className={`min-h-screen bg-background ${className}`}>
+          <div className="flex items-center justify-center h-screen">
+            <Alert className="max-w-md">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>Server Unavailable</AlertTitle>
+              <AlertDescription>
+                The backend server is currently unavailable. This is likely a temporary issue.
+                <br />
+                <div className="mt-4 space-y-2">
+                  <Button 
+                    onClick={checkServerConnectivity} 
+                    className="w-full"
+                    variant="outline"
+                  >
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Check Server Status
+                  </Button>
+                  <Button 
+                    onClick={() => window.location.reload()} 
+                    className="w-full"
+                    variant="default"
+                  >
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Reload Page
+                  </Button>
+                </div>
+              </AlertDescription>
+            </Alert>
+          </div>
+        </div>
+      </TooltipProvider>
+    )
+  }
+  
   // Handle no permissions
   if (!dataSourcePermissions.canView) {
     return (
@@ -1785,10 +2525,30 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
   
   return (
     <TooltipProvider>
-      <div className={`min-h-screen bg-background ${className}`}>
-        
-        {/* Enhanced Header with Enterprise Features */}
-        <header className="border-b bg-card">
+      <GracefulErrorBoundary 
+        errorType="api"
+        showReloadButton={true}
+        showRetryButton={true}
+        onError={(error, errorInfo) => {
+          console.error('Data Sources App Error:', error, errorInfo)
+          // Log error for telemetry with safety check
+          try {
+            if (typeof window !== 'undefined' && window.enterpriseEventBus && typeof window.enterpriseEventBus.emit === 'function') {
+              window.enterpriseEventBus.emit('app:error:caught', {
+                error: error.message,
+                componentStack: errorInfo.componentStack,
+                timestamp: new Date()
+              })
+            }
+          } catch (telemetryError) {
+            console.warn('Failed to emit telemetry event:', telemetryError)
+          }
+        }}
+      >
+        <div className={`min-h-screen bg-background ${className}`}>
+          
+          {/* Enhanced Header with Enterprise Features - Cursor/VSCode Style */}
+          <header className="border-b bg-card/50 backdrop-blur-sm border-border/50">
           <div className="flex h-16 items-center px-4">
             
             {/* Left: Logo and Navigation */}
@@ -1797,14 +2557,24 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
                 variant="ghost"
                 size="icon"
                 onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                className="hover:bg-accent/50 transition-colors"
               >
                 <Menu className="h-5 w-5" />
               </Button>
               
               <div className="flex items-center space-x-2">
-                <Database className="h-6 w-6 text-blue-600" />
-                <span className="font-semibold text-lg">Data Sources</span>
-                <Badge variant="secondary" className="text-xs">Enterprise</Badge>
+                <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600">
+                  <Database className="h-5 w-5 text-white" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-semibold text-lg bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                    Data Sources
+                  </span>
+                  <span className="text-xs text-muted-foreground">Enterprise Platform</span>
+                </div>
+                <Badge variant="secondary" className="text-xs bg-gradient-to-r from-blue-500/20 to-purple-500/20 border-blue-500/30 text-blue-600">
+                  Enterprise
+                </Badge>
               </div>
             </div>
 
@@ -1817,8 +2587,16 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onFocus={() => setCommandPaletteOpen(true)}
-                  className="pl-10"
+                  className="pl-10 bg-background/50 backdrop-blur-sm border-border/50 focus:bg-background transition-all duration-200"
                 />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+                  onClick={() => setCommandPaletteOpen(true)}
+                >
+                  ⌘K
+                </Button>
               </div>
             </div>
 
@@ -2052,15 +2830,15 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="flex items-center gap-2 px-3">
                     <Avatar className="h-6 w-6">
-                      <AvatarImage src={currentUser?.avatar} />
+                      <AvatarImage src={currentUser?.avatar || ''} />
                       <AvatarFallback className="text-xs">
-                        {currentUser?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
+                        {currentUser?.name?.split(' ').map((n: string) => n[0]).join('').toUpperCase() || 'U'}
                       </AvatarFallback>
                     </Avatar>
                     {!sidebarCollapsed && (
                       <div className="flex flex-col items-start">
                         <span className="text-sm font-medium">{currentUser?.name || 'User'}</span>
-                        <span className="text-xs text-gray-500">{currentUser?.roles?.[0] || 'Member'}</span>
+                        <span className="text-xs text-gray-500">{currentUser?.roles?.[0]?.toString() || 'Member'}</span>
                       </div>
                     )}
                   </Button>
@@ -2069,9 +2847,9 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
                   <DropdownMenuLabel className="pb-2">
                     <div className="flex items-center gap-3">
                       <Avatar className="h-8 w-8">
-                        <AvatarImage src={currentUser?.avatar} />
+                        <AvatarImage src={currentUser?.avatar || ''} />
                         <AvatarFallback>
-                          {currentUser?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
+                          {currentUser?.name?.split(' ').map((n: string) => n[0]).join('').toUpperCase() || 'U'}
                         </AvatarFallback>
                       </Avatar>
                       <div>
@@ -2147,7 +2925,7 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem 
-                    onClick={() => logUserAction('user_logout', 'system', null)}
+                    onClick={() => logUserAction('user_logout', 'system', 0)}
                   >
                     <LogOut className="mr-2 h-4 w-4" />
                     Sign Out
@@ -2161,51 +2939,89 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
         {/* Main Content with Resizable Panels */}
         <div className="flex h-[calc(100vh-4rem)]">
           
-          {/* Enhanced Sidebar */}
-          <aside className={`border-r bg-card transition-all duration-300 ${sidebarCollapsed ? 'w-16' : 'w-64'}`}>
+          {/* Enhanced Sidebar - Cursor/VSCode Style */}
+          <aside className={`border-r bg-card/30 backdrop-blur-sm border-border/50 transition-all duration-300 ${sidebarCollapsed ? 'w-16' : 'w-64'}`}>
             <ScrollArea className="h-full">
               <div className="p-4 space-y-6">
                 
                 {Object.entries(filteredNavigation).map(([categoryKey, category]) => (
                   <div key={categoryKey} className="space-y-2">
                     {!sidebarCollapsed && (
-                      <div className="flex items-center space-x-2 px-2">
-                        <category.icon className="h-4 w-4 text-gray-500" />
-                        <h3 className="text-sm font-medium text-gray-700">{category.label}</h3>
+                      <div className="flex items-center space-x-2 px-2 py-1">
+                        <div className="p-1.5 rounded-md bg-gradient-to-br from-muted/50 to-muted/30">
+                          <category.icon className="h-3.5 w-3.5 text-muted-foreground" />
+                        </div>
+                        <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                          {category.label}
+                        </h3>
                         {category.category === 'analytics' && (
-                          <Badge variant="outline" className="text-xs">AI</Badge>
+                          <Badge variant="outline" className="text-xs bg-purple-500/10 border-purple-500/20 text-purple-600">
+                            AI
+                          </Badge>
                         )}
                       </div>
                     )}
                     
                     <div className="space-y-1">
-                      {category.items.map((item) => (
+                      {category.items.map((item: any) => (
                         <Tooltip key={item.id} delayDuration={sidebarCollapsed ? 0 : 1000}>
                           <TooltipTrigger asChild>
                             <Button
                               variant={activeView === item.id ? "secondary" : "ghost"}
-                              className={`w-full justify-start ${sidebarCollapsed ? 'px-2' : 'px-3'}`}
+                              className={`w-full justify-start group transition-all duration-200 ${
+                                sidebarCollapsed ? 'px-2' : 'px-3'
+                              } ${
+                                activeView === item.id 
+                                  ? 'bg-gradient-to-r from-blue-500/20 to-purple-500/20 border-blue-500/30 shadow-sm' 
+                                  : 'hover:bg-accent/50 hover:shadow-sm'
+                              }`}
                               onClick={() => handleViewChange(item.id)}
                             >
-                              <item.icon className={`h-4 w-4 ${sidebarCollapsed ? '' : 'mr-2'}`} />
+                              <div className={`p-1 rounded-md transition-colors ${
+                                activeView === item.id 
+                                  ? 'bg-gradient-to-br from-blue-500 to-purple-600' 
+                                  : 'bg-muted/50 group-hover:bg-muted/70'
+                              }`}>
+                                <item.icon className={`h-3.5 w-3.5 ${
+                                  activeView === item.id ? 'text-white' : 'text-muted-foreground'
+                                }`} />
+                              </div>
                               {!sidebarCollapsed && (
-                                <div className="flex items-center justify-between w-full">
-                                  <span className="text-sm">{item.label}</span>
+                                <div className="flex items-center justify-between w-full ml-2">
+                                  <span className={`text-sm font-medium ${
+                                    activeView === item.id ? 'text-foreground' : 'text-muted-foreground'
+                                  }`}>
+                                    {item.label}
+                                  </span>
                                   <div className="flex items-center space-x-1">
-                                    {item.premium && <Crown className="h-3 w-3 text-yellow-500" />}
-                                    {item.features?.includes('ai') && <Brain className="h-3 w-3 text-purple-500" />}
-                                    {item.features?.includes('realTime') && <Zap className="h-3 w-3 text-green-500" />}
+                                    {item.premium && (
+                                      <div className="p-0.5 rounded bg-gradient-to-r from-yellow-400 to-orange-500">
+                                        <Crown className="h-2.5 w-2.5 text-white" />
+                                      </div>
+                                    )}
+                                    {item.features?.includes('ai') && (
+                                      <div className="p-0.5 rounded bg-gradient-to-r from-purple-400 to-pink-500">
+                                        <Brain className="h-2.5 w-2.5 text-white" />
+                                      </div>
+                                    )}
+                                    {item.features?.includes('realTime') && (
+                                      <div className="p-0.5 rounded bg-gradient-to-r from-green-400 to-teal-500">
+                                        <Zap className="h-2.5 w-2.5 text-white" />
+                                      </div>
+                                    )}
                                   </div>
                                 </div>
                               )}
                             </Button>
                           </TooltipTrigger>
-                          <TooltipContent side={sidebarCollapsed ? "right" : "bottom"}>
+                          <TooltipContent side={sidebarCollapsed ? "right" : "bottom"} className="bg-popover/95 backdrop-blur-sm border-border/50">
                             <div className="space-y-1">
                               <p className="font-medium">{item.label}</p>
-                              <p className="text-xs text-gray-500">{item.description}</p>
+                              <p className="text-xs text-muted-foreground">{item.description}</p>
                               {item.shortcut && (
-                                <p className="text-xs font-mono bg-gray-100 px-1 rounded">{item.shortcut}</p>
+                                <p className="text-xs font-mono bg-muted/50 px-1.5 py-0.5 rounded border border-border/30">
+                                  {item.shortcut}
+                                </p>
                               )}
                             </div>
                           </TooltipContent>
@@ -2218,30 +3034,133 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
             </ScrollArea>
           </aside>
 
-          {/* Main Content Area */}
-          <main className="flex-1 overflow-hidden">
-            <ResizablePanelGroup direction="horizontal">
+          {/* Main Content Area - Cursor/VSCode Style */}
+          <main className="flex-1 overflow-hidden bg-gradient-to-br from-background via-background to-muted/20">
+            <ResizablePanelGroup direction="horizontal" className="h-full">
               
               {panels.map((panel, index) => (
                 <React.Fragment key={panel.id}>
-                  <ResizablePanel defaultSize={panel.size}>
-                    <div className="h-full overflow-auto">
+                  <ResizablePanel defaultSize={panel.size} className="relative">
+                    <div className="h-full overflow-auto bg-card/30 backdrop-blur-sm border-r border-border/30 last:border-r-0">
                       {index === 0 ? (
-                        renderActiveComponent()
+                        <div className="relative">
+                          {/* Content Header */}
+                          <div className="sticky top-0 z-10 bg-card/80 backdrop-blur-sm border-b border-border/30 px-6 py-3">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-3">
+                                <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-blue-500/30">
+                                  <Eye className="h-4 w-4 text-blue-600" />
+                                </div>
+                                <div>
+                                  <h2 className="text-lg font-semibold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                                    {activeView.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                                  </h2>
+                                  <p className="text-xs text-muted-foreground">
+                                    {enterpriseNavigationStructure[Object.keys(enterpriseNavigationStructure).find(key => 
+                                      enterpriseNavigationStructure[key].items.some((item: any) => item.id === activeView)
+                                    ) || 'core']?.label || 'Core Management'}
+                                  </p>
+                                </div>
+                              </div>
+                              
+                              {/* Quick Actions */}
+                              <div className="flex items-center space-x-2">
+                                {contextualActions[activeView]?.map((action) => (
+                                  <Button
+                                    key={action.id}
+                                    size="sm"
+                                    variant="outline"
+                                    className="text-xs bg-gradient-to-r from-muted/50 to-muted/30 border-border/50 hover:bg-accent/50"
+                                  >
+                                    <action.icon className="h-3 w-3 mr-1" />
+                                    {action.label}
+                                  </Button>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* Main Content */}
+                          <div className="p-6">
+                            {renderActiveComponent()}
+                          </div>
+                        </div>
                       ) : (
                         <div className="p-4">
-                          <h3 className="text-lg font-medium mb-4">Panel {index + 1}</h3>
-                          {/* Additional panel content based on layout */}
-                          {panel.id === 'metrics' && <div>Metrics Panel</div>}
-                          {panel.id === 'activity' && <div>Activity Panel</div>}
-                          {panel.id === 'chat' && <div>Chat Panel</div>}
-                          {panel.id === 'alerts' && <div>Alerts Panel</div>}
+                          <div className="flex items-center space-x-2 mb-4">
+                            <div className="p-2 rounded-lg bg-gradient-to-br from-muted/50 to-muted/30">
+                              {panel.id === 'metrics' && <BarChart3 className="h-4 w-4 text-blue-600" />}
+                              {panel.id === 'activity' && <Activity className="h-4 w-4 text-green-600" />}
+                              {panel.id === 'chat' && <MessageSquare className="h-4 w-4 text-purple-600" />}
+                              {panel.id === 'alerts' && <AlertTriangle className="h-4 w-4 text-orange-600" />}
+                            </div>
+                            <h3 className="text-lg font-medium capitalize">
+                              {panel.id === 'metrics' ? 'Metrics' : 
+                               panel.id === 'activity' ? 'Activity' : 
+                               panel.id === 'chat' ? 'Chat' : 
+                               panel.id === 'alerts' ? 'Alerts' : 
+                               `Panel ${index + 1}`}
+                            </h3>
+                          </div>
+                          
+                          {/* Panel-specific content */}
+                          {panel.id === 'metrics' && (
+                            <div className="space-y-4">
+                              <div className="grid grid-cols-2 gap-4">
+                                <Card className="bg-gradient-to-br from-blue-500/10 to-blue-500/5 border-blue-500/20">
+                                  <CardContent className="p-4">
+                                    <div className="text-2xl font-bold text-blue-600">98%</div>
+                                    <div className="text-sm text-muted-foreground">System Health</div>
+                                  </CardContent>
+                                </Card>
+                                <Card className="bg-gradient-to-br from-green-500/10 to-green-500/5 border-green-500/20">
+                                  <CardContent className="p-4">
+                                    <div className="text-2xl font-bold text-green-600">24</div>
+                                    <div className="text-sm text-muted-foreground">Active Sources</div>
+                                  </CardContent>
+                                </Card>
+                              </div>
+                            </div>
+                          )}
+                          {panel.id === 'activity' && (
+                            <div className="space-y-3">
+                              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                <span>Data source scan completed</span>
+                              </div>
+                              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                <span>New user permissions granted</span>
+                              </div>
+                              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                                <span>AI insights generated</span>
+                              </div>
+                            </div>
+                          )}
+                          {panel.id === 'chat' && (
+                            <div className="text-center text-muted-foreground py-8">
+                              <MessageSquare className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                              <p>Collaboration chat will appear here</p>
+                            </div>
+                          )}
+                          {panel.id === 'alerts' && (
+                            <div className="space-y-3">
+                              <Alert className="bg-orange-500/10 border-orange-500/20">
+                                <AlertTriangle className="h-4 w-4 text-orange-600" />
+                                <AlertTitle>Performance Alert</AlertTitle>
+                                <AlertDescription>Database response time increased by 15%</AlertDescription>
+                              </Alert>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
                   </ResizablePanel>
                   
-                  {index < panels.length - 1 && <ResizableHandle />}
+                  {index < panels.length - 1 && (
+                    <ResizableHandle className="bg-border/50 hover:bg-border transition-colors" />
+                  )}
                 </React.Fragment>
               ))}
               
@@ -2249,17 +3168,17 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
           </main>
         </div>
 
-        {/* Advanced Floating Action Buttons - Databricks Style */}
-        <div className="fixed bottom-6 right-6 flex flex-col space-y-3">
+        {/* Advanced Floating Action Buttons - Enhanced Cursor Style */}
+        <div className="fixed bottom-6 right-6 flex flex-col space-y-3 z-50">
           
           {/* Main Quick Actions */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button size="icon" className="rounded-full h-14 w-14 shadow-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
-                <Plus className="h-6 w-6" />
+              <Button size="icon" className="rounded-full h-14 w-14 shadow-2xl bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-110">
+                <Plus className="h-6 w-6 text-white" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-72">
+            <DropdownMenuContent align="end" className="w-80 bg-popover/95 backdrop-blur-sm border-border/50">
               <DropdownMenuLabel className="flex items-center gap-2">
                 <Sparkles className="h-4 w-4" />
                 Quick Actions
@@ -2323,7 +3242,7 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
             <Button
               size="icon"
               variant="outline"
-              className="rounded-full h-12 w-12 shadow-lg bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white border-0"
+              className="rounded-full h-12 w-12 shadow-xl bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500 hover:from-purple-600 hover:via-pink-600 hover:to-rose-600 text-white border-0 transition-all duration-300 transform hover:scale-105"
               onClick={() => setModals(prev => ({ ...prev, aiInsights: true }))}
             >
               <Brain className="h-5 w-5" />
@@ -2335,7 +3254,7 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
             <Button
               size="icon"
               variant="outline"
-              className="rounded-full h-12 w-12 shadow-lg bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white border-0"
+              className="rounded-full h-12 w-12 shadow-xl bg-gradient-to-r from-green-500 via-teal-500 to-cyan-500 hover:from-green-600 hover:via-teal-600 hover:to-cyan-600 text-white border-0 transition-all duration-300 transform hover:scale-105"
               onClick={() => executeWorkflowAction('performance-optimization')}
             >
               <Zap className="h-5 w-5" />
@@ -2347,7 +3266,7 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
             <Button
               size="icon"
               variant="outline"
-              className="rounded-full h-12 w-12 shadow-lg bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white border-0"
+              className="rounded-full h-12 w-12 shadow-xl bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 hover:from-orange-600 hover:via-red-600 hover:to-pink-600 text-white border-0 transition-all duration-300 transform hover:scale-105"
               onClick={() => executeWorkflowAction('real-time-monitoring')}
             >
               <Activity className="h-5 w-5" />
@@ -2359,7 +3278,7 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
             <Button
               size="icon"
               variant="outline"
-              className="rounded-full h-12 w-12 shadow-lg bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-600 hover:to-blue-600 text-white border-0"
+              className="rounded-full h-12 w-12 shadow-xl bg-gradient-to-r from-indigo-500 via-blue-500 to-cyan-500 hover:from-indigo-600 hover:via-blue-600 hover:to-cyan-600 text-white border-0 transition-all duration-300 transform hover:scale-105"
               onClick={() => executeWorkflowAction('collaboration-workspace')}
             >
               <Users className="h-5 w-5" />
@@ -2371,7 +3290,7 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
             <Button
               size="icon"
               variant="outline"
-              className="rounded-full h-12 w-12 shadow-lg bg-gradient-to-r from-violet-500 to-purple-500 hover:from-violet-600 hover:to-purple-600 text-white border-0"
+              className="rounded-full h-12 w-12 shadow-xl bg-gradient-to-r from-violet-500 via-purple-500 to-pink-500 hover:from-violet-600 hover:via-purple-600 hover:to-pink-600 text-white border-0 transition-all duration-300 transform hover:scale-105"
               onClick={() => executeWorkflowAction('intelligent-orchestration')}
             >
               <Bot className="h-5 w-5" />
@@ -2383,7 +3302,7 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
             <Button
               size="icon"
               variant="outline"
-              className="rounded-full h-10 w-10 shadow-md bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white border-0"
+              className="rounded-full h-10 w-10 shadow-lg bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500 hover:from-cyan-600 hover:via-blue-600 hover:to-indigo-600 text-white border-0 transition-all duration-300 transform hover:scale-105"
               onClick={() => executeWorkflowAction('adaptive-workspace')}
             >
               <Sparkles className="h-4 w-4" />
@@ -2395,19 +3314,136 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
             <Button
               size="icon"
               variant="outline"
-              className="rounded-full h-10 w-10 shadow-md bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white border-0"
+              className="rounded-full h-10 w-10 shadow-lg bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-600 hover:via-teal-600 hover:to-cyan-600 text-white border-0 transition-all duration-300 transform hover:scale-105"
               onClick={() => executeWorkflowAction('cross-platform-sync')}
             >
               <Radar className="h-4 w-4" />
             </Button>
           )}
+
+          {/* System Health Monitor */}
+          <Button
+            size="icon"
+            variant="outline"
+            className="rounded-full h-10 w-10 shadow-lg bg-gradient-to-r from-slate-500 via-gray-500 to-zinc-500 hover:from-slate-600 hover:via-gray-600 hover:to-zinc-600 text-white border-0 transition-all duration-300 transform hover:scale-105"
+            onClick={() => setModals(prev => ({ ...prev, systemHealth: true }))}
+          >
+            <Activity className="h-4 w-4" />
+          </Button>
         </div>
+
+        {/* Command Palette */}
+        {commandPaletteOpen && (
+          <Dialog open={commandPaletteOpen} onOpenChange={setCommandPaletteOpen}>
+            <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <Command className="h-5 w-5" />
+                  Command Palette
+                </DialogTitle>
+                <DialogDescription>
+                  Quick access to all features and actions
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="space-y-4">
+                <Command className="rounded-lg border shadow-md">
+                  <CommandInput placeholder="Type a command or search..." />
+                  <CommandList className="max-h-96">
+                    <CommandEmpty>No results found.</CommandEmpty>
+                    
+                    {/* Quick Actions */}
+                    <CommandGroup heading="Quick Actions">
+                      <CommandItem onSelect={() => {
+                        setModals(prev => ({ ...prev, create: true }))
+                        setCommandPaletteOpen(false)
+                      }}>
+                        <Plus className="mr-2 h-4 w-4" />
+                        <span>Add Data Source</span>
+                        <kbd className="ml-auto text-xs bg-muted px-1 rounded">⌘+N</kbd>
+                      </CommandItem>
+                      <CommandItem onSelect={() => {
+                        setActiveView("enterprise-dashboard")
+                        setCommandPaletteOpen(false)
+                      }}>
+                        <BarChart3 className="mr-2 h-4 w-4" />
+                        <span>Go to Dashboard</span>
+                        <kbd className="ml-auto text-xs bg-muted px-1 rounded">⌘+D</kbd>
+                      </CommandItem>
+                      <CommandItem onSelect={() => {
+                        setActiveView("analytics-workbench")
+                        setCommandPaletteOpen(false)
+                      }}>
+                        <Brain className="mr-2 h-4 w-4" />
+                        <span>Open Analytics</span>
+                        <kbd className="ml-auto text-xs bg-muted px-1 rounded">⌘+A</kbd>
+                      </CommandItem>
+                    </CommandGroup>
+
+                    {/* Navigation */}
+                    <CommandGroup heading="Navigation">
+                      {Object.entries(filteredNavigation).map(([categoryKey, category]) => (
+                        <div key={categoryKey}>
+                          {category.items.map((item: any) => (
+                            <CommandItem
+                              key={item.id}
+                              onSelect={() => {
+                                handleViewChange(item.id)
+                                setCommandPaletteOpen(false)
+                              }}
+                            >
+                              <item.icon className="mr-2 h-4 w-4" />
+                              <span>{item.label}</span>
+                              {item.shortcut && (
+                                <kbd className="ml-auto text-xs bg-muted px-1 rounded">{item.shortcut}</kbd>
+                              )}
+                            </CommandItem>
+                          ))}
+                        </div>
+                      ))}
+                    </CommandGroup>
+
+                    {/* Workflow Actions */}
+                    <CommandGroup heading="Workflow Actions">
+                      {workflowActions.slice(0, 5).map((action) => (
+                        <CommandItem
+                          key={action.id}
+                          onSelect={() => {
+                            executeWorkflowAction(action.id)
+                            setCommandPaletteOpen(false)
+                          }}
+                        >
+                          <action.icon className="mr-2 h-4 w-4" />
+                          <span>{action.label}</span>
+                          <Badge variant="outline" className="ml-auto text-xs">
+                            {action.category}
+                          </Badge>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
 
         {/* Modals */}
         {modals.create && (
           <DataSourceCreateModal
             open={modals.create}
-            onOpenChange={(open) => setModals(prev => ({ ...prev, create: open }))}
+            onClose={() => setModals(prev => ({ ...prev, create: false }))}
+            onSuccess={async (payload) => {
+              const created = await createDataSourceMutation.mutateAsync(payload)
+              // Refresh list and select the newly created datasource in UI
+              await refetchDataSources()
+              try {
+                if (created && created.id) {
+                  setSelectedDataSource(created)
+                }
+              } catch (_) {}
+              return created
+            }}
           />
         )}
 
@@ -2421,7 +3457,8 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
 
         {/* Toast Notifications */}
         <Toaster position="top-right" />
-      </div>
+        </div>
+      </GracefulErrorBoundary>
     </TooltipProvider>
   )
 }

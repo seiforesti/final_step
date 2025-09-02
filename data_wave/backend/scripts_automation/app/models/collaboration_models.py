@@ -106,6 +106,70 @@ class WorkspaceMember(SQLModel, table=True):
     # Relationships
     workspace: Optional["Workspace"] = Relationship(back_populates="members")
 
+class CollaborationSession(SQLModel, table=True):
+    """Real-time collaboration session model"""
+    __tablename__ = "racine_collaboration_sessions"
+    
+    id: Optional[int] = Field(default=None, primary_key=True)
+    session_id: str = Field(unique=True, index=True)
+    workspace_id: int = Field(foreign_key="workspaces.id", index=True)
+    
+    # Session details
+    session_name: str
+    session_type: str  # e.g., "document_collaboration", "meeting", "workshop"
+    description: Optional[str] = None
+    
+    # Status and timing
+    status: str = Field(default="active")  # active, paused, ended
+    started_at: datetime = Field(default_factory=datetime.now)
+    ended_at: Optional[datetime] = None
+    last_activity: datetime = Field(default_factory=datetime.now)
+    
+    # Session configuration
+    session_config: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    max_participants: Optional[int] = None
+    is_private: bool = Field(default=False)
+    
+    # Active content
+    active_documents: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    current_activities: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    
+    # Metadata
+    session_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    
+    # Audit fields
+    created_at: datetime = Field(default_factory=datetime.now)
+    updated_at: datetime = Field(default_factory=datetime.now)
+
+
+class SessionParticipant(SQLModel, table=True):
+    """Session participant tracking"""
+    __tablename__ = "racine_collaboration_participants"
+    
+    id: Optional[int] = Field(default=None, primary_key=True)
+    session_id: int = Field(foreign_key="racine_collaboration_sessions.id", index=True)
+    user_id: str = Field(index=True)
+    
+    # Participation details
+    role: str = Field(default="participant")  # host, presenter, participant, observer
+    joined_at: datetime = Field(default_factory=datetime.now)
+    left_at: Optional[datetime] = None
+    is_active: bool = Field(default=True)
+    
+    # Activity tracking
+    last_activity: datetime = Field(default_factory=datetime.now)
+    contributions_count: int = Field(default=0)
+    time_spent_minutes: int = Field(default=0)
+    
+    # Permissions in session
+    can_edit: bool = Field(default=True)
+    can_share: bool = Field(default=True)
+    can_record: bool = Field(default=False)
+    
+    # Metadata
+    participant_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+
+
 class CollaborativeDocument(SQLModel, table=True):
     """Advanced collaborative documents with real-time editing"""
     __tablename__ = "collaborative_documents"

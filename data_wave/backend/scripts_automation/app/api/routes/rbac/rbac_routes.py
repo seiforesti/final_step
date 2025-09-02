@@ -42,19 +42,43 @@ class RoleUpdate(BaseModel):
 # Robust session checker
 from sqlalchemy.orm import Session
 from app.db_session import get_db
+import time
+
+_rbac_session_cache = {}
+_rbac_session_cache_ttl_seconds = 2.0
+
+def _cached_get_session(db: Session, token: str):
+    now = time.time()
+    cached = _rbac_session_cache.get(token)
+    if cached and now < cached[0]:
+        return cached[1]
+    value = get_session_by_token(db, token)
+    _rbac_session_cache[token] = (now + _rbac_session_cache_ttl_seconds, value)
+    return value
 
 def get_current_user(
+    request: Request,
     session_token: str = Cookie(None),
     authorization: str = Header(None),
     db: Session = Depends(get_db)
 ):
+    # Per-request reuse
+    if hasattr(request.state, "current_user") and request.state.current_user:
+        return request.state.current_user
     token = session_token
-    # Support Authorization: Bearer <token>
     if not token and authorization and authorization.lower().startswith("bearer "):
         token = authorization[7:]
-    session = get_session_by_token(db, token)
+    if not token:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    try:
+        session = _cached_get_session(db, token)
+    except RuntimeError as re:
+        if str(re) == "database_unavailable":
+            raise HTTPException(status_code=503, detail="Database unavailable")
+        raise
     if session is None or getattr(session, "user", None) is None:
         raise HTTPException(status_code=401, detail="Invalid or missing session token")
+    request.state.current_user = session.user
     return session.user
 
 # Pydantic model for role creation
@@ -324,6 +348,20 @@ def get_user_effective_permissions_v2(user_id: int, db: Session = Depends(get_db
     if perms is None:
         raise HTTPException(status_code=404, detail="User not found")
     return perms
+
+# --- User Effective Permissions Endpoint (v1 for backward compatibility) ---
+@router.get("/users/{user_id}/effective-permissions")
+def get_user_effective_permissions(user_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """
+    Legacy endpoint for retrieving a user's effective permissions (v1).
+    Maintains backward compatibility with existing frontend code.
+    """
+    from app.services.rbac_service import get_user_effective_permissions_rbac
+    perms = get_user_effective_permissions_rbac(db, user_id)
+    if perms is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return perms
+
 # --- List Access Requests (Delegation/Review) ---
 @router.get("/access-requests")
 def list_access_requests(
@@ -921,7 +959,7 @@ def request_access(
     requested_role: str = Body(...),
     justification: str = Body(...),
     db: Session = Depends(get_db),
-    current_user: User = Depends(lambda session_token=Cookie(None), db=Depends(get_db): get_session_by_token(db, session_token).user)
+    current_user: User = Depends(get_current_user)
 ):
     req = create_access_request(db, user_id, resource_type, resource_id, requested_role, justification)
     return {"detail": "Access request submitted", "status": req.status, "request": req.dict()}
@@ -933,7 +971,7 @@ def access_review(
     approve: bool = Body(...),
     review_note: Optional[str] = Body(None),
     db: Session = Depends(get_db),
-    current_user: User = Depends(lambda session_token=Cookie(None), db=Depends(get_db): get_session_by_token(db, session_token).user)
+    current_user: User = Depends(get_current_user)
 ):
     if getattr(current_user, "role", None) != "admin":
         raise HTTPException(status_code=403, detail="Admin only")
@@ -948,7 +986,7 @@ def get_rbac_audit_logs(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_user: User = Depends(lambda session_token=Cookie(None), db=Depends(get_db): get_session_by_token(db, session_token).user)
+    current_user: User = Depends(get_current_user)
 ):
     if getattr(current_user, "role", None) != "admin":
         raise HTTPException(status_code=403, detail="Admin only")
@@ -1091,7 +1129,7 @@ def list_group_roles_api(group_id: int, db: Session = Depends(get_db), current_u
 #---------------------------------------
 # --- Deny Assignment Endpoints ---
 @router.get("/deny-assignments")
-def list_deny_assignments_api(principal_type: str = None, principal_id: int = None, resource: str = None, action: str = None, db: Session = Depends(get_db), current_user: User = Depends(lambda session_token=Cookie(None), db=Depends(get_db): get_session_by_token(db, session_token).user)):
+def list_deny_assignments_api(principal_type: str = None, principal_id: int = None, resource: str = None, action: str = None, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     if getattr(current_user, "role", None) != "admin":
         raise HTTPException(status_code=403, detail="Admin only")
     from app.services.role_service import list_deny_assignments
@@ -1114,7 +1152,7 @@ def list_deny_assignments_api(principal_type: str = None, principal_id: int = No
 
 from fastapi import Request
 @router.post("/deny-assignments")
-def create_deny_assignment_api(request: Request, db: Session = Depends(get_db), current_user: User = Depends(lambda session_token=Cookie(None), db=Depends(get_db): get_session_by_token(db, session_token).user)):
+def create_deny_assignment_api(request: Request, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     if getattr(current_user, "role", None) != "admin":
         raise HTTPException(status_code=403, detail="Admin only")
     data = None
@@ -1150,7 +1188,7 @@ from app.models.auth_models import DenyAssignment
 def delete_deny_assignment_api(
     deny_assignment_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(lambda session_token=Cookie(None), db=Depends(get_db): get_session_by_token(db, session_token).user)
+    current_user: User = Depends(get_current_user)
 ):
     if getattr(current_user, "role", None) != "admin":
         raise HTTPException(status_code=403, detail="Admin only")
@@ -1760,3 +1798,185 @@ def get_roles_bulk_permissions(
         import traceback
         tb = traceback.format_exc()
         raise HTTPException(status_code=500, detail=f"Error in bulk role permissions: {str(e)}\n{tb}")
+
+# --- Frontend Required Endpoints ---
+@router.get("/user/permissions")
+def get_user_permissions(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Get current user's permissions for frontend integration."""
+    try:
+        from app.services.rbac_service import get_user_effective_permissions_rbac
+        
+        # Get user's effective permissions using the real RBAC service
+        perms = get_user_effective_permissions_rbac(db, current_user.id)
+        if perms is None:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Format permissions for frontend with real data
+        formatted_permissions = []
+        for perm in perms:
+            if perm.get('action') and perm.get('resource'):
+                formatted_permissions.append({
+                    "id": perm.get('id'),
+                    "action": perm['action'],
+                    "resource": perm['resource'],
+                    "description": perm.get('description', ''),
+                    "conditions": perm.get('conditions'),
+                    "is_effective": perm.get('is_effective', True),
+                    "note": perm.get('note'),
+                    "granted_at": perm.get('granted_at'),
+                    "granted_by": perm.get('granted_by')
+                })
+        
+        return formatted_permissions
+    except Exception as e:
+        logger.error(f"Error getting user permissions: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+@router.get("/user/roles")
+def get_user_roles(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Get current user's roles for frontend integration."""
+    try:
+        from sqlalchemy.orm import selectinload
+        from app.models.auth_models import Role, UserRole
+        
+        # Get user with roles loaded
+        user = db.query(User).options(
+            selectinload(User.roles)
+        ).filter(User.id == current_user.id).first()
+        
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        roles = []
+        
+        # Add primary role if exists (from User.role field)
+        if hasattr(user, "role") and isinstance(user.role, str):
+            roles.append({
+                "id": f"primary_{user.role}",
+                "name": user.role,
+                "description": f"Primary role: {user.role}",
+                "type": "primary",
+                "assigned_at": getattr(user, "created_at", None),
+                "assigned_by": "system"
+            })
+        
+        # Add additional roles from UserRole relationships
+        user_roles = getattr(user, "roles", []) or []
+        for role in user_roles:
+            if hasattr(role, "name") and isinstance(role.name, str):
+                # Get the UserRole record to get assignment details
+                user_role = db.query(UserRole).filter(
+                    UserRole.user_id == user.id,
+                    UserRole.role_id == role.id
+                ).first()
+                
+                roles.append({
+                    "id": str(getattr(role, "id", f"role_{role.name}")),
+                    "name": role.name,
+                    "description": getattr(role, "description", f"Role: {role.name}"),
+                    "type": "additional",
+                    "assigned_at": getattr(user_role, "created_at", None) if user_role else None,
+                    "assigned_by": getattr(user_role, "created_by", "system") if user_role else "system"
+                })
+        
+        return roles
+    except Exception as e:
+        logger.error(f"Error getting user roles: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+@router.delete("/user/roles/{role_id}")
+def revoke_user_role(role_id: str, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Revoke a role from the current user."""
+    try:
+        from app.models.auth_models import UserRole, Role
+        from app.services.rbac_service import RBACService
+        
+        # This is a simplified implementation - in production you'd want more validation
+        if role_id.startswith("primary_"):
+            raise HTTPException(status_code=400, detail="Cannot revoke primary role")
+        
+        # Find the role by ID
+        role = db.query(Role).filter(Role.id == int(role_id)).first()
+        if not role:
+            raise HTTPException(status_code=404, detail="Role not found")
+        
+        # Find and remove the role assignment
+        user_role = db.query(UserRole).filter(
+            UserRole.user_id == current_user.id,
+            UserRole.role_id == int(role_id)
+        ).first()
+        
+        if user_role:
+            db.delete(user_role)
+            db.commit()
+            
+            # Log the action
+            try:
+                rbac_service = RBACService(db)
+                rbac_service.log_rbac_action(
+                    action="revoke_role",
+                    performed_by=current_user.email,
+                    target_user=current_user.email,
+                    role=role.name,
+                    status="success"
+                )
+            except Exception as log_error:
+                logger.warning(f"Failed to log RBAC action: {log_error}")
+            
+            return {"message": "Role revoked successfully"}
+        else:
+            raise HTTPException(status_code=404, detail="Role assignment not found")
+    except Exception as e:
+        logger.error(f"Error revoking user role: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+@router.delete("/user/permissions/{permission_id}")
+def revoke_user_permission(permission_id: str, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Revoke a permission from the current user."""
+    try:
+        # Permissions are typically managed through roles, not directly
+        # This endpoint is for cases where direct permission management is needed
+        from app.models.auth_models import Permission, RolePermission
+        from app.services.rbac_service import RBACService
+        
+        # Find the permission
+        permission = db.query(Permission).filter(Permission.id == int(permission_id)).first()
+        if not permission:
+            raise HTTPException(status_code=404, detail="Permission not found")
+        
+        # Check if user has this permission through any role
+        user_roles = db.query(UserRole).filter(UserRole.user_id == current_user.id).all()
+        role_ids = [ur.role_id for ur in user_roles]
+        
+        # Find role-permission assignments for user's roles
+        role_permissions = db.query(RolePermission).filter(
+            RolePermission.role_id.in_(role_ids),
+            RolePermission.permission_id == int(permission_id)
+        ).all()
+        
+        if role_permissions:
+            # Remove the role-permission assignments
+            for rp in role_permissions:
+                db.delete(rp)
+            db.commit()
+            
+            # Log the action
+            try:
+                rbac_service = RBACService(db)
+                rbac_service.log_rbac_action(
+                    action="revoke_permission",
+                    performed_by=current_user.email,
+                    target_user=current_user.email,
+                    resource_type="permission",
+                    resource_id=permission_id,
+                    status="success"
+                )
+            except Exception as log_error:
+                logger.warning(f"Failed to log RBAC action: {log_error}")
+            
+            return {"message": "Permission revoked successfully"}
+        else:
+            return {"message": "User does not have this permission to revoke"}
+    except Exception as e:
+        logger.error(f"Error revoking user permission: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")

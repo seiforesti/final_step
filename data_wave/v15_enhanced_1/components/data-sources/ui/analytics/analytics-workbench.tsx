@@ -666,6 +666,21 @@ export const AnalyticsWorkbench: React.FC = () => {
   }), [])
 
   const realTimeMetricsData = useMemo(() => {
+    if (!realTimeData || !Array.isArray(realTimeData)) {
+      return {
+        labels: [],
+        datasets: [{
+          label: 'Real-time Metric',
+          data: [],
+          borderColor: '#10B981',
+          backgroundColor: 'rgba(16, 185, 129, 0.1)',
+          tension: 0.4,
+          pointRadius: 2,
+          borderWidth: 2
+        }]
+      }
+    }
+
     const timeLabels = realTimeData.slice(-20).map(d => 
       d.timestamp.toLocaleTimeString('en-US', { 
         hour12: false, 
@@ -693,7 +708,7 @@ export const AnalyticsWorkbench: React.FC = () => {
   // ========================================================================
 
   const renderDatasetOverview = () => {
-    const dataset = state.datasets.find(d => d.id === state.selectedDataset)
+    const dataset = datasets.find(d => d.id === selectedDataset)
     if (!dataset) return null
 
     return (
@@ -844,7 +859,7 @@ export const AnalyticsWorkbench: React.FC = () => {
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Correlation Results</h3>
         <div className="space-y-4">
-          {state.correlations.map(correlation => (
+          {(correlations || []).map((correlation, index) => (
             <motion.div
               key={correlation.id}
               initial={{ opacity: 0, y: 20 }}
@@ -904,7 +919,7 @@ export const AnalyticsWorkbench: React.FC = () => {
           <div className="flex items-center">
             <LightBulbIcon className="h-8 w-8 text-yellow-500 mr-3" />
             <div>
-              <div className="text-2xl font-bold text-gray-900">{state.insights.length}</div>
+              <div className="text-2xl font-bold text-gray-900">{(insights || []).length}</div>
               <div className="text-sm text-gray-600">Total Insights</div>
             </div>
           </div>
@@ -914,7 +929,7 @@ export const AnalyticsWorkbench: React.FC = () => {
             <ExclamationTriangleIcon className="h-8 w-8 text-red-500 mr-3" />
             <div>
               <div className="text-2xl font-bold text-gray-900">
-                {state.insights.filter(i => i.impact === 'critical' || i.impact === 'high').length}
+                {(insights || []).filter(i => i.impact === 'critical' || i.impact === 'high').length}
               </div>
               <div className="text-sm text-gray-600">High Priority</div>
             </div>
@@ -925,7 +940,7 @@ export const AnalyticsWorkbench: React.FC = () => {
             <SparklesIcon className="h-8 w-8 text-purple-500 mr-3" />
             <div>
               <div className="text-2xl font-bold text-gray-900">
-                {Math.round(state.insights.reduce((acc, i) => acc + i.confidence, 0) / state.insights.length * 100)}%
+                {(insights && insights.length > 0) ? Math.round(insights.reduce((acc, i) => acc + i.confidence, 0) / insights.length * 100) : 0}%
               </div>
               <div className="text-sm text-gray-600">Avg Confidence</div>
             </div>
@@ -955,7 +970,7 @@ export const AnalyticsWorkbench: React.FC = () => {
 
       {/* Insight Details */}
       <div className="space-y-4">
-        {state.insights.map(insight => (
+                  {(insights || []).map((insight, index) => (
           <motion.div
             key={insight.id}
             initial={{ opacity: 0, y: 20 }}
@@ -1061,7 +1076,7 @@ export const AnalyticsWorkbench: React.FC = () => {
       </div>
 
       {/* Prediction Results */}
-      {state.predictions.map(prediction => (
+                {(predictions || []).map((prediction, index) => prediction && (
         <div key={prediction.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-4">
             <div>
@@ -1083,18 +1098,18 @@ export const AnalyticsWorkbench: React.FC = () => {
             <div className="h-64">
               <Line
                 data={{
-                  labels: prediction.predictions.map(p => p.timestamp.toLocaleDateString()),
+                  labels: prediction.predictions?.map(p => p.timestamp.toLocaleDateString()) || [],
                   datasets: [
                     {
                       label: 'Predicted Values',
-                      data: prediction.predictions.map(p => p.value),
+                      data: prediction.predictions?.map(p => p.value) || [],
                       borderColor: '#3B82F6',
                       backgroundColor: 'rgba(59, 130, 246, 0.1)',
                       tension: 0.4
                     },
                     {
                       label: 'Confidence Upper Bound',
-                      data: prediction.confidence_interval.map(c => c.upper),
+                      data: prediction.confidence_interval?.map(c => c.upper) || [],
                       borderColor: '#93C5FD',
                       backgroundColor: 'rgba(147, 197, 253, 0.1)',
                       borderDash: [5, 5],
@@ -1102,7 +1117,7 @@ export const AnalyticsWorkbench: React.FC = () => {
                     },
                     {
                       label: 'Confidence Lower Bound',
-                      data: prediction.confidence_interval.map(c => c.lower),
+                      data: prediction.confidence_interval?.map(c => c.lower) || [],
                       borderColor: '#93C5FD',
                       backgroundColor: 'rgba(147, 197, 253, 0.1)',
                       borderDash: [5, 5],
@@ -1128,7 +1143,7 @@ export const AnalyticsWorkbench: React.FC = () => {
           <div className="mb-4">
             <h5 className="text-sm font-medium text-gray-900 mb-3">Feature Importance</h5>
             <div className="space-y-2">
-              {prediction.feature_importance.map((feature, index) => (
+              {prediction.feature_importance?.map((feature, index) => feature && (
                 <div key={index} className="flex items-center">
                   <div className="w-32 text-sm text-gray-600">{feature.feature}</div>
                   <div className="flex-1 mx-3">
@@ -1151,7 +1166,7 @@ export const AnalyticsWorkbench: React.FC = () => {
 
           {/* Validation Metrics */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {Object.entries(prediction.validation).map(([metric, value]) => (
+            {Object.entries(prediction.validation || {}).map(([metric, value]) => (
               <div key={metric} className="bg-gray-50 rounded p-3 text-center">
                 <div className="text-sm text-gray-600 uppercase">{metric}</div>
                 <div className="text-lg font-semibold text-gray-900">
@@ -1170,7 +1185,7 @@ export const AnalyticsWorkbench: React.FC = () => {
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Detected Patterns</h3>
         <div className="space-y-4">
-          {state.patterns.map(pattern => (
+          {(patterns || []).map((pattern, index) => (
             <motion.div
               key={pattern.id}
               initial={{ opacity: 0, y: 20 }}
@@ -1245,7 +1260,7 @@ export const AnalyticsWorkbench: React.FC = () => {
               className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">Select Dataset</option>
-              {state.datasets.map(dataset => (
+              {(datasets || []).map((dataset, index) => (
                 <option key={dataset.id} value={dataset.id}>{dataset.name}</option>
               ))}
             </select>

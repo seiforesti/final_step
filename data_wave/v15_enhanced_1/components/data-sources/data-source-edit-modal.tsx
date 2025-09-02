@@ -30,7 +30,8 @@ import { Database, AlertTriangle, CheckCircle, Eye, RefreshCw, Settings, Shield,
 import { toast } from "sonner"
 
 // Import backend services and types
-import { useUpdateDataSourceMutation, useTestConnectionMutation } from "./services/enterprise-apis"
+import { useUpdateDataSourceMutation } from "./services/apis"
+import { useTestConnectionMutation } from "./services/enterprise-apis"
 import { useEnterpriseFeatures } from "./hooks/use-enterprise-features"
 import { useRBACIntegration } from "./hooks/use-rbac-integration"
 import { DataSource, DataSourceUpdateParams } from "./types"

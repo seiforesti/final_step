@@ -12,6 +12,11 @@ from app.models.workflow_models import (
     WorkflowDependency, WorkflowTemplate, WorkflowSchedule, WorkflowMetrics,
     WorkflowType, WorkflowStatus, TriggerType, ActionType
 )
+from app.models.scan_workflow_models import (
+    ScanWorkflow, WorkflowStage, ScanWorkflowTemplate,
+    WorkflowType, WorkflowStatus, TriggerType, ApprovalType, ApprovalStatus,
+    WorkflowApproval, ScanWorkflowExecutionDetail
+)
 
 logger = logging.getLogger(__name__)
 
@@ -138,9 +143,10 @@ class AdvancedWorkflowService:
     ) -> Dict[str, Any]:
         """Execute workflow with real-time monitoring and optimization"""
         try:
-            workflow = session.exec(select(Workflow).where(
+            workflow_result = session.execute(select(Workflow).where(
                 Workflow.id == workflow_id
-            )).first()
+            ))
+            workflow = workflow_result.scalars().first()
             
             if not workflow:
                 raise ValueError(f"Workflow {workflow_id} not found")
@@ -166,9 +172,10 @@ class AdvancedWorkflowService:
             session.refresh(execution)
             
             # Get workflow steps
-            steps = session.exec(select(WorkflowStep).where(
+            steps_result = session.execute(select(WorkflowStep).where(
                 WorkflowStep.workflow_id == workflow_id
-            ).order_by(WorkflowStep.step_order)).all()
+            ).order_by(WorkflowStep.step_order))
+            steps = steps_result.scalars().all()
             
             execution.total_steps = len(steps)
             session.commit()
@@ -180,47 +187,23 @@ class AdvancedWorkflowService:
             
             # Update execution results
             execution.completed_at = datetime.now()
-            execution.duration_minutes = (execution.completed_at - execution.started_at).total_seconds() / 60
-            execution.output_data = execution_results.get('output_data', {})
-            execution.artifacts_generated = execution_results.get('artifacts', [])
-            execution.quality_score = execution_results.get('quality_score', 0.8)
-            execution.performance_metrics = execution_results.get('performance_metrics', {})
+            execution.duration_minutes = int((execution.completed_at - execution.started_at).total_seconds() / 60)
+            execution.status = WorkflowStatus.COMPLETED if execution_results.get("success") else WorkflowStatus.FAILED
+            execution.result_data = execution_results
             
-            # Determine final status
-            if execution_results.get('success', False):
-                execution.status = WorkflowStatus.COMPLETED
-                execution.completed_steps = execution.total_steps
-                execution.progress_percentage = 100.0
-            else:
-                execution.status = WorkflowStatus.FAILED
-                execution.error_message = execution_results.get('error_message')
-                execution.error_details = execution_results.get('error_details', {})
-            
+            session.add(execution)
             session.commit()
             
-            # Update workflow metrics
-            AdvancedWorkflowService._update_workflow_metrics(session, workflow, execution)
-            
-            # Generate execution insights
-            insights = AdvancedWorkflowService._generate_execution_insights(execution, execution_results)
-            
             return {
-                "execution_id": execution.execution_id,
-                "workflow_id": workflow.id,
-                "status": execution.status,
+                "execution_id": execution_id,
+                "status": execution.status.value,
                 "duration_minutes": execution.duration_minutes,
-                "success": execution.status == WorkflowStatus.COMPLETED,
-                "steps_completed": execution.completed_steps,
-                "steps_total": execution.total_steps,
-                "progress_percentage": execution.progress_percentage,
-                "quality_score": execution.quality_score,
-                "performance_metrics": execution.performance_metrics,
-                "insights": insights,
-                "started_at": execution.started_at.isoformat(),
-                "completed_at": execution.completed_at.isoformat() if execution.completed_at else None
+                "results": execution_results,
+                "monitoring_enabled": real_time_monitoring
             }
             
         except Exception as e:
+            session.rollback()
             logger.error(f"Error executing workflow with monitoring: {str(e)}")
             raise
 
@@ -235,9 +218,10 @@ class AdvancedWorkflowService:
     ) -> Dict[str, Any]:
         """Create workflow from intelligent template with customizations"""
         try:
-            template = session.exec(select(WorkflowTemplate).where(
-                WorkflowTemplate.id == template_id
-            )).first()
+            template_result = session.execute(select(ScanWorkflowTemplate).where(
+                ScanWorkflowTemplate.id == template_id
+            ))
+            template = template_result.scalars().first()
             
             if not template:
                 raise ValueError(f"Workflow template {template_id} not found")
@@ -301,9 +285,10 @@ class AdvancedWorkflowService:
     ) -> Dict[str, Any]:
         """Get comprehensive workflow analytics and performance insights"""
         try:
-            workflow = session.exec(select(Workflow).where(
+            workflow_result = session.execute(select(Workflow).where(
                 Workflow.id == workflow_id
-            )).first()
+            ))
+            workflow = workflow_result.scalars().first()
             
             if not workflow:
                 raise ValueError(f"Workflow {workflow_id} not found")
@@ -311,16 +296,18 @@ class AdvancedWorkflowService:
             since_date = datetime.now() - timedelta(days=analysis_period_days)
             
             # Get executions
-            executions = session.exec(select(WorkflowExecution).where(
+            executions_result = session.execute(select(WorkflowExecution).where(
                 WorkflowExecution.workflow_id == workflow_id,
                 WorkflowExecution.started_at >= since_date
-            )).all()
+            ))
+            executions = executions_result.scalars().all()
             
             # Get metrics
-            metrics = session.exec(select(WorkflowMetrics).where(
+            metrics_result = session.execute(select(WorkflowMetrics).where(
                 WorkflowMetrics.workflow_id == workflow_id,
                 WorkflowMetrics.metric_date >= since_date
-            )).all()
+            ))
+            metrics = metrics_result.scalars().all()
             
             # Calculate analytics
             analytics = AdvancedWorkflowService._calculate_workflow_analytics(
@@ -367,18 +354,20 @@ class AdvancedWorkflowService:
             if optimization_goals is None:
                 optimization_goals = ["performance", "cost", "reliability"]
             
-            workflow = session.exec(select(Workflow).where(
+            workflow_result = session.execute(select(Workflow).where(
                 Workflow.id == workflow_id
-            )).first()
+            ))
+            workflow = workflow_result.scalars().first()
             
             if not workflow:
                 raise ValueError(f"Workflow {workflow_id} not found")
             
             # Get recent execution data for analysis
-            recent_executions = session.exec(select(WorkflowExecution).where(
+            recent_executions_result = session.execute(select(WorkflowExecution).where(
                 WorkflowExecution.workflow_id == workflow_id,
                 WorkflowExecution.started_at >= datetime.now() - timedelta(days=7)
-            )).all()
+            ))
+            recent_executions = recent_executions_result.scalars().all()
             
             # Analyze current performance
             current_performance = AdvancedWorkflowService._analyze_current_performance(
@@ -428,9 +417,10 @@ class AdvancedWorkflowService:
     ) -> Dict[str, Any]:
         """Create smart workflow schedule with AI optimization"""
         try:
-            workflow = session.exec(select(Workflow).where(
+            workflow_result = session.execute(select(Workflow).where(
                 Workflow.id == workflow_id
-            )).first()
+            ))
+            workflow = workflow_result.scalars().first()
             
             if not workflow:
                 raise ValueError(f"Workflow {workflow_id} not found")
@@ -787,10 +777,11 @@ class AdvancedWorkflowService:
             today = datetime.now().date()
             
             # Get or create today's metrics
-            metrics = session.exec(select(WorkflowMetrics).where(
+            metrics_result = session.execute(select(WorkflowMetrics).where(
                 WorkflowMetrics.workflow_id == workflow.id,
                 WorkflowMetrics.metric_date == today
-            )).first()
+            ))
+            metrics = metrics_result.scalars().first()
             
             if not metrics:
                 metrics = WorkflowMetrics(
@@ -1236,3 +1227,471 @@ class AdvancedWorkflowService:
             return customized_definition
         except Exception:
             return workflow_definition
+
+    # ========================================================================================
+    # Missing Methods for Route Integration
+    # ========================================================================================
+
+    @staticmethod
+    def get_workflow_executions(
+        session: Session,
+        workflow_id: Optional[str] = None,
+        status: Optional[str] = None,
+        days: int = 30,
+        user_id: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """Get workflow execution history and status"""
+        try:
+            # Build query
+            query = select(WorkflowExecution)
+            
+            # Add filters
+            if workflow_id:
+                query = query.where(WorkflowExecution.workflow_id == workflow_id)
+            
+            if status:
+                query = query.where(WorkflowExecution.status == WorkflowStatus(status))
+            
+            # Filter by date
+            cutoff_date = datetime.now() - timedelta(days=days)
+            query = query.where(WorkflowExecution.started_at >= cutoff_date)
+            
+            # Execute query
+            executions_result = session.execute(query)
+            executions = executions_result.scalars().all()
+            
+            # Format response
+            execution_data = []
+            for execution in executions:
+                execution_data.append({
+                    "execution_id": execution.id,
+                    "workflow_id": execution.workflow_id,
+                    "status": execution.status.value if execution.status else "unknown",
+                    "started_at": execution.started_at.isoformat() if execution.started_at else None,
+                    "completed_at": execution.completed_at.isoformat() if execution.completed_at else None,
+                    "duration_minutes": execution.duration_minutes,
+                    "success_rate": execution.success_rate,
+                    "error_message": execution.error_message,
+                    "created_by": execution.created_by
+                })
+            
+            return {
+                "executions": execution_data,
+                "total_count": len(execution_data),
+                "filter_applied": {
+                    "workflow_id": workflow_id,
+                    "status": status,
+                    "days": days
+                }
+            }
+            
+        except Exception as e:
+            logger.error(f"Error getting workflow executions: {str(e)}")
+            return {
+                "executions": [],
+                "total_count": 0,
+                "error": str(e)
+            }
+
+    @staticmethod
+    def get_execution_details(
+        session: Session,
+        execution_id: str,
+        user_id: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """Get detailed workflow execution information"""
+        try:
+            execution_result = session.execute(
+                select(WorkflowExecution).where(WorkflowExecution.id == execution_id)
+            )
+            execution = execution_result.scalars().first()
+            
+            if not execution:
+                return {"error": "Execution not found"}
+            
+            # Get workflow details
+            workflow_result = session.execute(
+                select(Workflow).where(Workflow.id == execution.workflow_id)
+            )
+            workflow = workflow_result.scalars().first()
+            
+            # Get step executions
+            step_executions_result = session.execute(
+                select(StepExecution).where(StepExecution.workflow_execution_id == execution_id)
+            )
+            step_executions = step_executions_result.scalars().all()
+            
+            step_data = []
+            for step_exec in step_executions:
+                step_data.append({
+                    "step_id": step_exec.id,
+                    "step_name": step_exec.step_name,
+                    "status": step_exec.status.value if step_exec.status else "unknown",
+                    "started_at": step_exec.started_at.isoformat() if step_exec.started_at else None,
+                    "completed_at": step_exec.completed_at.isoformat() if step_exec.completed_at else None,
+                    "duration_minutes": step_exec.duration_minutes,
+                    "error_message": step_exec.error_message,
+                    "output_data": step_exec.output_data
+                })
+            
+            return {
+                "execution_id": execution.id,
+                "workflow_id": execution.workflow_id,
+                "workflow_name": workflow.name if workflow else "Unknown",
+                "status": execution.status.value if execution.status else "unknown",
+                "started_at": execution.started_at.isoformat() if execution.started_at else None,
+                "completed_at": execution.completed_at.isoformat() if execution.completed_at else None,
+                "duration_minutes": execution.duration_minutes,
+                "success_rate": execution.success_rate,
+                "error_message": execution.error_message,
+                "created_by": execution.created_by,
+                "step_executions": step_data,
+                "total_steps": len(step_data),
+                "completed_steps": len([s for s in step_data if s["status"] == "completed"]),
+                "failed_steps": len([s for s in step_data if s["status"] == "failed"])
+            }
+            
+        except Exception as e:
+            logger.error(f"Error getting execution details: {str(e)}")
+            return {"error": str(e)}
+
+    @staticmethod
+    def create_approval_workflow(
+        session: Session,
+        approval_data: Dict[str, Any],
+        creator_id: str
+    ) -> Dict[str, Any]:
+        """Create approval workflow for data governance operations"""
+        try:
+            # Create workflow definition
+            workflow = Workflow(
+                name=approval_data.get("name", "Approval Workflow"),
+                description=approval_data.get("description", "Data governance approval workflow"),
+                workflow_type=WorkflowType.APPROVAL,
+                definition=approval_data.get("definition", {}),
+                created_by=creator_id,
+                ai_optimization_enabled=False,
+                smart_scheduling=False,
+                supports_parallel_execution=False,
+                retry_policy={"max_retries": 0},
+                resource_requirements={"cpu": "low", "memory": "low"},
+                performance_targets={
+                    "max_duration_minutes": 1440,  # 24 hours
+                    "success_rate_target": 0.95,
+                    "cost_efficiency_target": 0.9
+                },
+                governance_policies=["approval_workflow", "data_governance"],
+                audit_enabled=True,
+                data_lineage_tracking=False
+            )
+            
+            session.add(workflow)
+            session.commit()
+            session.refresh(workflow)
+            
+            # Create approval steps
+            approval_steps = approval_data.get("steps", [])
+            created_steps = []
+            
+            for i, step_data in enumerate(approval_steps):
+                step = WorkflowStep(
+                    workflow_id=workflow.id,
+                    name=step_data.get("name", f"Approval Step {i+1}"),
+                    description=step_data.get("description", ""),
+                    action_type=ActionType.APPROVAL,
+                    step_order=i,
+                    configuration=step_data.get("configuration", {}),
+                    input_parameters=step_data.get("input_parameters", {}),
+                    output_parameters=step_data.get("output_parameters", {}),
+                    max_retries=0,
+                    timeout_minutes=1440,  # 24 hours
+                    ai_assisted_configuration=False,
+                    auto_parameter_tuning=False
+                )
+                
+                session.add(step)
+                created_steps.append(step)
+            
+            session.commit()
+            
+            return {
+                "workflow_id": workflow.id,
+                "workflow_name": workflow.name,
+                "approval_steps": len(created_steps),
+                "status": "created",
+                "message": "Approval workflow created successfully"
+            }
+            
+        except Exception as e:
+            session.rollback()
+            logger.error(f"Error creating approval workflow: {str(e)}")
+            return {"error": str(e)}
+
+    @staticmethod
+    def get_workflow_definitions(
+        session: Session,
+        workflow_type: Optional[str] = None,
+        status: Optional[str] = None,
+        user_id: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """Get workflow definitions for workflow designer"""
+        try:
+            query = select(Workflow)
+            
+            if workflow_type:
+                query = query.where(Workflow.workflow_type == WorkflowType(workflow_type))
+            
+            if status:
+                query = query.where(Workflow.status == WorkflowStatus(status))
+            
+            workflows_result = session.execute(query)
+            workflows = workflows_result.scalars().all()
+            
+            workflow_data = []
+            for workflow in workflows:
+                workflow_data.append({
+                    "workflow_id": workflow.id,
+                    "name": workflow.name,
+                    "description": workflow.description,
+                    "workflow_type": workflow.workflow_type.value if workflow.workflow_type else "unknown",
+                    "status": workflow.status.value if workflow.status else "unknown",
+                    "created_by": workflow.created_by,
+                    "created_at": workflow.created_at.isoformat() if workflow.created_at else None,
+                    "ai_optimization_enabled": workflow.ai_optimization_enabled,
+                    "smart_scheduling": workflow.smart_scheduling,
+                    "supports_parallel_execution": workflow.supports_parallel_execution
+                })
+            
+            return {
+                "workflows": workflow_data,
+                "total_count": len(workflow_data)
+            }
+            
+        except Exception as e:
+            logger.error(f"Error getting workflow definitions: {str(e)}")
+            return {
+                "workflows": [],
+                "total_count": 0,
+                "error": str(e)
+            }
+
+    @staticmethod
+    def create_workflow_definition(
+        session: Session,
+        workflow_data: Dict[str, Any],
+        creator_id: str
+    ) -> Dict[str, Any]:
+        """Create a new workflow definition"""
+        try:
+            workflow = Workflow(
+                name=workflow_data.get("name", "New Workflow"),
+                description=workflow_data.get("description", ""),
+                workflow_type=WorkflowType(workflow_data.get("workflow_type", "GENERAL")),
+                definition=workflow_data.get("definition", {}),
+                created_by=creator_id,
+                ai_optimization_enabled=workflow_data.get("ai_optimization_enabled", True),
+                smart_scheduling=workflow_data.get("smart_scheduling", True),
+                supports_parallel_execution=workflow_data.get("supports_parallel_execution", True),
+                retry_policy=workflow_data.get("retry_policy", {"max_retries": 3}),
+                resource_requirements=workflow_data.get("resource_requirements", {"cpu": "medium", "memory": "medium"}),
+                performance_targets=workflow_data.get("performance_targets", {
+                    "max_duration_minutes": 60,
+                    "success_rate_target": 0.95,
+                    "cost_efficiency_target": 0.8
+                }),
+                governance_policies=workflow_data.get("governance_policies", ["data_governance"]),
+                audit_enabled=workflow_data.get("audit_enabled", True),
+                data_lineage_tracking=workflow_data.get("data_lineage_tracking", True)
+            )
+            
+            session.add(workflow)
+            session.commit()
+            session.refresh(workflow)
+            
+            return {
+                "workflow_id": workflow.id,
+                "workflow_name": workflow.name,
+                "status": "created",
+                "message": "Workflow created successfully"
+            }
+            
+        except Exception as e:
+            session.rollback()
+            logger.error(f"Error creating workflow definition: {str(e)}")
+            return {"error": str(e)}
+
+    @staticmethod
+    def get_workflow_definition(
+        session: Session,
+        workflow_id: str,
+        user_id: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """Get detailed workflow definition for the designer"""
+        try:
+            workflow_result = session.execute(
+                select(Workflow).where(Workflow.id == workflow_id)
+            )
+            workflow = workflow_result.scalars().first()
+            
+            if not workflow:
+                return {"error": "Workflow not found"}
+            
+            # Get workflow steps
+            steps_result = session.execute(
+                select(WorkflowStep).where(WorkflowStep.workflow_id == workflow_id).order_by(WorkflowStep.step_order)
+            )
+            steps = steps_result.scalars().all()
+            
+            step_data = []
+            for step in steps:
+                step_data.append({
+                    "step_id": step.id,
+                    "name": step.name,
+                    "description": step.description,
+                    "action_type": step.action_type.value if step.action_type else "unknown",
+                    "step_order": step.step_order,
+                    "configuration": step.configuration,
+                    "input_parameters": step.input_parameters,
+                    "output_parameters": step.output_parameters,
+                    "max_retries": step.max_retries,
+                    "timeout_minutes": step.timeout_minutes
+                })
+            
+            return {
+                "workflow_id": workflow.id,
+                "name": workflow.name,
+                "description": workflow.description,
+                "workflow_type": workflow.workflow_type.value if workflow.workflow_type else "unknown",
+                "status": workflow.status.value if workflow.status else "unknown",
+                "definition": workflow.definition,
+                "created_by": workflow.created_by,
+                "created_at": workflow.created_at.isoformat() if workflow.created_at else None,
+                "ai_optimization_enabled": workflow.ai_optimization_enabled,
+                "smart_scheduling": workflow.smart_scheduling,
+                "supports_parallel_execution": workflow.supports_parallel_execution,
+                "retry_policy": workflow.retry_policy,
+                "resource_requirements": workflow.resource_requirements,
+                "performance_targets": workflow.performance_targets,
+                "governance_policies": workflow.governance_policies,
+                "audit_enabled": workflow.audit_enabled,
+                "data_lineage_tracking": workflow.data_lineage_tracking,
+                "steps": step_data,
+                "total_steps": len(step_data)
+            }
+            
+        except Exception as e:
+            logger.error(f"Error getting workflow definition: {str(e)}")
+            return {"error": str(e)}
+
+    @staticmethod
+    def get_workflow_templates(
+        session: Session,
+        template_type: Optional[str] = None,
+        user_id: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """Get workflow templates"""
+        try:
+            query = select(ScanWorkflowTemplate)
+            
+            if template_type:
+                query = query.where(ScanWorkflowTemplate.template_type == template_type)
+            
+            templates_result = session.execute(query)
+            templates = templates_result.scalars().all()
+            
+            template_data = []
+            for template in templates:
+                template_data.append({
+                    "template_id": template.id,
+                    "name": template.name,
+                    "description": template.description,
+                    "template_type": template.template_type.value if template.template_type else "unknown",
+                    "category": template.category,
+                    "difficulty_level": template.difficulty_level,
+                    "estimated_duration_minutes": template.estimated_duration_minutes,
+                    "tags": template.tags,
+                    "definition": template.definition,
+                    "parameters": template.parameters,
+                    "default_values": template.default_values,
+                    "created_by": template.created_by,
+                    "created_at": template.created_at.isoformat() if template.created_at else None
+                })
+            
+            return {
+                "templates": template_data,
+                "total_count": len(template_data)
+            }
+            
+        except Exception as e:
+            logger.error(f"Error getting workflow templates: {str(e)}")
+            return {
+                "templates": [],
+                "total_count": 0,
+                "error": str(e)
+            }
+
+    @staticmethod
+    def get_pending_approvals(
+        session: Session,
+        approver_id: Optional[str] = None,
+        user_id: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """Get pending approvals"""
+        try:
+            # Query pending approvals
+            query = select(WorkflowApproval).where(
+                WorkflowApproval.status == ApprovalStatus.PENDING
+            )
+            
+            if approver_id:
+                # Filter by approver if specified
+                # This would need to check if the approver_id is in the required_approvers list
+                pass
+            
+            if user_id:
+                # Filter by user who requested the approval
+                # This would need to be implemented based on how requesters are tracked
+                pass
+            
+            # Get pending approvals
+            pending_approvals_result = session.execute(query.order_by(WorkflowApproval.requested_at.desc()))
+            pending_approvals = pending_approvals_result.scalars().all()
+            
+            approval_data = []
+            for approval in pending_approvals:
+                # Get associated workflow info
+                workflow_result = session.execute(select(ScanWorkflow).where(ScanWorkflow.id == approval.workflow_id))
+                workflow = workflow_result.scalars().first()
+                workflow_name = workflow.workflow_name if workflow else "Unknown Workflow"
+                
+                approval_data.append({
+                    "approval_id": approval.approval_id,
+                    "workflow_id": approval.workflow_id,
+                    "workflow_name": workflow_name,
+                    "stage_id": approval.stage_id,
+                    "approval_type": approval.approval_type.value if approval.approval_type else "unknown",
+                    "approval_name": approval.approval_name,
+                    "description": approval.description,
+                    "status": approval.status.value if approval.status else "unknown",
+                    "required_approvals": approval.required_approvals,
+                    "current_approvals": approval.current_approvals,
+                    "requested_at": approval.requested_at.isoformat() if approval.requested_at else None,
+                    "due_date": approval.due_date.isoformat() if approval.due_date else None,
+                    "approval_criteria": approval.approval_criteria,
+                    "approval_notes": approval.approval_notes,
+                    "escalation_enabled": approval.escalation_enabled,
+                    "escalated_to": approval.escalated_to
+                })
+            
+            return {
+                "pending_approvals": approval_data,
+                "total_count": len(approval_data)
+            }
+            
+        except Exception as e:
+            logger.error(f"Error getting pending approvals: {str(e)}")
+            return {
+                "pending_approvals": [],
+                "total_count": 0,
+                "error": str(e)
+            }

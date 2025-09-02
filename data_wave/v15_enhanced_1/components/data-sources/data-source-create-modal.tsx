@@ -23,7 +23,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertTriangle } from 'lucide-react'
 
-import { DataSourceCreateParams } from "./types"
+import { DataSourceCreateParams, DataSourceType, DataSourceLocation } from "./types"
 import { DataDiscoveryWorkspace } from "./data-discovery/data-discovery-workspace"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { CheckCircle, Eye, RefreshCw, Database, Search, Layers } from 'lucide-react'
@@ -31,14 +31,14 @@ import { CheckCircle, Eye, RefreshCw, Database, Search, Layers } from 'lucide-re
 interface DataSourceCreateModalProps {
   open: boolean
   onClose: () => void
-  onSuccess?: (dataSource: DataSourceCreateParams) => Promise<void>
+  onSuccess?: (dataSource: DataSourceCreateParams) => Promise<any> | Promise<void>
 }
 
 export function DataSourceCreateModal({ open, onClose, onSuccess }: DataSourceCreateModalProps) {
   const [formData, setFormData] = useState<DataSourceCreateParams>({
     name: "",
-    source_type: "postgresql",
-    location: "cloud",
+    source_type: "postgresql" as DataSourceType,
+    location: "cloud" as DataSourceLocation,
     host: "",
     port: 5432,
     username: "",
@@ -142,9 +142,9 @@ export function DataSourceCreateModal({ open, onClose, onSuccess }: DataSourceCr
         defaultPort = 5432
     }
 
-    setFormData(prev => ({
+    setFormData((prev): DataSourceCreateParams => ({
       ...prev,
-      source_type: value,
+      source_type: value as DataSourceType,
       port: defaultPort
     }))
   }
@@ -208,7 +208,7 @@ export function DataSourceCreateModal({ open, onClose, onSuccess }: DataSourceCr
                 <div className="space-y-2">
                   <Label htmlFor="source_type">Source Type *</Label>
                   <Select 
-                    value={formData.source_type} 
+                    value={formData.source_type}
                     onValueChange={handleSourceTypeChange}
                     disabled={isSubmitting}
                   >
@@ -297,8 +297,8 @@ export function DataSourceCreateModal({ open, onClose, onSuccess }: DataSourceCr
                 <div className="space-y-2">
                   <Label htmlFor="location">Location</Label>
                   <Select 
-                    value={formData.location} 
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, location: value }))}
+                    value={formData.location}
+                    onValueChange={(value) => setFormData((prev): DataSourceCreateParams => ({ ...prev, location: value as DataSourceLocation }))}
                     disabled={isSubmitting}
                   >
                     <SelectTrigger>
@@ -306,7 +306,7 @@ export function DataSourceCreateModal({ open, onClose, onSuccess }: DataSourceCr
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="cloud">Cloud</SelectItem>
-                      <SelectItem value="on-premise">On-Premise</SelectItem>
+                      <SelectItem value="on_prem">On-Premise</SelectItem>
                       <SelectItem value="hybrid">Hybrid</SelectItem>
                     </SelectContent>
                   </Select>

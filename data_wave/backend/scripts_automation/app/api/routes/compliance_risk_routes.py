@@ -798,7 +798,7 @@ async def update_risk_matrix(
         from app.services.notification_service import NotificationService
 
         # Upsert single configuration row (keep latest)
-        existing = session.exec(select(ComplianceRiskMatrix).order_by(ComplianceRiskMatrix.updated_at.desc())).first()
+        existing = session.execute(select(ComplianceRiskMatrix).order_by(ComplianceRiskMatrix.updated_at.desc())).first()
         if existing:
             existing.probability_levels = matrix_data.get("probability_levels", [])
             existing.impact_levels = matrix_data.get("impact_levels", [])
@@ -922,7 +922,7 @@ async def get_data_source_risk_assessment(
         
         # Compliance Status Factor (based on actual compliance rules)
         from app.models.compliance_models import ComplianceRule
-        compliance_rules = session.exec(
+        compliance_rules = session.execute(
             select(ComplianceRule).where(
                 ComplianceRule.data_source_id == data_source_id,
                 ComplianceRule.is_active == True

@@ -53,6 +53,19 @@ export function DataSourceMonitoring({
   metrics,
   connectionPoolStats
 }: DataSourceMonitoringProps) {
+  // Safety check for dataSource
+  if (!dataSource) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="text-center">
+          <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-lg font-medium mb-2">Data Source Not Available</h3>
+          <p className="text-muted-foreground">Please select a data source to view monitoring information.</p>
+        </div>
+      </div>
+    )
+  }
+
   const [isMonitoring, setIsMonitoring] = useState(true)
   const [refreshInterval, setRefreshInterval] = useState("30")
   const [alertsEnabled, setAlertsEnabled] = useState(true)
@@ -184,34 +197,34 @@ export function DataSourceMonitoring({
       <CardContent className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            {dataSource.status === "connected" ? (
+            {dataSource?.status === "connected" ? (
               <Wifi className="h-4 w-4 text-green-500" />
             ) : (
               <WifiOff className="h-4 w-4 text-red-500" />
             )}
-            <span className="font-medium">{dataSource.name}</span>
+            <span className="font-medium">{dataSource?.name || 'Unknown Data Source'}</span>
           </div>
-          <Badge variant={dataSource.status === "connected" ? "default" : "destructive"}>
-            {dataSource.status}
+          <Badge variant={dataSource?.status === "connected" ? "default" : "destructive"}>
+            {dataSource?.status || 'unknown'}
           </Badge>
         </div>
         
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
             <span className="text-muted-foreground">Host:</span>
-            <div className="font-medium">{dataSource.host}</div>
+            <div className="font-medium">{dataSource?.host || 'N/A'}</div>
           </div>
           <div>
             <span className="text-muted-foreground">Port:</span>
-            <div className="font-medium">{dataSource.port}</div>
+            <div className="font-medium">{dataSource?.port || 'N/A'}</div>
           </div>
           <div>
             <span className="text-muted-foreground">Database:</span>
-            <div className="font-medium">{dataSource.database_name || "N/A"}</div>
+            <div className="font-medium">{dataSource?.database_name || "N/A"}</div>
           </div>
           <div>
             <span className="text-muted-foreground">Type:</span>
-            <div className="font-medium">{dataSource.type}</div>
+            <div className="font-medium">{dataSource?.type || 'N/A'}</div>
           </div>
         </div>
 
@@ -313,7 +326,7 @@ export function DataSourceMonitoring({
         <div>
           <h2 className="text-2xl font-bold">Real-time Monitoring</h2>
           <p className="text-muted-foreground">
-            Live performance metrics for {dataSource.name}
+            Live performance metrics for {dataSource?.name || 'Data Source'}
           </p>
         </div>
         
@@ -347,12 +360,12 @@ export function DataSourceMonitoring({
       </div>
 
       {/* Status Alert */}
-      {dataSource.status !== "connected" && (
+      {dataSource?.status && dataSource.status !== "connected" && (
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
           <AlertTitle>Connection Issue</AlertTitle>
           <AlertDescription>
-            Data source is currently {dataSource.status}. Some metrics may not be available.
+            Data source is currently {dataSource?.status}. Some metrics may not be available.
           </AlertDescription>
         </Alert>
       )}

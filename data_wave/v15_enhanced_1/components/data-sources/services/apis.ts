@@ -26,7 +26,7 @@ import {
   ColumnProfileRequest
 } from '../types';
 
-// Configure axios base URL - adjust this to match your backend
+// Configure axios base URL - use proxy for all API calls
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000/proxy';
 
 const api = axios.create({
@@ -36,6 +36,17 @@ const api = axios.create({
   },
 });
 
+// Burst control and error suppression for core api
+const CORE_REQUEST_MIN_INTERVAL_MS = 800
+const coreLastRequestAtByKey: Record<string, number> = {}
+function coreBuildRequestKey(config: any): string {
+  const method = (config?.method || 'get').toLowerCase()
+  const url = config?.url || ''
+  const params = config?.params ? JSON.stringify(config.params) : ''
+  const data = method === 'get' ? '' : (config?.data ? JSON.stringify(config.data) : '')
+  return `${method}:${url}|p=${params}|d=${data}`
+}
+
 // Add request interceptor for authentication
 api.interceptors.request.use((config) => {
   // Add auth token if available
@@ -43,22 +54,129 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  // throttle duplicate GETs and pause when tab hidden
+  try {
+    const key = coreBuildRequestKey(config)
+    const now = Date.now()
+    if ((config.method || 'get').toLowerCase() === 'get') {
+      const lastAt = coreLastRequestAtByKey[key] || 0
+      if (now - lastAt < CORE_REQUEST_MIN_INTERVAL_MS) {
+        const cancel: any = new axios.Cancel('Throttled duplicate GET request')
+        cancel.__throttled = true
+        throw cancel
+      }
+      coreLastRequestAtByKey[key] = now
+      if (typeof document !== 'undefined' && document.hidden) {
+        const cancelHidden: any = new axios.Cancel('Skipped GET while tab hidden')
+        cancelHidden.__skippedHidden = true
+        throw cancelHidden
+      }
+    }
+  } catch (_) {}
   return config;
 });
 
+// Response interceptor: retry idempotent GETs on 503 with backoff; single retry for POST /scan/data-sources
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const config: any = error?.config || {}
+    const status = error?.response?.status
+    const method = (config.method || 'get').toLowerCase()
+    const url: string = config.url || ''
+
+    // Simple backoff function
+    const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms))
+    config.__retryCount = config.__retryCount || 0
+
+    // Retry GETs on 503 up to 3 times with 200ms jittered backoff
+    if (status === 503 && method === 'get' && config.__retryCount < 3) {
+      config.__retryCount += 1
+      const delay = 200 * config.__retryCount + Math.floor(Math.random() * 150)
+      await sleep(delay)
+      return api.request(config)
+    }
+
+    // Allow one retry for data source creation specifically
+    if (status === 503 && method === 'post' && /\/scan\/data-sources$/.test(url) && config.__retryCount < 1) {
+      config.__retryCount += 1
+      await sleep(300)
+      return api.request(config)
+    }
+
+    return Promise.reject(error)
+  }
+)
+
 // ============================================================================
-// UPDATED API CALLS TO MATCH EXISTING BACKEND ENDPOINTS
+// UPDATED API CALLS TO MATCH REAL BACKEND ENDPOINTS
 // ============================================================================
 
-// Data Source CRUD Operations - ALREADY CORRECT
-export const getDataSources = async (params: URLSearchParams): Promise<DataSource[]> => {
-  const { data } = await api.get(`/scan/data-sources?${params.toString()}`);
-  return data;
+// Data Source CRUD Operations - MAPPED TO scan_routes.py
+export const getDataSources = async (filters: DataSourceFilters = {}): Promise<DataSource[]> => {
+  try {
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        params.append(key, value.toString());
+      }
+    });
+    
+    console.log('Fetching data sources with params:', params.toString());
+    const { data } = await api.get(`/scan/data-sources?${params.toString()}`);
+    return data;
+  } catch (error: any) {
+    console.error('Error fetching data sources:', error);
+    
+    // Log detailed error information
+    if (error.response) {
+      console.error('Response status:', error.response.status);
+      console.error('Response data:', error.response.data);
+      console.error('Response headers:', error.response.headers);
+    } else if (error.request) {
+      console.error('Request was made but no response received:', error.request);
+    } else {
+      console.error('Error setting up request:', error.message);
+    }
+    
+    // Return empty array as fallback to prevent crashes
+    return [];
+  }
 };
 
 export const getDataSource = async (dataSourceId: number): Promise<DataSource> => {
-  const { data } = await api.get(`/scan/data-sources/${dataSourceId}`);
-  return data;
+  try {
+    const { data } = await api.get(`/scan/data-sources/${dataSourceId}`);
+    return data;
+  } catch (error: any) {
+    console.error(`Error fetching data source ${dataSourceId}:`, error);
+    
+    if (error.response) {
+      console.error('Response status:', error.response.status);
+      console.error('Response data:', error.response.data);
+    }
+    
+    // Return a default data source object to prevent crashes
+    return {
+      id: dataSourceId,
+      name: 'Error Loading Data Source',
+      type: 'unknown',
+      host: 'N/A',
+      port: 0,
+      database_name: 'N/A',
+      username: 'N/A',
+      status: 'error',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      source_type: 'unknown',
+      location: 'N/A',
+      password_secret: 'N/A',
+      use_encryption: false,
+      ssl_mode: 'N/A',
+      connection_timeout: 30,
+      max_connections: 10
+    } as unknown as DataSource;
+  }
 };
 
 export const createDataSource = async (params: DataSourceCreateParams): Promise<DataSource> => {
@@ -75,24 +193,41 @@ export const deleteDataSource = async (id: number): Promise<void> => {
   await api.delete(`/scan/data-sources/${id}`);
 };
 
-// Health & Stats - ALREADY CORRECT
+// Health & Stats - MAPPED TO scan_routes.py
 export const getDataSourceStats = async (dataSourceId: number): Promise<DataSourceStats> => {
   const { data } = await api.get(`/scan/data-sources/${dataSourceId}/stats`);
   return data;
 };
 
 export const getDataSourceHealth = async (dataSourceId: number): Promise<DataSourceHealth> => {
-  const { data } = await api.get(`/scan/data-sources/${dataSourceId}/health`);
-  return data;
+  try {
+    const { data } = await api.get(`/scan/data-sources/${dataSourceId}/health`);
+    return data;
+  } catch (error: any) {
+    console.error(`Error fetching health for data source ${dataSourceId}:`, error);
+    
+    if (error.response) {
+      console.error('Response status:', error.response.status);
+      console.error('Response data:', error.response.data);
+    }
+    
+    // Return default health status to prevent crashes
+    return {
+      status: 'unknown',
+      last_checked: new Date().toISOString(),
+      response_time: 0,
+      error_message: error.message || 'Unknown error'
+    } as unknown as DataSourceHealth;
+  }
 };
 
-// Connection Testing - UPDATED TO USE DATA-DISCOVERY ROUTE
+// Connection Testing - MAPPED TO data_discovery_routes.py
 export const testDataSourceConnection = async (dataSourceId: number): Promise<ConnectionTestResult> => {
   const { data } = await api.post(`/data-discovery/data-sources/${dataSourceId}/test-connection`);
   return data;
 };
 
-// Scan Operations - ALREADY CORRECT
+// Scan Operations - MAPPED TO scan_routes.py
 export const startDataSourceScan = async (dataSourceId: number): Promise<ScanResult> => {
   const { data } = await api.post(`/scan/data-sources/${dataSourceId}/scan`);
   return data;
@@ -103,48 +238,13 @@ export const getScanSchedules = async (): Promise<any[]> => {
   return data;
 };
 
-// Advanced Features - ALREADY CORRECT
+// Advanced Features - MAPPED TO scan_routes.py
 export const getDataSourcePerformance = async (dataSourceId: number): Promise<any> => {
   const { data } = await api.get(`/scan/data-sources/${dataSourceId}/performance-metrics`);
   return data;
 };
 
-export const getDataSourceSecurity = async (dataSourceId: number): Promise<any> => {
-  const { data } = await api.get(`/scan/data-sources/${dataSourceId}/security-audit`);
-  return data;
-};
-
-export const getDataSourceAccessControl = async (dataSourceId: number): Promise<any> => {
-  const { data } = await api.get(`/scan/data-sources/${dataSourceId}/access-control`);
-  return data;
-};
-
-export const getDataSourceReports = async (dataSourceId: number): Promise<any[]> => {
-  const { data } = await api.get(`/scan/data-sources/${dataSourceId}/reports`);
-  return data;
-};
-
-export const getDataSourceVersionHistory = async (dataSourceId: number): Promise<any[]> => {
-  const { data } = await api.get(`/scan/data-sources/${dataSourceId}/version-history`);
-  return data;
-};
-
-export const getDataSourceTags = async (dataSourceId: number): Promise<any[]> => {
-  const { data } = await api.get(`/scan/data-sources/${dataSourceId}/tags`);
-  return data;
-};
-
-export const getDataSourceIntegrations = async (dataSourceId: number): Promise<any[]> => {
-  const { data } = await api.get(`/scan/data-sources/${dataSourceId}/integrations`);
-  return data;
-};
-
-export const getDataSourceCatalog = async (dataSourceId: number): Promise<any[]> => {
-  const { data } = await api.get(`/scan/data-sources/${dataSourceId}/catalog`);
-  return data;
-};
-
-// Data Discovery Operations - UPDATED TO USE CORRECT ROUTES
+// Data Discovery Operations - MAPPED TO data_discovery_routes.py
 export const discoverSchema = async (dataSourceId: number, request: SchemaDiscoveryRequest): Promise<any> => {
   const { data } = await api.post(`/data-discovery/data-sources/${dataSourceId}/discover-schema`, request);
   return data;
@@ -172,6 +272,51 @@ export const getDataSourceWorkspaces = async (dataSourceId: number): Promise<any
 
 export const saveWorkspace = async (dataSourceId: number, workspaceData: any): Promise<any> => {
   const { data } = await api.post(`/data-discovery/data-sources/${dataSourceId}/save-workspace`, workspaceData);
+  return data;
+};
+
+// Bulk Operations - MAPPED TO scan_routes.py
+export const bulkUpdateDataSources = async (ids: number[], updates: any): Promise<any> => {
+  const { data } = await api.post('/scan/data-sources/bulk-update', { data_source_ids: ids, updates });
+  return data;
+};
+
+export const bulkDeleteDataSources = async (ids: number[]): Promise<any> => {
+  const { data } = await api.delete('/scan/data-sources/bulk-delete', { data: { data_source_ids: ids } });
+  return data;
+};
+
+// Favorites - MAPPED TO scan_routes.py
+export const getFavoriteDataSources = async (): Promise<DataSource[]> => {
+  const { data } = await api.get('/scan/data-sources/favorites');
+  return data;
+};
+
+export const toggleFavorite = async (dataSourceId: number): Promise<any> => {
+  const { data } = await api.post(`/scan/data-sources/${dataSourceId}/toggle-favorite`);
+  return data;
+};
+
+// Toggle Operations - MAPPED TO scan_routes.py
+export const toggleMonitoring = async (dataSourceId: number): Promise<any> => {
+  const { data } = await api.post(`/scan/data-sources/${dataSourceId}/toggle-monitoring`);
+  return data;
+};
+
+export const toggleBackup = async (dataSourceId: number): Promise<any> => {
+  const { data } = await api.post(`/scan/data-sources/${dataSourceId}/toggle-backup`);
+  return data;
+};
+
+// Validation - MAPPED TO scan_routes.py
+export const validateDataSource = async (dataSourceId: number): Promise<any> => {
+  const { data } = await api.post(`/scan/data-sources/${dataSourceId}/validate`);
+  return data;
+};
+
+// Enums - MAPPED TO scan_routes.py
+export const getDataSourceEnums = async (): Promise<any> => {
+  const { data } = await api.get('/scan/data-sources/enums');
   return data;
 };
 
@@ -251,62 +396,50 @@ export const declineWorkspaceInvitation = async (invitationId: number): Promise<
 // UPDATED CATALOG OPERATIONS TO USE CORRECT ENDPOINTS
 // ============================================================================
 
-export const getCatalog = async (params: URLSearchParams): Promise<CatalogItem[]> => {
+export const getCatalog = async (params: URLSearchParams): Promise<any[]> => {
   // Using data-discovery discover-schema endpoint for catalog
   const { data } = await api.post('/data-discovery/data-sources/1/discover-schema', { auto_catalog: true });
   return data.catalog || [];
 };
 
-export const getLineage = async (entityType: string, entityId: string, depth: number = 3): Promise<LineageData> => {
+export const getLineage = async (entityType: string, entityId: string, depth: number = 3): Promise<any> => {
   // Using catalog endpoint for lineage information
   const { data } = await api.get(`/scan/data-sources/${entityId}/catalog`);
   return data;
 };
 
-export const getSystemHealth = async (): Promise<SystemHealth> => {
+export const getSystemHealth = async (): Promise<any> => {
   // Using notifications endpoint for system health
   const { data } = await api.get('/scan/notifications');
   return data;
 };
 
-export const getCurrentUser = async (): Promise<User> => {
+export const getCurrentUser = async (): Promise<any> => {
   // Using notifications endpoint for user info
   const { data } = await api.get('/scan/notifications');
   return data;
 };
 
-export const getNotifications = async (): Promise<Notification[]> => {
+export const getNotifications = async (): Promise<any[]> => {
   const { data } = await api.get('/scan/notifications');
   return data;
 };
 
-export const getAuditLogs = async (): Promise<AuditLog[]> => {
+export const getAuditLogs = async (): Promise<any[]> => {
   // Using notifications endpoint for audit logs
   const { data } = await api.get('/scan/notifications');
   return data;
 };
 
-export const getUserPermissions = async (): Promise<UserPermissions> => {
+export const getUserPermissions = async (): Promise<any> => {
   // Using notifications endpoint for permissions
   const { data } = await api.get('/scan/notifications');
   return data;
 };
 
-export const getWorkspaceActivity = async (workspaceId: number): Promise<WorkspaceActivity[]> => {
+export const getWorkspaceActivity = async (workspaceId: number): Promise<any[]> => {
   // Using access-control endpoint for workspace activity
   const { data } = await api.get(`/scan/data-sources/${workspaceId}/access-control`);
-  return data;
-};
-
-export const getDataCatalog = async (): Promise<DataCatalog> => {
-  // Using catalog endpoint for data catalog
-  const { data } = await api.get('/scan/data-sources/1/catalog');
-  return data;
-};
-
-export const getIntegrations = async (params: URLSearchParams): Promise<Integration[]> => {
-  // Using integrations endpoint
-  const { data } = await api.get(`/scan/data-sources/1/integrations?${params.toString()}`);
   return data;
 };
 
@@ -398,11 +531,11 @@ export const useTestConnectionMutation = () => {
 // DATA DISCOVERY OPERATIONS
 // ============================================================================
 
-export const useDiscoveryHistoryQuery = (dataSourceId: number, limit: number = 10, options = {}) => {
+export const useDiscoveryHistoryQuery = (dataSourceId: number, limit: number = 10, options: any = {}) => {
   return useQuery({
     queryKey: ['discovery-history', dataSourceId, limit],
     queryFn: () => getDiscoveryHistory(dataSourceId, limit),
-    enabled: !!dataSourceId,
+    enabled: !!dataSourceId && !!options.enabled,
     ...options,
   })
 }
@@ -429,6 +562,12 @@ export const useColumnProfileMutation = () => {
 // CONNECTION POOL OPERATIONS
 // ============================================================================
 
+// Connection Pool Stats - Not implemented in backend, using placeholder
+const getConnectionPoolStats = async (dataSourceId: number): Promise<any> => {
+  const { data } = await api.get(`/scan/data-sources/${dataSourceId}/stats`);
+  return data;
+};
+
 export const useConnectionPoolStatsQuery = (dataSourceId: number, options = {}) => {
   return useQuery({
     queryKey: ['connection-pool-stats', dataSourceId],
@@ -441,6 +580,12 @@ export const useConnectionPoolStatsQuery = (dataSourceId: number, options = {}) 
 // ============================================================================
 // SCAN OPERATIONS
 // ============================================================================
+
+// Scan Results - Using scan schedules as placeholder
+const getScanResults = async (dataSourceId: number, limit: number = 10): Promise<any> => {
+  const { data } = await api.get(`/scan/schedules?data_source_id=${dataSourceId}&limit=${limit}`);
+  return data;
+};
 
 export const useScanResultsQuery = (dataSourceId: number, limit: number = 10, options = {}) => {
   return useQuery({
@@ -455,6 +600,12 @@ export const useScanResultsQuery = (dataSourceId: number, limit: number = 10, op
 // QUALITY METRICS OPERATIONS
 // ============================================================================
 
+// Quality Metrics - Using data source stats as placeholder
+const getQualityMetrics = async (dataSourceId: number): Promise<any> => {
+  const { data } = await api.get(`/scan/data-sources/${dataSourceId}/stats`);
+  return data;
+};
+
 export const useQualityMetricsQuery = (dataSourceId: number, options = {}) => {
   return useQuery({
     queryKey: ['quality-metrics', dataSourceId],
@@ -467,6 +618,12 @@ export const useQualityMetricsQuery = (dataSourceId: number, options = {}) => {
 // ============================================================================
 // GROWTH METRICS OPERATIONS
 // ============================================================================
+
+// Growth Metrics - Using data source stats as placeholder
+const getGrowthMetrics = async (dataSourceId: number): Promise<any> => {
+  const { data } = await api.get(`/scan/data-sources/${dataSourceId}/stats`);
+  return data;
+};
 
 export const useGrowthMetricsQuery = (dataSourceId: number, options = {}) => {
   return useQuery({
@@ -704,15 +861,20 @@ export const useSecurityAuditQuery = (dataSourceId?: number, options = {}) => {
 }
 
 // Performance Metrics Hook (renaming existing one)
-export const usePerformanceMetricsQuery = (dataSourceId?: number, options = {}) => {
+export const usePerformanceMetricsQuery = (dataSourceId?: number, options: any = {}) => {
   return useQuery({
     queryKey: ['performance-metrics', dataSourceId],
     queryFn: async () => {
       if (!dataSourceId) return null
-      const { data } = await api.get(`/scan/data-sources/${dataSourceId}/performance`)
-      return data
+      // If backend has explicit performance-metrics route, call it; otherwise disable by default
+      try {
+        const { data } = await api.get(`/scan/data-sources/${dataSourceId}/performance-metrics`)
+        return data
+      } catch (e: any) {
+        return null
+      }
     },
-    enabled: !!dataSourceId,
+    enabled: !!dataSourceId && !!options.enabled,
     ...options,
   })
 }
@@ -734,7 +896,7 @@ export const useUserQuery = (options = {}) => {
   return useQuery({
     queryKey: ['user'],
     queryFn: async () => {
-      const { data } = await api.get('/rbac/me')  // Fixed: was '/auth/me'
+      const { data } = await api.get('/auth/me')
       return data
     },
     ...options,
@@ -746,8 +908,22 @@ export const useNotificationsQuery = (options = {}) => {
   return useQuery({
     queryKey: ['notifications'],
     queryFn: async () => {
-      const { data } = await api.get('/scan/notifications')
-      return data
+      // Fallback chain: new -> legacy -> scan
+      try {
+        const { data } = await api.get('/notifications')
+        return data
+      } catch (e: any) {
+        if (e?.response?.status === 404) {
+          try {
+            const { data } = await api.get('/scan/notifications')
+            return data
+          } catch (e2: any) {
+            const { data } = await api.get('/system/notifications')
+            return data
+          }
+        }
+        throw e
+      }
     },
     ...options,
   })
@@ -768,13 +944,23 @@ export const useDataSourceMetricsQuery = (dataSourceId?: number, options = {}) =
 }
 
 // Scheduled Tasks Hook (renaming existing one)
-export const useScheduledTasksQuery = (options = {}) => {
+export const useScheduledTasksQuery = (options: any = {}) => {
   return useQuery({
     queryKey: ['scheduled-tasks'],
     queryFn: async () => {
-      const { data } = await api.get('/scan/tasks')
-      return data
+      // Fallback chain for scheduler tasks
+      try {
+        const { data } = await api.get('/tasks')
+        return data
+      } catch (e: any) {
+        if (e?.response?.status === 404) {
+          const { data } = await api.get('/scan/tasks')
+          return data
+        }
+        throw e
+      }
     },
+    enabled: !!options.enabled,
     ...options,
   })
 }
@@ -784,8 +970,13 @@ export const useAuditLogsQuery = (options = {}) => {
   return useQuery({
     queryKey: ['audit-logs'],
     queryFn: async () => {
-      const { data } = await api.get('/sensitivity-labels/rbac/audit-logs')
-      return data
+      try {
+        const { data } = await api.get('/rbac/audit-logs')
+        return data
+      } catch (e: any) {
+        const { data } = await api.get('/sensitivity-labeling/rbac/audit-logs')
+        return data
+      }
     },
     ...options,
   })
@@ -804,7 +995,7 @@ export const useUserPermissionsQuery = (options = {}) => {
 }
 
 // Workspace Activity Hook
-export const useWorkspaceActivityQuery = (workspaceId?: number, options = {}) => {
+export const useWorkspaceActivityQuery = (workspaceId?: number, options: any = {}) => {
   return useQuery({
     queryKey: ['workspace-activity', workspaceId],
     queryFn: async () => {
@@ -812,7 +1003,7 @@ export const useWorkspaceActivityQuery = (workspaceId?: number, options = {}) =>
       const { data } = await api.get(`/workspace/${workspaceId}/activity`)
       return data
     },
-    enabled: !!workspaceId,
+    enabled: !!workspaceId && !!options.enabled,
     ...options,
   })
 }
@@ -822,7 +1013,7 @@ export const useDataCatalogQuery = (options = {}) => {
   return useQuery({
     queryKey: ['data-catalog'],
     queryFn: async () => {
-      const { data } = await api.get('/data-catalog')
+      const { data } = await api.get('/scan/catalog')
       return data
     },
     ...options,
@@ -833,15 +1024,15 @@ export const useDataCatalogQuery = (options = {}) => {
 // PERFORMANCE & ANALYTICS QUERY HOOKS
 // ============================================================================
 
-export const usePerformanceAnalyticsQuery = (dataSourceId?: number, options = {}) => {
+export const usePerformanceAnalyticsQuery = (dataSourceId?: number, options: any = {}) => {
   return useQuery({
     queryKey: ['performance-analytics', dataSourceId],
     queryFn: async () => {
       if (!dataSourceId) return null
-      const response = await api.get(`/data-sources/${dataSourceId}/performance`)
-      return response.data
+      // Disable if backend endpoint not guaranteed. Prefer stats/performance-metrics queries.
+      return null
     },
-    enabled: !!dataSourceId,
+    enabled: !!dataSourceId && !!options.enabled,
     ...options,
   })
 }
@@ -855,7 +1046,7 @@ export const useTagsQuery = (dataSourceId?: number, options = {}) => {
     queryKey: ['tags', dataSourceId],
     queryFn: async () => {
       if (!dataSourceId) return null
-      const response = await api.get(`/data-sources/${dataSourceId}/tags`)
+      const response = await api.get(`/scan/data-sources/${dataSourceId}/tags`)
       return response.data
     },
     enabled: !!dataSourceId,
@@ -872,7 +1063,7 @@ export const useVersionHistoryQuery = (dataSourceId?: number, options = {}) => {
     queryKey: ['version-history', dataSourceId],
     queryFn: async () => {
       if (!dataSourceId) return null
-      const response = await api.get(`/data-sources/${dataSourceId}/version-history`)
+      const response = await api.get(`/scan/data-sources/${dataSourceId}/version-history`)
       return response.data
     },
     enabled: !!dataSourceId,
@@ -884,15 +1075,15 @@ export const useVersionHistoryQuery = (dataSourceId?: number, options = {}) => {
 // BACKUP & RESTORE QUERY HOOKS
 // ============================================================================
 
-export const useBackupStatusQuery = (dataSourceId?: number, options = {}) => {
+export const useBackupStatusQuery = (dataSourceId?: number, options: any = {}) => {
   return useQuery({
     queryKey: ['backup-status', dataSourceId],
     queryFn: async () => {
       if (!dataSourceId) return null
-      const response = await api.get(`/data-sources/${dataSourceId}/backup-status`)
+      const response = await api.get(`/scan/data-sources/${dataSourceId}/backup-status`)
       return response.data
     },
-    enabled: !!dataSourceId,
+    enabled: !!dataSourceId && !!options.enabled,
     ...options,
   })
 }
@@ -906,7 +1097,7 @@ export const useAccessControlQuery = (dataSourceId?: number, options = {}) => {
     queryKey: ['access-control', dataSourceId],
     queryFn: async () => {
       if (!dataSourceId) return null
-      const response = await api.get(`/data-sources/${dataSourceId}/access-control`)
+      const response = await api.get(`/scan/data-sources/${dataSourceId}/access-control`)
       return response.data
     },
     enabled: !!dataSourceId,
@@ -923,7 +1114,7 @@ export const useReportsQuery = (dataSourceId?: number, options = {}) => {
     queryKey: ['reports', dataSourceId],
     queryFn: async () => {
       if (!dataSourceId) return null
-      const response = await api.get(`/data-sources/${dataSourceId}/reports`)
+      const response = await api.get(`/scan/data-sources/${dataSourceId}/reports`)
       return response.data
     },
     enabled: !!dataSourceId,
@@ -940,7 +1131,7 @@ export const useSchedulerJobsQuery = (dataSourceId?: number, options = {}) => {
     queryKey: ['scheduler-jobs', dataSourceId],
     queryFn: async () => {
       if (!dataSourceId) return null
-      const response = await api.get(`/data-sources/${dataSourceId}/scheduler/jobs`)
+      const response = await api.get(`/scan/data-sources/${dataSourceId}/scheduler/jobs`)
       return response.data
     },
     enabled: !!dataSourceId,

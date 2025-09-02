@@ -173,7 +173,7 @@ class PatternLibraryAPIService {
 
   constructor(config: Partial<PatternLibraryConfig> = {}) {
     this.config = {
-      baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000',
+      baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000/proxy',
       timeout: 30000,
       retryAttempts: 3,
       retryDelay: 1000,

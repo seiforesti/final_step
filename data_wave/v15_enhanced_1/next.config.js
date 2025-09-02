@@ -150,33 +150,134 @@ const nextConfig = {
     NEXT_PUBLIC_APP_ENV: process.env.NODE_ENV || "development",
   },
   
-  // Advanced API routing and proxying
+  // Advanced API routing and proxying - INTELLIGENT MAPPING SYSTEM
   async rewrites() {
     const backend = process.env.RACINE_BACKEND_URL || "http://localhost:8000";
     return [
-      // Smart proxy entrypoint (stays in Next, handled by app/api/proxy)
+      // ============================================================================
+      // PRIMARY PROXY ROUTE - Handles all API mapping intelligently
+      // ============================================================================
       {
         source: "/proxy/:path*",
-        destination: "/api/proxy/:path*",
+        destination: `${backend}/:path*`,
       },
-      // Route any API calls through the smart proxy
+      
+      // ============================================================================
+      // DIRECT BACKEND ROUTE MAPPINGS - Based on actual backend route structure
+      // ============================================================================
+      
+      // Data Source APIs - scan_routes.py
       {
-        source: "/api/:path*",
-        destination: "/api/proxy/:path*",
+        source: "/scan/:path*",
+        destination: `${backend}/scan/:path*`,
       },
-      // Health probe through proxy
+      
+      // Data Discovery APIs - data_discovery_routes.py
       {
-        source: "/health",
-        destination: "/api/proxy/health",
+        source: "/data-discovery/:path*",
+        destination: `${backend}/data-discovery/:path*`,
       },
-      // Map app paths to smart proxy namespaces
+      
+      // Racine APIs - racine_routes.py
       {
         source: "/racine/:path*",
-        destination: "/api/proxy/racine/:path*",
+        destination: `${backend}/racine/:path*`,
       },
+      
+      // Performance APIs - performance_routes.py
+      {
+        source: "/performance/:path*",
+        destination: `${backend}/performance/:path*`,
+      },
+      
+      // Security APIs - security_routes.py
+      {
+        source: "/security/:path*",
+        destination: `${backend}/security/:path*`,
+      },
+      
+      // Workflow APIs - workflow_routes.py
+      {
+        source: "/workflow/:path*",
+        destination: `${backend}/workflow/:path*`,
+      },
+      
+      // Collaboration APIs - collaboration_routes.py
+      {
+        source: "/collaboration/:path*",
+        destination: `${backend}/collaboration/:path*`,
+      },
+      
+      // Auth APIs - auth_routes.py
       {
         source: "/auth/:path*",
-        destination: "/api/proxy/auth/:path*",
+        destination: `${backend}/auth/:path*`,
+      },
+      
+      // RBAC APIs - rbac routes
+      {
+        source: "/rbac/:path*",
+        destination: `${backend}/rbac/:path*`,
+      },
+      
+      // Backup APIs - backup_routes.py
+      {
+        source: "/backups/:path*",
+        destination: `${backend}/backups/:path*`,
+      },
+      
+      // Restore APIs - backup_routes.py
+      {
+        source: "/restores/:path*",
+        destination: `${backend}/restores/:path*`,
+      },
+      
+      // Task APIs - various task routes
+      {
+        source: "/tasks/:path*",
+        destination: `${backend}/tasks/:path*`,
+      },
+      
+      // Integration APIs - integration_routes.py
+      {
+        source: "/integrations/:path*",
+        destination: `${backend}/integrations/:path*`,
+      },
+      
+      // Report APIs - report_routes.py
+      {
+        source: "/reports/:path*",
+        destination: `${backend}/reports/:path*`,
+      },
+      
+      // Version APIs - version_routes.py
+      {
+        source: "/versions/:path*",
+        destination: `${backend}/versions/:path*`,
+      },
+      
+      // Sensitivity Labels APIs - sensitivity_labeling
+      {
+        source: "/sensitivity-labels/:path*",
+        destination: `${backend}/sensitivity-labels/:path*`,
+      },
+      
+      // Health check endpoints
+      {
+        source: "/health",
+        destination: `${backend}/health`,
+      },
+      {
+        source: "/system/health",
+        destination: `${backend}/system/health`,
+      },
+      
+      // ============================================================================
+      // FALLBACK ROUTES - For any unmatched API calls
+      // ============================================================================
+      {
+        source: "/api/:path*",
+        destination: `${backend}/api/:path*`,
       },
     ];
   },

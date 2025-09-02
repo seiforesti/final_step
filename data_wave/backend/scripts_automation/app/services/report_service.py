@@ -20,7 +20,7 @@ class ReportService:
         """Get all reports for a data source"""
         try:
             statement = select(Report).where(Report.data_source_id == data_source_id)
-            reports = session.exec(statement).all()
+            reports = session.execute(statement).scalars().all()
             
             return [ReportResponse.from_orm(report) for report in reports]
         except Exception as e:
@@ -32,7 +32,7 @@ class ReportService:
         """Get report by ID"""
         try:
             statement = select(Report).where(Report.id == report_id)
-            report = session.exec(statement).first()
+            report = session.execute(statement).scalars().first()
             
             if report:
                 return ReportResponse.from_orm(report)
@@ -184,7 +184,7 @@ class ReportService:
             if data_source_id:
                 query = query.where(Report.data_source_id == data_source_id)
             
-            reports = session.exec(query).all()
+            reports = session.execute(query).scalars().all()
             
             # Calculate statistics
             total_reports = len(reports)
@@ -215,8 +215,8 @@ class ReportService:
                 total_size_mb=round(total_size_mb, 2),
                 avg_generation_time_minutes=round(
                     (
-                        sum((g.duration_seconds or 0) for g in session.exec(select(ReportGeneration)).all())
-                        / max(1, len(session.exec(select(ReportGeneration)).all()))
+                        sum((g.duration_seconds or 0) for g in session.execute(select(ReportGeneration)).all())
+                        / max(1, len(session.execute(select(ReportGeneration)).all()))
                     ) / 60,
                     2
                 ),
@@ -243,7 +243,7 @@ class ReportService:
         """Get all report templates"""
         try:
             statement = select(ReportTemplate).where(ReportTemplate.is_active == True)
-            templates = session.exec(statement).all()
+            templates = session.execute(statement).scalars().all()
             
             return [ReportTemplateResponse.from_orm(template) for template in templates]
         except Exception as e:
@@ -258,7 +258,7 @@ class ReportService:
                 Report.is_scheduled == True,
                 Report.status != ReportStatus.FAILED
             )
-            reports = session.exec(statement).all()
+            reports = session.execute(statement).scalars().all()
             
             return [ReportResponse.from_orm(report) for report in reports]
         except Exception as e:

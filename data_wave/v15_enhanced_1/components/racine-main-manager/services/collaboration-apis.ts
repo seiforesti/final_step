@@ -59,7 +59,7 @@ interface CollaborationAPIConfig {
  * Default configuration
  */
 const DEFAULT_CONFIG: CollaborationAPIConfig = {
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000',
+      baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000/proxy',
   timeout: process.env.NODE_ENV === 'development' ? 30000 : 30000, // 30s for both dev and prod
   retryAttempts: process.env.NODE_ENV === 'development' ? 1 : 3, // Fewer retries in dev
   retryDelay: 1000,

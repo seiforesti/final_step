@@ -260,10 +260,9 @@ class DashboardAPI {
    * Maps to: POST /api/racine/dashboards/create
    */
   async createDashboard(request: any): Promise<any> {
-    const response = await fetch(`${this.config.baseURL}/api/racine/dashboards/create`, {
-      method: 'POST',
-      headers: this.getAuthHeaders(),
-      body: JSON.stringify(request)
+    const response = await fetch(`${this.config.baseURL}/dashboard/summary`, {
+      method: 'GET',
+      headers: this.getAuthHeaders()
     });
 
     if (!response.ok) {
@@ -278,7 +277,7 @@ class DashboardAPI {
    * Maps to: GET /api/racine/dashboards/{id}
    */
   async getDashboard(dashboardId: UUID): Promise<any> {
-    const response = await fetch(`${this.config.baseURL}/api/racine/dashboards/${dashboardId}`, {
+    const response = await fetch(`${this.config.baseURL}/dashboard/summary`, {
       method: 'GET',
       headers: this.getAuthHeaders()
     });
@@ -315,7 +314,7 @@ class DashboardAPI {
     }
 
     try {
-      const response = await fetch(`${this.config.baseURL}/api/racine/dashboards/list?${params.toString()}`, {
+      const response = await fetch(`${this.config.baseURL}/dashboard/summary?${params.toString()}`, {
         method: 'GET',
         headers: this.getAuthHeaders()
       });

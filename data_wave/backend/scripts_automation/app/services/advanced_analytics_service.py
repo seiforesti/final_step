@@ -62,7 +62,7 @@ class AdvancedAnalyticsService:
                 correlation_types = ['pearson', 'spearman', 'mutual_info']
             
             # Get dataset
-            dataset = session.exec(select(AnalyticsDataset).where(
+            dataset = session.execute(select(AnalyticsDataset).where(
                 AnalyticsDataset.id == dataset_id
             )).first()
             
@@ -70,7 +70,7 @@ class AdvancedAnalyticsService:
                 raise ValueError(f"Dataset {dataset_id} not found")
             
             # Get data from data source
-            data_source = session.exec(select(DataSource).where(
+            data_source = session.execute(select(DataSource).where(
                 DataSource.id == dataset.data_source_id
             )).first()
             
@@ -183,7 +183,7 @@ class AdvancedAnalyticsService:
                 insight_types = ['anomaly', 'pattern', 'trend', 'opportunity']
             
             # Get dataset
-            dataset = session.exec(select(AnalyticsDataset).where(
+            dataset = session.execute(select(AnalyticsDataset).where(
                 AnalyticsDataset.id == dataset_id
             )).first()
             
@@ -191,7 +191,7 @@ class AdvancedAnalyticsService:
                 raise ValueError(f"Dataset {dataset_id} not found")
             
             # Get data source
-            data_source = session.exec(select(DataSource).where(
+            data_source = session.execute(select(DataSource).where(
                 DataSource.id == dataset.data_source_id
             )).first()
             
@@ -285,7 +285,7 @@ class AdvancedAnalyticsService:
         """
         try:
             # Get dataset
-            dataset = session.exec(select(AnalyticsDataset).where(
+            dataset = session.execute(select(AnalyticsDataset).where(
                 AnalyticsDataset.id == dataset_id
             )).first()
             
@@ -293,7 +293,7 @@ class AdvancedAnalyticsService:
                 raise ValueError(f"Dataset {dataset_id} not found")
             
             # Get data source
-            data_source = session.exec(select(DataSource).where(
+            data_source = session.execute(select(DataSource).where(
                 DataSource.id == dataset.data_source_id
             )).first()
             
@@ -2226,6 +2226,145 @@ class AdvancedAnalyticsService:
             return breaking_changes
         except Exception:
             return ['Unable to detect breaking changes']
+
+    async def get_user_analytics(self, user_id: str, time_range: str = "30d") -> Dict[str, Any]:
+        """
+        Get user analytics for the specified time range.
+        """
+        try:
+            # Parse time range
+            days = 30
+            if time_range == "7d":
+                days = 7
+            elif time_range == "24h":
+                days = 1
+            
+            since = datetime.utcnow() - timedelta(days=days)
+            
+            # Mock analytics for now - replace with real implementation
+            analytics = {
+                "activity_score": 85,
+                "engagement_level": "high",
+                "feature_usage": {
+                    "data_sources": 8,
+                    "scans": 12,
+                    "reports": 5,
+                    "workflows": 3,
+                    "collaboration": 7
+                },
+                "performance_metrics": {
+                    "avg_response_time": 245,
+                    "success_rate": 98.5,
+                    "error_rate": 1.5
+                },
+                "trends": {
+                    "activity_trend": "increasing",
+                    "engagement_trend": "stable",
+                    "performance_trend": "improving"
+                },
+                "recommendations": [
+                    "Consider enabling automated scanning for frequently accessed data sources",
+                    "Your workflow usage is below average - explore workflow templates",
+                    "High engagement detected - you're making great use of the platform"
+                ]
+            }
+            
+            return {
+                "user_id": user_id,
+                "time_range": time_range,
+                "analytics": analytics,
+                "timestamp": datetime.utcnow().isoformat()
+            }
+        except Exception as exc:
+            logger.error(f"get_user_analytics failed for user {user_id}: {exc}")
+            # Return fallback analytics
+            return {
+                "user_id": user_id,
+                "time_range": time_range,
+                "analytics": {
+                    "activity_score": 0,
+                    "engagement_level": "low",
+                    "feature_usage": {
+                        "data_sources": 0,
+                        "scans": 0,
+                        "reports": 0,
+                        "workflows": 0,
+                        "collaboration": 0
+                    },
+                    "performance_metrics": {
+                        "avg_response_time": 0,
+                        "success_rate": 0,
+                        "error_rate": 0
+                    },
+                    "trends": {
+                        "activity_trend": "unknown",
+                        "engagement_trend": "unknown",
+                        "performance_trend": "unknown"
+                    },
+                    "recommendations": [
+                        "Unable to generate recommendations at this time"
+                    ]
+                },
+                "timestamp": datetime.utcnow().isoformat()
+            }
+
+    @staticmethod
+    async def get_user_activity_summary(user_id: str, time_range: str = "7d") -> Dict[str, Any]:
+        """Get user activity summary for the specified time range"""
+        try:
+            # Parse time range
+            if time_range.endswith('d'):
+                days = int(time_range[:-1])
+            elif time_range.endswith('w'):
+                days = int(time_range[:-1]) * 7
+            elif time_range.endswith('m'):
+                days = int(time_range[:-1]) * 30
+            else:
+                days = 7  # Default to 7 days
+            
+            cutoff_date = datetime.now() - timedelta(days=days)
+            
+            # This is a placeholder implementation
+            # In a real implementation, you would query the database for actual user activity
+            summary = {
+                "total_actions": 0,
+                "last_activity": None,
+                "most_used_feature": "data_sources",
+                "activity_trend": "stable",
+                "session_count": 0,
+                "data_sources_accessed": 0,
+                "scans_performed": 0,
+                "reports_generated": 0,
+                "workflows_executed": 0,
+                "api_calls": 0,
+                "average_session_duration": 0,
+                "peak_activity_hours": [],
+                "feature_usage_distribution": {
+                    "data_sources": 0.4,
+                    "scans": 0.3,
+                    "reports": 0.2,
+                    "workflows": 0.1
+                }
+            }
+            
+            return {
+                "summary": summary,
+                "time_range": time_range,
+                "user_id": user_id,
+                "generated_at": datetime.now().isoformat()
+            }
+            
+        except Exception as e:
+            logger.error(f"Error getting user activity summary: {str(e)}")
+            return {
+                "summary": {
+                    "total_actions": 0,
+                    "last_activity": None,
+                    "most_used_feature": "data_sources",
+                    "activity_trend": "stable"
+                },
+                "error": str(e)
+            }
 
 # Export the service
 __all__ = ["AdvancedAnalyticsService"]

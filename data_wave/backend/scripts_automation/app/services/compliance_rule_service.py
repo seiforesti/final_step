@@ -735,7 +735,7 @@ class ComplianceRuleService:
             
             # Get total count
             count_query = select(func.count(ComplianceRule.id)).where(and_(*filters)) if filters else select(func.count(ComplianceRule.id))
-            total = session.exec(count_query).one()
+            total = session.execute(count_query).one()
             
             # Apply sorting
             if hasattr(ComplianceRule, sort):
@@ -749,7 +749,7 @@ class ComplianceRuleService:
             offset = (page - 1) * limit
             query = query.offset(offset).limit(limit)
             
-            rules = session.exec(query).all()
+            rules = session.execute(query).scalars().all()
             
             return [ComplianceRuleResponse.from_orm(rule) for rule in rules], total
             
@@ -902,7 +902,7 @@ class ComplianceRuleService:
                 return False
             
             # Check if rule has dependencies
-            evaluations_count = session.exec(
+            evaluations_count = session.execute(
                 select(func.count(ComplianceRuleEvaluation.id)).where(
                     ComplianceRuleEvaluation.rule_id == rule_id
                 )
@@ -956,13 +956,13 @@ class ComplianceRuleService:
             
             # Get total count
             count_query = select(func.count(ComplianceIssue.id)).where(and_(*filters)) if filters else select(func.count(ComplianceIssue.id))
-            total = session.exec(count_query).one()
+            total = session.execute(count_query).one()
             
             # Apply pagination
             offset = (page - 1) * limit
             query = query.offset(offset).limit(limit).order_by(ComplianceIssue.created_at.desc())
             
-            issues = session.exec(query).all()
+            issues = session.execute(query).scalars().all()
             
             return [ComplianceIssueResponse.from_orm(issue) for issue in issues], total
             
@@ -1039,13 +1039,13 @@ class ComplianceRuleService:
             
             # Get total count
             count_query = select(func.count(ComplianceWorkflow.id)).where(and_(*filters)) if filters else select(func.count(ComplianceWorkflow.id))
-            total = session.exec(count_query).one()
+            total = session.execute(count_query).one()
             
             # Apply pagination
             offset = (page - 1) * limit
             query = query.offset(offset).limit(limit).order_by(ComplianceWorkflow.created_at.desc())
             
-            workflows = session.exec(query).all()
+            workflows = session.execute(query).scalars().all()
             
             return [ComplianceWorkflowResponse.from_orm(workflow) for workflow in workflows], total
             
@@ -1147,7 +1147,7 @@ class ComplianceRuleService:
             if data_source_id:
                 rules_query = rules_query.where(ComplianceRule.data_sources.any(DataSource.id == data_source_id))
             
-            rules = session.exec(rules_query).all()
+            rules = session.execute(rules_query).scalars().all()
             
             # Calculate metrics
             total_rules = len(rules)
@@ -1170,7 +1170,7 @@ class ComplianceRuleService:
                     framework_counts[rule.compliance_standard] = framework_counts.get(rule.compliance_standard, 0) + 1
             
             # Recent evaluations
-            recent_evaluations = session.exec(
+            recent_evaluations = session.execute(
                 select(ComplianceRuleEvaluation).where(
                     ComplianceRuleEvaluation.evaluated_at >= start_date
                 ).order_by(ComplianceRuleEvaluation.evaluated_at.desc()).limit(10)
@@ -1180,7 +1180,7 @@ class ComplianceRuleService:
             trend_data = []
             for i in range(days):
                 date = start_date + timedelta(days=i)
-                day_evaluations = session.exec(
+                day_evaluations = session.execute(
                     select(ComplianceRuleEvaluation).where(
                         and_(
                             ComplianceRuleEvaluation.evaluated_at >= date,
@@ -1237,21 +1237,21 @@ class ComplianceRuleService:
             data_sources_count = len(DataSourceService.get_all_data_sources(session))
             
             # Check scan rule integration
-            scan_rules_with_compliance = session.exec(
+            scan_rules_with_compliance = session.execute(
                 select(func.count(ComplianceRule.id)).where(
                     ComplianceRule.scan_rule_set_id.isnot(None)
                 )
             ).one()
             
             # Check recent activity
-            recent_evaluations = session.exec(
+            recent_evaluations = session.execute(
                 select(func.count(ComplianceRuleEvaluation.id)).where(
                     ComplianceRuleEvaluation.evaluated_at >= datetime.now() - timedelta(hours=24)
                 )
             ).one()
             
             # Check workflow integration
-            workflow_integrations = session.exec(
+            workflow_integrations = session.execute(
                 select(func.count(ComplianceRule.id)).where(
                     ComplianceRule.remediation_workflow_id.isnot(None)
                 )
@@ -1757,7 +1757,7 @@ class ComplianceRuleService:
             ).order_by(ComplianceRuleEvaluation.evaluated_at.desc())
             
             # Get total count
-            total = session.exec(
+            total = session.execute(
                 select(func.count(ComplianceRuleEvaluation.id)).where(
                     ComplianceRuleEvaluation.rule_id == rule_id
                 )
@@ -1767,7 +1767,7 @@ class ComplianceRuleService:
             offset = (page - 1) * limit
             query = query.offset(offset).limit(limit)
             
-            evaluations = session.exec(query).all()
+            evaluations = session.execute(query).scalars().all()
             
             return [ComplianceRuleEvaluationResponse.from_orm(eval) for eval in evaluations], total
             

@@ -135,12 +135,8 @@ export const RacineMainLayout: React.FC<RacineMainLayoutProps> = ({
             )}
 
             <AppNavbar
-              currentUser={currentUser}
-              systemHealth={systemHealth}
-              notifications={recentNotifications}
-              onSearch={onSearch}
-              onQuickAction={onQuickAction}
-              onAIAssistant={() => onAIAssistantToggle(true)}
+              onQuickActionsTrigger={() => onQuickActionsSidebarToggle(true)}
+              isQuickActionsSidebarOpen={quickActionsSidebarOpen}
             />
 
             <div className="flex h-screen pt-16">

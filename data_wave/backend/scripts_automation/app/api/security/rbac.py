@@ -1,9 +1,10 @@
-from fastapi import Depends, HTTPException, status, Cookie
+from fastapi import Depends, HTTPException, status, Cookie, Header, Request
 from sqlalchemy.orm import Session
 from typing import Dict, Any, List, Optional
 
 from app.db_session import get_session, get_db
 from app.services.auth_service import get_user_by_email, get_session_by_token
+import time
 from app.services.rbac_service import get_user_effective_permissions_rbac
 
 
@@ -134,24 +135,57 @@ ROLE_PERMISSIONS = {
     ]
 }
 
-def get_current_user(session_token: str = Cookie(None), db: Session = Depends(get_db)) -> Dict[str, Any]:
-    """Get the current user from the session token."""
-    if not session_token:
+_SESSION_CACHE: dict[str, tuple[float, Any]] = {}
+_SESSION_CACHE_TTL_SECONDS = 2.0
+
+def _get_session_cached(db: Session, token: str):
+    now = time.time()
+    cached = _SESSION_CACHE.get(token)
+    if cached:
+        expires_at, value = cached
+        if now < expires_at:
+            return value
+        else:
+            # Expired entry; remove
+            _SESSION_CACHE.pop(token, None)
+    # Miss or expired; fetch and store
+    value = get_session_by_token(db, token)
+    _SESSION_CACHE[token] = (now + _SESSION_CACHE_TTL_SECONDS, value)
+    return value
+
+def get_current_user(
+    request: Request,
+    session_token: str = Cookie(None), 
+    authorization: str = Header(None), 
+    db: Session = Depends(get_db)
+) -> Dict[str, Any]:
+    """Get the current user from the session token or Authorization header with lightweight caching."""
+    # Per-request cache to avoid duplicate DB hits within the same request lifecycle
+    if hasattr(request.state, "current_user") and request.state.current_user:
+        return request.state.current_user
+
+    token = session_token
+    # If no cookie token, try Authorization header
+    if not token and authorization and authorization.lower().startswith("bearer "):
+        token = authorization[7:]  # Remove "Bearer " prefix
+    if not token:
         raise HTTPException(status_code=401, detail="Not authenticated")
-    
-    user_session = get_session_by_token(db, session_token)
-    if not user_session or not user_session.user:
+
+    user_session = _get_session_cached(db, token)
+    if not user_session or not getattr(user_session, "user", None):
         raise HTTPException(status_code=401, detail="Invalid session")
-    
+
     user = user_session.user
-    return {
+    result = {
         "id": user.id,
         "email": user.email,
-        "username": getattr(user, "display_name", user.email),  # Use display_name or fallback to email
+        "username": getattr(user, "display_name", user.email),
         "role": user.role,
         "department": getattr(user, "department", None),
         "region": getattr(user, "region", None)
     }
+    request.state.current_user = result
+    return result
 
 def check_permission(permission: str, current_user: Dict[str, Any] = Depends(get_current_user), db: Session = Depends(get_db)) -> bool:
     """Check if the current user has the specified permission."""

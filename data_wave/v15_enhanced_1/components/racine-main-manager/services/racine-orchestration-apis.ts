@@ -52,7 +52,7 @@ interface OrchestrationAPIConfig {
  * Default configuration
  */
 const DEFAULT_CONFIG: OrchestrationAPIConfig = {
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000',
+      baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || '/api/proxy',
   timeout: process.env.NODE_ENV === 'development' ? 30000 : 30000, // 30s for both dev and prod
   retryAttempts: process.env.NODE_ENV === 'development' ? 1 : 3, // Fewer retries in dev
   retryDelay: 1000,
@@ -291,7 +291,7 @@ export class RacineOrchestrationAPI {
    * Create a new orchestration master instance
    */
   async createOrchestration(request: CreateOrchestrationRequest, options?: RequestOptions): Promise<APIResponse<OrchestrationResponse>> {
-    return this.makeRequest<OrchestrationResponse>('/api/racine/orchestration/create', {
+    return this.makeRequest<OrchestrationResponse>('/orchestration/create', {
       method: 'POST',
       body: JSON.stringify(request),
       ...options

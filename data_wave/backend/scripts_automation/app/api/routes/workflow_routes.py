@@ -8,7 +8,7 @@ from app.models.workflow_models import (
     Workflow, WorkflowExecution, WorkflowStep,
     WorkflowTemplate
 )
-from app.api.security import get_current_user, require_permission
+from app.api.security.rbac import get_current_user, require_permission
 from app.api.security.rbac import (
     PERMISSION_WORKFLOW_VIEW, PERMISSION_WORKFLOW_MANAGE,
     PERMISSION_WORKFLOW_CREATE, PERMISSION_WORKFLOW_EXECUTE
@@ -17,7 +17,7 @@ from app.api.security.rbac import (
 router = APIRouter(prefix="/workflow", tags=["Workflow"])
 
 @router.get("/designer/workflows")
-async def get_workflows(
+async def get_workflow_designer_workflows(
     workflow_type: Optional[str] = Query(None, description="Filter by workflow type"),
     status: Optional[str] = Query(None, description="Filter by status"),
     session: Session = Depends(get_session),
@@ -175,30 +175,44 @@ async def execute_workflow(
 
 @router.get("/executions")
 async def get_workflow_executions(
-    workflow_id: Optional[str] = Query(None, description="Filter by workflow ID"),
+    days: int = Query(7, description="Number of days to look back"),
     status: Optional[str] = Query(None, description="Filter by execution status"),
-    days: int = Query(30, description="Number of days to look back"),
+    workflow_id: Optional[str] = Query(None, description="Filter by workflow ID"),
     session: Session = Depends(get_session),
     current_user: Dict[str, Any] = Depends(require_permission(PERMISSION_WORKFLOW_VIEW))
 ) -> Dict[str, Any]:
-    """Get workflow execution history and status"""
+    """
+    Get workflow execution history
+    
+    Features:
+    - Execution tracking
+    - Status monitoring
+    - Performance metrics
+    - Error reporting
+    """
     try:
         result = AdvancedWorkflowService.get_workflow_executions(
             session=session,
-            workflow_id=workflow_id,
-            status=status,
             days=days,
+            status=status,
+            workflow_id=workflow_id,
             user_id=current_user.get("user_id")
         )
         
         return {
             "success": True,
-            "data": result
+            "data": result,
+            "execution_features": [
+                "real_time_tracking",
+                "status_monitoring",
+                "performance_metrics",
+                "error_reporting"
+            ]
         }
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get executions: {str(e)}"
+            detail=f"Failed to get workflow executions: {str(e)}"
         )
 
 @router.get("/executions/{execution_id}")
@@ -264,21 +278,37 @@ async def create_approval_workflow(
         )
 
 @router.get("/approvals/pending")
-async def get_pending_approvals(
-    approver_id: Optional[str] = Query(None, description="Filter by approver"),
+async def get_pending_workflow_approvals(
+    workflow_id: Optional[str] = Query(None, description="Filter by workflow ID"),
+    approver_id: Optional[str] = Query(None, description="Filter by approver ID"),
     session: Session = Depends(get_session),
     current_user: Dict[str, Any] = Depends(require_permission(PERMISSION_WORKFLOW_VIEW))
 ) -> Dict[str, Any]:
-    """Get pending approval requests for the current user"""
+    """
+    Get pending workflow approvals
+    
+    Features:
+    - Approval queue management
+    - Workflow status tracking
+    - Approver assignment
+    - Deadline monitoring
+    """
     try:
         result = AdvancedWorkflowService.get_pending_approvals(
             session=session,
+            workflow_id=workflow_id,
             approver_id=approver_id or current_user.get("user_id")
         )
         
         return {
             "success": True,
-            "data": result
+            "data": result,
+            "approval_features": [
+                "queue_management",
+                "status_tracking",
+                "approver_assignment",
+                "deadline_monitoring"
+            ]
         }
     except Exception as e:
         raise HTTPException(

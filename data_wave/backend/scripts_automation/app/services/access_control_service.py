@@ -94,7 +94,7 @@ class AccessControlService:
                 (DataSourcePermission.expires_at.is_(None)) | 
                 (DataSourcePermission.expires_at > datetime.now())
             )
-            permissions = session.exec(statement).all()
+            permissions = session.execute(statement).scalars().all()
             
             return [PermissionResponse.from_orm(permission) for permission in permissions]
         except Exception as e:
@@ -106,7 +106,7 @@ class AccessControlService:
         """Get permission by ID"""
         try:
             statement = select(DataSourcePermission).where(DataSourcePermission.id == permission_id)
-            permission = session.exec(statement).first()
+            permission = session.execute(statement).scalars().first()
             
             if permission:
                 return PermissionResponse.from_orm(permission)
@@ -128,7 +128,7 @@ class AccessControlService:
             if data_source_id:
                 query = query.where(DataSourcePermission.data_source_id == data_source_id)
             
-            permissions = session.exec(query).all()
+            permissions = session.execute(query).scalars().all()
             return [PermissionResponse.from_orm(permission) for permission in permissions]
         except Exception as e:
             logger.error(f"Error getting permissions for user {user_id}: {str(e)}")
@@ -267,7 +267,7 @@ class AccessControlService:
                 (DataSourcePermission.expires_at > datetime.now())
             )
             
-            permission = session.exec(statement).first()
+            permission = session.execute(statement).scalars().first()
             has_access = permission is not None
             
             # Log access attempt
@@ -297,7 +297,7 @@ class AccessControlService:
                 AccessLog.data_source_id == data_source_id
             ).order_by(AccessLog.created_at.desc()).limit(limit)
             
-            logs = session.exec(statement).all()
+            logs = session.execute(statement).scalars().all()
             return [AccessLogResponse.from_orm(log) for log in logs]
         except Exception as e:
             logger.error(f"Error getting access logs: {str(e)}")
@@ -312,7 +312,7 @@ class AccessControlService:
             if data_source_id:
                 permission_query = permission_query.where(DataSourcePermission.data_source_id == data_source_id)
             
-            permissions = session.exec(permission_query).all()
+            permissions = session.execute(permission_query).scalars().all()
             
             total_permissions = len(permissions)
             active_permissions = len([p for p in permissions if not p.expires_at or p.expires_at > datetime.now()])
@@ -325,7 +325,7 @@ class AccessControlService:
             if data_source_id:
                 log_query = log_query.where(AccessLog.data_source_id == data_source_id)
             
-            logs = session.exec(log_query.limit(1000)).all()  # Limit for performance
+            logs = session.execute(log_query.limit(1000)).all()  # Limit for performance
             
             total_access_attempts = len(logs)
             successful_access = len([l for l in logs if l.result == "success"])
@@ -345,7 +345,7 @@ class AccessControlService:
                 most_accessed_ds = data_source.name if data_source else f"DS-{most_accessed_id}"
             
             # Get recent logs
-            recent_logs = session.exec(
+            recent_logs = session.execute(
                 select(AccessLog).order_by(AccessLog.created_at.desc()).limit(10)
             ).all()
             
@@ -391,7 +391,7 @@ class AccessControlService:
         if role_id:
             query = query.where(DataSourcePermission.role_id == role_id)
         
-        return session.exec(query).first()
+        return session.execute(query).scalars().first()
     
     @staticmethod
     def _update_existing_permission(session: Session, permission: DataSourcePermission, new_data: PermissionCreate, updated_by: str) -> PermissionResponse:

@@ -168,13 +168,13 @@ export async function middleware(request: NextRequest) {
   response.headers.set('X-Content-Type-Options', 'nosniff');
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
   response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
-  const backendBase = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+  const backendBase = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000/proxy';
   const backendOrigin = (() => {
     try {
       const u = new URL(backendBase);
       return `${u.protocol}//${u.host}`;
     } catch {
-      return 'http://localhost:8000';
+      return 'http://localhost:3000';
     }
   })();
   const wsBase = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000/ws';

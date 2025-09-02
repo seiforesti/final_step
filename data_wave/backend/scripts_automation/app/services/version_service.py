@@ -24,13 +24,13 @@ class VersionService:
                 DataSourceVersion.data_source_id == data_source_id
             ).order_by(DataSourceVersion.created_at.desc())
             
-            versions = session.exec(statement).all()
+            versions = session.execute(statement).scalars().all()
             
             result = []
             for version in versions:
                 response = DataSourceVersionResponse.from_orm(version)
                 # Get changes for this version
-                changes = session.exec(
+                changes = session.execute(
                     select(VersionChange).where(VersionChange.version_id == version.id)
                 ).all()
                 response.changes = [VersionChangeResponse.from_orm(change) for change in changes]
@@ -51,7 +51,7 @@ class VersionService:
             
             response = DataSourceVersionResponse.from_orm(version)
             # Get changes
-            changes = session.exec(
+            changes = session.execute(
                 select(VersionChange).where(VersionChange.version_id == version_id)
             ).all()
             response.changes = [VersionChangeResponse.from_orm(change) for change in changes]
@@ -70,11 +70,11 @@ class VersionService:
                 DataSourceVersion.is_current == True
             )
             
-            version = session.exec(statement).first()
+            version = session.execute(statement).scalars().first()
             if version:
                 response = DataSourceVersionResponse.from_orm(version)
                 # Get changes
-                changes = session.exec(
+                changes = session.execute(
                     select(VersionChange).where(VersionChange.version_id == version.id)
                 ).all()
                 response.changes = [VersionChangeResponse.from_orm(change) for change in changes]
@@ -95,7 +95,7 @@ class VersionService:
                 raise ValueError(f"Data source {data_source_id} not found")
             
             # Check if version already exists
-            existing = session.exec(
+            existing = session.execute(
                 select(DataSourceVersion).where(
                     DataSourceVersion.data_source_id == data_source_id,
                     DataSourceVersion.version == version_data.version
@@ -167,7 +167,7 @@ class VersionService:
             
             response = DataSourceVersionResponse.from_orm(version)
             # Get changes
-            changes = session.exec(
+            changes = session.execute(
                 select(VersionChange).where(VersionChange.version_id == version_id)
             ).all()
             response.changes = [VersionChangeResponse.from_orm(change) for change in changes]
@@ -188,7 +188,7 @@ class VersionService:
                 return False
             
             # Deactivate current version
-            current = session.exec(
+            current = session.execute(
                 select(DataSourceVersion).where(
                     DataSourceVersion.data_source_id == version.data_source_id,
                     DataSourceVersion.is_current == True
@@ -228,15 +228,15 @@ class VersionService:
             return False
     
     @staticmethod
-    def rollback_version(session: Session, data_source_id: int, target_version_id: int, rolled_back_by: str) -> bool:
-        """Rollback to a previous version"""
+    def restore_version(session: Session, data_source_id: int, version_id: int, restored_by: str) -> bool:
+        """Restore to a specific version"""
         try:
-            target_version = session.get(DataSourceVersion, target_version_id)
+            target_version = session.get(DataSourceVersion, version_id)
             if not target_version or target_version.data_source_id != data_source_id:
                 return False
             
             # Get current version
-            current = session.exec(
+            current = session.execute(
                 select(DataSourceVersion).where(
                     DataSourceVersion.data_source_id == data_source_id,
                     DataSourceVersion.is_current == True
@@ -245,7 +245,7 @@ class VersionService:
             
             if current:
                 current.is_current = False
-                current.status = VersionStatus.ROLLBACK
+                current.status = VersionStatus.ARCHIVED
                 session.add(current)
             
             # Activate target version
@@ -253,22 +253,81 @@ class VersionService:
             target_version.status = VersionStatus.ACTIVE
             target_version.activated_at = datetime.now()
             
-            # Create rollback deployment record
+            # Create restore deployment record
             deployment = VersionDeployment(
-                version_id=target_version_id,
-                deployment_type="rollback",
-                deployed_by=rolled_back_by,
+                version_id=version_id,
+                deployment_type="restore",
+                deployed_by=restored_by,
                 status="completed",
                 completed_at=datetime.now(),
                 rollback_version_id=current.id if current else None,
-                deployment_notes=f"Rolled back from version {current.version if current else 'unknown'}"
+                deployment_notes=f"Restored to version {target_version.version}"
             )
             
             session.add(target_version)
             session.add(deployment)
             session.commit()
             
-            logger.info(f"Rolled back to version {target_version_id} by {rolled_back_by}")
+            logger.info(f"Restored to version {version_id} by {restored_by}")
+            return True
+            
+        except Exception as e:
+            session.rollback()
+            logger.error(f"Error restoring version: {str(e)}")
+            return False
+
+    @staticmethod
+    def rollback_version(session: Session, data_source_id: int, rolled_back_by: str) -> bool:
+        """Rollback to previous version"""
+        try:
+            # Get current version
+            current = session.execute(
+                select(DataSourceVersion).where(
+                    DataSourceVersion.data_source_id == data_source_id,
+                    DataSourceVersion.is_current == True
+                )
+            ).first()
+            
+            if not current:
+                return False
+            
+            # Get previous version (most recent non-current)
+            previous = session.execute(
+                select(DataSourceVersion).where(
+                    DataSourceVersion.data_source_id == data_source_id,
+                    DataSourceVersion.id != current.id
+                ).order_by(DataSourceVersion.created_at.desc())
+            ).first()
+            
+            if not previous:
+                return False
+            
+            # Deactivate current version
+            current.is_current = False
+            current.status = VersionStatus.ROLLBACK
+            session.add(current)
+            
+            # Activate previous version
+            previous.is_current = True
+            previous.status = VersionStatus.ACTIVE
+            previous.activated_at = datetime.now()
+            
+            # Create rollback deployment record
+            deployment = VersionDeployment(
+                version_id=previous.id,
+                deployment_type="rollback",
+                deployed_by=rolled_back_by,
+                status="completed",
+                completed_at=datetime.now(),
+                rollback_version_id=current.id,
+                deployment_notes=f"Rolled back from version {current.version} to {previous.version}"
+            )
+            
+            session.add(previous)
+            session.add(deployment)
+            session.commit()
+            
+            logger.info(f"Rolled back from version {current.version} to {previous.version} by {rolled_back_by}")
             return True
             
         except Exception as e:
@@ -289,7 +348,7 @@ class VersionService:
                 raise ValueError("Cannot delete the current active version")
             
             # Delete associated changes
-            changes = session.exec(
+            changes = session.execute(
                 select(VersionChange).where(VersionChange.version_id == version_id)
             ).all()
             for change in changes:
@@ -344,7 +403,7 @@ class VersionService:
             if data_source_id:
                 query = query.where(DataSourceVersion.data_source_id == data_source_id)
             
-            versions = session.exec(query).all()
+            versions = session.execute(query).scalars().all()
             
             total_versions = len(versions)
             active_versions = len([v for v in versions if v.status == VersionStatus.ACTIVE])
@@ -357,7 +416,7 @@ class VersionService:
             if version_ids:
                 changes_query = changes_query.where(VersionChange.version_id.in_(version_ids))
             
-            changes = session.exec(changes_query).all()
+            changes = session.execute(changes_query).scalars().all()
             total_changes = len(changes)
             breaking_changes_count = len([v for v in versions if v.breaking_changes])
             
@@ -377,7 +436,7 @@ class VersionService:
             if data_source_id:
                 deployment_query = deployment_query.where(DeploymentHistory.data_source_id == data_source_id)
             
-            deployments = session.exec(deployment_query).all()
+            deployments = session.execute(deployment_query).scalars().all()
             
             if deployments:
                 # Calculate real deployment metrics
@@ -427,3 +486,101 @@ class VersionService:
                 success_rate_percentage=0.0,
                 most_common_change_type="none"
             )
+
+    @staticmethod
+    def compare_versions(session: Session, version1_id: int, version2_id: int) -> Dict[str, Any]:
+        """Compare two versions"""
+        try:
+            version1 = session.get(DataSourceVersion, version1_id)
+            version2 = session.get(DataSourceVersion, version2_id)
+            
+            if not version1 or not version2:
+                return None
+            
+            # Get changes for both versions
+            changes1 = session.execute(
+                select(VersionChange).where(VersionChange.version_id == version1_id)
+            ).scalars().all()
+            
+            changes2 = session.execute(
+                select(VersionChange).where(VersionChange.version_id == version2_id)
+            ).scalars().all()
+            
+            # Compare configurations
+            config1 = version1.configuration or {}
+            config2 = version2.configuration or {}
+            
+            config_diff = {}
+            all_keys = set(config1.keys()) | set(config2.keys())
+            
+            for key in all_keys:
+                val1 = config1.get(key)
+                val2 = config2.get(key)
+                if val1 != val2:
+                    config_diff[key] = {
+                        "version1": val1,
+                        "version2": val2,
+                        "changed": True
+                    }
+            
+            # Compare schema snapshots
+            schema1 = version1.schema_snapshot or {}
+            schema2 = version2.schema_snapshot or {}
+            
+            schema_diff = {}
+            all_schema_keys = set(schema1.keys()) | set(schema2.keys())
+            
+            for key in all_schema_keys:
+                val1 = schema1.get(key)
+                val2 = schema2.get(key)
+                if val1 != val2:
+                    schema_diff[key] = {
+                        "version1": val1,
+                        "version2": val2,
+                        "changed": True
+                    }
+            
+            return {
+                "version1": {
+                    "id": version1.id,
+                    "version": version1.version,
+                    "name": version1.name,
+                    "created_at": version1.created_at,
+                    "changes_count": len(changes1)
+                },
+                "version2": {
+                    "id": version2.id,
+                    "version": version2.version,
+                    "name": version2.name,
+                    "created_at": version2.created_at,
+                    "changes_count": len(changes2)
+                },
+                "configuration_diff": config_diff,
+                "schema_diff": schema_diff,
+                "changes_summary": {
+                    "version1_changes": [VersionChangeResponse.from_orm(c) for c in changes1],
+                    "version2_changes": [VersionChangeResponse.from_orm(c) for c in changes2]
+                },
+                "breaking_changes": {
+                    "version1": version1.breaking_changes,
+                    "version2": version2.breaking_changes
+                }
+            }
+            
+        except Exception as e:
+            logger.error(f"Error comparing versions: {str(e)}")
+            return None
+
+    @staticmethod
+    def get_version_changes(session: Session, version_id: int) -> List[VersionChangeResponse]:
+        """Get changes for a specific version"""
+        try:
+            changes = session.execute(
+                select(VersionChange).where(VersionChange.version_id == version_id)
+            ).scalars().all()
+            
+            return [VersionChangeResponse.from_orm(change) for change in changes]
+            
+        except Exception as e:
+            logger.error(f"Error getting version changes: {str(e)}")
+            return []

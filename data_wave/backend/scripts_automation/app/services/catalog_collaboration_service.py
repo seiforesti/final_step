@@ -292,7 +292,7 @@ class CatalogCollaborationService:
         """Add a member to a collaboration team"""
         try:
             # Check if member already exists
-            existing = session.exec(
+            existing = session.execute(
                 select(TeamMember).where(
                     and_(TeamMember.team_id == team_id, TeamMember.user_id == user_id)
                 )
@@ -590,7 +590,7 @@ class CatalogCollaborationService:
             
             query = query.order_by(desc(DataAnnotation.created_at)).offset(offset).limit(limit)
             
-            annotations = session.exec(query).all()
+            annotations = session.execute(query).scalars().all()
 
             return {
                 "success": True,
@@ -1044,7 +1044,7 @@ class CatalogCollaborationService:
                 start_date = end_date - timedelta(days=7)
 
             # Get activities
-            activities = session.exec(
+            activities = session.execute(
                 select(CollaborationActivity).where(
                     and_(
                         CollaborationActivity.hub_id == hub_id,
@@ -1054,19 +1054,19 @@ class CatalogCollaborationService:
             ).all()
 
             # Get teams
-            teams = session.exec(
+            teams = session.execute(
                 select(CollaborationTeam).where(CollaborationTeam.hub_id == hub_id)
             ).all()
 
             # Get annotations
-            annotations = session.exec(
+            annotations = session.execute(
                 select(DataAnnotation).where(
                     DataAnnotation.created_at >= start_date
                 )
             ).all()
 
             # Get reviews
-            reviews = session.exec(
+            reviews = session.execute(
                 select(AssetReview).where(
                     AssetReview.created_at >= start_date
                 )
@@ -1153,7 +1153,7 @@ class CatalogCollaborationService:
         """Auto-assign reviewers based on review type and availability"""
         try:
             # Get available reviewers for this review type
-            reviewers = session.exec(
+            reviewers = session.execute(
                 select(Reviewer).where(
                     and_(
                         Reviewer.status == "active",
@@ -1168,7 +1168,7 @@ class CatalogCollaborationService:
             # Compute workload and pick reviewer with lowest effective load
             reviewer_scores: List[Tuple[int, float]] = []  # (reviewer_id, score)
             for r in reviewers:
-                active_assignments = session.exec(
+                active_assignments = session.execute(
                     select(ReviewAssignment).where(
                         and_(
                             ReviewAssignment.reviewer_id == r.id,
@@ -1202,7 +1202,7 @@ class CatalogCollaborationService:
     def _find_suitable_expert(session: Session, network_id: int, topic: str) -> Optional[DomainExpert]:
         """Find suitable expert based on topic"""
         try:
-            experts = session.exec(
+            experts = session.execute(
                 select(DomainExpert).where(
                     and_(
                         DomainExpert.network_id == network_id,
@@ -1251,7 +1251,7 @@ class CatalogCollaborationService:
 
                 # Availability: fewer open consultations is better
                 try:
-                    open_reqs = session.exec(
+                    open_reqs = session.execute(
                         select(ConsultationRequest).where(
                             and_(
                                 ConsultationRequest.expert_id == ex.id,

@@ -1514,7 +1514,7 @@ async def get_task_stats(
         # Get recent executions for 24-hour stats
         from app.models.task_models import TaskExecution
         
-        recent_executions = session.exec(
+        recent_executions = session.execute(
             select(TaskExecution).where(TaskExecution.started_at >= yesterday)
         ).all()
         
@@ -1546,58 +1546,57 @@ async def get_task_stats(
 
 # Health System Endpoint
 @router.get("/health/system")
-async def get_system_health():
-    """Get system health information."""
+async def get_system_health(
+    session: Session = Depends(get_session),
+    current_user: Dict[str, Any] = Depends(get_current_user)
+) -> Dict[str, Any]:
+    """
+    Get system health status for scanning operations
+    
+    Features:
+    - System health monitoring
+    - Service status checks
+    - Performance metrics
+    - Resource utilization
+    """
     try:
-        import psutil
-        import time
-        
-        # Get system metrics
-        cpu_percent = psutil.cpu_percent(interval=1)
-        memory = psutil.virtual_memory()
-        disk = psutil.disk_usage('/')
-        
-        # Get application metrics
         from app.services.performance_service import PerformanceService
+        from app.services.scan_service import ScanService
+        
+        # Get system health metrics
         performance_service = PerformanceService()
+        system_metrics = performance_service.get_comprehensive_system_metrics(session)
         
+        # Get scan service health
+        scan_service = ScanService()
+        scan_health = scan_service.get_service_health(session)
+        
+        # Get database health
         try:
-            app_metrics = performance_service.get_comprehensive_system_metrics()
+            from sqlalchemy import text
+            session.execute(text("SELECT 1"))
+            db_status = "healthy"
         except Exception:
-            app_metrics = {
-                "performance_score": 85,
-                "average_response_time": 0.15,
-                "error_rate": 0.02,
-                "throughput_rps": 150.0,
-                "cache_hit_rate": 0.92
-            }
+            db_status = "unhealthy"
         
         return {
-            "status": "healthy",
-            "timestamp": time.time(),
-            "system": {
-                "cpu_usage": cpu_percent,
-                "memory_usage": memory.percent,
-                "memory_available": memory.available,
-                "memory_total": memory.total,
-                "disk_usage": disk.percent,
-                "disk_free": disk.free,
-                "disk_total": disk.total
-            },
-            "application": app_metrics,
-            "services": {
-                "database": "healthy",
-                "cache": "healthy",
-                "external_apis": "healthy"
+            "success": True,
+            "data": {
+                "system_health": system_metrics.get("system_health", {}),
+                "scan_service": scan_health,
+                "database": {
+                    "status": db_status,
+                    "connection": "active" if db_status == "healthy" else "failed"
+                },
+                "timestamp": datetime.utcnow().isoformat()
             }
         }
+        
     except Exception as e:
-        logger.error(f"Error getting system health: {str(e)}")
-        return {
-            "status": "degraded",
-            "timestamp": time.time(),
-            "error": str(e)
-        }
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get system health: {str(e)}"
+        )
 
 
 # General Reports Endpoints
@@ -1640,11 +1639,11 @@ async def get_all_reports(
             query = query.where(Report.data_source_id == data_source_id)
         
         # Get total count
-        total_count = len(session.exec(query).all())
+        total_count = len(session.execute(query).scalars().all())
         
         # Apply pagination
         query = query.order_by(Report.created_at.desc()).offset(offset).limit(limit)
-        reports = session.exec(query).all()
+        reports = session.execute(query).scalars().all()
         
         # Convert to response format
         reports_data = []
@@ -2036,4 +2035,57 @@ async def get_integrations(
     except Exception as e:
         logger.error(f"Error getting integrations: {str(e)}")
         raise HTTPException(status_code=500, detail="Internal server error")
+
+@router.get("/catalog")
+async def get_data_catalog(
+    current_user: Dict[str, Any] = Depends(require_permission(PERMISSION_SCAN_VIEW)),
+    session: Session = Depends(get_session)
+):
+    """Get general data catalog overview"""
+    try:
+        from app.services.catalog_service import EnhancedCatalogService
+        
+        # Get all catalog items
+        catalog_items = EnhancedCatalogService.get_all_catalog_items(session)
+        
+        catalog_data = {
+            "catalog": [
+                {
+                    "id": item.id,
+                    "name": item.name,
+                    "type": item.type,
+                    "description": item.description,
+                    "metadata": item.metadata,
+                    "tags": [tag.name for tag in item.tags] if item.tags else [],
+                    "data_source_id": item.data_source_id,
+                    "created_at": item.created_at.isoformat() if item.created_at else None,
+                    "updated_at": item.updated_at.isoformat() if item.updated_at else None
+                }
+                for item in catalog_items
+            ],
+            "total_count": len(catalog_items),
+            "catalog_summary": {
+                "total_items": len(catalog_items),
+                "by_type": {},
+                "by_data_source": {}
+            }
+        }
+        
+        # Generate summary statistics
+        for item in catalog_items:
+            # Count by type
+            item_type = item.type.value if hasattr(item.type, 'value') else str(item.type)
+            catalog_data["catalog_summary"]["by_type"][item_type] = catalog_data["catalog_summary"]["by_type"].get(item_type, 0) + 1
+            
+            # Count by data source
+            if item.data_source_id:
+                catalog_data["catalog_summary"]["by_data_source"][str(item.data_source_id)] = catalog_data["catalog_summary"]["by_data_source"].get(str(item.data_source_id), 0) + 1
+        
+        return {
+            "success": True,
+            "data": catalog_data,
+        }
+    except Exception as e:
+        logger.error(f"Error getting data catalog: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to get data catalog")
 

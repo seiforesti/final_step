@@ -88,7 +88,7 @@ def extract_mongodb_schema(request: ExtractionRequest, role: str = Depends(get_c
 @router.get("/search/fuzzy")
 def fuzzy_search(query: str):
     with get_session() as session:
-        result = session.exec(
+        result = session.execute(
             text("""
                 SELECT * FROM datatableschema 
                 WHERE table_name % :q OR column_name % :q
@@ -98,7 +98,7 @@ def fuzzy_search(query: str):
 
 @router.get("/search")
 def search_schema(query: str, session: Session = Depends(get_session)):
-    results = session.exec(
+    results = session.execute(
         select(DataTableSchema).where(
             or_(
                 DataTableSchema.table_name.ilike(f"%{query}%"),
@@ -111,25 +111,25 @@ def search_schema(query: str, session: Session = Depends(get_session)):
 # === Filtered classification ===
 @router.get("/classified")
 def get_all_classified_columns(session: Session = Depends(get_session)):
-    return session.exec(
+    return session.execute(
         select(DataTableSchema).where(DataTableSchema.categories != None)
     ).all()
 
 @router.get("/classified/hybrid")
 def get_hybrid_classified_columns(session: Session = Depends(get_session)):
-    return session.exec(
+    return session.execute(
         select(DataTableSchema).where(DataTableSchema.categories.ilike("%[Hybrid]%"))
     ).all()
 
 @router.get("/classified/regex")
 def get_regex_classified_columns(session: Session = Depends(get_session)):
-    return session.exec(
+    return session.execute(
         select(DataTableSchema).where(DataTableSchema.categories.ilike("%[Regex]%"))
     ).all()
 
 @router.get("/classified/dictionary")
 def get_dict_classified_columns(session: Session = Depends(get_session)):
-    return session.exec(
+    return session.execute(
         select(DataTableSchema).where(DataTableSchema.categories.ilike("%[Dictionary]%"))
     ).all()
 
@@ -164,7 +164,7 @@ def get_protected_classified_columns(
             user = user_session.user
     if not user:
         raise HTTPException(status_code=401, detail="Not authenticated")
-    all_classified = session.exec(
+    all_classified = session.execute(
         select(DataTableSchema).where(DataTableSchema.categories != None)
     ).all()
     allowed = []

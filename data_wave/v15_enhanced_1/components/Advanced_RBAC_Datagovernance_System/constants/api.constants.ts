@@ -1,7 +1,7 @@
 // API Endpoint Constants - Maps to backend route definitions
 
 // Base API URL - should be configurable via environment variables
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000/proxy';
 
 // Authentication endpoints
 export const AUTH_ENDPOINTS = {
@@ -19,7 +19,7 @@ export const AUTH_ENDPOINTS = {
 // RBAC endpoints
 export const RBAC_ENDPOINTS = {
   // Current user
-  ME: '/rbac/me',
+  ME: '/auth/me',
   ME_FLAT_PERMISSIONS: '/rbac/me/flat-permissions',
   
   // Users

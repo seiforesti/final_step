@@ -49,9 +49,13 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu"
 
+// Import hooks and APIs
+import { useActivityTracker } from '../../hooks/useActivityTracker'
+import { quickActionsAPI } from '../../services/quick-actions-apis'
+
 // Import types
-import type { ViewModeEnum } from "../../RacineMainManagerSPA"
-import type { User, Workspace } from "../../types/racine-core.types"
+import type { ViewMode } from "../../types/racine-core.types"
+import type { User, RacineWorkspace } from "../../types/racine-core.types"
 
 interface QuickAction {
   id: string
@@ -64,15 +68,15 @@ interface QuickAction {
   badge?: string
   disabled?: boolean
   url?: string
-  group: ViewModeEnum
+  group: ViewMode
 }
 
 interface GlobalQuickActionsSidebarProps {
   isOpen: boolean
   onClose: () => void
-  currentView: ViewModeEnum
-  onViewChange: (view: ViewModeEnum) => void
-  currentWorkspace?: Workspace
+  currentView: ViewMode
+  onViewChange: (view: ViewMode) => void
+  currentWorkspace?: RacineWorkspace
   currentUser?: User
 }
 
@@ -98,8 +102,8 @@ export const GlobalQuickActionsSidebar: React.FC<GlobalQuickActionsSidebarProps>
       description: "Build a new data governance workflow",
       icon: Workflow,
       category: "create",
-      group: "workflows" as ViewModeEnum,
-      action: () => onViewChange("workflows" as ViewModeEnum)
+      group: "workflows" as ViewMode,
+      action: () => onViewChange("workflows" as ViewMode)
     },
     {
       id: "new-pipeline",
@@ -107,8 +111,8 @@ export const GlobalQuickActionsSidebar: React.FC<GlobalQuickActionsSidebarProps>
       description: "Set up a new data processing pipeline",
       icon: GitBranch,
       category: "create",
-      group: "pipelines" as ViewModeEnum,
-      action: () => onViewChange("pipelines" as ViewModeEnum)
+      group: "pipelines" as ViewMode,
+      action: () => onViewChange("pipelines" as ViewMode)
     },
     {
       id: "view-activity",
@@ -116,8 +120,8 @@ export const GlobalQuickActionsSidebar: React.FC<GlobalQuickActionsSidebarProps>
       description: "View real-time system activity",
       icon: Activity,
       category: "monitor",
-      group: "activity" as ViewModeEnum,
-      action: () => onViewChange("activity" as ViewModeEnum)
+      group: "activity" as ViewMode,
+      action: () => onViewChange("activity" as ViewMode)
     },
     {
       id: "ai-assistant",
@@ -125,8 +129,8 @@ export const GlobalQuickActionsSidebar: React.FC<GlobalQuickActionsSidebarProps>
       description: "Get intelligent assistance",
       icon: Brain,
       category: "workflow",
-      group: "ai-assistant" as ViewModeEnum,
-      action: () => onViewChange("ai-assistant" as ViewModeEnum),
+      group: "ai-assistant" as ViewMode,
+      action: () => onViewChange("ai-assistant" as ViewMode),
       badge: "New"
     },
 
@@ -137,8 +141,8 @@ export const GlobalQuickActionsSidebar: React.FC<GlobalQuickActionsSidebarProps>
       description: "Add a new data connection",
       icon: Database,
       category: "create",
-      group: "data-sources" as ViewModeEnum,
-      action: () => onViewChange("data-sources" as ViewModeEnum)
+      group: "data-sources" as ViewMode,
+      action: () => onViewChange("data-sources" as ViewMode)
     },
     {
       id: "test-connections",
@@ -146,8 +150,8 @@ export const GlobalQuickActionsSidebar: React.FC<GlobalQuickActionsSidebarProps>
       description: "Verify data source connectivity",
       icon: CheckCircle,
       category: "monitor",
-      group: "data-sources" as ViewModeEnum,
-      action: () => onViewChange("data-sources" as ViewModeEnum)
+      group: "data-sources" as ViewMode,
+      action: () => onViewChange("data-sources" as ViewMode)
     },
 
     // Scan Rule Sets
@@ -157,8 +161,8 @@ export const GlobalQuickActionsSidebar: React.FC<GlobalQuickActionsSidebarProps>
       description: "Define new scanning rules",
       icon: Scan,
       category: "create",
-      group: "scan-rule-sets" as ViewModeEnum,
-      action: () => onViewChange("scan-rule-sets" as ViewModeEnum)
+      group: "scan-rule-sets" as ViewMode,
+      action: () => onViewChange("scan-rule-sets" as ViewMode)
     },
     {
       id: "run-scan",
@@ -166,8 +170,8 @@ export const GlobalQuickActionsSidebar: React.FC<GlobalQuickActionsSidebarProps>
       description: "Execute data scanning",
       icon: Play,
       category: "workflow",
-      group: "scan-rule-sets" as ViewModeEnum,
-      action: () => onViewChange("scan-rule-sets" as ViewModeEnum)
+      group: "scan-rule-sets" as ViewMode,
+      action: () => onViewChange("scan-rule-sets" as ViewMode)
     },
 
     // Classifications
@@ -177,8 +181,8 @@ export const GlobalQuickActionsSidebar: React.FC<GlobalQuickActionsSidebarProps>
       description: "Define new data classification",
       icon: FileText,
       category: "create",
-      group: "classifications" as ViewModeEnum,
-      action: () => onViewChange("classifications" as ViewModeEnum)
+      group: "classifications" as ViewMode,
+      action: () => onViewChange("classifications" as ViewMode)
     },
     {
       id: "classify-data",
@@ -186,8 +190,8 @@ export const GlobalQuickActionsSidebar: React.FC<GlobalQuickActionsSidebarProps>
       description: "Run automated classification",
       icon: Bot,
       category: "workflow",
-      group: "classifications" as ViewModeEnum,
-      action: () => onViewChange("classifications" as ViewModeEnum)
+      group: "classifications" as ViewMode,
+      action: () => onViewChange("classifications" as ViewMode)
     },
 
     // Compliance
@@ -197,8 +201,8 @@ export const GlobalQuickActionsSidebar: React.FC<GlobalQuickActionsSidebarProps>
       description: "Create compliance rule",
       icon: Shield,
       category: "create", 
-      group: "compliance-rule" as ViewModeEnum,
-      action: () => onViewChange("compliance-rule" as ViewModeEnum)
+      group: "compliance-rule" as ViewMode,
+      action: () => onViewChange("compliance-rule" as ViewMode)
     },
     {
       id: "compliance-check",
@@ -206,8 +210,8 @@ export const GlobalQuickActionsSidebar: React.FC<GlobalQuickActionsSidebarProps>
       description: "Run compliance validation",
       icon: CheckCircle,
       category: "monitor",
-      group: "compliance-rule" as ViewModeEnum,
-      action: () => onViewChange("compliance-rule" as ViewModeEnum)
+      group: "compliance-rule" as ViewMode,
+      action: () => onViewChange("compliance-rule" as ViewMode)
     },
 
     // Data Catalog
@@ -217,8 +221,8 @@ export const GlobalQuickActionsSidebar: React.FC<GlobalQuickActionsSidebarProps>
       description: "Find data assets",
       icon: Search,
       category: "analyze",
-      group: "advanced-catalog" as ViewModeEnum,
-      action: () => onViewChange("advanced-catalog" as ViewModeEnum)
+      group: "advanced-catalog" as ViewMode,
+      action: () => onViewChange("advanced-catalog" as ViewMode)
     },
     {
       id: "data-lineage",
@@ -226,8 +230,8 @@ export const GlobalQuickActionsSidebar: React.FC<GlobalQuickActionsSidebarProps>
       description: "View data lineage",
       icon: GitBranch,
       category: "analyze",
-      group: "advanced-catalog" as ViewModeEnum,
-      action: () => onViewChange("advanced-catalog" as ViewModeEnum)
+      group: "advanced-catalog" as ViewMode,
+      action: () => onViewChange("advanced-catalog" as ViewMode)
     },
 
     // Collaboration
@@ -237,8 +241,8 @@ export const GlobalQuickActionsSidebar: React.FC<GlobalQuickActionsSidebarProps>
       description: "Collaborate with team",
       icon: MessageSquare,
       category: "workflow",
-      group: "collaboration" as ViewModeEnum,
-      action: () => onViewChange("collaboration" as ViewModeEnum),
+      group: "collaboration" as ViewMode,
+      action: () => onViewChange("collaboration" as ViewMode),
       badge: "New"
     },
 
@@ -249,8 +253,8 @@ export const GlobalQuickActionsSidebar: React.FC<GlobalQuickActionsSidebarProps>
       description: "User management",
       icon: Users,
       category: "manage",
-      group: "rbac-system" as ViewModeEnum,
-      action: () => onViewChange("rbac-system" as ViewModeEnum)
+      group: "rbac-system" as ViewMode,
+      action: () => onViewChange("rbac-system" as ViewMode)
     },
 
   ], [onViewChange])

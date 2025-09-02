@@ -10,7 +10,7 @@ from sqlmodel import Session
 import json
 import asyncio
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from enum import Enum
 
 from ...db_session import get_session
@@ -145,9 +145,7 @@ class DataGovernanceConnectionManager:
         self.connection_metadata: Dict[str, Dict[str, Any]] = {}
 
     async def connect(self, websocket: WebSocket, connection_id: str, user_id: str, metadata: Dict[str, Any] = None):
-        """Accept a new WebSocket connection"""
-        await websocket.accept()
-        
+        """Register a new WebSocket connection (connection already accepted)"""
         self.active_connections[connection_id] = websocket
         
         # Track user connections
@@ -312,16 +310,33 @@ async def websocket_data_sources(
         user_info = None
         if token:
             try:
-                # For WebSocket, we need to handle authentication differently
-                # The token should be a session token that we can validate
-                user_info = {"user_id": "authenticated", "role": "user", "token": token}
+                # Validate session token against database
+                from app.db_session import get_session
+                from app.services.auth_service import get_session_by_token
+                
+                with get_session() as db:
+                    user_session = get_session_by_token(db, token)
+                    if user_session and user_session.user:
+                        user = user_session.user
+                        user_info = {
+                            "user_id": str(user.id),
+                            "email": user.email,
+                            "username": getattr(user, "display_name", user.email),
+                            "role": user.role,
+                            "department": getattr(user, "department", None),
+                            "region": getattr(user, "region", None),
+                            "authenticated": True
+                        }
+                        logger.info(f"WebSocket authenticated user: {user.email}")
+                    else:
+                        logger.warning(f"Invalid session token for WebSocket: {token[:10]}...")
+                        user_info = {"user_id": "anonymous", "role": "anonymous", "authenticated": False}
             except Exception as e:
-                logger.warning(f"WebSocket authentication failed: {str(e)}")
-                # Continue with anonymous user instead of closing connection
-                user_info = {"user_id": "anonymous", "role": "anonymous"}
+                logger.error(f"WebSocket authentication error: {str(e)}")
+                user_info = {"user_id": "anonymous", "role": "anonymous", "authenticated": False}
         else:
             # Allow anonymous connections for development
-            user_info = {"user_id": "anonymous", "role": "anonymous"}
+            user_info = {"user_id": "anonymous", "role": "anonymous", "authenticated": False}
         
         user_id = user_info.get("user_id", "anonymous") if user_info else "anonymous"
         
@@ -394,7 +409,494 @@ async def websocket_data_sources(
         
         # Clean up connection
         ws_manager.disconnect(connection_id)
-        logger.info(f"WebSocket connection closed: {connection_id}")
+
+# ============================================================================
+# SPECIFIC WEBSOCKET ENDPOINTS FOR FRONTEND INTEGRATION
+# ============================================================================
+
+@router.websocket("/ai-assistant")
+async def websocket_ai_assistant(
+    websocket: WebSocket,
+    token: Optional[str] = Query(None, description="Authentication token")
+):
+    """AI Assistant WebSocket endpoint for real-time AI interactions"""
+    connection_id = f"ai_assistant_{datetime.utcnow().timestamp()}_{id(websocket)}"
+    
+    try:
+        await websocket.accept()
+        
+        # Authenticate user using database session
+        user_info = None
+        if token:
+            try:
+                from app.db_session import get_session
+                from app.services.auth_service import get_session_by_token
+                
+                with get_session() as db:
+                    user_session = get_session_by_token(db, token)
+                    if user_session and user_session.user:
+                        user = user_session.user
+                        user_info = {
+                            "user_id": str(user.id),
+                            "email": user.email,
+                            "username": getattr(user, "display_name", user.email),
+                            "role": user.role,
+                            "authenticated": True
+                        }
+                        logger.info(f"AI Assistant WebSocket authenticated user: {user.email}")
+                    else:
+                        user_info = {"user_id": "anonymous", "role": "anonymous", "authenticated": False}
+            except Exception as e:
+                logger.error(f"AI Assistant WebSocket authentication error: {str(e)}")
+                user_info = {"user_id": "anonymous", "role": "anonymous", "authenticated": False}
+        else:
+            user_info = {"user_id": "anonymous", "role": "anonymous", "authenticated": False}
+        
+        user_id = user_info.get("user_id", "anonymous") if user_info else "anonymous"
+        
+        # Connect to manager
+        await ws_manager.connect(websocket, connection_id, user_id, {
+            "service": "ai_assistant",
+            "authenticated": user_info is not None
+        })
+        
+        # Send connection confirmation
+        await ws_manager.send_personal_message({
+            "type": "ai_assistant_connected",
+            "user_id": user_id,
+            "timestamp": datetime.utcnow().isoformat()
+        }, connection_id)
+        
+        # Message handling loop
+        while True:
+            try:
+                data = await websocket.receive_text()
+                message = json.loads(data)
+                
+                # Handle AI assistant specific messages
+                if message.get("type") == "ai_query":
+                    # Mock AI response for now
+                    await ws_manager.send_personal_message({
+                        "type": "ai_response",
+                        "query": message.get("query"),
+                        "response": f"AI Assistant response to: {message.get('query', '')}",
+                        "timestamp": datetime.utcnow().isoformat()
+                    }, connection_id)
+                else:
+                    await handle_websocket_message(connection_id, user_id, message)
+                    
+            except WebSocketDisconnect:
+                break
+            except Exception as e:
+                logger.error(f"AI Assistant WebSocket error: {str(e)}")
+                break
+                
+    except WebSocketDisconnect:
+        pass
+    except Exception as e:
+        logger.error(f"AI Assistant WebSocket connection error: {str(e)}")
+    finally:
+        ws_manager.disconnect(connection_id)
+
+@router.websocket("/workspace")
+async def websocket_workspace(
+    websocket: WebSocket,
+    token: Optional[str] = Query(None, description="Authentication token"),
+    workspace_id: Optional[str] = Query(None, description="Workspace ID")
+):
+    """Workspace WebSocket endpoint for real-time collaboration"""
+    connection_id = f"workspace_{datetime.utcnow().timestamp()}_{id(websocket)}"
+    
+    try:
+        await websocket.accept()
+        
+        # Authenticate user using database session
+        user_info = None
+        if token:
+            try:
+                from app.db_session import get_session
+                from app.services.auth_service import get_session_by_token
+                
+                with get_session() as db:
+                    user_session = get_session_by_token(db, token)
+                    if user_session and user_session.user:
+                        user = user_session.user
+                        user_info = {
+                            "user_id": str(user.id),
+                            "email": user.email,
+                            "username": getattr(user, "display_name", user.email),
+                            "role": user.role,
+                            "authenticated": True
+                        }
+                        logger.info(f"Workspace WebSocket authenticated user: {user.email}")
+                    else:
+                        user_info = {"user_id": "anonymous", "role": "anonymous", "authenticated": False}
+            except Exception as e:
+                logger.error(f"Workspace WebSocket authentication error: {str(e)}")
+                user_info = {"user_id": "anonymous", "role": "anonymous", "authenticated": False}
+        else:
+            user_info = {"user_id": "anonymous", "role": "anonymous", "authenticated": False}
+        
+        user_id = user_info.get("user_id", "anonymous") if user_info else "anonymous"
+        
+        # Connect to manager
+        await ws_manager.connect(websocket, connection_id, user_id, {
+            "service": "workspace",
+            "workspace_id": workspace_id,
+            "authenticated": user_info is not None
+        })
+        
+        # Join workspace room if specified
+        if workspace_id:
+            ws_manager.join_room(connection_id, f"workspace_{workspace_id}")
+            await ws_manager.send_to_room({
+                "type": "user_joined_workspace",
+                "user_id": user_id,
+                "workspace_id": workspace_id,
+                "timestamp": datetime.utcnow().isoformat()
+            }, f"workspace_{workspace_id}")
+        
+        # Send connection confirmation
+        await ws_manager.send_personal_message({
+            "type": "workspace_connected",
+            "user_id": user_id,
+            "workspace_id": workspace_id,
+            "timestamp": datetime.utcnow().isoformat()
+        }, connection_id)
+        
+        # Message handling loop
+        while True:
+            try:
+                data = await websocket.receive_text()
+                message = json.loads(data)
+                
+                # Handle workspace specific messages
+                if message.get("type") == "workspace_update":
+                    if workspace_id:
+                        await ws_manager.send_to_room({
+                            "type": "workspace_updated",
+                            "user_id": user_id,
+                            "workspace_id": workspace_id,
+                            "update": message.get("update"),
+                            "timestamp": datetime.utcnow().isoformat()
+                        }, f"workspace_{workspace_id}")
+                else:
+                    await handle_websocket_message(connection_id, user_id, message)
+                    
+            except WebSocketDisconnect:
+                break
+            except Exception as e:
+                logger.error(f"Workspace WebSocket error: {str(e)}")
+                break
+                
+    except WebSocketDisconnect:
+        pass
+    except Exception as e:
+        logger.error(f"Workspace WebSocket connection error: {str(e)}")
+    finally:
+        # Notify workspace about user leaving
+        if workspace_id:
+            await ws_manager.send_to_room({
+                "type": "user_left_workspace",
+                "user_id": user_id,
+                "workspace_id": workspace_id,
+                "timestamp": datetime.utcnow().isoformat()
+            }, f"workspace_{workspace_id}")
+        
+        ws_manager.disconnect(connection_id)
+
+@router.websocket("/data-sources")
+async def websocket_data_sources_specific(
+    websocket: WebSocket,
+    token: Optional[str] = Query(None, description="Authentication token")
+):
+    """Data Sources specific WebSocket endpoint"""
+    connection_id = f"data_sources_{datetime.utcnow().timestamp()}_{id(websocket)}"
+    
+    try:
+        await websocket.accept()
+        
+        # Authenticate user using database session
+        user_info = None
+        if token:
+            try:
+                from app.db_session import get_session
+                from app.services.auth_service import get_session_by_token
+                
+                with get_session() as db:
+                    user_session = get_session_by_token(db, token)
+                    if user_session and user_session.user:
+                        user = user_session.user
+                        user_info = {
+                            "user_id": str(user.id),
+                            "email": user.email,
+                            "username": getattr(user, "display_name", user.email),
+                            "role": user.role,
+                            "authenticated": True
+                        }
+                        logger.info(f"Data Sources WebSocket authenticated user: {user.email}")
+                    else:
+                        user_info = {"user_id": "anonymous", "role": "anonymous", "authenticated": False}
+            except Exception as e:
+                logger.error(f"Data Sources WebSocket authentication error: {str(e)}")
+                user_info = {"user_id": "anonymous", "role": "anonymous", "authenticated": False}
+        else:
+            user_info = {"user_id": "anonymous", "role": "anonymous", "authenticated": False}
+        
+        user_id = user_info.get("user_id", "anonymous") if user_info else "anonymous"
+        
+        # Connect to manager
+        await ws_manager.connect(websocket, connection_id, user_id, {
+            "service": "data_sources",
+            "authenticated": user_info is not None
+        })
+        
+        # Send connection confirmation
+        await ws_manager.send_personal_message({
+            "type": "data_sources_connected",
+            "user_id": user_id,
+            "timestamp": datetime.utcnow().isoformat()
+        }, connection_id)
+        
+        # Message handling loop
+        while True:
+            try:
+                data = await websocket.receive_text()
+                message = json.loads(data)
+                await handle_websocket_message(connection_id, user_id, message)
+                    
+            except WebSocketDisconnect:
+                break
+            except Exception as e:
+                logger.error(f"Data Sources WebSocket error: {str(e)}")
+                break
+                
+    except WebSocketDisconnect:
+        pass
+    except Exception as e:
+        logger.error(f"Data Sources WebSocket connection error: {str(e)}")
+    finally:
+        ws_manager.disconnect(connection_id)
+
+@router.websocket("/notifications")
+async def websocket_notifications(
+    websocket: WebSocket,
+    token: Optional[str] = Query(None, description="Authentication token")
+):
+    """Notifications WebSocket endpoint for real-time notifications"""
+    connection_id = f"notifications_{datetime.utcnow().timestamp()}_{id(websocket)}"
+    
+    try:
+        await websocket.accept()
+        
+        # Authenticate user using database session
+        user_info = None
+        if token:
+            try:
+                from app.db_session import get_session
+                from app.services.auth_service import get_session_by_token
+                
+                with get_session() as db:
+                    user_session = get_session_by_token(db, token)
+                    if user_session and user_session.user:
+                        user = user_session.user
+                        user_info = {
+                            "user_id": str(user.id),
+                            "email": user.email,
+                            "username": getattr(user, "display_name", user.email),
+                            "role": user.role,
+                            "authenticated": True
+                        }
+                        logger.info(f"Notifications WebSocket authenticated user: {user.email}")
+                    else:
+                        user_info = {"user_id": "anonymous", "role": "anonymous", "authenticated": False}
+            except Exception as e:
+                logger.error(f"Notifications WebSocket authentication error: {str(e)}")
+                user_info = {"user_id": "anonymous", "role": "anonymous", "authenticated": False}
+        else:
+            user_info = {"user_id": "anonymous", "role": "anonymous", "authenticated": False}
+        
+        user_id = user_info.get("user_id", "anonymous") if user_info else "anonymous"
+        
+        # Connect to manager
+        await ws_manager.connect(websocket, connection_id, user_id, {
+            "service": "notifications",
+            "authenticated": user_info is not None
+        })
+        
+        # Send connection confirmation
+        await ws_manager.send_personal_message({
+            "type": "notifications_connected",
+            "user_id": user_id,
+            "timestamp": datetime.utcnow().isoformat()
+        }, connection_id)
+        
+        # Message handling loop
+        while True:
+            try:
+                data = await websocket.receive_text()
+                message = json.loads(data)
+                await handle_websocket_message(connection_id, user_id, message)
+                    
+            except WebSocketDisconnect:
+                break
+            except Exception as e:
+                logger.error(f"Notifications WebSocket error: {str(e)}")
+                break
+                
+    except WebSocketDisconnect:
+        pass
+    except Exception as e:
+        logger.error(f"Notifications WebSocket connection error: {str(e)}")
+    finally:
+        ws_manager.disconnect(connection_id)
+
+@router.websocket("/monitoring")
+async def websocket_monitoring(
+    websocket: WebSocket,
+    token: Optional[str] = Query(None, description="Authentication token")
+):
+    """Monitoring WebSocket endpoint for real-time system monitoring"""
+    connection_id = f"monitoring_{datetime.utcnow().timestamp()}_{id(websocket)}"
+    
+    try:
+        await websocket.accept()
+        
+        # Authenticate user using database session
+        user_info = None
+        if token:
+            try:
+                from app.db_session import get_session
+                from app.services.auth_service import get_session_by_token
+                
+                with get_session() as db:
+                    user_session = get_session_by_token(db, token)
+                    if user_session and user_session.user:
+                        user = user_session.user
+                        user_info = {
+                            "user_id": str(user.id),
+                            "email": user.email,
+                            "username": getattr(user, "display_name", user.email),
+                            "role": user.role,
+                            "authenticated": True
+                        }
+                        logger.info(f"Monitoring WebSocket authenticated user: {user.email}")
+                    else:
+                        user_info = {"user_id": "anonymous", "role": "anonymous", "authenticated": False}
+            except Exception as e:
+                logger.error(f"Monitoring WebSocket authentication error: {str(e)}")
+                user_info = {"user_id": "anonymous", "role": "anonymous", "authenticated": False}
+        else:
+            user_info = {"user_id": "anonymous", "role": "anonymous", "authenticated": False}
+        
+        user_id = user_info.get("user_id", "anonymous") if user_info else "anonymous"
+        
+        # Connect to manager
+        await ws_manager.connect(websocket, connection_id, user_id, {
+            "service": "monitoring",
+            "authenticated": user_info is not None
+        })
+        
+        # Send connection confirmation
+        await ws_manager.send_personal_message({
+            "type": "monitoring_connected",
+            "user_id": user_id,
+            "timestamp": datetime.utcnow().isoformat()
+        }, connection_id)
+        
+        # Message handling loop
+        while True:
+            try:
+                data = await websocket.receive_text()
+                message = json.loads(data)
+                await handle_websocket_message(connection_id, user_id, message)
+                    
+            except WebSocketDisconnect:
+                break
+            except Exception as e:
+                logger.error(f"Monitoring WebSocket error: {str(e)}")
+                break
+                
+    except WebSocketDisconnect:
+        pass
+    except Exception as e:
+        logger.error(f"Monitoring WebSocket connection error: {str(e)}")
+    finally:
+        ws_manager.disconnect(connection_id)
+
+@router.websocket("/integration")
+async def websocket_integration(
+    websocket: WebSocket,
+    token: Optional[str] = Query(None, description="Authentication token")
+):
+    """Integration WebSocket endpoint for cross-system integration"""
+    connection_id = f"integration_{datetime.utcnow().timestamp()}_{id(websocket)}"
+    
+    try:
+        await websocket.accept()
+        
+        # Authenticate user using database session
+        user_info = None
+        if token:
+            try:
+                from app.db_session import get_session
+                from app.services.auth_service import get_session_by_token
+                
+                with get_session() as db:
+                    user_session = get_session_by_token(db, token)
+                    if user_session and user_session.user:
+                        user = user_session.user
+                        user_info = {
+                            "user_id": str(user.id),
+                            "email": user.email,
+                            "username": getattr(user, "display_name", user.email),
+                            "role": user.role,
+                            "authenticated": True
+                        }
+                        logger.info(f"Integration WebSocket authenticated user: {user.email}")
+                    else:
+                        user_info = {"user_id": "anonymous", "role": "anonymous", "authenticated": False}
+            except Exception as e:
+                logger.error(f"Integration WebSocket authentication error: {str(e)}")
+                user_info = {"user_id": "anonymous", "role": "anonymous", "authenticated": False}
+        else:
+            user_info = {"user_id": "anonymous", "role": "anonymous", "authenticated": False}
+        
+        user_id = user_info.get("user_id", "anonymous") if user_info else "anonymous"
+        
+        # Connect to manager
+        await ws_manager.connect(websocket, connection_id, user_id, {
+            "service": "integration",
+            "authenticated": user_info is not None
+        })
+        
+        # Send connection confirmation
+        await ws_manager.send_personal_message({
+            "type": "integration_connected",
+            "user_id": user_id,
+            "timestamp": datetime.utcnow().isoformat()
+        }, connection_id)
+        
+        # Message handling loop
+        while True:
+            try:
+                data = await websocket.receive_text()
+                message = json.loads(data)
+                await handle_websocket_message(connection_id, user_id, message)
+                    
+            except WebSocketDisconnect:
+                break
+            except Exception as e:
+                logger.error(f"Integration WebSocket error: {str(e)}")
+                break
+                
+    except WebSocketDisconnect:
+        pass
+    except Exception as e:
+        logger.error(f"Integration WebSocket connection error: {str(e)}")
+    finally:
+        ws_manager.disconnect(connection_id)
+
 
 async def handle_websocket_message(connection_id: str, user_id: str, message: Dict[str, Any]):
     """Handle incoming WebSocket messages from clients"""

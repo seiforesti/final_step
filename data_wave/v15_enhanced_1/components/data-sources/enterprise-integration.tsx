@@ -46,6 +46,32 @@ import {
   useScanResultsQuery
 } from './services/apis'
 
+// ============================================================================
+// ENTERPRISE QUERY CLIENT CONFIGURATION
+// ============================================================================
+
+export function createEnterpriseQueryClient(): QueryClient {
+  return new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: 2,
+        retryDelay: (attemptIndex) => Math.min(500 * 2 ** attemptIndex, 15000),
+        staleTime: 5 * 60 * 1000, // 5 minutes
+        gcTime: 10 * 60 * 1000, // 10 minutes
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: true,
+        refetchOnMount: false,
+        networkMode: 'online',
+        throwOnError: false,
+      },
+      mutations: {
+        retry: 2,
+        retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
+      },
+    },
+  })
+}
+
 import { DataSource } from './types'
 
 // ============================================================================
@@ -306,6 +332,13 @@ export function EnterpriseIntegrationProvider({
   const collaborationRef = useRef<RealTimeCollaborationManager>()
   const workflowsRef = useRef<WorkflowEngine>()
   const bulkOpsRef = useRef<BulkOperationsManager>()
+
+  // Safe no-op event bus to avoid subscribe errors before initialization
+  const noopBus = useMemo(() => ({
+    subscribe: (_evt: string, _handler: any) => ({ unsubscribe: () => {} }),
+    unsubscribe: (_evt: string, _handlerOrId?: any) => true,
+    publish: (_evt: any) => {},
+  }), [])
   
   // ========================================================================
   // BACKEND DATA INTEGRATION
@@ -474,12 +507,11 @@ export function EnterpriseIntegrationProvider({
   // ========================================================================
   
   const setupCrossSystemIntegration = async () => {
-    if (!coreRef.current?.eventBus) return
-    
-    const eventBus = coreRef.current.eventBus
+    const eventBus: any = coreRef.current?.eventBus || noopBus
+    if (!eventBus || typeof eventBus.subscribe !== 'function') return
     
     // Analytics → Collaboration Integration
-    eventBus.subscribe('analytics:insight:generated', async (event) => {
+    eventBus.subscribe('analytics:insight:generated', async (event: any) => {
       if (collaborationRef.current && config.collaboration.enableNotifications) {
         await collaborationRef.current.notifyParticipants({
           type: 'insight',
@@ -490,21 +522,21 @@ export function EnterpriseIntegrationProvider({
     })
     
     // Collaboration → Workflows Integration
-    eventBus.subscribe('collaboration:approval:requested', async (event) => {
+    eventBus.subscribe('collaboration:approval:requested', async (event: any) => {
       if (workflowsRef.current && config.workflows.enableApprovalWorkflows) {
         await workflowsRef.current.createApprovalWorkflow(event.payload)
       }
     })
     
     // Workflows → Analytics Integration
-    eventBus.subscribe('workflow:completed', async (event) => {
+    eventBus.subscribe('workflow:completed', async (event: any) => {
       if (analyticsRef.current && config.analytics.enableRealTimeAnalytics) {
         await analyticsRef.current.trackWorkflowCompletion(event.payload)
       }
     })
     
     // Backend Data → All Systems Integration
-    eventBus.subscribe('backend:data:updated', async (event) => {
+    eventBus.subscribe('backend:data:updated', async (event: any) => {
       // Update analytics with new data
       if (analyticsRef.current) {
         await analyticsRef.current.processNewData(event.payload)
@@ -751,7 +783,10 @@ export function EnterpriseIntegrationProvider({
   
   const contextValue: EnterpriseContext = useMemo(() => ({
     // Core Infrastructure
-    core: coreRef.current!,
+    core: {
+      ...(coreRef.current as any),
+      eventBus: (coreRef.current as any)?.eventBus || noopBus,
+    } as unknown as CoreInfrastructure,
     analytics: analyticsRef.current!,
     collaboration: collaborationRef.current!,
     workflows: workflowsRef.current!,

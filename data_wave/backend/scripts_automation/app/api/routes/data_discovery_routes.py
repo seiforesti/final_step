@@ -531,7 +531,7 @@ async def get_discovery_history(
             raise HTTPException(status_code=404, detail="Data source not found")
         
         # Get discovery history from database
-        history = list(session.exec(
+        history = list(session.execute(
             select(DiscoveryHistory)
             .where(DiscoveryHistory.data_source_id == data_source_id)
             .limit(limit)
@@ -673,7 +673,7 @@ async def get_user_workspaces(
             raise HTTPException(status_code=404, detail="Data source not found")
         
         # Get workspaces from database
-        workspaces = session.exec(
+        workspaces = session.execute(
             select(UserWorkspace)
             .where(UserWorkspace.data_source_id == data_source_id)
             .where(UserWorkspace.user_id == current_user.get("user_id"))
@@ -683,13 +683,13 @@ async def get_user_workspaces(
         workspace_list = []
         for workspace in workspaces:
             # Get items
-            items = session.exec(
+            items = session.execute(
                 select(WorkspaceItem)
                 .where(WorkspaceItem.workspace_id == workspace.id)
             ).all()
             
             # Get preferences
-            preferences = session.exec(
+            preferences = session.execute(
                 select(WorkspacePreference)
                 .where(WorkspacePreference.workspace_id == workspace.id)
             ).all()

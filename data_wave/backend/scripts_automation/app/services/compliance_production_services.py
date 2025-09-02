@@ -58,13 +58,13 @@ class ComplianceReportService:
             
             # Get total count
             count_query = select(func.count(ComplianceReport.id)).where(and_(*filters)) if filters else select(func.count(ComplianceReport.id))
-            total = session.exec(count_query).one()
+            total = session.execute(count_query).one()
             
             # Apply pagination and ordering
             offset = (page - 1) * limit
             query = query.offset(offset).limit(limit).order_by(desc(ComplianceReport.created_at))
             
-            reports = session.exec(query).all()
+            reports = session.execute(query).scalars().all()
             
             # Convert to response format with computed fields
             report_list = []
@@ -113,7 +113,7 @@ class ComplianceReportService:
             # Validate data sources exist
             data_source_ids = report_data.get("data_source_ids", [])
             if data_source_ids:
-                existing_sources = session.exec(
+                existing_sources = session.execute(
                     select(DataSource.id).where(DataSource.id.in_(data_source_ids))
                 ).all()
                 if len(existing_sources) != len(data_source_ids):
@@ -122,7 +122,7 @@ class ComplianceReportService:
             # Validate rules exist
             rule_ids = report_data.get("rule_ids", [])
             if rule_ids:
-                existing_rules = session.exec(
+                existing_rules = session.execute(
                     select(ComplianceRule.id).where(ComplianceRule.id.in_(rule_ids))
                 ).all()
                 if len(existing_rules) != len(rule_ids):
@@ -196,7 +196,7 @@ class ComplianceReportService:
             if report_type:
                 query = query.where(ComplianceReportTemplate.report_type == report_type)
             
-            templates = session.exec(query.order_by(ComplianceReportTemplate.name)).all()
+            templates = session.execute(query.order_by(ComplianceReportTemplate.name)).all()
             
             template_list = []
             for template in templates:
@@ -401,13 +401,13 @@ class ComplianceWorkflowService:
             
             # Get total count
             count_query = select(func.count(ComplianceWorkflow.id)).where(and_(*filters)) if filters else select(func.count(ComplianceWorkflow.id))
-            total = session.exec(count_query).one()
+            total = session.execute(count_query).one()
             
             # Apply pagination and ordering
             offset = (page - 1) * limit
             query = query.offset(offset).limit(limit).order_by(desc(ComplianceWorkflow.created_at))
             
-            workflows = session.exec(query).all()
+            workflows = session.execute(query).scalars().all()
             
             # Convert to response format
             workflow_list = []
@@ -531,7 +531,7 @@ class ComplianceWorkflowService:
                     )
                 )
             
-            templates = session.exec(query.order_by(ComplianceWorkflowTemplate.name)).all()
+            templates = session.execute(query.order_by(ComplianceWorkflowTemplate.name)).all()
             
             template_list = []
             for template in templates:
@@ -585,7 +585,7 @@ class ComplianceIntegrationService:
             if filters:
                 query = query.where(and_(*filters))
             
-            integrations = session.exec(query.order_by(ComplianceIntegration.name)).all()
+            integrations = session.execute(query.order_by(ComplianceIntegration.name)).all()
             
             integration_list = []
             for integration in integrations:
@@ -911,7 +911,7 @@ class ComplianceAuditService:
                 )
             ).order_by(desc(ComplianceAuditLog.created_at)).limit(limit)
             
-            logs = session.exec(query).all()
+            logs = session.execute(query).scalars().all()
             
             history = []
             for log in logs:
@@ -949,7 +949,7 @@ class ComplianceAuditService:
             if integration_type:
                 query = query.where(ComplianceIntegrationTemplate.integration_type == integration_type)
             
-            templates = session.exec(query.order_by(ComplianceIntegrationTemplate.name)).all()
+            templates = session.execute(query.order_by(ComplianceIntegrationTemplate.name)).all()
             
             template_list = []
             for template in templates:
@@ -1162,7 +1162,7 @@ class ComplianceAnalyticsService:
             if rule_id:
                 query = query.where(ComplianceRuleEvaluation.rule_id == rule_id)
             
-            evaluations = session.exec(query.order_by(ComplianceRuleEvaluation.evaluated_at)).all()
+            evaluations = session.execute(query.order_by(ComplianceRuleEvaluation.evaluated_at)).all()
             
             # Group by date and calculate daily averages
             daily_data = {}
@@ -1203,24 +1203,24 @@ class ComplianceAnalyticsService:
         """Get comprehensive dashboard statistics"""
         try:
             # Get rule statistics
-            total_rules = session.exec(select(func.count(ComplianceRule.id))).one()
-            active_rules = session.exec(
+            total_rules = session.execute(select(func.count(ComplianceRule.id))).one()
+            active_rules = session.execute(
                 select(func.count(ComplianceRule.id)).where(ComplianceRule.status == "active")
             ).one()
             
             # Get evaluation statistics
-            total_evaluations = session.exec(select(func.count(ComplianceRuleEvaluation.id))).one()
-            recent_evaluations = session.exec(
+            total_evaluations = session.execute(select(func.count(ComplianceRuleEvaluation.id))).one()
+            recent_evaluations = session.execute(
                 select(func.count(ComplianceRuleEvaluation.id)).where(
                     ComplianceRuleEvaluation.evaluated_at >= datetime.now() - timedelta(days=7)
                 )
             ).one()
             
             # Get issue statistics
-            open_issues = session.exec(
+            open_issues = session.execute(
                 select(func.count(ComplianceIssue.id)).where(ComplianceIssue.status == "open")
             ).one()
-            critical_issues = session.exec(
+            critical_issues = session.execute(
                 select(func.count(ComplianceIssue.id)).where(
                     and_(
                         ComplianceIssue.status == "open",
@@ -1230,7 +1230,7 @@ class ComplianceAnalyticsService:
             ).one()
             
             # Calculate compliance score
-            recent_scores = session.exec(
+            recent_scores = session.execute(
                 select(ComplianceRuleEvaluation.compliance_score).where(
                     ComplianceRuleEvaluation.evaluated_at >= datetime.now() - timedelta(days=30)
                 )
@@ -1239,7 +1239,7 @@ class ComplianceAnalyticsService:
             avg_compliance_score = sum(recent_scores) / len(recent_scores) if recent_scores else 0
             
             # Get framework distribution
-            framework_query = session.exec(
+            framework_query = session.execute(
                 select(ComplianceRule.compliance_standard, func.count(ComplianceRule.id))
                 .group_by(ComplianceRule.compliance_standard)
                 .where(ComplianceRule.compliance_standard.isnot(None))

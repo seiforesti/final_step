@@ -47,7 +47,7 @@ class IncrementalScanService:
                 Scan.data_source_id == data_source_id,
                 Scan.status == "completed"
             ).order_by(Scan.completed_at.desc()).limit(1)
-            result = session.exec(stmt).first()
+            result = session.execute(stmt).scalars().first()
             if result:
                 base_scan = result
         
@@ -144,7 +144,7 @@ class IncrementalScanService:
     def _get_latest_scan_result(session: Session, scan_id: int) -> Optional[ScanResult]:
         """Get the latest scan result for a scan."""
         stmt = select(ScanResult).where(ScanResult.scan_id == scan_id).order_by(ScanResult.created_at.desc()).limit(1)
-        return session.exec(stmt).first()
+        return session.execute(stmt).scalars().first()
     
     @staticmethod
     def _get_incremental_changes(base_metadata: Dict[str, Any], current_metadata: Dict[str, Any], 

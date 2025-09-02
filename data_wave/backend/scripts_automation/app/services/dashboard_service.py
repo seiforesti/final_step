@@ -28,7 +28,7 @@ class DashboardService:
             start_date = end_date - timedelta(days=days)
             
             # Get total scans in the period
-            total_scans = session.exec(
+            total_scans = session.execute(
                 select(func.count()).where(
                     Scan.created_at >= start_date,
                     Scan.created_at <= end_date
@@ -38,7 +38,7 @@ class DashboardService:
             # Get scans by status
             status_counts = {}
             for status in ["completed", "failed", "in_progress", "pending"]:
-                count = session.exec(
+                count = session.execute(
                     select(func.count()).where(
                         Scan.created_at >= start_date,
                         Scan.created_at <= end_date,
@@ -48,7 +48,7 @@ class DashboardService:
                 status_counts[status] = count
             
             # Get average scan duration for completed scans
-            avg_duration = session.exec(
+            avg_duration = session.execute(
                 select(func.avg(Scan.completed_at - Scan.started_at)).where(
                     Scan.created_at >= start_date,
                     Scan.created_at <= end_date,
@@ -70,7 +70,7 @@ class DashboardService:
                 Scan.created_at <= end_date
             ).group_by(DataSource.source_type)
             
-            results = session.exec(stmt).all()
+            results = session.execute(stmt).scalars().all()
             for source_type, count in results:
                 data_source_counts[source_type.value if hasattr(source_type, 'value') else str(source_type)] = count
             
@@ -127,7 +127,7 @@ class DashboardService:
                 "date", Scan.status
             ).order_by("date")
             
-            results = session.exec(stmt).all()
+            results = session.execute(stmt).scalars().all()
             
             # Organize the results by date and status
             trend_data = {}
@@ -167,19 +167,19 @@ class DashboardService:
         """
         try:
             # Get total data sources
-            total_sources = session.exec(select(func.count()).select_from(DataSource)).one()
+            total_sources = session.execute(select(func.count()).select_from(DataSource)).one()
             
             # Get data sources by type
             type_counts = {}
             stmt = select(DataSource.source_type, func.count()).group_by(DataSource.source_type)
-            results = session.exec(stmt).all()
+            results = session.execute(stmt).scalars().all()
             for source_type, count in results:
                 type_counts[source_type.value if hasattr(source_type, 'value') else str(source_type)] = count
             
             # Get data sources by location
             location_counts = {}
             stmt = select(DataSource.location, func.count()).group_by(DataSource.location)
-            results = session.exec(stmt).all()
+            results = session.execute(stmt).scalars().all()
             for location, count in results:
                 location_counts[location.value if hasattr(location, 'value') else str(location)] = count
             
@@ -198,7 +198,7 @@ class DashboardService:
             ).limit(10)
             
             most_scanned = []
-            results = session.exec(stmt).all()
+            results = session.execute(stmt).scalars().all()
             for id, name, source_type, scan_count in results:
                 most_scanned.append({
                     "id": id,
@@ -245,7 +245,7 @@ class DashboardService:
                 (ScanResult.created_at == subq.c.max_created_at)
             )
             
-            latest_results = session.exec(stmt).all()
+            latest_results = session.execute(stmt).scalars().all()
             
             # Initialize counters
             total_schemas = 0
@@ -325,7 +325,7 @@ class DashboardService:
                 DataSource, Scan.data_source_id == DataSource.id
             )
             
-            results = session.exec(stmt).all()
+            results = session.execute(stmt).scalars().all()
             
             # Build lineage graph
             nodes = []
@@ -380,7 +380,7 @@ class DashboardService:
             assets_stmt = select(IntelligentDataAsset)
             if data_source_id is not None:
                 assets_stmt = assets_stmt.where(IntelligentDataAsset.data_source_id == data_source_id)
-            assets = session.exec(assets_stmt).all()
+            assets = session.execute(assets_stmt).scalars().all()
             matched_assets = []
             for a in assets:
                 key = ((a.schema_name or "").strip(), (a.table_name or "").strip())
@@ -393,7 +393,7 @@ class DashboardService:
                     (EnterpriseDataLineage.source_asset_id.in_(asset_ids)) |
                     (EnterpriseDataLineage.target_asset_id.in_(asset_ids))
                 )
-                relationships = session.exec(rel_stmt).all()
+                relationships = session.execute(rel_stmt).scalars().all()
                 nodes, node_ids, edges = [], set(), []
                 for a in matched_assets:
                     if a.id not in node_ids:
@@ -591,7 +591,7 @@ class DashboardService:
                 DataSource, Scan.data_source_id == DataSource.id
             )
             
-            results = session.exec(stmt).all()
+            results = session.execute(stmt).scalars().all()
             
             # Initialize compliance metrics
             compliance_metrics = {
@@ -705,11 +705,11 @@ class DashboardService:
             assets_stmt = select(IntelligentDataAsset)
             if data_source_id is not None:
                 assets_stmt = assets_stmt.where(IntelligentDataAsset.data_source_id == data_source_id)
-            assets = session.exec(assets_stmt).all()
+            assets = session.execute(assets_stmt).scalars().all()
             asset_ids = [a.id for a in assets if a.id is not None]
             if asset_ids:
                 prof_stmt = select(DataProfilingResult).where(DataProfilingResult.asset_id.in_(asset_ids))
-                profiles = session.exec(prof_stmt).all()
+                profiles = session.execute(prof_stmt).scalars().all()
                 for p in profiles:
                     # Totals
                     compliance_info["total_columns"] += sum(v for v in (p.data_type_distribution or {}).values()) if isinstance(p.data_type_distribution, dict) else 0

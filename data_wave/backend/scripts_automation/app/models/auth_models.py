@@ -4,6 +4,7 @@ from sqlmodel import SQLModel, Field
 from typing import Optional, List, ClassVar, Any
 from datetime import datetime
 from sqlalchemy.orm import relationship
+from sqlalchemy import Text, JSON
 
 class RoleInheritance(SQLModel, table=True):
     __tablename__ = "role_inheritance"
@@ -120,6 +121,9 @@ class User(SQLModel, table=True):
         foreign_keys="[RacineWorkspaceResource.last_accessed_by]",
         back_populates="last_accessed_by_user"
     )
+    
+    # API Keys relationship
+    api_keys: ClassVar[Any] = relationship("APIKey", back_populates="user")
 
 # --- Group and Deny Assignment Models ---
 
@@ -299,6 +303,22 @@ class ConditionTemplate(SQLModel, table=True):
     description: Optional[str] = Field(default=None, description="Optional description or guidance for admins")
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+# --- API Key Model ---
+class APIKey(SQLModel, table=True):
+    __tablename__ = "api_keys"
+    id: Optional[int] = Field(default=None, primary_key=True)
+    user_id: int = Field(foreign_key="users.id", nullable=False, index=True)
+    name: str = Field(nullable=False, description="Human-readable name for the API key")
+    key: str = Field(nullable=False, description="Hashed API key value")
+    permissions: Optional[str] = Field(default=None, sa_type=JSON, description="JSON string of permissions granted to this key")
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: Optional[datetime] = Field(default=None)
+    last_used: Optional[datetime] = Field(default=None)
+    is_active: bool = Field(default=True, description="Whether the API key is active")
+    
+    # Relationships
+    user: ClassVar[Any] = relationship("User", back_populates="api_keys")
 
 # Import necessary types for forward references
 from typing import TYPE_CHECKING

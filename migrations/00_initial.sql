@@ -17,3 +17,5 @@ BEGIN
    END IF;
 END
 $do$;
+
+-- Migration moved to 06_add_session_id_to_racine_collaboration_sessions.sql

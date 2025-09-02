@@ -109,7 +109,6 @@ import { DataMapping } from '@/components/Compliance-Rule/types';
 import { ComponentStatus } from '@/components/data-sources/core';
 import { RollbackStrategy } from '@/components/data-sources/workflows/bulk-operations';
 import { DataSchema, DataTransformation, RetryPolicy, ConflictResolutionStrategy, EventSubscription, OptimizationGoal } from '@/components/racine-main-manager';
-import { BreadcrumbItem } from '@/components/racine-main-manager/components/routing';
 import { StepCondition, PerformanceOptimization } from '@/components/racine-main-manager/types';
 import { CommandShortcut, SheetContent, SheetHeader, SheetTitle, SheetDescription, DialogHeader, DialogFooter } from '@/components/ui';
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbPage, BreadcrumbLink, BreadcrumbSeparator } from '@/components/ui/breadcrumb';

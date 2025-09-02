@@ -21,7 +21,7 @@ class IntegrationService:
         """Get all integrations for a data source"""
         try:
             statement = select(Integration).where(Integration.data_source_id == data_source_id)
-            integrations = session.exec(statement).all()
+            integrations = session.execute(statement).scalars().all()
             
             return [IntegrationResponse.from_orm(integration) for integration in integrations]
         except Exception as e:
@@ -33,7 +33,7 @@ class IntegrationService:
         """Get integration by ID"""
         try:
             statement = select(Integration).where(Integration.id == integration_id)
-            integration = session.exec(statement).first()
+            integration = session.execute(statement).scalars().first()
             
             if integration:
                 return IntegrationResponse.from_orm(integration)
@@ -113,7 +113,7 @@ class IntegrationService:
             
             # Delete related logs first
             log_statement = select(IntegrationLog).where(IntegrationLog.integration_id == integration_id)
-            logs = session.exec(log_statement).all()
+            logs = session.execute(log_statement).scalars().all()
             for log in logs:
                 session.delete(log)
             
@@ -194,7 +194,7 @@ class IntegrationService:
             else:
                 statement = select(Integration)
             
-            integrations = session.exec(statement).all()
+            integrations = session.execute(statement).scalars().all()
             
             total_integrations = len(integrations)
             active_integrations = len([i for i in integrations if i.status == IntegrationStatus.ACTIVE])
@@ -234,7 +234,7 @@ class IntegrationService:
         """Get all available integration templates"""
         try:
             statement = select(IntegrationTemplate).where(IntegrationTemplate.is_active == True)
-            templates = session.exec(statement).all()
+            templates = session.execute(statement).scalars().all()
             return templates
         except Exception as e:
             logger.error(f"Error getting integration templates: {str(e)}")
@@ -299,7 +299,8 @@ class IntegrationService:
                 .order_by(IntegrationLog.execution_time.desc())
                 .limit(limit)
             )
-            logs = session.exec(statement).all()
+            result = session.execute(statement)
+            logs = result.scalars().all()
             return logs
         except Exception as e:
             logger.error(f"Error getting integration logs for {integration_id}: {str(e)}")
@@ -337,11 +338,13 @@ class IntegrationService:
             if provider:
                 count_query = count_query.where(Integration.provider == provider)
             
-            total_count = session.exec(count_query).first() or 0
+            total_count_result = session.execute(count_query)
+            total_count = total_count_result.scalar() or 0
             
             # Apply pagination and ordering
             query = query.order_by(Integration.created_at.desc()).offset(offset).limit(limit)
-            integrations = session.exec(query).all()
+            integrations_result = session.execute(query)
+            integrations = integrations_result.scalars().all()
             
             # Convert to response models
             integration_responses = [IntegrationResponse.from_orm(integration) for integration in integrations]

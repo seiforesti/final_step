@@ -1,6 +1,8 @@
 from typing import Dict, Any, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlmodel import Session
+from datetime import datetime, timedelta
+import logging
 
 from app.db_session import get_session
 from app.services.advanced_collaboration_service import AdvancedCollaborationService
@@ -10,7 +12,7 @@ from app.models.collaboration_models import (
     CollaborativeDocument as SharedDocument,
     Discussion as CollaborationSession,
 )
-from app.api.security import get_current_user, require_permission
+from app.api.security.rbac import get_current_user, require_permission
 from app.api.security.rbac import (
     PERMISSION_COLLABORATION_VIEW, PERMISSION_COLLABORATION_MANAGE,
     PERMISSION_WORKSPACE_CREATE, PERMISSION_WORKSPACE_EDIT
@@ -151,35 +153,29 @@ async def create_shared_document(
 
 @router.get("/sessions/active")
 async def get_active_collaboration_sessions(
-    workspace_id: Optional[str] = Query(None, description="Filter by workspace"),
+    workspace_id: Optional[str] = Query(None, description="Filter by workspace ID"),
     session: Session = Depends(get_session),
     current_user: Dict[str, Any] = Depends(require_permission(PERMISSION_COLLABORATION_VIEW))
 ) -> Dict[str, Any]:
     """
-    Get active real-time collaboration sessions
+    Get active collaboration sessions
     
     Features:
-    - Live user presence
-    - Real-time cursor tracking
-    - Session activity monitoring
-    - Concurrent editing management
+    - Real-time session monitoring
+    - Active user collaboration
+    - Session activity tracking
     """
     try:
         result = AdvancedCollaborationService.get_active_sessions(
             session=session,
-            workspace_id=workspace_id,
-            user_id=current_user.get("user_id")
+            user_id=current_user.get("user_id"),
+            workspace_id=workspace_id
         )
         
         return {
             "success": True,
             "data": result,
-            "real_time_features": [
-                "live_cursors",
-                "user_presence",
-                "activity_tracking",
-                "conflict_resolution"
-            ]
+            "active_sessions": True
         }
     except Exception as e:
         raise HTTPException(
@@ -303,4 +299,34 @@ async def get_workspace_activity(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to get workspace activity: {str(e)}"
+        )
+
+@router.get("/workspaces/current")
+async def get_current_user_workspace(
+    session: Session = Depends(get_session),
+    current_user: Dict[str, Any] = Depends(require_permission(PERMISSION_COLLABORATION_VIEW))
+) -> Dict[str, Any]:
+    """
+    Get current user's active workspace
+    
+    Features:
+    - Current user workspace context
+    - Active collaboration session
+    - Workspace preferences and settings
+    """
+    try:
+        result = AdvancedCollaborationService.get_current_user_workspace(
+            session=session,
+            user_id=current_user.get("user_id")
+        )
+        
+        return {
+            "success": True,
+            "data": result,
+            "current_workspace": True
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get current workspace: {str(e)}"
         )

@@ -81,6 +81,7 @@ from app.api.routes.scan_performance_routes import router as scan_performance_ro
 from app.api.routes.enterprise_integration_routes import router as enterprise_integration_router
 from app.api.routes.validation_websocket_routes import router as validation_websocket_router
 from app.api.routes.quick_actions_websocket_routes import router as quick_actions_websocket_router
+from app.api.routes.websocket_routes import router as websocket_router
 
 # Additional missing routes for the three groups
 from app.api.routes.scan_orchestration_routes import router as scan_orchestration_router
@@ -100,10 +101,39 @@ from app.api.routes.advanced_ai_tuning_routes import router as advanced_ai_tunin
 from app.api.routes.advanced_pattern_matching_routes import router as advanced_pattern_matching_router
 from app.api.routes.rule_marketplace_routes import router as rule_marketplace_router
 
+# ========================================
+# MISSING APIs IMPLEMENTATION ROUTES
+# ========================================
+# Backup & Restore Operations
+from app.api.routes.backup_routes import router as backup_routes_router
+
+# Reports Operations  
+from app.api.routes.report_routes import router as report_routes_router
+
+# Version History Operations
+from app.api.routes.version_routes import router as version_routes_router
+
+# Advanced Operations
+from app.api.routes.advanced_operations_routes import router as advanced_operations_routes_router
+
+# Notification Enhancements
+from app.api.routes.notification_routes import router as notification_routes_router
+
+# Quality & Growth Analytics
+from app.api.routes.quality_growth_routes import router as quality_growth_routes_router
+
+# Discovery Operations
+from app.api.routes.discovery_routes import router as discovery_routes_router
+
+# Integration Operations
+from app.api.routes.integration_routes import router as integration_routes_router
+
 from app.services.scan_scheduler_service import ScanSchedulerService
 from fastapi import Request
 import logging
 import asyncio
+from sqlalchemy.exc import OperationalError
+import time
 
 # Configure logging
 logging.basicConfig(
@@ -128,8 +158,17 @@ async def startup_event():
         # Initialize database (non-fatal if simple health check fails)
         try:
             await init_db()
+            logger.info("✅ Database initialized successfully")
         except Exception as e:
             logger.warning(f"Database initialization warning: {e}")
+        
+        # Start database health monitoring
+        try:
+            from app.db_health_monitor import start_health_monitoring
+            start_health_monitoring()
+            logger.info("✅ Database health monitor started")
+        except Exception as e:
+            logger.warning(f"⚠️  Database health monitor failed to start: {e}")
         
         # Lightweight schema guard: ensure optional columns exist (non-fatal)
         try:
@@ -175,7 +214,7 @@ async def startup_event():
         except Exception as e:
             logger.warning(f"Scan Performance Service not available: {e}")
         
-        logger.info("Enterprise Data Governance Platform startup completed successfully")
+        logger.info("🚀 Enterprise Data Governance Platform startup completed successfully")
         
     except Exception as e:
         logger.error(f"Startup error: {e}")
@@ -183,6 +222,59 @@ async def startup_event():
 
 # Import organization models to ensure they're registered
 from app.models.organization_models import Organization, OrganizationSetting
+
+# Global exception handlers for database errors
+@app.exception_handler(RuntimeError)
+async def runtime_error_exception_handler(request: Request, exc: RuntimeError):
+    if str(exc) == "database_unavailable":
+        logger.warning(f"Database unavailable error: {exc}")
+        return JSONResponse(status_code=503, content={"detail": "Database unavailable", "retry_after": 30})
+    # Fallback for other runtime errors
+    return JSONResponse(status_code=500, content={"detail": str(exc)})
+
+# Map SQLAlchemy OperationalError to HTTP 503 globally (e.g., too many clients)
+@app.exception_handler(OperationalError)
+async def sqlalchemy_operational_error_handler(request: Request, exc: OperationalError):
+    logger.error(f"Database OperationalError: {exc}")
+    return JSONResponse(
+        status_code=503, 
+        content={
+            "detail": "Database unavailable", 
+            "error": str(exc.orig) if hasattr(exc, 'orig') else str(exc),
+            "retry_after": 30
+        }
+    )
+
+# Admin utility to force cleanup of connection pool (use cautiously)
+@app.post("/admin/db/cleanup")
+async def admin_db_cleanup():
+    try:
+        from app.db_session import force_connection_cleanup
+        result = force_connection_cleanup()
+        return {"ok": True, "result": result, "message": "Connection pool cleanup completed"}
+    except Exception as e:
+        logger.error(f"Admin cleanup failed: {e}")
+        return JSONResponse(status_code=500, content={"ok": False, "error": str(e)})
+
+# Database health status endpoint
+@app.get("/admin/db/health")
+async def admin_db_health():
+    try:
+        from app.db_health_monitor import health_monitor
+        from app.db_session import get_connection_pool_status
+        
+        pool_status = get_connection_pool_status()
+        health_status = health_monitor.get_health_status()
+        
+        return {
+            "ok": True,
+            "pool_status": pool_status,
+            "health_monitor": health_status,
+            "timestamp": time.time()
+        }
+    except Exception as e:
+        logger.error(f"Health check failed: {e}")
+        return JSONResponse(status_code=500, content={"ok": False, "error": str(e)})
 
 # Add CORS middleware
 origins = [
@@ -212,9 +304,15 @@ app.include_router(ml_routes)
 app.include_router(classify.router)
 app.include_router(role_admin_router)
 app.include_router(sensitivity_labeling_router)
+app.include_router(rbac_router)  # Add RBAC router for /rbac/* endpoints
 app.include_router(analytics_router)
 app.include_router(notifications_router)
 app.include_router(ml_feedback_router)
+
+# Add new frontend-compatible notification routes
+from app.api.routes.notification_routes import router as notification_routes_router
+app.include_router(notification_routes_router)
+
 include_catalog_tree(app)
 
 # Legacy routes (maintained for backward compatibility)
@@ -246,6 +344,10 @@ app.include_router(ai_routes)  # Add AI classification routes (Version 3)
 # ========================================
 # ENTERPRISE DATA GOVERNANCE CORE ROUTES INTEGRATION
 # ========================================
+
+# ENTERPRISE API ROUTES - Frontend Integration
+from app.api.routes.enterprise_apis import router as enterprise_apis_router
+app.include_router(enterprise_apis_router, tags=["Enterprise APIs"])
 
 # 1. SCAN-RULE-SETS GROUP - Enterprise Implementation (85KB+ Service)
 app.include_router(enterprise_scan_rules_router, tags=["Enterprise Scan Rules"])
@@ -287,6 +389,7 @@ app.include_router(scan_performance_router, tags=["Scan Performance"])
 app.include_router(enterprise_integration_router, tags=["Enterprise Integration"])
 app.include_router(validation_websocket_router, tags=["Validation WebSocket"])
 app.include_router(quick_actions_websocket_router, tags=["Quick Actions WebSocket"])
+app.include_router(websocket_router, tags=["WebSocket"])
 
 # Additional missing routes for complete integration
 app.include_router(scan_orchestration_router, tags=["Scan Orchestration"])
@@ -316,7 +419,34 @@ app.include_router(rule_marketplace_router, tags=["Rule Marketplace"])
 app.include_router(database_integrity_router, tags=["Database Integrity Management"])
 
 # ========================================
-# RACINE MAIN MANAGER - ULTIMATE ORCHESTRATOR SYSTEM
+# MISSING APIs IMPLEMENTATION ROUTERS
+# ========================================
+# Backup & Restore Operations
+app.include_router(backup_routes_router, tags=["Backup & Restore"])
+
+# Reports Operations
+app.include_router(report_routes_router, tags=["Reports"])
+
+# Version History Operations
+app.include_router(version_routes_router, tags=["Version History"])
+
+# Advanced Operations
+app.include_router(advanced_operations_routes_router, tags=["Advanced Operations"])
+
+# Notification Enhancements
+app.include_router(notification_routes_router, tags=["Notifications"])
+
+# Quality & Growth Analytics
+app.include_router(quality_growth_routes_router, tags=["Quality & Growth Analytics"])
+
+# Discovery Operations
+app.include_router(discovery_routes_router, tags=["Discovery Operations"])
+
+# Integration Operations
+app.include_router(integration_routes_router, tags=["Integration Operations"])
+
+# ========================================
+# RACINE MAIN MANAGER - ADVANCED ENTERPRISE ORCHESTRATION
 # ========================================
 # Import all Racine routes for the comprehensive main manager system
 from app.api.routes.racine_routes import available_routers
@@ -357,10 +487,40 @@ def shutdown_event():
 @app.get("/health")
 async def health_check():
     """Enterprise health check endpoint."""
+    from app.db_session import engine
+    
+    # Get database connection pool status
+    try:
+        pool_status = {
+            "pool_size": engine.pool.size(),
+            "checked_in": engine.pool.checkedin(),
+            "checked_out": engine.pool.checkedout(),
+            "overflow": engine.pool.overflow(),
+            "pool_healthy": engine.pool.checkedout() < (engine.pool.size() + engine.pool.overflow())
+        }
+    except Exception as e:
+        pool_status = {
+            "error": str(e),
+            "pool_healthy": False
+        }
+    
+    # Test database connectivity
+    db_healthy = False
+    try:
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+            db_healthy = True
+    except Exception as e:
+        db_healthy = False
+    
     return {
-        "status": "healthy",
+        "status": "healthy" if db_healthy else "degraded",
         "platform": "PurSight Enterprise Data Governance with Racine Main Manager",
         "version": "2.0.0",
+        "database": {
+            "status": "healthy" if db_healthy else "unhealthy",
+            "connection_pool": pool_status
+        },
         "core_groups": [
             "Data Sources",
             "Compliance Rules", 
@@ -618,9 +778,7 @@ data_governance_racine_orchestration_health {service_health.get('racine_health',
 data_governance_cross_group_integration_health {service_health.get('integration_health', 1.0)}
 """
     
-    metrics_data = enterprise_metrics
-    
-    return metrics_data
+    return enterprise_metrics
 
 if __name__ == "__main__":
     uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)

@@ -1,0 +1,340 @@
+# ENHANCED DATA SOURCES API MAPPING & BACKEND INTEGRATION TASKS
+
+## PHASE 1: BACKEND API ANALYSIS & MAPPING
+
+### Task 1.1: Comprehensive Backend Route Analysis
+- [ ] **Analyze all backend routes in `scripts_automation/app/api/routes/`**
+  - [ ] Map all `@router.get`, `@router.post`, `@router.put`, `@router.delete` endpoints
+  - [ ] Document actual API prefixes (e.g., `/api/racine/`, `/api/v1/`, `/api/enterprise/`)
+  - [ ] Create comprehensive API endpoint registry
+  - [ ] Identify missing endpoints that frontend expects
+
+### Task 1.2: Backend Route Categories Mapping
+- [ ] **Core Racine Routes** (`/api/racine/`)
+  - [ ] Orchestration: `/api/racine/orchestration/`
+  - [ ] Workspace: `/api/racine/workspace/`
+  - [ ] Collaboration: `/api/racine/collaboration/`
+  - [ ] Dashboard: `/api/racine/dashboard/`
+  - [ ] Activity: `/api/racine/activity/`
+  - [ ] AI: `/api/racine/ai/`
+  - [ ] Integration: `/api/racine/integration/`
+  - [ ] Pipeline: `/api/racine/pipeline/`
+  - [ ] Workflow: `/api/racine/workflow/`
+
+- [ ] **Enterprise APIs** (`/api/enterprise/`)
+  - [ ] Auth: `/api/auth/`
+  - [ ] Collaboration: `/api/collaboration/`
+  - [ ] Workflow: `/api/workflow/`
+  - [ ] Scan: `/api/scan/`
+  - [ ] Performance: `/api/performance/`
+  - [ ] Security: `/api/security/`
+  - [ ] Notifications: `/api/v1/notifications/`
+
+- [ ] **Sensitivity Labeling APIs** (`/sensitivity-labels/`)
+  - [ ] Users: `/sensitivity-labels/users`
+  - [ ] RBAC: `/sensitivity-labels/rbac/`
+  - [ ] Labels: `/sensitivity-labels/`
+  - [ ] Analytics: `/sensitivity-labels/analytics/`
+
+### Task 1.3: API Response Schema Analysis
+- [ ] **Document all backend response schemas**
+  - [ ] DataSource models and responses
+  - [ ] User models and responses
+  - [ ] Workflow models and responses
+  - [ ] Security models and responses
+  - [ ] Performance models and responses
+  - [ ] Collaboration models and responses
+
+## PHASE 2: FRONTEND API USAGE AUDIT
+
+### Task 2.1: Frontend API Hook Analysis
+- [ ] **Audit all API hooks in `data-sources/services/`**
+  - [ ] `enterprise-apis.ts` - 3000+ lines of API hooks
+  - [ ] `apis.ts` - Core data source APIs
+  - [ ] Identify incorrect API prefixes
+  - [ ] Map frontend expectations to backend reality
+
+### Task 2.2: Component API Usage Audit
+- [ ] **Audit all components using APIs**
+  - [ ] `enhanced-data-sources-app.tsx` - Main SPA
+  - [ ] All 31 data source components
+  - [ ] Enterprise integration components
+  - [ ] Hook usage patterns
+  - [ ] Direct fetch/axios calls
+
+### Task 2.3: API Prefix Correction Mapping
+- [ ] **Create API prefix correction matrix**
+  - [ ] Frontend expects: `/api/enterprise/` → Backend has: `/api/racine/`
+  - [ ] Frontend expects: `/api/v1/` → Backend has: `/api/`
+  - [ ] Frontend expects: `/enterprise/` → Backend has: `/api/enterprise/`
+  - [ ] Frontend expects: `/sensitivity-labels/` → Backend has: `/sensitivity-labels/`
+
+## PHASE 3: PROXY ROUTE CONFIGURATION FIXES
+
+### Task 3.1: Enhanced Proxy Route Mapping
+- [ ] **Fix `route.ts` API mappings**
+  ```typescript
+  // Current incorrect mappings
+  '/enterprise/': ['/api/enterprise/', '/enterprise/', '/api/v1/enterprise/'],
+  
+  // Should be corrected to
+  '/api/enterprise/': ['/api/racine/', '/api/enterprise/', '/api/v1/enterprise/'],
+  '/api/racine/': ['/api/racine/', '/api/v1/racine/', '/racine/'],
+  '/sensitivity-labels/': ['/sensitivity-labels/', '/api/sensitivity-labels/'],
+  ```
+
+### Task 3.2: Backend URL Configuration
+- [ ] **Update backend base URL**
+  - [ ] Set `RACINE_BACKEND_URL` to correct backend port
+  - [ ] Ensure proxy points to `scripts_automation/app` backend
+  - [ ] Test all API endpoint mappings
+
+### Task 3.3: API Version Handling
+- [ ] **Implement proper API versioning**
+  - [ ] Support `/api/v1/` and `/api/` prefixes
+  - [ ] Handle version fallbacks
+  - [ ] Maintain backward compatibility
+
+## PHASE 4: FRONTEND API SERVICE FIXES
+
+### Task 4.1: Enterprise APIs Service Fix
+- [ ] **Fix `enterprise-apis.ts`**
+  - [ ] Correct all API endpoint URLs
+  - [ ] Update base URL configuration
+  - [ ] Fix API response type definitions
+  - [ ] Ensure proper error handling
+
+### Task 4.2: Core APIs Service Fix
+- [ ] **Fix `apis.ts`**
+  - [ ] Update data source API endpoints
+  - [ ] Fix authentication endpoints
+  - [ ] Update monitoring API endpoints
+  - [ ] Fix security API endpoints
+
+### Task 4.3: Hook Parameter Fixes
+- [ ] **Fix all API hook parameters**
+  - [ ] Handle optional parameters properly
+  - [ ] Fix type mismatches
+  - [ ] Add proper error boundaries
+  - [ ] Implement retry logic
+
+## PHASE 5: COMPONENT INTEGRATION FIXES
+
+### Task 5.1: Main SPA Component Fixes
+- [ ] **Fix `enhanced-data-sources-app.tsx`**
+  - [ ] Fix all API hook usage
+  - [ ] Handle loading states properly
+  - [ ] Fix error handling
+  - [ ] Implement proper data flow
+  - [ ] Fix component prop mismatches
+
+### Task 5.2: Individual Component Fixes
+- [ ] **Fix all 31 data source components**
+  - [ ] `data-source-list.tsx`
+  - [ ] `data-source-grid.tsx`
+  - [ ] `data-source-details.tsx`
+  - [ ] `data-source-monitoring.tsx`
+  - [ ] `data-source-security-view.tsx`
+  - [ ] `data-source-compliance-view.tsx`
+  - [ ] `data-source-performance-view.tsx`
+  - [ ] `data-source-discovery.tsx`
+  - [ ] `data-source-quality-analytics.tsx`
+  - [ ] `data-source-growth-analytics.tsx`
+  - [ ] `data-source-workspace-management.tsx`
+  - [ ] `data-source-backup-restore.tsx`
+  - [ ] `data-source-version-history.tsx`
+  - [ ] `data-source-tags-manager.tsx`
+  - [ ] `data-source-access-control.tsx`
+  - [ ] `data-source-notifications.tsx`
+  - [ ] `data-source-reports.tsx`
+  - [ ] `data-source-scheduler.tsx`
+  - [ ] `data-source-integrations.tsx`
+  - [ ] `data-source-catalog.tsx`
+  - [ ] `data-source-cloud-config.tsx`
+  - [ ] `data-source-monitoring-dashboard.tsx`
+  - [ ] `data-source-connection-test-modal.tsx`
+  - [ ] `data-source-bulk-actions.tsx`
+  - [ ] `data-source-filters.tsx`
+  - [ ] `data-source-edit-modal.tsx`
+  - [ ] `data-source-create-modal.tsx`
+  - [ ] `enterprise-integration.tsx`
+  - [ ] All subdirectory components
+
+### Task 5.3: Enterprise Integration Fixes
+- [ ] **Fix enterprise integration components**
+  - [ ] `ui/dashboard/enterprise-dashboard.tsx`
+  - [ ] `ui/dashboard/ai-powered-dashboard.tsx`
+  - [ ] `ui/collaboration/collaboration-studio.tsx`
+  - [ ] `ui/analytics/analytics-workbench.tsx`
+  - [ ] `ui/workflow/workflow-designer.tsx`
+
+## PHASE 6: TYPE DEFINITION FIXES
+
+### Task 6.1: Backend Model Alignment
+- [ ] **Align frontend types with backend models**
+  - [ ] Fix `User` type definition
+  - [ ] Fix `DataSource` type definition
+  - [ ] Fix `Workflow` type definition
+  - [ ] Fix `Security` type definition
+  - [ ] Fix `Performance` type definition
+
+### Task 6.2: API Response Type Fixes
+- [ ] **Fix API response type definitions**
+  - [ ] Handle optional fields properly
+  - [ ] Fix array type definitions
+  - [ ] Fix nested object types
+  - [ ] Add proper validation schemas
+
+### Task 6.3: Component Prop Type Fixes
+- [ ] **Fix component prop types**
+  - [ ] Fix required vs optional props
+  - [ ] Fix event handler types
+  - [ ] Fix callback function types
+  - [ ] Fix state management types
+
+## PHASE 7: ERROR HANDLING & VALIDATION
+
+### Task 7.1: API Error Handling
+- [ ] **Implement comprehensive error handling**
+  - [ ] Network error handling
+  - [ ] Authentication error handling
+  - [ ] Authorization error handling
+  - [ ] Validation error handling
+  - [ ] Server error handling
+
+### Task 7.2: Data Validation
+- [ ] **Implement data validation**
+  - [ ] Input validation
+  - [ ] Response validation
+  - [ ] Type validation
+  - [ ] Schema validation
+
+### Task 7.3: Loading States
+- [ ] **Implement proper loading states**
+  - [ ] Component loading states
+  - [ ] API loading states
+  - [ ] Error loading states
+  - [ ] Skeleton loading states
+
+## PHASE 8: PERFORMANCE & OPTIMIZATION
+
+### Task 8.1: API Performance Optimization
+- [ ] **Optimize API calls**
+  - [ ] Implement request caching
+  - [ ] Add request deduplication
+  - [ ] Implement request batching
+  - [ ] Add request prioritization
+
+### Task 8.2: Component Performance
+- [ ] **Optimize component performance**
+  - [ ] Implement React.memo
+  - [ ] Add useMemo for expensive calculations
+  - [ ] Add useCallback for event handlers
+  - [ ] Implement virtual scrolling for large lists
+
+### Task 8.3: Bundle Optimization
+- [ ] **Optimize bundle size**
+  - [ ] Implement code splitting
+  - [ ] Add lazy loading
+  - [ ] Optimize imports
+  - [ ] Remove unused code
+
+## PHASE 9: TESTING & VALIDATION
+
+### Task 9.1: API Endpoint Testing
+- [ ] **Test all API endpoints**
+  - [ ] Test successful responses
+  - [ ] Test error responses
+  - [ ] Test authentication
+  - [ ] Test authorization
+  - [ ] Test rate limiting
+
+### Task 9.2: Component Testing
+- [ ] **Test all components**
+  - [ ] Test component rendering
+  - [ ] Test component interactions
+  - [ ] Test component state changes
+  - [ ] Test component error handling
+
+### Task 9.3: Integration Testing
+- [ ] **Test full integration**
+  - [ ] Test data flow
+  - [ ] Test user workflows
+  - [ ] Test error scenarios
+  - [ ] Test performance under load
+
+## PHASE 10: DOCUMENTATION & DEPLOYMENT
+
+### Task 10.1: API Documentation
+- [ ] **Create comprehensive API documentation**
+  - [ ] Document all endpoints
+  - [ ] Document request/response schemas
+  - [ ] Document error codes
+  - [ ] Document authentication
+
+### Task 10.2: Component Documentation
+- [ ] **Create component documentation**
+  - [ ] Document component props
+  - [ ] Document component usage
+  - [ ] Document component examples
+  - [ ] Document component testing
+
+### Task 10.3: Deployment Preparation
+- [ ] **Prepare for deployment**
+  - [ ] Update environment variables
+  - [ ] Update build configuration
+  - [ ] Update deployment scripts
+  - [ ] Update monitoring configuration
+
+## CRITICAL FIXES REQUIRED
+
+### Immediate API Prefix Corrections:
+1. **Frontend expects `/api/enterprise/` but backend has `/api/racine/`**
+2. **Frontend expects `/api/v1/` but backend has `/api/`**
+3. **Frontend expects `/enterprise/` but backend has `/api/enterprise/`**
+4. **Frontend expects `/sensitivity-labels/` but backend has `/sensitivity-labels/`**
+
+### Component Prop Fixes:
+1. **Fix `DataSourceDetails` missing required props**
+2. **Fix `DataSourceMonitoring` missing dataSource prop**
+3. **Fix `DataDiscoveryWorkspace` missing required props**
+4. **Fix all lazy-loaded components missing default exports**
+
+### Type Definition Fixes:
+1. **Fix `User` type missing `name` and `avatar` properties**
+2. **Fix `Role` type assignment issues**
+3. **Fix API response type mismatches**
+4. **Fix component prop type mismatches**
+
+### Error Handling Fixes:
+1. **Fix event bus subscription type mismatches**
+2. **Fix API error response handling**
+3. **Fix component error boundaries**
+4. **Fix loading state handling**
+
+## SUCCESS CRITERIA
+
+- [ ] **100% API endpoint mapping accuracy**
+- [ ] **0 TypeScript compilation errors**
+- [ ] **0 runtime API errors**
+- [ ] **100% component functionality working**
+- [ ] **100% feature completeness**
+- [ ] **Optimal performance metrics**
+- [ ] **Comprehensive error handling**
+- [ ] **Full backend integration**
+
+## EXECUTION ORDER
+
+1. **Phase 1-2**: Analysis and Audit (Foundation)
+2. **Phase 3**: Proxy Configuration (Infrastructure)
+3. **Phase 4**: API Service Fixes (Core)
+4. **Phase 5**: Component Integration (Application)
+5. **Phase 6-7**: Type and Error Fixes (Quality)
+6. **Phase 8**: Performance Optimization (Enhancement)
+7. **Phase 9-10**: Testing and Deployment (Validation)
+
+This comprehensive task list ensures complete API mapping correction and backend integration for the enhanced data sources application.
+description:
+globs:
+alwaysApply: true
+---

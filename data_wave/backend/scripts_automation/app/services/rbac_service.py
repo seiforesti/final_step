@@ -326,3 +326,39 @@ class RBACService:
         except Exception as e:
             logger.warning(f"Error checking resource ownership: {e}")
             return False
+
+    def log_rbac_action(self, action: str, performed_by: str, target_user: str = None, 
+                       resource_type: str = None, resource_id: str = None, role: str = None, 
+                       status: str = "success", note: str = None, **kwargs):
+        """Log RBAC actions for audit purposes"""
+        try:
+            from app.models.auth_models import RbacAuditLog
+            
+            audit_log = RbacAuditLog(
+                action=action,
+                performed_by=performed_by,
+                target_user=target_user,
+                resource_type=resource_type,
+                resource_id=resource_id,
+                role=role,
+                status=status,
+                note=note,
+                timestamp=datetime.utcnow(),
+                entity_type=kwargs.get('entity_type'),
+                entity_id=kwargs.get('entity_id'),
+                before_state=kwargs.get('before_state'),
+                after_state=kwargs.get('after_state'),
+                correlation_id=kwargs.get('correlation_id'),
+                actor_ip=kwargs.get('actor_ip'),
+                actor_device=kwargs.get('actor_device'),
+                api_client=kwargs.get('api_client'),
+                extra_metadata=kwargs.get('extra_metadata')
+            )
+            
+            self.db.add(audit_log)
+            self.db.commit()
+            logger.info(f"RBAC action logged: {action} by {performed_by} - {status}")
+            
+        except Exception as e:
+            logger.error(f"Failed to log RBAC action: {e}")
+            # Don't fail the main operation if logging fails

@@ -1,11 +1,11 @@
 /**
  * useWorkspaceManagement Hook
  * ===========================
- * 
+ *
  * React hook for managing workspace state, operations, and real-time updates.
  * Maps to the workspace management API service and provides reactive state
  * management for workspace functionality.
- * 
+ *
  * Features:
  * - Reactive workspace state management
  * - Real-time workspace updates via WebSockets
@@ -15,13 +15,13 @@
  * - Optimistic updates and error handling
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { 
-  workspaceManagementAPI, 
-  WorkspaceEventType, 
+import { useState, useEffect, useCallback, useRef } from "react";
+import {
+  workspaceManagementAPI,
+  WorkspaceEventType,
   type WorkspaceEvent,
-  type WorkspaceEventHandler 
-} from '../services/workspace-management-apis';
+  type WorkspaceEventHandler,
+} from "../services/workspace-management-apis";
 import {
   RacineWorkspace,
   WorkspaceTemplate,
@@ -29,8 +29,8 @@ import {
   SharedResource,
   WorkspaceAnalytics,
   ResourceDependency,
-  UUID
-} from '../types/racine-core.types';
+  UUID,
+} from "../types/racine-core.types";
 import {
   CreateWorkspaceRequest,
   UpdateWorkspaceRequest,
@@ -38,8 +38,8 @@ import {
   WorkspaceListResponse,
   PaginationRequest,
   FilterRequest,
-  SortRequest
-} from '../types/api.types';
+  SortRequest,
+} from "../types/api.types";
 
 /**
  * Workspace state interface
@@ -91,22 +91,22 @@ const initialState: WorkspaceState = {
     currentWorkspace: false,
     members: false,
     resources: false,
-    analytics: false
+    analytics: false,
   },
   errors: {
     workspaces: null,
     currentWorkspace: null,
     members: null,
     resources: null,
-    analytics: null
+    analytics: null,
   },
   pagination: {
     page: 1,
     limit: 20,
     total: 0,
     hasNext: false,
-    hasPrev: false
-  }
+    hasPrev: false,
+  },
 };
 
 /**
@@ -123,13 +123,15 @@ interface UseWorkspaceManagementOptions {
 /**
  * useWorkspaceManagement hook
  */
-export function useWorkspaceManagement(options: UseWorkspaceManagementOptions = {}) {
+export function useWorkspaceManagement(
+  options: UseWorkspaceManagementOptions = {}
+) {
   const {
     autoLoadWorkspaces = true,
     enableRealTimeUpdates = true,
     defaultPagination = { page: 1, limit: 20 },
     onWorkspaceChange,
-    onError
+    onError,
   } = options;
 
   const [state, setState] = useState<WorkspaceState>(initialState);
@@ -140,294 +142,368 @@ export function useWorkspaceManagement(options: UseWorkspaceManagementOptions = 
   // STATE MANAGEMENT HELPERS
   // =============================================================================
 
-  const updateState = useCallback((updater: Partial<WorkspaceState> | ((prev: WorkspaceState) => WorkspaceState)) => {
-    setState(prev => typeof updater === 'function' ? updater(prev) : { ...prev, ...updater });
-  }, []);
+  const updateState = useCallback(
+    (
+      updater:
+        | Partial<WorkspaceState>
+        | ((prev: WorkspaceState) => WorkspaceState)
+    ) => {
+      setState((prev) =>
+        typeof updater === "function" ? updater(prev) : { ...prev, ...updater }
+      );
+    },
+    []
+  );
 
-  const setLoading = useCallback((key: keyof WorkspaceState['loading'], value: boolean) => {
-    updateState(prev => ({
-      ...prev,
-      loading: { ...prev.loading, [key]: value }
-    }));
-  }, [updateState]);
+  const setLoading = useCallback(
+    (key: keyof WorkspaceState["loading"], value: boolean) => {
+      updateState((prev) => ({
+        ...prev,
+        loading: { ...prev.loading, [key]: value },
+      }));
+    },
+    [updateState]
+  );
 
-  const setError = useCallback((key: keyof WorkspaceState['errors'], error: string | null) => {
-    updateState(prev => ({
-      ...prev,
-      errors: { ...prev.errors, [key]: error }
-    }));
-    
-    if (error && onError) {
-      onError(error, key);
-    }
-  }, [updateState, onError]);
+  const setError = useCallback(
+    (key: keyof WorkspaceState["errors"], error: string | null) => {
+      updateState((prev) => ({
+        ...prev,
+        errors: { ...prev.errors, [key]: error },
+      }));
+
+      if (error && onError) {
+        onError(error, key);
+      }
+    },
+    [updateState, onError]
+  );
 
   // =============================================================================
   // WORKSPACE CRUD OPERATIONS
   // =============================================================================
 
-  const createWorkspace = useCallback(async (request: CreateWorkspaceRequest): Promise<RacineWorkspace | null> => {
-    setLoading('workspaces', true);
-    setError('workspaces', null);
+  const createWorkspace = useCallback(
+    async (
+      request: CreateWorkspaceRequest
+    ): Promise<RacineWorkspace | null> => {
+      setLoading("workspaces", true);
+      setError("workspaces", null);
 
-    try {
-      const response = await workspaceManagementAPI.createWorkspace(request);
-      const newWorkspace = response.workspace;
+      try {
+        const response = await workspaceManagementAPI.createWorkspace(request);
+        const newWorkspace = response.workspace;
 
-      // Optimistic update
-      updateState(prev => ({
-        ...prev,
-        workspaces: [newWorkspace, ...prev.workspaces]
-      }));
+        // Optimistic update
+        updateState((prev) => ({
+          ...prev,
+          workspaces: [newWorkspace, ...prev.workspaces],
+        }));
 
-      return newWorkspace;
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to create workspace';
-      setError('workspaces', message);
-      return null;
-    } finally {
-      setLoading('workspaces', false);
-    }
-  }, [setLoading, setError, updateState]);
-
-  const loadWorkspace = useCallback(async (workspaceId: UUID): Promise<RacineWorkspace | null> => {
-    setLoading('currentWorkspace', true);
-    setError('currentWorkspace', null);
-
-    try {
-      const response = await workspaceManagementAPI.getWorkspace(workspaceId);
-      const workspace = response.workspace;
-
-      updateState(prev => ({
-        ...prev,
-        currentWorkspace: workspace
-      }));
-
-      if (onWorkspaceChange) {
-        onWorkspaceChange(workspace);
+        return newWorkspace;
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Failed to create workspace";
+        setError("workspaces", message);
+        return null;
+      } finally {
+        setLoading("workspaces", false);
       }
+    },
+    [setLoading, setError, updateState]
+  );
 
-      return workspace;
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to load workspace';
-      setError('currentWorkspace', message);
-      return null;
-    } finally {
-      setLoading('currentWorkspace', false);
-    }
-  }, [setLoading, setError, updateState, onWorkspaceChange]);
+  const loadWorkspace = useCallback(
+    async (workspaceId: UUID): Promise<RacineWorkspace | null> => {
+      setLoading("currentWorkspace", true);
+      setError("currentWorkspace", null);
 
-  const loadWorkspaces = useCallback(async (
-    pagination?: PaginationRequest,
-    filters?: FilterRequest,
-    sort?: SortRequest
-  ): Promise<void> => {
-    setLoading('workspaces', true);
-    setError('workspaces', null);
+      try {
+        const response = await workspaceManagementAPI.getWorkspace(workspaceId);
+        const workspace = response.workspace;
 
-    try {
-      const response = await workspaceManagementAPI.listWorkspaces(
-        pagination || defaultPagination,
-        filters,
-        sort
-      );
+        updateState((prev) => ({
+          ...prev,
+          currentWorkspace: workspace,
+        }));
 
-      updateState(prev => ({
-        ...prev,
-        workspaces: response.workspaces,
-        pagination: {
-          page: response.pagination?.page || 1,
-          limit: response.pagination?.limit || 20,
-          total: response.pagination?.total || 0,
-          hasNext: response.pagination?.hasNext || false,
-          hasPrev: response.pagination?.hasPrev || false
+        if (onWorkspaceChange) {
+          onWorkspaceChange(workspace);
         }
-      }));
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to load workspaces';
-      setError('workspaces', message);
-    } finally {
-      setLoading('workspaces', false);
-    }
-  }, [setLoading, setError, updateState, defaultPagination]);
 
-  const updateWorkspace = useCallback(async (
-    workspaceId: UUID, 
-    request: UpdateWorkspaceRequest
-  ): Promise<RacineWorkspace | null> => {
-    setLoading('currentWorkspace', true);
-    setError('currentWorkspace', null);
+        return workspace;
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Failed to load workspace";
+        setError("currentWorkspace", message);
+        return null;
+      } finally {
+        setLoading("currentWorkspace", false);
+      }
+    },
+    [setLoading, setError, updateState, onWorkspaceChange]
+  );
 
-    try {
-      const response = await workspaceManagementAPI.updateWorkspace(workspaceId, request);
-      const updatedWorkspace = response.workspace;
+  const loadWorkspaces = useCallback(
+    async (
+      pagination?: PaginationRequest,
+      filters?: FilterRequest,
+      sort?: SortRequest
+    ): Promise<void> => {
+      setLoading("workspaces", true);
+      setError("workspaces", null);
 
-      // Update in both current workspace and workspaces list
-      updateState(prev => ({
-        ...prev,
-        currentWorkspace: prev.currentWorkspace?.id === workspaceId ? updatedWorkspace : prev.currentWorkspace,
-        workspaces: prev.workspaces.map(w => w.id === workspaceId ? updatedWorkspace : w)
-      }));
+      try {
+        const response = await workspaceManagementAPI.listWorkspaces(
+          pagination || defaultPagination,
+          filters,
+          sort
+        );
 
-      return updatedWorkspace;
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to update workspace';
-      setError('currentWorkspace', message);
-      return null;
-    } finally {
-      setLoading('currentWorkspace', false);
-    }
-  }, [setLoading, setError, updateState]);
+        updateState((prev) => ({
+          ...prev,
+          workspaces: response.workspaces,
+          pagination: {
+            page: response.pagination?.page || 1,
+            limit: response.pagination?.limit || 20,
+            total: response.pagination?.total || 0,
+            hasNext: response.pagination?.hasNext || false,
+            hasPrev: response.pagination?.hasPrev || false,
+          },
+        }));
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Failed to load workspaces";
+        setError("workspaces", message);
+      } finally {
+        setLoading("workspaces", false);
+      }
+    },
+    [setLoading, setError, updateState, defaultPagination]
+  );
 
-  const deleteWorkspace = useCallback(async (workspaceId: UUID): Promise<boolean> => {
-    setLoading('workspaces', true);
-    setError('workspaces', null);
+  const updateWorkspace = useCallback(
+    async (
+      workspaceId: UUID,
+      request: UpdateWorkspaceRequest
+    ): Promise<RacineWorkspace | null> => {
+      setLoading("currentWorkspace", true);
+      setError("currentWorkspace", null);
 
-    try {
-      await workspaceManagementAPI.deleteWorkspace(workspaceId);
+      try {
+        const response = await workspaceManagementAPI.updateWorkspace(
+          workspaceId,
+          request
+        );
+        const updatedWorkspace = response.workspace;
 
-      // Remove from state
-      updateState(prev => ({
-        ...prev,
-        workspaces: prev.workspaces.filter(w => w.id !== workspaceId),
-        currentWorkspace: prev.currentWorkspace?.id === workspaceId ? null : prev.currentWorkspace
-      }));
+        // Update in both current workspace and workspaces list
+        updateState((prev) => ({
+          ...prev,
+          currentWorkspace:
+            prev.currentWorkspace?.id === workspaceId
+              ? updatedWorkspace
+              : prev.currentWorkspace,
+          workspaces: prev.workspaces.map((w) =>
+            w.id === workspaceId ? updatedWorkspace : w
+          ),
+        }));
 
-      return true;
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to delete workspace';
-      setError('workspaces', message);
-      return false;
-    } finally {
-      setLoading('workspaces', false);
-    }
-  }, [setLoading, setError, updateState]);
+        return updatedWorkspace;
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Failed to update workspace";
+        setError("currentWorkspace", message);
+        return null;
+      } finally {
+        setLoading("currentWorkspace", false);
+      }
+    },
+    [setLoading, setError, updateState]
+  );
+
+  const deleteWorkspace = useCallback(
+    async (workspaceId: UUID): Promise<boolean> => {
+      setLoading("workspaces", true);
+      setError("workspaces", null);
+
+      try {
+        await workspaceManagementAPI.deleteWorkspace(workspaceId);
+
+        // Remove from state
+        updateState((prev) => ({
+          ...prev,
+          workspaces: prev.workspaces.filter((w) => w.id !== workspaceId),
+          currentWorkspace:
+            prev.currentWorkspace?.id === workspaceId
+              ? null
+              : prev.currentWorkspace,
+        }));
+
+        return true;
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Failed to delete workspace";
+        setError("workspaces", message);
+        return false;
+      } finally {
+        setLoading("workspaces", false);
+      }
+    },
+    [setLoading, setError, updateState]
+  );
 
   // =============================================================================
   // RESOURCE MANAGEMENT
   // =============================================================================
 
-  const loadWorkspaceResources = useCallback(async (workspaceId: UUID): Promise<void> => {
-    setLoading('resources', true);
-    setError('resources', null);
+  const loadWorkspaceResources = useCallback(
+    async (workspaceId: UUID): Promise<void> => {
+      setLoading("resources", true);
+      setError("resources", null);
 
-    try {
-      const resources = await workspaceManagementAPI.getWorkspaceResources(workspaceId);
-      updateState(prev => ({ ...prev, resources }));
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to load workspace resources';
-      setError('resources', message);
-    } finally {
-      setLoading('resources', false);
-    }
-  }, [setLoading, setError, updateState]);
+      try {
+        const resources = await workspaceManagementAPI.getWorkspaceResources(
+          workspaceId
+        );
+        updateState((prev) => ({ ...prev, resources }));
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Failed to load workspace resources";
+        setError("resources", message);
+      } finally {
+        setLoading("resources", false);
+      }
+    },
+    [setLoading, setError, updateState]
+  );
 
-  const linkResource = useCallback(async (
-    workspaceId: UUID,
-    resourceType: string,
-    resourceId: UUID,
-    metadata?: Record<string, any>
-  ): Promise<boolean> => {
-    try {
-      await workspaceManagementAPI.linkResource(workspaceId, {
-        resourceType,
-        resourceId,
-        metadata
-      });
+  const linkResource = useCallback(
+    async (
+      workspaceId: UUID,
+      resourceType: string,
+      resourceId: UUID,
+      metadata?: Record<string, any>
+    ): Promise<boolean> => {
+      try {
+        await workspaceManagementAPI.linkResource(workspaceId, {
+          resourceType,
+          resourceId,
+          metadata,
+        });
 
-      // Reload resources to get updated list
-      await loadWorkspaceResources(workspaceId);
-      return true;
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to link resource';
-      setError('resources', message);
-      return false;
-    }
-  }, [loadWorkspaceResources, setError]);
+        // Reload resources to get updated list
+        await loadWorkspaceResources(workspaceId);
+        return true;
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Failed to link resource";
+        setError("resources", message);
+        return false;
+      }
+    },
+    [loadWorkspaceResources, setError]
+  );
 
-  const unlinkResource = useCallback(async (
-    workspaceId: UUID,
-    resourceId: UUID
-  ): Promise<boolean> => {
-    try {
-      await workspaceManagementAPI.unlinkResource(workspaceId, resourceId);
+  const unlinkResource = useCallback(
+    async (workspaceId: UUID, resourceId: UUID): Promise<boolean> => {
+      try {
+        await workspaceManagementAPI.unlinkResource(workspaceId, resourceId);
 
-      // Remove from local state
-      updateState(prev => ({
-        ...prev,
-        resources: prev.resources.filter(r => r.id !== resourceId)
-      }));
+        // Remove from local state
+        updateState((prev) => ({
+          ...prev,
+          resources: prev.resources.filter((r) => r.id !== resourceId),
+        }));
 
-      return true;
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to unlink resource';
-      setError('resources', message);
-      return false;
-    }
-  }, [updateState, setError]);
+        return true;
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Failed to unlink resource";
+        setError("resources", message);
+        return false;
+      }
+    },
+    [updateState, setError]
+  );
 
   // =============================================================================
   // MEMBER MANAGEMENT
   // =============================================================================
 
-  const loadWorkspaceMembers = useCallback(async (workspaceId: UUID): Promise<void> => {
-    setLoading('members', true);
-    setError('members', null);
+  const loadWorkspaceMembers = useCallback(
+    async (workspaceId: UUID): Promise<void> => {
+      setLoading("members", true);
+      setError("members", null);
 
-    try {
-      const members = await workspaceManagementAPI.getWorkspaceMembers(workspaceId);
-      updateState(prev => ({ ...prev, members }));
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to load workspace members';
-      setError('members', message);
-    } finally {
-      setLoading('members', false);
-    }
-  }, [setLoading, setError, updateState]);
+      try {
+        const members = await workspaceManagementAPI.getWorkspaceMembers(
+          workspaceId
+        );
+        updateState((prev) => ({ ...prev, members }));
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Failed to load workspace members";
+        setError("members", message);
+      } finally {
+        setLoading("members", false);
+      }
+    },
+    [setLoading, setError, updateState]
+  );
 
-  const addMember = useCallback(async (
-    workspaceId: UUID,
-    userId: UUID,
-    role: string,
-    permissions: string[]
-  ): Promise<boolean> => {
-    try {
-      await workspaceManagementAPI.addMember(workspaceId, {
-        userId,
-        role,
-        permissions
-      });
+  const addMember = useCallback(
+    async (
+      workspaceId: UUID,
+      userId: UUID,
+      role: string,
+      permissions: string[]
+    ): Promise<boolean> => {
+      try {
+        await workspaceManagementAPI.addMember(workspaceId, {
+          userId,
+          role,
+          permissions,
+        });
 
-      // Reload members to get updated list
-      await loadWorkspaceMembers(workspaceId);
-      return true;
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to add member';
-      setError('members', message);
-      return false;
-    }
-  }, [loadWorkspaceMembers, setError]);
+        // Reload members to get updated list
+        await loadWorkspaceMembers(workspaceId);
+        return true;
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Failed to add member";
+        setError("members", message);
+        return false;
+      }
+    },
+    [loadWorkspaceMembers, setError]
+  );
 
-  const removeMember = useCallback(async (
-    workspaceId: UUID,
-    memberId: UUID
-  ): Promise<boolean> => {
-    try {
-      await workspaceManagementAPI.removeMember(workspaceId, memberId);
+  const removeMember = useCallback(
+    async (workspaceId: UUID, memberId: UUID): Promise<boolean> => {
+      try {
+        await workspaceManagementAPI.removeMember(workspaceId, memberId);
 
-      // Remove from local state
-      updateState(prev => ({
-        ...prev,
-        members: prev.members.filter(m => m.id !== memberId)
-      }));
+        // Remove from local state
+        updateState((prev) => ({
+          ...prev,
+          members: prev.members.filter((m) => m.id !== memberId),
+        }));
 
-      return true;
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to remove member';
-      setError('members', message);
-      return false;
-    }
-  }, [updateState, setError]);
+        return true;
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Failed to remove member";
+        setError("members", message);
+        return false;
+      }
+    },
+    [updateState, setError]
+  );
 
   // =============================================================================
   // TEMPLATES AND ANALYTICS
@@ -436,129 +512,152 @@ export function useWorkspaceManagement(options: UseWorkspaceManagementOptions = 
   const loadTemplates = useCallback(async (): Promise<void> => {
     try {
       const templates = await workspaceManagementAPI.getTemplates();
-      updateState(prev => ({ ...prev, templates }));
+      updateState((prev) => ({ ...prev, templates }));
     } catch (error) {
-      console.error('Failed to load workspace templates:', error);
+      console.error("Failed to load workspace templates:", error);
     }
   }, [updateState]);
 
-  const createFromTemplate = useCallback(async (
-    templateId: UUID,
-    name: string,
-    customizations?: Record<string, any>
-  ): Promise<RacineWorkspace | null> => {
-    setLoading('workspaces', true);
-    
-    try {
-      const response = await workspaceManagementAPI.createFromTemplate({
-        templateId,
-        name,
-        customizations
-      });
+  const createFromTemplate = useCallback(
+    async (
+      templateId: UUID,
+      name: string,
+      customizations?: Record<string, any>
+    ): Promise<RacineWorkspace | null> => {
+      setLoading("workspaces", true);
 
-      // Add to workspaces list
-      updateState(prev => ({
-        ...prev,
-        workspaces: [response.workspace, ...prev.workspaces]
-      }));
+      try {
+        const response = await workspaceManagementAPI.createFromTemplate({
+          templateId,
+          name,
+          customizations,
+        });
 
-      return response.workspace;
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to create workspace from template';
-      setError('workspaces', message);
-      return null;
-    } finally {
-      setLoading('workspaces', false);
-    }
-  }, [setLoading, setError, updateState]);
+        // Add to workspaces list
+        updateState((prev) => ({
+          ...prev,
+          workspaces: [response.workspace, ...prev.workspaces],
+        }));
 
-  const loadAnalytics = useCallback(async (workspaceId: UUID): Promise<void> => {
-    setLoading('analytics', true);
-    setError('analytics', null);
+        return response.workspace;
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Failed to create workspace from template";
+        setError("workspaces", message);
+        return null;
+      } finally {
+        setLoading("workspaces", false);
+      }
+    },
+    [setLoading, setError, updateState]
+  );
 
-    try {
-      const analytics = await workspaceManagementAPI.getWorkspaceAnalytics(workspaceId);
-      updateState(prev => ({ ...prev, analytics }));
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to load workspace analytics';
-      setError('analytics', message);
-    } finally {
-      setLoading('analytics', false);
-    }
-  }, [setLoading, setError, updateState]);
+  const loadAnalytics = useCallback(
+    async (workspaceId: UUID): Promise<void> => {
+      setLoading("analytics", true);
+      setError("analytics", null);
+
+      try {
+        const analytics = await workspaceManagementAPI.getWorkspaceAnalytics(
+          workspaceId
+        );
+        updateState((prev) => ({ ...prev, analytics }));
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Failed to load workspace analytics";
+        setError("analytics", message);
+      } finally {
+        setLoading("analytics", false);
+      }
+    },
+    [setLoading, setError, updateState]
+  );
 
   // =============================================================================
   // REAL-TIME EVENT HANDLING
   // =============================================================================
 
-  const handleWorkspaceEvent: WorkspaceEventHandler = useCallback((event: WorkspaceEvent) => {
-    switch (event.type) {
-      case WorkspaceEventType.WORKSPACE_CREATED:
-        if (event.data.workspace) {
-          updateState(prev => ({
-            ...prev,
-            workspaces: [event.data.workspace, ...prev.workspaces]
-          }));
-        }
-        break;
+  const handleWorkspaceEvent: WorkspaceEventHandler = useCallback(
+    (event: WorkspaceEvent) => {
+      switch (event.type) {
+        case WorkspaceEventType.WORKSPACE_CREATED:
+          if (event.data.workspace) {
+            updateState((prev) => ({
+              ...prev,
+              workspaces: [event.data.workspace, ...prev.workspaces],
+            }));
+          }
+          break;
 
-      case WorkspaceEventType.WORKSPACE_UPDATED:
-        if (event.data.workspace) {
-          updateState(prev => ({
+        case WorkspaceEventType.WORKSPACE_UPDATED:
+          if (event.data.workspace) {
+            updateState((prev) => ({
+              ...prev,
+              workspaces: prev.workspaces.map((w) =>
+                w.id === event.workspaceId ? event.data.workspace : w
+              ),
+              currentWorkspace:
+                prev.currentWorkspace?.id === event.workspaceId
+                  ? event.data.workspace
+                  : prev.currentWorkspace,
+            }));
+          }
+          break;
+
+        case WorkspaceEventType.WORKSPACE_DELETED:
+          updateState((prev) => ({
             ...prev,
-            workspaces: prev.workspaces.map(w => 
-              w.id === event.workspaceId ? event.data.workspace : w
+            workspaces: prev.workspaces.filter(
+              (w) => w.id !== event.workspaceId
             ),
-            currentWorkspace: prev.currentWorkspace?.id === event.workspaceId 
-              ? event.data.workspace 
-              : prev.currentWorkspace
+            currentWorkspace:
+              prev.currentWorkspace?.id === event.workspaceId
+                ? null
+                : prev.currentWorkspace,
           }));
-        }
-        break;
+          break;
 
-      case WorkspaceEventType.WORKSPACE_DELETED:
-        updateState(prev => ({
-          ...prev,
-          workspaces: prev.workspaces.filter(w => w.id !== event.workspaceId),
-          currentWorkspace: prev.currentWorkspace?.id === event.workspaceId 
-            ? null 
-            : prev.currentWorkspace
-        }));
-        break;
+        case WorkspaceEventType.RESOURCE_LINKED:
+          if (event.data.resource) {
+            updateState((prev) => ({
+              ...prev,
+              resources: [...prev.resources, event.data.resource],
+            }));
+          }
+          break;
 
-      case WorkspaceEventType.RESOURCE_LINKED:
-        if (event.data.resource) {
-          updateState(prev => ({
+        case WorkspaceEventType.RESOURCE_UNLINKED:
+          updateState((prev) => ({
             ...prev,
-            resources: [...prev.resources, event.data.resource]
+            resources: prev.resources.filter(
+              (r) => r.id !== event.data.resourceId
+            ),
           }));
-        }
-        break;
+          break;
 
-      case WorkspaceEventType.RESOURCE_UNLINKED:
-        updateState(prev => ({
-          ...prev,
-          resources: prev.resources.filter(r => r.id !== event.data.resourceId)
-        }));
-        break;
+        case WorkspaceEventType.MEMBER_ADDED:
+          if (event.data.member) {
+            updateState((prev) => ({
+              ...prev,
+              members: [...prev.members, event.data.member],
+            }));
+          }
+          break;
 
-      case WorkspaceEventType.MEMBER_ADDED:
-        if (event.data.member) {
-          updateState(prev => ({
+        case WorkspaceEventType.MEMBER_REMOVED:
+          updateState((prev) => ({
             ...prev,
-            members: [...prev.members, event.data.member]
+            members: prev.members.filter((m) => m.id !== event.data.memberId),
           }));
-        }
-        break;
-
-      case WorkspaceEventType.MEMBER_REMOVED:
-        updateState(prev => ({
-          ...prev,
-          members: prev.members.filter(m => m.id !== event.data.memberId)
-        }));
-        break;
-    }
-  }, [updateState]);
+          break;
+      }
+    },
+    [updateState]
+  );
 
   // =============================================================================
   // INITIALIZATION AND CLEANUP
@@ -580,9 +679,12 @@ export function useWorkspaceManagement(options: UseWorkspaceManagementOptions = 
         eventSubscriptions.current.push(subscriptionId);
 
         // Subscribe to other event types
-        Object.values(WorkspaceEventType).forEach(eventType => {
+        Object.values(WorkspaceEventType).forEach((eventType) => {
           if (eventType !== WorkspaceEventType.WORKSPACE_CREATED) {
-            const id = workspaceManagementAPI.subscribeToEvents(eventType, handleWorkspaceEvent);
+            const id = workspaceManagementAPI.subscribeToEvents(
+              eventType,
+              handleWorkspaceEvent
+            );
             eventSubscriptions.current.push(id);
           }
         });
@@ -599,12 +701,18 @@ export function useWorkspaceManagement(options: UseWorkspaceManagementOptions = 
 
     return () => {
       // Cleanup subscriptions
-      eventSubscriptions.current.forEach(id => {
+      eventSubscriptions.current.forEach((id) => {
         workspaceManagementAPI.unsubscribeFromEvents(id);
       });
       eventSubscriptions.current = [];
     };
-  }, [enableRealTimeUpdates, autoLoadWorkspaces, handleWorkspaceEvent, loadWorkspaces, loadTemplates]);
+  }, [
+    enableRealTimeUpdates,
+    autoLoadWorkspaces,
+    handleWorkspaceEvent,
+    loadWorkspaces,
+    loadTemplates,
+  ]);
 
   // =============================================================================
   // RETURN HOOK INTERFACE
@@ -613,49 +721,49 @@ export function useWorkspaceManagement(options: UseWorkspaceManagementOptions = 
   return {
     // State
     ...state,
-    
+
     // Loading states
     isLoading: Object.values(state.loading).some(Boolean),
-    
+
     // Actions
     createWorkspace,
     loadWorkspace,
     loadWorkspaces,
     updateWorkspace,
     deleteWorkspace,
-    
+
     // Resource management
     loadWorkspaceResources,
     linkResource,
     unlinkResource,
-    
+
     // Member management
     loadWorkspaceMembers,
     addMember,
     removeMember,
-    
+
     // Templates and analytics
     loadTemplates,
     createFromTemplate,
     loadAnalytics,
-    
+
     // Utility functions
     clearErrors: useCallback(() => {
-      updateState(prev => ({
+      updateState((prev) => ({
         ...prev,
         errors: {
           workspaces: null,
           currentWorkspace: null,
           members: null,
           resources: null,
-          analytics: null
-        }
+          analytics: null,
+        },
       }));
     }, [updateState]),
-    
+
     refresh: useCallback(() => {
       loadWorkspaces();
       loadTemplates();
-    }, [loadWorkspaces, loadTemplates])
+    }, [loadWorkspaces, loadTemplates]),
   };
 }

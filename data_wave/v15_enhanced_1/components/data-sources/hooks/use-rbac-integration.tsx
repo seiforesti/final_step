@@ -72,7 +72,7 @@ interface PermissionCheckOptions {
 }
 
 // API Configuration
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000/proxy'
 
 const rbacApi = axios.create({
   baseURL: `${API_BASE_URL}/rbac`,
@@ -101,7 +101,14 @@ rbacApi.interceptors.request.use((config) => {
 const rbacApiFunctions = {
   // Authentication
   getCurrentUser: async (): Promise<User> => {
-    const response = await rbacApi.get('/me')
+    // Use full URL since this endpoint is under /auth, not /rbac
+    const response = await axios.get(`${API_BASE_URL}/auth/me`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('authToken') || sessionStorage.getItem('session_token') || document.cookie.split('; ').find(row => row.startsWith('session_token='))?.split('=')[1] || ''}`
+      },
+      timeout: 10000
+    })
     return response.data
   },
 
@@ -118,7 +125,7 @@ const rbacApiFunctions = {
 
   // Role management
   getUserRoles: async (userId: number): Promise<Role[]> => {
-    const response = await rbacApi.get(`/users/${userId}/roles`)
+    const response = await rbacApi.get(`/user/roles`)
     return response.data
   },
 
@@ -129,26 +136,25 @@ const rbacApiFunctions = {
 
   // Permission management
   getUserPermissions: async (userId: number): Promise<Permission[]> => {
-    const response = await rbacApi.get(`/users/${userId}/permissions`)
+    const response = await rbacApi.get(`/user/permissions`)
     return response.data
   },
 
   getUserEffectivePermissions: async (userId: number): Promise<any[]> => {
-    const response = await rbacApi.get(`/users/${userId}/effective-permissions`)
+    const response = await rbacApi.get(`/user/permissions`)
     return response.data
   },
 
   checkUserPermission: async (userId: number, permission: string, options?: PermissionCheckOptions): Promise<boolean> => {
-    const response = await rbacApi.post(`/users/${userId}/check-permission`, {
-      permission,
-      ...options
-    })
-    return response.data.hasPermission
+    // Use the effective permissions endpoint to check if user has permission
+    const response = await rbacApi.get(`/user/permissions`)
+    const permissions = response.data.permissions || []
+    return permissions.includes(permission)
   },
 
   // Audit logging
   logAction: async (action: string, resourceType: string, resourceId?: number, details?: any): Promise<void> => {
-    await rbacApi.post('/audit/log', {
+    await rbacApi.post('/audit-logs', {
       action,
       resource_type: resourceType,
       resource_id: resourceId,
@@ -158,36 +164,36 @@ const rbacApiFunctions = {
   },
 
   getAuditLogs: async (filters?: any): Promise<any[]> => {
-    const response = await rbacApi.get('/audit/logs', { params: filters })
+    const response = await rbacApi.get('/audit-logs', { params: filters })
     return response.data
   }
 }
 
-// Data Sources specific permissions
+// Data Sources specific permissions - Updated to match backend permissions
 export const DATA_SOURCE_PERMISSIONS = {
-  VIEW: 'datasource.view',
-  CREATE: 'datasource.create', 
-  EDIT: 'datasource.edit',
-  DELETE: 'datasource.delete',
-  TEST_CONNECTION: 'datasource.test_connection',
-  MANAGE_BACKUP: 'datasource.manage_backup',
-  VIEW_SECURITY: 'datasource.view_security',
-  MANAGE_SECURITY: 'datasource.manage_security',
-  VIEW_PERFORMANCE: 'datasource.view_performance',
-  MANAGE_PERFORMANCE: 'datasource.manage_performance',
-  VIEW_COMPLIANCE: 'datasource.view_compliance',
-  MANAGE_COMPLIANCE: 'datasource.manage_compliance',
-  VIEW_REPORTS: 'datasource.view_reports',
-  GENERATE_REPORTS: 'datasource.generate_reports',
-  MANAGE_TAGS: 'datasource.manage_tags',
-  VIEW_AUDIT: 'datasource.view_audit',
-  MANAGE_INTEGRATIONS: 'datasource.manage_integrations',
-  EXECUTE_SCANS: 'datasource.execute_scans',
-  VIEW_DISCOVERY: 'datasource.view_discovery',
-  MANAGE_DISCOVERY: 'datasource.manage_discovery',
-  VIEW_LINEAGE: 'datasource.view_lineage',
-  BULK_OPERATIONS: 'datasource.bulk_operations',
-  WORKSPACE_ADMIN: 'datasource.workspace_admin'
+  VIEW: 'data_source:read',
+  CREATE: 'data_source:write', 
+  EDIT: 'data_source:write',
+  DELETE: 'data_source:delete',
+  TEST_CONNECTION: 'data_source:write',
+  MANAGE_BACKUP: 'data_source:write',
+  VIEW_SECURITY: 'security:read',
+  MANAGE_SECURITY: 'security:write',
+  VIEW_PERFORMANCE: 'performance:read',
+  MANAGE_PERFORMANCE: 'performance:write',
+  VIEW_COMPLIANCE: 'compliance:read',
+  MANAGE_COMPLIANCE: 'compliance:write',
+  VIEW_REPORTS: 'report:read',
+  GENERATE_REPORTS: 'report:write',
+  MANAGE_TAGS: 'data_source:write',
+  VIEW_AUDIT: 'audit:read',
+  MANAGE_INTEGRATIONS: 'integrations:write',
+  EXECUTE_SCANS: 'scan:write',
+  VIEW_DISCOVERY: 'discovery:read',
+  MANAGE_DISCOVERY: 'discovery:write',
+  VIEW_LINEAGE: 'lineage:read',
+  BULK_OPERATIONS: 'data_source:write',
+  WORKSPACE_ADMIN: 'workspace:admin'
 } as const
 
 // Main RBAC Integration Hook
@@ -237,8 +243,10 @@ export function useRBACIntegration() {
     // Check if user has the specific permission
     const hasDirectPermission = rbacState.permissions.includes(permission)
     
-    // Check admin override
+    // Check admin override - support both old and new admin permission formats
     const isAdmin = rbacState.permissions.includes('admin.*') || 
+                   rbacState.permissions.includes('admin:read') ||
+                   rbacState.permissions.includes('admin:write') ||
                    currentUser.role === 'admin'
     
     if (options?.strictMode && !hasDirectPermission) {
@@ -403,7 +411,6 @@ export function useRBAC() {
   }
   return context
 }
-
 // DATA_SOURCE_PERMISSIONS already exported above
 
 // Export types

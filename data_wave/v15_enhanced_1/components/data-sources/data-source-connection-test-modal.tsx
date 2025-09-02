@@ -77,7 +77,7 @@ interface DataSourceConnectionTestModalProps {
 }
 
 // API Configuration
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000/proxy'
 
 // Backend API function for connection testing
 const connectionTestApi = {

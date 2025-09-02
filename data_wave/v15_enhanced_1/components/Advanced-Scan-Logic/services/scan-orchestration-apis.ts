@@ -88,7 +88,7 @@ export class ScanOrchestrationAPIService {
 
   constructor() {
     this.apiClient = new ApiClient();
-    this.baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+    this.baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000/proxy';
   }
 
   private getAuthToken(): string {

@@ -86,7 +86,7 @@ class AuditService:
                     stmt = stmt.where(ComplianceAuditLog.entity_type == entity_type)
                 if entity_id is not None:
                     stmt = stmt.where(ComplianceAuditLog.entity_id == entity_id)
-                rows = session.exec(stmt.limit(limit)).all() or []
+                rows = session.execute(stmt.limit(limit)).all() or []
                 return [
                     {
                         "id": r.id,

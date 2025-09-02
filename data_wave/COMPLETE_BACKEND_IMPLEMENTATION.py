@@ -324,7 +324,7 @@ class BackupService:
                 BackupOperation.data_source_id == data_source_id
             ).order_by(BackupOperation.created_at.desc()).limit(limit)
             
-            backups = session.exec(query).all()
+            backups = session.execute(query).scalars().all()
             
             return [BackupOperationResponse.from_orm(backup) for backup in backups]
             
@@ -343,7 +343,7 @@ class BackupService:
                 BackupSchedule.data_source_id == data_source_id
             ).order_by(BackupSchedule.next_run.asc())
             
-            schedules = session.exec(query).all()
+            schedules = session.execute(query).scalars().all()
             
             return [BackupScheduleResponse.from_orm(schedule) for schedule in schedules]
             
@@ -400,7 +400,7 @@ class BackupService:
                 BackupOperation.data_source_id == data_source_id
             ).group_by(BackupOperation.status)
             
-            results = session.exec(query).all()
+            results = session.execute(query).scalars().all()
             
             status_counts = {status.value: 0 for status in BackupStatus}
             for status, count in results:
@@ -421,7 +421,7 @@ class BackupService:
                 )
             )
             
-            avg_duration = session.exec(avg_duration_query).first() or 0
+            avg_duration = session.execute(avg_duration_query).scalars().first() or 0
             
             return {
                 "total_backups": total_backups,
@@ -450,7 +450,7 @@ class BackupService:
                 )
             )
             
-            total_size = session.exec(total_size_query).first() or 0
+            total_size = session.execute(total_size_query).scalars().first() or 0
             
             # Get backup count by type
             type_query = select(
@@ -464,7 +464,7 @@ class BackupService:
                 )
             ).group_by(BackupOperation.backup_type)
             
-            type_results = session.exec(type_query).all()
+            type_results = session.execute(type_query).scalars().all()
             
             type_breakdown = {}
             for backup_type, count, size in type_results:

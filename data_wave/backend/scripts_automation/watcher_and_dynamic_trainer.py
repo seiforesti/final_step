@@ -37,7 +37,7 @@ CATEGORIES = ["PII", "Sensitive", "Financial", "Transaction", "Unclassified"]
 def extract_classified_to_csv():
     print("🔁 Mise à jour training_data.csv depuis metadata DB...")
     session = get_session()
-    results = session.exec(select(DataTableSchema).where(DataTableSchema.categories != None)).all()
+    results = session.execute(select(DataTableSchema).where(DataTableSchema.categories != None)).all()
     rows = []
     for row in results:
         if not row.categories:
@@ -84,7 +84,7 @@ while True:
     # Vérifier si le nombre de lignes classifiées a changé dans la base de données
     try:
         session = get_session()
-        current_count = len(session.exec(select(DataTableSchema).where(DataTableSchema.categories != None)).all())
+        current_count = len(session.execute(select(DataTableSchema).where(DataTableSchema.categories != None)).all())
         if 'old_count' not in locals():
             old_count = current_count  # Initialiser old_count au démarrage
         if current_count != old_count:

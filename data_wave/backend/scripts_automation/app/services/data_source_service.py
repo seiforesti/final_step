@@ -164,7 +164,7 @@ class DataSourceService:
                 )
             )
         
-        result = session.exec(query).first()
+        result = session.execute(query).scalars().first()
         return cast(Optional[DataSource], result)
     
     @staticmethod
@@ -404,12 +404,12 @@ class DataSourceService:
             .order_by(desc(Scan.completed_at))
             .limit(1)
         )
-        latest_scan = session.exec(stmt).first()
+        latest_scan = session.execute(stmt).scalars().first()
 
         # Calculate entity stats from scan results
         entity_stats = {"total_entities": 0, "tables": 0, "views": 0, "stored_procedures": 0}
         if latest_scan:
-            scan_results = cast(List[ScanResult], session.exec(
+            scan_results = cast(List[ScanResult], session.execute(
                 select(ScanResult).where(ScanResult.scan_id == latest_scan.id)
             ).all())
             
@@ -438,7 +438,7 @@ class DataSourceService:
             }
 
         # Calculate growth rate from historical data
-        growth_metrics = session.exec(
+        growth_metrics = session.execute(
             select(GrowthMetric)
             .where(GrowthMetric.data_source_id == data_source_id)
             .order_by(desc(GrowthMetric.measured_at))
@@ -556,7 +556,7 @@ class DataSourceService:
             return False
 
         # Check if favorite already exists
-        favorite = session.exec(
+        favorite = session.execute(
             select(UserFavorite)
             .where(UserFavorite.data_source_id == data_source_id)
             .where(UserFavorite.user_id == user_id)
@@ -579,7 +579,7 @@ class DataSourceService:
     @staticmethod
     def get_user_favorites(session: Session, user_id: str) -> List[DataSource]:
         """Get all favorite data sources for a user."""
-        favorites = session.exec(
+        favorites = session.execute(
             select(DataSource)
             .join(UserFavorite)
             .where(UserFavorite.user_id == user_id)
@@ -594,7 +594,7 @@ class DataSourceService:
     ) -> List[DataSource]:
         """Bulk update multiple data sources."""
         stmt = select(DataSource).where(Column("id").in_(data_source_ids))
-        data_sources = cast(List[DataSource], session.exec(stmt).all())
+        data_sources = cast(List[DataSource], session.execute(stmt).scalars().all())
 
         updated_sources = []
         for data_source in data_sources:
@@ -679,7 +679,7 @@ class DataSourceService:
             }
 
         # Get latest quality metrics
-        metrics = session.exec(
+        metrics = session.execute(
             select(QualityMetric)
             .where(QualityMetric.data_source_id == data_source_id)
             .order_by(desc(QualityMetric.created_at))
@@ -769,7 +769,7 @@ class DataSourceService:
         query = query.offset((page - 1) * limit).limit(limit)
 
         # Execute query and ensure type safety
-        results = list(session.exec(query).all())
+        results = list(session.execute(query).scalars().all())
         return results, total
 
     @staticmethod
@@ -786,7 +786,7 @@ class DataSourceService:
         stats = DataSourceService.get_data_source_stats(session, data_source_id)
 
         # Get quality metrics
-        quality_metrics = session.exec(
+        quality_metrics = session.execute(
             select(QualityMetric)
             .where(QualityMetric.data_source_id == data_source_id)
             .order_by(desc(QualityMetric.created_at))
@@ -794,7 +794,7 @@ class DataSourceService:
         ).all()
 
         # Get growth metrics
-        growth_metrics = session.exec(
+        growth_metrics = session.execute(
             select(GrowthMetric)
             .where(GrowthMetric.data_source_id == data_source_id)
             .order_by(desc(GrowthMetric.measured_at))
@@ -923,7 +923,7 @@ class DataSourceService:
             return None
 
         # Get recent scans
-        recent_scans = session.exec(
+        recent_scans = session.execute(
             select(Scan)
             .where(Scan.data_source_id == data_source_id)
             .order_by(desc(Scan.created_at))
@@ -931,7 +931,7 @@ class DataSourceService:
         ).all()
 
         # Get scan rule sets
-        rule_sets = session.exec(
+        rule_sets = session.execute(
             select(ScanRuleSet)
             .where(ScanRuleSet.data_source_id == data_source_id)
         ).all()

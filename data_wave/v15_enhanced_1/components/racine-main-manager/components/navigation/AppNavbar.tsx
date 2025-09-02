@@ -51,26 +51,25 @@ import {
   WorkspaceState,
   CrossGroupState,
   NavigationContext,
-  NotificationItem,
+  NotificationType,
   QuickAction,
-  SearchQuery,
+  SearchResult,
   HealthStatus,
-  SPAStatus,
+  SPAContext,
   UserPermissions
 } from '../../types/racine-core.types'
 
 // Import utils (already implemented)
-import { coordinateNavigation, orchestrateExistingSPAs } from '../../utils/cross-group-orchestrator'
-import { checkPermissions, validateAccess } from '../../utils/security-utils'
+import { coordinateServices, validateIntegration } from '../../utils/cross-group-orchestrator'
 import { formatNotificationTime, getHealthStatusColor, getStatusIcon } from '../../utils/navigation-utils'
+
+// Import APIs for tracking
+import { crossGroupIntegrationAPI } from '../../services/cross-group-integration-apis'
 
 // Import constants (already implemented)
 import {
   SUPPORTED_GROUPS,
-  SPA_ROUTES,
-  HEALTH_CHECK_INTERVAL,
-  NOTIFICATION_TYPES,
-  QUICK_ACTION_CATEGORIES
+  HEALTH_CHECK_INTERVAL
 } from '../../constants/cross-group-configs'
 
 // Import new subcomponents for enhanced functionality
@@ -170,11 +169,11 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({
 }) => {
   // Core state management using foundation hooks
   const {
-    orchestrationState,
+    state: orchestrationState,
     executeWorkflow,
-    monitorHealth,
+    refreshSystemHealth: monitorHealth,
     optimizePerformance,
-    getSystemMetrics
+    loadMetrics: getSystemMetrics
   } = useRacineOrchestration()
 
   // Graceful health monitor wrapper
@@ -208,11 +207,11 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({
   }
 
   const {
-    workspaceState,
-    switchWorkspace,
-    getUserWorkspaces,
+    currentWorkspace: workspaceState,
+    loadWorkspace: switchWorkspace,
+    workspaces: getUserWorkspaces,
     createWorkspace,
-    getWorkspaceContext
+    loadWorkspace: getWorkspaceContext
   } = useWorkspaceManagement()
 
   const {
@@ -228,26 +227,25 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({
     unreadCount,
     markAsRead,
     markAllAsRead,
-    getNotificationsByType,
-    subscribeToUpdates
+    subscribeToNotifications
   } = useNotificationManager()
 
   const {
-    searchQuery,
-    searchResults,
+    query: searchQuery,
+    results: searchResults,
     isSearching,
-    executeGlobalSearch,
+    search: executeGlobalSearch,
     clearSearch,
-    getSearchSuggestions,
-    saveSearchQuery
+    getSuggestions: getSearchSuggestions,
+    saveSearch: saveSearchQuery
   } = useGlobalSearch()
 
   const {
-    quickActions,
+    availableActions: quickActions,
     getContextualActions,
-    executeQuickAction,
-    getQuickActionHistory,
-    customizeQuickActions
+    executeAction: executeQuickAction,
+    getExecutionHistory: getQuickActionHistory,
+    createCustomCategory: customizeQuickActions
   } = useQuickActions()
 
   // Local state
@@ -278,14 +276,13 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({
   // Subscribe to real-time notifications (safe)
   useEffect(() => {
     try {
-      const unsub = (subscribeToUpdates as any)?.((notification: any) => {
-        console.log('New notification:', notification)
-      })
-      return () => { try { (unsub as any)?.() } catch {} }
+      if (userContext.profile.email) {
+        subscribeToNotifications?.(userContext.profile.email)
+      }
     } catch {
-      return () => {}
+      // Ignore errors
     }
-  }, [subscribeToUpdates])
+  }, [subscribeToNotifications, userContext.profile.email])
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -332,14 +329,14 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({
 
   // Calculate overall system health
   const systemHealthSummary = useMemo(() => {
-    const healthData = orchestrationState?.systemMetrics?.health || {}
+    const healthData = orchestrationState?.systemHealth || {}
     const statuses = Object.values(healthData)
     
     const healthyCount = statuses.filter(status => status === 'healthy').length
     const degradedCount = statuses.filter(status => status === 'degraded').length
     const failedCount = statuses.filter(status => status === 'failed').length
     
-    const overallHealth: HealthStatus = 
+    const overallHealth = 
       failedCount > 0 ? 'failed' : 
       degradedCount > 0 ? 'degraded' : 'healthy'
 
@@ -350,33 +347,19 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({
       failed: failedCount,
       total: statuses.length
     }
-  }, [orchestrationState?.systemMetrics])
+  }, [orchestrationState?.systemHealth])
 
   // Handle search
   const handleSearch = useCallback(async (query: string) => {
     if (!query.trim()) return
 
     setSearchInput(query)
-    await executeGlobalSearch({
-      query,
-      filters: {
-        spas: Object.keys(EXISTING_SPA_ROUTES),
-        includeRacineFeatures: true
-      },
-      limit: 50
-    })
+    await executeGlobalSearch(query)
   }, [executeGlobalSearch])
 
   // Handle SPA navigation
   const handleSPANavigation = useCallback(async (spaKey: string) => {
     try {
-      // Use cross-group integration to coordinate navigation
-      await coordinateSPANavigation(spaKey, {
-        preserveContext: true,
-        updateHistory: true,
-        trackAnalytics: true
-      })
-
       // Navigate to the SPA
       const route = EXISTING_SPA_ROUTES[spaKey as keyof typeof EXISTING_SPA_ROUTES]
       if (route) {
@@ -385,7 +368,7 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({
     } catch (error) {
       console.error('Navigation error:', error)
     }
-  }, [coordinateSPANavigation, router])
+  }, [router])
 
   // Handle workspace switching
   const handleWorkspaceSwitch = useCallback(async (workspaceId: string) => {
@@ -555,8 +538,8 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({
                 )}
                 onClick={() => {
                   markAsRead(notification.id)
-                  if (notification.actionUrl) {
-                    router.push(notification.actionUrl)
+                  if (notification.actions?.[0]?.url) {
+                    router.push(notification.actions[0].url)
                     setIsNotificationsOpen(false)
                   }
                 }}
@@ -571,10 +554,10 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({
                     <p className="text-xs text-muted-foreground">{notification.message}</p>
                     <div className="flex items-center justify-between">
                       <Badge variant="outline" className="text-xs">
-                        {notification.category}
+                        {notification.type}
                       </Badge>
                       <span className="text-xs text-muted-foreground">
-                        {formatNotificationTime(notification.timestamp)}
+                        {formatNotificationTime(notification.createdAt)}
                       </span>
                     </div>
                   </div>
@@ -603,7 +586,7 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({
           className="h-8 px-3 text-sm font-medium"
         >
           <Globe className="w-4 h-4 mr-2" />
-          {workspaceState.currentWorkspace?.name || 'Select Workspace'}
+          {workspaceState?.name || 'Select Workspace'}
           <ChevronDown className="w-3 h-3 ml-1" />
         </Button>
       </DropdownMenuTrigger>
@@ -611,7 +594,7 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({
         <DropdownMenuLabel>Workspaces</DropdownMenuLabel>
         <DropdownMenuSeparator />
         
-        {workspaceState.availableWorkspaces?.map((workspace) => (
+        {getUserWorkspaces?.map((workspace: any) => (
           <DropdownMenuItem
             key={workspace.id}
             onClick={() => handleWorkspaceSwitch(workspace.id)}
@@ -620,11 +603,11 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({
             <div className="flex items-center gap-2">
               <div className={cn(
                 "w-2 h-2 rounded-full",
-                workspace.id === workspaceState.currentWorkspace?.id ? "bg-primary" : "bg-muted-foreground/30"
+                workspace.id === workspaceState?.id ? "bg-primary" : "bg-muted-foreground/30"
               )} />
               <span>{workspace.name}</span>
             </div>
-            {workspace.id === workspaceState.currentWorkspace?.id && (
+            {workspace.id === workspaceState?.id && (
               <CheckCircle className="w-3 h-3" />
             )}
           </DropdownMenuItem>
@@ -662,7 +645,7 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({
             <p className="font-medium">{userContext.profile?.name || 'User'}</p>
             <p className="text-xs text-muted-foreground">{userContext.profile?.email}</p>
             <div className="flex gap-1">
-              {userContext.permissions?.roles?.map((role) => (
+              {userContext.permissions?.roles?.map((role: string) => (
                 <Badge key={role} variant="outline" className="text-xs">
                   {role}
                 </Badge>
@@ -895,11 +878,9 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({
               onClose={() => setIsSearchOpen(false)}
               defaultQuery={searchInput}
               onResultSelect={(result) => {
-                // Navigate to the result
-                if (result.url) {
-                  router.push(result.url)
-                } else if (result.spa) {
-                  navigateToSPA(result.spa, result.path)
+                // Navigate to the result based on asset type
+                if (result.asset?.location) {
+                  router.push(result.asset.location)
                 }
                 setIsSearchOpen(false)
               }}
@@ -929,14 +910,14 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({
               showTemplates={true}
               onWorkspaceSwitch={(workspace) => {
                 // Track workspace switch
-                trackEvent('workspace_switched_from_navbar', {
+                crossGroupIntegrationAPI.trackEvent('workspace_switched_from_navbar', {
                   workspaceId: workspace.id,
                   workspaceName: workspace.name
                 })
               }}
               onWorkspaceCreate={(workspace) => {
                 // Track workspace creation
-                trackEvent('workspace_created_from_navbar', {
+                crossGroupIntegrationAPI.trackEvent('workspace_created_from_navbar', {
                   workspaceId: workspace.id,
                   workspaceName: workspace.name
                 })
@@ -969,10 +950,10 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({
               autoClose={false}
               onNotificationClick={(notification) => {
                 // Handle notification click based on type
-                if (notification.actionUrl) {
-                  router.push(notification.actionUrl)
+                if (notification.actions?.[0]?.url) {
+                  router.push(notification.actions[0].url)
                 } else if (notification.spa) {
-                  navigateToSPA(notification.spa, notification.path)
+                  navigateToSPA(notification.spa)
                 }
               }}
             />
@@ -1125,19 +1106,21 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({
                       key={index}
                       className="p-3 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
                       onClick={() => {
-                        router.push(result.url)
+                        if (result.asset?.location) {
+                          router.push(result.asset.location)
+                        }
                         setIsSearchOpen(false)
                       }}
                     >
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                          {result.icon && <result.icon className="w-4 h-4" />}
+                          <Database className="w-4 h-4" />
                         </div>
                         <div className="flex-1">
-                          <h4 className="font-medium text-sm">{result.title}</h4>
-                          <p className="text-xs text-muted-foreground">{result.description}</p>
+                          <h4 className="font-medium text-sm">{result.asset?.name || 'Unknown Asset'}</h4>
+                          <p className="text-xs text-muted-foreground">{result.asset?.description || 'No description available'}</p>
                           <Badge variant="outline" className="text-xs mt-1">
-                            {result.category}
+                            {result.asset?.type || 'Unknown Type'}
                           </Badge>
                         </div>
                       </div>

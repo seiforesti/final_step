@@ -1,13 +1,15 @@
 from typing import Dict, Any, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlmodel import Session
+from datetime import datetime, timedelta
+import logging
 
 from app.db_session import get_session
 from app.services.security_service import SecurityService
 from app.models.security_models import (
     SecurityScan, SecurityIncident, SecurityControl, SecurityVulnerability
 )
-from app.api.security import get_current_user, require_permission
+from app.api.security.rbac import get_current_user, require_permission
 from app.api.security.rbac import (
     PERMISSION_SECURITY_VIEW, PERMISSION_SECURITY_MANAGE,
     PERMISSION_AUDIT_VIEW, PERMISSION_AUDIT_MANAGE
@@ -98,72 +100,80 @@ async def create_security_scan(
 @router.get("/scans")
 async def get_security_scans(
     data_source_id: Optional[int] = Query(None, description="Filter by data source"),
-    scan_type: Optional[str] = Query(None, description="Filter by scan type"),
-    status: Optional[str] = Query(None, description="Filter by scan status"),
-    days: int = Query(30, description="Number of days to look back"),
     session: Session = Depends(get_session),
     current_user: Dict[str, Any] = Depends(require_permission(PERMISSION_SECURITY_VIEW))
 ) -> Dict[str, Any]:
-    """Get security scan history and results"""
+    """
+    Get security scans and monitoring results
+    
+    Features:
+    - Automated security scanning
+    - Real-time monitoring
+    - Scan history and trends
+    - Performance analytics
+    """
     try:
         result = SecurityService.get_security_scans(
             session=session,
-            data_source_id=data_source_id,
-            scan_type=scan_type,
-            status=status,
-            days=days,
-            user_id=current_user.get("user_id")
-        )
-        
-        return {
-            "success": True,
-            "data": result
-        }
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get security scans: {str(e)}"
-        )
-
-@router.get("/vulnerabilities")
-async def get_vulnerability_assessments(
-    severity: Optional[str] = Query(None, description="Filter by vulnerability severity"),
-    data_source_id: Optional[int] = Query(None, description="Filter by data source"),
-    status: Optional[str] = Query(None, description="Filter by remediation status"),
-    session: Session = Depends(get_session),
-    current_user: Dict[str, Any] = Depends(require_permission(PERMISSION_SECURITY_VIEW))
-) -> Dict[str, Any]:
-    """
-    Get vulnerability assessments with risk prioritization
-    
-    Features:
-    - CVSS scoring and risk analysis
-    - Vulnerability trend tracking
-    - Remediation planning
-    - Impact assessment
-    """
-    try:
-        result = SecurityService.get_vulnerability_assessments(
-            session=session,
-            severity=severity,
-            data_source_id=data_source_id,
-            status=status
+            data_source_id=data_source_id
         )
         
         return {
             "success": True,
             "data": result,
-            "vulnerability_features": [
-                "cvss_scoring",
-                "trend_tracking",
-                "remediation_planning",
-                "impact_assessment"
+            "scan_features": [
+                "automated_scanning",
+                "real_time_monitoring",
+                "scan_history",
+                "performance_analytics"
             ]
         }
     except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get vulnerabilities: {str(e)}"
+            status_code=500,
+            detail=f"Failed to get security scans: {str(e)}"
+        )
+
+@router.get("/vulnerability-assessments")
+async def get_vulnerability_assessments(
+    severity: Optional[str] = Query(None, description="Filter by vulnerability severity"),
+    data_source_id: Optional[int] = Query(None, description="Filter by data source"),
+    session: Session = Depends(get_session),
+    current_user: Dict[str, Any] = Depends(require_permission(PERMISSION_SECURITY_VIEW))
+) -> Dict[str, Any]:
+    """
+    Get vulnerability assessments and risk analysis
+    
+    Features:
+    - Vulnerability scanning and detection
+    - Risk scoring and prioritization
+    - Remediation recommendations
+    - Trend analysis
+    """
+    try:
+        result = SecurityService.get_vulnerabilities(
+            session=session,
+            data_source_id=data_source_id
+        )
+        
+        # Filter by severity if provided
+        if severity:
+            result = [v for v in result if v.severity == severity]
+        
+        return {
+            "success": True,
+            "data": result,
+            "vulnerability_features": [
+                "scanning_detection",
+                "risk_scoring",
+                "remediation_recommendations",
+                "trend_analysis"
+            ]
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to get vulnerability assessments: {str(e)}"
         )
 
 @router.post("/vulnerabilities/{vulnerability_id}/remediate")
@@ -196,13 +206,12 @@ async def remediate_vulnerability(
 @router.get("/incidents")
 async def get_security_incidents(
     severity: Optional[str] = Query(None, description="Filter by incident severity"),
-    status: Optional[str] = Query(None, description="Filter by incident status"),
     days: int = Query(30, description="Number of days to look back"),
     session: Session = Depends(get_session),
     current_user: Dict[str, Any] = Depends(require_permission(PERMISSION_SECURITY_VIEW))
 ) -> Dict[str, Any]:
     """
-    Get security incidents with threat intelligence
+    Get security incidents with advanced filtering
     
     Features:
     - Incident classification and tracking
@@ -214,7 +223,6 @@ async def get_security_incidents(
         result = SecurityService.get_security_incidents(
             session=session,
             severity=severity,
-            status=status,
             days=days
         )
         
@@ -230,7 +238,7 @@ async def get_security_incidents(
         }
     except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=500,
             detail=f"Failed to get incidents: {str(e)}"
         )
 
@@ -263,7 +271,6 @@ async def create_security_incident(
 async def get_compliance_checks(
     framework: Optional[str] = Query(None, description="Filter by compliance framework"),
     data_source_id: Optional[int] = Query(None, description="Filter by data source"),
-    status: Optional[str] = Query(None, description="Filter by check status"),
     session: Session = Depends(get_session),
     current_user: Dict[str, Any] = Depends(require_permission(PERMISSION_SECURITY_VIEW))
 ) -> Dict[str, Any]:
@@ -277,11 +284,13 @@ async def get_compliance_checks(
     - Regulatory reporting
     """
     try:
+        if not data_source_id:
+            raise HTTPException(status_code=400, detail="data_source_id is required")
+            
         result = SecurityService.get_compliance_checks(
             session=session,
-            framework=framework,
             data_source_id=data_source_id,
-            status=status
+            framework=framework
         )
         
         return {
@@ -296,7 +305,7 @@ async def get_compliance_checks(
         }
     except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=500,
             detail=f"Failed to get compliance checks: {str(e)}"
         )
 
@@ -369,38 +378,42 @@ async def get_threat_detection_results(
 @router.get("/analytics/dashboard")
 async def get_security_analytics_dashboard(
     time_range: str = Query("7d", description="Time range for analytics"),
+    data_source_id: Optional[int] = Query(None, description="Filter by data source"),
     session: Session = Depends(get_session),
-    current_user: Dict[str, Any] = Depends(require_permission(PERMISSION_SECURITY_VIEW))
+    current_user: Dict[str, Any] = Depends(get_current_user)
 ) -> Dict[str, Any]:
     """
-    Get comprehensive security analytics dashboard
+    Get security analytics dashboard data
     
     Features:
-    - Security posture overview
-    - Risk trend analysis
-    - Threat landscape insights
-    - Executive security reporting
+    - Security metrics overview
+    - Threat trend analysis
+    - Vulnerability statistics
+    - Incident reporting
     """
     try:
-        result = SecurityService.get_security_analytics_dashboard(
+        from app.services.security_service import SecurityService
+        
+        security_service = SecurityService()
+        dashboard_data = security_service.get_security_analytics_dashboard(
             session=session,
-            time_range=time_range
+            time_range=time_range,
+            data_source_id=data_source_id
         )
         
         return {
             "success": True,
-            "data": result,
-            "analytics_features": [
-                "posture_overview",
-                "risk_trends",
-                "threat_insights",
-                "executive_reporting"
-            ]
+            "data": dashboard_data,
+            "filters": {
+                "time_range": time_range,
+                "data_source_id": data_source_id
+            }
         }
+        
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get security analytics: {str(e)}"
+            detail=f"Failed to get security analytics dashboard: {str(e)}"
         )
 
 @router.get("/reports/risk-assessment")
@@ -479,4 +492,400 @@ async def start_security_monitoring(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to start security monitoring: {str(e)}"
+        )
+
+# ============================================================================
+# MISSING SECURITY & ACCESS CONTROL ENDPOINTS
+# Appended to avoid damaging existing APIs
+# ============================================================================
+
+@router.get("/data-sources/{data_source_id}/security")
+async def get_data_source_security(
+    data_source_id: int,
+    include_vulnerabilities: bool = Query(True, description="Include vulnerability assessment"),
+    include_controls: bool = Query(True, description="Include security controls"),
+    session: Session = Depends(get_session),
+    current_user: Dict[str, Any] = Depends(require_permission(PERMISSION_SECURITY_VIEW))
+) -> Dict[str, Any]:
+    """
+    Get comprehensive security information for a data source
+    
+    Features:
+    - Security vulnerability assessment
+    - Security controls overview
+    - Risk scoring and analysis
+    - Compliance status
+    """
+    try:
+        # Get security vulnerabilities
+        vulnerabilities = []
+        if include_vulnerabilities:
+            vulnerabilities = SecurityService.get_vulnerabilities(
+                session=session,
+                data_source_id=data_source_id
+            )
+        
+        # Get security controls
+        controls = []
+        if include_controls:
+            controls = SecurityService.get_security_controls(
+                session=session,
+                data_source_id=data_source_id
+            )
+        
+        # Get security audit summary
+        audit_summary = SecurityService.get_comprehensive_security_audit(
+            session=session,
+            data_source_id=data_source_id,
+            include_vulnerabilities=False,
+            include_compliance=False
+        )
+        
+        return {
+            "success": True,
+            "data": {
+                "data_source_id": data_source_id,
+                "vulnerabilities": vulnerabilities,
+                "security_controls": controls,
+                "audit_summary": audit_summary,
+                "security_score": len(vulnerabilities) * 10,  # Simple scoring
+                "last_updated": datetime.now().isoformat()
+            },
+            "security_features": [
+                "vulnerability_assessment",
+                "security_controls",
+                "risk_scoring",
+                "compliance_status"
+            ]
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get data source security: {str(e)}"
+        )
+
+@router.get("/data-sources/{data_source_id}/access-control")
+async def get_data_source_access_control(
+    data_source_id: int,
+    include_stats: bool = Query(False, description="Include access control statistics"),
+    include_logs: bool = Query(False, description="Include recent access logs"),
+    session: Session = Depends(get_session),
+    current_user: Dict[str, Any] = Depends(require_permission(PERMISSION_SECURITY_VIEW))
+) -> Dict[str, Any]:
+    """
+    Get access control information for a data source
+    
+    Features:
+    - User and role permissions
+    - Access control statistics
+    - Recent access logs
+    - Permission management
+    """
+    try:
+        from app.services.access_control_service import AccessControlService
+        
+        # Get permissions
+        permissions = AccessControlService.get_permissions_by_data_source(
+            session=session,
+            data_source_id=data_source_id
+        )
+        
+        # Get access statistics if requested
+        access_stats = None
+        if include_stats:
+            access_stats = AccessControlService.get_access_stats(
+                session=session,
+                data_source_id=data_source_id
+            )
+        
+        # Get access logs if requested
+        access_logs = []
+        if include_logs:
+            access_logs = AccessControlService.get_access_logs(
+                session=session,
+                data_source_id=data_source_id,
+                limit=50
+            )
+        
+        return {
+            "success": True,
+            "data": {
+                "data_source_id": data_source_id,
+                "permissions": permissions,
+                "access_stats": access_stats,
+                "access_logs": access_logs,
+                "total_permissions": len(permissions),
+                "last_updated": datetime.now().isoformat()
+            },
+            "access_control_features": [
+                "permission_management",
+                "access_statistics",
+                "audit_logging",
+                "role_based_access"
+            ]
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get access control: {str(e)}"
+        )
+
+@router.post("/data-sources/access-control")
+async def create_access_control_permission(
+    permission_data: Dict[str, Any],
+    session: Session = Depends(get_session),
+    current_user: Dict[str, Any] = Depends(require_permission(PERMISSION_SECURITY_MANAGE))
+) -> Dict[str, Any]:
+    """
+    Create a new access control permission
+    
+    Features:
+    - User permission assignment
+    - Role-based access control
+    - Permission expiration management
+    - Conditional access rules
+    """
+    try:
+        from app.services.access_control_service import AccessControlService, PermissionCreate
+        
+        # Validate required fields
+        required_fields = ["data_source_id", "permission_type", "access_level"]
+        for field in required_fields:
+            if field not in permission_data:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Missing required field: {field}"
+                )
+        
+        # Create permission request
+        permission_request = PermissionCreate(
+            data_source_id=permission_data["data_source_id"],
+            user_id=permission_data.get("user_id"),
+            role_id=permission_data.get("role_id"),
+            permission_type=permission_data["permission_type"],
+            access_level=permission_data["access_level"],
+            expires_at=permission_data.get("expires_at"),
+            conditions=permission_data.get("conditions", {})
+        )
+        
+        # Create permission
+        permission = AccessControlService.create_permission(
+            session=session,
+            permission_data=permission_request,
+            granted_by=current_user.get("username") or current_user.get("email")
+        )
+        
+        return {
+            "success": True,
+            "data": permission,
+            "message": "Access control permission created successfully",
+            "permission_features": [
+                "user_assignment",
+                "role_based_access",
+                "expiration_management",
+                "conditional_rules"
+            ]
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to create access control permission: {str(e)}"
+        )
+
+@router.put("/data-sources/access-control/{permission_id}")
+async def update_access_control_permission(
+    permission_id: int,
+    permission_data: Dict[str, Any],
+    session: Session = Depends(get_session),
+    current_user: Dict[str, Any] = Depends(require_permission(PERMISSION_SECURITY_MANAGE))
+) -> Dict[str, Any]:
+    """
+    Update an existing access control permission
+    
+    Features:
+    - Permission modification
+    - Access level updates
+    - Expiration management
+    - Conditional rule updates
+    """
+    try:
+        from app.services.access_control_service import AccessControlService, PermissionUpdate
+        
+        # Create update request
+        update_request = PermissionUpdate(
+            permission_type=permission_data.get("permission_type"),
+            access_level=permission_data.get("access_level"),
+            expires_at=permission_data.get("expires_at"),
+            conditions=permission_data.get("conditions")
+        )
+        
+        # Update permission
+        updated_permission = AccessControlService.update_permission(
+            session=session,
+            permission_id=permission_id,
+            permission_data=update_request,
+            updated_by=current_user.get("username") or current_user.get("email")
+        )
+        
+        if not updated_permission:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Permission {permission_id} not found"
+            )
+        
+        return {
+            "success": True,
+            "data": updated_permission,
+            "message": "Access control permission updated successfully",
+            "update_features": [
+                "permission_modification",
+                "access_level_updates",
+                "expiration_management",
+                "conditional_rules"
+            ]
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to update access control permission: {str(e)}"
+        )
+
+@router.delete("/data-sources/access-control/{permission_id}")
+async def delete_access_control_permission(
+    permission_id: int,
+    session: Session = Depends(get_session),
+    current_user: Dict[str, Any] = Depends(require_permission(PERMISSION_SECURITY_MANAGE))
+) -> Dict[str, Any]:
+    """
+    Delete an access control permission
+    
+    Features:
+    - Permission revocation
+    - Access removal
+    - Audit logging
+    - Security validation
+    """
+    try:
+        from app.services.access_control_service import AccessControlService
+        
+        # Revoke permission
+        success = AccessControlService.revoke_permission(
+            session=session,
+            permission_id=permission_id,
+            revoked_by=current_user.get("username") or current_user.get("email")
+        )
+        
+        if not success:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Permission {permission_id} not found"
+            )
+        
+        return {
+            "success": True,
+            "message": "Access control permission deleted successfully",
+            "deletion_features": [
+                "permission_revocation",
+                "access_removal",
+                "audit_logging",
+                "security_validation"
+            ]
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to delete access control permission: {str(e)}"
+        )
+
+@router.get("/data-sources/{data_source_id}/access-control/stats")
+async def get_access_control_stats(
+    data_source_id: int,
+    session: Session = Depends(get_session),
+    current_user: Dict[str, Any] = Depends(require_permission(PERMISSION_SECURITY_VIEW))
+) -> Dict[str, Any]:
+    """
+    Get access control statistics for a data source
+    
+    Features:
+    - Permission statistics
+    - Access attempt analytics
+    - Success rate metrics
+    - Usage patterns
+    """
+    try:
+        from app.services.access_control_service import AccessControlService
+        
+        # Get access statistics
+        access_stats = AccessControlService.get_access_stats(
+            session=session,
+            data_source_id=data_source_id
+        )
+        
+        return {
+            "success": True,
+            "data": access_stats,
+            "stats_features": [
+                "permission_statistics",
+                "access_analytics",
+                "success_metrics",
+                "usage_patterns"
+            ]
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get access control stats: {str(e)}"
+        )
+
+@router.get("/data-sources/{data_source_id}/access-control/logs")
+async def get_access_control_logs(
+    data_source_id: int,
+    limit: int = Query(100, description="Number of logs to return", ge=1, le=1000),
+    session: Session = Depends(get_session),
+    current_user: Dict[str, Any] = Depends(require_permission(PERMISSION_SECURITY_VIEW))
+) -> Dict[str, Any]:
+    """
+    Get access control logs for a data source
+    
+    Features:
+    - Access attempt logging
+    - User activity tracking
+    - Security event monitoring
+    - Audit trail
+    """
+    try:
+        from app.services.access_control_service import AccessControlService
+        
+        # Get access logs
+        access_logs = AccessControlService.get_access_logs(
+            session=session,
+            data_source_id=data_source_id,
+            limit=limit
+        )
+        
+        return {
+            "success": True,
+            "data": {
+                "data_source_id": data_source_id,
+                "access_logs": access_logs,
+                "total_logs": len(access_logs),
+                "limit": limit
+            },
+            "logging_features": [
+                "access_attempt_logging",
+                "user_activity_tracking",
+                "security_event_monitoring",
+                "audit_trail"
+            ]
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get access control logs: {str(e)}"
         )

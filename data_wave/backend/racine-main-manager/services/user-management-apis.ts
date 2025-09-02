@@ -50,7 +50,7 @@ interface UserManagementAPIConfig {
  * Default configuration
  */
 const DEFAULT_CONFIG: UserManagementAPIConfig = {
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000',
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000/proxy',
   timeout: process.env.NODE_ENV === 'development' ? 30000 : 30000, // 30s for both dev and prod
   retryAttempts: process.env.NODE_ENV === 'development' ? 1 : 3, // Fewer retries in dev
   retryDelay: 1000,
@@ -283,11 +283,11 @@ class UserManagementAPI {
   // =============================================================================
 
   async getCurrentUser(): Promise<UserProfileResponse> {
-    return this.makeRequestWithRetry<UserProfileResponse>('/api/auth/profile');
+    return this.makeRequestWithRetry<UserProfileResponse>('/auth/profile');
   }
 
   async updateUserProfile(request: UpdateUserProfileRequest): Promise<UserProfileResponse> {
-    return this.makeRequestWithRetry<UserProfileResponse>('/api/auth/profile', {
+    return this.makeRequestWithRetry<UserProfileResponse>('/auth/profile', {
       method: 'PUT',
       body: JSON.stringify(request)
     });
@@ -560,11 +560,11 @@ class UserManagementAPI {
   }
 
   async getNotificationSettings(): Promise<NotificationSettingsResponse> {
-    return this.makeRequestWithRetry<NotificationSettingsResponse>('/api/auth/notifications');
+    return this.makeRequestWithRetry<NotificationSettingsResponse>('/auth/notifications');
   }
 
   async updateNotificationSettings(request: UpdateNotificationSettingsRequest): Promise<NotificationSettingsResponse> {
-    return this.makeRequestWithRetry<NotificationSettingsResponse>('/api/auth/notifications', {
+    return this.makeRequestWithRetry<NotificationSettingsResponse>('/auth/notifications', {
       method: 'PUT',
       body: JSON.stringify(request)
     });
@@ -691,15 +691,15 @@ class UserManagementAPI {
   // =============================================================================
 
   async getUserAnalytics(timeRange = '30d'): Promise<UserAnalytics> {
-    return this.makeRequestWithRetry<UserAnalytics>(`/api/auth/analytics?time_range=${timeRange}`);
+    return this.makeRequestWithRetry<UserAnalytics>(`/auth/analytics?time_range=${timeRange}`);
   }
 
   async getActivitySummary(timeRange = '7d'): Promise<Record<string, any>> {
-    return this.makeRequestWithRetry<Record<string, any>>(`/api/auth/activity/summary?time_range=${timeRange}`);
+    return this.makeRequestWithRetry<Record<string, any>>(`/auth/activity/summary?time_range=${timeRange}`);
   }
 
   async getUsageStatistics(timeRange = '30d'): Promise<Record<string, any>> {
-    return this.makeRequestWithRetry<Record<string, any>>(`/api/auth/usage/statistics?time_range=${timeRange}`);
+    return this.makeRequestWithRetry<Record<string, any>>(`/auth/usage/statistics?time_range=${timeRange}`);
   }
 
   // =============================================================================
@@ -707,7 +707,7 @@ class UserManagementAPI {
   // =============================================================================
 
   async exportUserData(format: 'json' | 'csv'): Promise<Blob> {
-    const response = await fetch(`${this.config.baseURL}/api/auth/export?format=${format}`, {
+    const response = await fetch(`${this.config.baseURL}/auth/export?format=${format}`, {
       method: 'GET',
       headers: this.getAuthHeaders()
     });

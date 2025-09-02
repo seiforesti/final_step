@@ -1821,10 +1821,12 @@ class EnterpriseIntegrationService:
             
             # Get real performance metrics from all services
             service_metrics = {}
-            for service_name in ['data_sources', 'compliance_rules', 'classifications', 
-                               'scan_rule_sets', 'data_catalog', 'scan_logic']:
-                metrics = await performance_service.get_service_metrics(service_name)
-                service_metrics[service_name] = metrics
+            from app.db_session import get_session
+            with get_session() as db:
+                for service_name in ['data_sources', 'compliance_rules', 'classifications', 
+                                   'scan_rule_sets', 'data_catalog', 'scan_logic']:
+                    metrics = PerformanceService.get_service_metrics(db, service_name)
+                    service_metrics[service_name] = metrics
             
             # Calculate overall performance statistics
             total_requests = sum(m.get('total_requests', 0) for m in service_metrics.values())

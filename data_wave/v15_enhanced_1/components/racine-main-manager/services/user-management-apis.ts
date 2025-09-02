@@ -50,7 +50,7 @@ interface UserManagementAPIConfig {
  * Default configuration
  */
 const DEFAULT_CONFIG: UserManagementAPIConfig = {
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000',
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000/proxy',
   timeout: process.env.NODE_ENV === 'development' ? 30000 : 30000, // 30s for both dev and prod
   retryAttempts: process.env.NODE_ENV === 'development' ? 1 : 3, // Fewer retries in dev
   retryDelay: 1000,
@@ -283,18 +283,18 @@ class UserManagementAPI {
   // =============================================================================
 
   async getCurrentUser(): Promise<UserProfileResponse> {
-    return this.makeRequestWithRetry<UserProfileResponse>('/api/proxy/auth/profile');
+    return this.makeRequestWithRetry<UserProfileResponse>('/auth/profile');
   }
 
   async updateUserProfile(request: UpdateUserProfileRequest): Promise<UserProfileResponse> {
-    return this.makeRequestWithRetry<UserProfileResponse>('/api/proxy/auth/profile', {
+    return this.makeRequestWithRetry<UserProfileResponse>('/auth/profile', {
       method: 'PUT',
       body: JSON.stringify(request)
     });
   }
 
   async changePassword(currentPassword: string, newPassword: string): Promise<void> {
-    await this.makeRequestWithRetry<void>('/api/proxy/auth/change-password', {
+    await this.makeRequestWithRetry<void>('/auth/change-password', {
       method: 'POST',
       body: JSON.stringify({
         current_password: currentPassword,
@@ -307,7 +307,7 @@ class UserManagementAPI {
     const formData = new FormData();
     formData.append('avatar', avatarFile);
 
-    const response = await fetch(`${this.config.baseURL}/api/proxy/auth/avatar`, {
+    const response = await fetch(`${this.config.baseURL}/auth/avatar`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${this.getAuthToken()}`
@@ -324,7 +324,7 @@ class UserManagementAPI {
   }
 
   async deleteAccount(confirmationToken: string): Promise<void> {
-    await this.makeRequestWithRetry<void>('/api/proxy/auth/delete-account', {
+    await this.makeRequestWithRetry<void>('/auth/delete-account', {
       method: 'DELETE',
       body: JSON.stringify({
         confirmation_token: confirmationToken
@@ -337,7 +337,7 @@ class UserManagementAPI {
   // =============================================================================
 
   async login(email: string, password: string, mfaCode?: string): Promise<AuthenticationResponse> {
-    const response = await this.makeRequestWithRetry<AuthenticationResponse>('/api/proxy/auth/login', {
+    const response = await this.makeRequestWithRetry<AuthenticationResponse>('/auth/login', {
       method: 'POST',
       body: JSON.stringify({
         email,
@@ -359,7 +359,7 @@ class UserManagementAPI {
 
   async logout(): Promise<void> {
     try {
-      await this.makeRequestWithRetry<void>('/api/proxy/auth/logout', {
+      await this.makeRequestWithRetry<void>('/auth/logout', {
         method: 'POST'
       });
     } finally {
@@ -376,7 +376,7 @@ class UserManagementAPI {
       throw new Error('No refresh token available');
     }
 
-    const response = await this.makeRequestWithRetry<AuthenticationResponse>('/api/proxy/auth/refresh', {
+    const response = await this.makeRequestWithRetry<AuthenticationResponse>('/auth/refresh', {
       method: 'POST',
       body: JSON.stringify({
         refresh_token: refreshToken
@@ -395,13 +395,13 @@ class UserManagementAPI {
   }
 
   async setupMFA(): Promise<MFASetupResponse> {
-    return this.makeRequestWithRetry<MFASetupResponse>('/api/proxy/auth/mfa/setup', {
+    return this.makeRequestWithRetry<MFASetupResponse>('/auth/mfa/setup', {
       method: 'POST'
     });
   }
 
   async enableMFA(secret: string, code: string): Promise<void> {
-    await this.makeRequestWithRetry<void>('/api/proxy/auth/mfa/enable', {
+    await this.makeRequestWithRetry<void>('/auth/mfa/enable', {
       method: 'POST',
       body: JSON.stringify({
         secret,
@@ -411,7 +411,7 @@ class UserManagementAPI {
   }
 
   async disableMFA(password: string, code: string): Promise<void> {
-    await this.makeRequestWithRetry<void>('/api/proxy/auth/mfa/disable', {
+    await this.makeRequestWithRetry<void>('/auth/mfa/disable', {
       method: 'POST',
       body: JSON.stringify({
         password,
@@ -425,30 +425,30 @@ class UserManagementAPI {
   // =============================================================================
 
   async getAPIKeys(): Promise<APIKeyResponse[]> {
-    return this.makeRequestWithRetry<APIKeyResponse[]>('/api/proxy/auth/api-keys');
+    return this.makeRequestWithRetry<APIKeyResponse[]>('/auth/api-keys');
   }
 
   async createAPIKey(request: CreateAPIKeyRequest): Promise<APIKeyResponse> {
-    return this.makeRequestWithRetry<APIKeyResponse>('/api/proxy/auth/api-keys', {
+    return this.makeRequestWithRetry<APIKeyResponse>('/auth/api-keys', {
       method: 'POST',
       body: JSON.stringify(request)
     });
   }
 
   async revokeAPIKey(keyId: UUID): Promise<void> {
-    await this.makeRequestWithRetry<void>(`/api/proxy/auth/api-keys/${keyId}`, {
+    await this.makeRequestWithRetry<void>(`/auth/api-keys/${keyId}`, {
       method: 'DELETE'
     });
   }
 
   async regenerateAPIKey(keyId: UUID): Promise<APIKeyResponse> {
-    return this.makeRequestWithRetry<APIKeyResponse>(`/api/proxy/auth/api-keys/${keyId}/regenerate`, {
+    return this.makeRequestWithRetry<APIKeyResponse>(`/auth/api-keys/${keyId}/regenerate`, {
       method: 'POST'
     });
   }
 
   async updateAPIKeyPermissions(keyId: UUID, permissions: string[]): Promise<APIKeyResponse> {
-    return this.makeRequestWithRetry<APIKeyResponse>(`/api/proxy/auth/api-keys/${keyId}/permissions`, {
+    return this.makeRequestWithRetry<APIKeyResponse>(`/auth/api-keys/${keyId}/permissions`, {
       method: 'PUT',
       body: JSON.stringify({
         permissions
@@ -461,23 +461,23 @@ class UserManagementAPI {
   // =============================================================================
 
   async getUserRoles(): Promise<RoleResponse[]> {
-    return this.makeRequestWithRetry<RoleResponse[]>('/api/proxy/rbac/user/roles');
+    return this.makeRequestWithRetry<RoleResponse[]>('/rbac/user/roles');
   }
 
   async getUserPermissions(): Promise<PermissionResponse[]> {
-    return this.makeRequestWithRetry<PermissionResponse[]>('/api/proxy/rbac/user/permissions');
+    return this.makeRequestWithRetry<PermissionResponse[]>('/rbac/user/permissions');
   }
 
   async getAvailableRoles(): Promise<RoleResponse[]> {
-    return this.makeRequestWithRetry<RoleResponse[]>('/api/proxy/rbac/roles');
+    return this.makeRequestWithRetry<RoleResponse[]>('/rbac/roles');
   }
 
   async getAvailablePermissions(): Promise<PermissionResponse[]> {
-    return this.makeRequestWithRetry<PermissionResponse[]>('/api/proxy/rbac/permissions');
+    return this.makeRequestWithRetry<PermissionResponse[]>('/rbac/permissions');
   }
 
   async requestRole(roleId: UUID, justification: string): Promise<AccessRequestResponse> {
-    return this.makeRequestWithRetry<AccessRequestResponse>('/api/proxy/rbac/access-requests', {
+    return this.makeRequestWithRetry<AccessRequestResponse>('/rbac/access-requests', {
       method: 'POST',
       body: JSON.stringify({
         type: 'role',
@@ -488,7 +488,7 @@ class UserManagementAPI {
   }
 
   async requestPermission(permissionId: UUID, justification: string): Promise<AccessRequestResponse> {
-    return this.makeRequestWithRetry<AccessRequestResponse>('/api/proxy/rbac/access-requests', {
+    return this.makeRequestWithRetry<AccessRequestResponse>('/rbac/access-requests', {
       method: 'POST',
       body: JSON.stringify({
         type: 'permission',
@@ -499,13 +499,13 @@ class UserManagementAPI {
   }
 
   async revokeRole(roleId: UUID): Promise<void> {
-    await this.makeRequestWithRetry<void>(`/api/proxy/rbac/user/roles/${roleId}`, {
+    await this.makeRequestWithRetry<void>(`/rbac/user/roles/${roleId}`, {
       method: 'DELETE'
     });
   }
 
   async revokePermission(permissionId: UUID): Promise<void> {
-    await this.makeRequestWithRetry<void>(`/api/proxy/rbac/user/permissions/${permissionId}`, {
+    await this.makeRequestWithRetry<void>(`/rbac/user/permissions/${permissionId}`, {
       method: 'DELETE'
     });
   }
@@ -515,24 +515,24 @@ class UserManagementAPI {
   // =============================================================================
 
   async getAccessRequests(): Promise<AccessRequestResponse[]> {
-    return this.makeRequestWithRetry<AccessRequestResponse[]>('/api/proxy/rbac/access-requests');
+    return this.makeRequestWithRetry<AccessRequestResponse[]>('/rbac/access-requests');
   }
 
   async requestCrossGroupAccess(request: CreateAccessRequestRequest): Promise<AccessRequestResponse> {
-    return this.makeRequestWithRetry<AccessRequestResponse>('/api/proxy/rbac/cross-group-access', {
+    return this.makeRequestWithRetry<AccessRequestResponse>('/rbac/cross-group-access', {
       method: 'POST',
       body: JSON.stringify(request)
     });
   }
 
   async approveAccessRequest(requestId: UUID): Promise<void> {
-    await this.makeRequestWithRetry<void>(`/api/proxy/rbac/access-requests/${requestId}/approve`, {
+    await this.makeRequestWithRetry<void>(`/rbac/access-requests/${requestId}/approve`, {
       method: 'POST'
     });
   }
 
   async denyAccessRequest(requestId: UUID, reason: string): Promise<void> {
-    await this.makeRequestWithRetry<void>(`/api/proxy/rbac/access-requests/${requestId}/deny`, {
+    await this.makeRequestWithRetry<void>(`/rbac/access-requests/${requestId}/deny`, {
       method: 'POST',
       body: JSON.stringify({
         reason
@@ -541,7 +541,7 @@ class UserManagementAPI {
   }
 
   async getCrossGroupAccess(): Promise<Record<string, any>> {
-    return this.makeRequestWithRetry<Record<string, any>>('/api/proxy/rbac/cross-group-access');
+    return this.makeRequestWithRetry<Record<string, any>>('/rbac/cross-group-access');
   }
 
   // =============================================================================
@@ -549,88 +549,88 @@ class UserManagementAPI {
   // =============================================================================
 
   async getUserPreferences(): Promise<UserPreferencesResponse> {
-    return this.makeRequestWithRetry<UserPreferencesResponse>('/api/proxy/auth/preferences');
+    return this.makeRequestWithRetry<UserPreferencesResponse>('/auth/preferences');
   }
 
   async updateUserPreferences(request: UpdateUserPreferencesRequest): Promise<UserPreferencesResponse> {
-    return this.makeRequestWithRetry<UserPreferencesResponse>('/api/proxy/auth/preferences', {
+    return this.makeRequestWithRetry<UserPreferencesResponse>('/auth/preferences', {
       method: 'PUT',
       body: JSON.stringify(request)
     });
   }
 
   async getNotificationSettings(): Promise<NotificationSettingsResponse> {
-    return this.makeRequestWithRetry<NotificationSettingsResponse>('/api/proxy/auth/notifications');
+    return this.makeRequestWithRetry<NotificationSettingsResponse>('/auth/notifications');
   }
 
   async updateNotificationSettings(request: UpdateNotificationSettingsRequest): Promise<NotificationSettingsResponse> {
-    return this.makeRequestWithRetry<NotificationSettingsResponse>('/api/proxy/auth/notifications', {
+    return this.makeRequestWithRetry<NotificationSettingsResponse>('/auth/notifications', {
       method: 'PUT',
       body: JSON.stringify(request)
     });
   }
 
   async getCustomThemes(): Promise<any[]> {
-    return this.makeRequestWithRetry<any[]>('/api/proxy/auth/custom-themes');
+    return this.makeRequestWithRetry<any[]>('/auth/custom-themes');
   }
 
   async getCustomLayouts(): Promise<any[]> {
-    return this.makeRequestWithRetry<any[]>('/api/proxy/auth/custom-layouts');
+    return this.makeRequestWithRetry<any[]>('/auth/custom-layouts');
   }
 
   async getDevicePreferences(): Promise<any> {
-    return this.makeRequestWithRetry<any>('/api/proxy/auth/device-preferences');
+    return this.makeRequestWithRetry<any>('/auth/device-preferences');
   }
 
   async createCustomTheme(customTheme: any): Promise<any> {
-    return this.makeRequestWithRetry<any>('/api/proxy/auth/custom-themes', {
+    return this.makeRequestWithRetry<any>('/auth/custom-themes', {
       method: 'POST',
       body: JSON.stringify(customTheme)
     });
   }
 
   async deleteCustomTheme(themeId: string): Promise<void> {
-    await this.makeRequestWithRetry<void>(`/api/proxy/auth/custom-themes/${themeId}`, {
+    await this.makeRequestWithRetry<void>(`/auth/custom-themes/${themeId}`, {
       method: 'DELETE'
     });
   }
 
   async createCustomLayout(customLayout: any): Promise<any> {
-    return this.makeRequestWithRetry<any>('/api/proxy/auth/custom-layouts', {
+    return this.makeRequestWithRetry<any>('/auth/custom-layouts', {
       method: 'POST',
       body: JSON.stringify(customLayout)
     });
   }
 
   async deleteCustomLayout(layoutId: string): Promise<void> {
-    await this.makeRequestWithRetry<void>(`/api/proxy/auth/custom-layouts/${layoutId}`, {
+    await this.makeRequestWithRetry<void>(`/auth/custom-layouts/${layoutId}`, {
       method: 'DELETE'
     });
   }
 
   async syncPreferencesAcrossDevices(request: any): Promise<any> {
-    return this.makeRequestWithRetry<any>('/api/proxy/auth/sync-preferences', {
+    return this.makeRequestWithRetry<any>('/auth/sync-preferences', {
       method: 'POST',
       body: JSON.stringify(request)
     });
   }
 
   async updateThemePreferences(theme: Record<string, any>): Promise<void> {
-    await this.makeRequestWithRetry<void>('/api/proxy/auth/preferences/theme', {
+    await this.makeRequestWithRetry<void>('/auth/preferences/theme', {
       method: 'PUT',
       body: JSON.stringify(theme)
     });
   }
 
   async updateLayoutPreferences(layout: Record<string, any>): Promise<void> {
-    await this.makeRequestWithRetry<void>('/api/proxy/auth/preferences/layout', {
+    await this.makeRequestWithRetry<void>('/auth/preferences/layout', {
       method: 'PUT',
       body: JSON.stringify(layout)
     });
   }
 
   async resetPreferences(): Promise<void> {
-    await this.makeRequestWithRetry<void>('/api/proxy/auth/preferences/reset', {
+    await this.makeRequestWithRetry<void>('/auth/preferences/reset', {
       method: 'POST'
     });
   }
@@ -640,20 +640,20 @@ class UserManagementAPI {
   // =============================================================================
 
   async getSecurityAudit(timeRange = '30d'): Promise<SecurityAuditResponse> {
-    return this.makeRequestWithRetry<SecurityAuditResponse>(`/api/proxy/auth/security/audit?time_range=${timeRange}`);
+    return this.makeRequestWithRetry<SecurityAuditResponse>(`/auth/security/audit?time_range=${timeRange}`);
   }
 
   async getSecurityLogs(filters?: FilterRequest): Promise<SecurityLogResponse[]> {
     const queryParams = filters ? new URLSearchParams(filters as any).toString() : '';
-    return this.makeRequestWithRetry<SecurityLogResponse[]>(`/api/proxy/auth/security/logs?${queryParams}`);
+    return this.makeRequestWithRetry<SecurityLogResponse[]>(`/auth/security/logs?${queryParams}`);
   }
 
   async getComplianceStatus(): Promise<Record<string, any>> {
-    return this.makeRequestWithRetry<Record<string, any>>('/api/proxy/auth/compliance/status');
+    return this.makeRequestWithRetry<Record<string, any>>('/auth/compliance/status');
   }
 
   async generateSecurityReport(reportType: string): Promise<Blob> {
-    const response = await fetch(`${this.config.baseURL}/api/proxy/auth/security/reports/${reportType}`, {
+    const response = await fetch(`${this.config.baseURL}/auth/security/reports/${reportType}`, {
       method: 'GET',
       headers: this.getAuthHeaders()
     });
@@ -691,15 +691,15 @@ class UserManagementAPI {
   // =============================================================================
 
   async getUserAnalytics(timeRange = '30d'): Promise<UserAnalytics> {
-    return this.makeRequestWithRetry<UserAnalytics>(`/api/auth/analytics?time_range=${timeRange}`);
+    return this.makeRequestWithRetry<UserAnalytics>(`/auth/analytics?time_range=${timeRange}`);
   }
 
   async getActivitySummary(timeRange = '7d'): Promise<Record<string, any>> {
-    return this.makeRequestWithRetry<Record<string, any>>(`/api/auth/activity/summary?time_range=${timeRange}`);
+    return this.makeRequestWithRetry<Record<string, any>>(`/auth/activity/summary?time_range=${timeRange}`);
   }
 
   async getUsageStatistics(timeRange = '30d'): Promise<Record<string, any>> {
-    return this.makeRequestWithRetry<Record<string, any>>(`/api/auth/usage/statistics?time_range=${timeRange}`);
+    return this.makeRequestWithRetry<Record<string, any>>(`/auth/usage/statistics?time_range=${timeRange}`);
   }
 
   // =============================================================================
@@ -707,7 +707,7 @@ class UserManagementAPI {
   // =============================================================================
 
   async exportUserData(format: 'json' | 'csv'): Promise<Blob> {
-    const response = await fetch(`${this.config.baseURL}/api/auth/export?format=${format}`, {
+    const response = await fetch(`${this.config.baseURL}/auth/export?format=${format}`, {
       method: 'GET',
       headers: this.getAuthHeaders()
     });

@@ -82,7 +82,7 @@ class EnhancedCollaborationService:
             # Validate owner exists and has permission
             from app.models.auth_models import User
             from app.services.rbac_service import RBACService
-            owner = session.exec(select(User).where(User.id == owner_id)).first()
+            owner = session.execute(select(User).where(User.id == owner_id)).first()
             if not owner:
                 raise ValueError("Owner user not found")
             rbac = RBACService(session)
@@ -172,7 +172,7 @@ class EnhancedCollaborationService:
         try:
             # Get team hub
             statement = select(TeamCollaborationHub).where(TeamCollaborationHub.id == team_id)
-            result = session.exec(statement)
+            result = session.execute(statement)
             team_hub = result.first()
             
             if not team_hub:
@@ -190,7 +190,7 @@ class EnhancedCollaborationService:
                 members_statement = select(RuleTeamMember).where(
                     and_(RuleTeamMember.team_id == team_id, RuleTeamMember.is_active == True)
                 )
-                members_result = session.exec(members_statement)
+                members_result = session.execute(members_statement)
                 team_hub.members = list(members_result)
             
             # Add recent activity if requested
@@ -239,7 +239,7 @@ class EnhancedCollaborationService:
                 statement = statement.where(and_(*conditions))
             statement = statement.limit(limit)
             
-            result = session.exec(statement)
+            result = session.execute(statement)
             return list(result)
             
         except Exception as e:
@@ -260,10 +260,10 @@ class EnhancedCollaborationService:
             # Validate users and permissions
             from app.models.auth_models import User
             from app.services.rbac_service import RBACService
-            user = session.exec(select(User).where(User.id == user_id)).first()
+            user = session.execute(select(User).where(User.id == user_id)).first()
             if not user:
                 raise ValueError("User not found")
-            adder = session.exec(select(User).where(User.id == added_by)).first()
+            adder = session.execute(select(User).where(User.id == added_by)).first()
             if not adder:
                 raise ValueError("Actor not found")
             rbac = RBACService(session)
@@ -273,7 +273,7 @@ class EnhancedCollaborationService:
             existing_statement = select(RuleTeamMember).where(
                 and_(RuleTeamMember.team_id == team_id, RuleTeamMember.user_id == user_id)
             )
-            existing_result = session.exec(existing_statement)
+            existing_result = session.execute(existing_statement)
             existing_member = existing_result.first()
             
             if existing_member:
@@ -383,7 +383,7 @@ class EnhancedCollaborationService:
         """Get rule review details"""
         try:
             statement = select(EnhancedRuleReview).where(EnhancedRuleReview.id == review_id)
-            result = session.exec(statement)
+            result = session.execute(statement)
             review = result.first()
             
             if not review:
@@ -398,7 +398,7 @@ class EnhancedCollaborationService:
                             comments_statement = select(EnhancedRuleComment).where(
                 and_(EnhancedRuleComment.entity_type == "review", EnhancedRuleComment.entity_id == review_id)
             ).order_by(EnhancedRuleComment.created_at)
-            comments_result = session.exec(comments_statement)
+            comments_result = session.execute(comments_statement)
             review.comments = list(comments_result)
             
             # Add history if requested
@@ -428,7 +428,7 @@ class EnhancedCollaborationService:
                 raise PermissionError("Not allowed to update review status")
 
             statement = select(EnhancedRuleReview).where(EnhancedRuleReview.id == review_id)
-            result = session.exec(statement)
+            result = session.execute(statement)
             review = result.first()
             
             if not review:
@@ -569,7 +569,7 @@ class EnhancedCollaborationService:
             
             statement = statement.limit(limit)
             
-            result = session.exec(statement)
+            result = session.execute(statement)
             comments = list(result)
             
             # If including replies, organize them hierarchically
@@ -592,7 +592,7 @@ class EnhancedCollaborationService:
         """Resolve a comment"""
         try:
             statement = select(EnhancedRuleComment).where(EnhancedRuleComment.id == comment_id)
-            result = session.exec(statement)
+            result = session.execute(statement)
             comment = result.first()
             
             if not comment:
@@ -707,7 +707,7 @@ class EnhancedCollaborationService:
             
             statement = statement.order_by(KnowledgeItem.views_count.desc()).limit(limit)
             
-            result = session.exec(statement)
+            result = session.execute(statement)
             return list(result)
             
         except Exception as e:
@@ -797,7 +797,7 @@ class EnhancedCollaborationService:
             
             statement = statement.limit(limit)
             
-            result = session.exec(statement)
+            result = session.execute(statement)
             return list(result)
             
         except Exception as e:
@@ -844,7 +844,7 @@ class EnhancedCollaborationService:
             from ..notification_service import NotificationService
             
             # Get review details
-            review = session.exec(
+            review = session.execute(
                 select(EnhancedRuleReview).where(EnhancedRuleReview.id == review_id)
             ).first()
             
@@ -856,7 +856,7 @@ class EnhancedCollaborationService:
             notification_service = NotificationService()
             
             # Get team members to notify
-            team_members = session.exec(
+            team_members = session.execute(
                 select(RuleTeamMember).where(
                     and_(
                         RuleTeamMember.team_id == review.team_id,
@@ -909,7 +909,7 @@ class EnhancedCollaborationService:
             from ..notification_service import NotificationService
             
             # Get review details
-            review = session.exec(
+            review = session.execute(
                 select(EnhancedRuleReview).where(EnhancedRuleReview.id == review_id)
             ).first()
             
@@ -951,7 +951,7 @@ class EnhancedCollaborationService:
                 )
             
             # Send notification to team members
-            team_members = session.exec(
+            team_members = session.execute(
                 select(RuleTeamMember).where(
                     and_(
                         RuleTeamMember.team_id == review.team_id,
@@ -987,7 +987,7 @@ class EnhancedCollaborationService:
             from ..services.semantic_search_service import SemanticSearchService
             
             # Get knowledge item details
-            knowledge_item = session.exec(
+            knowledge_item = session.execute(
                 select(KnowledgeItem).where(KnowledgeItem.id == knowledge_id)
             ).first()
             
@@ -1043,7 +1043,7 @@ class EnhancedCollaborationService:
                     RuleTeamMember.is_active == True
                 )
             )
-            result = session.exec(statement)
+            result = session.execute(statement)
             return result.first() is not None
         except Exception:
             return False
@@ -1052,7 +1052,7 @@ class EnhancedCollaborationService:
         """Check if user has access to review"""
         try:
             statement = select(EnhancedRuleReview).where(EnhancedRuleReview.id == review_id)
-            result = session.exec(statement)
+            result = session.execute(statement)
             review = result.first()
             
             if not review:
@@ -1167,7 +1167,7 @@ class EnhancedCollaborationService:
             }
             
             # Get team members
-            team_members = session.exec(
+            team_members = session.execute(
                 select(RuleTeamMember).where(
                     and_(
                         RuleTeamMember.team_id == team_id,
@@ -1182,7 +1182,7 @@ class EnhancedCollaborationService:
                 return analytics
             
             # Calculate total activities
-            total_reviews = session.exec(
+            total_reviews = session.execute(
                 select(func.count(EnhancedRuleReview.id)).where(
                     and_(
                         EnhancedRuleReview.team_id == team_id,
@@ -1191,7 +1191,7 @@ class EnhancedCollaborationService:
                 )
             ).first() or 0
             
-            total_comments = session.exec(
+            total_comments = session.execute(
                 select(func.count(EnhancedRuleComment.id)).where(
                     and_(
                         EnhancedRuleComment.entity_type == "review",
@@ -1203,7 +1203,7 @@ class EnhancedCollaborationService:
                 )
             ).first() or 0
             
-            total_knowledge_items = session.exec(
+            total_knowledge_items = session.execute(
                 select(func.count(KnowledgeItem.id)).where(
                     and_(
                         KnowledgeItem.team_id == team_id,
@@ -1293,7 +1293,7 @@ class EnhancedCollaborationService:
         """Calculate collaboration score based on team interactions"""
         try:
             # Calculate interaction density
-            total_interactions = session.exec(
+            total_interactions = session.execute(
                 select(func.count(EnhancedRuleComment.id)).where(
                     and_(
                         EnhancedRuleComment.entity_type == "review",
@@ -1306,7 +1306,7 @@ class EnhancedCollaborationService:
             ).first() or 0
             
             # Calculate member participation
-            active_members = session.exec(
+            active_members = session.execute(
                 select(func.count(func.distinct(EnhancedRuleComment.user_id))).where(
                     and_(
                         EnhancedRuleComment.entity_type == "review",
@@ -1320,7 +1320,7 @@ class EnhancedCollaborationService:
             ).first() or 0
             
             # Calculate review completion rate
-            completed_reviews = session.exec(
+            completed_reviews = session.execute(
                 select(func.count(EnhancedRuleReview.id)).where(
                     and_(
                         EnhancedRuleReview.team_id == team_id,
@@ -1330,7 +1330,7 @@ class EnhancedCollaborationService:
                 )
             ).first() or 0
             
-            total_reviews = session.exec(
+            total_reviews = session.execute(
                 select(func.count(EnhancedRuleReview.id)).where(
                     and_(
                         EnhancedRuleReview.team_id == team_id,
@@ -1361,7 +1361,7 @@ class EnhancedCollaborationService:
         """Calculate participation metrics"""
         try:
             # Count active members
-            active_members = session.exec(
+            active_members = session.execute(
                 select(func.count(func.distinct(EnhancedRuleComment.user_id))).where(
                     and_(
                         EnhancedRuleComment.entity_type == "review",
@@ -1376,7 +1376,7 @@ class EnhancedCollaborationService:
             
             # Calculate average response time
             response_times = []
-            reviews = session.exec(
+            reviews = session.execute(
                 select(EnhancedRuleReview).where(
                     and_(
                         EnhancedRuleReview.team_id == team_id,
@@ -1394,7 +1394,7 @@ class EnhancedCollaborationService:
             
             # Calculate engagement rate
             total_possible_interactions = len(member_ids) * len(reviews) if member_ids and reviews else 1
-            actual_interactions = session.exec(
+            actual_interactions = session.execute(
                 select(func.count(EnhancedRuleComment.id)).where(
                     and_(
                         EnhancedRuleComment.entity_type == "review",
@@ -1426,7 +1426,7 @@ class EnhancedCollaborationService:
     ) -> Dict[str, Any]:
         """Calculate review efficiency metrics"""
         try:
-            reviews = session.exec(
+            reviews = session.execute(
                 select(EnhancedRuleReview).where(
                     and_(
                         EnhancedRuleReview.team_id == team_id,
@@ -1478,7 +1478,7 @@ class EnhancedCollaborationService:
     ) -> Dict[str, Any]:
         """Calculate knowledge sharing statistics"""
         try:
-            knowledge_items = session.exec(
+            knowledge_items = session.execute(
                 select(KnowledgeItem).where(
                     and_(
                         KnowledgeItem.team_id == team_id,
@@ -1515,7 +1515,7 @@ class EnhancedCollaborationService:
         """Calculate communication patterns"""
         try:
             # Get all comments in time period
-            comments = session.exec(
+            comments = session.execute(
                 select(EnhancedRuleComment).where(
                     and_(
                         EnhancedRuleComment.entity_type == "review",
@@ -1566,7 +1566,7 @@ class EnhancedCollaborationService:
                 week_end = current_date + timedelta(days=7)
                 
                 # Count reviews in week
-                week_reviews = session.exec(
+                week_reviews = session.execute(
                     select(func.count(EnhancedRuleReview.id)).where(
                         and_(
                             EnhancedRuleReview.team_id == team_id,
@@ -1577,7 +1577,7 @@ class EnhancedCollaborationService:
                 ).first() or 0
                 
                 # Count comments in week
-                week_comments = session.exec(
+                week_comments = session.execute(
                     select(func.count(EnhancedRuleComment.id)).where(
                         and_(
                             EnhancedRuleComment.entity_type == "review",

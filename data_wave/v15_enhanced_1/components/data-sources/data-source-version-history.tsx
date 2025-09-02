@@ -51,6 +51,19 @@ export function DataSourceVersionHistory({
   onNavigateToComponent,
   className = ""
 }: VersionHistoryProps) {
+  // Safety check for dataSource
+  if (!dataSource) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="text-center">
+          <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-lg font-medium mb-2">Data Source Not Available</h3>
+          <p className="text-muted-foreground">Please select a data source to view version history.</p>
+        </div>
+      </div>
+    )
+  }
+
   const [selectedVersion, setSelectedVersion] = useState<Version | null>(null)
   const [showCreateVersion, setShowCreateVersion] = useState(false)
   const [showVersionDetails, setShowVersionDetails] = useState(false)
@@ -62,14 +75,14 @@ export function DataSourceVersionHistory({
   })
 
   // Backend integration hooks
-  const { data: versionData, isLoading, error, refetch } = useDataSourceVersionHistoryQuery(dataSource.id)
+  const { data: versionData, isLoading, error, refetch } = useDataSourceVersionHistoryQuery(dataSource?.id)
   const createVersionMutation = useCreateVersionMutation()
   const restoreVersionMutation = useRestoreVersionMutation()
 
   // Enterprise features integration
   const enterpriseFeatures = useEnterpriseFeatures({
     componentName: 'DataSourceVersionHistory',
-    dataSourceId: dataSource.id,
+    dataSourceId: dataSource?.id,
     enableAnalytics: true,
     enableRealTimeUpdates: true,
     enableNotifications: true,
@@ -108,6 +121,11 @@ export function DataSourceVersionHistory({
     }
 
     try {
+      if (!dataSource?.id) {
+        toast.error("Data source not available")
+        return
+      }
+      
       await createVersionMutation.mutateAsync({
         data_source_id: dataSource.id,
         version: newVersion.version,
@@ -135,13 +153,18 @@ export function DataSourceVersionHistory({
 
   const handleRestoreVersion = async (versionId: string) => {
     try {
+      if (!dataSource?.id) {
+        toast.error("Data source not available")
+        return
+      }
+      
       await restoreVersionMutation.mutateAsync({
         data_source_id: dataSource.id,
-        version_id: versionId
+        version_id: parseInt(versionId)
       })
       
       toast.success("Version restored successfully")
-      logUserAction('version_restored', 'version_control', versionId)
+      logUserAction('version_restored', 'version_control', parseInt(versionId))
       refetch()
     } catch (error) {
       toast.error("Failed to restore version")

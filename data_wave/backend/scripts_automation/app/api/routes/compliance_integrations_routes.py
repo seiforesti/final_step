@@ -427,7 +427,7 @@ async def get_integration_template(
         # Get specific template from database
         from app.models.compliance_extended_models import ComplianceIntegrationTemplate
         
-        template = session.exec(
+        template = session.execute(
             select(ComplianceIntegrationTemplate).where(
                 ComplianceIntegrationTemplate.template_id == template_type,
                 ComplianceIntegrationTemplate.is_active == True
@@ -493,11 +493,11 @@ async def get_integration_logs(
         
         # Apply pagination
         offset = (page - 1) * limit
-        logs = session.exec(query.offset(offset).limit(limit)).all()
+        logs = session.execute(query.offset(offset).limit(limit)).all()
         
         # Count total
         from sqlmodel import func
-        total = session.exec(
+        total = session.execute(
             select(func.count(ComplianceIntegrationLog.id)).where(
                 ComplianceIntegrationLog.integration_id == integration_id
             )

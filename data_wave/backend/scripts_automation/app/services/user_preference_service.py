@@ -120,7 +120,8 @@ class UserPreferenceService:
             # Cache the preferences
             self.user_preferences[user_id] = user_prefs
             
-            logger.info(f"Retrieved preferences for user: {user_id}")
+            # Lower log level to avoid spamming logs during high-traffic endpoints
+            logger.debug(f"Retrieved preferences for user: {user_id}")
             return {
                 "success": True,
                 "user_id": user_id,

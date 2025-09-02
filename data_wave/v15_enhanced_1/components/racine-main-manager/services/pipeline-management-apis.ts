@@ -80,7 +80,7 @@ interface PipelineAPIConfig {
  * Default configuration
  */
 const DEFAULT_CONFIG: PipelineAPIConfig = {
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000',
+      baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000/proxy',
   timeout: 60000,
   retryAttempts: 3,
   retryDelay: 1000,

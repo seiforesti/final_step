@@ -1,4 +1,4 @@
-from sqlmodel import Session, select
+from sqlmodel import Session, select, and_
 from typing import Dict, Any, List, Optional
 from datetime import datetime, timedelta, timezone
 import json
@@ -10,7 +10,7 @@ from collections import defaultdict
 from app.models.collaboration_models import (
     Workspace, WorkspaceMember, CollaborativeDocument, DocumentVersion,
     Discussion, DiscussionReply, KnowledgeBase, CollaborationEvent,
-    WorkspaceType, DocumentType, CollaborationRole
+    WorkspaceType, DocumentType, CollaborationRole, CollaborationSession, SessionParticipant
 )
 
 logger = logging.getLogger(__name__)
@@ -116,7 +116,7 @@ class AdvancedCollaborationService:
     ) -> Dict[str, Any]:
         """Get comprehensive workspace analytics and insights"""
         try:
-            workspace = session.exec(select(Workspace).where(
+            workspace = session.execute(select(Workspace).where(
                 Workspace.id == workspace_id
             )).first()
             
@@ -126,17 +126,17 @@ class AdvancedCollaborationService:
             since_date = datetime.now(timezone.utc) - timedelta(days=time_range_days)
             
             # Get members analytics
-            members = session.exec(select(WorkspaceMember).where(
+            members = session.execute(select(WorkspaceMember).where(
                 WorkspaceMember.workspace_id == workspace_id
             )).all()
             
             # Get documents analytics
-            documents = session.exec(select(CollaborativeDocument).where(
+            documents = session.execute(select(CollaborativeDocument).where(
                 CollaborativeDocument.workspace_id == workspace_id
             )).all()
             
             # Get recent activity
-            recent_events = session.exec(select(CollaborationEvent).where(
+            recent_events = session.execute(select(CollaborationEvent).where(
                 CollaborationEvent.workspace_id == workspace_id,
                 CollaborationEvent.created_at >= since_date
             )).all()
@@ -295,9 +295,10 @@ class AdvancedCollaborationService:
     ) -> Dict[str, Any]:
         """Update document content with AI-powered suggestions"""
         try:
-            document = session.exec(select(CollaborativeDocument).where(
+            document_result = session.execute(select(CollaborativeDocument).where(
                 CollaborativeDocument.id == document_id
-            )).first()
+            ))
+            document = document_result.scalars().first()
             
             if not document:
                 raise ValueError(f"Document {document_id} not found")
@@ -375,9 +376,10 @@ class AdvancedCollaborationService:
     ) -> Dict[str, Any]:
         """Start a real-time collaboration session"""
         try:
-            document = session.exec(select(CollaborativeDocument).where(
+            document_result = session.execute(select(CollaborativeDocument).where(
                 CollaborativeDocument.id == document_id
-            )).first()
+            ))
+            document = document_result.scalars().first()
             
             if not document:
                 raise ValueError(f"Document {document_id} not found")
@@ -509,7 +511,7 @@ class AdvancedCollaborationService:
             if filters:
                 kb_query = kb_query.where(*filters)
             
-            knowledge_items = session.exec(kb_query.limit(limit * 2)).all()  # Get more for ranking
+            knowledge_items = session.execute(kb_query.limit(limit * 2)).all()  # Get more for ranking
             
             # Semantic search and ranking
             ranked_results = AdvancedCollaborationService._rank_knowledge_items(
@@ -553,7 +555,7 @@ class AdvancedCollaborationService:
             since_date = datetime.now(timezone.utc) - timedelta(days=analysis_period_days)
             
             # Get workspace data
-            workspace = session.exec(select(Workspace).where(
+            workspace = session.execute(select(Workspace).where(
                 Workspace.id == workspace_id
             )).first()
             
@@ -561,18 +563,18 @@ class AdvancedCollaborationService:
                 raise ValueError(f"Workspace {workspace_id} not found")
             
             # Get recent events
-            events = session.exec(select(CollaborationEvent).where(
+            events = session.execute(select(CollaborationEvent).where(
                 CollaborationEvent.workspace_id == workspace_id,
                 CollaborationEvent.created_at >= since_date
             )).all()
             
             # Get members
-            members = session.exec(select(WorkspaceMember).where(
+            members = session.execute(select(WorkspaceMember).where(
                 WorkspaceMember.workspace_id == workspace_id
             )).all()
             
             # Get documents
-            documents = session.exec(select(CollaborativeDocument).where(
+            documents = session.execute(select(CollaborativeDocument).where(
                 CollaborativeDocument.workspace_id == workspace_id
             )).all()
             
@@ -1088,30 +1090,435 @@ class AdvancedCollaborationService:
     @staticmethod
     def _log_collaboration_event(
         session: Session,
-        workspace_id: int,
+        workspace_id: str,
         user_id: str,
         event_type: str,
-        entity_type: str,
-        entity_id: int,
+        resource_type: str,
+        resource_id: str,
         description: str,
         metadata: Dict[str, Any] = None
-    ):
-        """Log collaboration event for activity tracking"""
+    ) -> None:
+        """Log collaboration events for audit and analytics"""
         try:
             event = CollaborationEvent(
                 workspace_id=workspace_id,
                 user_id=user_id,
                 event_type=event_type,
-                entity_type=entity_type,
-                entity_id=entity_id,
-                action=event_type,
+                resource_type=resource_type,
+                resource_id=resource_id,
                 description=description,
                 metadata=metadata or {},
-                is_real_time=True
+                timestamp=datetime.now(timezone.utc)
             )
-            
             session.add(event)
             session.commit()
+        except Exception as e:
+            logger.error(f"Failed to log collaboration event: {e}")
+            session.rollback()
+
+    @staticmethod
+    def get_user_workspaces(
+        session: Session,
+        user_id: str,
+        workspace_type: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """Get workspaces for a specific user"""
+        try:
+            query = select(Workspace).join(WorkspaceMember).where(WorkspaceMember.user_id == user_id)
+            
+            if workspace_type:
+                query = query.where(Workspace.workspace_type == workspace_type)
+            
+            workspaces = session.execute(query).scalars().all()
+            
+            return {
+                "workspaces": [
+                    {
+                        "id": ws.id,
+                        "name": ws.name,
+                        "description": ws.description,
+                        "type": ws.workspace_type,
+                        "owner_id": ws.owner_id,
+                        "created_at": ws.created_at.isoformat() if ws.created_at else None,
+                        "member_count": len([m for m in ws.members if m.user_id == user_id])
+                    }
+                    for ws in workspaces
+                ],
+                "total_count": len(workspaces)
+            }
+        except Exception as e:
+            logger.error(f"Failed to get user workspaces: {e}")
+            return {"workspaces": [], "total_count": 0, "error": str(e)}
+
+    @staticmethod
+    def create_workspace(
+        session: Session,
+        workspace_data: Dict[str, Any],
+        creator_id: str
+    ) -> Dict[str, Any]:
+        """Create a new workspace"""
+        try:
+            workspace = Workspace(
+                name=workspace_data.get("name", "New Workspace"),
+                description=workspace_data.get("description", ""),
+                workspace_type=workspace_data.get("type", WorkspaceType.TEAM),
+                owner_id=creator_id,
+                organization_id=workspace_data.get("organization_id"),
+                data_governance_policy=workspace_data.get("governance_policy", {})
+            )
+            
+            session.add(workspace)
+            session.commit()
+            session.refresh(workspace)
+            
+            # Add creator as member
+            member = WorkspaceMember(
+                workspace_id=workspace.id,
+                user_id=creator_id,
+                role=CollaborationRole.OWNER,
+                can_invite=True,
+                can_manage_data=True,
+                can_export=True,
+                can_delete=True
+            )
+            
+            session.add(member)
+            session.commit()
+            
+            return {
+                "id": workspace.id,
+                "name": workspace.name,
+                "description": workspace.description,
+                "type": workspace.workspace_type,
+                "owner_id": workspace.owner_id,
+                "created_at": workspace.created_at.isoformat() if workspace.created_at else None
+            }
+        except Exception as e:
+            logger.error(f"Failed to create workspace: {e}")
+            session.rollback()
+            raise
+
+    @staticmethod
+    def get_document_comments(
+        session: Session,
+        document_id: str,
+        user_id: str
+    ) -> Dict[str, Any]:
+        """Get comments for a document"""
+        try:
+            # Get the document first to verify it exists
+            document = session.execute(select(CollaborativeDocument).where(
+                CollaborativeDocument.id == int(document_id)
+            )).first()
+            
+            if not document:
+                return {
+                    "document_id": document_id,
+                    "comments": [],
+                    "total_count": 0,
+                    "error": "Document not found"
+                }
+            
+            # Get comments from the document's comments field
+            comments = document.comments or []
+            
+            # Convert comments to response format
+            comment_data = []
+            for comment in comments:
+                if isinstance(comment, dict):
+                    comment_data.append({
+                        "id": comment.get("id", str(uuid.uuid4())),
+                        "author": comment.get("author", "Unknown"),
+                        "content": comment.get("content", ""),
+                        "timestamp": comment.get("timestamp", datetime.now().isoformat()),
+                        "type": comment.get("type", "general"),
+                        "resolved": comment.get("resolved", False)
+                    })
+            
+            return {
+                "document_id": document_id,
+                "document_name": document.name,
+                "comments": comment_data,
+                "total_count": len(comment_data)
+            }
+        except Exception as e:
+            logger.error(f"Failed to get document comments: {e}")
+            return {"document_id": document_id, "comments": [], "total_count": 0, "error": str(e)}
+
+    @staticmethod
+    def invite_to_workspace(
+        session: Session,
+        workspace_id: str,
+        invitation_data: Dict[str, Any],
+        inviter_id: str
+    ) -> Dict[str, Any]:
+        """Invite users to a workspace"""
+        try:
+            # Verify workspace exists
+            workspace = session.get(Workspace, int(workspace_id))
+            if not workspace:
+                return {"error": "Workspace not found"}
+            
+            # Verify inviter has permission to invite
+            inviter_member = session.execute(select(WorkspaceMember).where(
+                and_(
+                    WorkspaceMember.workspace_id == int(workspace_id),
+                    WorkspaceMember.user_id == inviter_id
+                )
+            )).first()
+            
+            if not inviter_member or not inviter_member.can_invite:
+                return {"error": "Insufficient permissions to invite users"}
+            
+            # Get user IDs to invite
+            user_ids = invitation_data.get("user_ids", [])
+            if not user_ids:
+                return {"error": "No users specified for invitation"}
+            
+            # Create workspace members for invited users
+            invited_members = []
+            for user_id in user_ids:
+                # Check if user is already a member
+                existing_member = session.execute(select(WorkspaceMember).where(
+                    and_(
+                        WorkspaceMember.workspace_id == int(workspace_id),
+                        WorkspaceMember.user_id == user_id
+                    )
+                )).first()
+                
+                if not existing_member:
+                    # Create new member with default permissions
+                    new_member = WorkspaceMember(
+                        workspace_id=int(workspace_id),
+                        user_id=user_id,
+                        role=CollaborationRole.MEMBER,
+                        can_invite=False,
+                        can_manage_data=False,
+                        can_export=True,
+                        can_delete=False
+                    )
+                    session.add(new_member)
+                    invited_members.append(user_id)
+            
+            session.commit()
+            
+            # Log invitation event
+            AdvancedCollaborationService._log_collaboration_event(
+                session, workspace_id, inviter_id, "users_invited",
+                "workspace", workspace_id, f"Invited {len(invited_members)} users",
+                {"invited_users": invited_members, "inviter_id": inviter_id}
+            )
+            
+            return {
+                "workspace_id": workspace_id,
+                "workspace_name": workspace.name,
+                "invited_users": invited_members,
+                "inviter_id": inviter_id,
+                "status": "invited",
+                "total_invited": len(invited_members)
+            }
+        except Exception as e:
+            session.rollback()
+            logger.error(f"Failed to invite to workspace: {e}")
+            return {"error": str(e)}
+
+    @staticmethod
+    def get_workspace_activity(
+        session: Session,
+        workspace_id: str,
+        days: int,
+        user_id: str
+    ) -> Dict[str, Any]:
+        """Get workspace activity"""
+        try:
+            # Verify workspace exists
+            workspace = session.get(Workspace, int(workspace_id))
+            if not workspace:
+                return {"error": "Workspace not found"}
+            
+            # Calculate date range
+            since_date = datetime.now(timezone.utc) - timedelta(days=days)
+            
+            # Get collaboration events for the workspace
+            events = session.execute(select(CollaborationEvent).where(
+                and_(
+                    CollaborationEvent.workspace_id == workspace_id,
+                    CollaborationEvent.created_at >= since_date
+                )
+            ).order_by(CollaborationEvent.created_at.desc())).all()
+            
+            # Convert events to activity format
+            activities = []
+            for event in events:
+                activities.append({
+                    "id": event.id,
+                    "type": event.event_type,
+                    "user_id": event.user_id,
+                    "description": event.description,
+                    "timestamp": event.created_at.isoformat() if event.created_at else None,
+                    "resource_type": event.resource_type,
+                    "resource_id": event.resource_id,
+                    "metadata": event.metadata or {}
+                })
+            
+            # Get recent document activities
+            recent_documents = session.execute(select(CollaborativeDocument).where(
+                and_(
+                    CollaborativeDocument.workspace_id == int(workspace_id),
+                    CollaborativeDocument.updated_at >= since_date
+                )
+            ).order_by(CollaborativeDocument.updated_at.desc())).all()
+            
+            # Add document activities
+            for doc in recent_documents:
+                activities.append({
+                    "id": f"doc_{doc.id}",
+                    "type": "document_updated",
+                    "user_id": doc.last_edited_by,
+                    "description": f"Updated document: {doc.name}",
+                    "timestamp": doc.updated_at.isoformat() if doc.updated_at else None,
+                    "resource_type": "document",
+                    "resource_id": str(doc.id),
+                    "metadata": {"document_type": doc.document_type.value if doc.document_type else "unknown"}
+                })
+            
+            # Sort activities by timestamp
+            activities.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
+            
+            return {
+                "workspace_id": workspace_id,
+                "workspace_name": workspace.name,
+                "days": days,
+                "activities": activities,
+                "total_count": len(activities),
+                "activity_summary": {
+                    "document_updates": len([a for a in activities if a["type"] == "document_updated"]),
+                    "collaboration_events": len([a for a in activities if a["type"] != "document_updated"]),
+                    "unique_users": len(set(a["user_id"] for a in activities if a["user_id"]))
+                }
+            }
+        except Exception as e:
+            logger.error(f"Failed to get workspace activity: {e}")
+            return {"workspace_id": workspace_id, "activities": [], "total_count": 0, "error": str(e)}
+
+    @staticmethod
+    def get_current_user_workspace(
+        session: Session,
+        user_id: str
+    ) -> Dict[str, Any]:
+        """Get current user's active workspace"""
+        try:
+            # Get the most recently accessed workspace for the user
+            query = select(Workspace).join(WorkspaceMember).where(
+                WorkspaceMember.user_id == user_id
+            ).order_by(Workspace.updated_at.desc() if hasattr(Workspace, 'updated_at') else Workspace.created_at.desc())
+            
+            workspace = session.execute(query).scalars().first()
+            
+            if not workspace:
+                return {
+                    "current_workspace": None,
+                    "message": "No workspace found for user"
+                }
+            
+            return {
+                "current_workspace": {
+                    "id": workspace.id,
+                    "name": workspace.name,
+                    "description": workspace.description,
+                    "type": workspace.workspace_type,
+                    "owner_id": workspace.owner_id,
+                    "last_accessed": workspace.updated_at.isoformat() if hasattr(workspace, 'updated_at') else workspace.created_at.isoformat()
+                },
+                "user_id": user_id
+            }
+        except Exception as e:
+            logger.error(f"Failed to get current user workspace: {e}")
+            return {"error": str(e)}
+
+    # ========================================================================================
+    # Missing Methods for Route Integration
+    # ========================================================================================
+
+    @staticmethod
+    def get_active_sessions(
+        session: Session,
+        workspace_id: Optional[str] = None,
+        user_id: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """Get active real-time collaboration sessions"""
+        try:
+            # Build query for active sessions
+            query = select(CollaborationSession).where(
+                CollaborationSession.status == "active"
+            )
+            
+            if workspace_id:
+                query = query.where(CollaborationSession.workspace_id == int(workspace_id))
+            
+            # Get active sessions
+            active_sessions = session.execute(
+                query.order_by(CollaborationSession.started_at.desc())
+            ).scalars().all()
+            
+            session_data = []
+            for collab_session in active_sessions:
+                # Get participants for this session
+                participants_query = select(SessionParticipant).where(
+                    and_(
+                        SessionParticipant.session_id == collab_session.id,
+                        SessionParticipant.is_active == True
+                    )
+                )
+                participants = session.execute(participants_query).scalars().all()
+                
+                # Convert participants to response format
+                participant_data = []
+                for participant in participants:
+                    participant_data.append({
+                        "user_id": participant.user_id,
+                        "role": participant.role,
+                        "joined_at": participant.joined_at.isoformat() if participant.joined_at else None,
+                        "last_activity": participant.last_activity.isoformat() if participant.last_activity else None,
+                        "contributions_count": participant.contributions_count,
+                        "time_spent_minutes": participant.time_spent_minutes,
+                        "can_edit": participant.can_edit,
+                        "can_share": participant.can_share
+                    })
+                
+                # Get workspace info
+                workspace = session.get(Workspace, collab_session.workspace_id)
+                workspace_name = workspace.name if workspace else "Unknown Workspace"
+                
+                session_data.append({
+                    "session_id": getattr(collab_session, "session_id", None) or str(collab_session.id),
+                    "workspace_id": collab_session.workspace_id,
+                    "workspace_name": workspace_name,
+                    "session_name": collab_session.session_name,
+                    "session_type": collab_session.session_type,
+                    "description": collab_session.description,
+                    "status": collab_session.status,
+                    "started_at": collab_session.started_at.isoformat() if collab_session.started_at else None,
+                    "last_activity": collab_session.last_activity.isoformat() if collab_session.last_activity else None,
+                    "participants": participant_data,
+                    "active_documents": collab_session.active_documents,
+                    "current_activities": collab_session.current_activities,
+                    "total_participants": len(participant_data),
+                    "max_participants": collab_session.max_participants,
+                    "is_private": collab_session.is_private
+                })
+            
+            return {
+                "active_sessions": session_data,
+                "total_sessions": len(session_data),
+                "workspace_id": workspace_id,
+                "user_id": user_id
+            }
             
         except Exception as e:
-            logger.warning(f"Error logging collaboration event: {str(e)}")
+            logger.error(f"Failed to get active sessions: {e}")
+            return {
+                "active_sessions": [],
+                "total_sessions": 0,
+                "error": str(e)
+            }

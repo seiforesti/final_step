@@ -79,28 +79,54 @@ class EnhancedCatalogService:
     
     @staticmethod
     def get_catalog_items_by_data_source(session: Session, data_source_id: int) -> List[CatalogItemResponse]:
-        """Get all catalog items for a data source with caching."""
-        cache_key = f"catalog_items_ds_{data_source_id}"
-        
+        """Get all catalog items for a specific data source"""
         try:
-            # Try cache first
-            cached_result = asyncio.run(cache_get(cache_key))
-            if cached_result:
-                return [CatalogItemResponse(**item) for item in cached_result]
+            # Query catalog items by data source ID
+            query = select(CatalogItem).where(CatalogItem.data_source_id == data_source_id)
+            catalog_items = session.execute(query).scalars().all()
             
-            statement = select(CatalogItem).where(
-                CatalogItem.data_source_id == data_source_id
-            ).order_by(CatalogItem.created_at.desc())
-            
-            items = session.exec(statement).all()
-            result = [CatalogItemResponse.from_orm(item) for item in items]
-            
-            # Cache the result for 5 minutes
-            asyncio.run(cache_set(cache_key, [item.dict() for item in result], ttl=300))
-            
-            return result
+            # Convert to response models
+            return [
+                CatalogItemResponse(
+                    id=item.id,
+                    name=item.name,
+                    type=item.type,
+                    description=item.description,
+                    metadata=item.metadata,
+                    data_source_id=item.data_source_id,
+                    created_at=item.created_at,
+                    updated_at=item.updated_at
+                )
+                for item in catalog_items
+            ]
         except Exception as e:
-            logger.error(f"Error getting catalog items for data source {data_source_id}: {str(e)}")
+            logger.error(f"Error getting catalog items for data source {data_source_id}: {e}")
+            return []
+
+    @staticmethod
+    def get_all_catalog_items(session: Session) -> List[CatalogItemResponse]:
+        """Get all catalog items across all data sources"""
+        try:
+            # Query all catalog items
+            query = select(CatalogItem)
+            catalog_items = session.execute(query).scalars().all()
+            
+            # Convert to response models
+            return [
+                CatalogItemResponse(
+                    id=item.id,
+                    name=item.name,
+                    type=item.type,
+                    description=item.description,
+                    metadata=item.metadata,
+                    data_source_id=item.data_source_id,
+                    created_at=item.created_at,
+                    updated_at=item.updated_at
+                )
+                for item in catalog_items
+            ]
+        except Exception as e:
+            logger.error(f"Error getting all catalog items: {e}")
             return []
     
     @staticmethod
@@ -135,13 +161,14 @@ class EnhancedCatalogService:
                 raise ValueError(f"Data source {item_data.data_source_id} not found")
             
             # Check if item already exists with same path
-            existing = session.exec(
+            existing_result = session.execute(
                 select(CatalogItem).where(
                     CatalogItem.data_source_id == item_data.data_source_id,
                     CatalogItem.schema_name == item_data.schema_name,
                     CatalogItem.table_name == item_data.table_name
                 )
-            ).first()
+            )
+            existing = existing_result.scalars().first()
             
             if existing:
                 raise ValueError(f"Catalog item already exists for {item_data.schema_name}.{item_data.table_name}")
@@ -390,7 +417,7 @@ class EnhancedCatalogService:
         table_name = table_data["name"]
         
         # Check if already exists
-        existing = session.exec(
+        existing = session.execute(
             select(CatalogItem).where(
                 CatalogItem.data_source_id == data_source.id,
                 CatalogItem.schema_name == schema_name,
@@ -433,7 +460,7 @@ class EnhancedCatalogService:
         column_name = column_data["name"]
         
         # Check if already exists
-        existing = session.exec(
+        existing = session.execute(
             select(CatalogItem).where(
                 CatalogItem.data_source_id == data_source.id,
                 CatalogItem.schema_name == schema_name,
@@ -480,7 +507,7 @@ class EnhancedCatalogService:
         view_name = view_data["name"]
         
         # Check if already exists
-        existing = session.exec(
+        existing = session.execute(
             select(CatalogItem).where(
                 CatalogItem.data_source_id == data_source.id,
                 CatalogItem.schema_name == schema_name,
@@ -949,7 +976,7 @@ class EnhancedCatalogService:
                 statement = statement.where(CatalogItem.classification == classification)
             
             # Order by relevance (exact matches first, then partial)
-            items = session.exec(statement.limit(limit)).all()
+            items = session.execute(statement.limit(limit)).all()
             
             # Enterprise-level relevance scoring with comprehensive analysis
             scored_items = []
@@ -1119,7 +1146,7 @@ class EnhancedCatalogService:
             if data_source_id:
                 query = query.where(CatalogItem.data_source_id == data_source_id)
             
-            items = session.exec(query).all()
+            items = session.execute(query).scalars().all()
             
             total_items = len(items)
             active_items = len([i for i in items if i.is_active])
@@ -1139,18 +1166,18 @@ class EnhancedCatalogService:
             tag_query = select(CatalogTag)
             if data_source_id:
                 tag_query = tag_query.join(CatalogItem).where(CatalogItem.data_source_id == data_source_id)
-            tag_count = len(session.exec(tag_query).all())
+            tag_count = len(session.execute(tag_query).scalars().all())
             
             lineage_query = select(DataLineage)
             if data_source_id:
                 lineage_query = lineage_query.join(CatalogItem, DataLineage.source_item_id == CatalogItem.id).where(CatalogItem.data_source_id == data_source_id)
-            lineage_count = len(session.exec(lineage_query).all())
+            lineage_count = len(session.execute(lineage_query).scalars().all())
             
             # Get recent items (last 5)
             recent_query = select(CatalogItem).order_by(CatalogItem.created_at.desc()).limit(5)
             if data_source_id:
                 recent_query = recent_query.where(CatalogItem.data_source_id == data_source_id)
-            recent_items = session.exec(recent_query).all()
+            recent_items = session.execute(recent_query).scalars().all()
             
             # Get data quality rules count
             data_quality_rules_count = 0

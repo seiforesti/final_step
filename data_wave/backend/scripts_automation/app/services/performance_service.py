@@ -10,9 +10,17 @@ from app.models.performance_models import (
 )
 from app.models.scan_models import DataSource
 import logging
+import time
 import statistics
 
 logger = logging.getLogger(__name__)
+
+# Lightweight cache/throttle to avoid hammering DB on failures/high-frequency polls
+_svc_metrics_cache: Dict[str, Any] = {}
+_svc_metrics_cache_ts: float = 0.0
+_svc_metrics_ttl_seconds: float = 15.0
+_svc_metrics_failure_backoff_until: float = 0.0
+_svc_metrics_failure_backoff_seconds: float = 30.0
 
 
 class PerformanceService:
@@ -48,7 +56,7 @@ class PerformanceService:
                 query = query.where(PerformanceMetric.metric_type.in_(metric_types))
             
             # Get latest metrics for each type
-            metrics = session.exec(query.order_by(PerformanceMetric.measurement_time.desc())).all()
+            metrics = session.execute(query.order_by(PerformanceMetric.measurement_time.desc())).scalars().all()
             
             # Group by metric type and get the latest for each
             latest_metrics = {}
@@ -87,6 +95,75 @@ class PerformanceService:
         except Exception as e:
             logger.error(f"Error getting performance metrics for data source {data_source_id}: {str(e)}")
             raise
+    
+    @staticmethod
+    def get_service_metrics(session: Session, service_name: str = None) -> Dict[str, Any]:
+        """Get service-level performance metrics"""
+        try:
+            global _svc_metrics_cache, _svc_metrics_cache_ts, _svc_metrics_failure_backoff_until
+            now = time.time()
+            # Backoff after failures
+            if now < _svc_metrics_failure_backoff_until and _svc_metrics_cache:
+                return _svc_metrics_cache
+            # Serve cached if fresh
+            if _svc_metrics_cache and (now - _svc_metrics_cache_ts) < _svc_metrics_ttl_seconds:
+                return _svc_metrics_cache
+            # Get overall system metrics
+            total_data_sources = session.execute(select(func.count(DataSource.id))).scalar() or 0
+            
+            # Get recent performance metrics
+            recent_metrics = session.execute(
+                select(PerformanceMetric)
+                .where(PerformanceMetric.measurement_time >= datetime.now() - timedelta(hours=24))
+                .order_by(PerformanceMetric.measurement_time.desc())
+            ).scalars().all()
+            
+            # Calculate service health
+            # Use consistent string comparison; DB stores status as lowercase text
+            active_alerts = session.execute(
+                select(PerformanceAlert).where(PerformanceAlert.status == "active")
+            ).scalars().all()
+            
+            # Calculate average response time
+            response_times = [m.value for m in recent_metrics if m.metric_type == MetricType.RESPONSE_TIME]
+            avg_response_time = statistics.mean(response_times) if response_times else 0
+            
+            # Calculate success rate
+            success_metrics = [m for m in recent_metrics if m.metric_type == MetricType.SUCCESS_RATE]
+            avg_success_rate = statistics.mean([m.value for m in success_metrics]) if success_metrics else 100
+            
+            result = {
+                "service_name": service_name or "data_governance_platform",
+                "total_data_sources": total_data_sources,
+                "active_alerts": len(active_alerts),
+                "avg_response_time_ms": round(avg_response_time, 2),
+                "avg_success_rate_percent": round(avg_success_rate, 2),
+                "metrics_collected_24h": len(recent_metrics),
+                "timestamp": datetime.now().isoformat(),
+                "status": "healthy" if len(active_alerts) == 0 else "warning"
+            }
+            # Update cache
+            _svc_metrics_cache = result
+            _svc_metrics_cache_ts = now
+            return result
+            
+        except Exception as e:
+            logger.error(f"Error getting service metrics: {str(e)}")
+            # Set failure backoff window and serve last cached if available
+            _svc_metrics_failure_backoff_until = time.time() + _svc_metrics_failure_backoff_seconds
+            if _svc_metrics_cache:
+                return _svc_metrics_cache
+            return {
+                "service_name": service_name or "data_governance_platform",
+                "total_data_sources": 0,
+                "active_alerts": 0,
+                "avg_response_time_ms": 0,
+                "avg_success_rate_percent": 0,
+                "metrics_collected_24h": 0,
+                "timestamp": datetime.now().isoformat(),
+                "status": "error",
+                "error": str(e)
+            }
     
     @staticmethod
     def record_metric(
@@ -162,7 +239,7 @@ class PerformanceService:
                 )
             ).order_by(PerformanceAlert.created_at.desc())
             
-            alerts = session.exec(statement).all()
+            alerts = session.execute(statement).scalars().all()
             return [PerformanceAlertResponse.from_orm(alert) for alert in alerts]
             
         except Exception as e:
@@ -253,7 +330,7 @@ class PerformanceService:
             )
         ).order_by(PerformanceMetric.measurement_time.desc()).limit(1)
         
-        return session.exec(statement).first()
+        return session.execute(statement).scalar()
     
     @staticmethod
     def _determine_status(value: float, threshold: Optional[float], metric_type: MetricType) -> MetricStatus:
@@ -327,7 +404,7 @@ class PerformanceService:
             )
         ).order_by(PerformanceMetric.measurement_time.asc())
         
-        metrics = session.exec(statement).all()
+        metrics = session.execute(statement).scalars().all()
         
         trends = {}
         for metric_type in MetricType:
@@ -413,19 +490,21 @@ class PerformanceService:
         """Get comprehensive system-wide performance metrics"""
         try:
             # Check if session has exec method (SQLModel compatibility)
-            if not hasattr(session, 'exec'):
-                logger.warning("Session does not have exec method, using fallback metrics")
+            if not hasattr(session, 'execute'):
+                logger.warning("Session does not have execute method, using fallback metrics")
                 return PerformanceService._get_fallback_system_metrics()
             
             # Get overall system health
-            total_data_sources = session.exec(select(func.count(DataSource.id))).first() or 0
+            total_data_sources_result = session.execute(select(func.count(DataSource.id)))
+            total_data_sources = total_data_sources_result.scalar() or 0
             
             # Get recent performance metrics
-            recent_metrics = session.exec(
+            recent_metrics_result = session.execute(
                 select(PerformanceMetric)
                 .where(PerformanceMetric.measurement_time >= datetime.now() - timedelta(hours=24))
                 .order_by(PerformanceMetric.measurement_time.desc())
-            ).all()
+            )
+            recent_metrics = recent_metrics_result.scalars().all()
             
             # Calculate system-wide statistics
             if recent_metrics:
@@ -436,10 +515,11 @@ class PerformanceService:
                 avg_response_time = avg_throughput = avg_error_rate = 0
             
             # Get active alerts count
-            active_alerts = session.exec(
+            active_alerts_result = session.execute(
                 select(func.count(PerformanceAlert.id))
-                .where(PerformanceAlert.is_active == True)
-            ).first() or 0
+                .where(PerformanceAlert.status == "active")
+            )
+            active_alerts = active_alerts_result.scalar() or 0
             
             # Calculate system health score
             health_score = 100
@@ -449,30 +529,23 @@ class PerformanceService:
                 health_score -= 30
             if active_alerts > 10:
                 health_score -= 25
-            health_score = max(0, health_score)
             
             return {
                 "system_health": {
-                    "overall_score": health_score,
-                    "status": "healthy" if health_score >= 80 else "warning" if health_score >= 60 else "critical"
-                },
-                "data_sources": {
-                    "total_count": total_data_sources,
-                    "active_count": total_data_sources  # Assuming all are active for now
+                    "overall_score": max(0, health_score),
+                    "status": "healthy" if health_score >= 80 else "warning" if health_score >= 60 else "critical",
+                    "total_data_sources": total_data_sources,
+                    "active_alerts": active_alerts
                 },
                 "performance_metrics": {
-                    "average_response_time_ms": round(avg_response_time, 2),
-                    "average_throughput_ops": round(avg_throughput, 2),
-                    "average_error_rate_percent": round(avg_error_rate, 2)
+                    "avg_response_time_ms": round(avg_response_time, 2),
+                    "avg_throughput_ops_per_sec": round(avg_throughput, 2),
+                    "avg_error_rate_percent": round(avg_error_rate, 2)
                 },
-                "alerts": {
-                    "active_count": active_alerts,
-                    "critical_count": session.exec(
-                        select(func.count(PerformanceAlert.id))
-                        .where(and_(PerformanceAlert.is_active == True, PerformanceAlert.severity == "high"))
-                    ).first() or 0
-                },
-                "last_updated": datetime.now().isoformat()
+                "recent_activity": {
+                    "metrics_count": len(recent_metrics),
+                    "time_range_hours": 24
+                }
             }
             
         except Exception as e:
@@ -502,3 +575,746 @@ class PerformanceService:
             },
             "last_updated": datetime.now().isoformat()
         }
+
+    # ========================================================================================
+    # Missing Methods for Route Integration
+    # ========================================================================================
+
+    @staticmethod
+    def get_performance_alerts(
+        session: Session,
+        severity: Optional[str] = None,
+        status: Optional[str] = None,
+        days: int = 7,
+        user_id: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """Get performance alerts with advanced filtering"""
+        try:
+            # Build query
+            query = select(PerformanceAlert)
+            
+            # Add filters
+            if severity:
+                query = query.where(PerformanceAlert.severity == severity)
+            
+            if status:
+                query = query.where(PerformanceAlert.status == status)
+            
+            # Filter by date
+            cutoff_date = datetime.now() - timedelta(days=days)
+            query = query.where(PerformanceAlert.created_at >= cutoff_date)
+            
+            # Execute query
+            alerts = session.execute(query.order_by(PerformanceAlert.created_at.desc())).scalars().all()
+            
+            # Format response
+            alert_data = []
+            for alert in alerts:
+                alert_data.append({
+                    "alert_id": alert.id,
+                    "data_source_id": alert.data_source_id,
+                    "alert_type": alert.alert_type,
+                    "severity": alert.severity,
+                    "title": alert.title,
+                    "description": alert.description,
+                    "status": alert.status,
+                    "created_at": alert.created_at.isoformat() if alert.created_at else None,
+                    "acknowledged_at": alert.acknowledged_at.isoformat() if alert.acknowledged_at else None,
+                    "resolved_at": alert.resolved_at.isoformat() if alert.resolved_at else None,
+                    "is_active": alert.status == "active"
+                })
+            
+            return {
+                "alerts": alert_data,
+                "total_count": len(alert_data),
+                "filter_applied": {
+                    "severity": severity,
+                    "status": status,
+                    "days": days
+                }
+            }
+            
+        except Exception as e:
+            logger.error(f"Error getting performance alerts: {str(e)}")
+            return {
+                "alerts": [],
+                "total_count": 0,
+                "error": str(e)
+            }
+
+    @staticmethod
+    def acknowledge_alert(
+        session: Session,
+        alert_id: int,
+        acknowledgment_data: Dict[str, Any],
+        user_id: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """Acknowledge a performance alert"""
+        try:
+            alert = session.get(PerformanceAlert, alert_id)
+            if not alert:
+                return {"error": "Alert not found"}
+            
+            # Update alert
+            alert.status = "acknowledged"
+            alert.acknowledged_at = datetime.now()
+            alert.acknowledged_by = user_id
+            
+            session.commit()
+            
+            return {
+                "alert_id": alert.id,
+                "status": "acknowledged",
+                "acknowledged_at": alert.acknowledged_at.isoformat(),
+                "acknowledged_by": alert.acknowledged_by,
+                "message": "Alert acknowledged successfully"
+            }
+            
+        except Exception as e:
+            session.rollback()
+            logger.error(f"Error acknowledging alert: {str(e)}")
+            return {"error": str(e)}
+
+    @staticmethod
+    def resolve_alert(
+        session: Session,
+        alert_id: int,
+        resolution_data: Dict[str, Any],
+        user_id: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """Resolve a performance alert"""
+        try:
+            alert = session.get(PerformanceAlert, alert_id)
+            if not alert:
+                return {"error": "Alert not found"}
+            
+            # Update alert
+            alert.status = "resolved"
+            alert.resolved_at = datetime.now()
+            
+            session.commit()
+            
+            return {
+                "alert_id": alert.id,
+                "status": "resolved",
+                "resolved_at": alert.resolved_at.isoformat(),
+                "message": "Alert resolved successfully"
+            }
+            
+        except Exception as e:
+            session.rollback()
+            logger.error(f"Error resolving alert: {str(e)}")
+            return {"error": str(e)}
+
+    @staticmethod
+    def get_performance_thresholds(
+        session: Session,
+        data_source_id: Optional[int] = None,
+        metric_type: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """Get performance thresholds"""
+        try:
+            query = select(PerformanceBaseline)
+            
+            if data_source_id:
+                query = query.where(PerformanceBaseline.data_source_id == data_source_id)
+            
+            if metric_type:
+                query = query.where(PerformanceBaseline.metric_type == MetricType(metric_type))
+            
+            baselines = session.execute(query).scalars().all()
+            
+            threshold_data = []
+            for baseline in baselines:
+                threshold_data.append({
+                    "baseline_id": baseline.id,
+                    "data_source_id": baseline.data_source_id,
+                    "metric_type": baseline.metric_type.value if baseline.metric_type else "unknown",
+                    "warning_threshold": baseline.warning_threshold,
+                    "critical_threshold": baseline.critical_threshold,
+                    "target_value": baseline.target_value,
+                    "created_at": baseline.created_at.isoformat() if baseline.created_at else None,
+                    "updated_at": baseline.updated_at.isoformat() if baseline.updated_at else None
+                })
+            
+            return {
+                "thresholds": threshold_data,
+                "total_count": len(threshold_data)
+            }
+            
+        except Exception as e:
+            logger.error(f"Error getting performance thresholds: {str(e)}")
+            return {
+                "thresholds": [],
+                "total_count": 0,
+                "error": str(e)
+            }
+
+    @staticmethod
+    def get_performance_analytics_trends(
+        session: Session,
+        time_range: str = "30d",
+        data_source_id: Optional[int] = None
+    ) -> Dict[str, Any]:
+        """Get performance analytics trends"""
+        try:
+            # Calculate time range
+            time_delta = PerformanceService._parse_time_range(time_range)
+            since_time = datetime.now() - time_delta
+            
+            # Build query
+            query = select(PerformanceMetric).where(
+                PerformanceMetric.measurement_time >= since_time
+            )
+            
+            if data_source_id:
+                query = query.where(PerformanceMetric.data_source_id == data_source_id)
+            
+            metrics = session.execute(query.order_by(PerformanceMetric.measurement_time)).scalars().all()
+            
+            # Group by metric type and time period
+            trends = {}
+            for metric in metrics:
+                metric_type = metric.metric_type.value if metric.metric_type else "unknown"
+                if metric_type not in trends:
+                    trends[metric_type] = []
+                
+                trends[metric_type].append({
+                    "timestamp": metric.measurement_time.isoformat(),
+                    "value": metric.value,
+                    "data_source_id": metric.data_source_id
+                })
+            
+            return {
+                "trends": trends,
+                "time_range": time_range,
+                "data_source_id": data_source_id,
+                "total_metrics": len(metrics)
+            }
+            
+        except Exception as e:
+            logger.error(f"Error getting performance analytics trends: {str(e)}")
+            return {
+                "trends": {},
+                "time_range": time_range,
+                "data_source_id": data_source_id,
+                "total_metrics": 0,
+                "error": str(e)
+            }
+
+    @staticmethod
+    def get_performance_optimization_recommendations(
+        session: Session,
+        data_source_id: Optional[int] = None
+    ) -> Dict[str, Any]:
+        """Get performance optimization recommendations"""
+        try:
+            recommendations = []
+            
+            # Get recent metrics for analysis
+            recent_metrics = session.execute(
+                select(PerformanceMetric)
+                .where(PerformanceMetric.measurement_time >= datetime.now() - timedelta(hours=24))
+                .order_by(PerformanceMetric.measurement_time.desc())
+            ).scalars().all()
+            
+            if not recent_metrics:
+                return {
+                    "recommendations": [],
+                    "total_count": 0,
+                    "message": "No recent metrics available for analysis"
+                }
+            
+            # Analyze response times
+            response_time_metrics = [m for m in recent_metrics if m.metric_type == MetricType.RESPONSE_TIME]
+            if response_time_metrics:
+                avg_response_time = statistics.mean([m.value for m in response_time_metrics])
+                if avg_response_time > 2000:  # > 2 seconds
+                    recommendations.append({
+                        "type": "response_time_optimization",
+                        "priority": "high",
+                        "title": "Optimize Response Times",
+                        "description": f"Average response time is {avg_response_time:.2f}ms, consider query optimization",
+                        "impact": "high",
+                        "effort": "medium"
+                    })
+            
+            # Analyze error rates
+            error_rate_metrics = [m for m in recent_metrics if m.metric_type == MetricType.ERROR_RATE]
+            if error_rate_metrics:
+                avg_error_rate = statistics.mean([m.value for m in error_rate_metrics])
+                if avg_error_rate > 5:  # > 5%
+                    recommendations.append({
+                        "type": "error_rate_reduction",
+                        "priority": "critical",
+                        "title": "Reduce Error Rates",
+                        "description": f"Error rate is {avg_error_rate:.2f}%, investigate and fix issues",
+                        "impact": "critical",
+                        "effort": "high"
+                    })
+            
+            # Analyze throughput
+            throughput_metrics = [m for m in recent_metrics if m.metric_type == MetricType.THROUGHPUT]
+            if throughput_metrics:
+                avg_throughput = statistics.mean([m.value for m in throughput_metrics])
+                if avg_throughput < 50:  # < 50 ops/sec
+                    recommendations.append({
+                        "type": "throughput_improvement",
+                        "priority": "medium",
+                        "title": "Improve Throughput",
+                        "description": f"Throughput is {avg_throughput:.2f} ops/sec, consider scaling or optimization",
+                        "impact": "medium",
+                        "effort": "medium"
+                    })
+            
+            return {
+                "recommendations": recommendations,
+                "total_count": len(recommendations),
+                "analysis_period": "24h"
+            }
+            
+        except Exception as e:
+            logger.error(f"Error getting performance optimization recommendations: {str(e)}")
+            return {
+                "recommendations": [],
+                "total_count": 0,
+                "error": str(e)
+            }
+
+    @staticmethod
+    def get_performance_reports_summary(
+        session: Session,
+        time_range: str = "7d"
+    ) -> Dict[str, Any]:
+        """Get performance reports summary"""
+        try:
+            # Calculate time range
+            time_delta = PerformanceService._parse_time_range(time_range)
+            since_time = datetime.now() - time_delta
+            
+            # Get metrics for the period
+            metrics = session.execute(
+                select(PerformanceMetric)
+                .where(PerformanceMetric.measurement_time >= since_time)
+                .order_by(PerformanceMetric.measurement_time.desc())
+            ).scalars().all()
+            
+            # Get alerts for the period
+            alerts = session.execute(
+                select(PerformanceAlert)
+                .where(PerformanceAlert.created_at >= since_time)
+            ).scalars().all()
+            
+            # Calculate summary statistics
+            if metrics:
+                avg_response_time = statistics.mean([m.value for m in metrics if m.metric_type == MetricType.RESPONSE_TIME])
+                avg_throughput = statistics.mean([m.value for m in metrics if m.metric_type == MetricType.THROUGHPUT])
+                avg_error_rate = statistics.mean([m.value for m in metrics if m.metric_type == MetricType.ERROR_RATE])
+            else:
+                avg_response_time = avg_throughput = avg_error_rate = 0
+            
+            # Count alerts by severity
+            critical_alerts = len([a for a in alerts if a.severity == "high"])
+            warning_alerts = len([a for a in alerts if a.severity == "medium"])
+            info_alerts = len([a for a in alerts if a.severity == "low"])
+            
+            return {
+                "summary": {
+                    "time_range": time_range,
+                    "total_metrics": len(metrics),
+                    "total_alerts": len(alerts),
+                    "average_response_time_ms": round(avg_response_time, 2),
+                    "average_throughput_ops": round(avg_throughput, 2),
+                    "average_error_rate_percent": round(avg_error_rate, 2)
+                },
+                "alerts": {
+                    "critical": critical_alerts,
+                    "warnings": warning_alerts,
+                    "info": info_alerts
+                },
+                "performance_score": max(0, 100 - (avg_error_rate * 10) - (critical_alerts * 5)),
+                "generated_at": datetime.now().isoformat()
+            }
+            
+        except Exception as e:
+            logger.error(f"Error getting performance reports summary: {str(e)}")
+            return {
+                "summary": {
+                    "time_range": time_range,
+                    "total_metrics": 0,
+                    "total_alerts": 0,
+                    "average_response_time_ms": 0,
+                    "average_throughput_ops": 0,
+                    "average_error_rate_percent": 0
+                },
+                "alerts": {
+                    "critical": 0,
+                    "warnings": 0,
+                    "info": 0
+                },
+                "performance_score": 0,
+                "error": str(e)
+            }
+
+    @staticmethod
+    def get_performance_trends(
+        session: Session,
+        data_source_id: Optional[int] = None,
+        time_range: str = "30d"
+    ) -> Dict[str, Any]:
+        """Get performance trend analysis"""
+        try:
+            # Calculate time range
+            time_delta = PerformanceService._parse_time_range(time_range)
+            since_time = datetime.now() - time_delta
+            
+            # Build query
+            query = select(PerformanceMetric).where(
+                PerformanceMetric.measurement_time >= since_time
+            )
+            
+            if data_source_id:
+                query = query.where(PerformanceMetric.data_source_id == data_source_id)
+            
+            # Get metrics for the period
+            metrics = session.execute(
+                query.order_by(PerformanceMetric.measurement_time.asc())
+            ).scalars().all()
+            
+            # Group metrics by day and type
+            daily_metrics = {}
+            for metric in metrics:
+                day_key = metric.measurement_time.strftime("%Y-%m-%d")
+                if day_key not in daily_metrics:
+                    daily_metrics[day_key] = {}
+                if metric.metric_type not in daily_metrics[day_key]:
+                    daily_metrics[day_key][metric.metric_type] = []
+                daily_metrics[day_key][metric.metric_type].append(metric.value)
+            
+            # Calculate daily averages
+            trends = []
+            for day, day_metrics in sorted(daily_metrics.items()):
+                day_trend = {"date": day}
+                for metric_type, values in day_metrics.items():
+                    day_trend[metric_type] = round(statistics.mean(values), 2)
+                trends.append(day_trend)
+            
+            # Calculate trend indicators
+            trend_indicators = {}
+            if len(trends) >= 2:
+                for metric_type in ["response_time", "throughput", "error_rate"]:
+                    if metric_type in trends[0] and metric_type in trends[-1]:
+                        start_value = trends[0][metric_type]
+                        end_value = trends[-1][metric_type]
+                        if start_value != 0:
+                            change_percent = ((end_value - start_value) / start_value) * 100
+                            trend_indicators[metric_type] = {
+                                "change_percent": round(change_percent, 2),
+                                "trend": "improving" if change_percent < 0 else "degrading" if change_percent > 0 else "stable"
+                            }
+            
+            return {
+                "trends": trends,
+                "trend_indicators": trend_indicators,
+                "analysis_period": time_range,
+                "total_data_points": len(metrics),
+                "generated_at": datetime.now().isoformat()
+            }
+            
+        except Exception as e:
+            logger.error(f"Error getting performance trends: {str(e)}")
+            return {
+                "trends": [],
+                "trend_indicators": {},
+                "analysis_period": time_range,
+                "total_data_points": 0,
+                "error": str(e)
+            }
+
+    @staticmethod
+    def get_optimization_recommendations(
+        session: Session,
+        data_source_id: Optional[int] = None
+    ) -> Dict[str, Any]:
+        """Get AI-powered performance optimization recommendations"""
+        try:
+            # Get recent performance metrics
+            time_delta = PerformanceService._parse_time_range("24h")
+            since_time = datetime.now() - time_delta
+            
+            query = select(PerformanceMetric).where(
+                PerformanceMetric.measurement_time >= since_time
+            )
+            
+            if data_source_id:
+                query = query.where(PerformanceMetric.data_source_id == data_source_id)
+            
+            metrics = session.execute(
+                query.order_by(PerformanceMetric.measurement_time.desc())
+            ).scalars().all()
+            
+            # Get active alerts
+            alerts_query = select(PerformanceAlert).where(
+                PerformanceAlert.status == "active"
+            )
+            if data_source_id:
+                alerts_query = alerts_query.where(PerformanceAlert.data_source_id == data_source_id)
+            
+            alerts = session.execute(alerts_query).scalars().all()
+            
+            # Analyze performance patterns
+            recommendations = []
+            
+            # Response time optimization
+            response_time_metrics = [m for m in metrics if m.metric_type == MetricType.RESPONSE_TIME]
+            if response_time_metrics:
+                avg_response_time = statistics.mean([m.value for m in response_time_metrics])
+                if avg_response_time > 1000:  # > 1 second
+                    recommendations.append({
+                        "type": "response_time_optimization",
+                        "priority": "high",
+                        "title": "Optimize Response Time",
+                        "description": f"Average response time is {avg_response_time:.2f}ms, consider query optimization or caching",
+                        "impact": "high",
+                        "effort": "medium",
+                        "estimated_improvement": "20-40%"
+                    })
+            
+            # Throughput optimization
+            throughput_metrics = [m for m in metrics if m.metric_type == MetricType.THROUGHPUT]
+            if throughput_metrics:
+                avg_throughput = statistics.mean([m.value for m in throughput_metrics])
+                if avg_throughput < 100:  # < 100 ops/sec
+                    recommendations.append({
+                        "type": "throughput_optimization",
+                        "priority": "medium",
+                        "title": "Improve Throughput",
+                        "description": f"Throughput is {avg_throughput:.2f} ops/sec, consider parallel processing or resource scaling",
+                        "impact": "medium",
+                        "effort": "high",
+                        "estimated_improvement": "30-50%"
+                    })
+            
+            # Error rate optimization
+            error_rate_metrics = [m for m in metrics if m.metric_type == MetricType.ERROR_RATE]
+            if error_rate_metrics:
+                avg_error_rate = statistics.mean([m.value for m in error_rate_metrics])
+                if avg_error_rate > 5:  # > 5%
+                    recommendations.append({
+                        "type": "error_rate_optimization",
+                        "priority": "critical",
+                        "title": "Reduce Error Rate",
+                        "description": f"Error rate is {avg_error_rate:.2f}%, investigate root causes and implement error handling",
+                        "impact": "critical",
+                        "effort": "high",
+                        "estimated_improvement": "50-80%"
+                    })
+            
+            # Resource utilization optimization
+            resource_metrics = [m for m in metrics if m.metric_type in [MetricType.CPU_USAGE, MetricType.MEMORY_USAGE]]
+            if resource_metrics:
+                avg_resource_usage = statistics.mean([m.value for m in resource_metrics])
+                if avg_resource_usage > 80:  # > 80%
+                    recommendations.append({
+                        "type": "resource_optimization",
+                        "priority": "medium",
+                        "title": "Optimize Resource Usage",
+                        "description": f"Resource usage is {avg_resource_usage:.2f}%, consider resource scaling or load balancing",
+                        "impact": "medium",
+                        "effort": "medium",
+                        "estimated_improvement": "15-25%"
+                    })
+            
+            # Alert-based recommendations
+            critical_alerts = [a for a in alerts if a.severity == "high"]
+            if critical_alerts:
+                recommendations.append({
+                    "type": "alert_resolution",
+                    "priority": "critical",
+                    "title": "Resolve Critical Alerts",
+                    "description": f"Found {len(critical_alerts)} critical alerts requiring immediate attention",
+                    "impact": "critical",
+                    "effort": "high",
+                    "estimated_improvement": "Immediate stability improvement"
+                })
+            
+            return {
+                "recommendations": recommendations,
+                "total_count": len(recommendations),
+                "priority_breakdown": {
+                    "critical": len([r for r in recommendations if r["priority"] == "critical"]),
+                    "high": len([r for r in recommendations if r["priority"] == "high"]),
+                    "medium": len([r for r in recommendations if r["priority"] == "medium"]),
+                    "low": len([r for r in recommendations if r["priority"] == "low"])
+                },
+                "analysis_period": "24h",
+                "generated_at": datetime.now().isoformat()
+            }
+            
+        except Exception as e:
+            logger.error(f"Error getting optimization recommendations: {str(e)}")
+            return {
+                "recommendations": [],
+                "total_count": 0,
+                "priority_breakdown": {"critical": 0, "high": 0, "medium": 0, "low": 0},
+                "analysis_period": "24h",
+                "error": str(e)
+            }
+
+    @staticmethod
+    def get_performance_summary_report(
+        session: Session,
+        time_range: str = "7d",
+        data_sources: Optional[List[int]] = None
+    ) -> Dict[str, Any]:
+        """Get comprehensive performance summary report"""
+        try:
+            # Calculate time range
+            time_delta = PerformanceService._parse_time_range(time_range)
+            since_time = datetime.now() - time_delta
+            
+            # Build metrics query
+            metrics_query = select(PerformanceMetric).where(
+                PerformanceMetric.measurement_time >= since_time
+            )
+            
+            if data_sources:
+                metrics_query = metrics_query.where(
+                    PerformanceMetric.data_source_id.in_(data_sources)
+                )
+            
+            metrics = session.execute(
+                metrics_query.order_by(PerformanceMetric.measurement_time.desc())
+            ).scalars().all()
+            
+            # Build alerts query
+            alerts_query = select(PerformanceAlert).where(
+                PerformanceAlert.created_at >= since_time
+            )
+            
+            if data_sources:
+                alerts_query = alerts_query.where(
+                    PerformanceAlert.data_source_id.in_(data_sources)
+                )
+            
+            alerts = session.execute(alerts_query).scalars().all()
+            
+            # Calculate summary statistics
+            if metrics:
+                response_time_metrics = [m for m in metrics if m.metric_type == MetricType.RESPONSE_TIME]
+                throughput_metrics = [m for m in metrics if m.metric_type == MetricType.THROUGHPUT]
+                error_rate_metrics = [m for m in metrics if m.metric_type == MetricType.ERROR_RATE]
+                cpu_metrics = [m for m in metrics if m.metric_type == MetricType.CPU_USAGE]
+                memory_metrics = [m for m in metrics if m.metric_type == MetricType.MEMORY_USAGE]
+                
+                avg_response_time = statistics.mean([m.value for m in response_time_metrics]) if response_time_metrics else 0
+                avg_throughput = statistics.mean([m.value for m in throughput_metrics]) if throughput_metrics else 0
+                avg_error_rate = statistics.mean([m.value for m in error_rate_metrics]) if error_rate_metrics else 0
+                avg_cpu_usage = statistics.mean([m.value for m in cpu_metrics]) if cpu_metrics else 0
+                avg_memory_usage = statistics.mean([m.value for m in memory_metrics]) if memory_metrics else 0
+            else:
+                avg_response_time = avg_throughput = avg_error_rate = avg_cpu_usage = avg_memory_usage = 0
+            
+            # Count alerts by severity
+            critical_alerts = len([a for a in alerts if a.severity == "high"])
+            warning_alerts = len([a for a in alerts if a.severity == "medium"])
+            info_alerts = len([a for a in alerts if a.severity == "low"])
+            
+            # Calculate performance score
+            performance_score = max(0, 100 - (avg_error_rate * 10) - (critical_alerts * 5))
+            
+            # Generate executive summary
+            if performance_score >= 90:
+                status = "Excellent"
+                summary = "System performance is excellent with minimal issues detected."
+            elif performance_score >= 75:
+                status = "Good"
+                summary = "System performance is good with minor areas for improvement."
+            elif performance_score >= 60:
+                status = "Fair"
+                summary = "System performance is fair with several areas requiring attention."
+            else:
+                status = "Poor"
+                summary = "System performance is poor with critical issues requiring immediate attention."
+            
+            # Generate key insights
+            insights = []
+            if avg_response_time > 1000:
+                insights.append("Response times are above optimal thresholds")
+            if avg_error_rate > 5:
+                insights.append("Error rates are elevated and require investigation")
+            if critical_alerts > 0:
+                insights.append("Critical alerts indicate system stability issues")
+            if avg_cpu_usage > 80:
+                insights.append("High CPU usage suggests resource constraints")
+            
+            return {
+                "executive_summary": {
+                    "status": status,
+                    "performance_score": performance_score,
+                    "summary": summary,
+                    "key_insights": insights
+                },
+                "performance_metrics": {
+                    "time_range": time_range,
+                    "total_metrics": len(metrics),
+                    "total_alerts": len(alerts),
+                    "average_response_time_ms": round(avg_response_time, 2),
+                    "average_throughput_ops": round(avg_throughput, 2),
+                    "average_error_rate_percent": round(avg_error_rate, 2),
+                    "average_cpu_usage_percent": round(avg_cpu_usage, 2),
+                    "average_memory_usage_percent": round(avg_memory_usage, 2)
+                },
+                "alert_summary": {
+                    "critical": critical_alerts,
+                    "warnings": warning_alerts,
+                    "info": info_alerts,
+                    "total": len(alerts)
+                },
+                "data_source_coverage": {
+                    "total_data_sources": len(set(m.data_source_id for m in metrics)) if metrics else 0,
+                    "filtered_data_sources": len(data_sources) if data_sources else "All"
+                },
+                "report_metadata": {
+                    "generated_at": datetime.now().isoformat(),
+                    "analysis_period": time_range,
+                    "report_type": "performance_summary"
+                }
+            }
+            
+        except Exception as e:
+            logger.error(f"Error getting performance summary report: {str(e)}")
+            return {
+                "executive_summary": {
+                    "status": "Error",
+                    "performance_score": 0,
+                    "summary": "Failed to generate performance report",
+                    "key_insights": []
+                },
+                "performance_metrics": {
+                    "time_range": time_range,
+                    "total_metrics": 0,
+                    "total_alerts": 0,
+                    "average_response_time_ms": 0,
+                    "average_throughput_ops": 0,
+                    "average_error_rate_percent": 0,
+                    "average_cpu_usage_percent": 0,
+                    "average_memory_usage_percent": 0
+                },
+                "alert_summary": {
+                    "critical": 0,
+                    "warnings": 0,
+                    "info": 0,
+                    "total": 0
+                },
+                "data_source_coverage": {
+                    "total_data_sources": 0,
+                    "filtered_data_sources": len(data_sources) if data_sources else "All"
+                },
+                "report_metadata": {
+                    "generated_at": datetime.now().isoformat(),
+                    "analysis_period": time_range,
+                    "report_type": "performance_summary",
+                    "error": str(e)
+                }
+            }

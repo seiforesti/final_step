@@ -77,14 +77,16 @@ class ScanSchedulerService:
         return session.get(ScanSchedule, schedule_id)
     
     @staticmethod
-    def get_all_scan_schedules(session: Session) -> List[ScanSchedule]:
-        """Get all scan schedules."""
-        return session.exec(select(ScanSchedule)).all()
-    
+    def get_all_schedules(session: Session) -> List[ScanSchedule]:
+        """Get all scan schedules"""
+        result = session.execute(select(ScanSchedule))
+        return result.scalars().all()
+
     @staticmethod
-    def get_enabled_scan_schedules(session: Session) -> List[ScanSchedule]:
-        """Get all enabled scan schedules."""
-        return session.exec(select(ScanSchedule).where(ScanSchedule.enabled == True)).all()
+    def get_enabled_schedules(session: Session) -> List[ScanSchedule]:
+        """Get enabled scan schedules"""
+        result = session.execute(select(ScanSchedule).where(ScanSchedule.enabled == True))
+        return result.scalars().all()
     
     @staticmethod
     def update_scan_schedule(
@@ -205,11 +207,12 @@ class ScanSchedulerService:
                 # Check for schedules that need to be executed
                 with get_session() as session:
                     now = datetime.utcnow()
-                    schedules_to_run = session.exec(
+                    schedules_to_run_result = session.execute(
                         select(ScanSchedule)
                         .where(ScanSchedule.enabled == True)
                         .where(ScanSchedule.next_run <= now)
-                    ).all()
+                    )
+                    schedules_to_run = schedules_to_run_result.scalars().all()
                     
                     for schedule in schedules_to_run:
                         # Create and execute scan

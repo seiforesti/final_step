@@ -24,7 +24,7 @@ class TagService:
             if tag_type:
                 query = query.where(Tag.tag_type == tag_type)
             
-            tags = session.exec(query).all()
+            tags = session.execute(query).scalars().all()
             return [TagResponse.from_orm(tag) for tag in tags]
         except Exception as e:
             logger.error(f"Error getting tags: {str(e)}")
@@ -47,7 +47,7 @@ class TagService:
         """Create a new tag"""
         try:
             # Check if tag name already exists
-            existing = session.exec(select(Tag).where(Tag.name == tag_data.name)).first()
+            existing = session.execute(select(Tag).where(Tag.name == tag_data.name)).first()
             if existing:
                 raise ValueError(f"Tag with name '{tag_data.name}' already exists")
             
@@ -87,7 +87,7 @@ class TagService:
             # Update fields
             if tag_data.name is not None:
                 # Check name uniqueness
-                existing = session.exec(
+                existing = session.execute(
                     select(Tag).where(Tag.name == tag_data.name, Tag.id != tag_id)
                 ).first()
                 if existing:
@@ -136,10 +136,10 @@ class TagService:
                 return False
             
             # Remove all data source associations
-            session.exec(
+            session.execute(
                 select(DataSourceTag).where(DataSourceTag.tag_id == tag_id)
             ).all()
-            for association in session.exec(select(DataSourceTag).where(DataSourceTag.tag_id == tag_id)):
+            for association in session.execute(select(DataSourceTag).where(DataSourceTag.tag_id == tag_id)):
                 session.delete(association)
             
             session.delete(tag)
@@ -164,7 +164,7 @@ class TagService:
                 (DataSourceTag.expires_at > datetime.now())
             )
             
-            associations = session.exec(statement).all()
+            associations = session.execute(statement).scalars().all()
             
             result = []
             for assoc in associations:
@@ -189,7 +189,7 @@ class TagService:
                 raise ValueError(f"Data source {data_source_id} not found")
             
             # Remove existing assignments for these tags
-            existing = session.exec(
+            existing = session.execute(
                 select(DataSourceTag).where(
                     DataSourceTag.data_source_id == data_source_id,
                     DataSourceTag.tag_id.in_(request.tag_ids)
@@ -238,7 +238,7 @@ class TagService:
     def remove_tag_from_data_source(session: Session, data_source_id: int, tag_id: int, removed_by: str) -> bool:
         """Remove a tag from a data source"""
         try:
-            association = session.exec(
+            association = session.execute(
                 select(DataSourceTag).where(
                     DataSourceTag.data_source_id == data_source_id,
                     DataSourceTag.tag_id == tag_id
@@ -273,7 +273,7 @@ class TagService:
     def get_categories(session: Session) -> List[TagCategoryResponse]:
         """Get all tag categories"""
         try:
-            categories = session.exec(
+            categories = session.execute(
                 select(TagCategory).where(TagCategory.is_active == True)
                 .order_by(TagCategory.sort_order)
             ).all()
@@ -282,7 +282,7 @@ class TagService:
             for category in categories:
                 response = TagCategoryResponse.from_orm(category)
                 # Get tags in this category
-                tags = session.exec(
+                tags = session.execute(
                     select(Tag).where(Tag.category_id == category.id, Tag.is_active == True)
                 ).all()
                 response.tags = [TagResponse.from_orm(tag) for tag in tags]
@@ -304,7 +304,7 @@ class TagService:
                 (Tag.description.ilike(f"%{query}%"))
             ).limit(limit)
             
-            tags = session.exec(statement).all()
+            tags = session.execute(statement).scalars().all()
             return [TagResponse.from_orm(tag) for tag in tags]
         except Exception as e:
             logger.error(f"Error searching tags: {str(e)}")
@@ -315,7 +315,7 @@ class TagService:
         """Get tag statistics"""
         try:
             # Get tag counts
-            all_tags = session.exec(select(Tag)).all()
+            all_tags = session.execute(select(Tag)).all()
             total_tags = len(all_tags)
             active_tags = len([t for t in all_tags if t.is_active])
             system_tags = len([t for t in all_tags if t.tag_type == TagType.SYSTEM])
@@ -323,7 +323,7 @@ class TagService:
             automated_tags = len([t for t in all_tags if t.tag_type == TagType.AUTOMATED])
             
             # Get assignment count
-            total_assignments = session.exec(select(DataSourceTag)).all()
+            total_assignments = session.execute(select(DataSourceTag)).all()
             assignment_count = len(total_assignments)
             
             # Get most used tags
@@ -337,12 +337,12 @@ class TagService:
                 })
             
             # Get recent tags
-            recent_tags = session.exec(
+            recent_tags = session.execute(
                 select(Tag).order_by(Tag.created_at.desc()).limit(5)
             ).all()
             
             # Get category count
-            categories_count = len(session.exec(select(TagCategory)).all())
+            categories_count = len(session.execute(select(TagCategory)).all())
             
             return TagStats(
                 total_tags=total_tags,

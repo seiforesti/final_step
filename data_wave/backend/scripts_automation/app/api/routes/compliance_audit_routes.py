@@ -56,7 +56,7 @@ async def get_audit_trail(
         
         # Apply pagination
         offset = (page - 1) * limit
-        audit_logs = session.exec(
+        audit_logs = session.execute(
             query.order_by(ComplianceAuditLog.timestamp.desc())
             .offset(offset)
             .limit(limit)
@@ -70,7 +70,7 @@ async def get_audit_trail(
         if filters:
             count_query = count_query.where(and_(*filters))
         
-        total = session.exec(count_query).one()
+        total = session.execute(count_query).one()
         
         # Format audit trail data
         audit_data = []
@@ -134,7 +134,7 @@ async def get_audit_summary(
         )
         
         # Total actions
-        total_actions = session.exec(
+        total_actions = session.execute(
             select(func.count(ComplianceAuditLog.id)).where(
                 ComplianceAuditLog.entity_type == entity_type,
                 ComplianceAuditLog.entity_id == entity_id,
@@ -143,7 +143,7 @@ async def get_audit_summary(
         ).one()
         
         # Actions by type
-        actions_by_type = session.exec(
+        actions_by_type = session.execute(
             select(ComplianceAuditLog.action, func.count(ComplianceAuditLog.id))
             .where(
                 ComplianceAuditLog.entity_type == entity_type,
@@ -154,7 +154,7 @@ async def get_audit_summary(
         ).all()
         
         # Actions by user
-        actions_by_user = session.exec(
+        actions_by_user = session.execute(
             select(ComplianceAuditLog.user_id, ComplianceAuditLog.user_name, func.count(ComplianceAuditLog.id))
             .where(
                 ComplianceAuditLog.entity_type == entity_type,
@@ -165,7 +165,7 @@ async def get_audit_summary(
         ).all()
         
         # Recent activities
-        recent_activities = session.exec(
+        recent_activities = session.execute(
             base_query.order_by(ComplianceAuditLog.timestamp.desc()).limit(10)
         ).all()
         

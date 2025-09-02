@@ -67,17 +67,17 @@ class ScanRuleSetService:
     @staticmethod
     def get_scan_rule_set_by_name(session: Session, name: str) -> Optional[ScanRuleSet]:
         """Get a scan rule set by name."""
-        return session.exec(select(ScanRuleSet).where(ScanRuleSet.name == name)).first()
+        return session.execute(select(ScanRuleSet).where(ScanRuleSet.name == name)).first()
     
     @staticmethod
     def get_all_scan_rule_sets(session: Session) -> List[ScanRuleSet]:
         """Get all scan rule sets."""
-        return session.exec(select(ScanRuleSet)).all()
+        return session.execute(select(ScanRuleSet)).all()
     
     @staticmethod
     def get_scan_rule_sets_by_data_source(session: Session, data_source_id: int) -> List[ScanRuleSet]:
         """Get all scan rule sets for a specific data source."""
-        return session.exec(select(ScanRuleSet).where(ScanRuleSet.data_source_id == data_source_id)).all()
+        return session.execute(select(ScanRuleSet).where(ScanRuleSet.data_source_id == data_source_id)).all()
     
     @staticmethod
     def update_scan_rule_set(

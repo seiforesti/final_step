@@ -7,7 +7,7 @@ export const RBAC_SYSTEM_CONFIG = {
     name: 'Advanced RBAC Data Governance System',
     version: '1.0.0',
     environment: process.env.NODE_ENV || 'development',
-    apiUrl: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000',
+    apiUrl: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000/proxy',
     websocketUrl: process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000/ws',
     maxFileSize: 10 * 1024 * 1024, // 10MB
     supportedImageFormats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],

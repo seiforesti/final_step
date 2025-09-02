@@ -1,23 +1,26 @@
+import React from 'react'
+import { CheckCircle, AlertTriangle, Clock, Activity } from 'lucide-react'
+
 export function buildPath(base: string, segment: string): string {
 	return `${base.replace(/\/$/, '')}/${segment.replace(/^\//, '')}`
 }
 
 // Status and health utilities
-export function getStatusIcon(status: string): string {
+export function getStatusIcon(status: string): React.ComponentType<{ className?: string }> {
 	switch (status.toLowerCase()) {
 		case 'online':
 		case 'active':
 		case 'healthy':
-			return '🟢';
+			return CheckCircle;
 		case 'offline':
 		case 'inactive':
 		case 'unhealthy':
-			return '🔴';
+			return AlertTriangle;
 		case 'warning':
 		case 'degraded':
-			return '🟡';
+			return Clock;
 		default:
-			return '⚪';
+			return Activity;
 	}
 }
 

@@ -31,7 +31,7 @@ class UsageAnalyticsService:
                     .where(AssetUsageMetrics.asset_id == item_id)
                     .where(AssetUsageMetrics.metric_date >= since)
                 )
-                rows = session.exec(stmt).all() or []
+                rows = session.execute(stmt).scalars().all() or []
                 if not rows:
                     return 0.0
 
@@ -53,7 +53,7 @@ class UsageAnalyticsService:
         try:
             since = datetime.utcnow() - timedelta(days=90)
             with get_session() as session:
-                rows = session.exec(
+                rows = session.execute(
                     select(AssetUsageMetrics)
                     .where(AssetUsageMetrics.asset_id == item_id)
                     .where(AssetUsageMetrics.metric_date >= since)
@@ -70,5 +70,59 @@ class UsageAnalyticsService:
         except Exception as exc:
             logger.error(f"get_item_popularity_score failed for {item_id}: {exc}")
             return 0.0
+
+    async def get_user_usage_statistics(self, user_id: str, time_range: str = "30d") -> Dict[str, Any]:
+        """
+        Get user usage statistics for the specified time range.
+        """
+        try:
+            # Parse time range
+            days = 30
+            if time_range == "7d":
+                days = 7
+            elif time_range == "24h":
+                days = 1
+            
+            since = datetime.utcnow() - timedelta(days=days)
+            
+            with get_session() as session:
+                # Mock statistics for now - replace with real implementation
+                statistics = {
+                    "api_calls": 150,
+                    "data_sources_accessed": 8,
+                    "scans_performed": 12,
+                    "reports_generated": 5,
+                    "workflows_executed": 3,
+                    "collaboration_sessions": 7,
+                    "last_activity": since.isoformat(),
+                    "active_days": days,
+                    "engagement_score": 85.5
+                }
+                
+                return {
+                    "user_id": user_id,
+                    "time_range": time_range,
+                    "statistics": statistics,
+                    "timestamp": datetime.utcnow().isoformat()
+                }
+        except Exception as exc:
+            logger.error(f"get_user_usage_statistics failed for user {user_id}: {exc}")
+            # Return fallback statistics
+            return {
+                "user_id": user_id,
+                "time_range": time_range,
+                "statistics": {
+                    "api_calls": 0,
+                    "data_sources_accessed": 0,
+                    "scans_performed": 0,
+                    "reports_generated": 0,
+                    "workflows_executed": 0,
+                    "collaboration_sessions": 0,
+                    "last_activity": datetime.utcnow().isoformat(),
+                    "active_days": 0,
+                    "engagement_score": 0.0
+                },
+                "timestamp": datetime.utcnow().isoformat()
+            }
 
 

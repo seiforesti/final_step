@@ -177,6 +177,9 @@ class SecurityIncident(SQLModel, table=True):
     updated_at: datetime = Field(default_factory=datetime.now)
 
 
+# SecurityThreat model removed - using SecurityIncident instead
+
+
 # Response Models
 class SecurityVulnerabilityResponse(SQLModel):
     id: int
@@ -244,6 +247,30 @@ class SecurityIncidentResponse(SQLModel):
     impact_assessment: Optional[str]
     affected_systems: List[str]
     response_actions: List[str]
+
+
+class SecurityThreatResponse(SQLModel):
+    id: int
+    data_source_id: int
+    threat_id: str
+    threat_type: str
+    title: str
+    description: str
+    severity: VulnerabilitySeverity
+    detection_method: str
+    confidence_score: float
+    status: str
+    detected_at: datetime
+    first_seen: Optional[datetime]
+    last_seen: Optional[datetime]
+    resolved_at: Optional[datetime]
+    ioc_indicators: List[str]
+    threat_actors: List[str]
+    attack_vectors: List[str]
+    affected_assets: List[str]
+    potential_impact: str
+    response_actions: List[str]
+    assigned_to: Optional[str]
 
 
 class SecurityAuditResponse(SQLModel):

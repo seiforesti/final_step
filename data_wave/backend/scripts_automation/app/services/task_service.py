@@ -93,19 +93,30 @@ class TaskService:
     """Service layer for scheduled task management"""
     
     @staticmethod
-    def get_tasks(session: Session, data_source_id: Optional[int] = None) -> List[TaskResponse]:
-        """Get all tasks, optionally filtered by data source"""
+    def get_tasks(session: Session) -> List[Dict[str, Any]]:
+        """Get all scheduled tasks"""
         try:
-            query = select(ScheduledTask)
-            if data_source_id:
-                query = query.where(ScheduledTask.data_source_id == data_source_id)
+            query = select(ScheduledTask).order_by(ScheduledTask.created_at.desc())
+            result = session.execute(query)
+            tasks = result.scalars().all()
             
-            tasks = session.exec(query.order_by(ScheduledTask.created_at.desc())).all()
-            return [TaskResponse.from_orm(task) for task in tasks]
+            return [
+                {
+                    "id": task.id,
+                    "name": task.name,
+                    "task_type": task.task_type,
+                    "schedule": task.schedule,
+                    "status": task.status,
+                    "next_run": task.next_run.isoformat() if task.next_run else None,
+                    "created_at": task.created_at.isoformat() if task.created_at else None,
+                    "configuration": task.configuration
+                }
+                for task in tasks
+            ]
         except Exception as e:
             logger.error(f"Error getting tasks: {str(e)}")
             return []
-    
+
     @staticmethod
     def get_task_by_id(session: Session, task_id: int) -> Optional[TaskResponse]:
         """Get task by ID"""
@@ -208,7 +219,7 @@ class TaskService:
                 return False
             
             # Delete execution history
-            executions = session.exec(
+            executions = session.execute(
                 select(TaskExecution).where(TaskExecution.task_id == task_id)
             ).all()
             for execution in executions:
@@ -316,15 +327,27 @@ class TaskService:
             return False
     
     @staticmethod
-    def get_task_executions(session: Session, task_id: int, limit: int = 50) -> List[TaskExecutionResponse]:
+    def get_task_executions(session: Session, task_id: int) -> List[Dict[str, Any]]:
         """Get execution history for a task"""
         try:
             statement = select(TaskExecution).where(
                 TaskExecution.task_id == task_id
-            ).order_by(TaskExecution.started_at.desc()).limit(limit)
+            ).order_by(TaskExecution.started_at.desc())
+            result = session.execute(statement)
+            executions = result.scalars().all()
             
-            executions = session.exec(statement).all()
-            return [TaskExecutionResponse.from_orm(execution) for execution in executions]
+            return [
+                {
+                    "id": execution.id,
+                    "task_id": execution.task_id,
+                    "status": execution.status,
+                    "started_at": execution.started_at.isoformat() if execution.started_at else None,
+                    "completed_at": execution.completed_at.isoformat() if execution.completed_at else None,
+                    "duration_seconds": execution.duration_seconds,
+                    "error_message": execution.error_message
+                }
+                for execution in executions
+            ]
         except Exception as e:
             logger.error(f"Error getting task executions: {str(e)}")
             return []
@@ -340,7 +363,7 @@ class TaskService:
                 ScheduledTask.status != TaskStatus.RUNNING
             )
             
-            tasks = session.exec(statement).all()
+            tasks = session.execute(statement).scalars().all()
             return [TaskResponse.from_orm(task) for task in tasks]
         except Exception as e:
             logger.error(f"Error getting due tasks: {str(e)}")
@@ -355,7 +378,7 @@ class TaskService:
             if data_source_id:
                 query = query.where(ScheduledTask.data_source_id == data_source_id)
             
-            tasks = session.exec(query).all()
+            tasks = session.execute(query).scalars().all()
             
             total_tasks = len(tasks)
             enabled_tasks = len([t for t in tasks if t.is_enabled])
@@ -368,7 +391,7 @@ class TaskService:
             if task_ids:
                 exec_query = exec_query.where(TaskExecution.task_id.in_(task_ids))
             
-            executions = session.exec(exec_query).all()
+            executions = session.execute(exec_query).scalars().all()
             
             successful_executions = len([e for e in executions if e.status == TaskStatus.COMPLETED])
             failed_executions = len([e for e in executions if e.status == TaskStatus.FAILED])
@@ -382,7 +405,7 @@ class TaskService:
             avg_execution_time_minutes = avg_duration / 60
             
             # Get next scheduled task
-            next_task = session.exec(
+            next_task = session.execute(
                 select(ScheduledTask).where(
                     ScheduledTask.is_enabled == True,
                     ScheduledTask.next_run.is_not(None)

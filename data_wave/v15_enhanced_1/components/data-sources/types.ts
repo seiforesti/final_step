@@ -296,6 +296,22 @@ export interface Scan {
   created_by?: string;
 }
 
+// Scan Schedule
+export interface ScanSchedule {
+  id: number;
+  name: string;
+  description?: string;
+  data_source_id: number;
+  scan_rule_set_id?: number;
+  cron_expression: string;
+  is_active: boolean;
+  next_run?: string;
+  last_run?: string;
+  created_at: string;
+  updated_at: string;
+  created_by?: string;
+}
+
 // Scan result
 export interface ScanResult {
   id: number;

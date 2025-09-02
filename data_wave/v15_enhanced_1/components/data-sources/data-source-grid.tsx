@@ -137,16 +137,78 @@ const typeIcons = {
 // API functions for data source operations
 const dataSourceApi = {
   async getDataSources(filters?: any) {
-    const params = new URLSearchParams(filters)
-    const response = await fetch(`/api/data-sources?${params}`)
-    if (!response.ok) throw new Error('Failed to fetch data sources')
-    return response.json()
+    try {
+      const params = new URLSearchParams(filters)
+      console.log('Fetching data sources with params:', params.toString())
+      
+      const response = await fetch(`/api/data-sources?${params}`)
+      if (!response.ok) {
+        console.error('API response not ok:', response.status, response.statusText)
+        throw new Error(`Failed to fetch data sources: ${response.status} ${response.statusText}`)
+      }
+      return response.json()
+    } catch (error) {
+      console.error('Error fetching data sources:', error)
+      
+      // Return mock data to prevent crashes while backend is down
+      toast.warning('Backend service unavailable - showing mock data for demonstration')
+      
+             return [
+         {
+           id: 1,
+           name: 'Sample Database (Mock)',
+           source_type: 'postgresql',
+           host: 'localhost',
+           port: 5432,
+           database_name: 'sample_db',
+           username: 'user',
+           status: 'active',
+           created_at: new Date().toISOString(),
+           updated_at: new Date().toISOString(),
+           location: 'on_prem',
+           password_secret: 'encrypted',
+           use_encryption: true,
+           backup_enabled: true,
+           monitoring_enabled: true,
+           encryption_enabled: true
+         },
+         {
+           id: 2,
+           name: 'Analytics Warehouse (Mock)',
+           source_type: 'snowflake',
+           host: 'account.snowflakecomputing.com',
+           port: 443,
+           database_name: 'ANALYTICS_DB',
+           username: 'analytics_user',
+           status: 'active',
+           created_at: new Date().toISOString(),
+           updated_at: new Date().toISOString(),
+           location: 'cloud',
+           password_secret: 'encrypted',
+           use_encryption: true,
+           backup_enabled: true,
+           monitoring_enabled: true,
+           encryption_enabled: true
+         }
+       ]
+    }
   },
 
   async getDataSourceHealth(dataSourceId: number) {
-    const response = await fetch(`/api/data-sources/${dataSourceId}/health`)
-    if (!response.ok) throw new Error('Failed to fetch data source health')
-    return response.json()
+    try {
+      const response = await fetch(`/api/data-sources/${dataSourceId}/health`)
+      if (!response.ok) throw new Error('Failed to fetch data source health')
+      return response.json()
+    } catch (error) {
+      console.error(`Error fetching health for data source ${dataSourceId}:`, error)
+      // Return mock health data
+      return {
+        status: 'unknown',
+        last_checked: new Date().toISOString(),
+        response_time: 0,
+        error_message: 'Backend service unavailable'
+      }
+    }
   },
 
   async getDataSourceMetrics(dataSourceId: number) {
@@ -266,7 +328,7 @@ export function DataSourceGrid({
       sortBy,
       sortOrder
     }),
-    enabled: dataSourcePermissions.canView,
+    enabled: dataSourcePermissions.canView && dataSources.length === 0, // Only fetch if no props data
     refetchInterval: 30000, // Auto-refresh every 30 seconds
     staleTime: 10000
   })
@@ -389,16 +451,16 @@ export function DataSourceGrid({
   })
 
   // Use backend data if available, fallback to props
-  const effectiveDataSources = dataSourcesData?.data?.dataSources || dataSources
+  const effectiveDataSources = dataSourcesData?.data || dataSources
 
   // Filter and sort data sources
   const filteredDataSources = useMemo(() => {
     let filtered = effectiveDataSources.filter((ds: DataSource) => {
-      const matchesSearch = ds.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           ds.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           ds.type.toLowerCase().includes(searchQuery.toLowerCase())
-      
-      const matchesType = !filters.type || filters.type === "all" || ds.type === filters.type
+             const matchesSearch = ds.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            ds.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            ds.source_type.toLowerCase().includes(searchQuery.toLowerCase())
+       
+       const matchesType = !filters.type || filters.type === "all" || ds.source_type === filters.type
       const matchesStatus = !filters.status || filters.status === "all" || ds.status === filters.status
       const matchesEnvironment = !filters.environment || filters.environment === "all" || ds.environment === filters.environment
       
@@ -414,10 +476,10 @@ export function DataSourceGrid({
           valueA = a.name.toLowerCase()
           valueB = b.name.toLowerCase()
           break
-        case "type":
-          valueA = a.type
-          valueB = b.type
-          break
+                 case "type":
+           valueA = a.source_type
+           valueB = b.source_type
+           break
         case "status":
           valueA = a.status
           valueB = b.status
@@ -486,7 +548,7 @@ export function DataSourceGrid({
 
   const DataSourceCard = ({ dataSource }: { dataSource: DataSource }) => {
     const StatusIcon = statusConfig[dataSource.status as keyof typeof statusConfig]?.icon || AlertTriangle
-    const TypeIcon = typeIcons[dataSource.type as keyof typeof typeIcons] || Database
+            const TypeIcon = typeIcons[dataSource.source_type as keyof typeof typeIcons] || Database
     const status = statusConfig[dataSource.status as keyof typeof statusConfig]
     const healthScore = getHealthScore(dataSource)
     const healthData = healthQueries.data?.[dataSource.id]
@@ -575,7 +637,7 @@ export function DataSourceGrid({
                 {dataSource.status}
               </Badge>
               <Badge variant="outline" className="text-xs">
-                {dataSource.type}
+                {dataSource.source_type}
               </Badge>
               {dataSource.environment && (
                 <Badge variant="secondary" className="text-xs">
@@ -641,14 +703,14 @@ export function DataSourceGrid({
                 <span>Port:</span>
                 <span>{dataSource.port}</span>
               </div>
-              {dataSource.database && (
-                <div className="flex justify-between">
-                  <span>Database:</span>
-                  <span className="truncate ml-2 max-w-[120px]" title={dataSource.database}>
-                    {dataSource.database}
-                  </span>
-                </div>
-              )}
+                             {dataSource.database_name && (
+                 <div className="flex justify-between">
+                   <span>Database:</span>
+                   <span className="truncate ml-2 max-w-[120px]" title={dataSource.database_name}>
+                     {dataSource.database_name}
+                   </span>
+                 </div>
+               )}
             </div>
 
             {/* Description */}
@@ -914,7 +976,7 @@ export function DataSourceGrid({
             <div className="space-y-2">
               {filteredDataSources.map((dataSource: DataSource) => {
                 const StatusIcon = statusConfig[dataSource.status as keyof typeof statusConfig]?.icon || AlertTriangle
-                const TypeIcon = typeIcons[dataSource.type as keyof typeof typeIcons] || Database
+                const TypeIcon = typeIcons[dataSource.source_type as keyof typeof typeIcons] || Database
                 const status = statusConfig[dataSource.status as keyof typeof statusConfig]
                 const healthScore = getHealthScore(dataSource)
                 const isSelected = selectedItems.includes(dataSource.id.toString())
@@ -945,9 +1007,9 @@ export function DataSourceGrid({
                             <StatusIcon className="h-3 w-3 mr-1" />
                             {dataSource.status}
                           </Badge>
-                          <Badge variant="outline" className="text-xs">
-                            {dataSource.type}
-                          </Badge>
+                                                     <Badge variant="outline" className="text-xs">
+                             {dataSource.source_type}
+                           </Badge>
                         </div>
                         <div className="flex items-center gap-4 text-sm text-muted-foreground">
                           <span>{dataSource.host}:{dataSource.port}</span>

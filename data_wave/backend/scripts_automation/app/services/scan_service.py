@@ -72,25 +72,26 @@ class ScanService:
     
     @staticmethod
     def get_scan_by_uuid(session: Session, scan_uuid: str) -> Optional[Scan]:
-        """Get a scan by UUID."""
-        return session.exec(select(Scan).where(Scan.scan_id == scan_uuid)).first()
-    
+        """Get scan by UUID"""
+        return session.execute(select(Scan).where(Scan.scan_id == scan_uuid)).scalars().first()
+
     @staticmethod
     def get_all_scans(session: Session) -> List[Scan]:
-        """Get all scans."""
-        return list(session.exec(select(Scan)).all())
-    
+        """Get all scans"""
+        result = session.execute(select(Scan))
+        return list(result.scalars().all())
+
     @staticmethod
     def get_scans_by_data_source(session: Session, data_source_id: int) -> List[Scan]:
-        """Get all scans for a specific data source."""
-        return list(session.exec(select(Scan).where(Scan.data_source_id == data_source_id)).all())
+        """Get scans by data source"""
+        result = session.execute(select(Scan).where(Scan.data_source_id == data_source_id))
+        return list(result.scalars().all())
     
     @staticmethod
-    def get_scans_by_status(session: Session, status: Union[ScanStatus, str]) -> List[Scan]:
-        """Get all scans with a specific status."""
-        if isinstance(status, str):
-            status = ScanStatus(status)
-        return list(session.exec(select(Scan).where(Scan.status == status)).all())
+    def get_scans_by_status(session: Session, status: str) -> List[Scan]:
+        """Get scans by status"""
+        result = session.execute(select(Scan).where(Scan.status == status))
+        return list(result.scalars().all())
     
     @staticmethod
     def update_scan_status(
@@ -383,12 +384,12 @@ class ScanService:
     @staticmethod
     def get_scan_results(session: Session, scan_id: int) -> List[ScanResult]:
         """Get all results for a specific scan."""
-        return list(session.exec(select(ScanResult).where(ScanResult.scan_id == scan_id)).all())
+        return list(session.execute(select(ScanResult).where(ScanResult.scan_id == scan_id)).all())
     
     @staticmethod
     def get_scan_results_by_schema(session: Session, scan_id: int, schema_name: str) -> List[ScanResult]:
         """Get scan results for a specific schema."""
-        return list(session.exec(
+        return list(session.execute(
             select(ScanResult)
             .where(ScanResult.scan_id == scan_id)
             .where(ScanResult.schema_name == schema_name)
@@ -397,7 +398,7 @@ class ScanService:
     @staticmethod
     def get_scan_results_by_table(session: Session, scan_id: int, schema_name: str, table_name: str) -> List[ScanResult]:
         """Get scan results for a specific table."""
-        return list(session.exec(
+        return list(session.execute(
             select(ScanResult)
             .where(ScanResult.scan_id == scan_id)
             .where(ScanResult.schema_name == schema_name)
@@ -417,7 +418,7 @@ class ScanService:
             return {"success": False, "message": f"Data source with ID {scan.data_source_id} not found"}
         
         # Get scan results
-        results = list(session.exec(select(ScanResult).where(ScanResult.scan_id == scan_id)).all())
+        results = list(session.execute(select(ScanResult).where(ScanResult.scan_id == scan_id)).all())
         
         # Count schemas, tables, and columns
         schemas = set()
@@ -433,7 +434,7 @@ class ScanService:
                 columns += 1
         
         # Get latest discovery history
-        discoveries = list(session.exec(
+        discoveries = list(session.execute(
             select(DiscoveryHistory)
             .where(DiscoveryHistory.data_source_id == data_source.id)
         ).all())
@@ -467,3 +468,48 @@ class ScanService:
                 "error_message": discovery.error_message if discovery else None
             } if discovery else None
         }
+
+    @staticmethod
+    def get_service_health(session: Session) -> Dict[str, Any]:
+        """Get scan service health status"""
+        try:
+            # Check database connectivity
+            try:
+                from sqlalchemy import text
+                session.execute(text("SELECT 1"))
+                db_status = "healthy"
+            except Exception:
+                db_status = "unhealthy"
+            
+            # Get scan statistics
+            total_scans = session.query(Scan).count()
+            active_scans = session.query(Scan).filter(Scan.status == ScanStatus.RUNNING).count()
+            failed_scans = session.query(Scan).filter(Scan.status == ScanStatus.FAILED).count()
+            
+            # Calculate health score
+            if total_scans == 0:
+                health_score = 100
+            else:
+                success_rate = ((total_scans - failed_scans) / total_scans) * 100
+                health_score = min(100, max(0, success_rate))
+            
+            return {
+                "status": "healthy" if health_score >= 80 else "degraded" if health_score >= 50 else "unhealthy",
+                "health_score": health_score,
+                "database": db_status,
+                "statistics": {
+                    "total_scans": total_scans,
+                    "active_scans": active_scans,
+                    "failed_scans": failed_scans,
+                    "success_rate": success_rate if total_scans > 0 else 100
+                },
+                "timestamp": datetime.utcnow().isoformat()
+            }
+            
+        except Exception as e:
+            return {
+                "status": "unhealthy",
+                "health_score": 0,
+                "error": str(e),
+                "timestamp": datetime.utcnow().isoformat()
+            }

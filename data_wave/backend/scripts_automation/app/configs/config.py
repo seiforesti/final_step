@@ -32,3 +32,5 @@ OAUTH_CONFIG = {
     "microsoft_scopes": clean_env("MICROSOFT_SCOPES", "openid email profile User.Read"),
     "microsoft_tenant": clean_env("MICROSOFT_TENANT", "common"),
 }
+
+# Database configuration is now centralized in app.db_config

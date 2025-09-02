@@ -133,7 +133,7 @@ class ApprovalService:
 
             with get_sync_session() as session:
                 if WorkflowApproval is not None:
-                    row = session.exec(select(WorkflowApproval).where(WorkflowApproval.approval_id == approval_id)).first()
+                    row = session.execute(select(WorkflowApproval).where(WorkflowApproval.approval_id == approval_id)).first()
                     if not row:
                         raise ValueError("Approval not found")
                     if getattr(row, "status", None) != ApprovalStatus.PENDING:
@@ -153,7 +153,7 @@ class ApprovalService:
                     status_value = str(row.status)
                 elif CollaborationApprovalWorkflow is not None:
                     # Minimal support: mark decision history and set status
-                    row = session.exec(select(CollaborationApprovalWorkflow).where(CollaborationApprovalWorkflow.workflow_id == approval_id)).first()
+                    row = session.execute(select(CollaborationApprovalWorkflow).where(CollaborationApprovalWorkflow.workflow_id == approval_id)).first()
                     if not row:
                         raise ValueError("Approval workflow not found")
                     decisions = row.stage_decisions or {}
@@ -193,7 +193,7 @@ class ApprovalService:
 
             with get_sync_session() as session:
                 if WorkflowApproval is not None:
-                    row = session.exec(select(WorkflowApproval).where(WorkflowApproval.approval_id == approval_id)).first()
+                    row = session.execute(select(WorkflowApproval).where(WorkflowApproval.approval_id == approval_id)).first()
                     if not row:
                         raise ValueError("Approval not found")
                     row.rejected_by = list(set((row.rejected_by or []) + [str(approver_id)]))
@@ -204,7 +204,7 @@ class ApprovalService:
                     session.commit()
                     status_value = str(row.status)
                 elif CollaborationApprovalWorkflow is not None:
-                    row = session.exec(select(CollaborationApprovalWorkflow).where(CollaborationApprovalWorkflow.workflow_id == approval_id)).first()
+                    row = session.execute(select(CollaborationApprovalWorkflow).where(CollaborationApprovalWorkflow.workflow_id == approval_id)).first()
                     if not row:
                         raise ValueError("Approval workflow not found")
                     decisions = row.stage_decisions or {}
@@ -243,7 +243,7 @@ class ApprovalService:
                 results: List[Dict[str, Any]] = []
                 if WorkflowApproval is not None:
                     stmt = select(WorkflowApproval)
-                    rows = session.exec(stmt).all()
+                    rows = session.execute(stmt).scalars().all()
                     for row in rows:
                         reqd = set(row.required_approvers or [])
                         if str(approver_id) in reqd and str(getattr(row, "status", "").lower()) == str(ApprovalStatus.PENDING.value if hasattr(ApprovalStatus, 'PENDING') else 'pending'):
@@ -255,7 +255,7 @@ class ApprovalService:
                                 "current_approvals": row.current_approvals,
                             })
                 elif CollaborationApprovalWorkflow is not None:
-                    rows = session.exec(select(CollaborationApprovalWorkflow)).all()
+                    rows = session.execute(select(CollaborationApprovalWorkflow)).all()
                     for row in rows:
                         current = row.current_stage or 0
                         cur_cfg = (row.approvers or {}).get(str(current), {})

@@ -324,7 +324,7 @@ async def get_workflow_history(
         # Query workflow execution history from database
         from app.models.compliance_extended_models import ComplianceWorkflowExecution
         
-        executions = session.exec(
+        executions = session.execute(
             select(ComplianceWorkflowExecution).where(
                 ComplianceWorkflowExecution.workflow_id == workflow_id
             ).order_by(ComplianceWorkflowExecution.started_at.desc())
@@ -364,7 +364,7 @@ async def get_workflow_template(
 ):
     """Get a specific workflow template by type"""
     try:
-        template = session.exec(
+        template = session.execute(
             select(ComplianceWorkflowTemplate).where(
                 ComplianceWorkflowTemplate.template_id == template_type,
                 ComplianceWorkflowTemplate.is_active == True

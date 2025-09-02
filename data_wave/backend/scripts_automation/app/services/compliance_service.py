@@ -79,7 +79,7 @@ class ComplianceService:
             if framework:
                 query = query.where(ComplianceRequirement.framework == framework)
             
-            requirements = session.exec(
+            requirements = session.execute(
                 query.order_by(ComplianceRequirement.framework, ComplianceRequirement.category)
             ).all()
             
@@ -101,7 +101,7 @@ class ComplianceService:
                 ComplianceAssessment.data_source_id == data_source_id
             ).order_by(ComplianceAssessment.created_at.desc()).limit(limit)
             
-            assessments = session.exec(query).all()
+            assessments = session.execute(query).scalars().all()
             
             return [ComplianceAssessmentResponse.from_orm(assessment) for assessment in assessments]
             
@@ -124,7 +124,7 @@ class ComplianceService:
             if status:
                 query = query.where(ComplianceGap.status == status)
             
-            gaps = session.exec(
+            gaps = session.execute(
                 query.order_by(ComplianceGap.severity.desc(), ComplianceGap.created_at.desc())
             ).all()
             
@@ -320,7 +320,7 @@ class ComplianceService:
                 ComplianceRequirement.data_source_id == data_source_id
             )
             
-            requirements = session.exec(query).all()
+            requirements = session.execute(query).scalars().all()
             
             frameworks = {}
             for req in requirements:
@@ -426,7 +426,7 @@ class ComplianceService:
                 )
             ).order_by(ComplianceRequirement.next_assessment.asc()).limit(1)
             
-            requirement = session.exec(query).first()
+            requirement = session.execute(query).scalars().first()
             return requirement.next_assessment if requirement else None
             
         except Exception as e:
