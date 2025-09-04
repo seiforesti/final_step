@@ -366,17 +366,32 @@ async def websocket_data_sources(
                 "timestamp": datetime.utcnow().isoformat()
             }, room)
         
-        # Message handling loop
+        # Message handling loop with idle tolerance and ping/pong support
+        last_message_at = datetime.utcnow()
+        idle_grace_seconds = 120
         while True:
             try:
-                # Receive message from client
-                data = await websocket.receive_text()
+                # Use a timeout to periodically check for idle clients
+                data = await asyncio.wait_for(websocket.receive_text(), timeout=30.0)
                 message = json.loads(data)
+                last_message_at = datetime.utcnow()
                 
                 await handle_websocket_message(connection_id, user_id, message)
                 
             except WebSocketDisconnect:
                 break
+            except asyncio.TimeoutError:
+                # No message received in 30s; send a lightweight pong/heartbeat ack
+                try:
+                    await ws_manager.send_personal_message({
+                        "type": "heartbeat_ack",
+                        "timestamp": datetime.utcnow().isoformat()
+                    }, connection_id)
+                except Exception:
+                    pass
+                # Close only if beyond idle grace
+                if (datetime.utcnow() - last_message_at).total_seconds() > idle_grace_seconds:
+                    break
             except json.JSONDecodeError:
                 await ws_manager.send_personal_message({
                     "type": "error",
@@ -467,11 +482,14 @@ async def websocket_ai_assistant(
             "timestamp": datetime.utcnow().isoformat()
         }, connection_id)
         
-        # Message handling loop
+        # Message handling loop with idle tolerance and ping/pong support
+        last_message_at = datetime.utcnow()
+        idle_grace_seconds = 120
         while True:
             try:
-                data = await websocket.receive_text()
+                data = await asyncio.wait_for(websocket.receive_text(), timeout=30.0)
                 message = json.loads(data)
+                last_message_at = datetime.utcnow()
                 
                 # Handle AI assistant specific messages
                 if message.get("type") == "ai_query":
@@ -487,6 +505,16 @@ async def websocket_ai_assistant(
                     
             except WebSocketDisconnect:
                 break
+            except asyncio.TimeoutError:
+                try:
+                    await ws_manager.send_personal_message({
+                        "type": "heartbeat_ack",
+                        "timestamp": datetime.utcnow().isoformat()
+                    }, connection_id)
+                except Exception:
+                    pass
+                if (datetime.utcnow() - last_message_at).total_seconds() > idle_grace_seconds:
+                    break
             except Exception as e:
                 logger.error(f"AI Assistant WebSocket error: {str(e)}")
                 break
@@ -564,11 +592,14 @@ async def websocket_workspace(
             "timestamp": datetime.utcnow().isoformat()
         }, connection_id)
         
-        # Message handling loop
+        # Message handling loop with idle tolerance and ping/pong support
+        last_message_at = datetime.utcnow()
+        idle_grace_seconds = 120
         while True:
             try:
-                data = await websocket.receive_text()
+                data = await asyncio.wait_for(websocket.receive_text(), timeout=30.0)
                 message = json.loads(data)
+                last_message_at = datetime.utcnow()
                 
                 # Handle workspace specific messages
                 if message.get("type") == "workspace_update":
@@ -585,6 +616,16 @@ async def websocket_workspace(
                     
             except WebSocketDisconnect:
                 break
+            except asyncio.TimeoutError:
+                try:
+                    await ws_manager.send_personal_message({
+                        "type": "heartbeat_ack",
+                        "timestamp": datetime.utcnow().isoformat()
+                    }, connection_id)
+                except Exception:
+                    pass
+                if (datetime.utcnow() - last_message_at).total_seconds() > idle_grace_seconds:
+                    break
             except Exception as e:
                 logger.error(f"Workspace WebSocket error: {str(e)}")
                 break
@@ -658,15 +699,28 @@ async def websocket_data_sources_specific(
             "timestamp": datetime.utcnow().isoformat()
         }, connection_id)
         
-        # Message handling loop
+        # Message handling loop with idle tolerance and ping/pong support
+        last_message_at = datetime.utcnow()
+        idle_grace_seconds = 120
         while True:
             try:
-                data = await websocket.receive_text()
+                data = await asyncio.wait_for(websocket.receive_text(), timeout=30.0)
                 message = json.loads(data)
+                last_message_at = datetime.utcnow()
                 await handle_websocket_message(connection_id, user_id, message)
                     
             except WebSocketDisconnect:
                 break
+            except asyncio.TimeoutError:
+                try:
+                    await ws_manager.send_personal_message({
+                        "type": "heartbeat_ack",
+                        "timestamp": datetime.utcnow().isoformat()
+                    }, connection_id)
+                except Exception:
+                    pass
+                if (datetime.utcnow() - last_message_at).total_seconds() > idle_grace_seconds:
+                    break
             except Exception as e:
                 logger.error(f"Data Sources WebSocket error: {str(e)}")
                 break
@@ -731,15 +785,28 @@ async def websocket_notifications(
             "timestamp": datetime.utcnow().isoformat()
         }, connection_id)
         
-        # Message handling loop
+        # Message handling loop with idle tolerance and ping/pong support
+        last_message_at = datetime.utcnow()
+        idle_grace_seconds = 120
         while True:
             try:
-                data = await websocket.receive_text()
+                data = await asyncio.wait_for(websocket.receive_text(), timeout=30.0)
                 message = json.loads(data)
+                last_message_at = datetime.utcnow()
                 await handle_websocket_message(connection_id, user_id, message)
                     
             except WebSocketDisconnect:
                 break
+            except asyncio.TimeoutError:
+                try:
+                    await ws_manager.send_personal_message({
+                        "type": "heartbeat_ack",
+                        "timestamp": datetime.utcnow().isoformat()
+                    }, connection_id)
+                except Exception:
+                    pass
+                if (datetime.utcnow() - last_message_at).total_seconds() > idle_grace_seconds:
+                    break
             except Exception as e:
                 logger.error(f"Notifications WebSocket error: {str(e)}")
                 break
@@ -804,15 +871,28 @@ async def websocket_monitoring(
             "timestamp": datetime.utcnow().isoformat()
         }, connection_id)
         
-        # Message handling loop
+        # Message handling loop with idle tolerance and ping/pong support
+        last_message_at = datetime.utcnow()
+        idle_grace_seconds = 120
         while True:
             try:
-                data = await websocket.receive_text()
+                data = await asyncio.wait_for(websocket.receive_text(), timeout=30.0)
                 message = json.loads(data)
+                last_message_at = datetime.utcnow()
                 await handle_websocket_message(connection_id, user_id, message)
                     
             except WebSocketDisconnect:
                 break
+            except asyncio.TimeoutError:
+                try:
+                    await ws_manager.send_personal_message({
+                        "type": "heartbeat_ack",
+                        "timestamp": datetime.utcnow().isoformat()
+                    }, connection_id)
+                except Exception:
+                    pass
+                if (datetime.utcnow() - last_message_at).total_seconds() > idle_grace_seconds:
+                    break
             except Exception as e:
                 logger.error(f"Monitoring WebSocket error: {str(e)}")
                 break
@@ -877,15 +957,28 @@ async def websocket_integration(
             "timestamp": datetime.utcnow().isoformat()
         }, connection_id)
         
-        # Message handling loop
+        # Message handling loop with idle tolerance and ping/pong support
+        last_message_at = datetime.utcnow()
+        idle_grace_seconds = 120
         while True:
             try:
-                data = await websocket.receive_text()
+                data = await asyncio.wait_for(websocket.receive_text(), timeout=30.0)
                 message = json.loads(data)
+                last_message_at = datetime.utcnow()
                 await handle_websocket_message(connection_id, user_id, message)
                     
             except WebSocketDisconnect:
                 break
+            except asyncio.TimeoutError:
+                try:
+                    await ws_manager.send_personal_message({
+                        "type": "heartbeat_ack",
+                        "timestamp": datetime.utcnow().isoformat()
+                    }, connection_id)
+                except Exception:
+                    pass
+                if (datetime.utcnow() - last_message_at).total_seconds() > idle_grace_seconds:
+                    break
             except Exception as e:
                 logger.error(f"Integration WebSocket error: {str(e)}")
                 break

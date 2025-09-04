@@ -4,8 +4,10 @@ import logging
 from contextlib import contextmanager, asynccontextmanager
 from contextvars import ContextVar
 from typing import Generator, Optional
+import threading
 
 from sqlalchemy import create_engine, event
+from sqlalchemy.pool import QueuePool
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import sessionmaker, Session
@@ -31,32 +33,59 @@ def _get_database_url() -> str:
     return database_url
 
 
-def _create_engine(database_url: str) -> Engine:
-    # Use centralized config for consistency
+def _create_engine(database_url: str, *, pool_size_override: int | None = None, max_overflow_override: int | None = None, pool_timeout_override: int | None = None) -> Engine:
+    # Centralized pool configuration with DB_CONFIG/env overrides
     try:
-        from app.db_config import DB_CONFIG
-        pool_kwargs = {
-            "pool_pre_ping": DB_CONFIG["pool_pre_ping"],
-            "pool_size": max(1, DB_CONFIG["pool_size"]),  # Ensure minimum size of 1
-            "max_overflow": max(0, DB_CONFIG["max_overflow"]),  # Ensure non-negative
-            "pool_recycle": DB_CONFIG["pool_recycle"],
-            "pool_timeout": max(1, DB_CONFIG["pool_timeout"]),  # Ensure minimum timeout of 1
-            "pool_reset_on_return": DB_CONFIG["pool_reset_on_return"],
-            "echo_pool": DB_CONFIG["echo_pool"],
-            "pool_use_lifo": DB_CONFIG["pool_use_lifo"],
-        }
-    except ImportError:
-        # Fallback to environment variables if config not available
-        pool_kwargs = {
+        from app.db_config import DB_CONFIG as _DBC
+    except Exception:
+        _DBC = {
+            "pool_size": int(os.getenv("DB_POOL_SIZE", "15")),
+            "max_overflow": int(os.getenv("DB_MAX_OVERFLOW", "5")),
+            "pool_timeout": int(os.getenv("DB_POOL_TIMEOUT", "60")),
+            "pool_recycle": int(os.getenv("DB_POOL_RECYCLE", "900")),
             "pool_pre_ping": True,
-            "pool_size": max(1, min(int(os.getenv("DB_POOL_SIZE", "6")), 8)),
-            "max_overflow": max(0, int(os.getenv("DB_MAX_OVERFLOW", "0"))),
-            "pool_recycle": int(os.getenv("DB_POOL_RECYCLE", "1800")),
-            "pool_timeout": max(1, int(os.getenv("DB_POOL_TIMEOUT", "2"))),
             "pool_reset_on_return": "commit",
-            "echo_pool": os.getenv("DB_ECHO_POOL", "false").lower() == "true",
             "pool_use_lifo": True,
+            "echo_pool": False,
         }
+
+    # Use configuration values directly (no minimum enforcement to respect env vars)
+    cfg_pool_size = int(_DBC.get("pool_size", 15))
+    cfg_overflow = int(_DBC.get("max_overflow", 5))
+    cfg_timeout = int(_DBC.get("pool_timeout", 60))
+
+    if pool_size_override is not None:
+        cfg_pool_size = max(cfg_pool_size, int(pool_size_override))
+    if max_overflow_override is not None:
+        cfg_overflow = max(cfg_overflow, int(max_overflow_override))
+    if pool_timeout_override is not None:
+        cfg_timeout = max(cfg_timeout, int(pool_timeout_override))
+
+    # Detect PgBouncer/transaction-pooling environments where psycopg2 autocommit toggles during pre_ping cause errors
+    use_pgbouncer = (
+        os.getenv("DB_USE_PGBOUNCER", "false").lower() == "true"
+        or os.getenv("PGBOUNCER_POOL_MODE", "").lower() in {"transaction", "statement"}
+        or "pgbouncer" in database_url.lower()
+    )
+
+    pool_kwargs = {
+        "pool_pre_ping": False if use_pgbouncer else True,
+        "pool_size": cfg_pool_size,
+        "max_overflow": cfg_overflow,
+        "pool_recycle": int(_DBC.get("pool_recycle", 1800)),
+        "pool_timeout": cfg_timeout,
+        "pool_reset_on_return": _DBC.get("pool_reset_on_return", "commit"),
+        "echo_pool": bool(_DBC.get("echo_pool", False)),
+        "pool_use_lifo": bool(_DBC.get("pool_use_lifo", True)),
+        "poolclass": QueuePool,
+    }
+    
+    # Log the effective configuration
+    logger.info(
+        f"✅ SQLAlchemy pool config: size={pool_kwargs['pool_size']}, "
+        f"overflow={pool_kwargs['max_overflow']}, timeout={pool_kwargs['pool_timeout']}, "
+        f"recycle={pool_kwargs['pool_recycle']}"
+    )
 
     # Initialize connect_args for all database types
     connect_args = {}
@@ -68,7 +97,9 @@ def _create_engine(database_url: str) -> Engine:
         pool_kwargs = {"pool_pre_ping": True}
 
     # Log the pool configuration being used
-    logger.info(f"Creating engine with pool config: size={pool_kwargs['pool_size']}, max_overflow={pool_kwargs['max_overflow']}")
+    logger.info(
+        f"Creating engine with pool config: size={pool_kwargs['pool_size']}, max_overflow={pool_kwargs['max_overflow']}, pre_ping={pool_kwargs['pool_pre_ping']} (PgBouncer={use_pgbouncer})"
+    )
     
     try:
         engine = create_engine(database_url, connect_args=connect_args, **pool_kwargs)
@@ -81,12 +112,13 @@ def _create_engine(database_url: str) -> Engine:
         return engine
     except Exception as e:
         logger.error(f"Failed to create engine: {e}")
-        # Fallback to minimal configuration
+        # Fallback to conservative enterprise configuration
         fallback_kwargs = {
             "pool_pre_ping": True,
-            "pool_size": 5,
-            "max_overflow": 0,
-            "pool_timeout": 5,
+            "pool_size": 15,
+            "max_overflow": 5,
+            "pool_timeout": 60,
+            "poolclass": QueuePool,
         }
         logger.info("Using fallback engine configuration")
         return create_engine(database_url, connect_args=connect_args, **fallback_kwargs)
@@ -94,6 +126,10 @@ def _create_engine(database_url: str) -> Engine:
 
 # Create engine and sessionmaker at import time to satisfy FastAPI dependencies
 DATABASE_URL = _get_database_url()
+# Engine state & hot-swap primitives for zero-downtime scaling
+_engine_swap_lock = threading.Lock()
+_engine_swap_in_progress = False
+
 engine = _create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine, expire_on_commit=False)
 
@@ -119,6 +155,64 @@ def recreate_engine():
         logger.error(f"Failed to recreate engine: {e}")
         return False
 
+def scale_up_engine(new_pool_size: int, new_overflow: int, *, new_timeout: int | None = None) -> bool:
+    """Hot-scale the engine pool by recreating engine with larger capacity and swapping globals atomically."""
+    global engine, SessionLocal, _engine_swap_in_progress, _db_semaphore
+    try:
+        with _engine_swap_lock:
+            _engine_swap_in_progress = True
+            old_engine = engine
+            # Build a larger engine
+            enlarged = _create_engine(DATABASE_URL, pool_size_override=new_pool_size, max_overflow_override=new_overflow, pool_timeout_override=new_timeout)
+            # Swap session factory
+            new_session_local = sessionmaker(autocommit=False, autoflush=False, bind=enlarged, expire_on_commit=False)
+            engine = enlarged
+            SessionLocal = new_session_local
+            # Resize semaphore to new capacity (pool_size + overflow or MAX_CONCURRENT_DB_REQUESTS whichever lower)
+            try:
+                target_cap = enlarged.pool.size() + enlarged.pool.overflow()
+                from app.db_config import DB_CONFIG as _DBC
+                max_req = int(_DBC.get("max_concurrent_requests", target_cap))
+            except Exception:
+                max_req = target_cap
+            _db_semaphore = threading.BoundedSemaphore(value=max(1, min(max_req, target_cap)))
+            # Dispose old engine after swap
+            try:
+                if hasattr(old_engine, 'dispose'):
+                    old_engine.dispose()
+            except Exception:
+                pass
+            logger.info(f"Engine scaled up successfully to size={enlarged.pool.size()}, overflow={enlarged.pool.overflow()}")
+            return True
+    except Exception as e:
+        logger.error(f"Failed to scale up engine: {e}")
+        return False
+    finally:
+        _engine_swap_in_progress = False
+
+def _desired_pool_targets() -> tuple[int, int]:
+    """Read desired (pool_size, max_overflow) from DB_CONFIG/env with sane defaults."""
+    try:
+        from app.db_config import DB_CONFIG as _DBC
+        return int(_DBC.get("pool_size", 15)), int(_DBC.get("max_overflow", 5))
+    except Exception:
+        return int(os.getenv("DB_POOL_SIZE", "15")), int(os.getenv("DB_MAX_OVERFLOW", "5"))
+
+def ensure_pool_capacity() -> None:
+    """Ensure current engine pool capacity matches desired targets; recreate if not."""
+    try:
+        desired_size, desired_overflow = _desired_pool_targets()
+        current_size = engine.pool.size() if hasattr(engine, 'pool') else 0
+        current_overflow = engine.pool.overflow() if hasattr(engine, 'pool') else 0
+        if current_size < desired_size or current_overflow < desired_overflow:
+            logger.warning(
+                f"Engine pool below desired capacity (have size={current_size}/overflow={current_overflow}, "
+                f"want size={desired_size}/overflow={desired_overflow}). Recreating engine."
+            )
+            recreate_engine()
+    except Exception as e:
+        logger.error(f"ensure_pool_capacity failed: {e}")
+
 # Remove the problematic import-time check that can corrupt the pool
 # The health monitor will handle pool validation instead
 
@@ -132,6 +226,56 @@ def cleanup_connection_pool():
             logger.info("Connection pool cleaned up successfully")
     except Exception as e:
         logger.error(f"Error during connection pool cleanup: {e}")
+
+def force_connection_cleanup():
+    """Force cleanup of all connections and recreate the pool."""
+    global engine, SessionLocal
+    try:
+        logger.warning("Forcing connection pool cleanup...")
+        
+        # Dispose the entire engine to close all connections
+        if hasattr(engine, 'dispose'):
+            engine.dispose()
+        
+        # Force garbage collection
+        import gc
+        gc.collect()
+        
+        # Recreate the engine
+        engine = _create_engine(DATABASE_URL)
+        SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine, expire_on_commit=False)
+        
+        logger.info("Connection pool force cleanup completed successfully")
+        return True
+    except Exception as e:
+        logger.error(f"Error during force connection cleanup: {e}")
+        return False
+
+def get_connection_pool_status():
+    """Get detailed connection pool status."""
+    try:
+        if not hasattr(engine, 'pool'):
+            return {"error": "No pool available"}
+        
+        pool = engine.pool
+        checked_in = pool.checkedin()
+        checked_out = pool.checkedout()
+        pool_size = pool.size()
+        overflow = pool.overflow()
+        total_capacity = pool_size + overflow
+        utilization = (checked_out / total_capacity * 100) if total_capacity > 0 else 0
+        
+        return {
+            "pool_size": pool_size,
+            "max_overflow": overflow,
+            "total_capacity": total_capacity,
+            "checked_in": checked_in,
+            "checked_out": checked_out,
+            "utilization_percentage": round(utilization, 1),
+            "available": total_capacity - checked_out
+        }
+    except Exception as e:
+        return {"error": str(e)}
 
 # Schedule periodic cleanup
 import threading
@@ -182,7 +326,12 @@ pool_monitor_thread.start()
 try:
     from app.db_config import DB_CONFIG
     _max_concurrent_db_requests = DB_CONFIG["max_concurrent_requests"]
-    _db_semaphore = threading.BoundedSemaphore(value=max(1, _max_concurrent_db_requests))
+    # Align semaphore ceiling to pool capacity + overflow to avoid hard saturation
+    try:
+        pool_cap = int(DB_CONFIG.get("pool_size", 15)) + int(DB_CONFIG.get("max_overflow", 5))
+    except Exception:
+        pool_cap = 20
+    _db_semaphore = threading.BoundedSemaphore(value=max(1, min(_max_concurrent_db_requests, pool_cap)))
     _failure_window_seconds = DB_CONFIG["failure_window_seconds"]
     _failure_threshold = DB_CONFIG["failure_threshold"]
     _circuit_open_seconds = DB_CONFIG["circuit_open_seconds"]
@@ -190,8 +339,8 @@ try:
     _circuit_open_until = 0.0
 except ImportError:
     # Fallback values
-    _max_concurrent_db_requests = 6
-    _db_semaphore = threading.BoundedSemaphore(value=6)
+    _max_concurrent_db_requests = int(os.getenv("MAX_CONCURRENT_DB_REQUESTS", "15"))
+    _db_semaphore = threading.BoundedSemaphore(value=max(1, _max_concurrent_db_requests))
     _failure_window_seconds = 30
     _failure_threshold = 5
     _circuit_open_seconds = 15
@@ -318,6 +467,32 @@ async def init_async_db(max_retries: int = 10, backoff_seconds: float = 1.0) -> 
             time.sleep(min(sleep_for, 10.0))
 
 
+
+# Initialize connection pool properly
+def initialize_connection_pool():
+    """Initialize the connection pool with proper error handling."""
+    global engine, SessionLocal
+    
+    try:
+        # Test the connection pool
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+        
+        # Log pool status
+        if hasattr(engine, 'pool'):
+            pool = engine.pool
+            logger.info(f"Connection pool initialized: size={pool.size()}, checked_in={pool.checkedin()}, checked_out={pool.checkedout()}")
+        
+        return True
+    except Exception as e:
+        logger.error(f"Connection pool initialization failed: {e}")
+        return False
+
+# Call initialization after engine creation
+if 'engine' in globals():
+    initialize_connection_pool()
+
+
 def get_db() -> Generator[Session, None, None]:
     """FastAPI dependency that yields a per-request database session and ensures close.
 
@@ -329,21 +504,70 @@ def get_db() -> Generator[Session, None, None]:
         logger.warning("Circuit breaker is open; rejecting DB request.")
         raise RuntimeError("database_unavailable")
 
-    # Check connection pool health before getting a session
-    if engine.pool.checkedout() >= engine.pool.size() + engine.pool.overflow():
-        logger.warning("Connection pool is at capacity; rejecting additional work until a slot frees up.")
-        raise RuntimeError("database_unavailable")
+    # Check if pool is completely exhausted and try recovery
+    try:
+        pool_size = engine.pool.size()
+        overflow_cap = engine.pool.overflow()
+        max_allowed = pool_size + overflow_cap
+        current_usage = engine.pool.checkedout()
+        
+        # If pool is completely exhausted, try aggressive recovery
+        if current_usage >= max_allowed:
+            logger.warning(f"Connection pool exhausted: {current_usage}/{max_allowed}; attempting recovery...")
+            
+            # Try to force cleanup of stale connections
+            try:
+                cleanup_connection_pool()
+                # Wait a bit for cleanup to take effect
+                time.sleep(0.1)
+                current_usage = engine.pool.checkedout()
+                logger.info(f"After cleanup: {current_usage}/{max_allowed}")
+            except Exception as e:
+                logger.error(f"Cleanup failed: {e}")
+            
+            # If still exhausted, try to recreate engine
+            if current_usage >= max_allowed:
+                logger.warning("Pool still exhausted after cleanup, attempting engine recreation...")
+                try:
+                    if recreate_engine():
+                        # Recalculate after recreation
+                        pool_size = engine.pool.size()
+                        overflow_cap = engine.pool.overflow()
+                        max_allowed = pool_size + overflow_cap
+                        current_usage = engine.pool.checkedout()
+                        logger.info(f"After engine recreation: {current_usage}/{max_allowed}")
+                    else:
+                        logger.error("Engine recreation failed")
+                except Exception as e:
+                    logger.error(f"Engine recreation error: {e}")
+        
+        # If we are slightly above pool_size but within overflow, sleep briefly to smooth bursts
+        if current_usage >= pool_size and current_usage < max_allowed:
+            time.sleep(0.05)  # 50ms backoff to reduce contention
+        
+        # Hard cap only when exceeding full capacity after recovery attempts
+        if current_usage >= max_allowed:
+            logger.warning(f"Connection pool at capacity: {current_usage}/{max_allowed}; applying backpressure.")
+            # Short backoff and retry once before giving up
+            time.sleep(0.1)
+            current_usage = engine.pool.checkedout()
+            if current_usage >= max_allowed:
+                raise RuntimeError("database_unavailable")
+    
+    except Exception as e:
+        logger.error(f"Error checking pool status: {e}")
+        # Continue with request if we can't check pool status
 
-    # Try to acquire concurrency token quickly
+    # Try to acquire concurrency token with reasonable timeout
     try:
         from app.db_config import DB_CONFIG
         semaphore_timeout = DB_CONFIG["semaphore_timeout"]
     except ImportError:
-        semaphore_timeout = float(os.getenv("DB_SEMAPHORE_TIMEOUT", "0.05"))
+        semaphore_timeout = float(os.getenv("DB_SEMAPHORE_TIMEOUT", "5.0"))  # Increased default
     
     acquired = _db_semaphore.acquire(timeout=semaphore_timeout)
     if not acquired:
-        logger.warning("DB concurrency gate rejected a request (too many concurrent DB-bound operations).")
+        logger.warning(f"DB concurrency gate rejected a request after {semaphore_timeout}s timeout (too many concurrent DB-bound operations).")
         raise RuntimeError("database_unavailable")
 
     # Reuse existing session if present for this request context
@@ -531,66 +755,13 @@ def repair_database_integrity(fk_fixes: list, constraint_errors: list) -> tuple[
         return repairs_made, repair_errors
 
 
-def cleanup_connection_pool():
-    """Clean up connection pool to free up connections."""
-    try:
-        # Dispose of the engine to close all connections
-        engine.dispose()
-        logger.info("Database connection pool cleaned up")
-    except Exception as e:
-        logger.error(f"Error cleaning up connection pool: {e}")
 
 
-def get_connection_pool_status():
-    """Get current connection pool status for monitoring."""
-    try:
-        pool = engine.pool
-        status = {
-            "pool_size": pool.size(),
-            "checked_in": pool.checkedin(),
-            "checked_out": pool.checkedout(),
-            "overflow": pool.overflow(),
-            "total_connections": pool.size() + pool.overflow(),
-            "available_connections": pool.checkedin(),
-        }
-        
-        # Calculate utilization percentage safely
-        total_conn = status["total_connections"]
-        if total_conn > 0:
-            status["utilization_percentage"] = ((pool.checkedout() + pool.overflow()) / total_conn) * 100
-        else:
-            status["utilization_percentage"] = 0
-        
-        # Log warning if pool is getting full
-        if status["utilization_percentage"] > 80:
-            logger.warning(f"Connection pool utilization high: {status['utilization_percentage']:.1f}%")
-        if status["utilization_percentage"] > 95:
-            logger.error(f"Connection pool nearly exhausted: {status['utilization_percentage']:.1f}%")
-            
-        return status
-    except Exception as e:
-        logger.error(f"Error getting pool status: {e}")
-        return {"error": str(e)}
 
 
-def force_connection_cleanup():
-    """Force cleanup of all connections in the pool."""
-    try:
-        # Get current status
-        status = get_connection_pool_status()
-        logger.info(f"Before cleanup - Pool status: {status}")
-        
-        # Dispose of the engine to close all connections
-        engine.dispose()
-        
-        # Get status after cleanup
-        status_after = get_connection_pool_status()
-        logger.info(f"After cleanup - Pool status: {status_after}")
-        
-        return {"before": status, "after": status_after}
-    except Exception as e:
-        logger.error(f"Error during force cleanup: {e}")
-        return {"error": str(e)}
+
+
+
 
 
 def force_engine_recreation():
@@ -601,14 +772,12 @@ def force_engine_recreation():
         if hasattr(engine, 'dispose'):
             engine.dispose()
         
-        # Force garbage collection
         # Force garbage collection multiple times
         import gc
         for _ in range(3):
             gc.collect()
 
         # Wait a moment for cleanup
-        import time
         time.sleep(0.1)
 
         # Create completely new engine

@@ -1,3 +1,4 @@
+from app.utils.serialization_utils import safe_serialize_model, safe_serialize_list
 """
 Enterprise Scan Intelligence API Routes
 
@@ -107,7 +108,7 @@ async def create_intelligence_engine(
         return SuccessResponse(
             message="Intelligence engine created successfully",
             data={
-                "engine": IntelligenceEngineResponse.from_orm(engine),
+                "engine": IntelligenceEngineResponse.model_validate(engine, from_attributes=True),
                 "training_status": "started" if request.auto_train else "manual",
                 "estimated_training_time": "15-30 minutes" if request.auto_train else None
             }
@@ -159,7 +160,7 @@ async def list_intelligence_engines(
         return SuccessResponse(
             message="Intelligence engines retrieved successfully",
             data={
-                "engines": [IntelligenceEngineResponse.from_orm(engine) for engine in engines],
+                "engines": [IntelligenceEngineResponse.model_validate(engine, from_attributes=True) for engine in engines],
                 "pagination": {
                     "page": page,
                     "page_size": page_size,
@@ -205,7 +206,7 @@ async def get_intelligence_engine(
         
         return SuccessResponse(
             message="Intelligence engine retrieved successfully",
-            data={"engine": IntelligenceEngineResponse.from_orm(engine)}
+            data={"engine": IntelligenceEngineResponse.model_validate(engine, from_attributes=True)}
         )
         
     except HTTPException:
@@ -257,7 +258,7 @@ async def generate_prediction(
         return SuccessResponse(
             message="Prediction generated successfully",
             data={
-                "prediction": PredictionResponse.from_orm(prediction),
+                "prediction": PredictionResponse.model_validate(prediction, from_attributes=True),
                 "confidence_score": prediction.confidence_score,
                 "predicted_value": prediction.predicted_value,
                 "prediction_interval": prediction.prediction_interval,
@@ -299,7 +300,7 @@ async def get_prediction(
         
         return SuccessResponse(
             message="Prediction retrieved successfully",
-            data={"prediction": PredictionResponse.from_orm(prediction)}
+            data={"prediction": PredictionResponse.model_validate(prediction, from_attributes=True)}
         )
         
     except HTTPException:
@@ -358,7 +359,7 @@ async def create_optimization(
         return SuccessResponse(
             message="Optimization created successfully",
             data={
-                "optimization": OptimizationResponse.from_orm(optimization),
+                "optimization": OptimizationResponse.model_validate(optimization, from_attributes=True),
                 "execution_status": "started" if request.auto_apply else "pending",
                 "estimated_completion": optimization.estimated_completion_time
             }
@@ -458,7 +459,7 @@ async def detect_anomalies(
         return SuccessResponse(
             message="Anomaly detection completed successfully",
             data={
-                "anomalies": [AnomalyDetectionResponse.from_orm(anomaly) for anomaly in anomalies],
+                "anomalies": [AnomalyDetectionResponse.model_validate(anomaly, from_attributes=True) for anomaly in anomalies],
                 "total_anomalies": len(anomalies),
                 "severity_summary": await intelligence_service.get_anomaly_severity_summary(anomalies),
                 "recommendations": await intelligence_service.get_anomaly_recommendations(anomalies)
@@ -512,7 +513,7 @@ async def list_anomalies(
         return SuccessResponse(
             message="Anomalies retrieved successfully",
             data={
-                "anomalies": [AnomalyDetectionResponse.from_orm(anomaly) for anomaly in anomalies],
+                "anomalies": [AnomalyDetectionResponse.model_validate(anomaly, from_attributes=True) for anomaly in anomalies],
                 "pagination": {
                     "page": page,
                     "page_size": page_size,
@@ -575,7 +576,7 @@ async def recognize_patterns(
         return SuccessResponse(
             message="Pattern recognition completed successfully",
             data={
-                "patterns": [PatternRecognitionResponse.from_orm(pattern) for pattern in patterns],
+                "patterns": [PatternRecognitionResponse.model_validate(pattern, from_attributes=True) for pattern in patterns],
                 "total_patterns": len(patterns),
                 "pattern_summary": await intelligence_service.get_pattern_summary(patterns),
                 "insights": await intelligence_service.get_pattern_insights(patterns) if request.include_insights else None
@@ -628,7 +629,7 @@ async def list_patterns(
         return SuccessResponse(
             message="Patterns retrieved successfully",
             data={
-                "patterns": [PatternRecognitionResponse.from_orm(pattern) for pattern in patterns],
+                "patterns": [PatternRecognitionResponse.model_validate(pattern, from_attributes=True) for pattern in patterns],
                 "pagination": {
                     "page": page,
                     "page_size": page_size,
@@ -688,7 +689,7 @@ async def optimize_performance(
         return SuccessResponse(
             message="Performance optimization started successfully",
             data={
-                "optimization": PerformanceOptimizationResponse.from_orm(optimization),
+                "optimization": PerformanceOptimizationResponse.model_validate(optimization, from_attributes=True),
                 "baseline_metrics": optimization.baseline_metrics,
                 "target_metrics": optimization.target_metrics,
                 "estimated_improvement": optimization.estimated_improvement
@@ -943,7 +944,7 @@ async def train_models(
         
         return SuccessResponse(
             message="Model training started successfully",
-            data=ModelTrainingResponse.from_orm(training_job)
+            data=ModelTrainingResponse.model_validate(training_job, from_attributes=True)
         )
         
     except Exception as e:

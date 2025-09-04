@@ -1,3 +1,4 @@
+from app.utils.serialization_utils import safe_serialize_model, safe_serialize_list
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, BackgroundTasks, Query, Path
 from sqlalchemy.orm import Session
 from typing import List, Optional, Dict, Any, Union
@@ -405,7 +406,7 @@ async def create_classification_framework(
     """Create a new classification framework with enterprise features"""
     try:
         framework = await classification_service.create_classification_framework(
-            session, framework_data.dict(), user
+            session, framework_data.model_dump(), user
         )
         
         # Schedule background task to update dependent systems
@@ -413,7 +414,7 @@ async def create_classification_framework(
             _notify_framework_creation, framework.id, str(current_user["id"])
         )
         
-        return ClassificationFrameworkResponse.from_orm(framework)
+        return ClassificationFrameworkResponse.model_validate(framework, from_attributes=True)
         
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -441,7 +442,7 @@ async def list_classification_frameworks(
             query = query.filter(ClassificationFramework.owner.ilike(f"%{owner}%"))
         
         frameworks = query.offset(skip).limit(limit).all()
-        return [ClassificationFrameworkResponse.from_orm(f) for f in frameworks]
+        return [ClassificationFrameworkResponse.model_validate(f, from_attributes=True) for f in frameworks]
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error listing frameworks: {str(e)}")
@@ -456,7 +457,7 @@ async def get_classification_framework(
     if not framework:
         raise HTTPException(status_code=404, detail="Framework not found")
     
-    return ClassificationFrameworkResponse.from_orm(framework)
+    return ClassificationFrameworkResponse.model_validate(framework, from_attributes=True)
 
 @router.put("/frameworks/{framework_id}", response_model=ClassificationFrameworkResponse)
 async def update_classification_framework(
@@ -503,7 +504,7 @@ async def update_classification_framework(
         )
         session.commit()
         
-        return ClassificationFrameworkResponse.from_orm(framework)
+        return ClassificationFrameworkResponse.model_validate(framework, from_attributes=True)
         
     except Exception as e:
         session.rollback()
@@ -568,11 +569,11 @@ async def create_classification_rule(
     try:
         if validate_only:
             # Perform validation without creating
-            await classification_service._validate_rule_pattern(rule_data.dict())
+            await classification_service._validate_rule_pattern(rule_data.model_dump())
             return {"message": "Rule validation successful", "valid": True}
         
         rule = await classification_service.create_classification_rule(
-            session, rule_data.dict(), user
+            session, rule_data.model_dump(), user
         )
         
         # Add background notification for rule creation
@@ -580,7 +581,7 @@ async def create_classification_rule(
             _notify_rule_creation, rule.id, rule.framework_id, user
         )
         
-        return ClassificationRuleResponse.from_orm(rule)
+        return ClassificationRuleResponse.model_validate(rule, from_attributes=True)
         
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -621,7 +622,7 @@ async def list_classification_rules(
             )
         
         rules = query.order_by(ClassificationRule.priority).offset(skip).limit(limit).all()
-        return [ClassificationRuleResponse.from_orm(rule) for rule in rules]
+        return [ClassificationRuleResponse.model_validate(rule, from_attributes=True) for rule in rules]
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error listing rules: {str(e)}")
@@ -636,7 +637,7 @@ async def get_classification_rule(
     if not rule:
         raise HTTPException(status_code=404, detail="Rule not found")
     
-    return ClassificationRuleResponse.from_orm(rule)
+    return ClassificationRuleResponse.model_validate(rule, from_attributes=True)
 
 @router.put("/rules/{rule_id}", response_model=ClassificationRuleResponse)
 async def update_classification_rule(
@@ -693,7 +694,7 @@ async def update_classification_rule(
         )
         session.commit()
         
-        return ClassificationRuleResponse.from_orm(rule)
+        return ClassificationRuleResponse.model_validate(rule, from_attributes=True)
         
     except Exception as e:
         session.rollback()
@@ -930,7 +931,7 @@ async def update_data_source_classification_settings(
             # Create new settings
             setting = DataSourceClassificationSetting(
                 data_source_id=data_source_id,
-                **settings.dict(),
+                **settings.model_dump(),
                 created_by=user,
                 updated_by=user
             )
@@ -1313,7 +1314,7 @@ async def list_classification_results(
             query = query.filter(ClassificationResult.confidence_score >= confidence_threshold)
         
         results = query.order_by(ClassificationResult.created_at.desc()).offset(skip).limit(limit).all()
-        return [ClassificationResultResponse.from_orm(result) for result in results]
+        return [ClassificationResultResponse.model_validate(result, from_attributes=True) for result in results]
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error listing classification results: {str(e)}")
@@ -1351,7 +1352,7 @@ async def get_classification_audit_logs(
             query = query.filter(ClassificationAuditLog.risk_level == risk_level)
         
         logs = query.order_by(ClassificationAuditLog.created_at.desc()).offset(skip).limit(limit).all()
-        return [ClassificationAuditLogResponse.from_orm(log) for log in logs]
+        return [ClassificationAuditLogResponse.model_validate(log, from_attributes=True) for log in logs]
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error getting audit logs: {str(e)}")

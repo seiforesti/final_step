@@ -520,6 +520,8 @@ class PerformanceReport(SQLModel, table=True):
 
 class MetricQuery(BaseModel):
     """Performance metric query"""
+    class Config:
+        from_attributes = True
     metric_types: Optional[List[PerformanceMetricType]] = None
     resource_ids: Optional[List[str]] = None
     components: Optional[List[str]] = None

@@ -428,7 +428,7 @@ async def update_pipeline(
     try:
         logger.info(f"Updating pipeline: {pipeline_id} by user: {current_user.id}")
         
-        update_data = {k: v for k, v in request.dict().items() if v is not None}
+        update_data = {k: v for k, v in request.model_dump().items() if v is not None}
         
         pipeline = await pipeline_service.update_pipeline(
             pipeline_id=pipeline_id,

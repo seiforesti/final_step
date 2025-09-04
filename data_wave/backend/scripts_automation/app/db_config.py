@@ -30,31 +30,31 @@ def get_env_bool(key: str, default: bool) -> bool:
     return val in ('true', '1', 'yes', 'on')
 
 # Database Connection Pool Configuration
-# Conservative settings to prevent PostgreSQL connection exhaustion
+# Optimized settings to handle enterprise load while preventing exhaustion
 DB_CONFIG: Dict[str, Any] = {
-    # Pool Settings
-    "pool_size": get_env_int("DB_POOL_SIZE", 6),
-    "max_overflow": get_env_int("DB_MAX_OVERFLOW", 0),
-    "pool_timeout": get_env_int("DB_POOL_TIMEOUT", 2),
-    "pool_recycle": get_env_int("DB_POOL_RECYCLE", 1800),
+    # Pool Settings - REDUCED to prevent PostgreSQL overload
+    "pool_size": get_env_int("DB_POOL_SIZE", 15),  # Reduced from 20
+    "max_overflow": get_env_int("DB_MAX_OVERFLOW", 5),  # Reduced from 10
+    "pool_timeout": get_env_int("DB_POOL_TIMEOUT", 60),  # Increased from 30
+    "pool_recycle": get_env_int("DB_POOL_RECYCLE", 900),  # Reduced from 1800 (15 min)
     "pool_pre_ping": get_env_bool("DB_POOL_PRE_PING", True),
     "pool_reset_on_return": "commit",
     "pool_use_lifo": True,
     "echo_pool": get_env_bool("DB_ECHO_POOL", False),
     
-    # Concurrency Control
-    "max_concurrent_requests": get_env_int("MAX_CONCURRENT_DB_REQUESTS", 6),
-    "semaphore_timeout": get_env_int("DB_SEMAPHORE_TIMEOUT", 0.05),
+    # Concurrency Control - REDUCED to prevent pool exhaustion
+    "max_concurrent_requests": get_env_int("MAX_CONCURRENT_DB_REQUESTS", 15),  # Reduced from 25
+    "semaphore_timeout": get_env_int("DB_SEMAPHORE_TIMEOUT", 5),  # Increased from 0.1 to 5 seconds
     
-    # Circuit Breaker Settings
-    "failure_window_seconds": get_env_int("DB_FAILURE_WINDOW_SECONDS", 30),
-    "failure_threshold": get_env_int("DB_FAILURE_THRESHOLD", 5),
-    "circuit_open_seconds": get_env_int("DB_CIRCUIT_OPEN_SECONDS", 15),
+    # Circuit Breaker Settings - More aggressive for enterprise
+    "failure_window_seconds": get_env_int("DB_FAILURE_WINDOW_SECONDS", 30),  # Reduced from 60
+    "failure_threshold": get_env_int("DB_FAILURE_THRESHOLD", 5),  # Reduced from 10
+    "circuit_open_seconds": get_env_int("DB_CIRCUIT_OPEN_SECONDS", 60),  # Increased from 30
     
-    # Auto Cleanup Settings
+    # Auto Cleanup Settings - More aggressive cleanup
     "auto_force_cleanup": get_env_bool("AUTO_FORCE_DB_CLEANUP", True),
-    "cleanup_util_threshold": get_env_int("CLEANUP_UTIL_THRESHOLD", 80),
-    "cleanup_min_interval_sec": get_env_int("CLEANUP_MIN_INTERVAL_SEC", 60),
+    "cleanup_util_threshold": get_env_int("CLEANUP_UTIL_THRESHOLD", 60),  # Reduced from 70
+    "cleanup_min_interval_sec": get_env_int("CLEANUP_MIN_INTERVAL_SEC", 15),  # Reduced from 30
 }
 
 # Database URL Configuration
@@ -73,16 +73,16 @@ def validate_config() -> bool:
     max_overflow = DB_CONFIG["max_overflow"]
     total_connections = pool_size + max_overflow
     
-    # PostgreSQL typically has max_connections = 100
-    if total_connections > 50:
+    # PostgreSQL typically has max_connections = 100, keep under 60 for safety
+    if total_connections > 60:
         print(f"⚠️  WARNING: Total connections ({total_connections}) may be too high")
         return False
     
-    if pool_size > 10:
+    if pool_size > 20:
         print(f"⚠️  WARNING: Pool size ({pool_size}) may be too high")
         return False
     
-    if max_overflow > 5:
+    if max_overflow > 10:
         print(f"⚠️  WARNING: Max overflow ({max_overflow}) may be too high")
         return False
     

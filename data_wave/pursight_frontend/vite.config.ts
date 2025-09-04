@@ -19,6 +19,18 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      "next/navigation": path.resolve(__dirname, "./src/lib/next-navigation-shim.ts"),
+    },
+  },
+  server: {
+    proxy: {
+      // Proxy frontend calls to backend, stripping the /api/proxy prefix
+      "/api/proxy": {
+        target: "http://localhost:8000",
+        changeOrigin: true,
+        secure: false,
+        rewrite: (p) => p.replace(/^\/api\/proxy/, ""),
+      },
     },
   },
 });

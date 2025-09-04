@@ -41,6 +41,9 @@ const TableHeader: React.FC<TableHeaderProps> = ({ children, className }) => {
   return <thead className={className}>{children}</thead>;
 };
 
+// Backward-compatible alias expected by various modules
+const TableHead = TableHeader;
+
 // TableBody Component
 const TableBody: React.FC<TableBodyProps> = ({ children, className }) => {
   return <tbody className={className}>{children}</tbody>;
@@ -61,4 +64,4 @@ const TableCell: React.FC<TableCellProps> = ({
   return <CellTag className={` ${className}`}>{children}</CellTag>;
 };
 
-export { Table, TableHeader, TableBody, TableRow, TableCell };
+export { Table, TableHeader, TableHead, TableBody, TableRow, TableCell };

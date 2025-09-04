@@ -27,6 +27,12 @@ import {
   useOptimizedUserManagement,
 } from "./hooks/useOptimizedHooks"
 
+// Import global API control
+import { useGlobalAPIInterceptor } from "./hooks/useGlobalAPIInterceptor"
+import { GlobalRequestMonitor } from "./components/GlobalRequestMonitor"
+import { useBackendHealthSync } from "./hooks/useBackendHealthSync"
+import { setupAxiosInterception } from "./hooks/setupAxiosInterception"
+
 // Import icons for data governance nodes and AI interface
 import {
   Database,
@@ -44,6 +50,7 @@ import {
   Sparkles,
   Zap,
   Brain,
+  Activity,
 } from 'lucide-react'
 
 // Import lazy components
@@ -65,6 +72,23 @@ declare global {
 
 export const RacineMainManagerSPA: React.FC = () => {
   const reducedMotion = useReducedMotion()
+  
+  // Global API control - INTERCEPTS ALL API REQUESTS ACROSS THE ENTIRE APPLICATION
+  const globalAPIInterceptor = useGlobalAPIInterceptor()
+  const [showRequestMonitor, setShowRequestMonitor] = useState(false)
+  
+  // Bridge axios -> orchestrator to throttle and queue axios-based clients
+  useEffect(() => {
+    try {
+      setupAxiosInterception(globalAPIInterceptor)
+      console.log('[Racine] Axios interception setup complete')
+    } catch (e) {
+      console.warn('[Racine] Axios interception setup skipped:', e)
+    }
+  }, [globalAPIInterceptor])
+  
+  // Backend health synchronization - AUTOMATICALLY SYNC WITH BACKEND DATABASE HEALTH
+  const backendHealthSync = useBackendHealthSync()
   
   // Basic state management
   const [currentView, setCurrentView] = useState<ViewMode>(ViewMode.DASHBOARD)
@@ -786,6 +810,21 @@ export const RacineMainManagerSPA: React.FC = () => {
             )}
           </AnimatePresence>
         </div>
+        
+        {/* Global API Request Monitor - Controls ALL API requests across the entire application */}
+        <GlobalRequestMonitor 
+          isVisible={showRequestMonitor}
+          onToggle={setShowRequestMonitor}
+        />
+        
+        {/* Floating Toggle Button for Request Monitor */}
+        <button
+          onClick={() => setShowRequestMonitor(!showRequestMonitor)}
+          className="fixed bottom-4 left-4 z-50 p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg transition-all duration-300 hover:scale-110"
+          title="Toggle API Request Monitor"
+        >
+          <Activity className="h-5 w-5" />
+        </button>
       </EnterpriseErrorBoundary>
     </Suspense>
   )

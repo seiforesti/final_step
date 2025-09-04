@@ -1,3 +1,4 @@
+from app.utils.serialization_utils import safe_serialize_model, safe_serialize_list
 """
 Advanced Operations API Routes
 Provides endpoints for data source advanced operations like tagging, metrics, duplication, etc.
@@ -174,7 +175,7 @@ async def create_data_source_tag(
             confidence_score=data_source_tag.confidence_score,
             auto_assigned=data_source_tag.auto_assigned,
             expires_at=data_source_tag.expires_at,
-            tag=TagResponse.from_orm(new_tag)
+            tag=TagResponse.model_validate(new_tag, from_attributes=True)
         )
     except HTTPException:
         raise
@@ -391,7 +392,7 @@ async def get_data_source_performance(
         
         # Enhance with additional performance insights
         enhanced_performance = {
-            **performance_data.dict(),
+            **performance_data.model_dump(),
             "data_source_info": {
                 "id": data_source.id,
                 "name": data_source.name,

@@ -913,8 +913,8 @@ async def get_scan_schedules(
 ):
     """Get all scan schedules, optionally filtered by enabled status."""
     if enabled is not None and enabled:
-        return ScanSchedulerService.get_enabled_scan_schedules(session)
-    return ScanSchedulerService.get_all_scan_schedules(session)
+        return ScanSchedulerService.get_enabled_schedules(session)
+    return ScanSchedulerService.get_all_schedules(session)
 
 
 @router.get("/schedules/{schedule_id}", response_model=ScanScheduleResponse)
@@ -1260,7 +1260,8 @@ async def get_backup_status(
         from app.services.backup_service import BackupService
         
         # Get backup operations from database
-        backups = BackupService.get_backup_operations_by_data_source(session, data_source_id)
+        # Use available APIs on BackupService
+        backups = BackupService.get_recent_backups(session, data_source_id, limit=20)
         stats = BackupService.get_backup_stats(session, data_source_id)
         
         backup_data = {
@@ -1314,7 +1315,13 @@ async def get_scheduled_tasks(
         from app.services.task_service import TaskService
         
         # Get scheduled tasks from database
-        tasks = TaskService.get_tasks(session, data_source_id)
+        # Fetch all tasks and filter by data_source_id for now
+        tasks = TaskService.get_tasks(session)
+        if isinstance(tasks, list) and data_source_id is not None:
+            try:
+                tasks = [t for t in tasks if getattr(t, 'data_source_id', getattr(t, 'data_source_id', None)) == data_source_id]
+            except Exception:
+                pass
         
         tasks_data = {
             "tasks": [
@@ -1404,8 +1411,9 @@ async def get_notifications(
         # Get user ID from current user
         user_id = current_user.get("user_id", "unknown")
         
-        # Get notifications from database
-        notifications = NotificationService.get_notifications_by_user(session, user_id)
+        # Create notification service instance and get notifications from database
+        notification_service = NotificationService()
+        notifications = await notification_service.get_notifications_by_user(session, user_id)
         
         notifications_data = {
             "notifications": [
@@ -1481,7 +1489,7 @@ async def get_tasks(
         paginated_tasks = tasks[offset:offset + limit]
         
         return {
-            "tasks": [task.dict() for task in paginated_tasks],
+            "tasks": [task.model_dump() for task in paginated_tasks],
             "total": total_count,
             "page": (offset // limit) + 1,
             "limit": limit,
@@ -1828,10 +1836,10 @@ async def get_versions(
         # Convert to response format
         versions_data = []
         for version in paginated_versions:
-            version_dict = version.dict()
+            version_dict = version.model_dump()
             # Convert changes to list of dicts
             if version.changes:
-                version_dict["changes"] = [change.dict() for change in version.changes]
+                version_dict["changes"] = [change.model_dump() for change in version.changes]
             else:
                 version_dict["changes"] = []
             versions_data.append(version_dict)

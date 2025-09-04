@@ -317,6 +317,8 @@ class TemplateReview(SQLModel, table=True):
 
 class TemplateCreateRequest(BaseModel):
     """Request model for creating templates."""
+    class Config:
+        from_attributes = True
     name: str
     description: Optional[str] = None
     category_id: str
@@ -388,6 +390,8 @@ class TemplateResponse(BaseModel):
     created_by: str
     tags: List[str]
     
+    class Config:
+        from_attributes = True
 class CategoryResponse(BaseModel):
     """Response model for category operations."""
     category_id: str

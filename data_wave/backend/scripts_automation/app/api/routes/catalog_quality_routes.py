@@ -1,3 +1,4 @@
+from app.utils.serialization_utils import safe_serialize_model, safe_serialize_list
 """
 Enterprise Catalog Quality Management API Routes
 
@@ -115,7 +116,7 @@ async def create_quality_rule(
         return SuccessResponse(
             message="Quality rule created successfully",
             data={
-                "rule": QualityRuleResponse.from_orm(rule),
+                "rule": QualityRuleResponse.model_validate(rule, from_attributes=True),
                 "validation_status": "started" if request.auto_validate else "manual"
             }
         )
@@ -173,7 +174,7 @@ async def list_quality_rules(
         return SuccessResponse(
             message="Quality rules retrieved successfully",
             data={
-                "rules": [QualityRuleResponse.from_orm(rule) for rule in rules],
+                "rules": [QualityRuleResponse.model_validate(rule, from_attributes=True) for rule in rules],
                 "pagination": {
                     "page": page,
                     "page_size": page_size,
@@ -219,7 +220,7 @@ async def get_quality_rule(
         
         return SuccessResponse(
             message="Quality rule retrieved successfully",
-            data={"rule": QualityRuleResponse.from_orm(rule)}
+            data={"rule": QualityRuleResponse.model_validate(rule, from_attributes=True)}
         )
         
     except HTTPException:
@@ -283,7 +284,7 @@ async def update_quality_rule(
         
         return SuccessResponse(
             message="Quality rule updated successfully",
-            data={"rule": QualityRuleResponse.from_orm(rule)}
+            data={"rule": QualityRuleResponse.model_validate(rule, from_attributes=True)}
         )
         
     except Exception as e:
@@ -340,7 +341,7 @@ async def create_quality_assessment(
         return SuccessResponse(
             message="Quality assessment created successfully",
             data={
-                "assessment": QualityAssessmentResponse.from_orm(assessment),
+                "assessment": QualityAssessmentResponse.model_validate(assessment, from_attributes=True),
                 "execution_status": "started" if request.auto_execute else "pending"
             }
         )
@@ -436,7 +437,7 @@ async def list_quality_assessments(
         return SuccessResponse(
             message="Quality assessments retrieved successfully",
             data={
-                "assessments": [QualityAssessmentResponse.from_orm(assessment) for assessment in assessments],
+                "assessments": [QualityAssessmentResponse.model_validate(assessment, from_attributes=True) for assessment in assessments],
                 "pagination": {
                     "page": page,
                     "page_size": page_size,
@@ -487,7 +488,7 @@ async def get_quality_assessment(
         
         return SuccessResponse(
             message="Quality assessment retrieved successfully",
-            data={"assessment": QualityAssessmentResponse.from_orm(assessment)}
+            data={"assessment": QualityAssessmentResponse.model_validate(assessment, from_attributes=True)}
         )
         
     except HTTPException:
@@ -547,7 +548,7 @@ async def create_quality_scorecard(
         
         return SuccessResponse(
             message="Quality scorecard created successfully",
-            data={"scorecard": QualityScorecardResponse.from_orm(scorecard)}
+            data={"scorecard": QualityScorecardResponse.model_validate(scorecard, from_attributes=True)}
         )
         
     except Exception as e:
@@ -596,7 +597,7 @@ async def list_quality_scorecards(
         return SuccessResponse(
             message="Quality scorecards retrieved successfully",
             data={
-                "scorecards": [QualityScorecardResponse.from_orm(scorecard) for scorecard in scorecards],
+                "scorecards": [QualityScorecardResponse.model_validate(scorecard, from_attributes=True) for scorecard in scorecards],
                 "pagination": {
                     "page": page,
                     "page_size": page_size,
@@ -661,7 +662,7 @@ async def create_quality_monitoring(
         return SuccessResponse(
             message="Quality monitoring created successfully",
             data={
-                "monitor": QualityMonitoringResponse.from_orm(monitor),
+                "monitor": QualityMonitoringResponse.model_validate(monitor, from_attributes=True),
                 "monitoring_status": "started" if request.auto_start else "stopped"
             }
         )
@@ -801,7 +802,7 @@ async def generate_quality_report(
         return SuccessResponse(
             message="Quality report generation started",
             data={
-                "report": QualityReportResponse.from_orm(report),
+                "report": QualityReportResponse.model_validate(report, from_attributes=True),
                 "generation_status": "started" if request.auto_generate else "pending"
             }
         )
@@ -850,7 +851,7 @@ async def list_quality_reports(
         return SuccessResponse(
             message="Quality reports retrieved successfully",
             data={
-                "reports": [QualityReportResponse.from_orm(report) for report in reports],
+                "reports": [QualityReportResponse.model_validate(report, from_attributes=True) for report in reports],
                 "pagination": {
                     "page": page,
                     "page_size": page_size,

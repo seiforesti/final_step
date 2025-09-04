@@ -1,22 +1,29 @@
 import axios from "axios";
 
-// Set this to your backend API root (adjust port/host as needed)
-axios.defaults.baseURL = "http://localhost:8000";
+// Use Vite proxy for all API calls
+axios.defaults.baseURL = "/api/proxy";
 
-// Always send cookies/session with requests
-axios.defaults.withCredentials = true;
+// Do not send cookies by default (use bearer token headers instead)
+axios.defaults.withCredentials = false;
 
 // Add request timeout to prevent long waiting times
-axios.defaults.timeout = 10000; // 10 seconds
+axios.defaults.timeout = 15000; // 15 seconds
 
-// Add response interceptor for error handling
+// Add response interceptor for error handling and direct retry to backend
 axios.interceptors.response.use(
   (response) => response,
-  (error) => {
-    // Handle network errors or server not responding
-    if (error.code === 'ECONNABORTED' || !error.response) {
-      console.error('Backend server is not responding. Please check if the server is running.');
-      // You could dispatch a notification here or set a global state
+  async (error) => {
+    if ((error.code === 'ECONNABORTED' || !error.response) && !error.config?.__retriedDirectly) {
+      try {
+        error.config.__retriedDirectly = true;
+        const originalBaseURL = error.config.baseURL;
+        error.config.baseURL = 'http://localhost:8000';
+        const direct = await axios.request(error.config);
+        error.config.baseURL = originalBaseURL;
+        return direct;
+      } catch (e) {
+        console.error('Backend server is not responding. Please check if the server is running.');
+      }
     }
     return Promise.reject(error);
   }

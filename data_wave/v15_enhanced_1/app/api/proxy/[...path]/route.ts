@@ -108,6 +108,12 @@ const API_MAPPINGS: ApiMapping[] = [
     backendPath: '/data-discovery/data-sources/$1/discover-schema',
     description: 'Discover data source schema'
   },
+  // Alias: frontend sometimes uses schema-discovery instead of discover-schema
+  {
+    frontendPattern: /^\/data-discovery\/data-sources\/(\d+)\/schema-discovery\/?$/,
+    backendPath: '/data-discovery/data-sources/$1/discover-schema',
+    description: 'Alias for schema discovery'
+  },
   {
     frontendPattern: /^\/data-discovery\/data-sources\/(\d+)\/discovery-history\/?$/,
     backendPath: '/data-discovery/data-sources/$1/discovery-history',
@@ -200,6 +206,17 @@ const API_MAPPINGS: ApiMapping[] = [
     frontendPattern: /^\/scan\/notifications\/?$/,
     backendPath: '/scan/notifications',
     description: 'Get notifications'
+  },
+  // Aliases for notifications
+  {
+    frontendPattern: /^\/notifications\/?$/,
+    backendPath: '/scan/notifications',
+    description: 'Notifications alias to scan notifications'
+  },
+  {
+    frontendPattern: /^\/api\/v1\/notifications\/?$/,
+    backendPath: '/scan/notifications',
+    description: 'Legacy v1 notifications bridged to scan notifications'
   },
 
   // ============================================================================
@@ -332,6 +349,11 @@ const API_MAPPINGS: ApiMapping[] = [
     frontendPattern: /^\/health\/?$/,
     backendPath: '/health',
     description: 'System health check'
+  },
+  {
+    frontendPattern: /^\/health\/frontend-config\/?$/,
+    backendPath: '/health/frontend-config',
+    description: 'Frontend throttling config'
   },
   {
     frontendPattern: /^\/system\/health\/?$/,
@@ -537,12 +559,12 @@ const API_MAPPINGS: ApiMapping[] = [
 // INTELLIGENT API MAPPING FUNCTION
 // ============================================================================
 function mapFrontendToBackend(frontendPath: string): { backendPath: string; description: string } | null {
-  // Remove leading slash for pattern matching
-  const cleanPath = frontendPath.startsWith('/') ? frontendPath.slice(1) : frontendPath;
+  // Keep the leading slash so our regex patterns (which start with \/) match correctly
+  const pathForMatch = frontendPath;
   
   // Try to find a matching pattern
   for (const mapping of API_MAPPINGS) {
-    const match = cleanPath.match(mapping.frontendPattern);
+    const match = pathForMatch.match(mapping.frontendPattern);
     if (match) {
       // Replace placeholders in backend path
       let backendPath = mapping.backendPath;
@@ -611,6 +633,45 @@ class ProxyPerformanceMonitor {
 // ============================================================================
 // MAIN PROXY FUNCTION
 // ============================================================================
+// Simple in-memory limiter per client IP+path (token bucket)
+type BucketKey = string;
+const buckets: Map<BucketKey, { tokens: number; lastRefill: number }> = new Map();
+const MAX_TOKENS_PER_WINDOW = 8; // max concurrent-like tokens per key
+const REFILL_INTERVAL_MS = 1000; // 1s
+const TOKENS_PER_INTERVAL = 4; // refill rate
+
+function getClientIp(req: Request): string {
+  try {
+    const xff = req.headers.get('x-forwarded-for');
+    if (xff) return xff.split(',')[0].trim();
+    const url = new URL(req.url);
+    return url.hostname;
+  } catch {
+    return 'unknown';
+  }
+}
+
+function allowRequest(key: BucketKey): boolean {
+  const now = Date.now();
+  let bucket = buckets.get(key);
+  if (!bucket) {
+    bucket = { tokens: MAX_TOKENS_PER_WINDOW, lastRefill: now };
+    buckets.set(key, bucket);
+  }
+  // Refill
+  const elapsed = now - bucket.lastRefill;
+  if (elapsed >= REFILL_INTERVAL_MS) {
+    const increments = Math.floor(elapsed / REFILL_INTERVAL_MS);
+    bucket.tokens = Math.min(MAX_TOKENS_PER_WINDOW, bucket.tokens + increments * TOKENS_PER_INTERVAL);
+    bucket.lastRefill = now;
+  }
+  if (bucket.tokens > 0) {
+    bucket.tokens -= 1;
+    return true;
+  }
+  return false;
+}
+
 async function proxy(request: Request, ctx: { params: Promise<{ path: string[] }> | { path: string[] } }) {
   const startTime = Date.now();
   const monitor = ProxyPerformanceMonitor.getInstance();
@@ -620,6 +681,13 @@ async function proxy(request: Request, ctx: { params: Promise<{ path: string[] }
     const params = await ctx.params;
     const pathSegments = params.path || [];
     const frontendPath = `/${pathSegments.join('/')}`;
+    // Apply limiter per client and path family to cap burst concurrency
+    const client = getClientIp(request);
+    const limiterKey = `${client}:${frontendPath.split('/').slice(0,3).join('/')}`;
+    if (!allowRequest(limiterKey)) {
+      monitor.recordRequest(Date.now() - startTime, true);
+      return NextResponse.json({ error: 'Too many requests - proxy is rate limiting' }, { status: 429 });
+    }
     
     // Map frontend path to backend path
     const mapping = mapFrontendToBackend(frontendPath);

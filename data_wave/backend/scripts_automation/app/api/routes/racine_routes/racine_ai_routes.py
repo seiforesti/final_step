@@ -467,7 +467,7 @@ async def send_message(
             conversation_id,
             {
                 "type": "ai_response",
-                "data": message_response.dict()
+                "data": message_response.model_dump()
             }
         )
         

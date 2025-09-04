@@ -205,4 +205,3 @@ export const useRBACPermissions = (): UseRBACPermissionsReturn => {
     refreshPermissions: fetchUserPermissions
   };
 };
-};

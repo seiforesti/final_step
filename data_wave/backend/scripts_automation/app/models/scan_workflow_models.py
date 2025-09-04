@@ -523,6 +523,8 @@ class ScanWorkflowExecutionDetail(SQLModel, table=True):
 
 class WorkflowTemplateCreate(BaseModel):
     """Create workflow template request"""
+    class Config:
+        from_attributes = True
     template_name: str
     workflow_type: WorkflowType
     description: str
@@ -602,6 +604,8 @@ class WorkflowResponse(BaseModel):
     created_at: datetime
     started_at: Optional[datetime]
     completed_at: Optional[datetime]
+    class Config:
+        from_attributes = True
 
 class StageResponse(BaseModel):
     """Stage response"""
@@ -613,6 +617,8 @@ class StageResponse(BaseModel):
     stage_order: int
     started_at: Optional[datetime]
     completed_at: Optional[datetime]
+    class Config:
+        from_attributes = True
 
 class WorkflowExecutionResponse(BaseModel):
     """Workflow execution response"""
@@ -625,6 +631,8 @@ class WorkflowExecutionResponse(BaseModel):
     completed_stages: int
     started_at: Optional[datetime]
     estimated_completion: Optional[datetime]
+    class Config:
+        from_attributes = True
 
 class WorkflowMetrics(BaseModel):
     """Workflow metrics"""
@@ -635,3 +643,5 @@ class WorkflowMetrics(BaseModel):
     average_duration: float
     success_rate: float
     resource_utilization: Dict[str, float]
+    class Config:
+        from_attributes = True

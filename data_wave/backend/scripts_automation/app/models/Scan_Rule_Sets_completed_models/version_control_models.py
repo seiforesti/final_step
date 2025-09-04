@@ -387,6 +387,8 @@ class RuleComparison(SQLModel, table=True):
 
 class VersionCreateRequest(BaseModel):
     """Request model for creating new versions."""
+    class Config:
+        from_attributes = True
     rule_id: int
     change_type: ChangeType = ChangeType.MINOR
     change_summary: str
@@ -459,6 +461,8 @@ class VersionResponse(BaseModel):
     created_by: str
     usage_count: int
     
+    class Config:
+        from_attributes = True
 class BranchResponse(BaseModel):
     """Response model for branch operations."""
     branch_id: str
@@ -487,3 +491,5 @@ class MergeRequestResponse(BaseModel):
     created_by: str
     approved_by: List[str]
     review_status: str
+    class Config:
+        from_attributes = True

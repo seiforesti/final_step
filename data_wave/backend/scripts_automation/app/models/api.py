@@ -3,6 +3,8 @@ from pydantic import BaseModel, Field
 
 
 class QualityRuleRequest(BaseModel):
+    class Config:
+        from_attributes = True
     rule_name: str
     rule_type: str
     quality_dimension: str

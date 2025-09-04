@@ -392,6 +392,8 @@ class QualityReport(SQLModel, table=True):
 
 class QualityRuleCreate(BaseModel):
     """Create quality rule request"""
+    class Config:
+        from_attributes = True
     rule_name: str
     rule_type: QualityRuleType
     quality_dimension: QualityDimension
@@ -486,6 +488,8 @@ class QualityRuleResponse(BaseModel):
     created_at: datetime
     updated_at: Optional[datetime]
     
+    class Config:
+        from_attributes = True
 class QualityAssessmentResponse(BaseModel):
     """Quality assessment response"""
     assessment_id: str
@@ -512,3 +516,5 @@ class QualityScorecardResponse(BaseModel):
     assessment_summary: Dict[str, int]
     assessed_at: datetime
     valid_until: Optional[datetime]
+    class Config:
+        from_attributes = True

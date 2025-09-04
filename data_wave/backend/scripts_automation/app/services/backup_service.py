@@ -1,5 +1,6 @@
 from sqlmodel import Session, select, func, and_, or_
 from typing import List, Optional, Dict, Any
+from types import SimpleNamespace
 from datetime import datetime, timedelta
 import asyncio
 from app.models.backup_models import (
@@ -23,6 +24,22 @@ logger = logging.getLogger(__name__)
 class BackupService:
     """Service layer for backup management"""
     
+    @staticmethod
+    def get_backup_stats(session: Session, data_source_id: int):
+        """Public API: Return backup stats with attribute access expected by routes."""
+        try:
+            stats_dict = BackupService._calculate_backup_statistics(session, data_source_id) or {}
+            total_size = BackupService._calculate_storage_usage(session, data_source_id) or {}
+            ns = SimpleNamespace()
+            setattr(ns, "total_backups", stats_dict.get("total_backups", 0))
+            setattr(ns, "successful_backups", stats_dict.get("successful_backups", 0))
+            setattr(ns, "failed_backups", stats_dict.get("failed_backups", 0))
+            setattr(ns, "total_size_gb", total_size.get("total_size_gb", 0))
+            return ns
+        except Exception as e:
+            logger.error(f"Error getting backup stats for data source {data_source_id}: {str(e)}")
+            return SimpleNamespace(total_backups=0, successful_backups=0, failed_backups=0, total_size_gb=0)
+
     @staticmethod
     def get_backup_status(session: Session, data_source_id: int) -> BackupStatusResponse:
         """Get comprehensive backup status for a data source"""

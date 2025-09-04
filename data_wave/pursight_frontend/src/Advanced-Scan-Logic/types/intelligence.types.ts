@@ -1,0 +1,1439 @@
+// Advanced-Scan-Logic/types/intelligence.types.ts
+// Comprehensive intelligence types aligned with backend scan_intelligence_models.py
+
+export interface ScanIntelligenceInsight {
+  id: string;
+  scan_id: string;
+  insight_type: IntelligenceInsightType;
+  category: IntelligenceCategory;
+  severity: IntelligenceSeverity;
+  confidence_score: number;
+  title: string;
+  description: string;
+  recommendation: string;
+  impact_assessment: ImpactAssessment;
+  evidence: IntelligenceEvidence[];
+  metadata: IntelligenceMetadata;
+  tags: string[];
+  created_at: string;
+  updated_at: string;
+  resolved_at?: string;
+  status: IntelligenceStatus;
+  feedback: IntelligenceFeedback[];
+  related_insights: string[];
+  action_items: IntelligenceActionItem[];
+  business_context: BusinessContext;
+  technical_context: TechnicalContext;
+}
+
+export enum IntelligenceInsightType {
+  ANOMALY_DETECTION = 'anomaly_detection',
+  PATTERN_RECOGNITION = 'pattern_recognition',
+  TREND_ANALYSIS = 'trend_analysis',
+  PREDICTIVE_ANALYSIS = 'predictive_analysis',
+  CORRELATION_ANALYSIS = 'correlation_analysis',
+  BEHAVIORAL_ANALYSIS = 'behavioral_analysis',
+  PERFORMANCE_ANALYSIS = 'performance_analysis',
+  SECURITY_ANALYSIS = 'security_analysis',
+  QUALITY_ANALYSIS = 'quality_analysis',
+  COMPLIANCE_ANALYSIS = 'compliance_analysis',
+  RISK_ANALYSIS = 'risk_analysis',
+  OPTIMIZATION_OPPORTUNITY = 'optimization_opportunity',
+  RESOURCE_ANALYSIS = 'resource_analysis',
+  COST_ANALYSIS = 'cost_analysis',
+  CAPACITY_ANALYSIS = 'capacity_analysis',
+  EFFICIENCY_ANALYSIS = 'efficiency_analysis'
+}
+
+export enum IntelligenceCategory {
+  DATA_QUALITY = 'data_quality',
+  SECURITY = 'security',
+  PERFORMANCE = 'performance',
+  COMPLIANCE = 'compliance',
+  OPERATIONS = 'operations',
+  BUSINESS = 'business',
+  TECHNICAL = 'technical',
+  FINANCIAL = 'financial',
+  STRATEGIC = 'strategic',
+  TACTICAL = 'tactical'
+}
+
+export enum IntelligenceSeverity {
+  CRITICAL = 'critical',
+  HIGH = 'high',
+  MEDIUM = 'medium',
+  LOW = 'low',
+  INFORMATIONAL = 'informational'
+}
+
+export enum IntelligenceStatus {
+  NEW = 'new',
+  ACKNOWLEDGED = 'acknowledged',
+  INVESTIGATING = 'investigating',
+  IN_PROGRESS = 'in_progress',
+  RESOLVED = 'resolved',
+  DISMISSED = 'dismissed',
+  ESCALATED = 'escalated',
+  ARCHIVED = 'archived'
+}
+
+export interface PatternRecognitionResult {
+  id: string;
+  scan_id: string;
+  pattern_type: PatternType;
+  pattern_name: string;
+  pattern_description: string;
+  confidence_score: number;
+  frequency: number;
+  first_detected: string;
+  last_detected: string;
+  occurrences: PatternOccurrence[];
+  statistical_significance: number;
+  correlation_strength: number;
+  related_patterns: RelatedPattern[];
+  business_impact: PatternBusinessImpact;
+  recommendations: PatternRecommendation[];
+  validation_status: PatternValidationStatus;
+  metadata: PatternMetadata;
+}
+
+export enum PatternType {
+  DATA_USAGE = 'data_usage',
+  ACCESS_PATTERN = 'access_pattern',
+  TEMPORAL_PATTERN = 'temporal_pattern',
+  STRUCTURAL_PATTERN = 'structural_pattern',
+  BEHAVIORAL_PATTERN = 'behavioral_pattern',
+  PERFORMANCE_PATTERN = 'performance_pattern',
+  ERROR_PATTERN = 'error_pattern',
+  SECURITY_PATTERN = 'security_pattern',
+  COMPLIANCE_PATTERN = 'compliance_pattern',
+  QUALITY_PATTERN = 'quality_pattern',
+  CORRELATION_PATTERN = 'correlation_pattern',
+  ANOMALY_PATTERN = 'anomaly_pattern',
+  TREND_PATTERN = 'trend_pattern',
+  SEASONAL_PATTERN = 'seasonal_pattern',
+  CYCLIC_PATTERN = 'cyclic_pattern'
+}
+
+export interface AnomalyDetectionResult {
+  id: string;
+  scan_id: string;
+  anomaly_type: AnomalyType;
+  severity: AnomalySeverity;
+  detection_method: DetectionMethod;
+  confidence_score: number;
+  anomaly_score: number;
+  detected_at: string;
+  duration_minutes?: number;
+  affected_entities: AffectedEntity[];
+  baseline_comparison: BaselineComparison;
+  statistical_measures: StatisticalMeasures;
+  contextual_information: ContextualInformation;
+  root_cause_analysis: RootCauseAnalysis;
+  impact_assessment: AnomalyImpactAssessment;
+  remediation_suggestions: RemediationSuggestion[];
+  false_positive_probability: number;
+  investigation_notes: InvestigationNote[];
+}
+
+export enum AnomalyType {
+  STATISTICAL_OUTLIER = 'statistical_outlier',
+  BEHAVIORAL_ANOMALY = 'behavioral_anomaly',
+  PERFORMANCE_ANOMALY = 'performance_anomaly',
+  SECURITY_ANOMALY = 'security_anomaly',
+  QUALITY_ANOMALY = 'quality_anomaly',
+  VOLUME_ANOMALY = 'volume_anomaly',
+  PATTERN_DEVIATION = 'pattern_deviation',
+  TREND_BREAK = 'trend_break',
+  SEASONAL_ANOMALY = 'seasonal_anomaly',
+  CORRELATION_ANOMALY = 'correlation_anomaly',
+  THRESHOLD_VIOLATION = 'threshold_violation',
+  STRUCTURAL_ANOMALY = 'structural_anomaly',
+  TEMPORAL_ANOMALY = 'temporal_anomaly',
+  CONTEXTUAL_ANOMALY = 'contextual_anomaly'
+}
+
+export enum AnomalySeverity {
+  CRITICAL = 'critical',
+  HIGH = 'high',
+  MEDIUM = 'medium',
+  LOW = 'low',
+  NEGLIGIBLE = 'negligible'
+}
+
+export enum DetectionMethod {
+  STATISTICAL_ANALYSIS = 'statistical_analysis',
+  MACHINE_LEARNING = 'machine_learning',
+  DEEP_LEARNING = 'deep_learning',
+  RULE_BASED = 'rule_based',
+  HYBRID_APPROACH = 'hybrid_approach',
+  TIME_SERIES_ANALYSIS = 'time_series_analysis',
+  CLUSTERING_ANALYSIS = 'clustering_analysis',
+  ISOLATION_FOREST = 'isolation_forest',
+  ONE_CLASS_SVM = 'one_class_svm',
+  AUTOENCODER = 'autoencoder',
+  LSTM_NETWORKS = 'lstm_networks',
+  ENSEMBLE_METHODS = 'ensemble_methods'
+}
+
+export interface PredictiveModel {
+  id: string;
+  name: string;
+  model_type: PredictiveModelType;
+  algorithm: MLAlgorithm;
+  version: string;
+  training_data_period: TimePeriod;
+  features: ModelFeature[];
+  performance_metrics: ModelPerformanceMetrics;
+  confidence_intervals: ConfidenceInterval[];
+  predictions: Prediction[];
+  model_drift_analysis: ModelDriftAnalysis;
+  explainability_report: ExplainabilityReport;
+  validation_results: ValidationResults;
+  deployment_status: DeploymentStatus;
+  last_trained: string;
+  next_training_scheduled: string;
+  business_value_metrics: BusinessValueMetrics;
+}
+
+export enum PredictiveModelType {
+  CLASSIFICATION = 'classification',
+  REGRESSION = 'regression',
+  TIME_SERIES = 'time_series',
+  CLUSTERING = 'clustering',
+  REINFORCEMENT_LEARNING = 'reinforcement_learning',
+  ENSEMBLE = 'ensemble',
+  DEEP_LEARNING = 'deep_learning',
+  NEURAL_NETWORK = 'neural_network',
+  DECISION_TREE = 'decision_tree',
+  RANDOM_FOREST = 'random_forest',
+  GRADIENT_BOOSTING = 'gradient_boosting',
+  SVM = 'svm',
+  NAIVE_BAYES = 'naive_bayes',
+  LINEAR_MODEL = 'linear_model',
+  LOGISTIC_REGRESSION = 'logistic_regression'
+}
+
+export enum MLAlgorithm {
+  LINEAR_REGRESSION = 'linear_regression',
+  LOGISTIC_REGRESSION = 'logistic_regression',
+  DECISION_TREE = 'decision_tree',
+  RANDOM_FOREST = 'random_forest',
+  GRADIENT_BOOSTING = 'gradient_boosting',
+  XG_BOOST = 'xg_boost',
+  LIGHT_GBM = 'light_gbm',
+  CATBOOST = 'catboost',
+  SVM = 'svm',
+  KNN = 'knn',
+  NAIVE_BAYES = 'naive_bayes',
+  NEURAL_NETWORK = 'neural_network',
+  CNN = 'cnn',
+  RNN = 'rnn',
+  LSTM = 'lstm',
+  GRU = 'gru',
+  TRANSFORMER = 'transformer',
+  AUTOENCODER = 'autoencoder',
+  GAN = 'gan',
+  REINFORCEMENT_LEARNING = 'reinforcement_learning'
+}
+
+export interface BehavioralAnalysis {
+  id: string;
+  entity_id: string;
+  entity_type: EntityType;
+  analysis_period: TimePeriod;
+  behavior_patterns: BehaviorPattern[];
+  baseline_behavior: BaselineBehavior;
+  deviation_analysis: DeviationAnalysis;
+  trend_analysis: BehaviorTrendAnalysis;
+  segmentation_analysis: SegmentationAnalysis;
+  interaction_patterns: InteractionPattern[];
+  risk_indicators: RiskIndicator[];
+  compliance_indicators: ComplianceIndicator[];
+  performance_indicators: PerformanceIndicator[];
+  recommendations: BehavioralRecommendation[];
+  insights: BehavioralInsight[];
+}
+
+export enum EntityType {
+  USER = 'user',
+  SYSTEM = 'system',
+  APPLICATION = 'application',
+  DATA_SOURCE = 'data_source',
+  PROCESS = 'process',
+  WORKFLOW = 'workflow',
+  RESOURCE = 'resource',
+  TRANSACTION = 'transaction',
+  SESSION = 'session',
+  REQUEST = 'request'
+}
+
+export interface ThreatDetection {
+  id: string;
+  threat_type: ThreatType;
+  severity: ThreatSeverity;
+  confidence_score: number;
+  detection_time: string;
+  detection_method: ThreatDetectionMethod;
+  affected_assets: AffectedAsset[];
+  attack_vector: AttackVector;
+  threat_indicators: ThreatIndicator[];
+  intelligence_sources: IntelligenceSource[];
+  mitigation_strategies: MitigationStrategy[];
+  response_actions: ResponseAction[];
+  forensic_evidence: ForensicEvidence[];
+  attribution_analysis: AttributionAnalysis;
+  impact_assessment: ThreatImpactAssessment;
+  containment_status: ContainmentStatus;
+  investigation_status: InvestigationStatus;
+}
+
+export enum ThreatType {
+  MALWARE = 'malware',
+  PHISHING = 'phishing',
+  RANSOMWARE = 'ransomware',
+  DATA_BREACH = 'data_breach',
+  INSIDER_THREAT = 'insider_threat',
+  APT = 'apt',
+  DDoS = 'ddos',
+  SQL_INJECTION = 'sql_injection',
+  XSS = 'xss',
+  PRIVILEGE_ESCALATION = 'privilege_escalation',
+  UNAUTHORIZED_ACCESS = 'unauthorized_access',
+  DATA_EXFILTRATION = 'data_exfiltration',
+  SOCIAL_ENGINEERING = 'social_engineering',
+  SUPPLY_CHAIN_ATTACK = 'supply_chain_attack',
+  ZERO_DAY = 'zero_day',
+  BOTNET = 'botnet',
+  CRYPTOJACKING = 'cryptojacking'
+}
+
+export enum ThreatSeverity {
+  CRITICAL = 'critical',
+  HIGH = 'high',
+  MEDIUM = 'medium',
+  LOW = 'low',
+  INFORMATIONAL = 'informational'
+}
+
+export enum ThreatDetectionMethod {
+  SIGNATURE_BASED = 'signature_based',
+  BEHAVIOR_BASED = 'behavior_based',
+  ANOMALY_DETECTION = 'anomaly_detection',
+  MACHINE_LEARNING = 'machine_learning',
+  THREAT_INTELLIGENCE = 'threat_intelligence',
+  HEURISTIC_ANALYSIS = 'heuristic_analysis',
+  SANDBOXING = 'sandboxing',
+  NETWORK_ANALYSIS = 'network_analysis',
+  FILE_ANALYSIS = 'file_analysis',
+  REPUTATION_ANALYSIS = 'reputation_analysis',
+  CORRELATION_ANALYSIS = 'correlation_analysis'
+}
+
+export interface ContextualIntelligence {
+  id: string;
+  context_type: ContextType;
+  context_scope: ContextScope;
+  context_data: ContextData;
+  relevance_score: number;
+  temporal_context: TemporalContext;
+  spatial_context: SpatialContext;
+  business_context: BusinessContext;
+  technical_context: TechnicalContext;
+  environmental_context: EnvironmentalContext;
+  user_context: UserContext;
+  system_context: SystemContext;
+  relationships: ContextualRelationship[];
+  inferences: ContextualInference[];
+  recommendations: ContextualRecommendation[];
+}
+
+export enum ContextType {
+  TEMPORAL = 'temporal',
+  SPATIAL = 'spatial',
+  BUSINESS = 'business',
+  TECHNICAL = 'technical',
+  ENVIRONMENTAL = 'environmental',
+  USER = 'user',
+  SYSTEM = 'system',
+  OPERATIONAL = 'operational',
+  REGULATORY = 'regulatory',
+  ORGANIZATIONAL = 'organizational'
+}
+
+export enum ContextScope {
+  GLOBAL = 'global',
+  REGIONAL = 'regional',
+  ORGANIZATIONAL = 'organizational',
+  DEPARTMENTAL = 'departmental',
+  PROJECT = 'project',
+  SYSTEM = 'system',
+  APPLICATION = 'application',
+  USER = 'user',
+  SESSION = 'session',
+  TRANSACTION = 'transaction'
+}
+
+export interface IntelligenceReport {
+  id: string;
+  report_type: IntelligenceReportType;
+  title: string;
+  description: string;
+  generated_at: string;
+  generated_by: string;
+  report_period: TimePeriod;
+  executive_summary: ExecutiveSummary;
+  key_findings: KeyFinding[];
+  insights: ReportInsight[];
+  recommendations: ReportRecommendation[];
+  risk_assessment: RiskAssessment;
+  trend_analysis: TrendAnalysis;
+  comparative_analysis: ComparativeAnalysis;
+  predictive_analysis: PredictiveAnalysis;
+  impact_analysis: ImpactAnalysis;
+  action_plan: ActionPlan;
+  appendices: ReportAppendix[];
+  metadata: ReportMetadata;
+  distribution_list: string[];
+  classification: ReportClassification;
+}
+
+export enum IntelligenceReportType {
+  OPERATIONAL = 'operational',
+  STRATEGIC = 'strategic',
+  TACTICAL = 'tactical',
+  TECHNICAL = 'technical',
+  EXECUTIVE = 'executive',
+  INCIDENT = 'incident',
+  THREAT = 'threat',
+  VULNERABILITY = 'vulnerability',
+  COMPLIANCE = 'compliance',
+  PERFORMANCE = 'performance',
+  QUALITY = 'quality',
+  RISK = 'risk',
+  TREND = 'trend',
+  FORECAST = 'forecast',
+  COMPARATIVE = 'comparative'
+}
+
+// API Request/Response types
+export interface IntelligenceAnalysisRequest {
+  scan_ids?: string[];
+  analysis_types: IntelligenceInsightType[];
+  time_period?: TimePeriod;
+  confidence_threshold?: number;
+  include_predictions?: boolean;
+  include_recommendations?: boolean;
+  custom_parameters?: Record<string, any>;
+}
+
+export interface IntelligenceAnalysisResponse {
+  insights: ScanIntelligenceInsight[];
+  patterns: PatternRecognitionResult[];
+  anomalies: AnomalyDetectionResult[];
+  predictions: PredictiveModel[];
+  behavioral_analysis: BehavioralAnalysis[];
+  threats: ThreatDetection[];
+  contextual_intelligence: ContextualIntelligence[];
+  summary: AnalysisSummary;
+  recommendations: IntelligenceRecommendation[];
+  metadata: ResponseMetadata;
+}
+
+export interface IntelligenceMetrics {
+  total_insights_generated: number;
+  critical_insights_count: number;
+  patterns_detected: number;
+  anomalies_detected: number;
+  threats_identified: number;
+  predictions_made: number;
+  accuracy_metrics: AccuracyMetrics;
+  performance_metrics: IntelligencePerformanceMetrics;
+  business_impact_metrics: BusinessImpactMetrics;
+  user_engagement_metrics: UserEngagementMetrics;
+}
+
+export interface IntelligenceConfiguration {
+  enabled_analysis_types: IntelligenceInsightType[];
+  confidence_thresholds: Record<IntelligenceInsightType, number>;
+  real_time_analysis: boolean;
+  batch_analysis_schedule: string;
+  model_update_frequency: string;
+  data_retention_days: number;
+  privacy_settings: PrivacySettings;
+  notification_settings: IntelligenceNotificationSettings;
+  integration_settings: IntegrationSettings;
+  advanced_settings: AdvancedIntelligenceSettings;
+}
+
+// Supporting interfaces
+export interface ImpactAssessment {
+  business_impact: BusinessImpact;
+  technical_impact: TechnicalImpact;
+  financial_impact: FinancialImpact;
+  operational_impact: OperationalImpact;
+  compliance_impact: ComplianceImpact;
+  security_impact: SecurityImpact;
+  overall_impact_score: number;
+}
+
+export interface IntelligenceEvidence {
+  evidence_type: EvidenceType;
+  source: string;
+  data: any;
+  weight: number;
+  reliability_score: number;
+  timestamp: string;
+}
+
+export enum EvidenceType {
+  STATISTICAL = 'statistical',
+  OBSERVATIONAL = 'observational',
+  COMPARATIVE = 'comparative',
+  HISTORICAL = 'historical',
+  PREDICTIVE = 'predictive',
+  EXPERT_OPINION = 'expert_opinion',
+  AUTOMATED_ANALYSIS = 'automated_analysis',
+  MANUAL_ANALYSIS = 'manual_analysis'
+}
+
+export interface IntelligenceMetadata {
+  data_sources: string[];
+  analysis_methods: string[];
+  processing_time_ms: number;
+  data_quality_score: number;
+  model_versions: Record<string, string>;
+  feature_importance: Record<string, number>;
+  uncertainty_measures: UncertaintyMeasures;
+}
+
+export interface IntelligenceFeedback {
+  id: string;
+  user_id: string;
+  feedback_type: FeedbackType;
+  rating: number;
+  comments?: string;
+  accuracy_rating?: number;
+  usefulness_rating?: number;
+  actionability_rating?: number;
+  provided_at: string;
+}
+
+export enum FeedbackType {
+  ACCURACY = 'accuracy',
+  USEFULNESS = 'usefulness',
+  ACTIONABILITY = 'actionability',
+  RELEVANCE = 'relevance',
+  CLARITY = 'clarity',
+  COMPLETENESS = 'completeness',
+  TIMELINESS = 'timeliness',
+  GENERAL = 'general'
+}
+
+export interface IntelligenceActionItem {
+  id: string;
+  title: string;
+  description: string;
+  priority: ActionItemPriority;
+  category: ActionItemCategory;
+  assigned_to?: string;
+  due_date?: string;
+  status: ActionItemStatus;
+  estimated_effort: number;
+  dependencies: string[];
+  resources_required: string[];
+  success_criteria: string[];
+}
+
+export enum ActionItemPriority {
+  URGENT = 'urgent',
+  HIGH = 'high',
+  MEDIUM = 'medium',
+  LOW = 'low'
+}
+
+export enum ActionItemCategory {
+  IMMEDIATE_ACTION = 'immediate_action',
+  INVESTIGATION = 'investigation',
+  REMEDIATION = 'remediation',
+  OPTIMIZATION = 'optimization',
+  MONITORING = 'monitoring',
+  REPORTING = 'reporting',
+  TRAINING = 'training',
+  PROCESS_IMPROVEMENT = 'process_improvement'
+}
+
+export enum ActionItemStatus {
+  OPEN = 'open',
+  IN_PROGRESS = 'in_progress',
+  COMPLETED = 'completed',
+  CANCELLED = 'cancelled',
+  ON_HOLD = 'on_hold'
+}
+
+export interface TimePeriod {
+  start_date: string;
+  end_date: string;
+  timezone: string;
+  granularity: TimeGranularity;
+}
+
+export enum TimeGranularity {
+  MINUTE = 'minute',
+  HOUR = 'hour',
+  DAY = 'day',
+  WEEK = 'week',
+  MONTH = 'month',
+  QUARTER = 'quarter',
+  YEAR = 'year'
+}
+
+// Type aliases for component compatibility
+export type InsightCategory = IntelligenceCategory;
+export type InsightPriority = ActionItemPriority;
+export type InsightType = IntelligenceInsightType;
+export type InsightStatus = IntelligenceStatus;
+
+// Explicit exports for predictive analytics compatibility
+// Note: ModelType and PredictionType are now exported as enums below
+
+// Additional type aliases for predictive analytics
+export type ConfidenceLevel = 'low' | 'medium' | 'high' | 'very_high';
+
+// Explicit enum exports for better compatibility
+export enum ModelType {
+  CLASSIFICATION = 'classification',
+  REGRESSION = 'regression',
+  TIME_SERIES = 'time_series',
+  CLUSTERING = 'clustering',
+  REINFORCEMENT_LEARNING = 'reinforcement_learning',
+  ENSEMBLE = 'ensemble',
+  DEEP_LEARNING = 'deep_learning',
+  NEURAL_NETWORK = 'neural_network',
+  DECISION_TREE = 'decision_tree',
+  RANDOM_FOREST = 'random_forest',
+  GRADIENT_BOOSTING = 'gradient_boosting',
+  SVM = 'svm',
+  NAIVE_BAYES = 'naive_bayes',
+  LINEAR_MODEL = 'linear_model',
+  LOGISTIC_REGRESSION = 'logistic_regression'
+}
+
+export enum PredictionType {
+  CLASSIFICATION = 'classification',
+  REGRESSION = 'regression',
+  TIME_SERIES = 'time_series',
+  CLUSTERING = 'clustering',
+  REINFORCEMENT_LEARNING = 'reinforcement_learning',
+  ENSEMBLE = 'ensemble',
+  DEEP_LEARNING = 'deep_learning',
+  NEURAL_NETWORK = 'neural_network',
+  DECISION_TREE = 'decision_tree',
+  RANDOM_FOREST = 'random_forest',
+  GRADIENT_BOOSTING = 'gradient_boosting',
+  SVM = 'svm',
+  NAIVE_BAYES = 'naive_bayes',
+  LINEAR_MODEL = 'linear_model',
+  LOGISTIC_REGRESSION = 'logistic_regression'
+}
+
+// Additional types needed for PredictiveAnalyticsEngine
+export interface PredictiveAnalyticsConfig {
+  defaultTimeHorizon: TimeHorizon;
+  autoRetraining: boolean;
+  confidenceThreshold: number;
+  maxModels: number;
+  predictionRefreshInterval: number;
+  enableRealTimePredictions: boolean;
+  enableAnomalyDetection: boolean;
+  enableUncertaintyQuantification: boolean;
+  enableExplainability: boolean;
+  modelSelectionStrategy: string;
+  ensembleMethod: string;
+  featureSelectionMethod: string;
+  validationMethod: string;
+  hyperParameterOptimization: boolean;
+  earlyStoppingEnabled: boolean;
+  modelPersistence: boolean;
+  predictionCaching: boolean;
+  alertThresholds: {
+    accuracy: number;
+    drift: number;
+    performance: number;
+  };
+}
+
+export interface PredictionModel {
+  id: string;
+  name: string;
+  modelType: ModelType;
+  algorithm: string;
+  version: string;
+  status: ModelStatus;
+  accuracy: number;
+  lastTrained: string;
+  nextTrainingScheduled: string;
+  features: string[];
+  hyperParameters: Record<string, any>;
+  performanceMetrics: {
+    accuracy: number;
+    precision: number;
+    recall: number;
+    f1Score: number;
+    mse: number;
+    mae: number;
+  };
+}
+
+export interface ForecastResult {
+  id: string;
+  modelId: string;
+  predictionType: PredictionType;
+  targetVariable: string;
+  predictedValue: number;
+  confidenceInterval: {
+    lower: number;
+    upper: number;
+  };
+  confidence: number;
+  timestamp: string;
+  horizon: TimeHorizon;
+  features: Record<string, number>;
+  uncertainty: number;
+  trend: 'increasing' | 'decreasing' | 'stable';
+  seasonality: boolean;
+  anomalyScore: number;
+}
+
+export interface ModelAccuracy {
+  overall: number;
+  byCategory: Record<string, number>;
+  byTimePeriod: Record<string, number>;
+  trend: 'improving' | 'declining' | 'stable';
+  lastUpdated: string;
+}
+
+export interface FeatureImportance {
+  feature: string;
+  importance: number;
+  rank: number;
+  category: string;
+  description: string;
+}
+
+export interface PredictionInsight {
+  id: string;
+  type: 'optimization' | 'risk' | 'opportunity' | 'anomaly';
+  title: string;
+  description: string;
+  confidence: number;
+  impact: 'high' | 'medium' | 'low';
+  category: string;
+  recommendations: string[];
+  timestamp: string;
+  modelId: string;
+  data: Record<string, any>;
+}
+
+export interface ForecastTrend {
+  direction: 'up' | 'down' | 'stable';
+  magnitude: number;
+  confidence: number;
+  seasonality: boolean;
+  cyclicality: boolean;
+  breakpoints: string[];
+}
+
+export interface AnomalyPrediction {
+  id: string;
+  timestamp: string;
+  anomalyScore: number;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  type: string;
+  description: string;
+  affectedMetrics: string[];
+  confidence: number;
+}
+
+export interface ResourcePrediction {
+  id: string;
+  resourceType: string;
+  metric: string;
+  predictedValue: number;
+  currentValue: number;
+  trend: 'increasing' | 'decreasing' | 'stable';
+  confidence: number;
+  timestamp: string;
+  recommendations: string[];
+}
+
+export interface PerformancePrediction {
+  id: string;
+  metric: string;
+  predictedValue: number;
+  baseline: number;
+  improvement: number;
+  confidence: number;
+  timestamp: string;
+  factors: string[];
+}
+
+export interface CapacityPrediction {
+  id: string;
+  resourceType: string;
+  currentUtilization: number;
+  predictedUtilization: number;
+  capacityLimit: number;
+  timeToCapacity: number;
+  confidence: number;
+  recommendations: string[];
+}
+
+export interface RiskPrediction {
+  id: string;
+  riskType: string;
+  probability: number;
+  impact: 'low' | 'medium' | 'high' | 'critical';
+  description: string;
+  mitigationStrategies: string[];
+  confidence: number;
+  timestamp: string;
+}
+
+export interface CostPrediction {
+  id: string;
+  costCategory: string;
+  currentCost: number;
+  predictedCost: number;
+  variance: number;
+  confidence: number;
+  timestamp: string;
+  factors: string[];
+}
+
+export interface QualityPrediction {
+  id: string;
+  qualityMetric: string;
+  currentScore: number;
+  predictedScore: number;
+  trend: 'improving' | 'declining' | 'stable';
+  confidence: number;
+  timestamp: string;
+  recommendations: string[];
+}
+
+export interface CompliancePrediction {
+  id: string;
+  complianceArea: string;
+  currentStatus: string;
+  predictedStatus: string;
+  riskLevel: 'low' | 'medium' | 'high';
+  confidence: number;
+  timestamp: string;
+  requirements: string[];
+}
+
+export interface SecurityPrediction {
+  id: string;
+  threatType: string;
+  probability: number;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  description: string;
+  mitigationStrategies: string[];
+  confidence: number;
+  timestamp: string;
+}
+
+export interface BusinessPrediction {
+  id: string;
+  businessMetric: string;
+  currentValue: number;
+  predictedValue: number;
+  trend: 'positive' | 'negative' | 'neutral';
+  confidence: number;
+  timestamp: string;
+  businessImpact: string;
+}
+
+export interface ValidationMetrics {
+  accuracy: number;
+  precision: number;
+  recall: number;
+  f1Score: number;
+  auc: number;
+  mse: number;
+  mae: number;
+  r2Score: number;
+}
+
+export interface TrainingProgress {
+  currentEpoch: number;
+  totalEpochs: number;
+  currentLoss: number;
+  validationLoss: number;
+  accuracy: number;
+  status: 'training' | 'validating' | 'completed' | 'failed';
+  estimatedTimeRemaining: number;
+  currentBatch: number;
+  totalBatches: number;
+}
+
+export interface HyperParameters {
+  learningRate: number;
+  maxDepth: number;
+  nEstimators: number;
+  regularization: number;
+  batchSize: number;
+  epochs: number;
+}
+
+export interface ModelComparison {
+  modelId: string;
+  name: string;
+  accuracy: number;
+  performance: number;
+  trainingTime: number;
+  inferenceTime: number;
+  resourceUsage: number;
+  complexity: number;
+  interpretability: number;
+}
+
+export interface AutomationSuggestion {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  estimatedTimeSaved: number;
+  implementationEffort: 'low' | 'medium' | 'high';
+  priority: 'low' | 'medium' | 'high';
+  confidence: number;
+  prerequisites: string[];
+  steps: string[];
+}
+
+export interface WorkflowRecommendation {
+  id: string;
+  name: string;
+  description: string;
+  steps: WorkflowStep[];
+  involvedSPAs: string[];
+  estimatedDuration: number;
+  complexity: 'simple' | 'moderate' | 'complex';
+  priority: 'low' | 'medium' | 'high';
+  businessValue: number;
+}
+
+export interface WorkflowStep {
+  id: string;
+  name: string;
+  description: string;
+  type: 'action' | 'decision' | 'wait' | 'integration';
+  order: number;
+  dependencies: string[];
+  estimatedDuration: number;
+  requiredResources: string[];
+  outputs: string[];
+}
+
+// Supporting interfaces for existing types
+export interface BusinessContext {
+  businessUnit: string;
+  project: string;
+  priority: string;
+  impact: string;
+  stakeholders: string[];
+}
+
+export interface TechnicalContext {
+  system: string;
+  component: string;
+  version: string;
+  environment: string;
+  dependencies: string[];
+}
+
+export interface PatternOccurrence {
+  timestamp: string;
+  frequency: number;
+  context: Record<string, any>;
+}
+
+export interface RelatedPattern {
+  patternId: string;
+  relationship: string;
+  strength: number;
+}
+
+export interface PatternBusinessImpact {
+  area: string;
+  severity: string;
+  description: string;
+  metrics: Record<string, number>;
+}
+
+export interface PatternRecommendation {
+  action: string;
+  priority: string;
+  effort: string;
+  expectedOutcome: string;
+}
+
+export interface PatternValidationStatus {
+  status: 'pending' | 'validated' | 'rejected';
+  confidence: number;
+  reviewer: string;
+  notes: string;
+}
+
+// Missing enum types
+export enum TimeHorizon {
+  SHORT_TERM = 'short_term',
+  MEDIUM_TERM = 'medium_term',
+  LONG_TERM = 'long_term',
+  IMMEDIATE = 'immediate',
+  DAILY = 'daily',
+  WEEKLY = 'weekly',
+  MONTHLY = 'monthly',
+  QUARTERLY = 'quarterly',
+  YEARLY = 'yearly'
+}
+
+export enum ModelStatus {
+  DRAFT = 'draft',
+  TRAINING = 'training',
+  VALIDATION = 'validation',
+  DEPLOYED = 'deployed',
+  DEPRECATED = 'deprecated',
+  FAILED = 'failed',
+  ARCHIVED = 'archived',
+  UPDATING = 'updating',
+  TESTING = 'testing',
+  PRODUCTION = 'production'
+}
+
+// API Error type for service compatibility
+export interface APIError {
+  code: string;
+  message: string;
+  details?: any;
+  timestamp: string;
+  request_id?: string;
+}
+
+export interface StrategicInsight {
+  strategic_area: string;
+  current_position: string;
+  target_position: string;
+  strategic_actions: string[];
+  success_metrics: string[];
+}
+
+// =============================================================================
+// ML INSIGHTS TYPES FOR COMPONENT COMPATIBILITY
+// =============================================================================
+
+/**
+ * ML Insight interface for advanced analytics components
+ */
+export interface MLInsight {
+  id: string;
+  scan_id: string;
+  title: string;
+  description: string;
+  insight_type: InsightType;
+  category: InsightCategory;
+  priority: InsightPriority;
+  status: InsightStatus;
+  confidence_score: number;
+  severity: string;
+  recommendation: string;
+  impact_assessment: ImpactAssessment;
+  evidence: IntelligenceEvidence[];
+  metadata: IntelligenceMetadata;
+  tags: string[];
+  created_at: string;
+  updated_at: string;
+  resolved_at?: string;
+  feedback: IntelligenceFeedback[];
+  related_insights: string[];
+  action_items: IntelligenceActionItem[];
+  business_context: BusinessContext;
+  technical_context: TechnicalContext;
+  validation_status: string;
+  accuracy_score?: number;
+  reliability_score?: number;
+}
+
+/**
+ * Insight Type enum for ML insights
+ */
+export enum InsightType {
+  ANOMALY_DETECTION = 'anomaly_detection',
+  PATTERN_RECOGNITION = 'pattern_recognition',
+  TREND_ANALYSIS = 'trend_analysis',
+  PREDICTIVE_ANALYSIS = 'predictive_analysis',
+  CORRELATION_ANALYSIS = 'correlation_analysis',
+  BEHAVIORAL_ANALYSIS = 'behavioral_analysis',
+  PERFORMANCE_ANALYSIS = 'performance_analysis',
+  SECURITY_ANALYSIS = 'security_analysis',
+  QUALITY_ANALYSIS = 'quality_analysis',
+  COMPLIANCE_ANALYSIS = 'compliance_analysis',
+  RISK_ANALYSIS = 'risk_analysis',
+  OPTIMIZATION_OPPORTUNITY = 'optimization_opportunity',
+  RESOURCE_ANALYSIS = 'resource_analysis',
+  COST_ANALYSIS = 'cost_analysis',
+  CAPACITY_ANALYSIS = 'capacity_analysis',
+  EFFICIENCY_ANALYSIS = 'efficiency_analysis'
+}
+
+/**
+ * Insight Category enum for ML insights
+ */
+export enum InsightCategory {
+  DATA_QUALITY = 'data_quality',
+  SECURITY = 'security',
+  PERFORMANCE = 'performance',
+  COMPLIANCE = 'compliance',
+  OPERATIONS = 'operations',
+  BUSINESS = 'business',
+  TECHNICAL = 'technical',
+  FINANCIAL = 'financial',
+  STRATEGIC = 'strategic',
+  TACTICAL = 'tactical'
+}
+
+/**
+ * Insight Priority enum for ML insights
+ */
+export enum InsightPriority {
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+  CRITICAL = 'critical'
+}
+
+/**
+ * Insight Status enum for ML insights
+ */
+export enum InsightStatus {
+  NEW = 'new',
+  ACKNOWLEDGED = 'acknowledged',
+  INVESTIGATING = 'investigating',
+  IN_PROGRESS = 'in_progress',
+  RESOLVED = 'resolved',
+  DISMISSED = 'dismissed',
+  ESCALATED = 'escalated',
+  ARCHIVED = 'archived',
+  VALIDATED = 'validated',
+  ACTIVE = 'active'
+}
+
+/**
+ * Additional types for ML insights compatibility
+ */
+export interface RecommendationEngine {
+  id: string;
+  name: string;
+  type: string;
+  algorithm: string;
+  confidence: number;
+  recommendations: string[];
+}
+
+export interface CorrelationAnalysis {
+  id: string;
+  correlation_type: string;
+  strength: number;
+  significance: number;
+  variables: string[];
+  analysis: string;
+}
+
+export interface TrendAnalysisResult {
+  id: string;
+  trend_type: string;
+  direction: string;
+  magnitude: number;
+  confidence: number;
+  period: string;
+  analysis: string;
+}
+
+export interface ClusteringAnalysis {
+  id: string;
+  cluster_count: number;
+  algorithm: string;
+  silhouette_score: number;
+  clusters: any[];
+  insights: string[];
+}
+
+export interface FeatureImportanceResult {
+  id: string;
+  features: Array<{
+    name: string;
+    importance: number;
+    rank: number;
+  }>;
+  model_type: string;
+  analysis_date: string;
+}
+
+export interface ModelExplanation {
+  id: string;
+  model_id: string;
+  explanation_type: string;
+  features: string[];
+  coefficients: number[];
+  interpretation: string;
+}
+
+export interface BusinessImpactAnalysis {
+  id: string;
+  impact_area: string;
+  severity: string;
+  financial_impact: number;
+  operational_impact: string;
+  strategic_impact: string;
+}
+
+export interface ActionableInsight {
+  id: string;
+  insight_id: string;
+  action: string;
+  priority: string;
+  effort: string;
+  expected_outcome: string;
+  timeline: string;
+}
+
+export interface InsightValidation {
+  id: string;
+  insight_id: string;
+  validator: string;
+  validation_date: string;
+  confidence: number;
+  notes: string;
+  status: string;
+}
+
+export interface InsightFeedback {
+  id: string;
+  insight_id: string;
+  user_id: string;
+  rating: number;
+  comment: string;
+  timestamp: string;
+}
+
+export interface AutomatedRecommendation {
+  id: string;
+  insight_id: string;
+  recommendation: string;
+  confidence: number;
+  implementation_steps: string[];
+  expected_benefits: string[];
+}
+
+export interface IntelligentAlert {
+  id: string;
+  alert_type: string;
+  severity: string;
+  message: string;
+  timestamp: string;
+  actions: string[];
+}
+
+export interface CrossSystemCorrelation {
+  id: string;
+  systems: string[];
+  correlation_type: string;
+  strength: number;
+  insights: string[];
+}
+
+export interface PredictiveInsight {
+  id: string;
+  prediction_type: string;
+  confidence: number;
+  timeframe: string;
+  factors: string[];
+  recommendations: string[];
+}
+
+export interface OptimizationOpportunity {
+  id: string;
+  area: string;
+  current_state: string;
+  target_state: string;
+  effort_required: string;
+  expected_benefits: string[];
+}
+
+export interface RiskAssessment {
+  id: string;
+  risk_type: string;
+  probability: number;
+  impact: string;
+  mitigation_strategies: string[];
+  monitoring_requirements: string[];
+}
+
+export interface PerformanceInsight {
+  id: string;
+  metric: string;
+  current_value: number;
+  target_value: number;
+  trend: string;
+  recommendations: string[];
+}
+
+export interface QualityInsight {
+  id: string;
+  quality_dimension: string;
+  score: number;
+  issues: string[];
+  improvement_actions: string[];
+}
+
+export interface CostInsight {
+  id: string;
+  cost_category: string;
+  current_cost: number;
+  projected_cost: number;
+  savings_opportunities: string[];
+  optimization_recommendations: string[];
+}
+
+export interface SecurityInsight {
+  id: string;
+  security_concern: string;
+  risk_level: string;
+  affected_assets: string[];
+  remediation_steps: string[];
+  monitoring_requirements: string[];
+}
+
+export interface ComplianceInsight {
+  id: string;
+  compliance_requirement: string;
+  current_status: string;
+  gaps: string[];
+  remediation_actions: string[];
+  deadline: string;
+}
+
+export interface OperationalInsight {
+  operational_area: string;
+  current_efficiency: number;
+  improvement_opportunities: string[];
+  best_practices: string[];
+}
+
+// =============================================================================
+// ADDITIONAL TYPES FOR RULE DESIGNER COMPONENTS
+// =============================================================================
+
+/**
+ * AI Test Generation interface for rule testing framework
+ */
+export interface AITestGeneration {
+  id: string;
+  rule_id: string;
+  test_type: string;
+  generation_strategy: string;
+  test_cases: TestCase[];
+  coverage_metrics: CoverageMetrics;
+  confidence_score: number;
+  created_at: string;
+  status: string;
+}
+
+/**
+ * AI Test Optimization interface for rule testing framework
+ */
+export interface AITestOptimization {
+  id: string;
+  test_suite_id: string;
+  optimization_algorithm: string;
+  current_coverage: number;
+  target_coverage: number;
+  optimization_results: OptimizationResult[];
+  performance_improvements: PerformanceImprovement[];
+  created_at: string;
+}
+
+/**
+ * Test Insights interface for rule testing framework
+ */
+export interface TestInsights {
+  id: string;
+  test_run_id: string;
+  insight_type: string;
+  description: string;
+  confidence: number;
+  recommendations: string[];
+  created_at: string;
+}
+
+/**
+ * AI Insight interface for rule template library
+ */
+export interface AIInsight {
+  id: string;
+  insight_type: string;
+  title: string;
+  description: string;
+  confidence_score: number;
+  category: string;
+  priority: string;
+  recommendations: string[];
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * Pattern Suggestion interface for rule template library
+ */
+export interface PatternSuggestion {
+  id: string;
+  pattern_name: string;
+  pattern_type: string;
+  description: string;
+  use_cases: string[];
+  implementation_guidance: string;
+  confidence_score: number;
+  created_at: string;
+}
+
+// Supporting interfaces for the above types
+export interface TestCase {
+  id: string;
+  name: string;
+  description: string;
+  input_data: any;
+  expected_output: any;
+  priority: string;
+}
+
+export interface CoverageMetrics {
+  line_coverage: number;
+  branch_coverage: number;
+  function_coverage: number;
+  statement_coverage: number;
+}
+
+export interface OptimizationResult {
+  metric: string;
+  before_value: number;
+  after_value: number;
+  improvement_percentage: number;
+}
+
+export interface PerformanceImprovement {
+  area: string;
+  improvement_type: string;
+  magnitude: number;
+  description: string;
+}

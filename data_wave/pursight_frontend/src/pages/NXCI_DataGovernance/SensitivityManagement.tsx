@@ -455,7 +455,7 @@ const SensitivityManagement: React.FC = () => {
           <Route path="/labels" element={
             <AnimatedBox sx={{ p: 0 }}>
               <SensitivityLabelList />
-            </Box>
+            </AnimatedBox>
           } />
           <Route path="/assignments" element={
             <AnimatedBox sx={{ p: 3, animation: `${fadeIn} 0.5s ease-out` }}>

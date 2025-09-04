@@ -4,8 +4,8 @@ pydantic==1.10.13
 uvicorn[standard]==0.24.0
 
 # Database - CRITICAL: Fixed versions for enterprise production
-sqlmodel==0.0.14
-sqlalchemy==2.0.23
+sqlmodel==0.0.12
+sqlalchemy==1.4.53
 psycopg2-binary==2.9.7
 pymysql>=1.0.3
 pymongo>=4.3.3

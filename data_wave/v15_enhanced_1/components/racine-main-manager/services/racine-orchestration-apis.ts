@@ -26,6 +26,7 @@ import {
   ISODateString,
   OperationStatus
 } from '../types/racine-core.types';
+import { globalWebSocketManager, type MessageHandler } from './WebSocketManager';
 
 import {
   SystemHealth,
@@ -131,6 +132,7 @@ export class RacineOrchestrationAPI {
   private heartbeatInterval: NodeJS.Timeout | null = null;
   private offlineMode: boolean = false; // New property for offline mode
   private authToken: string | null = null;
+  private wsUnsubscribe?: () => void;
 
   constructor(config?: Partial<OrchestrationAPIConfig>) {
     this.config = { ...DEFAULT_CONFIG, ...config };
@@ -1356,52 +1358,21 @@ export class RacineOrchestrationAPI {
    * Connect to WebSocket
    */
   private connectWebSocket(): void {
-    try {
-      if (!this.config.websocketURL) {
-        console.warn('WebSocket URL not configured, skipping WebSocket connection');
-        return;
+    if (!this.config.websocketURL) return;
+    const wsUrl = `${this.config.websocketURL}/orchestration`;
+    const handler: MessageHandler = (data: any) => {
+      try {
+        const evt: OrchestrationEvent = typeof data === 'string' ? JSON.parse(data) : data;
+        // Optionally validate evt.type exists
+        if (evt && (evt as any).type) {
+          this.handleWebSocketEvent(evt);
+        }
+      } catch (_) {
+        // ignore
       }
-      
-      const wsUrl = `${this.config.websocketURL}/orchestration`;
-      console.log('Attempting to connect to WebSocket:', wsUrl);
-      this.websocket = new WebSocket(wsUrl);
-
-      this.websocket.onopen = () => {
-        console.log('Orchestration WebSocket connected');
-        this.reconnectAttempts = 0;
-        
-        // Send authentication if available
-        if (this.authToken) {
-          this.websocket?.send(JSON.stringify({
-            type: 'auth',
-            token: this.authToken
-          }));
-        }
-      };
-
-      this.websocket.onmessage = (event) => {
-        try {
-          const orchestrationEvent = JSON.parse(event.data) as OrchestrationEvent;
-          this.handleWebSocketEvent(orchestrationEvent);
-        } catch (error) {
-          console.warn('Failed to parse WebSocket message:', event.data, error);
-        }
-      };
-
-      this.websocket.onclose = () => {
-        console.log('Orchestration WebSocket disconnected');
-        this.handleWebSocketReconnect();
-      };
-
-      this.websocket.onerror = (error) => {
-        console.error('Orchestration WebSocket error:', error);
-        console.error('WebSocket URL:', this.config.websocketURL);
-        console.error('WebSocket readyState:', this.websocket?.readyState);
-        console.error('WebSocket URL constructed:', `${this.config.websocketURL}/orchestration`);
-      };
-
-    } catch (error) {
-      console.error('Failed to initialize WebSocket:', error);
+    };
+    if (!this.wsUnsubscribe) {
+      this.wsUnsubscribe = globalWebSocketManager.subscribe(wsUrl, handler);
     }
   }
 

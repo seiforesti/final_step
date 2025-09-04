@@ -399,7 +399,7 @@ async def update_workflow(
     try:
         logger.info(f"Updating workflow: {workflow_id} by user: {current_user.id}")
         
-        update_data = {k: v for k, v in request.dict().items() if v is not None}
+        update_data = {k: v for k, v in request.model_dump().items() if v is not None}
         
         workflow = await workflow_service.update_workflow(
             workflow_id=workflow_id,

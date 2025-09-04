@@ -16,6 +16,7 @@ from app.api.routes.ml import router as ml_routes
 from app.api.routes import classify
 from app.api.routes.role_admin import router as role_admin_router
 from app.db_session import init_db
+from app.db_session import ensure_pool_capacity, scale_up_engine
 from sqlalchemy import text
 from app.services.scheduler import schedule_tasks
 from fastapi.responses import RedirectResponse
@@ -157,10 +158,32 @@ async def startup_event():
         
         # Initialize database (non-fatal if simple health check fails)
         try:
-            await init_db()
+            # init_db is synchronous; don't await it in async context
+            init_db()
             logger.info("✅ Database initialized successfully")
         except Exception as e:
             logger.warning(f"Database initialization warning: {e}")
+        
+        # Ensure pool capacity aligns with desired settings (handles hot-reloads)
+        try:
+            ensure_pool_capacity()
+            logger.info("✅ Verified database pool capacity")
+        except Exception as e:
+            logger.warning(f"Pool capacity verification failed: {e}")
+
+        # Dynamic auto-scaling: if pool is undersized under load, scale up without restart
+        try:
+            from app.db_session import get_connection_pool_status
+            status = get_connection_pool_status()
+            pool_size = int(status.get("pool_size", 0) or 0)
+            overflow = int(status.get("overflow", 0) or 0)
+            if pool_size <= 6 and overflow <= 0:
+                target_size = 20
+                target_overflow = 10
+                if scale_up_engine(target_size, target_overflow, new_timeout=10):
+                    logger.info(f"✅ Auto-scaled DB engine to size={target_size}, overflow={target_overflow}")
+        except Exception as e:
+            logger.warning(f"Auto-scale check failed: {e}")
         
         # Start database health monitoring
         try:
@@ -312,6 +335,23 @@ app.include_router(ml_feedback_router)
 # Add new frontend-compatible notification routes
 from app.api.routes.notification_routes import router as notification_routes_router
 app.include_router(notification_routes_router)
+
+# Enhanced Health Monitoring - Frontend-Backend Integration
+from app.api.routes.enhanced_health_routes import router as enhanced_health_router
+app.include_router(enhanced_health_router, tags=["Enhanced Health Monitoring"])
+
+# Standard health routes for /health, /health/frontend-config, etc.
+from app.api.routes.health_routes import router as standard_health_router
+app.include_router(standard_health_router, tags=["Health Monitoring"])
+
+# Advanced Circuit Breaker Middleware - Database Connection Protection
+from app.core.circuit_breaker import DatabaseCircuitBreakerMiddleware
+app.add_middleware(
+    DatabaseCircuitBreakerMiddleware,
+    failure_threshold=3,
+    recovery_timeout=30.0,
+    monitor_interval=10.0
+)
 
 include_catalog_tree(app)
 

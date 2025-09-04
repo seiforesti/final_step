@@ -146,7 +146,8 @@ const nextConfig = {
   // Environment configuration for enterprise
   env: {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000",
-    NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000",
+    // Route frontend API calls through the internal Next.js proxy route
+    NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL || "/api/proxy",
     NEXT_PUBLIC_APP_ENV: process.env.NODE_ENV || "development",
   },
   

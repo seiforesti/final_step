@@ -1,235 +1,291 @@
 #!/usr/bin/env python3
 """
-Quick Fix for Database Connection Pool Issues
-This script immediately resolves the connection pool exhaustion problem
+Quick Database Connection Pool Fix
+Emergency script to resolve connection pool exhaustion issues.
 """
 
 import os
 import sys
-import signal
 import time
 import psycopg2
-from sqlalchemy import create_engine, text
+from psycopg2 import OperationalError
+import logging
 
 # Add the app directory to the path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'app')))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'app'))
 
-def kill_long_running_queries():
-    """Kill long-running queries that might be holding connections"""
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
+def get_db_connection():
+    """Get a direct database connection for emergency operations."""
     try:
-        conn = psycopg2.connect(
-            host="localhost",
-            port="5432",
-            database="data_governance",
-            user="postgres",
-            password="postgres",
-            connect_timeout=10
-        )
-        cursor = conn.cursor()
+        # Try multiple connection methods
+        connection_strings = [
+            "postgresql://postgres:postgres@data_governance_postgres:5432/data_governance",
+            "postgresql://postgres:postgres@localhost:5432/data_governance",
+            "postgresql://postgres:postgres@127.0.0.1:5432/data_governance"
+        ]
         
-        # Find long-running queries (more than 30 seconds)
-        cursor.execute("""
-            SELECT pid, query_start, state, query 
-            FROM pg_stat_activity 
-            WHERE state = 'active' 
-            AND query_start < NOW() - INTERVAL '30 seconds'
-            AND pid != pg_backend_pid()
-        """)
+        for conn_str in connection_strings:
+            try:
+                logger.info(f"Trying connection: {conn_str}")
+                conn = psycopg2.connect(conn_str)
+                logger.info("✅ Database connection successful!")
+                return conn
+            except Exception as e:
+                logger.warning(f"Connection failed: {e}")
+                continue
         
-        long_running = cursor.fetchall()
-        
-        if long_running:
-            print(f"🔍 Found {len(long_running)} long-running queries")
-            for pid, query_start, state, query in long_running:
-                print(f"   PID {pid}: {state} since {query_start}")
-                print(f"   Query: {query[:100]}...")
-                
-                # Kill the query
-                try:
-                    cursor.execute(f"SELECT pg_terminate_backend({pid})")
-                    print(f"   ✅ Terminated PID {pid}")
-                except Exception as e:
-                    print(f"   ❌ Failed to terminate PID {pid}: {e}")
-        else:
-            print("✅ No long-running queries found")
-            
-        cursor.close()
-        conn.close()
+        raise Exception("All connection attempts failed")
         
     except Exception as e:
-        print(f"❌ Error checking long-running queries: {e}")
+        logger.error(f"Failed to connect to database: {e}")
+        return None
 
-def reset_connection_pool():
-    """Reset the SQLAlchemy connection pool"""
+def check_postgres_connections(conn):
+    """Check current PostgreSQL connection status."""
     try:
-        from app.db_session import engine
-        
-        print("🔄 Resetting SQLAlchemy connection pool...")
-        
-        # Dispose the current pool
-        engine.pool.dispose()
-        print("   ✅ Pool disposed")
-        
-        # Wait a moment for cleanup
-        time.sleep(2)
-        
-        # Test a new connection
-        with engine.connect() as conn:
-            result = conn.execute(text("SELECT 1"))
-            if result.fetchone()[0] == 1:
-                print("   ✅ New connection test successful")
-                return True
-            else:
-                print("   ❌ New connection test failed")
-                return False
-                
-    except Exception as e:
-        print(f"❌ Error resetting connection pool: {e}")
-        return False
-
-def optimize_postgres_settings():
-    """Optimize PostgreSQL settings for better connection handling"""
-    try:
-        conn = psycopg2.connect(
-            host="localhost",
-            port="5432",
-            database="data_governance",
-            user="postgres",
-            password="postgres",
-            connect_timeout=10
-        )
-        cursor = conn.cursor()
-        
-        print("⚙️  Optimizing PostgreSQL settings...")
-        
-        # Check current settings
-        cursor.execute("SHOW max_connections")
-        max_conn = cursor.fetchone()[0]
-        
-        cursor.execute("SHOW shared_preload_libraries")
-        shared_libs = cursor.fetchone()[0]
-        
-        print(f"   Current max_connections: {max_conn}")
-        print(f"   Shared libraries: {shared_libs}")
-        
-        # Optimize connection settings (if we have superuser privileges)
-        try:
-            # Increase max connections temporarily
-            cursor.execute("ALTER SYSTEM SET max_connections = '200'")
-            cursor.execute("ALTER SYSTEM SET shared_preload_libraries = 'pg_stat_statements'")
-            cursor.execute("SELECT pg_reload_conf()")
-            print("   ✅ PostgreSQL settings optimized")
-        except Exception as e:
-            print(f"   ⚠️  Could not optimize settings (may need superuser): {e}")
-        
-        cursor.close()
-        conn.close()
-        
-    except Exception as e:
-        print(f"❌ Error optimizing PostgreSQL: {e}")
-
-def cleanup_idle_connections():
-    """Clean up idle connections"""
-    try:
-        conn = psycopg2.connect(
-            host="localhost",
-            port="5432",
-            database="data_governance",
-            user="postgres",
-            password="postgres",
-            connect_timeout=10
-        )
-        cursor = conn.cursor()
-        
-        # Count idle connections
-        cursor.execute("""
-            SELECT count(*) 
-            FROM pg_stat_activity 
-            WHERE state = 'idle' 
-            AND pid != pg_backend_pid()
-        """)
-        
-        idle_count = cursor.fetchone()[0]
-        print(f"🔍 Found {idle_count} idle connections")
-        
-        if idle_count > 10:  # If more than 10 idle connections
-            print("   🧹 Cleaning up idle connections...")
-            
-            # Terminate idle connections older than 5 minutes
+        with conn.cursor() as cursor:
+            # Check current connections
             cursor.execute("""
-                SELECT pg_terminate_backend(pid) 
+                SELECT 
+                    count(*) as total_connections,
+                    count(*) FILTER (WHERE state = 'active') as active_connections,
+                    count(*) FILTER (WHERE state = 'idle') as idle_connections,
+                    count(*) FILTER (WHERE state = 'idle in transaction') as idle_in_transaction,
+                    count(*) FILTER (WHERE state = 'disabled') as disabled_connections
                 FROM pg_stat_activity 
-                WHERE state = 'idle' 
-                AND pid != pg_backend_pid()
-                AND state_change < NOW() - INTERVAL '5 minutes'
+                WHERE datname = 'data_governance'
             """)
             
-            terminated = cursor.rowcount
-            print(f"   ✅ Terminated {terminated} idle connections")
-        
-        cursor.close()
-        conn.close()
-        
-    except Exception as e:
-        print(f"❌ Error cleaning up idle connections: {e}")
-
-def main():
-    """Main fix function"""
-    print("🚀 Quick Fix for Database Connection Pool Issues")
-    print("=" * 60)
-    
-    # Step 1: Kill long-running queries
-    print("\n1️⃣  Killing long-running queries...")
-    kill_long_running_queries()
-    
-    # Step 2: Clean up idle connections
-    print("\n2️⃣  Cleaning up idle connections...")
-    cleanup_idle_connections()
-    
-    # Step 3: Reset connection pool
-    print("\n3️⃣  Resetting connection pool...")
-    pool_reset = reset_connection_pool()
-    
-    # Step 4: Optimize PostgreSQL settings
-    print("\n4️⃣  Optimizing PostgreSQL settings...")
-    optimize_postgres_settings()
-    
-    # Step 5: Final health check
-    print("\n5️⃣  Final health check...")
-    try:
-        from app.db_session import engine
-        
-        pool_size = engine.pool.size()
-        checked_in = engine.pool.checkedin()
-        checked_out = engine.pool.checkedout()
-        overflow = engine.pool.overflow()
-        
-        print(f"   📊 Pool Status: {checked_out}/{pool_size + overflow} connections in use")
-        
-        if checked_out < (pool_size + overflow) * 0.8:  # Less than 80% usage
-            print("   ✅ Connection pool is healthy")
-        else:
-            print("   ⚠️  Connection pool still has high usage")
+            result = cursor.fetchone()
+            if result:
+                total, active, idle, idle_txn, disabled = result
+                logger.info(f"📊 Connection Status:")
+                logger.info(f"   Total: {total}")
+                logger.info(f"   Active: {active}")
+                logger.info(f"   Idle: {idle}")
+                logger.info(f"   Idle in Transaction: {idle_txn}")
+                logger.info(f"   Disabled: {disabled}")
+                
+                return {
+                    'total': total,
+                    'active': active,
+                    'idle': idle,
+                    'idle_txn': idle_txn,
+                    'disabled': disabled
+                }
             
     except Exception as e:
-        print(f"   ❌ Health check failed: {e}")
+        logger.error(f"Error checking connections: {e}")
+        return None
+
+def kill_idle_connections(conn, max_idle_time_minutes=5):
+    """Kill idle connections that have been idle for too long."""
+    try:
+        with conn.cursor() as cursor:
+            # Find and kill idle connections
+            cursor.execute("""
+                SELECT 
+                    pid,
+                    usename,
+                    application_name,
+                    client_addr,
+                    state,
+                    state_change,
+                    EXTRACT(EPOCH FROM (now() - state_change))/60 as idle_minutes
+                FROM pg_stat_activity 
+                WHERE datname = 'data_governance' 
+                AND state = 'idle'
+                AND EXTRACT(EPOCH FROM (now() - state_change))/60 > %s
+                AND pid <> pg_backend_pid()
+            """, (max_idle_time_minutes,))
+            
+            idle_connections = cursor.fetchall()
+            
+            if not idle_connections:
+                logger.info("✅ No long-idle connections found")
+                return 0
+            
+            logger.info(f"🔍 Found {len(idle_connections)} long-idle connections:")
+            killed_count = 0
+            
+            for conn_info in idle_connections:
+                pid, user, app, client, state, state_change, idle_mins = conn_info
+                logger.info(f"   PID {pid}: {user}@{client} ({app}) - idle for {idle_mins:.1f} minutes")
+                
+                try:
+                    cursor.execute("SELECT pg_terminate_backend(%s)", (pid,))
+                    if cursor.rowcount > 0:
+                        killed_count += 1
+                        logger.info(f"   ✅ Killed PID {pid}")
+                    else:
+                        logger.warning(f"   ❌ Failed to kill PID {pid}")
+                except Exception as e:
+                    logger.error(f"   ❌ Error killing PID {pid}: {e}")
+            
+            logger.info(f"✅ Killed {killed_count} idle connections")
+            return killed_count
+            
+    except Exception as e:
+        logger.error(f"Error killing idle connections: {e}")
+        return 0
+
+def kill_idle_transactions(conn, max_idle_time_minutes=2):
+    """Kill connections that are idle in transaction for too long."""
+    try:
+        with conn.cursor() as cursor:
+            # Find and kill idle in transaction connections
+            cursor.execute("""
+                SELECT 
+                    pid,
+                    usename,
+                    application_name,
+                    client_addr,
+                    state,
+                    state_change,
+                    EXTRACT(EPOCH FROM (now() - state_change))/60 as idle_minutes
+                FROM pg_stat_activity 
+                WHERE datname = 'data_governance' 
+                AND state = 'idle in transaction'
+                AND EXTRACT(EPOCH FROM (now() - state_change))/60 > %s
+                AND pid <> pg_backend_pid()
+            """, (max_idle_time_minutes,))
+            
+            idle_txn_connections = cursor.fetchall()
+            
+            if not idle_txn_connections:
+                logger.info("✅ No long-idle transactions found")
+                return 0
+            
+            logger.info(f"🔍 Found {len(idle_txn_connections)} long-idle transactions:")
+            killed_count = 0
+            
+            for conn_info in idle_txn_connections:
+                pid, user, app, client, state, state_change, idle_mins = conn_info
+                logger.info(f"   PID {pid}: {user}@{client} ({app}) - idle in transaction for {idle_mins:.1f} minutes")
+                
+                try:
+                    cursor.execute("SELECT pg_terminate_backend(%s)", (pid,))
+                    if cursor.rowcount > 0:
+                        killed_count += 1
+                        logger.info(f"   ✅ Killed PID {pid}")
+                    else:
+                        logger.warning(f"   ❌ Failed to kill PID {pid}")
+                except Exception as e:
+                    logger.error(f"   ❌ Error killing PID {pid}: {e}")
+            
+            logger.info(f"✅ Killed {killed_count} idle transaction connections")
+            return killed_count
+            
+    except Exception as e:
+        logger.error(f"Error killing idle transactions: {e}")
+        return 0
+
+def reset_connection_pool():
+    """Reset the connection pool by killing all non-essential connections."""
+    try:
+        conn = get_db_connection()
+        if not conn:
+            logger.error("❌ Cannot reset pool without database connection")
+            return False
+        
+        logger.info("🔄 Starting connection pool reset...")
+        
+        # Check current status
+        initial_status = check_postgres_connections(conn)
+        if not initial_status:
+            logger.error("❌ Cannot determine current connection status")
+            return False
+        
+        # Kill idle connections first
+        killed_idle = kill_idle_connections(conn, max_idle_time_minutes=1)
+        
+        # Kill idle transactions
+        killed_txn = kill_idle_transactions(conn, max_idle_time_minutes=1)
+        
+        # Wait a moment for connections to close
+        time.sleep(2)
+        
+        # Check final status
+        final_status = check_postgres_connections(conn)
+        if final_status:
+            logger.info("📊 Final Connection Status:")
+            logger.info(f"   Total: {final_status['total']} (was {initial_status['total']})")
+            logger.info(f"   Active: {final_status['active']} (was {initial_status['active']})")
+            logger.info(f"   Idle: {final_status['idle']} (was {initial_status['idle']})")
+            logger.info(f"   Idle in Transaction: {final_status['idle_txn']} (was {initial_status['idle_txn']})")
+        
+        conn.close()
+        logger.info("✅ Connection pool reset completed")
+        return True
+        
+    except Exception as e:
+        logger.error(f"❌ Error during connection pool reset: {e}")
+        return False
+
+def main():
+    """Main function to fix the connection pool issue."""
+    logger.info("🚀 Starting Database Connection Pool Fix...")
     
-    print("\n" + "=" * 60)
-    print("🎯 Quick Fix Complete!")
-    print("   The connection pool issues should now be resolved.")
-    print("   If problems persist, restart the backend service.")
+    # Try to connect first
+    conn = get_db_connection()
+    if not conn:
+        logger.error("❌ Cannot connect to database. Check if PostgreSQL is running.")
+        return False
     
-    return 0 if pool_reset else 1
+    try:
+        # Check initial status
+        logger.info("📊 Checking initial connection status...")
+        initial_status = check_postgres_connections(conn)
+        
+        if initial_status and initial_status['total'] > 50:
+            logger.warning("⚠️  High connection count detected. Starting aggressive cleanup...")
+            
+            # Kill long-idle connections
+            killed_idle = kill_idle_connections(conn, max_idle_time_minutes=2)
+            
+            # Kill long-idle transactions
+            killed_txn = kill_idle_transactions(conn, max_idle_time_minutes=1)
+            
+            # Wait for cleanup to take effect
+            time.sleep(3)
+            
+            # Check final status
+            final_status = check_postgres_connections(conn)
+            if final_status:
+                logger.info("📊 After cleanup:")
+                logger.info(f"   Total: {final_status['total']} (was {initial_status['total']})")
+                logger.info(f"   Active: {final_status['active']} (was {initial_status['active']})")
+                logger.info(f"   Idle: {final_status['idle']} (was {initial_status['idle']})")
+                logger.info(f"   Idle in Transaction: {final_status['idle_txn']} (was {initial_status['idle_txn']})")
+            
+            if final_status and final_status['total'] < 30:
+                logger.info("✅ Connection pool cleanup successful!")
+                return True
+            else:
+                logger.warning("⚠️  Connection count still high. Consider restarting the backend service.")
+                return False
+        else:
+            logger.info("✅ Connection count is within normal limits")
+            return True
+            
+    except Exception as e:
+        logger.error(f"❌ Error during cleanup: {e}")
+        return False
+    finally:
+        if conn:
+            conn.close()
 
 if __name__ == "__main__":
-    try:
-        exit_code = main()
-        sys.exit(exit_code)
-    except KeyboardInterrupt:
-        print("\n\n⏹️  Fix interrupted by user")
-        sys.exit(1)
-    except Exception as e:
-        print(f"\n\n❌ Unexpected error: {e}")
+    success = main()
+    if success:
+        logger.info("🎉 Database connection pool fix completed successfully!")
+        sys.exit(0)
+    else:
+        logger.error("💥 Database connection pool fix failed!")
         sys.exit(1)
 
 

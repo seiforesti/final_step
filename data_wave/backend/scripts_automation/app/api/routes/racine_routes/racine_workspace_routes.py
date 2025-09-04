@@ -256,7 +256,7 @@ async def update_workspace(
             raise HTTPException(status_code=403, detail="Insufficient permissions")
         
         # Prepare update data
-        update_data = {k: v for k, v in request.dict().items() if v is not None}
+        update_data = {k: v for k, v in request.model_dump().items() if v is not None}
         
         # Update workspace
         workspace = await workspace_service.update_workspace(

@@ -408,10 +408,11 @@ class DataSourceService:
 
         # Calculate entity stats from scan results
         entity_stats = {"total_entities": 0, "tables": 0, "views": 0, "stored_procedures": 0}
+        scan_results: List[ScanResult] = []
         if latest_scan:
-            scan_results = cast(List[ScanResult], session.execute(
+            scan_results = session.execute(
                 select(ScanResult).where(ScanResult.scan_id == latest_scan.id)
-            ).all())
+            ).scalars().all()
             
             tables = set()
             views = set()
@@ -492,7 +493,7 @@ class DataSourceService:
         # Get compliance stats
         compliance_stats = {
             "compliance_score": str(data_source.compliance_score or 0),
-            "violations": sum(1 for r in scan_results if r.compliance_issues),
+            "violations": sum(1 for r in scan_results if getattr(r, "compliance_issues", None)),
             "last_audit": data_source.last_scan.isoformat() if data_source.last_scan else None
         }
 

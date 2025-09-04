@@ -1,3 +1,4 @@
+from app.utils.serialization_utils import safe_serialize_model, safe_serialize_list
 """
 Enterprise Scan Performance Monitoring API Routes
 
@@ -94,7 +95,7 @@ async def get_performance_metrics(
         return SuccessResponse(
             message="Performance metrics retrieved successfully",
             data={
-                "metrics": [PerformanceMetricResponse.from_orm(metric) for metric in metrics],
+                "metrics": [PerformanceMetricResponse.model_validate(metric, from_attributes=True) for metric in metrics],
                 "summary": await performance_service.get_metrics_summary(metrics),
                 "trends": await performance_service.get_metrics_trends(metrics) if include_history else None
             }
@@ -149,7 +150,7 @@ async def record_performance_metric(
         return SuccessResponse(
             message="Performance metric recorded successfully",
             data={
-                "metric": PerformanceMetricResponse.from_orm(metric),
+                "metric": PerformanceMetricResponse.model_validate(metric, from_attributes=True),
                 "status": metric.status.value,
                 "alerts_triggered": await performance_service.check_metric_alerts(metric.metric_id)
             }
@@ -193,7 +194,7 @@ async def get_performance_metric(
         
         return SuccessResponse(
             message="Performance metric retrieved successfully",
-            data={"metric": PerformanceMetricResponse.from_orm(metric)}
+            data={"metric": PerformanceMetricResponse.model_validate(metric, from_attributes=True)}
         )
         
     except HTTPException:
@@ -253,7 +254,7 @@ async def create_performance_optimization(
         return SuccessResponse(
             message="Performance optimization created successfully",
             data={
-                "optimization": PerformanceOptimizationResponse.from_orm(optimization),
+                "optimization": PerformanceOptimizationResponse.model_validate(optimization, from_attributes=True),
                 "execution_status": "started" if request.auto_execute else "pending",
                 "estimated_impact": optimization.estimated_impact
             }
@@ -355,7 +356,7 @@ async def list_performance_optimizations(
         return SuccessResponse(
             message="Performance optimizations retrieved successfully",
             data={
-                "optimizations": [PerformanceOptimizationResponse.from_orm(opt) for opt in optimizations],
+                "optimizations": [PerformanceOptimizationResponse.model_validate(opt, from_attributes=True) for opt in optimizations],
                 "pagination": {
                     "page": page,
                     "page_size": page_size,
@@ -543,7 +544,7 @@ async def create_performance_alert(
         return SuccessResponse(
             message="Performance alert created successfully",
             data={
-                "alert": PerformanceAlertResponse.from_orm(alert),
+                "alert": PerformanceAlertResponse.model_validate(alert, from_attributes=True),
                 "monitoring_status": "active" if request.is_active else "inactive"
             }
         )
@@ -597,7 +598,7 @@ async def list_performance_alerts(
         return SuccessResponse(
             message="Performance alerts retrieved successfully",
             data={
-                "alerts": [PerformanceAlertResponse.from_orm(alert) for alert in alerts],
+                "alerts": [PerformanceAlertResponse.model_validate(alert, from_attributes=True) for alert in alerts],
                 "pagination": {
                     "page": page,
                     "page_size": page_size,
@@ -664,7 +665,7 @@ async def create_performance_benchmark(
         
         return SuccessResponse(
             message="Performance benchmark created successfully",
-            data={"benchmark": PerformanceBenchmarkResponse.from_orm(benchmark)}
+            data={"benchmark": PerformanceBenchmarkResponse.model_validate(benchmark, from_attributes=True)}
         )
         
     except Exception as e:
@@ -713,7 +714,7 @@ async def list_performance_benchmarks(
         return SuccessResponse(
             message="Performance benchmarks retrieved successfully",
             data={
-                "benchmarks": [PerformanceBenchmarkResponse.from_orm(benchmark) for benchmark in benchmarks],
+                "benchmarks": [PerformanceBenchmarkResponse.model_validate(benchmark, from_attributes=True) for benchmark in benchmarks],
                 "pagination": {
                     "page": page,
                     "page_size": page_size,
@@ -861,7 +862,7 @@ async def generate_performance_report(
         return SuccessResponse(
             message="Performance report generation started",
             data={
-                "report": PerformanceReportResponse.from_orm(report),
+                "report": PerformanceReportResponse.model_validate(report, from_attributes=True),
                 "generation_status": "started" if request.auto_generate else "pending"
             }
         )

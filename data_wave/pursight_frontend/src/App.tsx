@@ -35,6 +35,7 @@ import { RBACContext } from "./hooks/useRBAC";
 import DataSourceConnectPage from "./pages/datasource/DataSourceConnectPage";
 import DataMapDesignerPage from "./pages/datamap/DataMapDesignerPage";
 import MainPage from "./pages/NXCI_DataGovernance/MainPage";
+import { RacineMainManagerSPA } from "./racine-main-manager/index";
 
 // AuthRoute component for protected routes (fixes React hook rules)
 type AuthRouteProps = Readonly<{
@@ -66,8 +67,8 @@ export default function App() {
                   element={<AuthRoute element={<MainPage />} />}
                 />
                 {/* Home and other dashboard routes */}
-                <Route index path="/" element={<HomePursight />} />
-                <Route index path="/home_pursight" element={<HomePursight />} />
+                <Route index path="/" element={<RacineMainManagerSPA />} />
+                <Route index path="/home_pursight" element={<RacineMainManagerSPA />} />
                 <Route path="/profile" element={<UserProfiles />} />
                 <Route path="/calendar" element={<Calendar />} />
                 <Route path="/blank" element={<Blank />} />

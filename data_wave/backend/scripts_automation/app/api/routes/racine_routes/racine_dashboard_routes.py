@@ -211,7 +211,7 @@ async def update_dashboard(
         dashboard_service = RacineDashboardService(db)
         
         # Prepare update data
-        update_data = {k: v for k, v in request.dict().items() if v is not None}
+        update_data = {k: v for k, v in request.model_dump().items() if v is not None}
         
         # Update dashboard
         dashboard = await dashboard_service.update_dashboard(

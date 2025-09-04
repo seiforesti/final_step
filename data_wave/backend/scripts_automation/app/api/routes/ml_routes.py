@@ -513,7 +513,7 @@ async def create_ml_model_config(
         
         # Create model configuration
         config = await ml_service.create_ml_model_config(
-            session, current_user, request.dict()
+            session, current_user, request.model_dump()
         )
         
         return {
@@ -654,7 +654,7 @@ async def create_training_dataset(
         
         # Create dataset
         dataset = await ml_service.create_training_dataset(
-            session, current_user, request.dict()
+            session, current_user, request.model_dump()
         )
         
         return {
@@ -723,7 +723,7 @@ async def start_training_job(
         
         # Start training job
         job = await ml_service.start_training_job(
-            session, current_user, request.dict()
+            session, current_user, request.model_dump()
         )
         
         return {
@@ -799,7 +799,7 @@ async def create_ml_prediction(
         
         # Create prediction
         prediction = await ml_service.create_ml_prediction(
-            session, current_user, request.dict()
+            session, current_user, request.model_dump()
         )
         
         return {
@@ -836,7 +836,7 @@ async def create_batch_predictions(
         
         # Create batch predictions
         predictions = await ml_service.batch_predict(
-            session, current_user, request.dict()
+            session, current_user, request.model_dump()
         )
         
         return {
@@ -875,7 +875,7 @@ async def submit_ml_feedback(
         
         # Submit feedback
         feedback = await ml_service.submit_ml_feedback(
-            session, current_user, request.dict()
+            session, current_user, request.model_dump()
         )
         
         return {
@@ -946,7 +946,7 @@ async def create_ml_experiment(
         
         # Create experiment
         experiment = await ml_service.create_ml_experiment(
-            session, current_user, request.dict()
+            session, current_user, request.model_dump()
         )
         
         return {

@@ -117,7 +117,7 @@ async def google_callback(request: Request, code: Optional[str] = None, state: O
             },
         )
         token_response.raise_for_status()
-        tokens = token_response.json()
+        tokens = token_response.model_dump_json()
         access_token = tokens.get("access_token")
         logger.info(f"Access token received: {bool(access_token)}")
         if not access_token:
@@ -130,7 +130,7 @@ async def google_callback(request: Request, code: Optional[str] = None, state: O
             headers={"Authorization": f"Bearer {access_token}"},
         )
         userinfo_response.raise_for_status()
-        userinfo = userinfo_response.json()
+        userinfo = userinfo_response.model_dump_json()
         
         user_email = userinfo.get("email")
         first_name = userinfo.get("given_name")
@@ -239,7 +239,7 @@ async def microsoft_callback(request: Request, code: Optional[str] = None, state
             },
         )
         token_response.raise_for_status()
-        tokens = token_response.json()
+        tokens = token_response.model_dump_json()
         access_token = tokens.get("access_token")
         
         logger.info(f"Microsoft access token received: {bool(access_token)}")
@@ -252,7 +252,7 @@ async def microsoft_callback(request: Request, code: Optional[str] = None, state
             headers={"Authorization": f"Bearer {access_token}"},
         )
         userinfo_response.raise_for_status()
-        userinfo = userinfo_response.json()
+        userinfo = userinfo_response.model_dump_json()
         
         # Get user photo
         photo_url = None
@@ -411,7 +411,7 @@ from fastapi import Request
 
 @router.post("/verify")
 async def email_verify(request: Request, db: Session = Depends(get_db)):
-    data = await request.json()
+    data = await request.model_dump_json()
     email = data.get("email", "").strip().lower()
     code = data.get("code", "").strip()
     if not email or not code:

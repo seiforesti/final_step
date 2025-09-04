@@ -568,7 +568,7 @@ async def create_ai_model_config(
         
         # Create AI model configuration
         config = await ai_service.create_ai_model_config(
-            session, current_user, request.dict()
+            session, current_user, request.model_dump()
         )
         
         return {
@@ -711,7 +711,7 @@ async def start_ai_conversation(
         
         # Start conversation
         conversation = await ai_service.start_ai_conversation(
-            session, current_user, request.dict()
+            session, current_user, request.model_dump()
         )
         
         return {
@@ -851,7 +851,7 @@ async def create_ai_prediction(
         
         # Create AI prediction
         prediction = await ai_service.create_ai_prediction(
-            session, current_user, request.dict()
+            session, current_user, request.model_dump()
         )
         
         return {
@@ -945,7 +945,7 @@ async def submit_ai_feedback(
         
         # Submit feedback
         feedback = await ai_service.submit_ai_feedback(
-            session, current_user, request.dict()
+            session, current_user, request.model_dump()
         )
         
         return {
@@ -983,7 +983,7 @@ async def create_knowledge_entry(
         
         # Create knowledge entry
         knowledge = await ai_service.create_knowledge_entry(
-            session, current_user, request.dict()
+            session, current_user, request.model_dump()
         )
         
         return {

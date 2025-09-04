@@ -27,6 +27,7 @@ import {
   ISODateString,
   OperationStatus
 } from '../types/racine-core.types';
+import { globalWebSocketManager, type MessageHandler } from './WebSocketManager';
 
 import {
   RBACVisualization,
@@ -99,11 +100,12 @@ export type UserManagementEventHandler = (event: UserManagementEvent) => void;
  */
 class UserManagementAPI {
   private config: UserManagementAPIConfig;
-  private websocket: WebSocket | null = null;
+  private websocket: WebSocket | null = null; // kept for backward compatibility; not used with manager
   private eventHandlers: Map<UserManagementEventType, UserManagementEventHandler[]> = new Map();
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
   private offlineMode: boolean = false; // New property for offline mode
+  private wsUnsubscribe?: () => void;
 
   constructor(config: Partial<UserManagementAPIConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
@@ -762,52 +764,27 @@ class UserManagementAPI {
   }
 
   private connectWebSocket(): void {
-    if (this.websocket?.readyState === WebSocket.OPEN) {
-      return;
-    }
-
+    if (!this.config.websocketURL) return;
     const token = this.getAuthToken();
     if (!token) {
       console.warn('No auth token available for WebSocket connection');
       return;
     }
 
-    try {
-      const wsUrl = `${this.config.websocketURL}/user-management?token=${encodeURIComponent(token)}`;
-      this.websocket = new WebSocket(wsUrl);
+    const wsUrl = `${this.config.websocketURL}/user-management?token=${encodeURIComponent(token)}`;
+    // Use shared manager; store unsubscribe to allow cleanup
+    const handler: MessageHandler = (data: any) => {
+      try {
+        const event: UserManagementEvent = typeof data === 'string' ? JSON.parse(data) : data;
+        this.handleWebSocketEvent(event);
+      } catch (e) {
+        // ignore malformed
+      }
+    };
 
-      this.websocket.onopen = () => {
-        console.log('User management WebSocket connected');
-        this.reconnectAttempts = 0;
-      };
-
-      this.websocket.onmessage = (event) => {
-        try {
-          const userManagementEvent: UserManagementEvent = JSON.parse(event.data);
-          this.handleWebSocketEvent(userManagementEvent);
-        } catch (error) {
-          console.error('Error parsing WebSocket message:', error);
-        }
-      };
-
-      this.websocket.onclose = (event) => {
-        console.log('User management WebSocket disconnected:', event.code, event.reason);
-        this.websocket = null;
-        
-        // Attempt to reconnect if not a clean close
-        if (event.code !== 1000 && this.reconnectAttempts < this.maxReconnectAttempts) {
-          this.reconnectAttempts++;
-          setTimeout(() => {
-            this.connectWebSocket();
-          }, Math.min(30000, 1000 * Math.pow(2, this.reconnectAttempts)));
-        }
-      };
-
-      this.websocket.onerror = (error) => {
-        console.error('User management WebSocket error:', error);
-      };
-    } catch (error) {
-      console.error('Failed to create WebSocket connection:', error);
+    // If already subscribed, skip
+    if (!this.wsUnsubscribe) {
+      this.wsUnsubscribe = globalWebSocketManager.subscribe(wsUrl, handler);
     }
   }
 

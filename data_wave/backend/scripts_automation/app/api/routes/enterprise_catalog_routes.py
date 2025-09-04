@@ -1,3 +1,4 @@
+from app.utils.serialization_utils import safe_serialize_model, safe_serialize_list
 """
 Enterprise Data Catalog API Routes - Advanced Production Implementation
 =====================================================================
@@ -293,7 +294,7 @@ async def create_intelligent_asset(
         )
         
         # Convert to response model
-        response = IntelligentAssetResponse.from_orm(intelligent_asset)
+        response = IntelligentAssetResponse.model_validate(intelligent_asset, from_attributes=True)
         
         logger.info(
             "Intelligent data asset created successfully",
@@ -391,12 +392,12 @@ async def get_intelligent_asset(
             )
         
         # Convert to response model
-        response = IntelligentAssetResponse.from_orm(asset)
+        response = IntelligentAssetResponse.model_validate(asset, from_attributes=True)
         
         # Cache the result
         await cache.set(
             cache_key, 
-            response.dict(), 
+            response.model_dump(), 
             expire=300  # 5 minutes
         )
         
@@ -558,7 +559,7 @@ async def update_intelligent_asset(
         )
         
         # Convert to response model
-        response = IntelligentAssetResponse.from_orm(asset)
+        response = IntelligentAssetResponse.model_validate(asset, from_attributes=True)
         
         logger.info(
             "Asset updated successfully",

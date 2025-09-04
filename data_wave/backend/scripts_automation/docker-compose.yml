@@ -16,17 +16,19 @@ services:
       - DB_URL=postgresql://postgres:postgres@data_governance_postgres:5432/data_governance
       - REDIS_URL=redis://data_governance_redis:6379
       - ENVIRONMENT=development
+      # Disable SQLAlchemy pool_pre_ping when behind PgBouncer/transaction pooling to avoid psycopg2 autocommit errors
+      - DB_USE_PGBOUNCER=true
       - LOG_LEVEL=INFO
-      # DB pool & concurrency safety
-      - DB_POOL_SIZE=6
-      - DB_MAX_OVERFLOW=0
-      - DB_POOL_TIMEOUT=2
-      - MAX_CONCURRENT_DB_REQUESTS=6
-      - DB_SEMAPHORE_TIMEOUT=0.02
-      # Auto cleanup under high utilization
+      # DB pool & concurrency safety - OPTIMIZED FOR ENTERPRISE LOAD
+      - DB_POOL_SIZE=15
+      - DB_MAX_OVERFLOW=5
+      - DB_POOL_TIMEOUT=60
+      - MAX_CONCURRENT_DB_REQUESTS=15
+      - DB_SEMAPHORE_TIMEOUT=5
+      # Auto cleanup under high utilization - MORE AGGRESSIVE
       - AUTO_FORCE_DB_CLEANUP=true
-      - CLEANUP_UTIL_THRESHOLD=95
-      - CLEANUP_MIN_INTERVAL_SEC=120
+      - CLEANUP_UTIL_THRESHOLD=60
+      - CLEANUP_MIN_INTERVAL_SEC=15
       # Frontend URL used for OAuth callbacks/root redirects
       - FRONTEND_URL=http://localhost:3000/app
       # Disable optional performance service to avoid startup errors

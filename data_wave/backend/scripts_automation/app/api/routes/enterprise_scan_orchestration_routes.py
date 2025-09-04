@@ -575,12 +575,12 @@ async def start_orchestration_system(
             user_id=current_user.get("user_id"),
             resource_type="orchestration_system",
             resource_id="global",
-            metadata={"config": config.dict() if config else None}
+            metadata={"config": config.model_dump() if config else None}
         )
         
         # Apply configuration if provided
         if config:
-            await orchestrator.apply_configuration(config.dict())
+            await orchestrator.apply_configuration(config.model_dump())
         
         # Start orchestration system
         await orchestrator.start_orchestration()
@@ -929,11 +929,11 @@ async def update_configuration(
             user_id=current_user.get("user_id"),
             resource_type="orchestration_system",
             resource_id="global",
-            metadata=config.dict()
+            metadata=config.model_dump()
         )
         
         # Update configuration
-        result = await orchestrator.update_configuration(config.dict())
+        result = await orchestrator.update_configuration(config.model_dump())
         
         return SuccessResponse(
             message="Configuration updated successfully",

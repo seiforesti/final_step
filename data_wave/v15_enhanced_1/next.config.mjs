@@ -20,72 +20,20 @@ const nextConfig = {
     },
   },
   env: {
-    NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000',
+    // Route all frontend API calls through the internal Next.js proxy
+    // This must be an internal path, not a backend URL, to avoid bypassing our proxy route handlers
+    NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL || '/api/proxy',
     NEXT_PUBLIC_WS_URL: process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000/ws',
     NEXT_PUBLIC_APP_VERSION: process.env.NEXT_PUBLIC_APP_VERSION || 'v15-enhanced',
   },
+  // IMPORTANT: We intentionally avoid generic rewrites of "/api/*" to the backend
+  // because we rely on our internal proxy route at "/api/proxy/[...path]" to map and throttle requests.
+  // Any additional rewrites should be narrow and must NOT include "/api/proxy/*".
   async rewrites() {
-    // Proxy frontend "/api/*" calls to backend to avoid CORS and align with enterprise routing
-    const backendBase = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
     return [
-      {
-        source: '/api/:path*',
-        destination: `${backendBase}/api/:path*`,
-      },
-      {
-        // Bridge mismatch: frontend uses /api/racine/orchestration/* but backend exposes /racine/orchestration/*
-        source: '/api/racine/orchestration/:path*',
-        destination: `${backendBase}/racine/orchestration/:path*`,
-      },
-      {
-        // Fix pluralization mismatch for workflow routes
-        source: '/api/racine/workflows/:path*',
-        destination: `${backendBase}/api/racine/workflow/:path*`,
-      },
-      {
-        // Workspace pluralization bridge
-        source: '/api/racine/workspaces/:path*',
-        destination: `${backendBase}/api/racine/workspace/:path*`,
-      },
-      {
-        // Racine analytics bridge to enterprise analytics service
-        source: '/api/racine/analytics/:path*',
-        destination: `${backendBase}/analytics/:path*`,
-      },
-      {
-        // Security service bridge
-        source: '/api/racine/security/:path*',
-        destination: `${backendBase}/security/:path*`,
-      },
-      {
-        // Lineage service bridge
-        source: '/api/racine/lineage/:path*',
-        destination: `${backendBase}/api/v1/lineage/:path*`,
-      },
-      {
-        // Monitoring service bridge
-        source: '/api/racine/monitoring/:path*',
-        destination: `${backendBase}/api/v1/monitoring/:path*`,
-      },
-      {
-        // Integration service bridge
-        source: '/api/racine/integration/:path*',
-        destination: `${backendBase}/api/v1/integration/:path*`,
-      },
-      {
-        // Streaming orchestration bridge
-        source: '/api/racine/streaming/:path*',
-        destination: `${backendBase}/api/v1/streaming-orchestration/:path*`,
-      },
-      {
-        // Semantic search bridge
-        source: '/api/racine/search/:path*',
-        destination: `${backendBase}/semantic-search/:path*`,
-      },
-      {
-        source: '/health',
-        destination: `${backendBase}/health`,
-      },
+      // Forward bare health checks to proxy so direct /health still works in code paths that skip orchestrator
+      { source: '/health', destination: '/api/proxy/health' },
+      { source: '/health/:path*', destination: '/api/proxy/health/:path*' },
     ]
   },
 }

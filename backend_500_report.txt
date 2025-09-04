@@ -1,0 +1,1023 @@
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.mfa_enabled AS users_mfa_enabled, users.mfa_secret AS users_mfa_secret, users.role AS users_role, users.first_name AS users_first_name, users.last_name AS users_last_name, users.display_name AS users_display_name, users.profile_picture_url AS users_profile_picture_url, users.birthday AS users_birthday, users.phone_number AS users_phone_number, users.department AS users_department, users.region AS users_region, users.oauth_provider AS users_oauth_provider, users.oauth_id AS users_oauth_id, users.last_login AS users_last_login, users.timezone AS users_timezone, users.organization_id AS users_organization_id 
+2025-09-02 14:07:57 FROM users 
+2025-09-02 14:07:57 WHERE users.id = %(pk_1)s
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.3s ago] {'pk_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.3s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.3s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT users_1.id AS users_1_id, roles.id AS roles_id, roles.name AS roles_name, roles.description AS roles_description 
+2025-09-02 14:07:57 FROM users AS users_1 JOIN user_roles AS user_roles_1 ON users_1.id = user_roles_1.user_id JOIN roles ON roles.id = user_roles_1.role_id 
+2025-09-02 14:07:57 WHERE users_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.3s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:57 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:57 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.3s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     app.services.user_preference_service | Retrieved preferences for user: 1
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | ROLLBACK
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | BEGIN (implicit)
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | BEGIN (implicit)
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | BEGIN (implicit)
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | BEGIN (implicit)
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:57 FROM sessions 
+2025-09-02 14:07:57 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:57  LIMIT %(param_1)s
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:57 FROM sessions 
+2025-09-02 14:07:57 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:57  LIMIT %(param_1)s
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:57 FROM sessions 
+2025-09-02 14:07:57 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:57  LIMIT %(param_1)s
+2025-09-02 14:07:57 Log queue full, dropping record: BEGIN (implicit)
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:57 FROM sessions 
+2025-09-02 14:07:57 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:57  LIMIT %(param_1)s
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:57 FROM sessions 
+2025-09-02 14:07:57 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:57  LIMIT %(param_1)s
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:57 FROM sessions 
+2025-09-02 14:07:57 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:57  LIMIT %(param_1)s
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.4s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:57 FROM sessions 
+2025-09-02 14:07:57 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:57  LIMIT %(param_1)s
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:57 FROM sessions 
+2025-09-02 14:07:57 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:57  LIMIT %(param_1)sLog queue full, dropping record: SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:57 FROM sessions 
+2025-09-02 14:07:57 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:57  LIMIT %(param_1)s
+2025-09-02 14:07:57 
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.4s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:57 FROM sessions 
+2025-09-02 14:07:57 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:57  LIMIT %(param_1)sLog queue full, dropping record: [cached since 110.4s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:57 
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.4s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.4s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.4s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.4s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.4s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.4s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.4s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.4s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.mfa_enabled AS users_mfa_enabled, users.mfa_secret AS users_mfa_secret, users.role AS users_role, users.first_name AS users_first_name, users.last_name AS users_last_name, users.display_name AS users_display_name, users.profile_picture_url AS users_profile_picture_url, users.birthday AS users_birthday, users.phone_number AS users_phone_number, users.department AS users_department, users.region AS users_region, users.oauth_provider AS users_oauth_provider, users.oauth_id AS users_oauth_id, users.last_login AS users_last_login, users.timezone AS users_timezone, users.organization_id AS users_organization_id 
+2025-09-02 14:07:57 FROM users 
+2025-09-02 14:07:57 WHERE users.id = %(pk_1)s
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.mfa_enabled AS users_mfa_enabled, users.mfa_secret AS users_mfa_secret, users.role AS users_role, users.first_name AS users_first_name, users.last_name AS users_last_name, users.display_name AS users_display_name, users.profile_picture_url AS users_profile_picture_url, users.birthday AS users_birthday, users.phone_number AS users_phone_number, users.department AS users_department, users.region AS users_region, users.oauth_provider AS users_oauth_provider, users.oauth_id AS users_oauth_id, users.last_login AS users_last_login, users.timezone AS users_timezone, users.organization_id AS users_organization_id 
+2025-09-02 14:07:57 FROM users 
+2025-09-02 14:07:57 WHERE users.id = %(pk_1)s
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.mfa_enabled AS users_mfa_enabled, users.mfa_secret AS users_mfa_secret, users.role AS users_role, users.first_name AS users_first_name, users.last_name AS users_last_name, users.display_name AS users_display_name, users.profile_picture_url AS users_profile_picture_url, users.birthday AS users_birthday, users.phone_number AS users_phone_number, users.department AS users_department, users.region AS users_region, users.oauth_provider AS users_oauth_provider, users.oauth_id AS users_oauth_id, users.last_login AS users_last_login, users.timezone AS users_timezone, users.organization_id AS users_organization_id 
+2025-09-02 14:07:57 FROM users 
+2025-09-02 14:07:57 WHERE users.id = %(pk_1)s
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.mfa_enabled AS users_mfa_enabled, users.mfa_secret AS users_mfa_secret, users.role AS users_role, users.first_name AS users_first_name, users.last_name AS users_last_name, users.display_name AS users_display_name, users.profile_picture_url AS users_profile_picture_url, users.birthday AS users_birthday, users.phone_number AS users_phone_number, users.department AS users_department, users.region AS users_region, users.oauth_provider AS users_oauth_provider, users.oauth_id AS users_oauth_id, users.last_login AS users_last_login, users.timezone AS users_timezone, users.organization_id AS users_organization_id 
+2025-09-02 14:07:57 FROM users 
+2025-09-02 14:07:57 WHERE users.id = %(pk_1)s
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.mfa_enabled AS users_mfa_enabled, users.mfa_secret AS users_mfa_secret, users.role AS users_role, users.first_name AS users_first_name, users.last_name AS users_last_name, users.display_name AS users_display_name, users.profile_picture_url AS users_profile_picture_url, users.birthday AS users_birthday, users.phone_number AS users_phone_number, users.department AS users_department, users.region AS users_region, users.oauth_provider AS users_oauth_provider, users.oauth_id AS users_oauth_id, users.last_login AS users_last_login, users.timezone AS users_timezone, users.organization_id AS users_organization_id 
+2025-09-02 14:07:57 FROM users 
+2025-09-02 14:07:57 WHERE users.id = %(pk_1)s
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.mfa_enabled AS users_mfa_enabled, users.mfa_secret AS users_mfa_secret, users.role AS users_role, users.first_name AS users_first_name, users.last_name AS users_last_name, users.display_name AS users_display_name, users.profile_picture_url AS users_profile_picture_url, users.birthday AS users_birthday, users.phone_number AS users_phone_number, users.department AS users_department, users.region AS users_region, users.oauth_provider AS users_oauth_provider, users.oauth_id AS users_oauth_id, users.last_login AS users_last_login, users.timezone AS users_timezone, users.organization_id AS users_organization_id 
+2025-09-02 14:07:57 FROM users 
+2025-09-02 14:07:57 WHERE users.id = %(pk_1)s
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.mfa_enabled AS users_mfa_enabled, users.mfa_secret AS users_mfa_secret, users.role AS users_role, users.first_name AS users_first_name, users.last_name AS users_last_name, users.display_name AS users_display_name, users.profile_picture_url AS users_profile_picture_url, users.birthday AS users_birthday, users.phone_number AS users_phone_number, users.department AS users_department, users.region AS users_region, users.oauth_provider AS users_oauth_provider, users.oauth_id AS users_oauth_id, users.last_login AS users_last_login, users.timezone AS users_timezone, users.organization_id AS users_organization_id 
+2025-09-02 14:07:57 FROM users 
+2025-09-02 14:07:57 WHERE users.id = %(pk_1)sLog queue full, dropping record: SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.mfa_enabled AS users_mfa_enabled, users.mfa_secret AS users_mfa_secret, users.role AS users_role, users.first_name AS users_first_name, users.last_name AS users_last_name, users.display_name AS users_display_name, users.profile_picture_url AS users_profile_picture_url, users.birthday AS users_birthday, users.phone_number AS users_phone_number, users.department AS users_department, users.region AS users_region, users.oauth_provider AS users_oauth_provider, users.oauth_id AS users_oauth_id, users.last_login AS users_last_login, users.timezone AS users_timezone, users.organization_id AS users_organization_id 
+2025-09-02 14:07:57 FROM users 
+2025-09-02 14:07:57 WHERE users.id = %(pk_1)s
+2025-09-02 14:07:57 
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.4s ago] {'pk_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.4s ago] {'pk_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.mfa_enabled AS users_mfa_enabled, users.mfa_secret AS users_mfa_secret, users.role AS users_role, users.first_name AS users_first_name, users.last_name AS users_last_name, users.display_name AS users_display_name, users.profile_picture_url AS users_profile_picture_url, users.birthday AS users_birthday, users.phone_number AS users_phone_number, users.department AS users_department, users.region AS users_region, users.oauth_provider AS users_oauth_provider, users.oauth_id AS users_oauth_id, users.last_login AS users_last_login, users.timezone AS users_timezone, users.organization_id AS users_organization_id 
+2025-09-02 14:07:57 FROM users 
+2025-09-02 14:07:57 WHERE users.id = %(pk_1)s
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.mfa_enabled AS users_mfa_enabled, users.mfa_secret AS users_mfa_secret, users.role AS users_role, users.first_name AS users_first_name, users.last_name AS users_last_name, users.display_name AS users_display_name, users.profile_picture_url AS users_profile_picture_url, users.birthday AS users_birthday, users.phone_number AS users_phone_number, users.department AS users_department, users.region AS users_region, users.oauth_provider AS users_oauth_provider, users.oauth_id AS users_oauth_id, users.last_login AS users_last_login, users.timezone AS users_timezone, users.organization_id AS users_organization_id 
+2025-09-02 14:07:57 FROM users 
+2025-09-02 14:07:57 WHERE users.id = %(pk_1)s
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.4s ago] {'pk_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.4s ago] {'pk_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.4s ago] {'pk_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.4s ago] {'pk_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.4s ago] {'pk_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.4s ago] {'pk_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.4s ago] {'pk_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.4s ago] {'pk_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT users_1.id AS users_1_id, roles.id AS roles_id, roles.name AS roles_name, roles.description AS roles_description 
+2025-09-02 14:07:57 FROM users AS users_1 JOIN user_roles AS user_roles_1 ON users_1.id = user_roles_1.user_id JOIN roles ON roles.id = user_roles_1.role_id 
+2025-09-02 14:07:57 WHERE users_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT users_1.id AS users_1_id, roles.id AS roles_id, roles.name AS roles_name, roles.description AS roles_description 
+2025-09-02 14:07:57 FROM users AS users_1 JOIN user_roles AS user_roles_1 ON users_1.id = user_roles_1.user_id JOIN roles ON roles.id = user_roles_1.role_id 
+2025-09-02 14:07:57 WHERE users_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT users_1.id AS users_1_id, roles.id AS roles_id, roles.name AS roles_name, roles.description AS roles_description 
+2025-09-02 14:07:57 FROM users AS users_1 JOIN user_roles AS user_roles_1 ON users_1.id = user_roles_1.user_id JOIN roles ON roles.id = user_roles_1.role_id 
+2025-09-02 14:07:57 WHERE users_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.4s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT users_1.id AS users_1_id, roles.id AS roles_id, roles.name AS roles_name, roles.description AS roles_description 
+2025-09-02 14:07:57 FROM users AS users_1 JOIN user_roles AS user_roles_1 ON users_1.id = user_roles_1.user_id JOIN roles ON roles.id = user_roles_1.role_id 
+2025-09-02 14:07:57 WHERE users_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT users_1.id AS users_1_id, roles.id AS roles_id, roles.name AS roles_name, roles.description AS roles_description 
+2025-09-02 14:07:57 FROM users AS users_1 JOIN user_roles AS user_roles_1 ON users_1.id = user_roles_1.user_id JOIN roles ON roles.id = user_roles_1.role_id 
+2025-09-02 14:07:57 WHERE users_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT users_1.id AS users_1_id, roles.id AS roles_id, roles.name AS roles_name, roles.description AS roles_description 
+2025-09-02 14:07:57 FROM users AS users_1 JOIN user_roles AS user_roles_1 ON users_1.id = user_roles_1.user_id JOIN roles ON roles.id = user_roles_1.role_id 
+2025-09-02 14:07:57 WHERE users_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT users_1.id AS users_1_id, roles.id AS roles_id, roles.name AS roles_name, roles.description AS roles_description 
+2025-09-02 14:07:57 FROM users AS users_1 JOIN user_roles AS user_roles_1 ON users_1.id = user_roles_1.user_id JOIN roles ON roles.id = user_roles_1.role_id 
+2025-09-02 14:07:57 WHERE users_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT users_1.id AS users_1_id, roles.id AS roles_id, roles.name AS roles_name, roles.description AS roles_description 
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.4s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 FROM users AS users_1 JOIN user_roles AS user_roles_1 ON users_1.id = user_roles_1.user_id JOIN roles ON roles.id = user_roles_1.role_id 
+2025-09-02 14:07:57 WHERE users_1.id IN (%(primary_keys_1)s)Log queue full, dropping record: [cached since 110.4s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.4s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT users_1.id AS users_1_id, roles.id AS roles_id, roles.name AS roles_name, roles.description AS roles_description 
+2025-09-02 14:07:57 FROM users AS users_1 JOIN user_roles AS user_roles_1 ON users_1.id = user_roles_1.user_id JOIN roles ON roles.id = user_roles_1.role_id 
+2025-09-02 14:07:57 WHERE users_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.4s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT users_1.id AS users_1_id, roles.id AS roles_id, roles.name AS roles_name, roles.description AS roles_description 
+2025-09-02 14:07:57 FROM users AS users_1 JOIN user_roles AS user_roles_1 ON users_1.id = user_roles_1.user_id JOIN roles ON roles.id = user_roles_1.role_id 
+2025-09-02 14:07:57 WHERE users_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.4s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.4s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.4s ago] {'primary_keys_1': 1}Log queue full, dropping record: [cached since 110.4s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:57 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:57 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.4s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:57 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:57 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:57 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:57 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:57 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:57 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:57 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.4s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:57 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:57 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:57 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:57 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.4s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.4s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:57 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:57 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:57 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.4s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.4s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.4s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.4s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.4s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.4s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     app.services.user_preference_service | Retrieved preferences for user: 1
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.4s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: Retrieved preferences for user: 1
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     app.services.user_preference_service | Retrieved preferences for user: 1
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     app.services.user_preference_service | Retrieved preferences for user: 1
+2025-09-02 14:07:57 Log queue full, dropping record: Retrieved preferences for user: 1
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     app.services.user_preference_service | Retrieved preferences for user: 1
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | ROLLBACK
+2025-09-02 14:07:57 Log queue full, dropping record: Retrieved preferences for user: 1
+2025-09-02 14:07:57 Log queue full, dropping record: ROLLBACK
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | ROLLBACK
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | ROLLBACK
+2025-09-02 14:07:57 Log queue full, dropping record: ROLLBACK
+2025-09-02 14:07:57 Log queue full, dropping record: ROLLBACK
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | ROLLBACK
+2025-09-02 14:07:57 Log queue full, dropping record: ROLLBACK
+2025-09-02 14:07:57 Log queue full, dropping record: ROLLBACK
+2025-09-02 14:07:57 Log queue full, dropping record: ROLLBACK
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | BEGIN (implicit)
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | BEGIN (implicit)
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | BEGIN (implicit)
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:57 FROM sessions 
+2025-09-02 14:07:57 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:57  LIMIT %(param_1)s
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:57 FROM sessions 
+2025-09-02 14:07:57 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:57  LIMIT %(param_1)s
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | BEGIN (implicit)
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:57 FROM sessions 
+2025-09-02 14:07:57 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:57  LIMIT %(param_1)s
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.5s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.5s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:57 FROM sessions 
+2025-09-02 14:07:57 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:57  LIMIT %(param_1)s
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.5s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.mfa_enabled AS users_mfa_enabled, users.mfa_secret AS users_mfa_secret, users.role AS users_role, users.first_name AS users_first_name, users.last_name AS users_last_name, users.display_name AS users_display_name, users.profile_picture_url AS users_profile_picture_url, users.birthday AS users_birthday, users.phone_number AS users_phone_number, users.department AS users_department, users.region AS users_region, users.oauth_provider AS users_oauth_provider, users.oauth_id AS users_oauth_id, users.last_login AS users_last_login, users.timezone AS users_timezone, users.organization_id AS users_organization_id 
+2025-09-02 14:07:57 FROM users 
+2025-09-02 14:07:57 WHERE users.id = %(pk_1)s
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.5s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.5s ago] {'pk_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.mfa_enabled AS users_mfa_enabled, users.mfa_secret AS users_mfa_secret, users.role AS users_role, users.first_name AS users_first_name, users.last_name AS users_last_name, users.display_name AS users_display_name, users.profile_picture_url AS users_profile_picture_url, users.birthday AS users_birthday, users.phone_number AS users_phone_number, users.department AS users_department, users.region AS users_region, users.oauth_provider AS users_oauth_provider, users.oauth_id AS users_oauth_id, users.last_login AS users_last_login, users.timezone AS users_timezone, users.organization_id AS users_organization_id 
+2025-09-02 14:07:57 FROM users 
+2025-09-02 14:07:57 WHERE users.id = %(pk_1)s
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.mfa_enabled AS users_mfa_enabled, users.mfa_secret AS users_mfa_secret, users.role AS users_role, users.first_name AS users_first_name, users.last_name AS users_last_name, users.display_name AS users_display_name, users.profile_picture_url AS users_profile_picture_url, users.birthday AS users_birthday, users.phone_number AS users_phone_number, users.department AS users_department, users.region AS users_region, users.oauth_provider AS users_oauth_provider, users.oauth_id AS users_oauth_id, users.last_login AS users_last_login, users.timezone AS users_timezone, users.organization_id AS users_organization_id 
+2025-09-02 14:07:57 FROM users 
+2025-09-02 14:07:57 WHERE users.id = %(pk_1)s
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.mfa_enabled AS users_mfa_enabled, users.mfa_secret AS users_mfa_secret, users.role AS users_role, users.first_name AS users_first_name, users.last_name AS users_last_name, users.display_name AS users_display_name, users.profile_picture_url AS users_profile_picture_url, users.birthday AS users_birthday, users.phone_number AS users_phone_number, users.department AS users_department, users.region AS users_region, users.oauth_provider AS users_oauth_provider, users.oauth_id AS users_oauth_id, users.last_login AS users_last_login, users.timezone AS users_timezone, users.organization_id AS users_organization_id 
+2025-09-02 14:07:57 FROM users 
+2025-09-02 14:07:57 WHERE users.id = %(pk_1)s
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.5s ago] {'pk_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT users_1.id AS users_1_id, roles.id AS roles_id, roles.name AS roles_name, roles.description AS roles_description 
+2025-09-02 14:07:57 FROM users AS users_1 JOIN user_roles AS user_roles_1 ON users_1.id = user_roles_1.user_id JOIN roles ON roles.id = user_roles_1.role_id 
+2025-09-02 14:07:57 WHERE users_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.5s ago] {'pk_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.5s ago] {'pk_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.5s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT users_1.id AS users_1_id, roles.id AS roles_id, roles.name AS roles_name, roles.description AS roles_description 
+2025-09-02 14:07:57 FROM users AS users_1 JOIN user_roles AS user_roles_1 ON users_1.id = user_roles_1.user_id JOIN roles ON roles.id = user_roles_1.role_id 
+2025-09-02 14:07:57 WHERE users_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.5s ago] {'pk_1': 1}Log queue full, dropping record: [cached since 110.5s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.5s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT users_1.id AS users_1_id, roles.id AS roles_id, roles.name AS roles_name, roles.description AS roles_description 
+2025-09-02 14:07:57 FROM users AS users_1 JOIN user_roles AS user_roles_1 ON users_1.id = user_roles_1.user_id JOIN roles ON roles.id = user_roles_1.role_id 
+2025-09-02 14:07:57 WHERE users_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT users_1.id AS users_1_id, roles.id AS roles_id, roles.name AS roles_name, roles.description AS roles_description 
+2025-09-02 14:07:57 FROM users AS users_1 JOIN user_roles AS user_roles_1 ON users_1.id = user_roles_1.user_id JOIN roles ON roles.id = user_roles_1.role_id 
+2025-09-02 14:07:57 WHERE users_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT users_1.id AS users_1_id, roles.id AS roles_id, roles.name AS roles_name, roles.description AS roles_description 
+2025-09-02 14:07:57 FROM users AS users_1 JOIN user_roles AS user_roles_1 ON users_1.id = user_roles_1.user_id JOIN roles ON roles.id = user_roles_1.role_id 
+2025-09-02 14:07:57 WHERE users_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT users_1.id AS users_1_id, roles.id AS roles_id, roles.name AS roles_name, roles.description AS roles_description 
+2025-09-02 14:07:57 FROM users AS users_1 JOIN user_roles AS user_roles_1 ON users_1.id = user_roles_1.user_id JOIN roles ON roles.id = user_roles_1.role_id 
+2025-09-02 14:07:57 WHERE users_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:57 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:57 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:57 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:57 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT users_1.id AS users_1_id, roles.id AS roles_id, roles.name AS roles_name, roles.description AS roles_description 
+2025-09-02 14:07:57 FROM users AS users_1 JOIN user_roles AS user_roles_1 ON users_1.id = user_roles_1.user_id JOIN roles ON roles.id = user_roles_1.role_id 
+2025-09-02 14:07:57 WHERE users_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.5s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT users_1.id AS users_1_id, roles.id AS roles_id, roles.name AS roles_name, roles.description AS roles_description 
+2025-09-02 14:07:57 FROM users AS users_1 JOIN user_roles AS user_roles_1 ON users_1.id = user_roles_1.user_id JOIN roles ON roles.id = user_roles_1.role_id 
+2025-09-02 14:07:57 WHERE users_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.5s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.5s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:57 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:57 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.5s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.5s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.5s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.5s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.5s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.5s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.5s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:57 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:57 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:57 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:57 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:57 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:57 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:57 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:57 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:57 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:57 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.5s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.5s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.5s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.5s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:57 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:57 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     app.services.user_preference_service | Retrieved preferences for user: 1
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.5s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:57 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:57 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:57 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:57 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 Log queue full, dropping record: Retrieved preferences for user: 1
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.5s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.5s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.5s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     app.services.user_preference_service | Retrieved preferences for user: 1
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | ROLLBACK
+2025-09-02 14:07:57 Log queue full, dropping record: ROLLBACKLog queue full, dropping record: Retrieved preferences for user: 1
+2025-09-02 14:07:57 
+2025-09-02 14:07:57 Log queue full, dropping record: Retrieved preferences for user: 1
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     app.services.user_preference_service | Retrieved preferences for user: 1
+2025-09-02 14:07:57 Log queue full, dropping record: Retrieved preferences for user: 1
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     app.services.user_preference_service | Retrieved preferences for user: 1
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | ROLLBACK
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | ROLLBACK
+2025-09-02 14:07:57 Log queue full, dropping record: ROLLBACK
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | ROLLBACK
+2025-09-02 14:07:57 Log queue full, dropping record: ROLLBACK
+2025-09-02 14:07:57 Log queue full, dropping record: ROLLBACK
+2025-09-02 14:07:57 Log queue full, dropping record: ROLLBACK
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | BEGIN (implicit)
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:57 FROM sessions 
+2025-09-02 14:07:57 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:57  LIMIT %(param_1)s
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.6s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:57 FROM sessions 
+2025-09-02 14:07:57 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:57  LIMIT %(param_1)s
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.6s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.6s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.mfa_enabled AS users_mfa_enabled, users.mfa_secret AS users_mfa_secret, users.role AS users_role, users.first_name AS users_first_name, users.last_name AS users_last_name, users.display_name AS users_display_name, users.profile_picture_url AS users_profile_picture_url, users.birthday AS users_birthday, users.phone_number AS users_phone_number, users.department AS users_department, users.region AS users_region, users.oauth_provider AS users_oauth_provider, users.oauth_id AS users_oauth_id, users.last_login AS users_last_login, users.timezone AS users_timezone, users.organization_id AS users_organization_id 
+2025-09-02 14:07:57 FROM users 
+2025-09-02 14:07:57 WHERE users.id = %(pk_1)s
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.5s ago] {'pk_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.5s ago] {'pk_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT users_1.id AS users_1_id, roles.id AS roles_id, roles.name AS roles_name, roles.description AS roles_description 
+2025-09-02 14:07:57 FROM users AS users_1 JOIN user_roles AS user_roles_1 ON users_1.id = user_roles_1.user_id JOIN roles ON roles.id = user_roles_1.role_id 
+2025-09-02 14:07:57 WHERE users_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.6s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | BEGIN (implicit)
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | BEGIN (implicit)
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | BEGIN (implicit)
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:57 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:57 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 Log queue full, dropping record: BEGIN (implicit)Log queue full, dropping record: BEGIN (implicit)
+2025-09-02 14:07:57 Log queue full, dropping record: BEGIN (implicit)
+2025-09-02 14:07:57 
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:57 FROM sessions 
+2025-09-02 14:07:57 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:57  LIMIT %(param_1)s
+2025-09-02 14:07:57 Log queue full, dropping record: BEGIN (implicit)
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:57 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:57 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:57 FROM sessions 
+2025-09-02 14:07:57 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:57  LIMIT %(param_1)s
+2025-09-02 14:07:57 Log queue full, dropping record: BEGIN (implicit)Log queue full, dropping record: SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:57 FROM sessions 
+2025-09-02 14:07:57 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:57  LIMIT %(param_1)s
+2025-09-02 14:07:57 
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:57 FROM sessions 
+2025-09-02 14:07:57 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:57  LIMIT %(param_1)s
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:57 FROM sessions 
+2025-09-02 14:07:57 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:57  LIMIT %(param_1)s
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.6s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.6s ago] {'primary_keys_1': 1}Log queue full, dropping record: SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:57 FROM sessions 
+2025-09-02 14:07:57 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:57  LIMIT %(param_1)s
+2025-09-02 14:07:57 
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.6s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:57 FROM sessions 
+2025-09-02 14:07:57 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.6s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:57  LIMIT %(param_1)s
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:57 FROM sessions 
+2025-09-02 14:07:57 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.6s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:57  LIMIT %(param_1)s
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.6s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.6s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.6s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.6s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.mfa_enabled AS users_mfa_enabled, users.mfa_secret AS users_mfa_secret, users.role AS users_role, users.first_name AS users_first_name, users.last_name AS users_last_name, users.display_name AS users_display_name, users.profile_picture_url AS users_profile_picture_url, users.birthday AS users_birthday, users.phone_number AS users_phone_number, users.department AS users_department, users.region AS users_region, users.oauth_provider AS users_oauth_provider, users.oauth_id AS users_oauth_id, users.last_login AS users_last_login, users.timezone AS users_timezone, users.organization_id AS users_organization_id 
+2025-09-02 14:07:57 FROM users 
+2025-09-02 14:07:57 WHERE users.id = %(pk_1)s
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.6s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.mfa_enabled AS users_mfa_enabled, users.mfa_secret AS users_mfa_secret, users.role AS users_role, users.first_name AS users_first_name, users.last_name AS users_last_name, users.display_name AS users_display_name, users.profile_picture_url AS users_profile_picture_url, users.birthday AS users_birthday, users.phone_number AS users_phone_number, users.department AS users_department, users.region AS users_region, users.oauth_provider AS users_oauth_provider, users.oauth_id AS users_oauth_id, users.last_login AS users_last_login, users.timezone AS users_timezone, users.organization_id AS users_organization_id 
+2025-09-02 14:07:57 FROM users 
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     app.services.user_preference_service | Retrieved preferences for user: 1
+2025-09-02 14:07:57 WHERE users.id = %(pk_1)s
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.6s ago] {'pk_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: Retrieved preferences for user: 1
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.mfa_enabled AS users_mfa_enabled, users.mfa_secret AS users_mfa_secret, users.role AS users_role, users.first_name AS users_first_name, users.last_name AS users_last_name, users.display_name AS users_display_name, users.profile_picture_url AS users_profile_picture_url, users.birthday AS users_birthday, users.phone_number AS users_phone_number, users.department AS users_department, users.region AS users_region, users.oauth_provider AS users_oauth_provider, users.oauth_id AS users_oauth_id, users.last_login AS users_last_login, users.timezone AS users_timezone, users.organization_id AS users_organization_id 
+2025-09-02 14:07:57 FROM users 
+2025-09-02 14:07:57 WHERE users.id = %(pk_1)s
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.mfa_enabled AS users_mfa_enabled, users.mfa_secret AS users_mfa_secret, users.role AS users_role, users.first_name AS users_first_name, users.last_name AS users_last_name, users.display_name AS users_display_name, users.profile_picture_url AS users_profile_picture_url, users.birthday AS users_birthday, users.phone_number AS users_phone_number, users.department AS users_department, users.region AS users_region, users.oauth_provider AS users_oauth_provider, users.oauth_id AS users_oauth_id, users.last_login AS users_last_login, users.timezone AS users_timezone, users.organization_id AS users_organization_id 
+2025-09-02 14:07:57 FROM users 
+2025-09-02 14:07:57 WHERE users.id = %(pk_1)s
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.6s ago] {'pk_1': 1}Log queue full, dropping record: SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.mfa_enabled AS users_mfa_enabled, users.mfa_secret AS users_mfa_secret, users.role AS users_role, users.first_name AS users_first_name, users.last_name AS users_last_name, users.display_name AS users_display_name, users.profile_picture_url AS users_profile_picture_url, users.birthday AS users_birthday, users.phone_number AS users_phone_number, users.department AS users_department, users.region AS users_region, users.oauth_provider AS users_oauth_provider, users.oauth_id AS users_oauth_id, users.last_login AS users_last_login, users.timezone AS users_timezone, users.organization_id AS users_organization_id 
+2025-09-02 14:07:57 FROM users 
+2025-09-02 14:07:57 WHERE users.id = %(pk_1)s
+2025-09-02 14:07:57 
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.mfa_enabled AS users_mfa_enabled, users.mfa_secret AS users_mfa_secret, users.role AS users_role, users.first_name AS users_first_name, users.last_name AS users_last_name, users.display_name AS users_display_name, users.profile_picture_url AS users_profile_picture_url, users.birthday AS users_birthday, users.phone_number AS users_phone_number, users.department AS users_department, users.region AS users_region, users.oauth_provider AS users_oauth_provider, users.oauth_id AS users_oauth_id, users.last_login AS users_last_login, users.timezone AS users_timezone, users.organization_id AS users_organization_id 
+2025-09-02 14:07:57 FROM users 
+2025-09-02 14:07:57 WHERE users.id = %(pk_1)sLog queue full, dropping record: SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.mfa_enabled AS users_mfa_enabled, users.mfa_secret AS users_mfa_secret, users.role AS users_role, users.first_name AS users_first_name, users.last_name AS users_last_name, users.display_name AS users_display_name, users.profile_picture_url AS users_profile_picture_url, users.birthday AS users_birthday, users.phone_number AS users_phone_number, users.department AS users_department, users.region AS users_region, users.oauth_provider AS users_oauth_provider, users.oauth_id AS users_oauth_id, users.last_login AS users_last_login, users.timezone AS users_timezone, users.organization_id AS users_organization_id 
+2025-09-02 14:07:57 FROM users 
+2025-09-02 14:07:57 WHERE users.id = %(pk_1)s
+2025-09-02 14:07:57 
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.mfa_enabled AS users_mfa_enabled, users.mfa_secret AS users_mfa_secret, users.role AS users_role, users.first_name AS users_first_name, users.last_name AS users_last_name, users.display_name AS users_display_name, users.profile_picture_url AS users_profile_picture_url, users.birthday AS users_birthday, users.phone_number AS users_phone_number, users.department AS users_department, users.region AS users_region, users.oauth_provider AS users_oauth_provider, users.oauth_id AS users_oauth_id, users.last_login AS users_last_login, users.timezone AS users_timezone, users.organization_id AS users_organization_id 
+2025-09-02 14:07:57 FROM users 
+2025-09-02 14:07:57 WHERE users.id = %(pk_1)s
+2025-09-02 14:07:57 Log queue full, dropping record: ROLLBACK
+2025-09-02 14:07:57 Log queue full, dropping record: ROLLBACK
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | ROLLBACK
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.6s ago] {'pk_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.6s ago] {'pk_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT users_1.id AS users_1_id, roles.id AS roles_id, roles.name AS roles_name, roles.description AS roles_description 
+2025-09-02 14:07:57 FROM users AS users_1 JOIN user_roles AS user_roles_1 ON users_1.id = user_roles_1.user_id JOIN roles ON roles.id = user_roles_1.role_id 
+2025-09-02 14:07:57 WHERE users_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.6s ago] {'pk_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT users_1.id AS users_1_id, roles.id AS roles_id, roles.name AS roles_name, roles.description AS roles_description 
+2025-09-02 14:07:57 FROM users AS users_1 JOIN user_roles AS user_roles_1 ON users_1.id = user_roles_1.user_id JOIN roles ON roles.id = user_roles_1.role_id 
+2025-09-02 14:07:57 WHERE users_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT users_1.id AS users_1_id, roles.id AS roles_id, roles.name AS roles_name, roles.description AS roles_description 
+2025-09-02 14:07:57 FROM users AS users_1 JOIN user_roles AS user_roles_1 ON users_1.id = user_roles_1.user_id JOIN roles ON roles.id = user_roles_1.role_id 
+2025-09-02 14:07:57 WHERE users_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT users_1.id AS users_1_id, roles.id AS roles_id, roles.name AS roles_name, roles.description AS roles_description 
+2025-09-02 14:07:57 FROM users AS users_1 JOIN user_roles AS user_roles_1 ON users_1.id = user_roles_1.user_id JOIN roles ON roles.id = user_roles_1.role_id 
+2025-09-02 14:07:57 WHERE users_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT users_1.id AS users_1_id, roles.id AS roles_id, roles.name AS roles_name, roles.description AS roles_description 
+2025-09-02 14:07:57 FROM users AS users_1 JOIN user_roles AS user_roles_1 ON users_1.id = user_roles_1.user_id JOIN roles ON roles.id = user_roles_1.role_id 
+2025-09-02 14:07:57 WHERE users_1.id IN (%(primary_keys_1)s)Log queue full, dropping record: SELECT users_1.id AS users_1_id, roles.id AS roles_id, roles.name AS roles_name, roles.description AS roles_description 
+2025-09-02 14:07:57 FROM users AS users_1 JOIN user_roles AS user_roles_1 ON users_1.id = user_roles_1.user_id JOIN roles ON roles.id = user_roles_1.role_id 
+2025-09-02 14:07:57 WHERE users_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.6s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.6s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.6s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.6s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.6s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT users_1.id AS users_1_id, roles.id AS roles_id, roles.name AS roles_name, roles.description AS roles_description 
+2025-09-02 14:07:57 FROM users AS users_1 JOIN user_roles AS user_roles_1 ON users_1.id = user_roles_1.user_id JOIN roles ON roles.id = user_roles_1.role_id 
+2025-09-02 14:07:57 WHERE users_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.6s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.6s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:57 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:57 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:57 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:57 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:57 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:57 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:57 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:57 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:57 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:57 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.6s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.6s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | BEGIN (implicit)
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.6s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.6s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.6s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.6s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: BEGIN (implicit)Log queue full, dropping record: [cached since 110.6s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:57 FROM sessions 
+2025-09-02 14:07:57 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:57  LIMIT %(param_1)s
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.6s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     app.services.user_preference_service | Retrieved preferences for user: 1
+2025-09-02 14:07:57 Log queue full, dropping record: Retrieved preferences for user: 1
+2025-09-02 14:07:57 Log queue full, dropping record: Retrieved preferences for user: 1
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.6s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     app.services.user_preference_service | Retrieved preferences for user: 1
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.6s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.6s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: Retrieved preferences for user: 1
+2025-09-02 14:07:57 Log queue full, dropping record: Retrieved preferences for user: 1
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.mfa_enabled AS users_mfa_enabled, users.mfa_secret AS users_mfa_secret, users.role AS users_role, users.first_name AS users_first_name, users.last_name AS users_last_name, users.display_name AS users_display_name, users.profile_picture_url AS users_profile_picture_url, users.birthday AS users_birthday, users.phone_number AS users_phone_number, users.department AS users_department, users.region AS users_region, users.oauth_provider AS users_oauth_provider, users.oauth_id AS users_oauth_id, users.last_login AS users_last_login, users.timezone AS users_timezone, users.organization_id AS users_organization_id 
+2025-09-02 14:07:57 FROM users 
+2025-09-02 14:07:57 WHERE users.id = %(pk_1)s
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     app.services.user_preference_service | Retrieved preferences for user: 1
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | ROLLBACK
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.6s ago] {'pk_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: ROLLBACK
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.6s ago] {'pk_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: ROLLBACK
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | ROLLBACK
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | ROLLBACK
+2025-09-02 14:07:57 Log queue full, dropping record: ROLLBACK
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.6s ago] {'pk_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: ROLLBACK
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT users_1.id AS users_1_id, roles.id AS roles_id, roles.name AS roles_name, roles.description AS roles_description 
+2025-09-02 14:07:57 FROM users AS users_1 JOIN user_roles AS user_roles_1 ON users_1.id = user_roles_1.user_id JOIN roles ON roles.id = user_roles_1.role_id 
+2025-09-02 14:07:57 WHERE users_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 Log queue full, dropping record: ROLLBACK
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT users_1.id AS users_1_id, roles.id AS roles_id, roles.name AS roles_name, roles.description AS roles_description 
+2025-09-02 14:07:57 FROM users AS users_1 JOIN user_roles AS user_roles_1 ON users_1.id = user_roles_1.user_id JOIN roles ON roles.id = user_roles_1.role_id 
+2025-09-02 14:07:57 WHERE users_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.7s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.7s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | BEGIN (implicit)
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:57 FROM sessions 
+2025-09-02 14:07:57 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:57  LIMIT %(param_1)s
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:57 FROM sessions 
+2025-09-02 14:07:57 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:57  LIMIT %(param_1)s
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:57 FROM sessions 
+2025-09-02 14:07:57 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:57 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:57 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | BEGIN (implicit)
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.7s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:57  LIMIT %(param_1)sLog queue full, dropping record: SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:57 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:57 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:57 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:57 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 Log queue full, dropping record: BEGIN (implicit)
+2025-09-02 14:07:57 Log queue full, dropping record: BEGIN (implicit)
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.7s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:57 FROM sessions 
+2025-09-02 14:07:57 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:57  LIMIT %(param_1)s
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.7s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:57 FROM sessions 
+2025-09-02 14:07:57 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:57  LIMIT %(param_1)s
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.7s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:57 FROM sessions 
+2025-09-02 14:07:57 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:57  LIMIT %(param_1)s
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.7s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.mfa_enabled AS users_mfa_enabled, users.mfa_secret AS users_mfa_secret, users.role AS users_role, users.first_name AS users_first_name, users.last_name AS users_last_name, users.display_name AS users_display_name, users.profile_picture_url AS users_profile_picture_url, users.birthday AS users_birthday, users.phone_number AS users_phone_number, users.department AS users_department, users.region AS users_region, users.oauth_provider AS users_oauth_provider, users.oauth_id AS users_oauth_id, users.last_login AS users_last_login, users.timezone AS users_timezone, users.organization_id AS users_organization_id 
+2025-09-02 14:07:57 FROM users 
+2025-09-02 14:07:57 WHERE users.id = %(pk_1)s
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     app.services.user_preference_service | Retrieved preferences for user: 1
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.mfa_enabled AS users_mfa_enabled, users.mfa_secret AS users_mfa_secret, users.role AS users_role, users.first_name AS users_first_name, users.last_name AS users_last_name, users.display_name AS users_display_name, users.profile_picture_url AS users_profile_picture_url, users.birthday AS users_birthday, users.phone_number AS users_phone_number, users.department AS users_department, users.region AS users_region, users.oauth_provider AS users_oauth_provider, users.oauth_id AS users_oauth_id, users.last_login AS users_last_login, users.timezone AS users_timezone, users.organization_id AS users_organization_id 
+2025-09-02 14:07:57 FROM users 
+2025-09-02 14:07:57 WHERE users.id = %(pk_1)s
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.mfa_enabled AS users_mfa_enabled, users.mfa_secret AS users_mfa_secret, users.role AS users_role, users.first_name AS users_first_name, users.last_name AS users_last_name, users.display_name AS users_display_name, users.profile_picture_url AS users_profile_picture_url, users.birthday AS users_birthday, users.phone_number AS users_phone_number, users.department AS users_department, users.region AS users_region, users.oauth_provider AS users_oauth_provider, users.oauth_id AS users_oauth_id, users.last_login AS users_last_login, users.timezone AS users_timezone, users.organization_id AS users_organization_id 
+2025-09-02 14:07:57 FROM users 
+2025-09-02 14:07:57 WHERE users.id = %(pk_1)s
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.7s ago] {'pk_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.mfa_enabled AS users_mfa_enabled, users.mfa_secret AS users_mfa_secret, users.role AS users_role, users.first_name AS users_first_name, users.last_name AS users_last_name, users.display_name AS users_display_name, users.profile_picture_url AS users_profile_picture_url, users.birthday AS users_birthday, users.phone_number AS users_phone_number, users.department AS users_department, users.region AS users_region, users.oauth_provider AS users_oauth_provider, users.oauth_id AS users_oauth_id, users.last_login AS users_last_login, users.timezone AS users_timezone, users.organization_id AS users_organization_id 
+2025-09-02 14:07:57 FROM users 
+2025-09-02 14:07:57 WHERE users.id = %(pk_1)s
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.7s ago] {'pk_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.7s ago] {'pk_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.mfa_enabled AS users_mfa_enabled, users.mfa_secret AS users_mfa_secret, users.role AS users_role, users.first_name AS users_first_name, users.last_name AS users_last_name, users.display_name AS users_display_name, users.profile_picture_url AS users_profile_picture_url, users.birthday AS users_birthday, users.phone_number AS users_phone_number, users.department AS users_department, users.region AS users_region, users.oauth_provider AS users_oauth_provider, users.oauth_id AS users_oauth_id, users.last_login AS users_last_login, users.timezone AS users_timezone, users.organization_id AS users_organization_id 
+2025-09-02 14:07:57 FROM users 
+2025-09-02 14:07:57 WHERE users.id = %(pk_1)s
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | ROLLBACK
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT users_1.id AS users_1_id, roles.id AS roles_id, roles.name AS roles_name, roles.description AS roles_description 
+2025-09-02 14:07:57 FROM users AS users_1 JOIN user_roles AS user_roles_1 ON users_1.id = user_roles_1.user_id JOIN roles ON roles.id = user_roles_1.role_id 
+2025-09-02 14:07:57 WHERE users_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 Log queue full, dropping record: ROLLBACK
+2025-09-02 14:07:57 Log queue full, dropping record: ROLLBACK
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.7s ago] {'pk_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.7s ago] {'pk_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.7s ago] {'pk_1': 1}Log queue full, dropping record: [cached since 110.7s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.7s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.7s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT users_1.id AS users_1_id, roles.id AS roles_id, roles.name AS roles_name, roles.description AS roles_description 
+2025-09-02 14:07:57 FROM users AS users_1 JOIN user_roles AS user_roles_1 ON users_1.id = user_roles_1.user_id JOIN roles ON roles.id = user_roles_1.role_id 
+2025-09-02 14:07:57 WHERE users_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:57 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:57 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:57 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:57 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 Log queue full, dropping record: SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:57 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:57 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.7s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.7s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.7s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.7s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.7s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:57 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:57 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.7s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: [cached since 110.7s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 Log queue full, dropping record: Retrieved preferences for user: 1
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | [cached since 110.7s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     app.services.user_preference_service | Retrieved preferences for user: 1
+2025-09-02 14:07:57 Log queue full, dropping record: Retrieved preferences for user: 1
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | ROLLBACK
+2025-09-02 14:07:57 Log queue full, dropping record: Retrieved preferences for user: 1
+2025-09-02 14:07:57 Log queue full, dropping record: Retrieved preferences for user: 1
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     app.services.user_preference_service | Retrieved preferences for user: 1
+2025-09-02 14:07:57 [2025-09-02 13:07:57] INFO     sqlalchemy.engine.Engine  | ROLLBACK
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | BEGIN (implicit)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:58 FROM sessions 
+2025-09-02 14:07:58 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:58  LIMIT %(param_1)s
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.5s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.mfa_enabled AS users_mfa_enabled, users.mfa_secret AS users_mfa_secret, users.role AS users_role, users.first_name AS users_first_name, users.last_name AS users_last_name, users.display_name AS users_display_name, users.profile_picture_url AS users_profile_picture_url, users.birthday AS users_birthday, users.phone_number AS users_phone_number, users.department AS users_department, users.region AS users_region, users.oauth_provider AS users_oauth_provider, users.oauth_id AS users_oauth_id, users.last_login AS users_last_login, users.timezone AS users_timezone, users.organization_id AS users_organization_id 
+2025-09-02 14:07:58 FROM users 
+2025-09-02 14:07:58 WHERE users.id = %(pk_1)s
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.5s ago] {'pk_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | BEGIN (implicit)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:58 FROM sessions 
+2025-09-02 14:07:58 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:58  LIMIT %(param_1)s
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT users_1.id AS users_1_id, roles.id AS roles_id, roles.name AS roles_name, roles.description AS roles_description 
+2025-09-02 14:07:58 FROM users AS users_1 JOIN user_roles AS user_roles_1 ON users_1.id = user_roles_1.user_id JOIN roles ON roles.id = user_roles_1.role_id 
+2025-09-02 14:07:58 WHERE users_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.5s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.5s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | BEGIN (implicit)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.mfa_enabled AS users_mfa_enabled, users.mfa_secret AS users_mfa_secret, users.role AS users_role, users.first_name AS users_first_name, users.last_name AS users_last_name, users.display_name AS users_display_name, users.profile_picture_url AS users_profile_picture_url, users.birthday AS users_birthday, users.phone_number AS users_phone_number, users.department AS users_department, users.region AS users_region, users.oauth_provider AS users_oauth_provider, users.oauth_id AS users_oauth_id, users.last_login AS users_last_login, users.timezone AS users_timezone, users.organization_id AS users_organization_id 
+2025-09-02 14:07:58 FROM users 
+2025-09-02 14:07:58 WHERE users.id = %(pk_1)s
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:58 FROM sessions 
+2025-09-02 14:07:58 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:58  LIMIT %(param_1)s
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | BEGIN (implicit)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:58 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:58 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.5s ago] {'pk_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.5s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:58 FROM sessions 
+2025-09-02 14:07:58 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:58  LIMIT %(param_1)s
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.5s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.5s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.mfa_enabled AS users_mfa_enabled, users.mfa_secret AS users_mfa_secret, users.role AS users_role, users.first_name AS users_first_name, users.last_name AS users_last_name, users.display_name AS users_display_name, users.profile_picture_url AS users_profile_picture_url, users.birthday AS users_birthday, users.phone_number AS users_phone_number, users.department AS users_department, users.region AS users_region, users.oauth_provider AS users_oauth_provider, users.oauth_id AS users_oauth_id, users.last_login AS users_last_login, users.timezone AS users_timezone, users.organization_id AS users_organization_id 
+2025-09-02 14:07:58 FROM users 
+2025-09-02 14:07:58 WHERE users.id = %(pk_1)s
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT users_1.id AS users_1_id, roles.id AS roles_id, roles.name AS roles_name, roles.description AS roles_description 
+2025-09-02 14:07:58 FROM users AS users_1 JOIN user_roles AS user_roles_1 ON users_1.id = user_roles_1.user_id JOIN roles ON roles.id = user_roles_1.role_id 
+2025-09-02 14:07:58 WHERE users_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.mfa_enabled AS users_mfa_enabled, users.mfa_secret AS users_mfa_secret, users.role AS users_role, users.first_name AS users_first_name, users.last_name AS users_last_name, users.display_name AS users_display_name, users.profile_picture_url AS users_profile_picture_url, users.birthday AS users_birthday, users.phone_number AS users_phone_number, users.department AS users_department, users.region AS users_region, users.oauth_provider AS users_oauth_provider, users.oauth_id AS users_oauth_id, users.last_login AS users_last_login, users.timezone AS users_timezone, users.organization_id AS users_organization_id 
+2025-09-02 14:07:58 FROM users 
+2025-09-02 14:07:58 WHERE users.id = %(pk_1)s
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     app.services.user_preference_service | Retrieved preferences for user: 1
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.5s ago] {'pk_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.5s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.5s ago] {'pk_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | ROLLBACK
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:58 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:58 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT users_1.id AS users_1_id, roles.id AS roles_id, roles.name AS roles_name, roles.description AS roles_description 
+2025-09-02 14:07:58 FROM users AS users_1 JOIN user_roles AS user_roles_1 ON users_1.id = user_roles_1.user_id JOIN roles ON roles.id = user_roles_1.role_id 
+2025-09-02 14:07:58 WHERE users_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT users_1.id AS users_1_id, roles.id AS roles_id, roles.name AS roles_name, roles.description AS roles_description 
+2025-09-02 14:07:58 FROM users AS users_1 JOIN user_roles AS user_roles_1 ON users_1.id = user_roles_1.user_id JOIN roles ON roles.id = user_roles_1.role_id 
+2025-09-02 14:07:58 WHERE users_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.5s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.5s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.5s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:58 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:58 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:58 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:58 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     app.services.user_preference_service | Retrieved preferences for user: 1
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.5s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.5s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | ROLLBACK
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | BEGIN (implicit)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     app.services.user_preference_service | Retrieved preferences for user: 1
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:58 FROM sessions 
+2025-09-02 14:07:58 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:58  LIMIT %(param_1)s
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     app.services.user_preference_service | Retrieved preferences for user: 1
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | ROLLBACK
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.5s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | ROLLBACK
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.mfa_enabled AS users_mfa_enabled, users.mfa_secret AS users_mfa_secret, users.role AS users_role, users.first_name AS users_first_name, users.last_name AS users_last_name, users.display_name AS users_display_name, users.profile_picture_url AS users_profile_picture_url, users.birthday AS users_birthday, users.phone_number AS users_phone_number, users.department AS users_department, users.region AS users_region, users.oauth_provider AS users_oauth_provider, users.oauth_id AS users_oauth_id, users.last_login AS users_last_login, users.timezone AS users_timezone, users.organization_id AS users_organization_id 
+2025-09-02 14:07:58 FROM users 
+2025-09-02 14:07:58 WHERE users.id = %(pk_1)s
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.5s ago] {'pk_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT users_1.id AS users_1_id, roles.id AS roles_id, roles.name AS roles_name, roles.description AS roles_description 
+2025-09-02 14:07:58 FROM users AS users_1 JOIN user_roles AS user_roles_1 ON users_1.id = user_roles_1.user_id JOIN roles ON roles.id = user_roles_1.role_id 
+2025-09-02 14:07:58 WHERE users_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | BEGIN (implicit)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.5s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:58 FROM sessions 
+2025-09-02 14:07:58 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:58  LIMIT %(param_1)s
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.5s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:58 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:58 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.mfa_enabled AS users_mfa_enabled, users.mfa_secret AS users_mfa_secret, users.role AS users_role, users.first_name AS users_first_name, users.last_name AS users_last_name, users.display_name AS users_display_name, users.profile_picture_url AS users_profile_picture_url, users.birthday AS users_birthday, users.phone_number AS users_phone_number, users.department AS users_department, users.region AS users_region, users.oauth_provider AS users_oauth_provider, users.oauth_id AS users_oauth_id, users.last_login AS users_last_login, users.timezone AS users_timezone, users.organization_id AS users_organization_id 
+2025-09-02 14:07:58 FROM users 
+2025-09-02 14:07:58 WHERE users.id = %(pk_1)s
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.5s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.5s ago] {'pk_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT users_1.id AS users_1_id, roles.id AS roles_id, roles.name AS roles_name, roles.description AS roles_description 
+2025-09-02 14:07:58 FROM users AS users_1 JOIN user_roles AS user_roles_1 ON users_1.id = user_roles_1.user_id JOIN roles ON roles.id = user_roles_1.role_id 
+2025-09-02 14:07:58 WHERE users_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     app.services.user_preference_service | Retrieved preferences for user: 1
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.5s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | ROLLBACK
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | BEGIN (implicit)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | BEGIN (implicit)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:58 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:58 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:58 FROM sessions 
+2025-09-02 14:07:58 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:58  LIMIT %(param_1)s
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:58 FROM sessions 
+2025-09-02 14:07:58 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:58  LIMIT %(param_1)s
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.5s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.6s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.6s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.mfa_enabled AS users_mfa_enabled, users.mfa_secret AS users_mfa_secret, users.role AS users_role, users.first_name AS users_first_name, users.last_name AS users_last_name, users.display_name AS users_display_name, users.profile_picture_url AS users_profile_picture_url, users.birthday AS users_birthday, users.phone_number AS users_phone_number, users.department AS users_department, users.region AS users_region, users.oauth_provider AS users_oauth_provider, users.oauth_id AS users_oauth_id, users.last_login AS users_last_login, users.timezone AS users_timezone, users.organization_id AS users_organization_id 
+2025-09-02 14:07:58 FROM users 
+2025-09-02 14:07:58 WHERE users.id = %(pk_1)s
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.mfa_enabled AS users_mfa_enabled, users.mfa_secret AS users_mfa_secret, users.role AS users_role, users.first_name AS users_first_name, users.last_name AS users_last_name, users.display_name AS users_display_name, users.profile_picture_url AS users_profile_picture_url, users.birthday AS users_birthday, users.phone_number AS users_phone_number, users.department AS users_department, users.region AS users_region, users.oauth_provider AS users_oauth_provider, users.oauth_id AS users_oauth_id, users.last_login AS users_last_login, users.timezone AS users_timezone, users.organization_id AS users_organization_id 
+2025-09-02 14:07:58 FROM users 
+2025-09-02 14:07:58 WHERE users.id = %(pk_1)s
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.5s ago] {'pk_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.5s ago] {'pk_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     app.services.user_preference_service | Retrieved preferences for user: 1
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT users_1.id AS users_1_id, roles.id AS roles_id, roles.name AS roles_name, roles.description AS roles_description 
+2025-09-02 14:07:58 FROM users AS users_1 JOIN user_roles AS user_roles_1 ON users_1.id = user_roles_1.user_id JOIN roles ON roles.id = user_roles_1.role_id 
+2025-09-02 14:07:58 WHERE users_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT users_1.id AS users_1_id, roles.id AS roles_id, roles.name AS roles_name, roles.description AS roles_description 
+2025-09-02 14:07:58 FROM users AS users_1 JOIN user_roles AS user_roles_1 ON users_1.id = user_roles_1.user_id JOIN roles ON roles.id = user_roles_1.role_id 
+2025-09-02 14:07:58 WHERE users_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | ROLLBACK
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.6s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.6s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | BEGIN (implicit)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:58 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:58 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:58 FROM sessions 
+2025-09-02 14:07:58 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:58  LIMIT %(param_1)s
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.6s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.6s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:58 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:58 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.6s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.mfa_enabled AS users_mfa_enabled, users.mfa_secret AS users_mfa_secret, users.role AS users_role, users.first_name AS users_first_name, users.last_name AS users_last_name, users.display_name AS users_display_name, users.profile_picture_url AS users_profile_picture_url, users.birthday AS users_birthday, users.phone_number AS users_phone_number, users.department AS users_department, users.region AS users_region, users.oauth_provider AS users_oauth_provider, users.oauth_id AS users_oauth_id, users.last_login AS users_last_login, users.timezone AS users_timezone, users.organization_id AS users_organization_id 
+2025-09-02 14:07:58 FROM users 
+2025-09-02 14:07:58 WHERE users.id = %(pk_1)s
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     app.services.user_preference_service | Retrieved preferences for user: 1
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.6s ago] {'pk_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     app.services.user_preference_service | Retrieved preferences for user: 1
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | ROLLBACK
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT users_1.id AS users_1_id, roles.id AS roles_id, roles.name AS roles_name, roles.description AS roles_description 
+2025-09-02 14:07:58 FROM users AS users_1 JOIN user_roles AS user_roles_1 ON users_1.id = user_roles_1.user_id JOIN roles ON roles.id = user_roles_1.role_id 
+2025-09-02 14:07:58 WHERE users_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | ROLLBACK
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | BEGIN (implicit)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.6s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:58 FROM sessions 
+2025-09-02 14:07:58 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:58  LIMIT %(param_1)s
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.6s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:58 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:58 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.6s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.mfa_enabled AS users_mfa_enabled, users.mfa_secret AS users_mfa_secret, users.role AS users_role, users.first_name AS users_first_name, users.last_name AS users_last_name, users.display_name AS users_display_name, users.profile_picture_url AS users_profile_picture_url, users.birthday AS users_birthday, users.phone_number AS users_phone_number, users.department AS users_department, users.region AS users_region, users.oauth_provider AS users_oauth_provider, users.oauth_id AS users_oauth_id, users.last_login AS users_last_login, users.timezone AS users_timezone, users.organization_id AS users_organization_id 
+2025-09-02 14:07:58 FROM users 
+2025-09-02 14:07:58 WHERE users.id = %(pk_1)s
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     app.services.user_preference_service | Retrieved preferences for user: 1
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.6s ago] {'pk_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | ROLLBACK
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT users_1.id AS users_1_id, roles.id AS roles_id, roles.name AS roles_name, roles.description AS roles_description 
+2025-09-02 14:07:58 FROM users AS users_1 JOIN user_roles AS user_roles_1 ON users_1.id = user_roles_1.user_id JOIN roles ON roles.id = user_roles_1.role_id 
+2025-09-02 14:07:58 WHERE users_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.6s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | BEGIN (implicit)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | BEGIN (implicit)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:58 FROM sessions 
+2025-09-02 14:07:58 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:58  LIMIT %(param_1)s
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:58 FROM sessions 
+2025-09-02 14:07:58 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:58  LIMIT %(param_1)s
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:58 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:58 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.6s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.6s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.6s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.mfa_enabled AS users_mfa_enabled, users.mfa_secret AS users_mfa_secret, users.role AS users_role, users.first_name AS users_first_name, users.last_name AS users_last_name, users.display_name AS users_display_name, users.profile_picture_url AS users_profile_picture_url, users.birthday AS users_birthday, users.phone_number AS users_phone_number, users.department AS users_department, users.region AS users_region, users.oauth_provider AS users_oauth_provider, users.oauth_id AS users_oauth_id, users.last_login AS users_last_login, users.timezone AS users_timezone, users.organization_id AS users_organization_id 
+2025-09-02 14:07:58 FROM users 
+2025-09-02 14:07:58 WHERE users.id = %(pk_1)s
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     app.services.user_preference_service | Retrieved preferences for user: 1
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.mfa_enabled AS users_mfa_enabled, users.mfa_secret AS users_mfa_secret, users.role AS users_role, users.first_name AS users_first_name, users.last_name AS users_last_name, users.display_name AS users_display_name, users.profile_picture_url AS users_profile_picture_url, users.birthday AS users_birthday, users.phone_number AS users_phone_number, users.department AS users_department, users.region AS users_region, users.oauth_provider AS users_oauth_provider, users.oauth_id AS users_oauth_id, users.last_login AS users_last_login, users.timezone AS users_timezone, users.organization_id AS users_organization_id 
+2025-09-02 14:07:58 FROM users 
+2025-09-02 14:07:58 WHERE users.id = %(pk_1)s
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.6s ago] {'pk_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.6s ago] {'pk_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | ROLLBACK
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT users_1.id AS users_1_id, roles.id AS roles_id, roles.name AS roles_name, roles.description AS roles_description 
+2025-09-02 14:07:58 FROM users AS users_1 JOIN user_roles AS user_roles_1 ON users_1.id = user_roles_1.user_id JOIN roles ON roles.id = user_roles_1.role_id 
+2025-09-02 14:07:58 WHERE users_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT users_1.id AS users_1_id, roles.id AS roles_id, roles.name AS roles_name, roles.description AS roles_description 
+2025-09-02 14:07:58 FROM users AS users_1 JOIN user_roles AS user_roles_1 ON users_1.id = user_roles_1.user_id JOIN roles ON roles.id = user_roles_1.role_id 
+2025-09-02 14:07:58 WHERE users_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.6s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.6s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:58 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:58 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:58 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:58 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.6s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.6s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     app.services.user_preference_service | Retrieved preferences for user: 1
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     app.services.user_preference_service | Retrieved preferences for user: 1
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | ROLLBACK
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | ROLLBACK
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | BEGIN (implicit)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:58 FROM sessions 
+2025-09-02 14:07:58 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:58  LIMIT %(param_1)s
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | BEGIN (implicit)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.7s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | BEGIN (implicit)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:58 FROM sessions 
+2025-09-02 14:07:58 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:58  LIMIT %(param_1)s
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | BEGIN (implicit)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:58 FROM sessions 
+2025-09-02 14:07:58 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:58  LIMIT %(param_1)s
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.7s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.mfa_enabled AS users_mfa_enabled, users.mfa_secret AS users_mfa_secret, users.role AS users_role, users.first_name AS users_first_name, users.last_name AS users_last_name, users.display_name AS users_display_name, users.profile_picture_url AS users_profile_picture_url, users.birthday AS users_birthday, users.phone_number AS users_phone_number, users.department AS users_department, users.region AS users_region, users.oauth_provider AS users_oauth_provider, users.oauth_id AS users_oauth_id, users.last_login AS users_last_login, users.timezone AS users_timezone, users.organization_id AS users_organization_id 
+2025-09-02 14:07:58 FROM users 
+2025-09-02 14:07:58 WHERE users.id = %(pk_1)s
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:58 FROM sessions 
+2025-09-02 14:07:58 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:58  LIMIT %(param_1)s
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.7s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.7s ago] {'pk_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.7s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.mfa_enabled AS users_mfa_enabled, users.mfa_secret AS users_mfa_secret, users.role AS users_role, users.first_name AS users_first_name, users.last_name AS users_last_name, users.display_name AS users_display_name, users.profile_picture_url AS users_profile_picture_url, users.birthday AS users_birthday, users.phone_number AS users_phone_number, users.department AS users_department, users.region AS users_region, users.oauth_provider AS users_oauth_provider, users.oauth_id AS users_oauth_id, users.last_login AS users_last_login, users.timezone AS users_timezone, users.organization_id AS users_organization_id 
+2025-09-02 14:07:58 FROM users 
+2025-09-02 14:07:58 WHERE users.id = %(pk_1)s
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT users_1.id AS users_1_id, roles.id AS roles_id, roles.name AS roles_name, roles.description AS roles_description 
+2025-09-02 14:07:58 FROM users AS users_1 JOIN user_roles AS user_roles_1 ON users_1.id = user_roles_1.user_id JOIN roles ON roles.id = user_roles_1.role_id 
+2025-09-02 14:07:58 WHERE users_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.mfa_enabled AS users_mfa_enabled, users.mfa_secret AS users_mfa_secret, users.role AS users_role, users.first_name AS users_first_name, users.last_name AS users_last_name, users.display_name AS users_display_name, users.profile_picture_url AS users_profile_picture_url, users.birthday AS users_birthday, users.phone_number AS users_phone_number, users.department AS users_department, users.region AS users_region, users.oauth_provider AS users_oauth_provider, users.oauth_id AS users_oauth_id, users.last_login AS users_last_login, users.timezone AS users_timezone, users.organization_id AS users_organization_id 
+2025-09-02 14:07:58 FROM users 
+2025-09-02 14:07:58 WHERE users.id = %(pk_1)s
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.7s ago] {'pk_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.7s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.mfa_enabled AS users_mfa_enabled, users.mfa_secret AS users_mfa_secret, users.role AS users_role, users.first_name AS users_first_name, users.last_name AS users_last_name, users.display_name AS users_display_name, users.profile_picture_url AS users_profile_picture_url, users.birthday AS users_birthday, users.phone_number AS users_phone_number, users.department AS users_department, users.region AS users_region, users.oauth_provider AS users_oauth_provider, users.oauth_id AS users_oauth_id, users.last_login AS users_last_login, users.timezone AS users_timezone, users.organization_id AS users_organization_id 
+2025-09-02 14:07:58 FROM users 
+2025-09-02 14:07:58 WHERE users.id = %(pk_1)s
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.7s ago] {'pk_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.7s ago] {'pk_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT users_1.id AS users_1_id, roles.id AS roles_id, roles.name AS roles_name, roles.description AS roles_description 
+2025-09-02 14:07:58 FROM users AS users_1 JOIN user_roles AS user_roles_1 ON users_1.id = user_roles_1.user_id JOIN roles ON roles.id = user_roles_1.role_id 
+2025-09-02 14:07:58 WHERE users_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT users_1.id AS users_1_id, roles.id AS roles_id, roles.name AS roles_name, roles.description AS roles_description 
+2025-09-02 14:07:58 FROM users AS users_1 JOIN user_roles AS user_roles_1 ON users_1.id = user_roles_1.user_id JOIN roles ON roles.id = user_roles_1.role_id 
+2025-09-02 14:07:58 WHERE users_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:58 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:58 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.7s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT users_1.id AS users_1_id, roles.id AS roles_id, roles.name AS roles_name, roles.description AS roles_description 
+2025-09-02 14:07:58 FROM users AS users_1 JOIN user_roles AS user_roles_1 ON users_1.id = user_roles_1.user_id JOIN roles ON roles.id = user_roles_1.role_id 
+2025-09-02 14:07:58 WHERE users_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.7s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.7s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.7s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:58 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:58 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:58 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:58 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.7s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     app.services.user_preference_service | Retrieved preferences for user: 1
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:58 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:58 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.7s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | ROLLBACK
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.7s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     app.services.user_preference_service | Retrieved preferences for user: 1
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     app.services.user_preference_service | Retrieved preferences for user: 1
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     app.services.user_preference_service | Retrieved preferences for user: 1
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | ROLLBACK
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | ROLLBACK
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | ROLLBACK
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | BEGIN (implicit)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:58 FROM sessions 
+2025-09-02 14:07:58 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:58  LIMIT %(param_1)s
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.7s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.mfa_enabled AS users_mfa_enabled, users.mfa_secret AS users_mfa_secret, users.role AS users_role, users.first_name AS users_first_name, users.last_name AS users_last_name, users.display_name AS users_display_name, users.profile_picture_url AS users_profile_picture_url, users.birthday AS users_birthday, users.phone_number AS users_phone_number, users.department AS users_department, users.region AS users_region, users.oauth_provider AS users_oauth_provider, users.oauth_id AS users_oauth_id, users.last_login AS users_last_login, users.timezone AS users_timezone, users.organization_id AS users_organization_id 
+2025-09-02 14:07:58 FROM users 
+2025-09-02 14:07:58 WHERE users.id = %(pk_1)s
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.7s ago] {'pk_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT users_1.id AS users_1_id, roles.id AS roles_id, roles.name AS roles_name, roles.description AS roles_description 
+2025-09-02 14:07:58 FROM users AS users_1 JOIN user_roles AS user_roles_1 ON users_1.id = user_roles_1.user_id JOIN roles ON roles.id = user_roles_1.role_id 
+2025-09-02 14:07:58 WHERE users_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.7s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:58 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:58 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.7s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     app.services.user_preference_service | Retrieved preferences for user: 1
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | ROLLBACK
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | BEGIN (implicit)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:58 FROM sessions 
+2025-09-02 14:07:58 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:58  LIMIT %(param_1)s
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.8s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.mfa_enabled AS users_mfa_enabled, users.mfa_secret AS users_mfa_secret, users.role AS users_role, users.first_name AS users_first_name, users.last_name AS users_last_name, users.display_name AS users_display_name, users.profile_picture_url AS users_profile_picture_url, users.birthday AS users_birthday, users.phone_number AS users_phone_number, users.department AS users_department, users.region AS users_region, users.oauth_provider AS users_oauth_provider, users.oauth_id AS users_oauth_id, users.last_login AS users_last_login, users.timezone AS users_timezone, users.organization_id AS users_organization_id 
+2025-09-02 14:07:58 FROM users 
+2025-09-02 14:07:58 WHERE users.id = %(pk_1)s
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.7s ago] {'pk_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT users_1.id AS users_1_id, roles.id AS roles_id, roles.name AS roles_name, roles.description AS roles_description 
+2025-09-02 14:07:58 FROM users AS users_1 JOIN user_roles AS user_roles_1 ON users_1.id = user_roles_1.user_id JOIN roles ON roles.id = user_roles_1.role_id 
+2025-09-02 14:07:58 WHERE users_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.8s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | BEGIN (implicit)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | BEGIN (implicit)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | BEGIN (implicit)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT roles_1.id AS roles_1_id, permissions.id AS permissions_id, permissions.action AS permissions_action, permissions.resource AS permissions_resource, permissions.conditions AS permissions_conditions 
+2025-09-02 14:07:58 FROM roles AS roles_1 JOIN role_permissions AS role_permissions_1 ON roles_1.id = role_permissions_1.role_id JOIN permissions ON permissions.id = role_permissions_1.permission_id 
+2025-09-02 14:07:58 WHERE roles_1.id IN (%(primary_keys_1)s)
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:58 FROM sessions 
+2025-09-02 14:07:58 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:58  LIMIT %(param_1)s
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:58 FROM sessions 
+2025-09-02 14:07:58 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:58  LIMIT %(param_1)s
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT sessions.id AS sessions_id, sessions.user_id AS sessions_user_id, sessions.session_token AS sessions_session_token, sessions.created_at AS sessions_created_at, sessions.expires_at AS sessions_expires_at 
+2025-09-02 14:07:58 FROM sessions 
+2025-09-02 14:07:58 WHERE sessions.session_token = %(session_token_1)s 
+2025-09-02 14:07:58  LIMIT %(param_1)s
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.8s ago] {'primary_keys_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.8s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.8s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | [cached since 111.8s ago] {'session_token_1': '9O5YrnydNUdr8gCqNxFBu8Wbt9YqSYLO5ncjOIPfsVZGTqNGFEpKXwW432TSmH8O', 'param_1': 1}
+2025-09-02 14:07:58 [2025-09-02 13:07:58] INFO     sqlalchemy.engine.Engine  | SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.is_active AS users_is_active, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.mfa_enabled AS users_mfa_enabled, users.mfa_secret AS users_mfa_secret, users.role AS users_role, users.first_name AS users_first_name, users.last_name AS users_last_name, users.display_name AS users_display_name, users.profile_picture_url AS users_profile_picture_url, users.birthday AS users_birthday, users.phone_number AS users_phone_number, users.department AS users_department, users.region AS users_region, users.oauth_provider AS users_oauth_provider, users.oauth_id AS users_oauth_id, users.last_l

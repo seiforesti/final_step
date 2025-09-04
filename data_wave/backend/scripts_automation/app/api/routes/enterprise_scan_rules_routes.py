@@ -1,3 +1,4 @@
+from app.utils.serialization_utils import safe_serialize_model, safe_serialize_list
 """
 Enterprise Scan Rules API Routes - Production Implementation
 =========================================================
@@ -229,7 +230,7 @@ async def create_intelligent_rule(
                 )
         
         # Convert to response model
-        response = IntelligentRuleResponse.from_orm(intelligent_rule)
+        response = IntelligentRuleResponse.model_validate(intelligent_rule, from_attributes=True)
         
         logger.info(
             "Intelligent scan rule created successfully",
@@ -341,7 +342,7 @@ async def list_intelligent_rules(
         rules = result.scalars().all()
         
         # Convert to response models
-        response = [IntelligentRuleResponse.from_orm(rule) for rule in rules]
+        response = [IntelligentRuleResponse.model_validate(rule, from_attributes=True) for rule in rules]
         
         logger.info(
             "Listed intelligent scan rules",
@@ -408,7 +409,7 @@ async def get_intelligent_rule(
                 detail=f"Rule with ID {rule_id} not found"
             )
         
-        response = IntelligentRuleResponse.from_orm(rule)
+        response = IntelligentRuleResponse.model_validate(rule, from_attributes=True)
         
         logger.info(
             "Retrieved intelligent scan rule",
@@ -488,7 +489,7 @@ async def update_intelligent_rule(
         await session.commit()
         await session.refresh(rule)
         
-        response = IntelligentRuleResponse.from_orm(rule)
+        response = IntelligentRuleResponse.model_validate(rule, from_attributes=True)
         
         logger.info(
             "Updated intelligent scan rule",
@@ -1243,7 +1244,7 @@ async def list_pattern_library(
         patterns = result.scalars().all()
         
         # Convert to response models
-        response = [PatternLibraryResponse.from_orm(pattern) for pattern in patterns]
+        response = [PatternLibraryResponse.model_validate(pattern, from_attributes=True) for pattern in patterns]
         
         logger.info(
             "Listed pattern library",

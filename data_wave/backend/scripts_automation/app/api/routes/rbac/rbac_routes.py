@@ -162,7 +162,7 @@ def create_condition_template(template: ConditionTemplateCreate, db: Session = D
             json.loads(template.value)
         except Exception as e:
             raise HTTPException(status_code=400, detail=f"Invalid JSON in value: {e}")
-    obj = ConditionTemplate(**template.dict(), created_at=datetime.utcnow(), updated_at=datetime.utcnow())
+    obj = ConditionTemplate(**template.model_dump(), created_at=datetime.utcnow(), updated_at=datetime.utcnow())
     db.add(obj)
     db.commit()
     db.refresh(obj)
@@ -381,7 +381,7 @@ def list_access_requests(
     if status:
         q = q.filter(AccessRequest.status == status)
     reqs = q.order_by(AccessRequest.created_at.desc()).all()
-    return [r.dict() for r in reqs]
+    return [r.model_dump() for r in reqs]
 
 # --- Periodic Access Review Trigger ---
 @router.post("/access-review/trigger")
@@ -447,7 +447,7 @@ def filter_rbac_audit_logs(
     if status:
         q = q.filter(RbacAuditLog.status == status)
     logs = q.order_by(RbacAuditLog.timestamp.desc()).offset(skip).limit(limit).all()
-    return {"logs": [l.dict() for l in logs], "skip": skip, "limit": limit}
+    return {"logs": [l.model_dump() for l in logs], "skip": skip, "limit": limit}
 """
 RBAC API routes: advanced, Azure-inspired, enterprise-grade RBAC endpoints.
 Handles: user/role/permission/group/service principal management, resource-level scoping, ABAC, delegation, access review, audit logging.
@@ -884,7 +884,7 @@ def assign_role_scope(
     if not resource_type:
         raise HTTPException(status_code=400, detail="resource_type is required")
     rr = assign_resource_role(db, user_id, role_id, resource_type, resource_id, performed_by=current_user.email)
-    return {"detail": f"Role {role_id} assigned to user {user_id} for {resource_type}:{resource_id}", "assignment": rr.dict()}
+    return {"detail": f"Role {role_id} assigned to user {user_id} for {resource_type}:{resource_id}", "assignment": rr.model_dump()}
 
 @router.get("/resource-roles")
 def get_resource_roles(
@@ -897,7 +897,7 @@ def get_resource_roles(
     if getattr(current_user, "role", None) != "admin":
         raise HTTPException(status_code=403, detail="Admin only")
     roles = list_resource_roles(db, user_id, resource_type, resource_id)
-    return [r.dict() for r in roles]
+    return [r.model_dump() for r in roles]
 
 # Built-in roles endpoint (Azure-style)
 @router.get("/builtin-roles")
@@ -962,7 +962,7 @@ def request_access(
     current_user: User = Depends(get_current_user)
 ):
     req = create_access_request(db, user_id, resource_type, resource_id, requested_role, justification)
-    return {"detail": "Access request submitted", "status": req.status, "request": req.dict()}
+    return {"detail": "Access request submitted", "status": req.status, "request": req.model_dump()}
 
 # Access review: approve/reject access requests
 @router.post("/access-review")
@@ -978,7 +978,7 @@ def access_review(
     req = review_access_request(db, request_id, approve, reviewer=current_user.email, review_note=review_note)
     if not req:
         raise HTTPException(status_code=404, detail="Access request not found")
-    return {"detail": "Access request reviewed", "approved": approve, "request": req.dict()}
+    return {"detail": "Access request reviewed", "approved": approve, "request": req.model_dump()}
 
 # Audit log: list RBAC-related audit events
 @router.get("/audit-logs")
@@ -991,7 +991,7 @@ def get_rbac_audit_logs(
     if getattr(current_user, "role", None) != "admin":
         raise HTTPException(status_code=403, detail="Admin only")
     logs = list_rbac_audit_logs(db, skip=skip, limit=limit)
-    return {"logs": [l.dict() for l in logs], "skip": skip, "limit": limit}
+    return {"logs": [l.model_dump() for l in logs], "skip": skip, "limit": limit}
 
 # --- Entity-centric Audit Log Endpoint ---
 from typing import Any
@@ -1011,7 +1011,7 @@ def get_audit_history_for_entity(
     if getattr(current_user, "role", None) != "admin":
         raise HTTPException(status_code=403, detail="Admin only")
     logs = get_entity_audit_history(db, query.entity_type, query.entity_id, query.limit)
-    return {"logs": [l.dict() for l in logs], "entity_type": query.entity_type, "entity_id": query.entity_id}
+    return {"logs": [l.model_dump() for l in logs], "entity_type": query.entity_type, "entity_id": query.entity_id}
 
 
 #---------------------------------------------------------------------------------
@@ -1158,7 +1158,7 @@ def create_deny_assignment_api(request: Request, db: Session = Depends(get_db), 
     data = None
     import asyncio
     if hasattr(request, 'json'):
-        data = asyncio.run(request.json())
+        data = asyncio.run(request.model_dump_json())
     if not data:
         data = getattr(request, '_json', {})
     principal_type = data.get("principal_type")
@@ -1315,7 +1315,7 @@ def build_resource_tree(db: Session, parent_id: Optional[int] = None):
     nodes = db.query(Resource).filter(Resource.parent_id == parent_id).all()
     return [
         {
-            **n.dict(),
+            **n.model_dump(),
             "children": build_resource_tree(db, n.id)
         }
         for n in nodes
@@ -1327,7 +1327,7 @@ def get_resource_tree(db: Session = Depends(get_db), current_user: User = Depend
 
 @router.post("/resources", response_model=Resource)
 def create_resource(resource: ResourceCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    r = Resource(**resource.dict())
+    r = Resource(**resource.model_dump())
     db.add(r)
     db.commit()
     db.refresh(r)
@@ -1435,7 +1435,7 @@ def get_effective_user_permissions_for_resource(resource_id: int, db: Session = 
     user_permissions = {}
     for user_id, role_ids in user_roles.items():
         perms = get_permissions_for_roles(db, list(role_ids))
-        user_permissions[user_id] = [p.dict() for p in perms]
+        user_permissions[user_id] = [p.model_dump() for p in perms]
     return user_permissions
 
 # Place after router = APIRouter(...)
@@ -1542,7 +1542,7 @@ PREBUILT_CONDITION_TEMPLATES = [
 #             "description": match["description"]
 #         }
 #     else:
-#         template_data = template.dict()
+#         template_data = template.model_dump()
 #     if db.query(ConditionTemplate).filter_by(label=template_data["label"]).first():
 #         raise HTTPException(status_code=400, detail="Label already exists")
 #     obj = ConditionTemplate(**template_data, created_at=datetime.utcnow(), updated_at=datetime.utcnow())
@@ -1600,7 +1600,7 @@ def api_get_resource_ancestors(resource_id: int, db: Session = Depends(get_sessi
     Returns a list of ancestor resources, closest parent first, up to the root.
     Uses recursive CTE if supported by the DB, otherwise falls back to Python recursion.
     """
-    return [r.dict() for r in get_resource_ancestors(db, resource_id)]
+    return [r.model_dump() for r in get_resource_ancestors(db, resource_id)]
 
 # --- Get all descendants of a resource (children, grandchildren, etc.) ---
 @router.get("/resources/{resource_id}/descendants")
@@ -1609,7 +1609,7 @@ def api_get_resource_descendants(resource_id: int, db: Session = Depends(get_ses
     Returns a flat list of all descendant resources (children, grandchildren, etc.).
     Uses recursive CTE if supported by the DB, otherwise falls back to Python recursion.
     """
-    return [r.dict() for r in get_resource_descendants(db, resource_id)]
+    return [r.model_dump() for r in get_resource_descendants(db, resource_id)]
 
 # --- Data Source Integration Endpoints ---
 @router.post("/resources/sync-data-sources")
@@ -1633,17 +1633,17 @@ def get_resource_by_data_source_endpoint(data_source_id: int, db: Session = Depe
     resource = get_resource_by_data_source(db, data_source_id)
     if not resource:
         raise HTTPException(status_code=404, detail="No resource found for this data source")
-    return resource.dict()
+    return resource.model_dump()
 
 @router.get("/resources/data-source/{data_source_id}/hierarchy")
 def get_data_source_hierarchy_endpoint(data_source_id: int, db: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
     """Get all resources in the hierarchy for a specific data source."""
     hierarchy = get_resources_by_data_source_hierarchy(db, data_source_id)
     return {
-        "data_source": [r.dict() for r in hierarchy["data_source"]],
-        "databases": [r.dict() for r in hierarchy["databases"]],
-        "schemas": [r.dict() for r in hierarchy["schemas"]],
-        "tables": [r.dict() for r in hierarchy["tables"]]
+        "data_source": [r.model_dump() for r in hierarchy["data_source"]],
+        "databases": [r.model_dump() for r in hierarchy["databases"]],
+        "schemas": [r.model_dump() for r in hierarchy["schemas"]],
+        "tables": [r.model_dump() for r in hierarchy["tables"]]
     }
 
 class CreateSchemaResourcesRequest(BaseModel):
@@ -1664,7 +1664,7 @@ def create_schema_resources_endpoint(
         resources = create_schema_resources_for_data_source(db, data_source_id, request.schemas)
         return {
             "created_count": len(resources),
-            "resources": [r.dict() for r in resources]
+            "resources": [r.model_dump() for r in resources]
         }
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
@@ -1689,7 +1689,7 @@ def create_table_resources_endpoint(
         resources = create_table_resources_for_schema(db, schema_resource_id, request.tables)
         return {
             "created_count": len(resources),
-            "resources": [r.dict() for r in resources]
+            "resources": [r.model_dump() for r in resources]
         }
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))

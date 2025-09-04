@@ -9,7 +9,406 @@ import React, { useState, useEffect, Suspense, useCallback, useMemo, createConte
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import { Toaster } from "sonner"
-import { Database, Settings, Activity, TrendingUp, Users, Shield, Cloud, Search, BarChart3, Eye, Zap, Target, Bell, Menu, X, ChevronLeft, ChevronRight, Plus, Filter, Download, Upload, RefreshCw, HelpCircle, User, LogOut, Monitor, Palette, Globe, Lock, Building, FileText, MessageSquare, Star, Grid, List, Layers, GitBranch, Workflow, Calendar, Clock, AlertTriangle, CheckCircle, Info, Play, Pause, Square, Edit, Trash2, Copy, Share2, ExternalLink, MoreHorizontal, ChevronDown, ChevronUp, Maximize2, Minimize2, PanelLeftOpen, PanelRightOpen, SplitSquareHorizontal, Layout, Command, Cpu, HardDrive, Network, Gauge, LineChart, PieChart, AreaChart, TestTube, Beaker, Microscope, Cog, Wrench, Package, Server, CircuitBoard, Boxes, Archive, FolderOpen, Folder, File, Code2, Terminal, Bug, Sparkles, Rocket, Flame, Lightbulb, Brain, Bot, Radar, Crosshair, Focus, Scan, SearchX, ScanLine, Binary, Hash, Type, Key, ShieldCheckIcon, UserCheck, Crown, Badge as BadgeIcon, Award, Medal, Trophy, Flag, Bookmark, Heart, ThumbsUp, Smile, Frown, AlertCircle, XCircle, Wifi, WifiOff, Signal, SignalHigh, SignalLow, SignalMedium, Route, Map, MapPin, Navigation, Compass, TreePine, Workflow as WorkflowIcon, Camera, Video, Mic, MicOff, Maximize, Minimize, RotateCcw, RotateCw, ZoomIn, ZoomOut, Expand, Shrink, Move, PinIcon, Bookmark as BookmarkIcon, Tag, Tags, Hash as HashIcon, Percent, DollarSign, Euro, ArrowDown } from 'lucide-react'
+import { Database, Settings, Activity, TrendingUp, Users, Shield, Cloud, Search, BarChart3, Eye, Zap, Target, Bell, Menu, X, ChevronLeft, ChevronRight, Plus, Filter, Download, Upload, RefreshCw, HelpCircle, User, LogOut, Monitor, Palette, Globe, Lock, Building, FileText, MessageSquare, Star, Grid, List, Layers, GitBranch, Workflow, Calendar, Clock, AlertTriangle, CheckCircle, Info, Play, Pause, Square, Edit, Trash2, Copy, Share2, ExternalLink, MoreHorizontal, ChevronDown, ChevronUp, Maximize2, Minimize2, PanelLeftOpen, PanelRightOpen, SplitSquareHorizontal, Layout, Command, Cpu, HardDrive, Network, Gauge, LineChart, PieChart, AreaChart, TestTube, Beaker, Microscope, Cog, Wrench, Package, Server, CircuitBoard, Boxes, Archive, FolderOpen, Folder, File, Code2, Terminal, Bug, Sparkles, Rocket, Flame, Lightbulb, Brain, Bot, Radar, Crosshair, Focus, Scan, SearchX, ScanLine, Binary, Hash, Type, Key, ShieldCheckIcon, UserCheck, Crown, Badge as BadgeIcon, Award, Medal, Trophy, Flag, Bookmark, Heart, ThumbsUp, Smile, Frown, AlertCircle, XCircle, Wifi, WifiOff, Signal, SignalHigh, SignalLow, SignalMedium, Route, Map as MapIcon, MapPin, Navigation, Compass, TreePine, Workflow as WorkflowIcon, Camera, Video, Mic, MicOff, Maximize, Minimize, RotateCcw, RotateCw, ZoomIn, ZoomOut, Expand, Shrink, Move, PinIcon, Bookmark as BookmarkIcon, Tag, Tags, Hash as HashIcon, Percent, DollarSign, Euro, ArrowDown } from 'lucide-react'
+
+// ============================================================================
+// API REQUEST THROTTLING AND DEBOUNCING SYSTEM
+// ============================================================================
+
+// Global API request manager to prevent burst requests
+class APIRequestManager {
+  private static instance: APIRequestManager
+  private requestQueue: globalThis.Map<string, { timestamp: number; count: number }>
+  private activeRequests: globalThis.Set<string>
+  private requestDelays: globalThis.Map<string, number>
+  private maxConcurrentRequests = 1 // ULTRA AGGRESSIVE: Only 1 concurrent request
+  private requestTimeout = 10000 // REDUCED to 10 seconds
+  private retryDelays = [5000, 10000, 20000, 30000] // Much longer delays
+  private circuitBreakerOpen = false
+  private circuitBreakerFailures = 0
+  private maxFailures = 2 // Very low failure threshold
+  private lastFailureTime = 0
+  private cooldownPeriod = 60000 // 60 seconds cooldown
+  private requestCount = 0
+  private maxRequestsPerMinute = 5 // ULTRA AGGRESSIVE: Only 5 requests per minute
+  private requestTimestamps: number[] = []
+  private isEmergencyMode = false
+
+  constructor() {
+    this.requestQueue = new globalThis.Map()
+    this.activeRequests = new globalThis.Set()
+    this.requestDelays = new globalThis.Map()
+  }
+
+  static getInstance(): APIRequestManager {
+    if (!APIRequestManager.instance) {
+      APIRequestManager.instance = new APIRequestManager()
+    }
+    return APIRequestManager.instance
+  }
+
+  // Check if we can make a request - ULTRA AGGRESSIVE THROTTLING
+  canMakeRequest(endpoint: string): boolean {
+    const now = Date.now()
+    
+    // EMERGENCY MODE: If too many failures, block ALL requests
+    if (this.isEmergencyMode) {
+      console.warn('🚨 EMERGENCY MODE: All API requests blocked to protect database')
+      return false
+    }
+    
+    // CIRCUIT BREAKER: If circuit is open, block requests
+    if (this.circuitBreakerOpen) {
+      if (now - this.lastFailureTime < this.cooldownPeriod) {
+        console.warn('🔴 Circuit breaker OPEN: Requests blocked for cooldown')
+        return false
+      } else {
+        // Reset circuit breaker after cooldown
+        this.circuitBreakerOpen = false
+        this.circuitBreakerFailures = 0
+        console.log('🟢 Circuit breaker RESET: Requests allowed again')
+      }
+    }
+    
+    // RATE LIMITING: Maximum 5 requests per minute globally
+    this.requestTimestamps = this.requestTimestamps.filter(timestamp => now - timestamp < 60000)
+    if (this.requestTimestamps.length >= this.maxRequestsPerMinute) {
+      console.warn('⏰ Rate limit exceeded: Maximum requests per minute reached')
+      return false
+    }
+    
+    // CONCURRENT LIMIT: Only 1 concurrent request allowed
+    if (this.activeRequests.size >= this.maxConcurrentRequests) {
+      console.warn('🚫 Concurrent limit: Maximum concurrent requests reached')
+      return false
+    }
+    
+    // ENDPOINT-SPECIFIC THROTTLING: Very strict per endpoint
+    const queueKey = `${endpoint}_${Math.floor(now / 10000)}` // Group by 10 seconds
+    const queueItem = this.requestQueue.get(queueKey)
+    if (!queueItem) {
+      this.requestQueue.set(queueKey, { timestamp: now, count: 1 })
+    } else {
+      // Only 1 request per 10 seconds per endpoint
+      if (queueItem.count >= 1) {
+        console.warn(`⏳ Endpoint throttled: ${endpoint} - only 1 request per 10 seconds`)
+        return false
+      }
+      queueItem.count++
+    }
+    
+    // Add to rate limiting tracker
+    this.requestTimestamps.push(now)
+    return true
+  }
+
+  // Add request delay for specific endpoints
+  addRequestDelay(endpoint: string, delay: number): void {
+    this.requestDelays.set(endpoint, delay)
+  }
+
+  // Get delay for endpoint
+  getRequestDelay(endpoint: string): number {
+    return this.requestDelays.get(endpoint) || 0
+  }
+
+  // Track active request
+  startRequest(requestId: string): void {
+    this.activeRequests.add(requestId)
+  }
+
+  // Complete request
+  completeRequest(requestId: string): void {
+    this.activeRequests.delete(requestId)
+  }
+
+  // Check if too many concurrent requests
+  hasTooManyConcurrentRequests(): boolean {
+    return this.activeRequests.size >= this.maxConcurrentRequests
+  }
+
+  // Clean up old queue entries
+  cleanup(): void {
+    const now = Date.now()
+    const oneMinuteAgo = now - 60000
+
+    for (const [key, item] of this.requestQueue.entries()) {
+      if (item.timestamp < oneMinuteAgo) {
+        this.requestQueue.delete(key)
+      }
+    }
+  }
+
+  // Handle request failure - triggers circuit breaker
+  handleRequestFailure(): void {
+    this.circuitBreakerFailures++
+    this.lastFailureTime = Date.now()
+    
+    console.warn(`🔴 Request failure #${this.circuitBreakerFailures}`)
+    
+    if (this.circuitBreakerFailures >= this.maxFailures) {
+      this.circuitBreakerOpen = true
+      console.error('🚨 CIRCUIT BREAKER OPENED: Too many failures, blocking all requests')
+    }
+  }
+
+  // Handle request success - resets failure count
+  handleRequestSuccess(): void {
+    if (this.circuitBreakerFailures > 0) {
+      this.circuitBreakerFailures = Math.max(0, this.circuitBreakerFailures - 1)
+      console.log(`🟢 Request success, failure count: ${this.circuitBreakerFailures}`)
+    }
+  }
+
+  // Enable emergency mode - blocks ALL requests
+  enableEmergencyMode(): void {
+    this.isEmergencyMode = true
+    this.circuitBreakerOpen = true
+    console.error('🚨🚨🚨 EMERGENCY MODE ENABLED: ALL API REQUESTS BLOCKED 🚨🚨🚨')
+  }
+
+  // Disable emergency mode
+  disableEmergencyMode(): void {
+    this.isEmergencyMode = false
+    this.circuitBreakerOpen = false
+    this.circuitBreakerFailures = 0
+    console.log('🟢 Emergency mode DISABLED: API requests allowed again')
+  }
+
+  // Get emergency status
+  isInEmergencyMode(): boolean {
+    return this.isEmergencyMode
+  }
+
+  // Get request statistics
+  getStats(): { activeRequests: number; queueSize: number } {
+    return {
+      activeRequests: this.activeRequests.size,
+      queueSize: this.requestQueue.size
+    }
+  }
+}
+
+// Enhanced Query Client with throttling
+const createThrottledQueryClient = () => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: (failureCount, error: any) => {
+          // Don't retry on 4xx errors
+          if (error?.response?.status >= 400 && error?.response?.status < 500) {
+            return false
+          }
+          // Retry up to 3 times with exponential backoff
+          return failureCount < 3
+        },
+        retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+        staleTime: 5 * 60 * 1000, // 5 minutes
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: true,
+        refetchOnMount: true,
+      },
+      mutations: {
+        retry: 1,
+        retryDelay: 1000,
+      },
+    },
+  })
+
+  return queryClient
+}
+
+// Custom hook for throttled API calls
+const useThrottledQuery = (queryKey: any[], queryFn: () => Promise<any>, options: any = {}) => {
+  const [isThrottled, setIsThrottled] = useState(false)
+  const [throttleDelay, setThrottleDelay] = useState(0)
+  const requestManager = APIRequestManager.getInstance()
+
+  const endpoint = Array.isArray(queryKey) ? queryKey[0] : queryKey
+  const canMakeRequest = requestManager.canMakeRequest(endpoint)
+  const hasDelay = requestManager.getRequestDelay(endpoint)
+
+  useEffect(() => {
+    // Cleanup old queue entries
+    requestManager.cleanup()
+  }, [])
+
+  // Apply throttling logic
+  useEffect(() => {
+    if (!canMakeRequest) {
+      setIsThrottled(true)
+      setThrottleDelay(1000) // 1 second delay
+    } else if (hasDelay > 0) {
+      setIsThrottled(true)
+      setThrottleDelay(hasDelay)
+    } else {
+      setIsThrottled(false)
+      setThrottleDelay(0)
+    }
+  }, [canMakeRequest, hasDelay])
+
+  // Enhanced options with throttling
+  const enhancedOptions = {
+    ...options,
+    enabled: options.enabled !== false && !isThrottled,
+    refetchInterval: isThrottled ? false : options.refetchInterval,
+    staleTime: Math.max(options.staleTime || 5000, throttleDelay),
+  }
+
+  return {
+    isThrottled,
+    throttleDelay,
+    requestStats: requestManager.getStats(),
+    ...enhancedOptions
+  }
+}
+
+// API request interceptor for global throttling
+const setupAPIThrottling = () => {
+  const requestManager = APIRequestManager.getInstance()
+
+  // ULTRA AGGRESSIVE delays for all endpoints
+  requestManager.addRequestDelay('data-sources', 10000) // 10 second delay
+  requestManager.addRequestDelay('system-health', 15000) // 15 second delay
+  requestManager.addRequestDelay('performance-metrics', 12000) // 12 second delay
+  requestManager.addRequestDelay('security-audit', 10000) // 10 second delay
+  requestManager.addRequestDelay('collaboration-workspaces', 8000) // 8 second delay
+  requestManager.addRequestDelay('workflow-definitions', 10000) // 10 second delay
+  requestManager.addRequestDelay('notifications', 5000) // 5 second delay
+  requestManager.addRequestDelay('workspace', 8000) // 8 second delay
+  requestManager.addRequestDelay('scan', 15000) // 15 second delay
+  requestManager.addRequestDelay('data-discovery', 12000) // 12 second delay
+
+  // Override fetch to add ULTRA AGGRESSIVE throttling
+  const originalFetch = window.fetch
+  window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = typeof input === 'string' ? input : input.toString()
+    const endpoint = new URL(url, window.location.origin).pathname
+
+    // EMERGENCY CHECK: If in emergency mode, block ALL requests
+    if (requestManager.isInEmergencyMode()) {
+      console.error('🚨 EMERGENCY MODE: Request blocked to protect database')
+      throw new Error('Emergency mode: All requests blocked to protect database')
+    }
+
+    // Check if we can make this request
+    if (!requestManager.canMakeRequest(endpoint)) {
+      console.warn(`🚫 Request throttled for endpoint: ${endpoint}`)
+      throw new Error(`Request throttled for ${endpoint}`)
+    }
+
+    // Check for too many concurrent requests
+    if (requestManager.hasTooManyConcurrentRequests()) {
+      console.warn('🚫 Too many concurrent requests, delaying...')
+      await new Promise(resolve => setTimeout(resolve, 5000)) // 5 second delay
+    }
+
+    const requestId = `${endpoint}_${Date.now()}`
+    requestManager.startRequest(requestId)
+
+    try {
+      const response = await originalFetch(input, init)
+      
+      // Handle different error responses
+      if (response.status === 429) {
+        requestManager.handleRequestFailure()
+        const retryAfter = response.headers.get('Retry-After')
+        const delay = retryAfter ? parseInt(retryAfter) * 1000 : 10000
+        requestManager.addRequestDelay(endpoint, delay)
+        throw new Error(`Rate limited for ${endpoint}`)
+      }
+      
+      if (response.status >= 500) {
+        // Server errors - trigger circuit breaker
+        requestManager.handleRequestFailure()
+        console.error(`🔴 Server error ${response.status} for ${endpoint}`)
+        throw new Error(`Server error ${response.status} for ${endpoint}`)
+      }
+      
+      if (response.status >= 400) {
+        // Client errors - don't trigger circuit breaker but log
+        console.warn(`⚠️ Client error ${response.status} for ${endpoint}`)
+      } else {
+        // Success - reset failure count
+        requestManager.handleRequestSuccess()
+      }
+
+      return response
+    } catch (error: any) {
+      // Handle network errors and other failures
+      if (error.name === 'TypeError' || error.message.includes('Network Error') || 
+          error.message.includes('Failed to fetch') || error.message.includes('database_unavailable')) {
+        requestManager.handleRequestFailure()
+        console.error(`🔴 Network/Database error for ${endpoint}:`, error.message)
+        
+        // If too many database errors, enable emergency mode
+        if (error.message.includes('database_unavailable') || error.message.includes('too many clients')) {
+          requestManager.enableEmergencyMode()
+          console.error('🚨🚨🚨 DATABASE OVERLOAD DETECTED - EMERGENCY MODE ENABLED 🚨🚨🚨')
+        }
+      }
+      throw error
+    } finally {
+      requestManager.completeRequest(requestId)
+    }
+  }
+
+  console.log('🚀 ULTRA AGGRESSIVE API throttling system initialized')
+}
+
+// Initialize throttling on module load
+if (typeof window !== 'undefined') {
+  setupAPIThrottling()
+}
+
+// ============================================================================
+// COMPONENT INITIALIZATION THROTTLING
+// ============================================================================
+
+// Hook to manage component initialization timing
+const useComponentInitialization = () => {
+  const [isInitialized, setIsInitialized] = useState(false)
+  const [initializationPhase, setInitializationPhase] = useState(0)
+  const requestManager = APIRequestManager.getInstance()
+
+  useEffect(() => {
+    const initializeComponent = async () => {
+      try {
+        // ULTRA CONSERVATIVE initialization to prevent database overload
+        
+        // Phase 1: Core data (after 2 seconds)
+        setInitializationPhase(1)
+        await new Promise(resolve => setTimeout(resolve, 2000))
+
+        // Phase 2: User and workspace data (after 5 seconds)
+        setInitializationPhase(2)
+        await new Promise(resolve => setTimeout(resolve, 3000))
+
+        // Phase 3: Health and metrics (after 10 seconds)
+        setInitializationPhase(3)
+        await new Promise(resolve => setTimeout(resolve, 5000))
+
+        // Phase 4: Secondary data (after 20 seconds)
+        setInitializationPhase(4)
+        await new Promise(resolve => setTimeout(resolve, 10000))
+
+        // Phase 5: Background data (after 35 seconds)
+        setInitializationPhase(5)
+        await new Promise(resolve => setTimeout(resolve, 15000))
+
+        setIsInitialized(true)
+        console.log('🚀 ULTRA CONSERVATIVE component initialization completed')
+      } catch (error) {
+        console.error('Component initialization failed:', error)
+        setIsInitialized(true) // Still mark as initialized to prevent blocking
+      }
+    }
+
+    initializeComponent()
+  }, [])
+
+  return { isInitialized, initializationPhase }
+}
 
 // Import shadcn/ui components
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -931,31 +1330,76 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
   })
 
   // ========================================================================
-  // COMPREHENSIVE BACKEND DATA INTEGRATION - ALL ENTERPRISE APIs
+  // COMPREHENSIVE BACKEND DATA INTEGRATION - ALL ENTERPRISE APIs WITH THROTTLING
   // ========================================================================
   
-  // Core Data Sources Integration - WITH PROPER ERROR HANDLING
-  const { data: dataSources, isLoading: dataSourcesLoading, error: dataSourcesError, refetch: refetchDataSources } = useDataSourcesQuery()
+  // Use component initialization hook
+  const { isInitialized, initializationPhase } = useComponentInitialization()
+  
+  // Core Data Sources Integration - WITH THROTTLING AND ERROR HANDLING
+  const { data: dataSources, isLoading: dataSourcesLoading, error: dataSourcesError, refetch: refetchDataSources } = useDataSourcesQuery({
+    enabled: isInitialized && initializationPhase >= 1,
+    refetchInterval: 60000, // Only refetch every minute
+    staleTime: 30000 // 30 seconds stale time
+  })
+  
   // Create datasource mutation (real backend)
   const createDataSourceMutation = useCreateDataSourceMutation()
 
+  // Core User and Workspace Integration - WITH THROTTLING AND ERROR BOUNDARIES
+  const { data: user, isLoading: userLoading, error: userError } = useUserQuery({
+    enabled: isInitialized && initializationPhase >= 2,
+    refetchInterval: 300000, // Only refetch every 5 minutes
+    staleTime: 120000 // 2 minutes stale time
+  })
   
-  // Core User and Workspace Integration - WITH ERROR BOUNDARIES
-  const { data: user, isLoading: userLoading, error: userError } = useUserQuery()
-  const { data: userNotifications, error: notificationsError } = useNotificationsQuery()
-  const { data: workspace, error: workspaceError } = useWorkspaceQuery()
-  const { data: metrics, error: metricsError } = useDataSourceMetricsQuery(selectedDataSource?.id)
+  const { data: userNotifications, error: notificationsError } = useNotificationsQuery({
+    enabled: isInitialized && initializationPhase >= 2,
+    refetchInterval: 120000, // Only refetch every 2 minutes
+    staleTime: 60000 // 1 minute stale time
+  })
   
-  // Core data source backend integrations - WITH ERROR BOUNDARIES
-  const { data: dataSourceHealth, error: healthError } = useDataSourceHealthQuery(selectedDataSource?.id || 0)
-  const { data: connectionPoolStats, error: poolError } = useConnectionPoolStatsQuery(selectedDataSource?.id || 0)
-  const { data: discoveryHistory, error: discoveryError } = useDiscoveryHistoryQuery(selectedDataSource?.id || 0)
-  const { data: scanResults, error: scanError } = useScanResultsQuery(selectedDataSource?.id || 0)
+  const { data: workspace, error: workspaceError } = useWorkspaceQuery({
+    enabled: isInitialized && initializationPhase >= 2,
+    refetchInterval: 300000, // Only refetch every 5 minutes
+    staleTime: 180000 // 3 minutes stale time
+  })
+  
+  const { data: metrics, error: metricsError } = useDataSourceMetricsQuery(selectedDataSource?.id, {
+    enabled: isInitialized && initializationPhase >= 2 && !!selectedDataSource?.id,
+    refetchInterval: 60000, // Only refetch every minute
+    staleTime: 30000 // 30 seconds stale time
+  })
+  
+  // Core data source backend integrations - WITH THROTTLING AND ERROR BOUNDARIES
+  const { data: dataSourceHealth, error: healthError } = useDataSourceHealthQuery(selectedDataSource?.id || 0, {
+    enabled: isInitialized && initializationPhase >= 3 && !!selectedDataSource?.id,
+    refetchInterval: 120000, // Only refetch every 2 minutes
+    staleTime: 60000 // 1 minute stale time
+  })
+  
+  const { data: connectionPoolStats, error: poolError } = useConnectionPoolStatsQuery(selectedDataSource?.id || 0, {
+    enabled: isInitialized && initializationPhase >= 3 && !!selectedDataSource?.id,
+    refetchInterval: 180000, // Only refetch every 3 minutes
+    staleTime: 90000 // 1.5 minutes stale time
+  })
+  
+  const { data: discoveryHistory, error: discoveryError } = useDiscoveryHistoryQuery(selectedDataSource?.id || 0, {
+    enabled: isInitialized && initializationPhase >= 3 && !!selectedDataSource?.id,
+    refetchInterval: 300000, // Only refetch every 5 minutes
+    staleTime: 180000 // 3 minutes stale time
+  })
+  
+  const { data: scanResults, error: scanError } = useScanResultsQuery(selectedDataSource?.id || 0, {
+    enabled: isInitialized && initializationPhase >= 3 && !!selectedDataSource?.id,
+    refetchInterval: 300000, // Only refetch every 5 minutes
+    staleTime: 180000 // 3 minutes stale time
+  })
   // Memoize data source ID to prevent unnecessary re-renders
   const dataSourceId = useMemo(() => selectedDataSource?.id, [selectedDataSource?.id])
   const workspaceId = useMemo(() => workspace?.id, [workspace?.id])
 
-  // Additional enterprise feature hooks for comprehensive functionality
+  // Additional enterprise feature hooks for comprehensive functionality - WITH THROTTLING
   const monitoringFeatures = useMonitoringFeatures(dataSourceId)
   const securityFeatures = useSecurityFeatures(dataSourceId)
   const operationsFeatures = useOperationsFeatures(dataSourceId)
@@ -964,152 +1408,232 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
   const analyticsIntegration = useAnalyticsIntegration('data-sources-app', dataSourceId)
   
   const { data: qualityMetrics, error: qualityError } = useQualityMetricsQuery(dataSourceId || 0, {
-    enabled: !!dataSourceId
+    enabled: isInitialized && initializationPhase >= 4 && !!dataSourceId,
+    refetchInterval: 300000, // Only refetch every 5 minutes
+    staleTime: 180000 // 3 minutes stale time
   })
+  
   const { data: growthMetrics, error: growthError } = useGrowthMetricsQuery(dataSourceId || 0, {
-    enabled: !!dataSourceId
+    enabled: isInitialized && initializationPhase >= 4 && !!dataSourceId,
+    refetchInterval: 300000, // Only refetch every 5 minutes
+    staleTime: 180000 // 3 minutes stale time
   })
+  
   const { data: schemaDiscoveryData, error: schemaError } = useSchemaDiscoveryQuery(dataSourceId, {
-    enabled: !!dataSourceId
+    enabled: isInitialized && initializationPhase >= 4 && !!dataSourceId,
+    refetchInterval: 600000, // Only refetch every 10 minutes
+    staleTime: 300000 // 5 minutes stale time
   })
+  
   const { data: dataLineage, error: lineageError } = useDataLineageQuery(dataSourceId, {
-    enabled: !!dataSourceId
+    enabled: isInitialized && initializationPhase >= 4 && !!dataSourceId,
+    refetchInterval: 600000, // Only refetch every 10 minutes
+    staleTime: 300000 // 5 minutes stale time
   })
+  
   const { data: backupStatus, error: backupError } = useBackupStatusQuery(dataSourceId, {
-    enabled: !!dataSourceId
+    enabled: isInitialized && initializationPhase >= 4 && !!dataSourceId,
+    refetchInterval: 300000, // Only refetch every 5 minutes
+    staleTime: 180000 // 3 minutes stale time
   })
+  
   // Gate queries by visibility and required identifiers to reduce backend pressure
   const isVisible = typeof document !== 'undefined' ? !document.hidden : true
   
   const { data: scheduledTasks, error: tasksError } = useScheduledTasksQuery(dataSourceId, {
-    enabled: !!dataSourceId && isVisible,
-    refetchInterval: isVisible ? 30000 : false // Only refetch every 30 seconds when visible
+    enabled: isInitialized && initializationPhase >= 4 && !!dataSourceId && isVisible,
+    refetchInterval: isVisible ? 300000 : false, // Only refetch every 5 minutes when visible
+    staleTime: 120000 // 2 minutes stale time
   })
+  
   const { data: auditLogs, error: auditError } = useAuditLogsQuery(dataSourceId, {
-    enabled: !!dataSourceId && isVisible,
-    refetchInterval: isVisible ? 60000 : false // Only refetch every minute when visible
+    enabled: isInitialized && initializationPhase >= 4 && !!dataSourceId && isVisible,
+    refetchInterval: isVisible ? 600000 : false, // Only refetch every 10 minutes when visible
+    staleTime: 300000 // 5 minutes stale time
   })
+  
   const { data: userPermissions, error: permissionsError } = useUserPermissionsQuery({
-    enabled: true,
-    refetchInterval: 300000 // Only refetch every 5 minutes
+    enabled: isInitialized && initializationPhase >= 2,
+    refetchInterval: 600000, // Only refetch every 10 minutes
+    staleTime: 300000 // 5 minutes stale time
   })
+  
   const { data: dataCatalog, error: catalogError } = useDataCatalogQuery({
-    enabled: isVisible,
-    refetchInterval: isVisible ? 600000 : false // Only refetch every 10 minutes when visible
+    enabled: isInitialized && initializationPhase >= 5 && isVisible,
+    refetchInterval: isVisible ? 900000 : false, // Only refetch every 15 minutes when visible
+    staleTime: 600000 // 10 minutes stale time
   })
 
   // =====================================================================================
-  // NEW ENTERPRISE APIs - REAL BACKEND INTEGRATION (NO MOCK DATA)
+  // NEW ENTERPRISE APIs - REAL BACKEND INTEGRATION WITH THROTTLING (NO MOCK DATA)
   // =====================================================================================
   
-  // COLLABORATION APIs
+  // COLLABORATION APIs - WITH THROTTLING
   const { data: collaborationWorkspaces } = useCollaborationWorkspacesQuery({
-    enabled: true,
-    refetchInterval: 60000 // Only refetch every minute
+    enabled: isInitialized && initializationPhase >= 3,
+    refetchInterval: 300000, // Only refetch every 5 minutes
+    staleTime: 180000 // 3 minutes stale time
   })
+  
   const { data: activeCollaborationSessions } = useActiveCollaborationSessionsQuery({
-    enabled: true,
-    refetchInterval: 30000 // Only refetch every 30 seconds
+    enabled: isInitialized && initializationPhase >= 3,
+    refetchInterval: 180000, // Only refetch every 3 minutes
+    staleTime: 120000 // 2 minutes stale time
   })
+  
   const { data: sharedDocuments } = useSharedDocumentsQuery(
     dataSourceId?.toString() || '', 
     { document_type: 'all' },
     {
-      enabled: !!dataSourceId,
-      refetchInterval: 120000 // Only refetch every 2 minutes
+      enabled: isInitialized && initializationPhase >= 4 && !!dataSourceId,
+      refetchInterval: 600000, // Only refetch every 10 minutes
+      staleTime: 300000 // 5 minutes stale time
     }
   )
+  
   // Only fetch comments when a document is selected
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null)
   const { data: documentComments } = useDocumentCommentsQuery(selectedDocumentId || '', {
-    enabled: !!selectedDocumentId && isVisible,
-    refetchInterval: isVisible ? 300000 : false // Only refetch every 5 minutes when visible
+    enabled: isInitialized && initializationPhase >= 4 && !!selectedDocumentId && isVisible,
+    refetchInterval: isVisible ? 600000 : false, // Only refetch every 10 minutes when visible
+    staleTime: 300000 // 5 minutes stale time
   })
+  
   const { data: workspaceActivity } = useWorkspaceActivityQuery(workspaceId?.toString() || '', 7, {
-    enabled: !!workspaceId,
-    refetchInterval: 300000 // Only refetch every 5 minutes
+    enabled: isInitialized && initializationPhase >= 3 && !!workspaceId,
+    refetchInterval: 600000, // Only refetch every 10 minutes
+    staleTime: 300000 // 5 minutes stale time
   })
   
-  // WORKFLOW APIs
+  // WORKFLOW APIs - WITH THROTTLING
   const { data: workflowDefinitions } = useWorkflowDefinitionsQuery({
-    enabled: true,
-    refetchInterval: 300000 // Only refetch every 5 minutes
+    enabled: isInitialized && initializationPhase >= 3,
+    refetchInterval: 600000, // Only refetch every 10 minutes
+    staleTime: 300000 // 5 minutes stale time
   })
-  const { data: workflowExecutions } = useWorkflowExecutionsQuery({ days: 7 })
-  const { data: pendingApprovals } = usePendingApprovalsQuery()
-  const { data: workflowTemplates } = useWorkflowTemplatesQuery()
-  const { data: bulkOperationStatus } = useBulkOperationStatusQuery('')
   
-  // ENHANCED PERFORMANCE APIs
-  const { data: systemHealth } = useSystemHealthQuery({
-    enabled: isVisible,
-    refetchInterval: isVisible ? 30000 : false
+  const { data: workflowExecutions } = useWorkflowExecutionsQuery({ days: 7 }, {
+    enabled: isInitialized && initializationPhase >= 4,
+    refetchInterval: 900000, // Only refetch every 15 minutes
+    staleTime: 600000 // 10 minutes stale time
   })
+  
+  const { data: pendingApprovals } = usePendingApprovalsQuery({
+    enabled: isInitialized && initializationPhase >= 3,
+    refetchInterval: 300000, // Only refetch every 5 minutes
+    staleTime: 180000 // 3 minutes stale time
+  })
+  
+  const { data: workflowTemplates } = useWorkflowTemplatesQuery({
+    enabled: isInitialized && initializationPhase >= 3,
+    refetchInterval: 900000, // Only refetch every 15 minutes
+    staleTime: 600000 // 10 minutes stale time
+  })
+  
+  const { data: bulkOperationStatus } = useBulkOperationStatusQuery('', {
+    enabled: isInitialized && initializationPhase >= 3,
+    refetchInterval: 300000, // Only refetch every 5 minutes
+    staleTime: 180000 // 3 minutes stale time
+  })
+  
+  // ENHANCED PERFORMANCE APIs - WITH THROTTLING
+  const { data: systemHealth } = useSystemHealthQuery({
+    enabled: isInitialized && initializationPhase >= 3 && isVisible,
+    refetchInterval: isVisible ? 120000 : false, // Only refetch every 2 minutes when visible
+    staleTime: 60000 // 1 minute stale time
+  })
+  
   const { data: enhancedPerformanceMetrics } = useEnhancedPerformanceMetricsQuery(
     dataSourceId || 0,
     { time_range: '24h', metric_types: ['cpu', 'memory', 'io', 'network'] },
     {
-      enabled: !!dataSourceId,
-      refetchInterval: 60000 // Only refetch every minute
+      enabled: isInitialized && initializationPhase >= 4 && !!dataSourceId,
+      refetchInterval: 300000, // Only refetch every 5 minutes
+      staleTime: 180000 // 3 minutes stale time
     }
   )
+  
   const { data: performanceAlerts } = usePerformanceAlertsQuery({ severity: 'all', days: 7 }, {
-    enabled: true,
-    refetchInterval: 30000 // Only refetch every 30 seconds
-  })
-  const { data: performanceTrends } = usePerformanceTrendsQuery(dataSourceId, '30d', {
-    enabled: !!dataSourceId,
-    refetchInterval: 300000 // Only refetch every 5 minutes
-  })
-  const { data: optimizationRecommendations } = useOptimizationRecommendationsQuery(dataSourceId, {
-    enabled: !!dataSourceId,
-    refetchInterval: 600000 // Only refetch every 10 minutes
-  })
-  const { data: performanceSummaryReport } = usePerformanceSummaryReportQuery({ time_range: '7d' }, {
-    enabled: true,
-    refetchInterval: 600000 // Only refetch every 10 minutes
-  })
-  const { data: performanceThresholds } = usePerformanceThresholdsQuery(dataSourceId, {
-    enabled: !!dataSourceId,
-    refetchInterval: 600000 // Only refetch every 10 minutes
+    enabled: isInitialized && initializationPhase >= 3,
+    refetchInterval: 180000, // Only refetch every 3 minutes
+    staleTime: 120000 // 2 minutes stale time
   })
   
-  // ENHANCED SECURITY APIs
+  const { data: performanceTrends } = usePerformanceTrendsQuery(dataSourceId, '30d', {
+    enabled: isInitialized && initializationPhase >= 4 && !!dataSourceId,
+    refetchInterval: 600000, // Only refetch every 10 minutes
+    staleTime: 300000 // 5 minutes stale time
+  })
+  
+  const { data: optimizationRecommendations } = useOptimizationRecommendationsQuery(dataSourceId, {
+    enabled: isInitialized && initializationPhase >= 5 && !!dataSourceId,
+    refetchInterval: 900000, // Only refetch every 15 minutes
+    staleTime: 600000 // 10 minutes stale time
+  })
+  
+  const { data: performanceSummaryReport } = usePerformanceSummaryReportQuery({ time_range: '7d' }, {
+    enabled: isInitialized && initializationPhase >= 4,
+    refetchInterval: 900000, // Only refetch every 15 minutes
+    staleTime: 600000 // 10 minutes stale time
+  })
+  
+  const { data: performanceThresholds } = usePerformanceThresholdsQuery(dataSourceId, {
+    enabled: isInitialized && initializationPhase >= 4 && !!dataSourceId,
+    refetchInterval: 900000, // Only refetch every 15 minutes
+    staleTime: 600000 // 10 minutes stale time
+  })
+  
+  // ENHANCED SECURITY APIs - WITH THROTTLING
   const { data: enhancedSecurityAudit } = useEnhancedSecurityAuditQuery(
     dataSourceId || 0,
     { include_vulnerabilities: true, include_compliance: true },
     {
-      enabled: !!dataSourceId,
-      refetchInterval: 300000 // Only refetch every 5 minutes
+      enabled: isInitialized && initializationPhase >= 4 && !!dataSourceId,
+      refetchInterval: 600000, // Only refetch every 10 minutes
+      staleTime: 300000 // 5 minutes stale time
     }
   )
+  
   const { data: vulnerabilityAssessments } = useVulnerabilityAssessmentsQuery({ severity: 'all' }, {
-    enabled: true,
-    refetchInterval: 300000 // Only refetch every 5 minutes
+    enabled: isInitialized && initializationPhase >= 4,
+    refetchInterval: 600000, // Only refetch every 10 minutes
+    staleTime: 300000 // 5 minutes stale time
   })
+  
   const { data: securityIncidents } = useSecurityIncidentsQuery({ days: 30 }, {
-    enabled: true,
-    refetchInterval: 60000 // Only refetch every minute
+    enabled: isInitialized && initializationPhase >= 3,
+    refetchInterval: 300000, // Only refetch every 5 minutes
+    staleTime: 180000 // 3 minutes stale time
   })
+  
   const { data: complianceChecks } = useComplianceChecksQuery({
-    enabled: true,
-    refetchInterval: 600000 // Only refetch every 10 minutes
+    enabled: isInitialized && initializationPhase >= 4,
+    refetchInterval: 900000, // Only refetch every 15 minutes
+    staleTime: 600000 // 10 minutes stale time
   })
+  
   const { data: threatDetection } = useThreatDetectionQuery({ days: 7 }, {
-    enabled: true,
-    refetchInterval: 120000 // Only refetch every 2 minutes
+    enabled: isInitialized && initializationPhase >= 3,
+    refetchInterval: 300000, // Only refetch every 5 minutes
+    staleTime: 180000 // 3 minutes stale time
   })
+  
   const { data: securityAnalyticsDashboard } = useSecurityAnalyticsDashboardQuery('7d', {
-    enabled: true,
-    refetchInterval: 300000 // Only refetch every 5 minutes
+    enabled: isInitialized && initializationPhase >= 4,
+    refetchInterval: 600000, // Only refetch every 10 minutes
+    staleTime: 300000 // 5 minutes stale time
   })
+  
   const { data: riskAssessmentReport } = useRiskAssessmentReportQuery({
-    enabled: true,
-    refetchInterval: 600000 // Only refetch every 10 minutes
+    enabled: isInitialized && initializationPhase >= 4,
+    refetchInterval: 900000, // Only refetch every 15 minutes
+    staleTime: 600000 // 10 minutes stale time
   })
+  
   const { data: securityScans } = useSecurityScansQuery({ days: 30 }, {
-    enabled: true,
-    refetchInterval: 300000 // Only refetch every 5 minutes
+    enabled: isInitialized && initializationPhase >= 4,
+    refetchInterval: 600000, // Only refetch every 10 minutes
+    staleTime: 300000 // 5 minutes stale time
   })
 
   // Mutation hooks for enterprise actions
@@ -1158,7 +1682,7 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
     catalog: catalogError
   }
 
-  // Check if we should enter fallback mode
+  // Enhanced error handling with graceful degradation
   const criticalErrors = Object.values(allErrors).filter(error => 
     error && (
       (error.response && (error.response.status === 500 || error.response.status === 502 || error.response.status === 503)) ||
@@ -1166,7 +1690,22 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
     )
   )
 
+  const missingEndpointErrors = Object.values(allErrors).filter(error => 
+    error && (
+      (error.response && error.response.status === 404) ||
+      (error.status === 404)
+    )
+  )
+
+  // Count different types of errors
+  const errorStats = {
+    critical: criticalErrors.length,
+    missing: missingEndpointErrors.length,
+    total: Object.values(allErrors).filter(Boolean).length
+  }
+
   useEffect(() => {
+    // Enter fallback mode if too many critical errors
     if (criticalErrors.length > 3) {
       setFallbackMode(true)
       setNotifications(prev => [...prev.slice(-9), {
@@ -1179,7 +1718,17 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
     } else if (criticalErrors.length === 0) {
       setFallbackMode(false)
     }
-  }, [criticalErrors.length])
+
+    // Log error statistics for debugging
+    if (errorStats.total > 0) {
+      console.log('API Error Statistics:', {
+        critical: errorStats.critical,
+        missing: errorStats.missing,
+        total: errorStats.total,
+        fallbackMode: fallbackMode
+      })
+    }
+  }, [criticalErrors.length, errorStats.total, fallbackMode])
 
   // Legacy enterprise context data for backward compatibility
   const { backendData } = enterprise || { backendData: { dataSources, loading } }
@@ -1746,20 +2295,67 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
   // ========================================================================
   
   useEffect(() => {
+    // Enhanced error monitoring and reporting with emergency mode detection
+    const requestManager = APIRequestManager.getInstance()
+    
+    // Check for database overload patterns and enable emergency mode
+    const databaseErrors = criticalErrors.filter(error => 
+      error?.message?.includes('database_unavailable') || 
+      error?.message?.includes('too many clients') ||
+      error?.message?.includes('Connection pool is at capacity')
+    )
+    
+    if (databaseErrors.length >= 2) {
+      console.error('🚨🚨🚨 DATABASE OVERLOAD DETECTED - ENABLING EMERGENCY MODE 🚨🚨🚨')
+      requestManager.enableEmergencyMode()
+    }
+    
+    const errorReport = {
+      timestamp: new Date().toISOString(),
+      userAgent: navigator.userAgent,
+      url: window.location.href,
+      errors: {
+        critical: criticalErrors.length,
+        missing: missingEndpointErrors.length,
+        database: databaseErrors.length,
+        total: errorStats.total
+      },
+      throttling: {
+        activeRequests: requestManager.getStats().activeRequests,
+        queueSize: requestManager.getStats().queueSize,
+        emergencyMode: requestManager.isInEmergencyMode()
+      }
+    }
+
+    // Log comprehensive error report
+    if (errorStats.total > 0) {
+      console.group('🚨 API Error Report')
+      console.log('Error Statistics:', errorReport.errors)
+      console.log('Throttling Status:', errorReport.throttling)
+      console.log('Critical Errors:', criticalErrors.map(e => e?.message || 'Unknown'))
+      console.log('Missing Endpoints:', missingEndpointErrors.map(e => e?.message || 'Unknown'))
+      console.groupEnd()
+    }
+
     // Global error handler for unhandled errors
     const handleGlobalError = (event: ErrorEvent) => {
       console.error('Global error caught:', event.error)
       
-      // Emit error event for telemetry with safety check
-      try {
-        if (typeof window !== 'undefined' && window.enterpriseEventBus && typeof window.enterpriseEventBus.emit === 'function') {
-          window.enterpriseEventBus.emit('global:error:caught', {
-            error: event.error?.message || 'Unknown error',
+      // Enhanced error reporting
+      const errorDetails = {
+        message: event.error?.message || 'Unknown error',
             filename: event.filename,
             lineno: event.lineno,
             colno: event.colno,
-            timestamp: new Date()
-          })
+        timestamp: new Date().toISOString(),
+        stack: event.error?.stack,
+        type: 'global_error'
+      }
+
+      // Emit error event for telemetry with safety check
+      try {
+        if (typeof window !== 'undefined' && window.enterpriseEventBus && typeof window.enterpriseEventBus.emit === 'function') {
+          window.enterpriseEventBus.emit('global:error:caught', errorDetails)
         }
       } catch (telemetryError) {
         console.warn('Failed to emit telemetry event:', telemetryError)
@@ -2365,7 +2961,7 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
     )
   }
 
-  // Handle API errors gracefully
+  // Enhanced error handling with graceful degradation
   if (dataSourcesError) {
     // Check if it's a graceful error that can be handled
     const isGracefulError = (dataSourcesError as any)?.isGraceful
@@ -2376,6 +2972,23 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
                         dataSourcesError.message?.includes('Bad Gateway') ||
                         dataSourcesError.message?.includes('Request failed with status code 502')
     
+    // Check if it's a 404 error (missing endpoint)
+    const isMissingEndpoint = dataSourcesError.message?.includes('404') ||
+                             dataSourcesError.message?.includes('Request failed with status code 404')
+    
+    // Check if it's a 500 error (server error)
+    const isServerError = dataSourcesError.message?.includes('500') ||
+                         dataSourcesError.message?.includes('Request failed with status code 500')
+    
+    // Check if it's a database overload error
+    const isDatabaseOverload = dataSourcesError.message?.includes('database_unavailable') ||
+                              dataSourcesError.message?.includes('too many clients') ||
+                              dataSourcesError.message?.includes('Connection pool is at capacity')
+    
+    // Check emergency mode status
+    const requestManager = APIRequestManager.getInstance()
+    const isEmergencyMode = requestManager.isInEmergencyMode()
+    
     return (
       <TooltipProvider>
         <div className={`min-h-screen bg-background ${className}`}>
@@ -2383,12 +2996,24 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
             <Alert className="max-w-md">
               <AlertTriangle className="h-4 w-4" />
               <AlertTitle>
-                {isServerDown ? 'Server Unavailable' : 
+                {isEmergencyMode ? '🚨 EMERGENCY MODE ACTIVE' :
+                 isDatabaseOverload ? 'Database Overload Detected' :
+                 isServerDown ? 'Server Unavailable' : 
+                 isMissingEndpoint ? 'API Endpoint Missing' :
+                 isServerError ? 'Server Error' :
                  isGracefulError ? 'Connection Issue Detected' : 'API Connection Error'}
               </AlertTitle>
               <AlertDescription>
-                {isServerDown 
+                {isEmergencyMode 
+                  ? '🚨 EMERGENCY MODE: All API requests have been blocked to protect the database from overload. The system will automatically recover when the database is stable.'
+                  : isDatabaseOverload
+                    ? 'The database connection pool is at capacity. The system has automatically enabled protective measures to prevent further overload.'
+                    : isServerDown 
                   ? 'The backend server is currently unavailable. This is likely a temporary issue.'
+                      : isMissingEndpoint
+                        ? 'Some API endpoints are not yet implemented. The application will work with limited functionality.'
+                        : isServerError
+                          ? 'The server encountered an error. Some features may be unavailable.'
                   : isGracefulError 
                     ? 'The system detected a connection issue and is working to resolve it automatically.'
                     : 'Unable to connect to data sources. The system will attempt to reconnect automatically.'
@@ -2398,7 +3023,20 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
                   Error: {dataSourcesError.message || 'Unknown error'}
                 </small>
                 <div className="mt-4 space-y-2">
-                  {canRetry && !isServerDown && (
+                  {isEmergencyMode && (
+                    <Button 
+                      onClick={() => {
+                        requestManager.disableEmergencyMode()
+                        window.location.reload()
+                      }} 
+                      className="w-full"
+                      variant="destructive"
+                    >
+                      <Shield className="h-4 w-4 mr-2" />
+                      🚨 Disable Emergency Mode & Reload
+                    </Button>
+                  )}
+                  {canRetry && !isServerDown && !isEmergencyMode && (
                     <Button 
                       onClick={() => refetchDataSources()} 
                       className="w-full"
@@ -2416,6 +3054,16 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
                     <RefreshCw className="h-4 w-4 mr-2" />
                     Reload Page
                   </Button>
+                  {isMissingEndpoint && !isEmergencyMode && (
+                    <Button 
+                      onClick={() => setFallbackMode(true)} 
+                      className="w-full"
+                      variant="secondary"
+                    >
+                      <Shield className="h-4 w-4 mr-2" />
+                      Continue with Limited Features
+                    </Button>
+                  )}
                 </div>
               </AlertDescription>
             </Alert>
