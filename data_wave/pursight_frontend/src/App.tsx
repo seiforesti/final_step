@@ -29,13 +29,12 @@ import DataCatalog from "./pages/catalog/DataCatalog";
 import SignIn from "./pages/catalog/SignIn";
 import { AppProviders } from "./AppProviders";
 import RBACAdminDashboard from "./pages/rbac_system/RBACAdminDashboard";
-import { RBACProvider } from "./providers/RBACProvider";
-import { RBACContext } from "./hooks/useRBAC";
+import { SecureRBACProvider, useSecureRBACContext } from "./providers/SecureRBACProvider";
 // Import new pages
 import DataSourceConnectPage from "./pages/datasource/DataSourceConnectPage";
 import DataMapDesignerPage from "./pages/datamap/DataMapDesignerPage";
 import MainPage from "./pages/NXCI_DataGovernance/MainPage";
-import { RacineMainManagerSPA } from "./racine-main-manager/index";
+import { RacineMainManagerSPA } from "./racine-main-manager/RacineMainManagerSPA.secure";
 
 // AuthRoute component for protected routes (fixes React hook rules)
 type AuthRouteProps = Readonly<{
@@ -43,11 +42,20 @@ type AuthRouteProps = Readonly<{
   children?: React.ReactNode;
 }>;
 function AuthRoute({ element }: AuthRouteProps) {
-  const { user, isLoading, flatLoading } = useContext(RBACContext);
-  if (isLoading || flatLoading) return <div>Loading RBAC context...</div>;
-  if (!user) {
+  const { user, isLoading, isAuthenticated, emergencyMode } = useSecureRBACContext();
+  
+  if (isLoading) {
+    return <div>Loading secure authentication...</div>;
+  }
+  
+  if (emergencyMode) {
+    return <div>System in emergency mode - redirecting...</div>;
+  }
+  
+  if (!isAuthenticated) {
     return <Navigate to="/signin" replace />;
   }
+  
   return element;
 }
 
@@ -56,7 +64,12 @@ export default function App() {
     <AppProviders>
       <ModalProvider>
         <Router>
-          <RBACProvider>
+          <SecureRBACProvider 
+            enableRouteProtection={true}
+            enableHealthMonitoring={true}
+            enableEmergencyMode={true}
+            fallbackMode={true}
+          >
             <ScrollToTop />
             <Routes>
               {/* Dashboard Layout and Protected Routes */}
@@ -95,7 +108,7 @@ export default function App() {
               {/* Fallback Route */}
               <Route path="*" element={<NotFound />} />
             </Routes>
-          </RBACProvider>
+          </SecureRBACProvider>
         </Router>
       </ModalProvider>
     </AppProviders>
