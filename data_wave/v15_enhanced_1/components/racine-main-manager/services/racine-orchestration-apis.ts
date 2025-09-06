@@ -53,11 +53,11 @@ interface OrchestrationAPIConfig {
  * Default configuration
  */
 const DEFAULT_CONFIG: OrchestrationAPIConfig = {
-      baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || '/api/proxy',
-  timeout: process.env.NODE_ENV === 'development' ? 30000 : 30000, // 30s for both dev and prod
-  retryAttempts: process.env.NODE_ENV === 'development' ? 1 : 3, // Fewer retries in dev
-  retryDelay: 1000,
-  enableWebSocket: false, // Disabled by default to prevent WebSocket errors in development
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || '/api/proxy',
+  timeout: process.env.NODE_ENV === 'development' ? 8000 : 30000, // Shorter timeout in dev
+  retryAttempts: process.env.NODE_ENV === 'development' ? 1 : 2, // Fewer retries in dev
+  retryDelay: 2000, // Longer delay between retries
+  enableWebSocket: false, // Disabled by default to prevent WebSocket errors
   websocketURL: process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000/ws'
 };
 
@@ -127,12 +127,21 @@ export class RacineOrchestrationAPI {
   private eventSubscriptions: Map<UUID, EventSubscription> = new Map();
   private websocket: WebSocket | null = null;
   private reconnectAttempts = 0;
-  private maxReconnectAttempts = 5;
+  private maxReconnectAttempts = 3; // Reduced from 5 to 3
   private reconnectTimeout: NodeJS.Timeout | null = null;
   private heartbeatInterval: NodeJS.Timeout | null = null;
-  private offlineMode: boolean = false; // New property for offline mode
+  private offlineMode: boolean = false;
   private authToken: string | null = null;
   private wsUnsubscribe?: () => void;
+  
+  // Circuit breaker properties
+  private circuitBreakerState: 'CLOSED' | 'OPEN' | 'HALF_OPEN' = 'CLOSED';
+  private failureCount = 0;
+  private maxFailures = 3;
+  private circuitBreakerTimeout = 30000; // 30 seconds
+  private lastFailureTime = 0;
+  private endpointFailures = new Map<string, number>();
+  private endpointLastFailure = new Map<string, number>();
 
   constructor(config?: Partial<OrchestrationAPIConfig>) {
     this.config = { ...DEFAULT_CONFIG, ...config };
@@ -163,9 +172,15 @@ export class RacineOrchestrationAPI {
   }
 
   /**
-   * Make HTTP request with timeout, retry logic, and offline mode support
+   * Make HTTP request with timeout, retry logic, circuit breaker, and offline mode support
    */
   private async makeRequest<T>(url: string, options: RequestOptions = {}): Promise<T> {
+    // Check circuit breaker state
+    if (this.isCircuitBreakerOpen(url)) {
+      console.warn(`Circuit breaker is OPEN for ${url}, using offline fallback`);
+      return this.getOfflineFallback<T>(url);
+    }
+
     // Check if we're in offline mode or if backend is not available
     if (this.isOfflineMode()) {
       console.warn(`Backend not available, using offline mode for ${url}`);
@@ -219,33 +234,40 @@ export class RacineOrchestrationAPI {
           }
 
           const data = await response.json();
-        return data as T;
+          
+          // Record success for circuit breaker
+          this.recordSuccess(url);
+          
+          return data as T;
 
         } catch (error) {
           lastError = error as Error;
           
-        // Clear timeout on error
-        if (timeoutId) {
-          clearTimeout(timeoutId);
-          timeoutId = null;
-        }
-        
-        // Handle different error types gracefully
-        if (error instanceof Error) {
-          if (error.name === 'AbortError') {
-            // Don't throw timeout errors - just log and continue
-            console.warn(`Request to ${url} was aborted`);
-            return this.getOfflineFallback<T>(url);
-          } else if (error.message && error.message.includes('fetch')) {
-            // Network error - switch to offline mode
-            console.warn(`Network error for ${url}, switching to offline mode`);
-            this.setOfflineMode(true);
-            return this.getOfflineFallback<T>(url);
-          }
+          // Clear timeout on error
+          if (timeoutId) {
+            clearTimeout(timeoutId);
+            timeoutId = null;
           }
           
-          if (attempt < retryAttempts && this.shouldRetry(error as Error)) {
-          await this.delay(this.config.retryDelay * Math.pow(2, attempt));
+          // Record failure for circuit breaker
+          this.recordFailure(url);
+          
+          // Handle different error types gracefully
+          if (error instanceof Error) {
+            if (error.name === 'AbortError') {
+              // Don't throw timeout errors - just log and continue
+              console.warn(`Request to ${url} was aborted`);
+              return this.getOfflineFallback<T>(url);
+            } else if (error.message && error.message.includes('fetch')) {
+              // Network error - switch to offline mode
+              console.warn(`Network error for ${url}, switching to offline mode`);
+              this.setOfflineMode(true);
+              return this.getOfflineFallback<T>(url);
+            }
+          }
+          
+          if (attempt < retryAttempts && this.shouldRetry(error as Error) && !this.isCircuitBreakerOpen(url)) {
+            await this.delay(this.config.retryDelay * Math.pow(2, attempt));
             continue;
           }
           
@@ -283,6 +305,79 @@ export class RacineOrchestrationAPI {
    */
   private delay(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  /**
+   * Check if circuit breaker is open for a specific endpoint
+   */
+  private isCircuitBreakerOpen(url: string): boolean {
+    const now = Date.now();
+    
+    // Check global circuit breaker
+    if (this.circuitBreakerState === 'OPEN') {
+      if (now - this.lastFailureTime > this.circuitBreakerTimeout) {
+        this.circuitBreakerState = 'HALF_OPEN';
+        this.failureCount = 0;
+        return false;
+      }
+      return true;
+    }
+    
+    // Check endpoint-specific circuit breaker
+    const endpointFailures = this.endpointFailures.get(url) || 0;
+    const lastFailure = this.endpointLastFailure.get(url) || 0;
+    
+    if (endpointFailures >= this.maxFailures) {
+      if (now - lastFailure > this.circuitBreakerTimeout) {
+        // Reset endpoint circuit breaker
+        this.endpointFailures.set(url, 0);
+        this.endpointLastFailure.set(url, 0);
+        return false;
+      }
+      return true;
+    }
+    
+    return false;
+  }
+
+  /**
+   * Record a failure for circuit breaker tracking
+   */
+  private recordFailure(url: string): void {
+    const now = Date.now();
+    
+    // Record global failure
+    this.failureCount++;
+    this.lastFailureTime = now;
+    
+    if (this.failureCount >= this.maxFailures) {
+      this.circuitBreakerState = 'OPEN';
+      console.warn(`Circuit breaker OPENED due to ${this.failureCount} failures`);
+    }
+    
+    // Record endpoint-specific failure
+    const currentFailures = this.endpointFailures.get(url) || 0;
+    this.endpointFailures.set(url, currentFailures + 1);
+    this.endpointLastFailure.set(url, now);
+    
+    if (currentFailures + 1 >= this.maxFailures) {
+      console.warn(`Circuit breaker OPENED for endpoint ${url} due to ${currentFailures + 1} failures`);
+    }
+  }
+
+  /**
+   * Record a success for circuit breaker tracking
+   */
+  private recordSuccess(url: string): void {
+    // Reset global circuit breaker on success
+    if (this.circuitBreakerState === 'HALF_OPEN') {
+      this.circuitBreakerState = 'CLOSED';
+      this.failureCount = 0;
+    }
+    
+    // Reset endpoint-specific circuit breaker
+    this.endpointFailures.set(url, 0);
+    this.endpointLastFailure.set(url, 0);
   }
 
   // =============================================================================
@@ -1332,7 +1427,7 @@ export class RacineOrchestrationAPI {
   // =============================================================================
 
   /**
-   * Initialize WebSocket connection for real-time updates
+   * Initialize WebSocket connection for real-time updates with circuit breaker
    */
   private initializeWebSocket(): void {
     if (!this.config.enableWebSocket) {
@@ -1348,6 +1443,12 @@ export class RacineOrchestrationAPI {
     // Only attempt WebSocket connection in browser environment
     if (typeof window === 'undefined') {
       console.log('WebSocket initialization skipped - not in browser environment');
+      return;
+    }
+
+    // Check if we've exceeded max reconnection attempts
+    if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+      console.warn(`WebSocket connection disabled - exceeded max reconnection attempts (${this.maxReconnectAttempts})`);
       return;
     }
 
@@ -1377,15 +1478,26 @@ export class RacineOrchestrationAPI {
   }
 
   /**
-   * Handle WebSocket reconnection
+   * Handle WebSocket reconnection with circuit breaker
    */
   private handleWebSocketReconnect(): void {
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
-      setTimeout(() => {
+      const delay = Math.min(this.config.retryDelay * Math.pow(2, this.reconnectAttempts), 30000); // Max 30s delay
+      
+      // Clear any existing reconnect timeout
+      if (this.reconnectTimeout) {
+        clearTimeout(this.reconnectTimeout);
+      }
+      
+      this.reconnectTimeout = setTimeout(() => {
         this.reconnectAttempts++;
-        console.log(`Attempting WebSocket reconnection (${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
+        console.log(`Attempting WebSocket reconnection (${this.reconnectAttempts}/${this.maxReconnectAttempts}) in ${delay}ms`);
         this.connectWebSocket();
-      }, this.reconnectDelay * Math.pow(2, this.reconnectAttempts));
+      }, delay);
+    } else {
+      console.warn(`WebSocket reconnection stopped - exceeded max attempts (${this.maxReconnectAttempts})`);
+      // Switch to offline mode if WebSocket fails completely
+      this.setOfflineMode(true);
     }
   }
 
@@ -1641,11 +1753,66 @@ export class RacineOrchestrationAPI {
   }
 
   /**
+   * Get saved searches - Global search functionality
+   */
+  async getSavedSearches(): Promise<any[]> {
+    try {
+      const response = await this.makeRequest('/api/v1/global-search/saved-searches', {
+        method: 'GET'
+      });
+      return response.data || [];
+    } catch (error) {
+      console.warn('Failed to load saved searches:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Save search data - Global search functionality
+   */
+  async saveSearch(searchData: any): Promise<any> {
+    return this.makeRequest('/api/v1/global-search/save', {
+      method: 'POST',
+      body: JSON.stringify(searchData)
+    });
+  }
+
+  /**
+   * Delete saved search - Global search functionality
+   */
+  async deleteSavedSearch(searchId: string): Promise<any> {
+    return this.makeRequest(`/api/v1/global-search/delete/${searchId}`, {
+      method: 'DELETE'
+    });
+  }
+
+  /**
    * Clean up resources
    */
   destroy(): void {
+    // Clear timeouts
+    if (this.reconnectTimeout) {
+      clearTimeout(this.reconnectTimeout);
+      this.reconnectTimeout = null;
+    }
+    
+    if (this.heartbeatInterval) {
+      clearInterval(this.heartbeatInterval);
+      this.heartbeatInterval = null;
+    }
+    
+    // Clean up WebSocket
     this.closeWebSocket();
+    
+    // Clear subscriptions and circuit breaker state
     this.eventSubscriptions.clear();
+    this.endpointFailures.clear();
+    this.endpointLastFailure.clear();
+    
+    // Reset circuit breaker
+    this.circuitBreakerState = 'CLOSED';
+    this.failureCount = 0;
+    this.reconnectAttempts = 0;
   }
 }
 

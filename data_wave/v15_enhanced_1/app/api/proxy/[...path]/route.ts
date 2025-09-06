@@ -189,6 +189,11 @@ const API_MAPPINGS: ApiMapping[] = [
     description: 'Racine integration operations'
   },
   {
+    frontendPattern: /^\/api\/racine\/integration\/health\/?$/,
+    backendPath: '/api/racine/integration/health',
+    description: 'Racine integration health check'
+  },
+  {
     frontendPattern: /^\/racine\/pipeline\/?$/,
     backendPath: '/racine/pipeline',
     description: 'Racine pipeline operations'
@@ -197,6 +202,51 @@ const API_MAPPINGS: ApiMapping[] = [
     frontendPattern: /^\/racine\/workflow\/?$/,
     backendPath: '/racine/workflow',
     description: 'Racine workflow operations'
+  },
+  {
+    frontendPattern: /^\/api\/racine\/orchestration\/health\/?$/,
+    backendPath: '/api/racine/orchestration/health',
+    description: 'Racine orchestration health check'
+  },
+  {
+    frontendPattern: /^\/api\/racine\/orchestration\/masters\/?$/,
+    backendPath: '/api/racine/orchestration/masters',
+    description: 'Racine orchestration masters'
+  },
+  {
+    frontendPattern: /^\/api\/racine\/orchestration\/alerts\/?$/,
+    backendPath: '/api/racine/orchestration/alerts',
+    description: 'Racine orchestration alerts'
+  },
+  {
+    frontendPattern: /^\/api\/racine\/orchestration\/metrics\/?$/,
+    backendPath: '/api/racine/orchestration/metrics',
+    description: 'Racine orchestration metrics'
+  },
+  {
+    frontendPattern: /^\/api\/racine\/orchestration\/recommendations\/?$/,
+    backendPath: '/api/racine/orchestration/recommendations',
+    description: 'Racine orchestration recommendations'
+  },
+  {
+    frontendPattern: /^\/api\/racine\/workspace\/list\/?$/,
+    backendPath: '/api/racine/workspace/list',
+    description: 'Racine workspace list'
+  },
+  {
+    frontendPattern: /^\/api\/racine\/workspace\/templates\/?$/,
+    backendPath: '/api/racine/workspace/templates',
+    description: 'Racine workspace templates'
+  },
+  {
+    frontendPattern: /^\/api\/v1\/notifications\/?$/,
+    backendPath: '/api/v1/notifications',
+    description: 'Notifications API'
+  },
+  {
+    frontendPattern: /^\/api\/v1\/notifications\/settings\/?$/,
+    backendPath: '/api/v1/notifications/settings',
+    description: 'Notification settings'
   },
 
   // ============================================================================
@@ -379,6 +429,56 @@ const API_MAPPINGS: ApiMapping[] = [
     backendPath: '/auth/logout',
     description: 'User logout'
   },
+  {
+    frontendPattern: /^\/auth\/profile\/?$/,
+    backendPath: '/auth/profile',
+    description: 'User profile management'
+  },
+  {
+    frontendPattern: /^\/auth\/preferences\/?$/,
+    backendPath: '/auth/preferences',
+    description: 'User preferences'
+  },
+  {
+    frontendPattern: /^\/auth\/notifications\/?$/,
+    backendPath: '/auth/notifications',
+    description: 'User notifications'
+  },
+  {
+    frontendPattern: /^\/auth\/api-keys\/?$/,
+    backendPath: '/auth/api-keys',
+    description: 'API key management'
+  },
+  {
+    frontendPattern: /^\/auth\/analytics\/?$/,
+    backendPath: '/auth/analytics',
+    description: 'User analytics'
+  },
+  {
+    frontendPattern: /^\/auth\/activity\/summary\/?$/,
+    backendPath: '/auth/activity/summary',
+    description: 'User activity summary'
+  },
+  {
+    frontendPattern: /^\/auth\/usage\/statistics\/?$/,
+    backendPath: '/auth/usage/statistics',
+    description: 'Usage statistics'
+  },
+  {
+    frontendPattern: /^\/auth\/custom-themes\/?$/,
+    backendPath: '/auth/custom-themes',
+    description: 'Custom themes'
+  },
+  {
+    frontendPattern: /^\/auth\/custom-layouts\/?$/,
+    backendPath: '/auth/custom-layouts',
+    description: 'Custom layouts'
+  },
+  {
+    frontendPattern: /^\/auth\/device-preferences\/?$/,
+    backendPath: '/auth/device-preferences',
+    description: 'Device preferences'
+  },
 
   // ============================================================================
   // RBAC APIs - Mapped to rbac routes
@@ -392,6 +492,21 @@ const API_MAPPINGS: ApiMapping[] = [
     frontendPattern: /^\/rbac\/roles\/?$/,
     backendPath: '/rbac/roles',
     description: 'Get roles'
+  },
+  {
+    frontendPattern: /^\/rbac\/user\/permissions\/?$/,
+    backendPath: '/rbac/user/permissions',
+    description: 'Get user permissions'
+  },
+  {
+    frontendPattern: /^\/rbac\/user\/roles\/?$/,
+    backendPath: '/rbac/user/roles',
+    description: 'Get user roles'
+  },
+  {
+    frontendPattern: /^\/rbac\/access-requests\/?$/,
+    backendPath: '/rbac/access-requests',
+    description: 'Access requests management'
   },
 
   // ============================================================================

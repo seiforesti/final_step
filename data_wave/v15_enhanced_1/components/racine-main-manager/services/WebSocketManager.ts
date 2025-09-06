@@ -9,10 +9,13 @@ interface ConnectionEntry {
   subscribers: Set<MessageHandler>;
   isConnecting: boolean;
   reconnectAttempts: number;
+  maxReconnectAttempts: number; // Circuit breaker limit
   backoffBaseMs: number;
   maxBackoffMs: number;
   lastCloseCode?: number;
   heartbeatTimerId?: number;
+  circuitBreakerOpen: boolean; // Circuit breaker state
+  lastFailureTime: number; // For circuit breaker timeout
 }
 
 class WebSocketManager {
@@ -64,8 +67,11 @@ class WebSocketManager {
         subscribers: new Set(),
         isConnecting: false,
         reconnectAttempts: 0,
+        maxReconnectAttempts: 3, // Circuit breaker limit
         backoffBaseMs: 1000,
         maxBackoffMs: 30000,
+        circuitBreakerOpen: false,
+        lastFailureTime: 0,
       };
       this.connections.set(key, entry);
     }
@@ -90,6 +96,22 @@ class WebSocketManager {
   private open(entry: ConnectionEntry): void {
     if (typeof window === 'undefined') return;
     if (entry.isConnecting) return;
+    
+    // Circuit breaker check
+    if (entry.circuitBreakerOpen) {
+      const now = Date.now();
+      const circuitBreakerTimeout = 60000; // 1 minute timeout
+      
+      if (now - entry.lastFailureTime < circuitBreakerTimeout) {
+        console.warn(`WebSocket circuit breaker is OPEN for ${entry.url}. Blocking connection attempt.`);
+        return;
+      } else {
+        // Reset circuit breaker after timeout
+        console.log(`WebSocket circuit breaker timeout expired for ${entry.url}. Attempting to reconnect.`);
+        entry.circuitBreakerOpen = false;
+        entry.reconnectAttempts = 0;
+      }
+    }
 
     entry.isConnecting = true;
     try {
@@ -148,12 +170,24 @@ class WebSocketManager {
 
   private scheduleReconnect(entry: ConnectionEntry): void {
     entry.reconnectAttempts += 1;
+    entry.lastFailureTime = Date.now();
+    
+    // Circuit breaker: Stop reconnecting after max attempts
+    if (entry.reconnectAttempts >= entry.maxReconnectAttempts) {
+      console.warn(`WebSocket circuit breaker OPENED for ${entry.url} after ${entry.reconnectAttempts} failed attempts`);
+      entry.circuitBreakerOpen = true;
+      return;
+    }
+    
     const delay = Math.min(
       entry.maxBackoffMs,
       entry.backoffBaseMs * Math.pow(2, entry.reconnectAttempts)
     );
+    
+    console.log(`WebSocket reconnection attempt ${entry.reconnectAttempts}/${entry.maxReconnectAttempts} for ${entry.url} in ${delay}ms`);
+    
     setTimeout(() => {
-      if (entry.subscribers.size > 0 && !entry.ws) {
+      if (entry.subscribers.size > 0 && !entry.ws && !entry.circuitBreakerOpen) {
         this.open(entry);
       }
     }, delay);
