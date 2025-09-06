@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
+import axios from "../api/axiosConfig";
 
 export interface RbacMe {
   id: number;
@@ -8,7 +8,7 @@ export interface RbacMe {
   permissions: [string, string][];
 }
 
-export function useRbacMe() {
+export function useRbacMe(enabled: boolean = true) {
   return useQuery<RbacMe, Error>({
     queryKey: ["rbac", "me"],
     queryFn: async () => {
@@ -19,5 +19,6 @@ export function useRbacMe() {
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 1,
+    enabled,
   });
 }

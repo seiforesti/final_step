@@ -4,6 +4,7 @@
 
 import { useEffect, useRef, useCallback } from 'react'
 import { useGlobalAPIInterceptor } from './useGlobalAPIInterceptor'
+import { globalHealthMonitor } from '../services/health-monitor'
 
 interface BackendHealthConfig {
   api_throttling: {
@@ -44,28 +45,89 @@ export const useBackendHealthSync = () => {
   const syncIntervalRef = useRef<NodeJS.Timeout | null>(null)
   const lastHealthCheckRef = useRef<Date | null>(null)
   const healthCheckCountRef = useRef(0)
+  const consecutiveFailuresRef = useRef(0)
+  const maxConsecutiveFailures = 3
+  const baseURL = (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_API_BASE_URL) || '/api/proxy'
   
   // Fetch backend health configuration
   const fetchBackendHealth = useCallback(async () => {
     try {
-      // Use plain fetch and route through internal proxy to reach backend health router
-      const response = await fetch('/api/proxy/health/frontend-config', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        // Add timeout to prevent hanging
-        signal: AbortSignal.timeout(5000)
-      })
+      // Check if we've had too many consecutive failures
+      if (consecutiveFailuresRef.current >= maxConsecutiveFailures) {
+        console.warn('🚨 Too many consecutive health check failures, skipping this check')
+        return
+      }
+
+      // Try the main health endpoint first, fallback to basic health check
+      let response
+      try {
+        response = await fetch('/health', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          // Add timeout to prevent hanging
+          signal: AbortSignal.timeout(3000)
+        })
+      } catch (error) {
+        // Fallback to basic health check if main endpoint fails
+        console.warn('Main health endpoint failed, trying basic health check')
+        response = await fetch('/api/proxy/health/frontend-config', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          // Add timeout to prevent hanging
+          signal: AbortSignal.timeout(3000)
+        })
+      }
       
       if (!response.ok) {
         throw new Error(`Health check failed: ${response.status}`)
       }
       
-      const healthConfig: BackendHealthConfig = await response.json()
+      const healthData = await response.json()
+      
+      // Handle different response formats
+      let healthConfig: BackendHealthConfig
+      if (healthData.health_context) {
+        // Full health config response
+        healthConfig = healthData
+      } else {
+        // Basic health response - create minimal config
+        healthConfig = {
+          api_throttling: {
+            enabled: true,
+            max_concurrent_requests: 3,
+            max_requests_per_minute: 10,
+            request_delay_ms: 1000,
+            batch_size: 2,
+            batch_delay_ms: 1500
+          },
+          emergency_mode: {
+            enabled: healthData.status === 'critical',
+            reason: healthData.status === 'critical' ? 'Database health critical' : 'Normal operation'
+          },
+          circuit_breaker: {
+            enabled: healthData.status !== 'healthy',
+            failure_threshold: 3,
+            timeout_ms: 30000
+          },
+          health_context: {
+            status: healthData.status || 'unknown',
+            pool_usage: healthData.database?.connection_pool?.pool_healthy ? 'healthy' : 'unknown',
+            error_rate: '0%',
+            response_time: '0ms',
+            last_check: new Date().toISOString()
+          }
+        }
+      }
       
       // Update frontend orchestrator based on backend health
       await syncFrontendWithBackend(healthConfig)
+      
+      // Reset failure counter on success
+      consecutiveFailuresRef.current = 0
       
       // Update last health check time
       lastHealthCheckRef.current = new Date()
@@ -76,8 +138,14 @@ export const useBackendHealthSync = () => {
     } catch (error) {
       console.error('❌ Backend health sync failed:', error)
       
-      // Avoid immediately flipping to emergency on a single failure
-      // Only escalate if we have consecutive failures handled elsewhere
+      // Increment failure counter
+      consecutiveFailuresRef.current++
+      
+      // If we've had too many failures, enable emergency mode
+      if (consecutiveFailuresRef.current >= maxConsecutiveFailures) {
+        console.warn('🚨 Enabling emergency mode due to repeated health check failures')
+        enableEmergencyMode()
+      }
     }
   }, [enableEmergencyMode, updateDatabaseHealth, globalState.isEmergencyMode])
   
@@ -120,18 +188,34 @@ export const useBackendHealthSync = () => {
   
   // Start health monitoring
   useEffect(() => {
+    // Start the health monitor
+    globalHealthMonitor.start(baseURL)
+    
+    // Add listener for health status changes
+    const handleHealthChange = (status: any) => {
+      updateDatabaseHealth({
+        isHealthy: status.isHealthy,
+        lastCheck: new Date().toISOString(),
+        poolUsage: status.isHealthy ? 'healthy' : 'unhealthy',
+        errorRate: status.isHealthy ? '0%' : 'high',
+        responseTime: status.responseTime ? `${status.responseTime}ms` : 'unknown',
+        status: status.isHealthy ? 'healthy' : 'unhealthy'
+      })
+    }
+    
+    globalHealthMonitor.addListener(handleHealthChange)
+    
     // Initial health check
     fetchBackendHealth()
     
-    // Set up periodic health checks
-    syncIntervalRef.current = setInterval(fetchBackendHealth, 30000) // Every 30 seconds
-    
     return () => {
+      globalHealthMonitor.removeListener(handleHealthChange)
+      globalHealthMonitor.stop()
       if (syncIntervalRef.current) {
         clearInterval(syncIntervalRef.current)
       }
     }
-  }, [fetchBackendHealth])
+  }, [fetchBackendHealth, baseURL, updateDatabaseHealth])
   
   // Manual health check trigger
   const triggerHealthCheck = useCallback(() => {

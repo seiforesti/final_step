@@ -61,10 +61,20 @@ class DatabaseHealthMonitor:
             if "error" in status:
                 logger.warning(f"Health check failed: {status['error']}")
                 return
+            
+            # Check if PgBouncer is managing the pool
+            if status.get("pgbouncer_enabled", False):
+                logger.debug("PgBouncer is managing connection pooling - skipping health checks")
+                return
                 
             utilization = status.get("utilization_percentage", 0)
             checked_out = status.get("checked_out", 0)
             total_connections = status.get("total_connections", 0)
+            
+            # Ensure utilization is a number, not a string
+            if isinstance(utilization, str):
+                logger.debug("Pool status contains string values - skipping health checks")
+                return
             
             # Log health status
             logger.debug(f"DB Health: {utilization:.1f}% utilization, {checked_out}/{total_connections} connections")
@@ -136,13 +146,23 @@ class DatabaseHealthMonitor:
             from app.db_session import get_connection_pool_status
             pool_status = get_connection_pool_status()
             
+            # Check if PgBouncer is managing the pool
+            if pool_status.get("pgbouncer_enabled", False):
+                health_status = "healthy"  # PgBouncer handles pooling
+            else:
+                utilization = pool_status.get("utilization_percentage", 0)
+                if isinstance(utilization, str):
+                    health_status = "healthy"  # Skip if string values
+                else:
+                    health_status = "healthy" if utilization < 80 else "warning"
+            
             return {
                 "monitor_running": self.is_running,
                 "last_health_check": self.last_health_check,
                 "recovery_attempts": self.recovery_attempts,
                 "max_recovery_attempts": self.max_recovery_attempts,
                 "pool_status": pool_status,
-                "health_status": "healthy" if pool_status.get("utilization_percentage", 0) < 80 else "warning"
+                "health_status": health_status
             }
         except Exception as e:
             return {

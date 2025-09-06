@@ -2901,7 +2901,7 @@ const ClassificationsSPAInternal: React.FC<ClassificationsSPAProps> = ({
             <Shield className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <h2 className="text-xl font-semibold text-gray-900 mb-2">Authentication Required</h2>
             <p className="text-gray-600 mb-4">Please log in to access the Classifications system.</p>
-            <Button onClick={() => window.location.href = '/login'} className="w-full">
+            <Button onClick={() => window.location.href = '/signin'} className="w-full">
               <Lock className="h-4 w-4 mr-2" />
               Log In
             </Button>

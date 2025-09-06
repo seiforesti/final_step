@@ -76,7 +76,9 @@ const DEFAULT_CONFIG: WorkspaceAPIConfig = {
   retryAttempts: 3,
   retryDelay: 1000,
   enableRealTimeSync: true, // Enable real-time sync by default
-  websocketURL: (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_WS_URL) || 'ws://localhost:8000/ws'
+  // Prefer proxied WS path if not explicitly set
+  websocketURL: (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_WS_URL)
+    || (typeof window !== 'undefined' ? `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}/api/proxy/ws` : 'ws://localhost:5173/api/proxy/ws')
 };
 
 /**
@@ -251,7 +253,7 @@ class WorkspaceManagementAPI {
    * Maps to: POST /api/racine/workspace/create
    */
   async createWorkspace(request: CreateWorkspaceRequest): Promise<WorkspaceResponse> {
-    const response = await fetch(`${this.config.baseURL}/api/racine/workspace/create`, {
+    const response = await fetch(`${this.config.baseURL}/racine/workspace/create`, {
       method: 'POST',
       headers: this.getAuthHeaders(),
       body: JSON.stringify(request)
@@ -269,7 +271,7 @@ class WorkspaceManagementAPI {
    * Maps to: GET /api/racine/workspace/{id}
    */
   async getWorkspace(workspaceId: UUID): Promise<WorkspaceResponse> {
-    const response = await fetch(`${this.config.baseURL}/api/racine/workspace/${workspaceId}`, {
+    const response = await fetch(`${this.config.baseURL}/racine/workspace/${workspaceId}`, {
       method: 'GET',
       headers: this.getAuthHeaders()
     });
@@ -306,7 +308,7 @@ class WorkspaceManagementAPI {
     }
 
     try {
-      const response = await fetch(`${this.config.baseURL}/api/racine/workspace/list?${params}`, {
+      const response = await fetch(`${this.config.baseURL}/racine/workspace/list?${params}`, {
         method: 'GET',
         headers: this.getAuthHeaders()
       });
@@ -331,7 +333,7 @@ class WorkspaceManagementAPI {
    * Maps to: PUT /api/racine/workspace/{id}
    */
   async updateWorkspace(workspaceId: UUID, request: UpdateWorkspaceRequest): Promise<WorkspaceResponse> {
-    const response = await fetch(`${this.config.baseURL}/api/racine/workspace/${workspaceId}`, {
+    const response = await fetch(`${this.config.baseURL}/racine/workspace/${workspaceId}`, {
       method: 'PUT',
       headers: this.getAuthHeaders(),
       body: JSON.stringify(request)
@@ -349,7 +351,7 @@ class WorkspaceManagementAPI {
    * Maps to: DELETE /api/racine/workspace/{id}
    */
   async deleteWorkspace(workspaceId: UUID): Promise<void> {
-    const response = await fetch(`${this.config.baseURL}/api/racine/workspace/${workspaceId}`, {
+    const response = await fetch(`${this.config.baseURL}/racine/workspace/${workspaceId}`, {
       method: 'DELETE',
       headers: this.getAuthHeaders()
     });

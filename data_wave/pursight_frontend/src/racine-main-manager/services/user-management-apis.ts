@@ -28,6 +28,8 @@ import {
   OperationStatus
 } from '../types/racine-core.types';
 import { globalWebSocketManager, type MessageHandler } from './WebSocketManager';
+import { circuitBreakers, withCircuitBreaker } from '../utils/circuit-breaker';
+import { requestThrottlers, withThrottling } from '../utils/request-throttler';
 
 import {
   RBACVisualization,
@@ -52,10 +54,10 @@ interface UserManagementAPIConfig {
  */
 const DEFAULT_CONFIG: UserManagementAPIConfig = {
   baseURL: (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_API_BASE_URL) || '/api/proxy',
-  timeout: 30000, // 30s for both dev and prod
-  retryAttempts: 3, // Standard retry attempts
-  retryDelay: 1000,
-  enableWebSocket: true, // Enable WebSocket by default
+  timeout: 5000, // Reduced to 5 seconds to prevent hanging
+  retryAttempts: 0, // Disable retries to prevent database overload
+  retryDelay: 5000, // Increased delay
+  enableWebSocket: false, // Disable WebSocket by default to prevent connection issues
   websocketURL: (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_WS_URL) || 'ws://localhost:8000/ws'
 };
 
@@ -210,11 +212,36 @@ class UserManagementAPI {
     options: RequestInit = {},
     retryCount = 0
   ): Promise<T> {
+    const throttledRequest = withThrottling(
+      requestThrottlers.userManagement,
+      async () => {
+        return await this.makeRequest<T>(endpoint, options);
+      }
+    );
+
+    const circuitBreakerRequest = withCircuitBreaker(
+      circuitBreakers.userManagement,
+      throttledRequest
+    );
+
     try {
-      return await this.makeRequest<T>(endpoint, options);
+      return await circuitBreakerRequest();
     } catch (error) {
+      // Don't retry if we're already in offline mode or if it's a 502/503 error
+      if (this.isOfflineMode() || 
+          (error as any)?.status === 502 || 
+          (error as any)?.status === 503 ||
+          (error as any)?.message?.includes('502') ||
+          (error as any)?.message?.includes('503')) {
+        console.warn(`Not retrying ${endpoint} due to server error or offline mode`);
+        throw error;
+      }
+      
       if (retryCount < this.config.retryAttempts) {
-        await new Promise(resolve => setTimeout(resolve, this.config.retryDelay * Math.pow(2, retryCount)));
+        // Exponential backoff with jitter
+        const delay = this.config.retryDelay * Math.pow(2, retryCount) + Math.random() * 1000;
+        console.log(`Retrying ${endpoint} in ${Math.round(delay)}ms (attempt ${retryCount + 1}/${this.config.retryAttempts})`);
+        await new Promise(resolve => setTimeout(resolve, delay));
         return this.makeRequestWithRetry<T>(endpoint, options, retryCount + 1);
       }
       throw error;
@@ -285,7 +312,7 @@ class UserManagementAPI {
   // =============================================================================
 
   async getCurrentUser(): Promise<UserProfileResponse> {
-    return this.makeRequestWithRetry<UserProfileResponse>('/auth/profile');
+    return this.makeRequestWithRetry<UserProfileResponse>('/auth/me');
   }
 
   async updateUserProfile(request: UpdateUserProfileRequest): Promise<UserProfileResponse> {
@@ -463,11 +490,11 @@ class UserManagementAPI {
   // =============================================================================
 
   async getUserRoles(): Promise<RoleResponse[]> {
-    return this.makeRequestWithRetry<RoleResponse[]>('/rbac/user/roles');
+    return this.makeRequestWithRetry<RoleResponse[]>('/rbac/roles');
   }
 
   async getUserPermissions(): Promise<PermissionResponse[]> {
-    return this.makeRequestWithRetry<PermissionResponse[]>('/rbac/user/permissions');
+    return this.makeRequestWithRetry<PermissionResponse[]>('/rbac/permissions');
   }
 
   async getAvailableRoles(): Promise<RoleResponse[]> {

@@ -1,0 +1,10 @@
+DATABASE_URL=postgresql://postgres:postgres@data_governance_pgbouncer:6432/data_governance
+DB_URL=postgresql://postgres:postgres@data_governance_pgbouncer:6432/data_governance
+DB_POOL_SIZE=25
+DB_MAX_OVERFLOW=10
+DB_POOL_TIMEOUT=30
+MAX_CONCURRENT_DB_REQUESTS=50
+DB_SEMAPHORE_TIMEOUT=3
+DB_USE_PGBOUNCER=true
+CLEANUP_UTIL_THRESHOLD=70
+CLEANUP_MIN_INTERVAL_SEC=10

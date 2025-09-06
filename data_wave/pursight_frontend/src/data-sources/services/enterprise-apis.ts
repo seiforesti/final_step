@@ -1214,11 +1214,21 @@ export const useUserQuery = (options?: any) => {
   })
 }
 
-export const useWorkspaceQuery = (workspace_id?: string, options = {}) => {
+export const useWorkspaceQuery = (workspace_id?: string | number | object, options = {}) => {
   return useQuery({
     queryKey: ['workspace', workspace_id],
     queryFn: async () => {
-      const { data } = await enterpriseApi.get(`/collaboration/workspaces/${workspace_id || 'current'}`)
+      // Handle object serialization properly
+      let workspaceId = 'current';
+      if (workspace_id) {
+        if (typeof workspace_id === 'object') {
+          // If it's an object, try to extract an ID or use a default
+          workspaceId = (workspace_id as any).id || (workspace_id as any).workspace_id || 'current';
+        } else {
+          workspaceId = String(workspace_id);
+        }
+      }
+      const { data } = await enterpriseApi.get(`/collaboration/workspaces/${workspaceId}`)
       return data
     },
     ...options,
@@ -1828,9 +1838,24 @@ export const createApprovalWorkflow = async (approvalData: {
   return data.data || data
 }
 
-export const getPendingApprovals = async (approver_id?: string): Promise<ApprovalWorkflow[]> => {
+export const getPendingApprovals = async (approver_id?: string | number | object): Promise<ApprovalWorkflow[]> => {
   const params = new URLSearchParams()
-  if (approver_id) params.append('approver_id', approver_id)
+  if (approver_id) {
+    // Handle object serialization properly
+    let approverId: string;
+    if (typeof approver_id === 'object') {
+      // If it's an object, try to extract an ID or skip the parameter
+      approverId = (approver_id as any).id || (approver_id as any).approver_id || (approver_id as any).user_id;
+      if (!approverId) {
+        // Skip this parameter if we can't extract a valid ID
+        console.warn('Invalid approver_id object provided:', approver_id);
+      } else {
+        params.append('approver_id', String(approverId));
+      }
+    } else {
+      params.append('approver_id', String(approver_id));
+    }
+  }
   
   const { data } = await enterpriseApi.get(`/workflow/approvals/pending?${params.toString()}`)
   return data.data || data

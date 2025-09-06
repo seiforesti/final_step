@@ -31,14 +31,14 @@ export class AuthService {
   // OAuth authentication
   async initiateGoogleLogin(): Promise<void> {
     if (typeof window !== 'undefined') {
-      const backendBase = (process.env.RACINE_BACKEND_URL || 'http://localhost:3000/proxy').replace(/\/$/, '');
+      const backendBase = (process.env.RACINE_BACKEND_URL || 'api/proxy').replace(/\/$/, '');
       window.location.href = `${backendBase}${AUTH_ENDPOINTS.GOOGLE_LOGIN}`;
     }
   }
 
   async initiateMicrosoftLogin(): Promise<void> {
     if (typeof window !== 'undefined') {
-      const backendBase = (process.env.RACINE_BACKEND_URL || 'http://localhost:3000/proxy').replace(/\/$/, '');
+      const backendBase = (process.env.RACINE_BACKEND_URL || 'api/proxy').replace(/\/$/, '');
       window.location.href = `${backendBase}${AUTH_ENDPOINTS.MICROSOFT_LOGIN}`;
     }
   }
@@ -46,7 +46,7 @@ export class AuthService {
   // OAuth popup handling
   async handleOAuthPopup(provider: 'google' | 'microsoft'): Promise<AuthResponse> {
     return new Promise((resolve, reject) => {
-      const backendBase = (process.env.RACINE_BACKEND_URL || 'http://localhost:3000/proxy').replace(/\/$/, '');
+      const backendBase = (process.env.RACINE_BACKEND_URL || 'api/proxy').replace(/\/$/, '');
       const popup = window.open(
         `${backendBase}${provider === 'google' ? AUTH_ENDPOINTS.GOOGLE_LOGIN : AUTH_ENDPOINTS.MICROSOFT_LOGIN}`,
         'oauth',
@@ -72,7 +72,7 @@ export class AuthService {
       // Listen for OAuth success message
       const messageHandler = (event: MessageEvent) => {
         try {
-          const backendBase = (process.env.RACINE_BACKEND_URL || 'http://localhost:3000/proxy').replace(/\/$/, '');
+          const backendBase = (process.env.RACINE_BACKEND_URL || 'api/proxy').replace(/\/$/, '');
           const backendOrigin = new URL(backendBase).origin;
           const allowedOrigins = new Set([window.location.origin, backendOrigin]);
           if (!allowedOrigins.has(event.origin)) return;
@@ -129,10 +129,57 @@ export class AuthService {
     });
   }
 
-  async disableMFA(userId: number, verificationCode: string): Promise<ApiResponse<{ success: boolean }>> {
-    return rbacApiService.post<{ success: boolean }>(`/rbac/users/${userId}/disable-mfa`, {
-      verification_code: verificationCode
-    });
+  async disableMFA(userId: number, method: string): Promise<ApiResponse<{ success: boolean }>> {
+    return rbacApiService.delete<{ success: boolean }>(`/rbac/users/${userId}/mfa/${method}`);
+  }
+
+  // Advanced MFA methods
+  async getMFAStatus(userId: number): Promise<ApiResponse<{
+    enabled: boolean;
+    methods: any[];
+    last_verification?: string;
+  }>> {
+    return rbacApiService.get(`/rbac/users/${userId}/mfa/status`);
+  }
+
+  async setupTOTP(userId: number): Promise<ApiResponse<{
+    secret: string;
+    qr_code: string;
+  }>> {
+    return rbacApiService.post(`/rbac/users/${userId}/mfa/totp/setup`);
+  }
+
+  async setupSMS(userId: number, phoneNumber: string): Promise<ApiResponse<{ success: boolean }>> {
+    return rbacApiService.post(`/rbac/users/${userId}/mfa/sms/setup`, { phone_number: phoneNumber });
+  }
+
+  async setupEmailMFA(userId: number, email: string): Promise<ApiResponse<{ success: boolean }>> {
+    return rbacApiService.post(`/rbac/users/${userId}/mfa/email/setup`, { email });
+  }
+
+  async setupBiometric(userId: number, credentialData: any): Promise<ApiResponse<{ success: boolean }>> {
+    return rbacApiService.post(`/rbac/users/${userId}/mfa/biometric/setup`, credentialData);
+  }
+
+  async verifyMFASetup(userId: number, verificationData: any): Promise<ApiResponse<{ success: boolean }>> {
+    return rbacApiService.post(`/rbac/users/${userId}/mfa/verify-setup`, verificationData);
+  }
+
+  async generateBackupCodes(userId: number): Promise<ApiResponse<{ codes: string[] }>> {
+    return rbacApiService.post(`/rbac/users/${userId}/mfa/backup-codes/generate`);
+  }
+
+  async getBackupCodes(userId: number): Promise<ApiResponse<any[]>> {
+    return rbacApiService.get(`/rbac/users/${userId}/mfa/backup-codes`);
+  }
+
+  async getBiometricCredentials(userId: number): Promise<ApiResponse<any[]>> {
+    return rbacApiService.get(`/rbac/users/${userId}/mfa/biometric/credentials`);
+  }
+
+  async getSecurityEvents(userId: number, filters: any): Promise<ApiResponse<any[]>> {
+    const queryString = rbacApiService.buildQueryString(filters);
+    return rbacApiService.get(`/rbac/users/${userId}/security/events${queryString}`);
   }
 
   // Registration with invite

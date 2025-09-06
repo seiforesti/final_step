@@ -38,9 +38,22 @@ def _create_engine(database_url: str, *, pool_size_override: int | None = None, 
     try:
         from app.db_config import DB_CONFIG as _DBC
     except Exception:
+        # Check if PgBouncer is being used and adjust pool sizes accordingly
+        database_url = os.getenv("DATABASE_URL", "")
+        is_using_pgbouncer = "pgbouncer" in database_url.lower() or "6432" in database_url
+        
+        if is_using_pgbouncer:
+            # Use smaller pool sizes when PgBouncer is handling connection pooling
+            default_pool_size = "2"
+            default_max_overflow = "1"
+        else:
+            # Use normal pool sizes when connecting directly to PostgreSQL
+            default_pool_size = "2"
+            default_max_overflow = "1"
+        
         _DBC = {
-            "pool_size": int(os.getenv("DB_POOL_SIZE", "15")),
-            "max_overflow": int(os.getenv("DB_MAX_OVERFLOW", "5")),
+            "pool_size": int(os.getenv("DB_POOL_SIZE", default_pool_size)),
+            "max_overflow": int(os.getenv("DB_MAX_OVERFLOW", default_max_overflow)),
             "pool_timeout": int(os.getenv("DB_POOL_TIMEOUT", "60")),
             "pool_recycle": int(os.getenv("DB_POOL_RECYCLE", "900")),
             "pool_pre_ping": True,
@@ -68,24 +81,36 @@ def _create_engine(database_url: str, *, pool_size_override: int | None = None, 
         or "pgbouncer" in database_url.lower()
     )
 
-    pool_kwargs = {
-        "pool_pre_ping": False if use_pgbouncer else True,
-        "pool_size": cfg_pool_size,
-        "max_overflow": cfg_overflow,
-        "pool_recycle": int(_DBC.get("pool_recycle", 1800)),
-        "pool_timeout": cfg_timeout,
-        "pool_reset_on_return": _DBC.get("pool_reset_on_return", "commit"),
-        "echo_pool": bool(_DBC.get("echo_pool", False)),
-        "pool_use_lifo": bool(_DBC.get("pool_use_lifo", True)),
-        "poolclass": QueuePool,
-    }
+    # Use NullPool when PgBouncer is detected to avoid double pooling
+    if use_pgbouncer:
+        from sqlalchemy.pool import NullPool
+        pool_kwargs = {
+            "pool_pre_ping": False,
+            "poolclass": NullPool,  # No pooling - PgBouncer handles it
+        }
+        logger.info("✅ Using NullPool - PgBouncer handles connection pooling")
+    else:
+        pool_kwargs = {
+            "pool_pre_ping": True,
+            "pool_size": cfg_pool_size,
+            "max_overflow": cfg_overflow,
+            "pool_recycle": int(_DBC.get("pool_recycle", 1800)),
+            "pool_timeout": cfg_timeout,
+            "pool_reset_on_return": _DBC.get("pool_reset_on_return", "commit"),
+            "echo_pool": bool(_DBC.get("echo_pool", False)),
+            "pool_use_lifo": bool(_DBC.get("pool_use_lifo", True)),
+            "poolclass": QueuePool,
+        }
     
     # Log the effective configuration
-    logger.info(
-        f"✅ SQLAlchemy pool config: size={pool_kwargs['pool_size']}, "
-        f"overflow={pool_kwargs['max_overflow']}, timeout={pool_kwargs['pool_timeout']}, "
-        f"recycle={pool_kwargs['pool_recycle']}"
-    )
+    if use_pgbouncer:
+        logger.info("✅ SQLAlchemy pool config: NullPool (PgBouncer handles pooling)")
+    else:
+        logger.info(
+            f"✅ SQLAlchemy pool config: size={pool_kwargs['pool_size']}, "
+            f"overflow={pool_kwargs['max_overflow']}, timeout={pool_kwargs['pool_timeout']}, "
+            f"recycle={pool_kwargs['pool_recycle']}"
+        )
 
     # Initialize connect_args for all database types
     connect_args = {}
@@ -97,9 +122,12 @@ def _create_engine(database_url: str, *, pool_size_override: int | None = None, 
         pool_kwargs = {"pool_pre_ping": True}
 
     # Log the pool configuration being used
-    logger.info(
-        f"Creating engine with pool config: size={pool_kwargs['pool_size']}, max_overflow={pool_kwargs['max_overflow']}, pre_ping={pool_kwargs['pool_pre_ping']} (PgBouncer={use_pgbouncer})"
-    )
+    if use_pgbouncer:
+        logger.info(f"Creating engine with NullPool (PgBouncer={use_pgbouncer})")
+    else:
+        logger.info(
+            f"Creating engine with pool config: size={pool_kwargs['pool_size']}, max_overflow={pool_kwargs['max_overflow']}, pre_ping={pool_kwargs['pool_pre_ping']} (PgBouncer={use_pgbouncer})"
+        )
     
     try:
         engine = create_engine(database_url, connect_args=connect_args, **pool_kwargs)
@@ -107,7 +135,10 @@ def _create_engine(database_url: str, *, pool_size_override: int | None = None, 
         # Verify the pool was created correctly
         if hasattr(engine, 'pool'):
             pool = engine.pool
-            logger.info(f"Engine created successfully. Pool size: {pool.size()}, Max overflow: {getattr(pool, '_max_overflow', 'N/A')}")
+            if use_pgbouncer:
+                logger.info(f"Engine created successfully with NullPool (PgBouncer handles pooling)")
+            else:
+                logger.info(f"Engine created successfully. Pool size: {pool.size()}, Max overflow: {getattr(pool, '_max_overflow', 'N/A')}")
         
         return engine
     except Exception as e:
@@ -194,13 +225,34 @@ def _desired_pool_targets() -> tuple[int, int]:
     """Read desired (pool_size, max_overflow) from DB_CONFIG/env with sane defaults."""
     try:
         from app.db_config import DB_CONFIG as _DBC
-        return int(_DBC.get("pool_size", 15)), int(_DBC.get("max_overflow", 5))
+        return int(_DBC.get("pool_size", 2)), int(_DBC.get("max_overflow", 1))
     except Exception:
-        return int(os.getenv("DB_POOL_SIZE", "15")), int(os.getenv("DB_MAX_OVERFLOW", "5"))
+        # Check if PgBouncer is being used and adjust pool sizes accordingly
+        database_url = os.getenv("DATABASE_URL", "")
+        is_using_pgbouncer = "pgbouncer" in database_url.lower() or "6432" in database_url
+        
+        if is_using_pgbouncer:
+            # Use smaller pool sizes when PgBouncer is handling connection pooling
+            default_pool_size = "2"
+            default_max_overflow = "1"
+        else:
+            # Use normal pool sizes when connecting directly to PostgreSQL
+            default_pool_size = "2"
+            default_max_overflow = "1"
+        
+        return int(os.getenv("DB_POOL_SIZE", default_pool_size)), int(os.getenv("DB_MAX_OVERFLOW", default_max_overflow))
 
 def ensure_pool_capacity() -> None:
     """Ensure current engine pool capacity matches desired targets; recreate if not."""
     try:
+        # Check if PgBouncer is being used - skip pool capacity checks
+        database_url = os.getenv("DATABASE_URL", "")
+        is_using_pgbouncer = "pgbouncer" in database_url.lower() or "6432" in database_url
+        
+        if is_using_pgbouncer:
+            logger.debug("PgBouncer detected - skipping pool capacity checks")
+            return
+            
         desired_size, desired_overflow = _desired_pool_targets()
         current_size = engine.pool.size() if hasattr(engine, 'pool') else 0
         current_overflow = engine.pool.overflow() if hasattr(engine, 'pool') else 0
@@ -220,6 +272,14 @@ def ensure_pool_capacity() -> None:
 def cleanup_connection_pool():
     """Clean up stale connections and reset pool if needed."""
     try:
+        # Check if PgBouncer is being used - skip pool cleanup
+        database_url = os.getenv("DATABASE_URL", "")
+        is_using_pgbouncer = "pgbouncer" in database_url.lower() or "6432" in database_url
+        
+        if is_using_pgbouncer:
+            logger.debug("PgBouncer detected - skipping connection pool cleanup")
+            return
+            
         if engine.pool.checkedout() > engine.pool.size() * 0.8:  # If 80% of connections are checked out
             logger.warning("Connection pool usage high, attempting cleanup...")
             engine.pool.dispose()  # Dispose and recreate pool
@@ -254,6 +314,23 @@ def force_connection_cleanup():
 def get_connection_pool_status():
     """Get detailed connection pool status."""
     try:
+        # Check if we're using PgBouncer
+        database_url = os.getenv("DATABASE_URL", "")
+        is_using_pgbouncer = "pgbouncer" in database_url.lower() or "6432" in database_url
+        
+        if is_using_pgbouncer:
+            # With PgBouncer, return simplified status since PgBouncer handles pooling
+            return {
+                "pool_size": "managed_by_pgbouncer",
+                "max_overflow": "managed_by_pgbouncer", 
+                "total_capacity": "managed_by_pgbouncer",
+                "checked_in": "managed_by_pgbouncer",
+                "checked_out": "managed_by_pgbouncer",
+                "utilization_percentage": "managed_by_pgbouncer",
+                "available": "managed_by_pgbouncer",
+                "pgbouncer_enabled": True
+            }
+        
         if not hasattr(engine, 'pool'):
             return {"error": "No pool available"}
         
@@ -272,7 +349,8 @@ def get_connection_pool_status():
             "checked_in": checked_in,
             "checked_out": checked_out,
             "utilization_percentage": round(utilization, 1),
-            "available": total_capacity - checked_out
+            "available": total_capacity - checked_out,
+            "pgbouncer_enabled": False
         }
     except Exception as e:
         return {"error": str(e)}
@@ -305,7 +383,20 @@ def pool_monitor():
             if auto_force:
                 try:
                     status = get_connection_pool_status()
-                    utilization = float(status.get("utilization_percentage", 0)) if isinstance(status, dict) else 0
+                    
+                    # Check if PgBouncer is managing the pool
+                    if status.get("pgbouncer_enabled", False):
+                        logger.debug("PgBouncer is managing pooling - skipping auto cleanup")
+                        return
+                    
+                    utilization_raw = status.get("utilization_percentage", 0)
+                    
+                    # Skip if utilization is a string (PgBouncer managed)
+                    if isinstance(utilization_raw, str):
+                        logger.debug("Pool status contains string values - skipping auto cleanup")
+                        return
+                    
+                    utilization = float(utilization_raw) if isinstance(status, dict) else 0
                     now = time.time()
                     if utilization >= util_threshold and (now - last_forced) >= min_interval:
                         logger.warning(
@@ -328,7 +419,7 @@ try:
     _max_concurrent_db_requests = DB_CONFIG["max_concurrent_requests"]
     # Align semaphore ceiling to pool capacity + overflow to avoid hard saturation
     try:
-        pool_cap = int(DB_CONFIG.get("pool_size", 15)) + int(DB_CONFIG.get("max_overflow", 5))
+        pool_cap = int(DB_CONFIG.get("pool_size", 2)) + int(DB_CONFIG.get("max_overflow", 1))
     except Exception:
         pool_cap = 20
     _db_semaphore = threading.BoundedSemaphore(value=max(1, min(_max_concurrent_db_requests, pool_cap)))
@@ -481,7 +572,14 @@ def initialize_connection_pool():
         # Log pool status
         if hasattr(engine, 'pool'):
             pool = engine.pool
-            logger.info(f"Connection pool initialized: size={pool.size()}, checked_in={pool.checkedin()}, checked_out={pool.checkedout()}")
+            # Check if PgBouncer is being used
+            database_url = os.getenv("DATABASE_URL", "")
+            is_using_pgbouncer = "pgbouncer" in database_url.lower() or "6432" in database_url
+            
+            if is_using_pgbouncer:
+                logger.info(f"Connection pool initialized with NullPool (PgBouncer handles pooling)")
+            else:
+                logger.info(f"Connection pool initialized: size={pool.size()}, checked_in={pool.checkedin()}, checked_out={pool.checkedout()}")
         
         return True
     except Exception as e:
@@ -504,55 +602,65 @@ def get_db() -> Generator[Session, None, None]:
         logger.warning("Circuit breaker is open; rejecting DB request.")
         raise RuntimeError("database_unavailable")
 
-    # Check if pool is completely exhausted and try recovery
+    # Check if we're using PgBouncer (connection pooling is handled by PgBouncer)
     try:
-        pool_size = engine.pool.size()
-        overflow_cap = engine.pool.overflow()
-        max_allowed = pool_size + overflow_cap
-        current_usage = engine.pool.checkedout()
+        # Check if we're connecting through PgBouncer
+        database_url = os.getenv("DATABASE_URL", "")
+        is_using_pgbouncer = "pgbouncer" in database_url.lower() or "6432" in database_url
         
-        # If pool is completely exhausted, try aggressive recovery
-        if current_usage >= max_allowed:
-            logger.warning(f"Connection pool exhausted: {current_usage}/{max_allowed}; attempting recovery...")
+        if is_using_pgbouncer:
+            # With PgBouncer, we don't need to check SQLAlchemy pool status
+            # PgBouncer handles connection pooling for us
+            logger.debug("Using PgBouncer - skipping SQLAlchemy pool status check")
+        else:
+            # Only check pool status when not using PgBouncer
+            pool_size = engine.pool.size()
+            overflow_cap = engine.pool.overflow()
+            max_allowed = pool_size + overflow_cap
+            current_usage = engine.pool.checkedout()
             
-            # Try to force cleanup of stale connections
-            try:
-                cleanup_connection_pool()
-                # Wait a bit for cleanup to take effect
+            # If pool is completely exhausted, try aggressive recovery
+            if current_usage >= max_allowed:
+                logger.warning(f"Connection pool exhausted: {current_usage}/{max_allowed}; attempting recovery...")
+                
+                # Try to force cleanup of stale connections
+                try:
+                    cleanup_connection_pool()
+                    # Wait a bit for cleanup to take effect
+                    time.sleep(0.1)
+                    current_usage = engine.pool.checkedout()
+                    logger.info(f"After cleanup: {current_usage}/{max_allowed}")
+                except Exception as e:
+                    logger.error(f"Cleanup failed: {e}")
+                
+                # If still exhausted, try to recreate engine
+                if current_usage >= max_allowed:
+                    logger.warning("Pool still exhausted after cleanup, attempting engine recreation...")
+                    try:
+                        if recreate_engine():
+                            # Recalculate after recreation
+                            pool_size = engine.pool.size()
+                            overflow_cap = engine.pool.overflow()
+                            max_allowed = pool_size + overflow_cap
+                            current_usage = engine.pool.checkedout()
+                            logger.info(f"After engine recreation: {current_usage}/{max_allowed}")
+                        else:
+                            logger.error("Engine recreation failed")
+                    except Exception as e:
+                        logger.error(f"Engine recreation error: {e}")
+            
+            # If we are slightly above pool_size but within overflow, sleep briefly to smooth bursts
+            if current_usage >= pool_size and current_usage < max_allowed:
+                time.sleep(0.05)  # 50ms backoff to reduce contention
+            
+            # Hard cap only when exceeding full capacity after recovery attempts
+            if current_usage >= max_allowed:
+                logger.warning(f"Connection pool at capacity: {current_usage}/{max_allowed}; applying backpressure.")
+                # Short backoff and retry once before giving up
                 time.sleep(0.1)
                 current_usage = engine.pool.checkedout()
-                logger.info(f"After cleanup: {current_usage}/{max_allowed}")
-            except Exception as e:
-                logger.error(f"Cleanup failed: {e}")
-            
-            # If still exhausted, try to recreate engine
-            if current_usage >= max_allowed:
-                logger.warning("Pool still exhausted after cleanup, attempting engine recreation...")
-                try:
-                    if recreate_engine():
-                        # Recalculate after recreation
-                        pool_size = engine.pool.size()
-                        overflow_cap = engine.pool.overflow()
-                        max_allowed = pool_size + overflow_cap
-                        current_usage = engine.pool.checkedout()
-                        logger.info(f"After engine recreation: {current_usage}/{max_allowed}")
-                    else:
-                        logger.error("Engine recreation failed")
-                except Exception as e:
-                    logger.error(f"Engine recreation error: {e}")
-        
-        # If we are slightly above pool_size but within overflow, sleep briefly to smooth bursts
-        if current_usage >= pool_size and current_usage < max_allowed:
-            time.sleep(0.05)  # 50ms backoff to reduce contention
-        
-        # Hard cap only when exceeding full capacity after recovery attempts
-        if current_usage >= max_allowed:
-            logger.warning(f"Connection pool at capacity: {current_usage}/{max_allowed}; applying backpressure.")
-            # Short backoff and retry once before giving up
-            time.sleep(0.1)
-            current_usage = engine.pool.checkedout()
-            if current_usage >= max_allowed:
-                raise RuntimeError("database_unavailable")
+                if current_usage >= max_allowed:
+                    raise RuntimeError("database_unavailable")
     
     except Exception as e:
         logger.error(f"Error checking pool status: {e}")

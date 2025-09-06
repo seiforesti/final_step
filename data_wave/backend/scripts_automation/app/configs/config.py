@@ -22,15 +22,15 @@ SMTP_CONFIG = {
 
 # OAuth configuration
 OAUTH_CONFIG = {
-    "google_client_id": clean_env("GOOGLE_CLIENT_ID"),
-    "google_client_secret": clean_env("GOOGLE_CLIENT_SECRET"),
-    "google_redirect_uri": clean_env("GOOGLE_REDIRECT_URI", "http://localhost:8000/auth/google/callback"),
-    "google_scopes": clean_env("GOOGLE_SCOPES", "openid email profile"),
-    "microsoft_client_id": clean_env("MICROSOFT_CLIENT_ID"),
-    "microsoft_client_secret": clean_env("MICROSOFT_CLIENT_SECRET"),
-    "microsoft_redirect_uri": clean_env("MICROSOFT_REDIRECT_URI", "http://localhost:8000/auth/microsoft/callback"),
-    "microsoft_scopes": clean_env("MICROSOFT_SCOPES", "openid email profile User.Read"),
-    "microsoft_tenant": clean_env("MICROSOFT_TENANT", "common"),
+    "google_client_id": "950547023330-d9ufg3raafbha6lesgnq5lfho5nc7fk4.apps.googleusercontent.com",
+    "google_client_secret": "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",
+    "google_redirect_uri": "http://localhost:8000/auth/google/callback",
+    "google_scopes": "openid email profile",
+    "microsoft_client_id": "bb0376c9-a26b-4ce1-8b6d-1c333fda6209",
+    "microsoft_client_secret": "4da9bfbc-4a5f-4368-b7bb-484613faeda4",
+    "microsoft_redirect_uri": "http://localhost:8000/auth/microsoft/callback",
+    "microsoft_scopes": "openid email profile User.Read",
+    "microsoft_tenant": "common",
 }
 
 # Database configuration is now centralized in app.db_config

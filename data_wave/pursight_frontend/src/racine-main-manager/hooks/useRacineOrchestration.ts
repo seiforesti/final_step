@@ -28,6 +28,7 @@ import {
   OrchestrationEvent,
   OrchestrationEventHandler
 } from '../services/racine-orchestration-apis';
+import { shouldAttemptRequest, getServiceStatusMessage } from '../utils/circuit-breaker-status';
 
 import {
   SystemHealthResponse,
@@ -426,6 +427,15 @@ export function useRacineOrchestration(
     updateLoading('orchestrationMasters', true);
     updateError('orchestrationMasters', null);
     
+    // Check if service is available before attempting requests
+    if (!shouldAttemptRequest('orchestration')) {
+      const statusMessage = getServiceStatusMessage('orchestration');
+      console.warn(`Skipping orchestration masters load: ${statusMessage}`);
+      updateLoading('orchestrationMasters', false);
+      updateError('orchestrationMasters', new Error(statusMessage));
+      return;
+    }
+    
     try {
       const response = await racineOrchestrationAPI.listOrchestrationMasters(
         config.initialPagination,
@@ -464,6 +474,15 @@ export function useRacineOrchestration(
   const refreshSystemHealth = useCallback(async (): Promise<void> => {
     updateLoading('systemHealth', true);
     updateError('systemHealth', null);
+    
+    // Check if service is available before attempting requests
+    if (!shouldAttemptRequest('orchestration')) {
+      const statusMessage = getServiceStatusMessage('orchestration');
+      console.warn(`Skipping system health refresh: ${statusMessage}`);
+      updateLoading('systemHealth', false);
+      updateError('systemHealth', new Error(statusMessage));
+      return;
+    }
     
     try {
       const response = await racineOrchestrationAPI.getSystemHealth();
@@ -584,6 +603,15 @@ export function useRacineOrchestration(
   const loadAlerts = useCallback(async (): Promise<void> => {
     updateLoading('alerts', true);
     updateError('alerts', null);
+    
+    // Check if service is available before attempting requests
+    if (!shouldAttemptRequest('orchestration')) {
+      const statusMessage = getServiceStatusMessage('orchestration');
+      console.warn(`Skipping alerts load: ${statusMessage}`);
+      updateLoading('alerts', false);
+      updateError('alerts', new Error(statusMessage));
+      return;
+    }
     
     try {
       const response = await racineOrchestrationAPI.getSystemAlerts(
@@ -817,6 +845,15 @@ export function useRacineOrchestration(
     updateLoading('metrics', true);
     updateError('metrics', null);
     
+    // Check if service is available before attempting requests
+    if (!shouldAttemptRequest('orchestration')) {
+      const statusMessage = getServiceStatusMessage('orchestration');
+      console.warn(`Skipping metrics load: ${statusMessage}`);
+      updateLoading('metrics', false);
+      updateError('metrics', new Error(statusMessage));
+      return;
+    }
+    
     try {
       const response = await racineOrchestrationAPI.getMetrics();
       
@@ -907,6 +944,15 @@ export function useRacineOrchestration(
   const loadOptimizationRecommendations = useCallback(async (): Promise<void> => {
     updateLoading('optimization', true);
     updateError('optimization', null);
+    
+    // Check if service is available before attempting requests
+    if (!shouldAttemptRequest('orchestration')) {
+      const statusMessage = getServiceStatusMessage('orchestration');
+      console.warn(`Skipping optimization recommendations load: ${statusMessage}`);
+      updateLoading('optimization', false);
+      updateError('optimization', new Error(statusMessage));
+      return;
+    }
     
     try {
       const response = await racineOrchestrationAPI.getOptimizationRecommendations();

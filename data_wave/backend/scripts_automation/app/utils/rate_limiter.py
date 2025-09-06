@@ -72,7 +72,7 @@ class EnterpriseRateLimiter:
     
     def __init__(
         self,
-        redis_url: str = "redis://localhost:6379",
+        redis_url: str = "redis://data_governance_redis:6379",
         default_rules: Optional[Dict[str, RateLimitRule]] = None,
         enable_monitoring: bool = True
     ):

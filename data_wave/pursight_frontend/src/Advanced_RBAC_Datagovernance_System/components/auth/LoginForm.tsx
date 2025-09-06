@@ -13,7 +13,7 @@ import {
 } from '../shared/Icons';
 import { MFAHandler } from './MFAHandler';
 import { authService } from '../../services/auth.service';
-import { VALIDATION_PATTERNS, VALIDATION_MESSAGES, FIELD_LENGTHS } from '../../constants/validation.constants';
+import { VALIDATION_PATTERNS, VALIDATION_MESSAGES } from '../../constants/validation.constants';
 import { THEME_COLORS, ANIMATIONS, FORM_CONFIG } from '../../constants/ui.constants';
 import type { 
   LoginRequest, 
@@ -101,10 +101,10 @@ const useFormValidation = (initialState: FormState) => {
         if (!value) return VALIDATION_MESSAGES.REQUIRED;
         if (typeof value === 'string') {
           if (!VALIDATION_PATTERNS.EMAIL.test(value)) {
-            return VALIDATION_MESSAGES.INVALID_EMAIL;
+            return VALIDATION_MESSAGES.EMAIL_INVALID;
           }
-          if (value.length > FIELD_LENGTHS.EMAIL.max) {
-            return VALIDATION_MESSAGES.TOO_LONG(FIELD_LENGTHS.EMAIL.max);
+          if (value.length > 254) {
+            return 'Email is too long (max 254 characters)';
           }
           // Check for suspicious email patterns
           if (value.includes('+') && value.split('+').length > 2) {
@@ -115,8 +115,8 @@ const useFormValidation = (initialState: FormState) => {
       
       case 'firstName':
         if (value && typeof value === 'string') {
-          if (value.length > FIELD_LENGTHS.FIRST_NAME.max) {
-            return VALIDATION_MESSAGES.TOO_LONG(FIELD_LENGTHS.FIRST_NAME.max);
+          if (value.length > 50) {
+            return 'First name is too long (max 50 characters)';
           }
           if (!/^[a-zA-Z\s'-]+$/.test(value)) {
             return 'First name can only contain letters, spaces, hyphens and apostrophes';
@@ -126,8 +126,8 @@ const useFormValidation = (initialState: FormState) => {
       
       case 'lastName':
         if (value && typeof value === 'string') {
-          if (value.length > FIELD_LENGTHS.LAST_NAME.max) {
-            return VALIDATION_MESSAGES.TOO_LONG(FIELD_LENGTHS.LAST_NAME.max);
+          if (value.length > 50) {
+            return 'Last name is too long (max 50 characters)';
           }
           if (!/^[a-zA-Z\s'-]+$/.test(value)) {
             return 'Last name can only contain letters, spaces, hyphens and apostrophes';
@@ -139,7 +139,7 @@ const useFormValidation = (initialState: FormState) => {
         if (value && typeof value === 'string') {
           const cleanPhone = value.replace(/[\s\-\(\)]/g, '');
           if (!VALIDATION_PATTERNS.PHONE.test(value)) {
-            return VALIDATION_MESSAGES.INVALID_PHONE;
+            return VALIDATION_MESSAGES.PHONE_INVALID;
           }
           if (cleanPhone.length < 10 || cleanPhone.length > 15) {
             return 'Phone number must be between 10-15 digits';
@@ -167,11 +167,11 @@ const useFormValidation = (initialState: FormState) => {
       
       case 'profilePicture':
         if (value instanceof File) {
-          if (value.size > FORM_CONFIG.MAX_FILE_SIZE) {
-            return VALIDATION_MESSAGES.FILE_TOO_LARGE('10MB');
+          if (value.size > 10 * 1024 * 1024) {
+            return 'File is too large (max 10MB)';
           }
-          if (!FORM_CONFIG.ALLOWED_IMAGE_TYPES.includes(value.type)) {
-            return VALIDATION_MESSAGES.INVALID_FILE_TYPE(FORM_CONFIG.ALLOWED_IMAGE_TYPES.join(', '));
+          if (!['image/jpeg', 'image/png', 'image/gif'].includes(value.type)) {
+            return 'Invalid file type. Only JPG, PNG, and GIF are allowed';
           }
           // Check for potentially malicious files
           if (value.name.includes('..') || value.name.includes('/')) {
@@ -187,12 +187,35 @@ const useFormValidation = (initialState: FormState) => {
     setState(prev => ({ ...prev, [field]: value }));
     
     const error = validateField(field, value);
-    setValidation(prev => ({
-      ...prev,
-      errors: { ...prev.errors, [field]: error },
-      touched: { ...prev.touched, [field]: true }
-    }));
-  }, [validateField]);
+    setValidation(prev => {
+      const newErrors = { ...prev.errors, [field]: error };
+      const newTouched = { ...prev.touched, [field]: true };
+      
+      // Check if form is valid for current step
+      let isValid = true;
+      if (field === 'email') {
+        // For login step, only email is required
+        isValid = !error && !!value;
+      } else if (field === 'firstName' || field === 'lastName' || field === 'phoneNumber' || field === 'profilePicture') {
+        // For signup step, check all required fields
+        const emailError = validateField('email', state.email);
+        const firstNameError = field === 'firstName' ? error : validateField('firstName', state.firstName);
+        const lastNameError = field === 'lastName' ? error : validateField('lastName', state.lastName);
+        const phoneError = field === 'phoneNumber' ? error : validateField('phoneNumber', state.phoneNumber);
+        const profileError = field === 'profilePicture' ? error : validateField('profilePicture', state.profilePicture);
+        
+        isValid = !emailError && !firstNameError && !lastNameError && !phoneError && !profileError && 
+                 !!state.email && !!state.firstName && !!state.lastName && !!state.phoneNumber;
+      }
+      
+      return {
+        ...prev,
+        errors: newErrors,
+        touched: newTouched,
+        isValid
+      };
+    });
+  }, [validateField, state]);
 
   const validateForm = useCallback((step: AuthStep): boolean => {
     const errors: FormErrors = {};
@@ -351,7 +374,6 @@ export const LoginForm: React.FC = () => {
       scale: 1,
       transition: { 
         duration: 0.6, 
-        ease: "easeOut",
         staggerChildren: 0.1
       }
     },
@@ -371,7 +393,6 @@ export const LoginForm: React.FC = () => {
       rotateY: 0,
       transition: { 
         duration: 0.5, 
-        ease: "easeOut",
         staggerChildren: 0.05
       }
     },
@@ -390,8 +411,7 @@ export const LoginForm: React.FC = () => {
       y: 0,
       scale: 1,
       transition: { 
-        duration: 0.3, 
-        ease: "easeOut"
+        duration: 0.3
       }
     }
   };
@@ -402,8 +422,7 @@ export const LoginForm: React.FC = () => {
       opacity: 1,
       scale: 1,
       transition: {
-        duration: 0.4,
-        ease: "backOut"
+        duration: 0.4
       }
     }
   };
@@ -411,6 +430,26 @@ export const LoginForm: React.FC = () => {
   // ============================================================================
   // EFFECTS
   // ============================================================================
+
+  // Handle OAuth success redirect
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('oauth_success') === 'true') {
+      // OAuth was successful, get user info if available
+      const userEmail = urlParams.get('user');
+      const successMessage = userEmail 
+        ? `OAuth authentication successful! Welcome ${userEmail}`
+        : 'OAuth authentication successful!';
+      
+      setCurrentStep('success');
+      setAuthResponse({ success: true, message: successMessage });
+      
+      // Redirect to home after a short delay
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 2000);
+    }
+  }, []);
 
   useEffect(() => {
     controls.start('visible');
@@ -529,35 +568,112 @@ export const LoginForm: React.FC = () => {
   const handleOAuthAuth = useCallback(async (provider: 'google' | 'microsoft') => {
     setIsLoading(true);
     setAuthMethod(provider);
-    setCurrentStep('security_check');
 
     try {
-      // Enhanced security check
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Use Vite proxy to redirect to backend
+      const oauthUrl = provider === 'google' 
+        ? `/api/proxy/auth/google`
+        : `/api/proxy/auth/microsoft`;
       
-      const response = await authService.handleOAuthPopup(provider);
-      setAuthResponse(response);
-      setCurrentStep('success');
-      
-      // Trigger success animation
-      await controls.start({
-        scale: [1, 1.05, 1],
-        transition: { duration: 0.5 }
-      });
+      // Open OAuth window
+      const oauthWindow = window.open(
+        oauthUrl,
+        'oauthWindow',
+        'width=500,height=600,scrollbars=yes,resizable=yes'
+      );
+
+      if (!oauthWindow) {
+        throw new Error('Popup blocked. Please allow popups for this site.');
+      }
+
+      // Monitor the popup window with COOP error handling
+      const checkClosed = setInterval(() => {
+        try {
+          if (oauthWindow.closed) {
+            clearInterval(checkClosed);
+            setIsLoading(false);
+            // Check if authentication was successful by checking for redirect
+            if (window.location.pathname === '/' || window.location.pathname === '/') {
+              setCurrentStep('success');
+            } else {
+              setValidation(prev => ({
+                ...prev,
+                errors: { 
+                  ...prev.errors, 
+                  general: `${provider} authentication was cancelled or failed.` 
+                }
+              }));
+            }
+          }
+        } catch (error) {
+          // COOP policy blocks access to popup window
+          console.warn('COOP policy blocks window access, using alternative monitoring');
+          clearInterval(checkClosed);
+          setIsLoading(false);
+          // Use a different approach - check for URL changes or use postMessage
+        }
+      }, 1000);
+
+      // Listen for OAuth success message from popup
+      const messageHandler = (event: MessageEvent) => {
+        if (event.origin !== window.location.origin) return;
+        
+        if (event.data.type === 'OAUTH_SUCCESS') {
+          clearInterval(checkClosed);
+          try {
+            oauthWindow.close();
+          } catch (error) {
+            console.warn('Could not close popup window due to COOP policy');
+          }
+          setAuthResponse(event.data.response);
+          setCurrentStep('success');
+          setIsLoading(false);
+          window.removeEventListener('message', messageHandler);
+        } else if (event.data.type === 'OAUTH_ERROR') {
+          clearInterval(checkClosed);
+          try {
+            oauthWindow.close();
+          } catch (error) {
+            console.warn('Could not close popup window due to COOP policy');
+          }
+          setValidation(prev => ({
+            ...prev,
+            errors: { 
+              ...prev.errors, 
+              general: event.data.error || `${provider} authentication failed.` 
+            }
+          }));
+          setIsLoading(false);
+          window.removeEventListener('message', messageHandler);
+        }
+      };
+
+      window.addEventListener('message', messageHandler);
       
     } catch (error: any) {
-      setCurrentStep('login');
-      setValidation(prev => ({
-        ...prev,
-        errors: { 
-          ...prev.errors, 
-          general: error.message || `${provider} authentication failed. Please try again.` 
-        }
-      }));
-    } finally {
+      console.error(`${provider} OAuth error:`, error);
+      
+      // Handle specific OAuth configuration errors
+      if (error.response?.status === 503) {
+        setValidation(prev => ({
+          ...prev,
+          errors: { 
+            ...prev.errors, 
+            general: `${provider} OAuth is not configured on the server. Please contact your administrator.` 
+          }
+        }));
+      } else {
+        setValidation(prev => ({
+          ...prev,
+          errors: { 
+            ...prev.errors, 
+            general: error.message || `${provider} authentication failed. Please try again.` 
+          }
+        }));
+      }
       setIsLoading(false);
     }
-  }, [controls, setValidation]);
+  }, [setValidation]);
 
   const handleVerifyCode = useCallback(async () => {
     if (!validateForm('verify')) return;
@@ -724,7 +840,7 @@ export const LoginForm: React.FC = () => {
       variants={securityVariants}
       initial="hidden"
       animate="visible"
-      className="relative bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-2xl p-6 border border-blue-200/50 shadow-lg backdrop-blur-sm"
+      className="relative bg-gradient-to-br from-gray-800/50 via-gray-700/50 to-gray-800/50 rounded-2xl p-6 border border-gray-600/50 shadow-lg backdrop-blur-sm"
     >
       {/* Animated background particles */}
       <div className="absolute inset-0 overflow-hidden rounded-2xl">
@@ -760,10 +876,10 @@ export const LoginForm: React.FC = () => {
             <SecurityShieldIcon className="h-6 w-6 text-white" />
           </motion.div>
           <div>
-            <h3 className="text-lg font-bold bg-gradient-to-r from-blue-900 to-purple-900 bg-clip-text text-transparent">
+            <h3 className="text-lg font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
               Enterprise Security Suite
             </h3>
-            <p className="text-sm text-blue-700">Advanced threat protection enabled</p>
+            <p className="text-sm text-blue-300">Advanced threat protection enabled</p>
           </div>
         </div>
 
@@ -794,9 +910,9 @@ export const LoginForm: React.FC = () => {
                   />
                 )}
               </div>
-              <feature.icon className="h-4 w-4 text-blue-600" />
+              <feature.icon className="h-4 w-4 text-blue-400" />
               <span className={`font-medium ${
-                feature.enabled ? 'text-blue-900' : 'text-gray-500'
+                feature.enabled ? 'text-blue-300' : 'text-gray-500'
               }`}>
                 {feature.label}
               </span>
@@ -808,15 +924,15 @@ export const LoginForm: React.FC = () => {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
-          className="mt-4 p-3 bg-gradient-to-r from-green-100 to-blue-100 rounded-lg border border-green-200/50"
+          className="mt-4 p-3 bg-gradient-to-r from-green-900/30 to-blue-900/30 rounded-lg border border-green-600/50"
         >
           <div className="flex items-center space-x-2">
-            <CheckCircleIcon className="h-5 w-5 text-green-600" />
-            <span className="text-sm font-semibold text-green-800">
+            <CheckCircleIcon className="h-5 w-5 text-green-400" />
+            <span className="text-sm font-semibold text-green-300">
               Security Level: {securityLevel.charAt(0).toUpperCase() + securityLevel.slice(1)}
             </span>
           </div>
-          <p className="text-xs text-green-700 mt-1">
+          <p className="text-xs text-green-400 mt-1">
             Your connection is secured with enterprise-grade protection
           </p>
         </motion.div>
@@ -829,28 +945,28 @@ export const LoginForm: React.FC = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.8 }}
-      className="bg-gray-50/80 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50"
+      className="bg-gray-800/80 backdrop-blur-sm rounded-xl p-4 border border-gray-600/50"
     >
-      <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+      <h4 className="text-sm font-semibold text-gray-300 mb-3 flex items-center">
         <ComputerDesktopIcon className="h-4 w-4 mr-2" />
         Session Information
       </h4>
       <div className="grid grid-cols-2 gap-2 text-xs">
         <div className="flex items-center space-x-2">
-          <GlobeAltIcon className="h-3 w-3 text-gray-500" />
-          <span className="text-gray-600">Platform: {systemInfo.platform}</span>
+          <GlobeAltIcon className="h-3 w-3 text-gray-400" />
+          <span className="text-gray-400">Platform: {systemInfo.platform}</span>
         </div>
         <div className="flex items-center space-x-2">
-          <ClockIcon className="h-3 w-3 text-gray-500" />
-          <span className="text-gray-600">TZ: {systemInfo.timezone}</span>
+          <ClockIcon className="h-3 w-3 text-gray-400" />
+          <span className="text-gray-400">TZ: {systemInfo.timezone}</span>
         </div>
         <div className="flex items-center space-x-2">
-          <WifiIcon className="h-3 w-3 text-gray-500" />
-          <span className="text-gray-600">Connection: {systemInfo.connection}</span>
+          <WifiIcon className="h-3 w-3 text-gray-400" />
+          <span className="text-gray-400">Connection: {systemInfo.connection}</span>
         </div>
         <div className="flex items-center space-x-2">
-          <DeviceTabletIcon className="h-3 w-3 text-gray-500" />
-          <span className="text-gray-600">Display: {systemInfo.screen}</span>
+          <DeviceTabletIcon className="h-3 w-3 text-gray-400" />
+          <span className="text-gray-400">Display: {systemInfo.screen}</span>
         </div>
       </div>
     </motion.div>
@@ -866,16 +982,16 @@ export const LoginForm: React.FC = () => {
     options?: string[]
   ) => (
     <motion.div variants={fieldVariants} className="space-y-2">
-      <label className="block text-sm font-semibold text-gray-700">
+      <label className="block text-sm font-semibold text-gray-300">
         {label}
         {['email', 'verificationCode', 'mfaCode'].includes(field) && (
-          <span className="text-red-500 ml-1">*</span>
+          <span className="text-red-400 ml-1">*</span>
         )}
       </label>
       <div className="relative group">
         {icon && (
           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
-            <div className="h-5 w-5 text-gray-400 group-focus-within:text-blue-500 transition-colors">
+            <div className="h-5 w-5 text-gray-500 group-focus-within:text-blue-400 transition-colors">
               {icon}
             </div>
           </div>
@@ -885,10 +1001,10 @@ export const LoginForm: React.FC = () => {
           <select
             value={formState[field] as string}
             onChange={(e) => updateField(field, e.target.value)}
-            className={`block w-full ${icon ? 'pl-12' : 'pl-4'} pr-4 py-3.5 bg-white/80 backdrop-blur-sm border-2 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-200 hover:shadow-md ${
+            className={`block w-full ${icon ? 'pl-12' : 'pl-4'} pr-4 py-3.5 bg-gray-700/80 backdrop-blur-sm border-2 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-200 hover:shadow-md text-white ${
               validation.errors[field] 
-                ? 'border-red-300 bg-red-50/50 focus:border-red-500 focus:ring-red-500/50' 
-                : 'border-gray-200 hover:border-gray-300'
+                ? 'border-red-500/50 bg-red-900/20 focus:border-red-400 focus:ring-red-500/50' 
+                : 'border-gray-600 hover:border-gray-500'
             }`}
           >
             <option value="">Select {label}</option>
@@ -902,16 +1018,16 @@ export const LoginForm: React.FC = () => {
             value={formState[field] as string}
             onChange={(e) => updateField(field, e.target.value)}
             placeholder={placeholder}
-            className={`block w-full ${icon ? 'pl-12' : 'pl-4'} pr-4 py-3.5 bg-white/80 backdrop-blur-sm border-2 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-200 hover:shadow-md ${
+            className={`block w-full ${icon ? 'pl-12' : 'pl-4'} pr-4 py-3.5 bg-gray-700/80 backdrop-blur-sm border-2 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-200 hover:shadow-md text-white ${
               validation.errors[field] 
-                ? 'border-red-300 bg-red-50/50 focus:border-red-500 focus:ring-red-500/50' 
-                : 'border-gray-200 hover:border-gray-300'
+                ? 'border-red-500/50 bg-red-900/20 focus:border-red-400 focus:ring-red-500/50' 
+                : 'border-gray-600 hover:border-gray-500'
             }`}
             maxLength={
-              field === 'email' ? FIELD_LENGTHS.EMAIL.max :
-              field === 'firstName' ? FIELD_LENGTHS.FIRST_NAME.max :
-              field === 'lastName' ? FIELD_LENGTHS.LAST_NAME.max :
-              field === 'phoneNumber' ? FIELD_LENGTHS.PHONE_NUMBER.max :
+              field === 'email' ? 254 :
+              field === 'firstName' ? 50 :
+              field === 'lastName' ? 50 :
+              field === 'phoneNumber' ? 20 :
               undefined
             }
           />
@@ -924,7 +1040,7 @@ export const LoginForm: React.FC = () => {
             animate={{ opacity: 1, x: 0 }}
             className="absolute inset-y-0 right-0 pr-4 flex items-center"
           >
-            <ExclamationTriangleIcon className="h-5 w-5 text-red-500" />
+            <ExclamationTriangleIcon className="h-5 w-5 text-red-400" />
           </motion.div>
         )}
 
@@ -935,7 +1051,7 @@ export const LoginForm: React.FC = () => {
             animate={{ opacity: 1, scale: 1 }}
             className="absolute inset-y-0 right-0 pr-4 flex items-center"
           >
-            <CheckCircleIcon className="h-5 w-5 text-green-500" />
+            <CheckCircleIcon className="h-5 w-5 text-green-400" />
           </motion.div>
         )}
       </div>
@@ -944,7 +1060,7 @@ export const LoginForm: React.FC = () => {
         <motion.div 
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center space-x-2 text-sm text-red-600 bg-red-50/50 rounded-lg p-2"
+          className="flex items-center space-x-2 text-sm text-red-400 bg-red-900/20 rounded-lg p-2"
         >
           <ExclamationTriangleIcon className="h-4 w-4 flex-shrink-0" />
           <span>{validation.errors[field]}</span>
@@ -956,7 +1072,7 @@ export const LoginForm: React.FC = () => {
   // Enhanced profile picture upload with drag & drop
   const renderProfilePictureUpload = () => (
     <motion.div variants={fieldVariants} className="space-y-3">
-      <label className="block text-sm font-semibold text-gray-700">Profile Picture</label>
+      <label className="block text-sm font-semibold text-gray-300">Profile Picture</label>
       <div className="flex items-center space-x-6">
         <div className="relative">
           {profilePreview ? (
@@ -977,7 +1093,7 @@ export const LoginForm: React.FC = () => {
               </motion.button>
             </div>
           ) : (
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 border-2 border-dashed border-gray-300 flex items-center justify-center shadow-inner">
+            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-gray-700 to-gray-600 border-2 border-dashed border-gray-500 flex items-center justify-center shadow-inner">
               <PhotoIcon className="h-8 w-8 text-gray-400" />
             </div>
           )}
@@ -996,12 +1112,12 @@ export const LoginForm: React.FC = () => {
             whileTap={{ scale: 0.98 }}
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="inline-flex items-center px-6 py-3 border-2 border-blue-200 rounded-xl shadow-sm text-sm font-semibold text-blue-700 bg-blue-50/50 hover:bg-blue-100/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-200"
+            className="inline-flex items-center px-6 py-3 border-2 border-blue-600 rounded-xl shadow-sm text-sm font-semibold text-blue-300 bg-blue-900/30 hover:bg-blue-800/40 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-200"
           >
             <PhotoIcon className="h-5 w-5 mr-2" />
             Choose Photo
           </motion.button>
-          <p className="text-xs text-gray-500 mt-2">
+          <p className="text-xs text-gray-400 mt-2">
             JPG, PNG, GIF up to 10MB • Recommended: 400x400px
           </p>
         </div>
@@ -1011,7 +1127,7 @@ export const LoginForm: React.FC = () => {
         <motion.div 
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center space-x-2 text-sm text-red-600 bg-red-50/50 rounded-lg p-2"
+          className="flex items-center space-x-2 text-sm text-red-400 bg-red-900/20 rounded-lg p-2"
         >
           <ExclamationTriangleIcon className="h-4 w-4" />
           <span>{validation.errors.profilePicture}</span>
@@ -1041,8 +1157,8 @@ export const LoginForm: React.FC = () => {
         </motion.div>
         
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Security Verification</h1>
-          <p className="text-gray-600 mt-2">
+          <h1 className="text-2xl font-bold text-white">Security Verification</h1>
+          <p className="text-gray-300 mt-2">
             Analyzing request and validating security protocols...
           </p>
         </div>
@@ -1067,7 +1183,7 @@ export const LoginForm: React.FC = () => {
                 transition={{ duration: 1, repeat: Infinity, delay: index * 0.5 }}
                 className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full"
               />
-              <span className="text-sm text-gray-600">{check}</span>
+              <span className="text-sm text-gray-300">{check}</span>
             </motion.div>
           ))}
         </div>
@@ -1102,14 +1218,14 @@ export const LoginForm: React.FC = () => {
         </motion.div>
         
         <div className="space-y-2">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-purple-900 bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-blue-300 bg-clip-text text-transparent">
             Welcome Back
           </h1>
-          <p className="text-lg text-gray-600">
-            Sign in to your <span className="font-semibold text-blue-600">Data Governance Platform</span>
+          <p className="text-lg text-gray-300">
+            Sign in to your <span className="font-semibold text-blue-400">Data Governance Platform</span>
           </p>
-          <div className="flex items-center justify-center space-x-2 text-sm text-gray-500">
-            <FireIcon className="h-4 w-4 text-orange-500" />
+          <div className="flex items-center justify-center space-x-2 text-sm text-gray-400">
+            <FireIcon className="h-4 w-4 text-orange-400" />
             <span>Powered by Enterprise AI & Zero Trust Security</span>
           </div>
         </div>
@@ -1513,15 +1629,15 @@ export const LoginForm: React.FC = () => {
 
       <div className="space-y-4">
         <div className="space-y-2">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
             Welcome to the Platform!
           </h1>
-          <p className="text-xl text-gray-600">
+          <p className="text-xl text-gray-300">
             You've successfully authenticated with enterprise-grade security
           </p>
           {authResponse?.user && (
-            <p className="text-sm text-gray-500">
-              Signed in as <span className="font-semibold">{authResponse.user.display_name || authResponse.user.email}</span>
+            <p className="text-sm text-gray-400">
+              Signed in as <span className="font-semibold text-gray-300">{authResponse.user.display_name || authResponse.user.email}</span>
             </p>
           )}
         </div>
@@ -1530,7 +1646,7 @@ export const LoginForm: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 rounded-2xl p-8 border border-green-200/50 shadow-lg"
+          className="bg-gradient-to-br from-green-900/30 via-emerald-900/30 to-teal-900/30 rounded-2xl p-8 border border-green-600/50 shadow-lg"
         >
           <div className="flex items-center justify-center space-x-3 mb-6">
             <motion.div
@@ -1539,7 +1655,7 @@ export const LoginForm: React.FC = () => {
             >
               <DataFlowIcon className="h-8 w-8 text-green-600" />
             </motion.div>
-            <h3 className="text-xl font-bold text-green-900">Platform Features</h3>
+            <h3 className="text-xl font-bold text-green-300">Platform Features</h3>
           </div>
           
           <div className="grid grid-cols-2 gap-4 text-sm">
@@ -1558,8 +1674,8 @@ export const LoginForm: React.FC = () => {
                 transition={{ delay: 0.6 + index * 0.1 }}
                 className="flex items-center space-x-3"
               >
-                <feature.icon className="h-5 w-5 text-green-600 flex-shrink-0" />
-                <span className="text-green-800 font-medium">{feature.label}</span>
+                <feature.icon className="h-5 w-5 text-green-400 flex-shrink-0" />
+                <span className="text-green-300 font-medium">{feature.label}</span>
               </motion.div>
             ))}
           </div>
@@ -1590,13 +1706,13 @@ export const LoginForm: React.FC = () => {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-red-50 border-2 border-red-200 rounded-2xl p-4 mb-6 shadow-lg"
+        className="bg-red-900/30 border-2 border-red-600/50 rounded-2xl p-4 mb-6 shadow-lg"
       >
         <div className="flex items-center space-x-3">
-          <ExclamationTriangleIcon className="h-6 w-6 text-red-500 flex-shrink-0" />
+          <ExclamationTriangleIcon className="h-6 w-6 text-red-400 flex-shrink-0" />
           <div>
-            <h4 className="text-sm font-semibold text-red-800">Authentication Error</h4>
-            <p className="text-sm text-red-700 mt-1">{validation.errors.general}</p>
+            <h4 className="text-sm font-semibold text-red-300">Authentication Error</h4>
+            <p className="text-sm text-red-400 mt-1">{validation.errors.general}</p>
           </div>
         </div>
       </motion.div>
@@ -1608,22 +1724,35 @@ export const LoginForm: React.FC = () => {
   // ============================================================================
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white via-purple-50 to-indigo-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden z-[9999]">
-      {/* Animated background elements */}
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden z-[9999]">
+      {/* Databricks-style animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-        {[...Array(10)].map((_, i) => (
+        {/* Grid pattern overlay */}
+        <div className="absolute inset-0 opacity-5">
+          <div className="h-full w-full" style={{
+            backgroundImage: `
+              linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
+            `,
+            backgroundSize: '50px 50px'
+          }} />
+        </div>
+        
+        {/* Floating particles */}
+        {[...Array(15)].map((_, i) => (
           <motion.div
             key={i}
-            className="absolute w-4 h-4 bg-blue-400/10 rounded-full"
+            className="absolute w-2 h-2 bg-blue-400/20 rounded-full"
             animate={{
               x: [0, window.innerWidth || 1200],
               y: [0, -(window.innerHeight || 800)],
-              opacity: [0, 1, 0]
+              opacity: [0, 0.6, 0],
+              scale: [0.5, 1, 0.5]
             }}
             transition={{
-              duration: 10 + i * 2,
+              duration: 15 + i * 3,
               repeat: Infinity,
-              delay: i * 1.5,
+              delay: i * 2,
               ease: "linear"
             }}
             style={{
@@ -1632,6 +1761,26 @@ export const LoginForm: React.FC = () => {
             }}
           />
         ))}
+        
+        {/* Databricks-style geometric shapes */}
+        <motion.div
+          className="absolute top-20 left-20 w-32 h-32 border border-blue-500/20 rounded-lg"
+          animate={{ rotate: 360 }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+        />
+        <motion.div
+          className="absolute bottom-32 right-32 w-24 h-24 border border-purple-500/20 rounded-full"
+          animate={{ rotate: -360 }}
+          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+        />
+        <motion.div
+          className="absolute top-1/2 left-10 w-16 h-16 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-lg"
+          animate={{ 
+            y: [-20, 20, -20],
+            opacity: [0.3, 0.7, 0.3]
+          }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        />
       </div>
 
       <motion.div
@@ -1640,9 +1789,12 @@ export const LoginForm: React.FC = () => {
         animate="visible"
         className="sm:mx-auto sm:w-full sm:max-w-lg relative z-10"
       >
-        <div className="bg-white/80 backdrop-blur-xl py-10 px-6 shadow-2xl rounded-3xl sm:px-12 border border-gray-200/50 relative overflow-hidden">
-          {/* Glass morphism effect */}
-          <div className="absolute inset-0 bg-gradient-to-br from-white/80 to-white/40 rounded-3xl" />
+        <div className="bg-gray-800/90 backdrop-blur-xl py-10 px-6 shadow-2xl rounded-3xl sm:px-12 border border-gray-700/50 relative overflow-hidden">
+          {/* Databricks-style glass morphism effect */}
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-800/90 to-gray-900/80 rounded-3xl" />
+          
+          {/* Subtle inner glow */}
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 rounded-3xl" />
           
           <div className="relative z-10">
             {renderErrorMessage()}
@@ -1659,32 +1811,34 @@ export const LoginForm: React.FC = () => {
         </div>
       </motion.div>
 
-      {/* Enhanced Footer */}
+      {/* Databricks-style Enhanced Footer */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1 }}
-        className="mt-8 text-center text-sm text-gray-500 relative z-10"
+        className="mt-8 text-center text-sm text-gray-400 relative z-10"
       >
-        <p className="font-medium">
+        <p className="font-medium text-gray-300">
           © 2024 Data Governance Platform. Secured by Enterprise AI.
         </p>
         <div className="mt-3 flex items-center justify-center space-x-6">
-          <a href="/help" className="text-blue-600 hover:text-blue-500 transition-colors font-medium">
+          <a href="/help" className="text-blue-400 hover:text-blue-300 transition-colors font-medium">
             Help Center
           </a>
-          <a href="/security" className="text-blue-600 hover:text-blue-500 transition-colors font-medium">
+          <a href="/security" className="text-blue-400 hover:text-blue-300 transition-colors font-medium">
             Security
           </a>
-          <a href="/status" className="text-blue-600 hover:text-blue-500 transition-colors font-medium">
+          <a href="/status" className="text-blue-400 hover:text-blue-300 transition-colors font-medium">
             System Status
           </a>
         </div>
-        <div className="mt-2 flex items-center justify-center space-x-2 text-xs">
-          <SecurityShieldIcon className="h-3 w-3 text-green-500" />
+        <div className="mt-2 flex items-center justify-center space-x-2 text-xs text-gray-500">
+          <SecurityShieldIcon className="h-3 w-3 text-green-400" />
           <span>SOC 2 Type II Certified • ISO 27001 Compliant</span>
         </div>
       </motion.div>
     </div>
   );
 };
+
+export default LoginForm;

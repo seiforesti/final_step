@@ -29,6 +29,7 @@ import {
   UserManagementEvent,
   UserManagementEventHandler
 } from '../services/user-management-apis';
+import { shouldAttemptRequest, getServiceStatusMessage, getTimeUntilRetry } from '../utils/circuit-breaker-status';
 
 import {
   UUID,
@@ -1213,33 +1214,91 @@ export const useUserManagement = (config?: Partial<UserManagementHookConfig>): [
 
   const refresh = useCallback(async (): Promise<void> => {
     try {
+      // Prevent concurrent refresh calls
+      if (!refreshIntervalRef.current) {
+        // no-op; just ensuring ref exists
+      }
+      if ((refresh as any)._inFlight) {
+        return;
+      }
+      (refresh as any)._inFlight = true;
+
+      // Check if service is available before attempting requests
+      if (!shouldAttemptRequest('userManagement')) {
+        const statusMessage = getServiceStatusMessage('userManagement');
+        console.warn(`Skipping refresh: ${statusMessage}`);
+        setState(prevState => ({ ...prevState, isConnected: false }));
+        return;
+      }
+
       setState(prevState => ({ ...prevState, isConnected: false }));
       
-      // Fetch all user management data
-      const promises = [
-        userManagementAPI.getCurrentUser(),
-        userManagementAPI.getUserRoles(),
-        userManagementAPI.getUserPermissions(),
-        userManagementAPI.getAvailableRoles(),
-        userManagementAPI.getAvailablePermissions(),
-        userManagementAPI.getAPIKeys(),
-        userManagementAPI.getAccessRequests(),
-        userManagementAPI.getUserPreferences(),
-        userManagementAPI.getNotificationSettings()
-      ];
+      // Stage requests to avoid throttler queue saturation (sequential for first batch)
+      let currentUser, userPermissions;
+      try {
+        currentUser = await userManagementAPI.getCurrentUser();
+        await new Promise(res => setTimeout(res, 100)); // Shorter delay
+        userPermissions = await userManagementAPI.getUserPermissions();
+      } catch (error: any) {
+        if (error.message?.includes('Request queue is full')) {
+          console.warn('User management queue full, using fallback data');
+          currentUser = { success: false, data: null };
+          userPermissions = { success: false, data: [] };
+        } else {
+          throw error;
+        }
+      }
+
+      // Small delay before second batch to smooth bursts
+      await new Promise(res => setTimeout(res, 200)); // Shorter delay
+
+      const secondBatchPromises: Promise<any>[] = [];
+      const addIfAllowed = (fn: () => Promise<any>) => {
+        if (shouldAttemptRequest('userManagement')) {
+          secondBatchPromises.push(fn());
+        }
+      };
+      addIfAllowed(() => userManagementAPI.getUserRoles());
+      addIfAllowed(() => userManagementAPI.getAvailableRoles());
+      addIfAllowed(() => userManagementAPI.getAvailablePermissions());
+      addIfAllowed(() => userManagementAPI.getAPIKeys());
+      addIfAllowed(() => userManagementAPI.getAccessRequests());
+      addIfAllowed(() => userManagementAPI.getUserPreferences());
+      addIfAllowed(() => userManagementAPI.getNotificationSettings());
 
       if (includeAnalytics) {
-        promises.push(
+        secondBatchPromises.push(
           userManagementAPI.getUserAnalytics(),
           userManagementAPI.getActivitySummary(),
           userManagementAPI.getUsageStatistics()
         );
       }
 
+      // Re-check service availability before firing second batch
+      if (!shouldAttemptRequest('userManagement')) {
+        console.warn('Skipping secondary user-management batch due to circuit breaker');
+        secondBatchPromises.length = 0;
+      }
+
+      let secondBatch: any[] = [];
+      try {
+        if (secondBatchPromises.length > 0) {
+          secondBatch = await Promise.all(secondBatchPromises);
+        }
+      } catch (e: any) {
+        // If throttler queue is full, skip remaining batch this cycle
+        const msg = e && typeof e.message === 'string' ? e.message : '';
+        if (msg.includes('Request queue is full') || msg.includes('Circuit breaker is OPEN')) {
+          const waitMs = getTimeUntilRetry('userManagement') || 10000;
+          console.warn(`Skipping secondary user-management batch. Next retry in ${Math.ceil(waitMs/1000)}s`);
+          secondBatch = [] as any[];
+        } else {
+          throw e;
+        }
+      }
+
       const [
-        currentUser,
         userRoles,
-        userPermissions,
         availableRoles,
         availablePermissions,
         apiKeys,
@@ -1247,7 +1306,7 @@ export const useUserManagement = (config?: Partial<UserManagementHookConfig>): [
         userPreferences,
         notificationSettings,
         ...analyticsData
-      ] = await Promise.all(promises);
+      ] = secondBatch as any[];
 
         // Normalize potentially non-array payloads to arrays to avoid runtime errors
       const apiKeysArray = Array.isArray(apiKeys)
@@ -1283,6 +1342,9 @@ export const useUserManagement = (config?: Partial<UserManagementHookConfig>): [
       setState(prevState => ({ ...prevState, isConnected: false }));
       throw error;
     }
+    finally {
+      (refresh as any)._inFlight = false;
+    }
   }, [includeAnalytics]);
 
   const disconnect = useCallback((): void => {
@@ -1311,6 +1373,19 @@ export const useUserManagement = (config?: Partial<UserManagementHookConfig>): [
     disconnect();
     
     if (autoConnect) {
+      // Check if service is available before attempting reconnection
+      if (!shouldAttemptRequest('userManagement')) {
+        const statusMessage = getServiceStatusMessage('userManagement');
+        console.warn(`Skipping reconnection: ${statusMessage}`);
+        
+        // Schedule retry when service becomes available
+        const retryDelay = Math.min(30000, 1000 * Math.pow(2, 3 - retryAttempts));
+        retryTimeoutRef.current = setTimeout(() => {
+          reconnect();
+        }, retryDelay);
+        return;
+      }
+
       try {
         await refresh();
         

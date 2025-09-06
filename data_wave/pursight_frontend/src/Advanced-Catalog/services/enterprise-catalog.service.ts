@@ -68,7 +68,7 @@ class BaseApiService {
         if (error.response?.status === 401) {
           // Handle token refresh or redirect to login
           localStorage.removeItem('auth_token');
-          window.location.href = '/login';
+          window.location.href = '/signin';
         }
         return Promise.reject(error);
       }

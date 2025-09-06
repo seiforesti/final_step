@@ -119,8 +119,8 @@ class EnterpriseAPIClient {
     sessionStorage.removeItem('auth_token')
     
     // Redirect to login or refresh token
-    if (window.location.pathname !== '/login') {
-      window.location.href = '/login'
+    if (window.location.pathname !== '/signin') {
+      window.location.href = '/signin'
     }
   }
 

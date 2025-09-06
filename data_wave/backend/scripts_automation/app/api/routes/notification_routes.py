@@ -51,6 +51,43 @@ async def get_notifications(
         logger.error(f"Error getting notifications: {str(e)}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
+# ============================================================================
+# NOTIFICATION PREFERENCES ENDPOINTS (MUST BE BEFORE /{notification_id} ROUTE)
+# ============================================================================
+
+@router.get("/preferences")
+async def get_notification_preferences(
+    session: Session = Depends(get_session),
+    current_user: Dict[str, Any] = Depends(require_permission(PERMISSION_SCAN_VIEW))
+):
+    """Get notification preferences for the current user"""
+    try:
+        user_id = current_user.get("username") or current_user.get("email")
+        preferences = NotificationService.get_notification_preferences(session, user_id)
+        return preferences
+    except Exception as e:
+        logger.error(f"Error getting notification preferences: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+@router.put("/preferences")
+async def update_notification_preferences(
+    preferences_data: Dict[str, Any] = Body(...),
+    session: Session = Depends(get_session),
+    current_user: Dict[str, Any] = Depends(require_permission(PERMISSION_SCAN_EDIT))
+):
+    """Update notification preferences for the current user"""
+    try:
+        user_id = current_user.get("username") or current_user.get("email")
+        success = NotificationService.update_notification_preferences(session, user_id, preferences_data)
+        if not success:
+            raise HTTPException(status_code=400, detail="Invalid preferences data")
+        return {"message": "Notification preferences updated successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating notification preferences: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
 @router.get("/{notification_id}", response_model=NotificationResponse)
 async def get_notification(
     notification_id: int,
@@ -159,41 +196,8 @@ async def get_notification_stats(
         raise HTTPException(status_code=500, detail="Internal server error")
 
 # ============================================================================
-# NOTIFICATION PREFERENCES ENDPOINTS
+# NOTIFICATION PREFERENCES ENDPOINTS (MOVED ABOVE TO AVOID ROUTE CONFLICTS)
 # ============================================================================
-
-@router.get("/preferences")
-async def get_notification_preferences(
-    session: Session = Depends(get_session),
-    current_user: Dict[str, Any] = Depends(require_permission(PERMISSION_SCAN_VIEW))
-):
-    """Get notification preferences for the current user"""
-    try:
-        user_id = current_user.get("username") or current_user.get("email")
-        preferences = NotificationService.get_notification_preferences(session, user_id)
-        return preferences
-    except Exception as e:
-        logger.error(f"Error getting notification preferences: {str(e)}")
-        raise HTTPException(status_code=500, detail="Internal server error")
-
-@router.put("/preferences")
-async def update_notification_preferences(
-    preferences_data: Dict[str, Any] = Body(...),
-    session: Session = Depends(get_session),
-    current_user: Dict[str, Any] = Depends(require_permission(PERMISSION_SCAN_EDIT))
-):
-    """Update notification preferences for the current user"""
-    try:
-        user_id = current_user.get("username") or current_user.get("email")
-        success = NotificationService.update_notification_preferences(session, user_id, preferences_data)
-        if not success:
-            raise HTTPException(status_code=400, detail="Invalid preferences data")
-        return {"message": "Notification preferences updated successfully"}
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error updating notification preferences: {str(e)}")
-        raise HTTPException(status_code=500, detail="Internal server error")
 
 # ============================================================================
 # NOTIFICATION TEMPLATES ENDPOINTS

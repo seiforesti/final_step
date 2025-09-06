@@ -31,10 +31,28 @@ def get_env_bool(key: str, default: bool) -> bool:
 
 # Database Connection Pool Configuration
 # Optimized settings to handle enterprise load while preventing exhaustion
+
+# Check if PgBouncer is being used and set appropriate defaults
+database_url = os.getenv("DATABASE_URL", "")
+is_using_pgbouncer = "pgbouncer" in database_url.lower() or "6432" in database_url
+
+if is_using_pgbouncer:
+
+    # DISABLE SQLAlchemy connection pooling when PgBouncer is used
+    # PgBouncer handles all connection pooling, backend should not pool at all
+    os.environ["DB_POOL_SIZE"] = "0"
+    os.environ["DB_MAX_OVERFLOW"] = "0"
+    default_pool_size = 0
+    default_max_overflow = 0
+else:
+    # Use normal pool sizes when connecting directly to PostgreSQL
+    default_pool_size = 8
+    default_max_overflow = 3
+
 DB_CONFIG: Dict[str, Any] = {
-    # Pool Settings - REDUCED to prevent PostgreSQL overload
-    "pool_size": get_env_int("DB_POOL_SIZE", 15),  # Reduced from 20
-    "max_overflow": get_env_int("DB_MAX_OVERFLOW", 5),  # Reduced from 10
+    # Pool Settings - OPTIMIZED FOR PGBOUNCER when detected
+    "pool_size": get_env_int("DB_POOL_SIZE", default_pool_size),
+    "max_overflow": get_env_int("DB_MAX_OVERFLOW", default_max_overflow),
     "pool_timeout": get_env_int("DB_POOL_TIMEOUT", 60),  # Increased from 30
     "pool_recycle": get_env_int("DB_POOL_RECYCLE", 900),  # Reduced from 1800 (15 min)
     "pool_pre_ping": get_env_bool("DB_POOL_PRE_PING", True),
@@ -42,8 +60,8 @@ DB_CONFIG: Dict[str, Any] = {
     "pool_use_lifo": True,
     "echo_pool": get_env_bool("DB_ECHO_POOL", False),
     
-    # Concurrency Control - REDUCED to prevent pool exhaustion
-    "max_concurrent_requests": get_env_int("MAX_CONCURRENT_DB_REQUESTS", 15),  # Reduced from 25
+    # Concurrency Control - FURTHER REDUCED to prevent pool exhaustion during health check loops
+    "max_concurrent_requests": get_env_int("MAX_CONCURRENT_DB_REQUESTS", 8),  # Further reduced from 15
     "semaphore_timeout": get_env_int("DB_SEMAPHORE_TIMEOUT", 5),  # Increased from 0.1 to 5 seconds
     
     # Circuit Breaker Settings - More aggressive for enterprise

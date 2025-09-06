@@ -275,7 +275,7 @@ export const ROUTE_PATTERNS = {
   // Core Routes
   HOME: '/',
   DASHBOARD: '/dashboard',
-  LOGIN: '/login',
+  LOGIN: '/signin',
   
   // Data Governance Groups
   DATA_SOURCES: '/data-sources',

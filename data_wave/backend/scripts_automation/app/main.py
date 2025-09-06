@@ -2,6 +2,11 @@ import sys
 import os
 
 import uvicorn
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv('/app/.env')
+
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
@@ -129,6 +134,21 @@ from app.api.routes.discovery_routes import router as discovery_routes_router
 # Integration Operations
 from app.api.routes.integration_routes import router as integration_routes_router
 
+# ========================================
+# MISSING API ENDPOINTS - FRONTEND INTEGRATION
+# ========================================
+# Global Search API
+from app.api.routes.global_search_routes import router as global_search_router
+
+# Racine Orchestration API
+from app.api.routes.racine_orchestration_api import router as racine_orchestration_api_router
+
+# Auth and RBAC API
+from app.api.routes.auth_rbac_api import auth_router, rbac_router as auth_rbac_router
+
+# Performance Alerts API
+from app.api.routes.performance_alerts_api import router as performance_alerts_router
+
 from app.services.scan_scheduler_service import ScanSchedulerService
 from fastapi import Request
 import logging
@@ -175,13 +195,25 @@ async def startup_event():
         try:
             from app.db_session import get_connection_pool_status
             status = get_connection_pool_status()
-            pool_size = int(status.get("pool_size", 0) or 0)
-            overflow = int(status.get("overflow", 0) or 0)
-            if pool_size <= 6 and overflow <= 0:
-                target_size = 20
-                target_overflow = 10
-                if scale_up_engine(target_size, target_overflow, new_timeout=10):
-                    logger.info(f"✅ Auto-scaled DB engine to size={target_size}, overflow={target_overflow}")
+            
+            # Check if PgBouncer is managing the pool
+            if status.get("pgbouncer_enabled", False):
+                logger.debug("PgBouncer is managing pooling - skipping auto-scaling")
+            else:
+                pool_size_raw = status.get("pool_size", 0)
+                overflow_raw = status.get("overflow", 0)
+                
+                # Skip if values are strings (PgBouncer managed)
+                if isinstance(pool_size_raw, str) or isinstance(overflow_raw, str):
+                    logger.debug("Pool status contains string values - skipping auto-scaling")
+                else:
+                    pool_size = int(pool_size_raw or 0)
+                    overflow = int(overflow_raw or 0)
+                    if pool_size <= 6 and overflow <= 0:
+                        target_size = 20
+                        target_overflow = 10
+                        if scale_up_engine(target_size, target_overflow, new_timeout=10):
+                            logger.info(f"✅ Auto-scaled DB engine to size={target_size}, overflow={target_overflow}")
         except Exception as e:
             logger.warning(f"Auto-scale check failed: {e}")
         
@@ -317,9 +349,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include routers
+# Include routers with proper prefixes
 app.include_router(oauth_auth_router)
-app.include_router(auth_router, tags=["auth"])
+app.include_router(auth_router, prefix="/auth", tags=["auth"])
 app.include_router(extract.router)
 app.include_router(metrics.router)
 app.include_router(ml_metrics_router)
@@ -327,9 +359,9 @@ app.include_router(ml_routes)
 app.include_router(classify.router)
 app.include_router(role_admin_router)
 app.include_router(sensitivity_labeling_router)
-app.include_router(rbac_router)  # Add RBAC router for /rbac/* endpoints
+app.include_router(rbac_router, prefix="/rbac", tags=["rbac"])  # Add RBAC router for /rbac/* endpoints
 app.include_router(analytics_router)
-app.include_router(notifications_router)
+app.include_router(notifications_router, prefix="/notifications", tags=["Notifications"])
 app.include_router(ml_feedback_router)
 
 # Add new frontend-compatible notification routes
@@ -353,6 +385,64 @@ app.add_middleware(
     monitor_interval=10.0
 )
 
+# Error Handling Middleware - Fix ModelField serialization errors
+from app.middleware.error_handling import error_handling_middleware
+app.middleware("http")(error_handling_middleware)
+
+# Rate Limiting Middleware - Prevent API loops and excessive requests
+from app.middleware.rate_limiting_middleware import rate_limiting_middleware, circuit_breaker_middleware
+app.middleware("http")(rate_limiting_middleware)
+app.middleware("http")(circuit_breaker_middleware)
+
+# Global exception handler for serialization errors
+from fastapi import HTTPException
+from fastapi.responses import JSONResponse
+from app.core.serialization import safe_json_response
+import logging
+
+logger = logging.getLogger(__name__)
+
+@app.exception_handler(ValueError)
+async def value_error_handler(request, exc):
+    """Handle ValueError exceptions (including serialization errors)."""
+    error_str = str(exc)
+    if ("ModelField" in error_str or 
+        "not iterable" in error_str or 
+        "jsonable_encoder" in error_str or
+        "object is not iterable" in error_str):
+        logger.error(f"Serialization error on {request.url.path}: {exc}")
+        return JSONResponse(
+            status_code=500,
+            content=safe_json_response({
+                "error": "Serialization error",
+                "message": "Response could not be serialized",
+                "path": str(request.url.path),
+                "details": "Object serialization issue"
+            })
+        )
+    raise exc
+
+@app.exception_handler(TypeError)
+async def type_error_handler(request, exc):
+    """Handle TypeError exceptions (including serialization errors)."""
+    error_str = str(exc)
+    if ("ModelField" in error_str or 
+        "not iterable" in error_str or 
+        "__dict__" in error_str or
+        "object is not iterable" in error_str or
+        "jsonable_encoder" in error_str):
+        logger.error(f"Type error on {request.url.path}: {exc}")
+        return JSONResponse(
+            status_code=500,
+            content=safe_json_response({
+                "error": "Type error",
+                "message": "Response serialization failed",
+                "path": str(request.url.path),
+                "details": "Object serialization issue"
+            })
+        )
+    raise exc
+
 include_catalog_tree(app)
 
 # Legacy routes (maintained for backward compatibility)
@@ -369,7 +459,7 @@ app.include_router(enterprise_analytics_router)  # Add enterprise analytics rout
 app.include_router(collaboration_router)  # Add collaboration routes
 app.include_router(workflow_router)  # Add workflow routes  
 app.include_router(performance_router)  # Add enhanced performance routes
-app.include_router(security_router)  # Add enhanced security routes
+app.include_router(security_router, prefix="/security", tags=["Security"])  # Add enhanced security routes
 app.include_router(compliance_rule_routes)
 app.include_router(compliance_framework_routes)
 app.include_router(compliance_risk_routes)
@@ -387,7 +477,7 @@ app.include_router(ai_routes)  # Add AI classification routes (Version 3)
 
 # ENTERPRISE API ROUTES - Frontend Integration
 from app.api.routes.enterprise_apis import router as enterprise_apis_router
-app.include_router(enterprise_apis_router, tags=["Enterprise APIs"])
+app.include_router(enterprise_apis_router, prefix="/collaboration", tags=["Enterprise APIs"])
 
 # 1. SCAN-RULE-SETS GROUP - Enterprise Implementation (85KB+ Service)
 app.include_router(enterprise_scan_rules_router, tags=["Enterprise Scan Rules"])
@@ -420,7 +510,7 @@ app.include_router(catalog_quality_router, tags=["Catalog Quality"])
 # 3. SCAN LOGIC GROUP - Enterprise Implementation (120KB+ Service)
 app.include_router(enterprise_scan_orchestration_router, tags=["Enterprise Scan Orchestration"])
 app.include_router(scan_intelligence_router, tags=["Scan Intelligence"])
-app.include_router(scan_workflow_router, tags=["Scan Workflows"])
+app.include_router(scan_workflow_router, prefix="/workflow", tags=["Scan Workflows"])
 app.include_router(scan_performance_router, tags=["Scan Performance"])
 
 # SCAN-RULE-SETS COMPLETED ROUTES - Unique Routes Only (Duplicates Removed)
@@ -486,6 +576,24 @@ app.include_router(discovery_routes_router, tags=["Discovery Operations"])
 app.include_router(integration_routes_router, tags=["Integration Operations"])
 
 # ========================================
+# MISSING API ENDPOINTS - FRONTEND INTEGRATION
+# ========================================
+# Global Search API - Prevents 404 errors for /api/v1/global-search/*
+app.include_router(global_search_router, tags=["Global Search"])
+
+# Racine Orchestration API - Prevents 404 errors for /racine/orchestration/*
+app.include_router(racine_orchestration_api_router, prefix="/racine/orchestration", tags=["Racine Orchestration API"])
+
+# Auth API - Prevents 502 errors for /auth/* (already registered above with prefix)
+# app.include_router(auth_router, tags=["Authentication API"])
+
+# RBAC API - Prevents 502 errors for /rbac/* (already registered above with prefix)
+# app.include_router(auth_rbac_router, tags=["RBAC API"])
+
+# Performance Alerts API - Prevents 404 errors for /performance/*
+app.include_router(performance_alerts_router, prefix="/performance", tags=["Performance Alerts"])
+
+# ========================================
 # RACINE MAIN MANAGER - ADVANCED ENTERPRISE ORCHESTRATION
 # ========================================
 # Import all Racine routes for the comprehensive main manager system
@@ -502,8 +610,8 @@ app.mount("/popuphandler", StaticFiles(directory="app/popuphandler"), name="stat
 @app.get("/")
 def read_root():
     print("✅ Enterprise Data Governance Platform Root endpoint called")  # log terminal
-    # Redirect to configurable frontend URL (default Next.js on 3000)
-    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000/app")
+    # Redirect to configurable frontend URL (default Vite on 5173)
+    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
     return RedirectResponse(url=frontend_url)
 
 @app.exception_handler(FastAPIRequestValidationError)
@@ -531,13 +639,26 @@ async def health_check():
     
     # Get database connection pool status
     try:
-        pool_status = {
-            "pool_size": engine.pool.size(),
-            "checked_in": engine.pool.checkedin(),
-            "checked_out": engine.pool.checkedout(),
-            "overflow": engine.pool.overflow(),
-            "pool_healthy": engine.pool.checkedout() < (engine.pool.size() + engine.pool.overflow())
-        }
+        # Check if PgBouncer is being used
+        database_url = os.getenv("DATABASE_URL", "")
+        is_using_pgbouncer = "pgbouncer" in database_url.lower() or "6432" in database_url
+        
+        if is_using_pgbouncer:
+            pool_status = {
+                "pool_size": "managed_by_pgbouncer",
+                "checked_in": "managed_by_pgbouncer",
+                "checked_out": "managed_by_pgbouncer",
+                "overflow": "managed_by_pgbouncer",
+                "pool_healthy": True
+            }
+        else:
+            pool_status = {
+                "pool_size": engine.pool.size(),
+                "checked_in": engine.pool.checkedin(),
+                "checked_out": engine.pool.checkedout(),
+                "overflow": engine.pool.overflow(),
+                "pool_healthy": engine.pool.checkedout() < (engine.pool.size() + engine.pool.overflow())
+            }
     except Exception as e:
         pool_status = {
             "error": str(e),

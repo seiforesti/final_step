@@ -21,19 +21,16 @@ import FormElements from "./pages/Forms/FormElements";
 import Blank from "./pages/Blank";
 import AppLayout from "./layout/AppLayout";
 import { ScrollToTop } from "./components/common/ScrollToTop";
-import HomePursight from "./pages/Dashboard/HomePursight";
 import { ModalProvider } from "./pages/fenetresModales/ModalContext";
 import JobCreationPage from "./pages/job/JobCreationPage";
 import NotebookPage from "./pages/notebook/NotebookPage";
 import DataCatalog from "./pages/catalog/DataCatalog";
-import SignIn from "./pages/catalog/SignIn";
+import LoginForm from "./Advanced_RBAC_Datagovernance_System/components/auth/LoginForm";
 import { AppProviders } from "./AppProviders";
 import RBACAdminDashboard from "./pages/rbac_system/RBACAdminDashboard";
 import { RBACProvider } from "./providers/RBACProvider";
 import { RBACContext } from "./hooks/useRBAC";
 // Import new pages
-import DataSourceConnectPage from "./pages/datasource/DataSourceConnectPage";
-import DataMapDesignerPage from "./pages/datamap/DataMapDesignerPage";
 import MainPage from "./pages/NXCI_DataGovernance/MainPage";
 import { RacineMainManagerSPA } from "./racine-main-manager/index";
 
@@ -43,7 +40,14 @@ type AuthRouteProps = Readonly<{
   children?: React.ReactNode;
 }>;
 function AuthRoute({ element }: AuthRouteProps) {
-  const { user, isLoading, flatLoading } = useContext(RBACContext);
+  const rbacContext = useContext(RBACContext);
+  
+  // Handle case when context is not available
+  if (!rbacContext) {
+    return <div>Loading RBAC context...</div>;
+  }
+  
+  const { user, isLoading, flatLoading } = rbacContext;
   if (isLoading || flatLoading) return <div>Loading RBAC context...</div>;
   if (!user) {
     return <Navigate to="/signin" replace />;
@@ -90,7 +94,7 @@ export default function App() {
               </Route>
 
               {/* Auth Layout */}
-              <Route path="/signin" element={<SignIn />} />
+              <Route path="/signin" element={<LoginForm />} />
     
               {/* Fallback Route */}
               <Route path="*" element={<NotFound />} />

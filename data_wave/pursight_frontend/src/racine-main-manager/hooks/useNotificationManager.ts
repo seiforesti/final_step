@@ -138,7 +138,7 @@ export const useNotificationManager = (options: UseNotificationManagerOptions = 
     refetch: refetchNotifications
   } = useQuery({
     queryKey: ['notifications'],
-    queryFn: () => racineOrchestrationAPI.makeRequest('/api/v1/notifications', { method: 'GET' }),
+    queryFn: () => racineOrchestrationAPI.makeRequest('/notifications', { method: 'GET' }),
     enabled: true,
     refetchInterval: 30000, // Refetch every 30 seconds
     staleTime: 10000
@@ -151,14 +151,14 @@ export const useNotificationManager = (options: UseNotificationManagerOptions = 
     refetch: refetchSettings
   } = useQuery({
     queryKey: ['notificationSettings'],
-    queryFn: () => racineOrchestrationAPI.makeRequest('/api/v1/notifications/settings', { method: 'GET' }),
+    queryFn: () => racineOrchestrationAPI.makeRequest('/notifications/preferences', { method: 'GET' }),
     enabled: true,
     staleTime: 300000 // 5 minutes
   })
 
   // Mark notification as read mutation
   const markAsReadMutation = useMutation({
-    mutationFn: (id: string) => racineOrchestrationAPI.makeRequest(`/api/v1/notifications/${id}/read`, {
+    mutationFn: (id: string) => racineOrchestrationAPI.makeRequest(`/notifications/${id}/read`, {
       method: 'POST'
     }),
     onSuccess: () => {
@@ -172,7 +172,7 @@ export const useNotificationManager = (options: UseNotificationManagerOptions = 
   // Update settings mutation
   const updateSettingsMutation = useMutation({
     mutationFn: (newSettings: Partial<NotificationSettings>) => 
-      racineOrchestrationAPI.makeRequest('/api/v1/notifications/settings', {
+      racineOrchestrationAPI.makeRequest('/notifications/preferences', {
         method: 'PUT',
         data: newSettings
       }),

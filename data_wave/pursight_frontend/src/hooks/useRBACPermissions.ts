@@ -174,12 +174,13 @@ export function useRBACPermissions() {
  * Hook to fetch and cache the flat permissions array
  * for use in RBACProvider and permission checks.
  */
-export function useRBACFlatPermissions() {
+export function useRBACFlatPermissions(enabled: boolean = true) {
   const queryClient = useQueryClient();
   return useQuery({
     queryKey: ["flat-permissions"],
     queryFn: fetchCurrentUserFlatPermissions,
     staleTime: 5 * 60 * 1000,
     cacheTime: 10 * 60 * 1000,
+    enabled,
   });
 }

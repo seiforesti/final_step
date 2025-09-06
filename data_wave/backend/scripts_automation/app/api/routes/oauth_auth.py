@@ -33,7 +33,7 @@ from typing import Dict, Any
 
 # Try to connect to Redis, fallback to in-memory if not available
 try:
-    redis_client = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
+    redis_client = redis.Redis(host='data_governance_redis', port=6379, db=0, decode_responses=True)
     redis_client.ping()  # Test connection
     USE_REDIS = True
 except:
@@ -76,6 +76,13 @@ from fastapi.responses import RedirectResponse
 
 @router.get("/google")
 def google_login():
+    # Check if OAuth credentials are configured
+    if not OAUTH_CONFIG.get('google_client_id') or OAUTH_CONFIG['google_client_id'] in ['', 'your_google_client_id_here']:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Google OAuth is not configured. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables."
+        )
+    
     state = generate_state_token()
     set_oauth_state(state, time.time())
     scopes = OAUTH_CONFIG.get('google_scopes', 'openid email profile')
@@ -93,6 +100,7 @@ def google_login():
 async def google_callback(request: Request, code: Optional[str] = None, state: Optional[str] = None, db: Session = Depends(get_db)):
     logger = logging.getLogger("oauth_auth")
     logger.info(f"Google OAuth callback: code={code}, state={state}")
+    
     if not code or not state or not check_oauth_state_exists(state):
         logger.error("Invalid OAuth callback parameters: missing code or state or invalid state")
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid OAuth callback parameters")
@@ -117,7 +125,7 @@ async def google_callback(request: Request, code: Optional[str] = None, state: O
             },
         )
         token_response.raise_for_status()
-        tokens = token_response.model_dump_json()
+        tokens = token_response.json()
         access_token = tokens.get("access_token")
         logger.info(f"Access token received: {bool(access_token)}")
         if not access_token:
@@ -130,7 +138,7 @@ async def google_callback(request: Request, code: Optional[str] = None, state: O
             headers={"Authorization": f"Bearer {access_token}"},
         )
         userinfo_response.raise_for_status()
-        userinfo = userinfo_response.model_dump_json()
+        userinfo = userinfo_response.json()
         
         user_email = userinfo.get("email")
         first_name = userinfo.get("given_name")
@@ -178,7 +186,11 @@ async def google_callback(request: Request, code: Optional[str] = None, state: O
         print("Exception in google_callback:", e, file=sys.stderr)
         print(traceback.format_exc(), file=sys.stderr)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Internal server error during OAuth callback: {e}")
-    response = RedirectResponse(url="/popuphandler/oauth_success.html")
+    
+    # Redirect to static HTML file that will handle the redirect to frontend
+    redirect_url = "/popuphandler/oauth_success.html"
+    
+    response = RedirectResponse(url=redirect_url)
     # Set cookies for both backend and frontend (localhost domain covers ports 3000 and 8000)
     try:
         response.set_cookie(key="session_token", value=session.session_token, httponly=True, samesite="Lax", domain="localhost", path="/")
@@ -194,6 +206,13 @@ async def google_callback(request: Request, code: Optional[str] = None, state: O
 
 @router.get("/microsoft")
 def microsoft_login():
+    # Check if OAuth credentials are configured
+    if not OAUTH_CONFIG.get('microsoft_client_id') or OAUTH_CONFIG['microsoft_client_id'] in ['', 'your_microsoft_client_id_here']:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Microsoft OAuth is not configured. Please set MICROSOFT_CLIENT_ID and MICROSOFT_CLIENT_SECRET environment variables."
+        )
+    
     state = generate_state_token()
     set_oauth_state(state, time.time())
     scopes = OAUTH_CONFIG.get('microsoft_scopes', 'openid email profile User.Read')
@@ -239,7 +258,7 @@ async def microsoft_callback(request: Request, code: Optional[str] = None, state
             },
         )
         token_response.raise_for_status()
-        tokens = token_response.model_dump_json()
+        tokens = token_response.json()
         access_token = tokens.get("access_token")
         
         logger.info(f"Microsoft access token received: {bool(access_token)}")
@@ -252,7 +271,7 @@ async def microsoft_callback(request: Request, code: Optional[str] = None, state
             headers={"Authorization": f"Bearer {access_token}"},
         )
         userinfo_response.raise_for_status()
-        userinfo = userinfo_response.model_dump_json()
+        userinfo = userinfo_response.json()
         
         # Get user photo
         photo_url = None
@@ -314,7 +333,10 @@ async def microsoft_callback(request: Request, code: Optional[str] = None, state
         logger.error(f"Exception in microsoft_callback: {e}", exc_info=True)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Internal server error during OAuth callback: {e}")
     
-    response = RedirectResponse(url="/popuphandler/oauth_success.html")
+    # Redirect to static HTML file that will handle the redirect to frontend
+    redirect_url = "/popuphandler/oauth_success.html"
+    
+    response = RedirectResponse(url=redirect_url)
     try:
         response.set_cookie(key="session_token", value=session.session_token, httponly=True, samesite="Lax", domain="localhost", path="/")
         response.set_cookie(key="racine_session", value=session.session_token, httponly=True, samesite="Lax", domain="localhost", path="/")
@@ -411,7 +433,7 @@ from fastapi import Request
 
 @router.post("/verify")
 async def email_verify(request: Request, db: Session = Depends(get_db)):
-    data = await request.model_dump_json()
+    data = await request.json()
     email = data.get("email", "").strip().lower()
     code = data.get("code", "").strip()
     if not email or not code:

@@ -34,7 +34,7 @@ class RedisConfig(BaseSettings):
     """Redis configuration settings."""
     
     url: str = Field(
-        default=os.getenv("REDIS_URL", "redis://localhost:6379/0"),
+        default=os.getenv("REDIS_URL", "redis://data_governance_redis:6379/0"),
         description="Redis connection URL"
     )
     password: Optional[str] = Field(default=None, description="Redis password")

@@ -81,15 +81,15 @@ interface AIAssistantAPIConfig {
  */
 const DEFAULT_CONFIG: AIAssistantAPIConfig = {
   baseURL: (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_API_BASE_URL) || '/api/proxy',
-  timeout: 45000,
-  retryAttempts: 3,
-  retryDelay: 1000,
-  enableContextAnalysis: true,
-  enableProactiveRecommendations: true,
-  enableLearning: true,
+  timeout: 5000, // Reduced to 5 seconds to prevent hanging
+  retryAttempts: 0, // Disable retries to prevent database overload
+  retryDelay: 5000, // Increased delay
+  enableContextAnalysis: false, // Disable to prevent excessive API calls
+  enableProactiveRecommendations: false, // Disable to prevent excessive API calls
+  enableLearning: false, // Disable to prevent excessive API calls
   websocketURL: (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_WS_URL) || 'ws://localhost:8000/ws',
-  contextUpdateInterval: 30000,
-  learningBatchSize: 10
+  contextUpdateInterval: 60000, // Increased interval to reduce API calls
+  learningBatchSize: 5 // Reduced batch size
 };
 
 /**

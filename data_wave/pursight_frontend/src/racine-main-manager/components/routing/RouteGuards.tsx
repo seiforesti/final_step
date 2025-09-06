@@ -418,7 +418,7 @@ const createAuthenticationGuard = (): RouteGuard => ({
           allowed: false,
           reason: 'User not authenticated',
           requiresAuth: true,
-          redirectTo: '/login',
+          redirectTo: '/signin',
           errorCode: 'AUTH_REQUIRED',
           metadata: {
             executionTime: performance.now() - startTime,
@@ -435,7 +435,7 @@ const createAuthenticationGuard = (): RouteGuard => ({
           allowed: false,
           reason: 'Authentication token missing',
           requiresAuth: true,
-          redirectTo: '/login',
+          redirectTo: '/signin',
           errorCode: 'TOKEN_MISSING'
         };
       }
@@ -2212,7 +2212,7 @@ export const AdminRouteGuard: React.FC<AdminRouteGuardProps> = ({
         const authToken = localStorage.getItem('auth_token');
         if (!authToken) {
           setError('Authentication required');
-          router.push('/login');
+          router.push('/signin');
           return;
         }
 
@@ -2226,7 +2226,7 @@ export const AdminRouteGuard: React.FC<AdminRouteGuardProps> = ({
 
         if (!userResponse.ok) {
           setError('Authentication failed');
-          router.push('/login');
+          router.push('/signin');
           return;
         }
 
@@ -2260,7 +2260,7 @@ export const AdminRouteGuard: React.FC<AdminRouteGuardProps> = ({
           const sessionValid = await validateSession(authToken);
           if (!sessionValid) {
             setError('Session expired');
-            router.push('/login');
+            router.push('/signin');
             return;
           }
         }

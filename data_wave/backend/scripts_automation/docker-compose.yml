@@ -12,16 +12,16 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=postgresql://postgres:postgres@data_governance_postgres:5432/data_governance
-      - DB_URL=postgresql://postgres:postgres@data_governance_postgres:5432/data_governance
+      - DATABASE_URL=postgresql://postgres:postgres@data_governance_pgbouncer:6432/data_governance
+      - DB_URL=postgresql://postgres:postgres@data_governance_pgbouncer:6432/data_governance
       - REDIS_URL=redis://data_governance_redis:6379
       - ENVIRONMENT=development
       # Disable SQLAlchemy pool_pre_ping when behind PgBouncer/transaction pooling to avoid psycopg2 autocommit errors
       - DB_USE_PGBOUNCER=true
       - LOG_LEVEL=INFO
-      # DB pool & concurrency safety - OPTIMIZED FOR ENTERPRISE LOAD
-      - DB_POOL_SIZE=15
-      - DB_MAX_OVERFLOW=5
+      # DB pool & concurrency safety - OPTIMIZED FOR PGBOUNCER
+      - DB_POOL_SIZE=5
+      - DB_MAX_OVERFLOW=2
       - DB_POOL_TIMEOUT=60
       - MAX_CONCURRENT_DB_REQUESTS=15
       - DB_SEMAPHORE_TIMEOUT=5
@@ -29,24 +29,29 @@ services:
       - AUTO_FORCE_DB_CLEANUP=true
       - CLEANUP_UTIL_THRESHOLD=60
       - CLEANUP_MIN_INTERVAL_SEC=15
-      # Frontend URL used for OAuth callbacks/root redirects
-      - FRONTEND_URL=http://localhost:3000/app
+      # Frontend URL used for OAuth callbacks/root redirects (supports both Vite and Next.js)
+      - FRONTEND_URL=http://localhost:5173
+      - FRONTEND_URL_ALT=http://localhost:3000/app
       # Disable optional performance service to avoid startup errors
       - ENABLE_PERFORMANCE_SERVICE=false
-      # OAuth configuration (set real values before deploy)
-      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+          # OAuth configuration (direct values)
+      - GOOGLE_CLIENT_ID=950547023330-d9ufg3raafbha6lesgnq5lfho5nc7fk4.apps.googleusercontent.com
+      - GOOGLE_CLIENT_SECRET=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
       - GOOGLE_REDIRECT_URI=http://localhost:8000/auth/google/callback
+      - GOOGLE_REDIRECT_URI_ALT=http://localhost:8000/auth/google/callback
       - GOOGLE_SCOPES=openid email profile
-      - MICROSOFT_CLIENT_ID=${MICROSOFT_CLIENT_ID}
-      - MICROSOFT_CLIENT_SECRET=${MICROSOFT_CLIENT_SECRET}
+      - MICROSOFT_CLIENT_ID=bb0376c9-a26b-4ce1-8b6d-1c333fda6209
+      - MICROSOFT_CLIENT_SECRET=4da9bfbc-4a5f-4368-b7bb-484613faeda4
       - MICROSOFT_REDIRECT_URI=http://localhost:8000/auth/microsoft/callback
+      - MICROSOFT_REDIRECT_URI_ALT=http://localhost:8000/auth/microsoft/callback
       - MICROSOFT_SCOPES=openid email profile User.Read
       - MICROSOFT_TENANT=common
       # SpaCy model installation path
       - SPACY_MODEL_PATH=/opt/venv/lib/python3.11/site-packages
     depends_on:
       postgres:
+        condition: service_healthy
+      pgbouncer:
         condition: service_healthy
       redis:
         condition: service_healthy
@@ -107,6 +112,67 @@ services:
       retries: 5
       start_period: 30s
     command: postgres -c config_file=/etc/postgresql/postgresql.conf
+
+
+  # PgBouncer Connection Pooler (Enterprise Optimization)
+  pgbouncer:
+    image: pgbouncer/pgbouncer:latest
+    container_name: data_governance_pgbouncer
+    environment:
+      - DATABASES_HOST=data_governance_postgres
+      - DATABASES_PORT=5432
+      - DATABASES_USER=postgres
+      - DATABASES_PASSWORD=postgres
+      - DATABASES_DBNAME=data_governance
+      - POOL_MODE=transaction
+      - MAX_CLIENT_CONN=1000
+      - DEFAULT_POOL_SIZE=50
+      - MIN_POOL_SIZE=10
+      - RESERVE_POOL_SIZE=10
+      - RESERVE_POOL_TIMEOUT=5
+      - SERVER_CONNECT_TIMEOUT=15
+      - SERVER_LOGIN_RETRY=15
+      - QUERY_TIMEOUT=0
+      - QUERY_WAIT_TIMEOUT=120
+      - CLIENT_IDLE_TIMEOUT=0
+      - CLIENT_LOGIN_TIMEOUT=60
+      - AUTODB_IDLE_TIMEOUT=3600
+      - LOG_CONNECTIONS=1
+      - LOG_DISCONNECTIONS=1
+      - LOG_POOLER_ERRORS=1
+      - LOG_STATS=1
+      - STATS_PERIOD=60
+      - ADMIN_USERS=postgres
+      - STATS_USERS=postgres
+      - SERVER_RESET_QUERY=DISCARD ALL
+      - SERVER_CHECK_QUERY=SELECT 1
+      - SERVER_CHECK_DELAY=30
+      - SERVER_LIFETIME=3600
+      - SERVER_IDLE_TIMEOUT=600
+      - MAX_USER_CONNECTIONS=100
+    ports:
+      - "6432:6432"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.25'
+        reservations:
+          memory: 128M
+          cpus: '0.1'
+    healthcheck:
+      test: ["CMD", "pgbouncer", "-u", "postgres", "-h", "localhost", "-p", "6432", "-d", "data_governance", "-c", "SHOW VERSION;"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    volumes:
+      - ./pgbouncer.conf:/etc/pgbouncer/pgbouncer.conf
+      - ./userlist.txt:/etc/pgbouncer/userlist.txt
 
   # pgAdmin for PostgreSQL Management
   pgadmin:

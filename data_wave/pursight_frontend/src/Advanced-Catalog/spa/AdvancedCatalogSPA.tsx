@@ -1969,7 +1969,7 @@ const AdvancedCatalogSPA: React.FC<AdvancedCatalogSPAProps> = ({
             </CardDescription>
           </CardHeader>
           <CardContent className="text-center">
-            <Button onClick={() => window.location.href = '/login'} className="w-full">
+            <Button onClick={() => window.location.href = '/signin'} className="w-full">
               <Lock className="h-4 w-4 mr-2" />
               Login to Continue
             </Button>

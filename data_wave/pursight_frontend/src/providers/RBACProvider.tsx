@@ -7,12 +7,16 @@ import { useLocation, useNavigate } from "react-router-dom";
 export function RBACProvider({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const navigate = useNavigate();
-  const { data, isLoading, error } = useRbacMe();
+  
+  // Only fetch RBAC data if not on signin page
+  const shouldFetchRBAC = location.pathname !== "/signin";
+  
+  const { data, isLoading, error } = useRbacMe(shouldFetchRBAC);
   const {
     data: flatPermissions,
     isLoading: flatLoading,
     error: flatError,
-  } = useRBACFlatPermissions();
+  } = useRBACFlatPermissions(shouldFetchRBAC);
 
   // Debug logging
   console.log("RBACProvider:", {
@@ -161,6 +165,12 @@ export function RBACProvider({ children }: { children: React.ReactNode }) {
   if (location.pathname === "/signin") {
     return <>{children}</>;
   }
+  
+  // If RBAC is disabled (on signin page), just render children
+  if (!shouldFetchRBAC) {
+    return <>{children}</>;
+  }
+  
   if (
     error &&
     (error as any).response &&

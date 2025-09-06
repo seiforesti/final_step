@@ -1,7 +1,7 @@
 // API Endpoint Constants - Maps to backend route definitions
 
 // Base API URL - should be configurable via environment variables
-export const API_BASE_URL = (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_API_BASE_URL) || 'http://localhost:3000/proxy';
+export const API_BASE_URL = (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_API_BASE_URL) || 'api/proxy';
 
 // Authentication endpoints
 export const AUTH_ENDPOINTS = {

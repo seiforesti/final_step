@@ -858,10 +858,28 @@ def get_rbac_me_flat_permissions(current_user: User = Depends(get_current_user),
     if perms is None:
         raise HTTPException(status_code=404, detail="User not found")
     flat_permissions = [f"{p['resource']}.{p['action']}" for p in perms if p.get('action') and p.get('resource')]
+    
+    # Safely serialize roles to avoid ModelField serialization errors
+    roles = []
+    user_roles = getattr(current_user, "roles", []) or []
+    for role in user_roles:
+        if hasattr(role, 'name') and isinstance(role.name, str):
+            roles.append(role.name)
+        elif hasattr(role, '__dict__'):
+            # Handle case where role might be a model object
+            role_dict = {}
+            for key, value in role.__dict__.items():
+                if not key.startswith('_') and not callable(value):
+                    role_dict[key] = value
+            roles.append(role_dict.get('name', str(role)))
+        else:
+            # Fallback to string representation
+            roles.append(str(role))
+    
     return {
         "id": getattr(current_user, "id", None),
         "email": getattr(current_user, "email", None),
-        "roles": [r for r in getattr(current_user, "roles", [])],
+        "roles": roles,
         "flatPermissions": flat_permissions,
     }
 

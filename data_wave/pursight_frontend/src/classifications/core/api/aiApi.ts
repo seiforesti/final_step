@@ -150,7 +150,7 @@ class AIApiClient {
       error => {
         if (error.response?.status === 401) {
           localStorage.removeItem('authToken');
-          window.location.href = '/login';
+          window.location.href = '/signin';
         }
         return Promise.reject(error);
       }

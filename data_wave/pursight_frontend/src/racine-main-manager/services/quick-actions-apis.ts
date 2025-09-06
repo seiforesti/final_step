@@ -59,15 +59,15 @@ interface QuickActionsAPIConfig {
  */
 const DEFAULT_CONFIG: QuickActionsAPIConfig = {
   baseURL: (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_API_BASE_URL) || '/api/proxy',
-  timeout: 30000,
-  retryAttempts: 3,
-  retryDelay: 1000,
-  enableWebSocket: true,
+  timeout: 5000, // Reduced to 5 seconds to prevent hanging
+  retryAttempts: 0, // Disable retries to prevent database overload
+  retryDelay: 5000, // Increased delay
+  enableWebSocket: false, // Disable WebSocket to prevent connection issues
   // Use proxied ws URL by default
   websocketURL: (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_WS_URL)
     || `${typeof window !== 'undefined' && window.location.protocol === 'https:' ? 'wss' : 'ws'}://${typeof window !== 'undefined' ? window.location.host : 'localhost:5173'}/api/proxy/ws`,
-  maxHistoryItems: 100,
-  enableAnalytics: true
+  maxHistoryItems: 50, // Reduced to prevent memory issues
+  enableAnalytics: false // Disable analytics to reduce API calls
 };
 
 /**
@@ -94,7 +94,10 @@ export class QuickActionsAPI {
   private ws: WebSocket | null = null;
   private eventListeners: Map<string, Function[]> = new Map();
   private reconnectAttempts = 0;
-  private maxReconnectAttempts = 5;
+  private maxReconnectAttempts = 3; // Reduced from 5
+  private lastReconnectTime = 0;
+  private reconnectCooldown = 30000; // 30 seconds cooldown
+  private isReconnectBlocked = false;
 
   constructor(config?: Partial<QuickActionsAPIConfig>) {
     this.config = { ...DEFAULT_CONFIG, ...config };
@@ -203,26 +206,47 @@ export class QuickActionsAPI {
   }
 
   /**
-   * Schedule WebSocket reconnection
+   * Schedule WebSocket reconnection with circuit breaker
    */
   private scheduleReconnect() {
+    const now = Date.now();
+    
+    // Check if we're in cooldown period
+    if (this.isReconnectBlocked && (now - this.lastReconnectTime) < this.reconnectCooldown) {
+      console.log('WebSocket reconnection blocked due to cooldown period');
+      return;
+    }
+    
+    // Check if we've exceeded max attempts
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-      console.warn('Max WebSocket reconnection attempts reached, will retry later');
-      // Reset attempts after a longer delay and try again
+      console.warn('Max WebSocket reconnection attempts reached, entering cooldown period');
+      this.isReconnectBlocked = true;
+      this.lastReconnectTime = now;
+      
+      // Reset attempts after cooldown period
       setTimeout(() => {
         this.reconnectAttempts = 0;
-        this.initializeWebSocket();
-      }, 30000); // Wait 30 seconds before trying again
+        this.isReconnectBlocked = false;
+        console.log('WebSocket reconnection cooldown expired, will retry later');
+      }, this.reconnectCooldown);
       return;
     }
 
     this.reconnectAttempts++;
-    const delay = this.config.retryDelay * Math.pow(2, this.reconnectAttempts - 1);
+    this.lastReconnectTime = now;
     
-    console.log(`Quick Actions WebSocket reconnection attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts} in ${delay}ms`);
+    // Exponential backoff with jitter
+    const baseDelay = this.config.retryDelay * Math.pow(2, this.reconnectAttempts - 1);
+    const jitter = Math.random() * 1000; // Add up to 1 second of jitter
+    const delay = Math.min(baseDelay + jitter, 30000); // Cap at 30 seconds
+    
+    console.log(`Quick Actions WebSocket reconnection attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts} in ${Math.round(delay)}ms`);
     
     setTimeout(() => {
-      this.initializeWebSocket();
+      // Check if we're still allowed to reconnect
+      if (!this.isReconnectBlocked) {
+        this.initializeWebSocket();
+      }
     }, delay);
   }
 

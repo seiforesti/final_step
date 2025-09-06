@@ -5,7 +5,7 @@ import { Check, ChevronDown, ChevronUp } from 'lucide-react'
 
 import { cn } from "@/lib/utils"
 
-// React 19 compatible Select components with proper event handling
+// Fixed Select component with proper dropdown behavior
 const Select = React.memo(({ 
   children, 
   value, 
@@ -25,6 +25,7 @@ const Select = React.memo(({
 }) => {
   const [isOpen, setIsOpen] = React.useState(open || false);
   const [selectedValue, setSelectedValue] = React.useState(value || defaultValue || '');
+  const selectRef = React.useRef<HTMLDivElement>(null);
 
   const handleOpenChange = React.useCallback((newOpen: boolean) => {
     setIsOpen(newOpen);
@@ -34,8 +35,22 @@ const Select = React.memo(({
   const handleValueChange = React.useCallback((newValue: string) => {
     setSelectedValue(newValue);
     onValueChange?.(newValue);
-    setIsOpen(false);
+    setIsOpen(false); // Close dropdown after selection
   }, [onValueChange]);
+
+  // Close dropdown when clicking outside
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (selectRef.current && !selectRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [isOpen]);
 
   React.useEffect(() => {
     if (value !== undefined) {
@@ -51,6 +66,8 @@ const Select = React.memo(({
 
   return (
     <div 
+      ref={selectRef}
+      className="relative"
       data-radix-select-root 
       data-state={isOpen ? 'open' : 'closed'}
       data-value={selectedValue}
@@ -192,26 +209,17 @@ const SelectContent = React.memo(({
   return (
     <div
       className={cn(
-        "absolute z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
-        position === "popper" &&
-          "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
+        "absolute z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-lg animate-in fade-in-0 zoom-in-95 slide-in-from-top-2",
+        "top-full left-0 right-0 mt-1",
         className
       )}
       data-radix-select-content
       data-state="open"
       {...props}
     >
-      <SelectScrollUpButton />
-      <div
-        className={cn(
-          "p-1",
-          position === "popper" &&
-            "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]"
-        )}
-      >
+      <div className="p-1 max-h-80 overflow-y-auto">
         {children}
       </div>
-      <SelectScrollDownButton />
     </div>
   );
 });
@@ -245,7 +253,9 @@ const SelectItem = React.memo(({
   onOpenChange?: (open: boolean) => void;
 }) => {
   const isSelected = value === selectedValue;
-  const handleClick = React.useCallback(() => {
+  const handleClick = React.useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (value && onValueChange) {
       onValueChange(value);
     }
@@ -254,13 +264,17 @@ const SelectItem = React.memo(({
   return (
     <div
       className={cn(
-        "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-accent hover:text-accent-foreground",
-        isSelected && "bg-accent text-accent-foreground",
+        "relative flex w-full cursor-pointer select-none items-center rounded-sm py-2 pl-8 pr-2 text-sm outline-none transition-colors",
+        "hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+        "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+        isSelected && "bg-accent text-accent-foreground font-medium",
         className
       )}
       data-radix-select-item
       data-state={isSelected ? "checked" : "unchecked"}
       onClick={handleClick}
+      role="option"
+      aria-selected={isSelected}
       {...props}
     >
       <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">

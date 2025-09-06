@@ -347,7 +347,7 @@ const DefaultErrorFallback: React.FC<ErrorRecoveryProps> = ({
 
   const handleLogout = () => {
     logout();
-    window.location.href = '/login';
+    window.location.href = '/signin';
   };
 
   const getErrorIcon = () => {

@@ -27,6 +27,8 @@ import {
   OperationStatus
 } from '../types/racine-core.types';
 import { globalWebSocketManager, type MessageHandler } from './WebSocketManager';
+import { circuitBreakers, withCircuitBreaker } from '../utils/circuit-breaker';
+import { requestThrottlers, withThrottling } from '../utils/request-throttler';
 
 import {
   SystemHealth,
@@ -54,9 +56,9 @@ interface OrchestrationAPIConfig {
  */
 const DEFAULT_CONFIG: OrchestrationAPIConfig = {
   baseURL: (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_API_BASE_URL) || '/api/proxy',
-  timeout: 30000, // 30s for both dev and prod
-  retryAttempts: 3, // Standard retry attempts
-  retryDelay: 1000,
+  timeout: 5000, // Reduced to 5 seconds to prevent hanging
+  retryAttempts: 0, // Disable retries to prevent database overload
+  retryDelay: 5000, // Increased delay
   enableWebSocket: false, // Disabled by default to prevent WebSocket errors in development
   websocketURL: (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_WS_URL) || 'ws://localhost:8000/ws'
 };
@@ -172,100 +174,112 @@ export class RacineOrchestrationAPI {
       return this.getOfflineFallback<T>(url);
     }
 
-    const controller = new AbortController();
-    let timeoutId: NodeJS.Timeout | null = null;
-    const { retryAttempts = this.config.retryAttempts } = options;
+    const throttledRequest = withThrottling(
+      requestThrottlers.orchestration,
+      async () => {
+        const controller = new AbortController();
+        let timeoutId: NodeJS.Timeout | null = null;
+        const { retryAttempts = this.config.retryAttempts } = options;
 
-    // Set up timeout only if timeout > 0 - but don't throw errors
-    if (this.config.timeout > 0) {
-        timeoutId = setTimeout(() => {
-        // Just log a warning - don't throw or abort
-        console.warn(`Request to ${url} is taking longer than expected (${this.config.timeout}ms)`);
-      }, this.config.timeout);
-    }
+        // Set up timeout only if timeout > 0 - but don't throw errors
+        if (this.config.timeout > 0) {
+            timeoutId = setTimeout(() => {
+            // Just log a warning - don't throw or abort
+            console.warn(`Request to ${url} is taking longer than expected (${this.config.timeout}ms)`);
+          }, this.config.timeout);
+        }
 
-    const fetchOptions: RequestInit = {
-      method: options.method || 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(this.authToken && { 'Authorization': `Bearer ${this.authToken}` }),
-        ...options.headers
-      },
-      signal: controller.signal
-    };
+        const fetchOptions: RequestInit = {
+          method: options.method || 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(this.authToken && { 'Authorization': `Bearer ${this.authToken}` }),
+            ...options.headers
+          },
+          signal: controller.signal
+        };
 
-    if (options.body) {
-      fetchOptions.body = options.body;
-    }
+        if (options.body) {
+          fetchOptions.body = options.body;
+        }
 
-    let lastError: Error = new Error('Unknown error occurred');
+        let lastError: Error = new Error('Unknown error occurred');
 
-      for (let attempt = 0; attempt <= retryAttempts; attempt++) {
-        try {
-          const response = await fetch(`${this.config.baseURL}${url}`, {
-            ...fetchOptions,
-          headers: fetchOptions.headers,
-            signal: controller.signal
-          });
+          for (let attempt = 0; attempt <= retryAttempts; attempt++) {
+            try {
+              const response = await fetch(`${this.config.baseURL}${url}`, {
+                ...fetchOptions,
+            headers: fetchOptions.headers,
+                signal: controller.signal
+              });
 
-        // Clear timeout on success
+            // Clear timeout on success
+              if (timeoutId) {
+                clearTimeout(timeoutId);
+                timeoutId = null;
+              }
+
+              if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+              }
+
+              const data = await response.json();
+              return data as T;
+
+            } catch (error) {
+              lastError = error as Error;
+              
+            // Clear timeout on error
+            if (timeoutId) {
+              clearTimeout(timeoutId);
+              timeoutId = null;
+            }
+            
+            // Handle different error types gracefully
+            if (error instanceof Error) {
+              if (error.name === 'AbortError') {
+                // Don't throw timeout errors - just log and continue
+                console.warn(`Request to ${url} was aborted`);
+                return this.getOfflineFallback<T>(url);
+              } else if (error.message && error.message.includes('fetch')) {
+                // Network error - switch to offline mode
+                console.warn(`Network error for ${url}, switching to offline mode`);
+                this.setOfflineMode(true);
+                return this.getOfflineFallback<T>(url);
+              }
+              }
+              
+              if (attempt < retryAttempts && this.shouldRetry(error as Error)) {
+              await this.delay(this.config.retryDelay * Math.pow(2, attempt));
+                continue;
+              }
+              
+              break;
+            }
+          }
+
+        // Final cleanup
           if (timeoutId) {
             clearTimeout(timeoutId);
-            timeoutId = null;
           }
-
-          if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-          }
-
-          const data = await response.json();
-        return data as T;
-
-        } catch (error) {
-          lastError = error as Error;
-          
-        // Clear timeout on error
-        if (timeoutId) {
-          clearTimeout(timeoutId);
-          timeoutId = null;
-        }
         
-        // Handle different error types gracefully
-        if (error instanceof Error) {
-          if (error.name === 'AbortError') {
-            // Don't throw timeout errors - just log and continue
-            console.warn(`Request to ${url} was aborted`);
-            return this.getOfflineFallback<T>(url);
-          } else if (error.message && error.message.includes('fetch')) {
-            // Network error - switch to offline mode
-            console.warn(`Network error for ${url}, switching to offline mode`);
-            this.setOfflineMode(true);
-            return this.getOfflineFallback<T>(url);
-          }
-          }
-          
-          if (attempt < retryAttempts && this.shouldRetry(error as Error)) {
-          await this.delay(this.config.retryDelay * Math.pow(2, attempt));
-            continue;
-          }
-          
-          break;
+        // For any other error, try offline fallback
+        const message = (lastError as any)?.message || '';
+        if (message.includes('Circuit breaker open')) {
+          // Provide lightweight empty shape for common endpoints
+          return this.getOfflineFallback<T>(url);
         }
+        console.warn(`Request failed for ${url}, using offline fallback:`, lastError);
+        return this.getOfflineFallback<T>(url);
       }
+    );
 
-    // Final cleanup
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-    
-    // For any other error, try offline fallback
-    const message = (lastError as any)?.message || '';
-    if (message.includes('Circuit breaker open')) {
-      // Provide lightweight empty shape for common endpoints
-      return this.getOfflineFallback<T>(url);
-    }
-    console.warn(`Request failed for ${url}, using offline fallback:`, lastError);
-    return this.getOfflineFallback<T>(url);
+    const circuitBreakerRequest = withCircuitBreaker(
+      circuitBreakers.orchestration,
+      throttledRequest
+    );
+
+    return await circuitBreakerRequest();
   }
 
   /**
@@ -377,7 +391,12 @@ export class RacineOrchestrationAPI {
     orchestrationId: UUID, 
     options?: RequestOptions
   ): Promise<APIResponse<SystemHealthResponse>> {
-    return this.makeRequest<SystemHealthResponse>(`/api/racine/orchestration/${orchestrationId}/health`, {
+    // Validate orchestrationId to prevent undefined values
+    if (!orchestrationId || orchestrationId === 'undefined' || orchestrationId === 'null') {
+      throw new Error('Invalid orchestrationId: orchestrationId is required and cannot be undefined');
+    }
+    
+    return this.makeRequest<SystemHealthResponse>(`/racine/orchestration/${orchestrationId}/health`, {
       method: 'GET',
       ...options
     });
@@ -391,7 +410,7 @@ export class RacineOrchestrationAPI {
    * Create a new orchestration master
    */
   async createOrchestrationMaster(request: any): Promise<any> {
-    return this.makeRequest<any>('/api/racine/orchestration/masters', {
+    return this.makeRequest<any>('/racine/orchestration/active', {
       method: 'POST',
       body: JSON.stringify(request)
     });
@@ -401,7 +420,7 @@ export class RacineOrchestrationAPI {
    * Update orchestration master
    */
   async updateOrchestrationMaster(id: string, updates: any): Promise<any> {
-    return this.makeRequest<any>(`/api/racine/orchestration/masters/${id}`, {
+    return this.makeRequest<any>(`/racine/orchestration/${id}`, {
       method: 'PUT',
       body: JSON.stringify(updates)
     });
@@ -411,7 +430,7 @@ export class RacineOrchestrationAPI {
    * Delete orchestration master
    */
   async deleteOrchestrationMaster(id: string): Promise<any> {
-    return this.makeRequest<any>(`/api/racine/orchestration/masters/${id}`, {
+    return this.makeRequest<any>(`/racine/orchestration/${id}`, {
       method: 'DELETE'
     });
   }
@@ -435,7 +454,7 @@ export class RacineOrchestrationAPI {
       });
     }
 
-    const endpoint = `/api/racine/orchestration/masters${params.toString() ? `?${params.toString()}` : ''}`;
+    const endpoint = `/racine/orchestration/active${params.toString() ? `?${params.toString()}` : ''}`;
     return this.makeRequest<any>(endpoint, {
       method: 'GET'
     });
@@ -701,7 +720,7 @@ export class RacineOrchestrationAPI {
     options?: RequestOptions
   ): Promise<APIResponse<GroupHealthStatus>> {
     return this.makeRequest<GroupHealthStatus>(
-      `/api/racine/orchestration/health/groups/${groupId}`,
+      `/racine/orchestration/health/groups/${groupId}`,
       { method: 'GET', ...options }
     );
   }
@@ -714,7 +733,7 @@ export class RacineOrchestrationAPI {
     options?: RequestOptions
   ): Promise<APIResponse<ServiceHealthStatus>> {
     return this.makeRequest<ServiceHealthStatus>(
-      `/api/racine/orchestration/health/services/${serviceId}`,
+      `/racine/orchestration/health/services/${serviceId}`,
       { method: 'GET', ...options }
     );
   }
@@ -727,7 +746,7 @@ export class RacineOrchestrationAPI {
     options?: RequestOptions
   ): Promise<APIResponse<IntegrationHealthStatus>> {
     return this.makeRequest<IntegrationHealthStatus>(
-      `/api/racine/orchestration/health/integrations/${integrationId}`,
+      `/racine/orchestration/health/integrations/${integrationId}`,
       { method: 'GET', ...options }
     );
   }
@@ -739,7 +758,7 @@ export class RacineOrchestrationAPI {
     options?: RequestOptions
   ): Promise<APIResponse<PerformanceHealthStatus>> {
     return this.makeRequest<PerformanceHealthStatus>(
-      '/api/racine/orchestration/health/performance',
+      '/racine/orchestration/health/performance',
       { method: 'GET', ...options }
     );
   }
@@ -769,7 +788,7 @@ export class RacineOrchestrationAPI {
     }
 
     const queryString = params.toString();
-    const url = `/api/racine/orchestration/alerts${queryString ? `?${queryString}` : ''}`;
+    const url = `/performance/alerts${queryString ? `?${queryString}` : ''}`;
 
     return this.makeRequest<SystemAlert[]>(url, {
       method: 'GET',
@@ -785,7 +804,7 @@ export class RacineOrchestrationAPI {
     options?: RequestOptions
   ): Promise<APIResponse<void>> {
     return this.makeRequest<void>(
-      `/api/racine/orchestration/alerts/${alertId}/acknowledge`,
+      `/performance/alerts/${alertId}/acknowledge`,
       { method: 'POST', ...options }
     );
   }
@@ -799,7 +818,7 @@ export class RacineOrchestrationAPI {
     options?: RequestOptions
   ): Promise<APIResponse<void>> {
     return this.makeRequest<void>(
-      `/api/racine/orchestration/alerts/${alertId}/resolve`,
+      `/performance/alerts/${alertId}/resolve`,
       {
         method: 'POST',
         body: JSON.stringify({ resolution }),
@@ -958,7 +977,7 @@ export class RacineOrchestrationAPI {
     }
 
     const queryString = params.toString();
-    const url = `/api/racine/orchestration/recommendations${queryString ? `?${queryString}` : ''}`;
+    const url = `/racine/orchestration/recommendations${queryString ? `?${queryString}` : ''}`;
 
     return this.makeRequest<OptimizationRecommendation[]>(url, {
       method: 'GET',
@@ -1008,7 +1027,23 @@ export class RacineOrchestrationAPI {
     }
 
     const queryString = params.toString();
-    const url = `/api/racine/orchestration/metrics${queryString ? `?${queryString}` : ''}`;
+    // Backend requires orchestration id for metrics; resolve first active id
+    const activeList = await this.listOrchestrationMasters({ page: 1, limit: 1 });
+    const activeId = (Array.isArray(activeList) ? activeList[0]?.id : activeList?.data?.[0]?.id) as string | undefined;
+    if (!activeId) {
+      // Graceful fallback when no active orchestration exists
+      return {
+        success: true,
+        data: {
+          timestamp: new Date().toISOString(),
+          performance: {},
+          throughput: {},
+          latency: {},
+          errors: [],
+        } as unknown as PerformanceMetrics
+      } as unknown as APIResponse<PerformanceMetrics>;
+    }
+    const url = `/api/racine/orchestration/${activeId}/metrics${queryString ? `?${queryString}` : ''}`;
 
     return this.makeRequest<PerformanceMetrics>(url, {
       method: 'GET',
@@ -1403,12 +1438,8 @@ export class RacineOrchestrationAPI {
    */
   async getSavedSearches(): Promise<any[]> {
     try {
-      const response = await fetch(`${this.config.baseURL}/api/v1/global-search/saved-searches`, {
-        method: 'GET'
-      });
-      if (!response.ok) return [];
-      const data = await response.json();
-      return (data as any)?.data || [];
+      // Endpoint not available in backend; gate feature to prevent loops
+      return [];
     } catch (_e) {
       return [];
     }
@@ -1991,6 +2022,21 @@ Object.assign(RacineOrchestrationAPI.prototype, {
       return (response as any)?.data || [];
     } catch (error) {
       console.warn('getSavedSearches failed:', error);
+      return [];
+    }
+  },
+
+  /**
+   * Global search: get popular searches
+   */
+  async getPopularSearches(this: RacineOrchestrationAPI): Promise<any[]> {
+    try {
+      const response = await this.makeRequest<any>('/api/v1/global-search/popular-searches', {
+        method: 'GET'
+      });
+      return (response as any)?.data || [];
+    } catch (error) {
+      console.warn('getPopularSearches failed:', error);
       return [];
     }
   },

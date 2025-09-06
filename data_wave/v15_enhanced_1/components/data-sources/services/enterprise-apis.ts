@@ -43,7 +43,7 @@ export {
 // ============================================================================
 
 // In enterprise-apis.ts
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000/proxy'
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '/api/proxy'
 const enterpriseApi = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -3380,7 +3380,7 @@ if (typeof window !== 'undefined' && !window.enterpriseEventBus) {
   
   // WebSocket connection management
   let wsConnections: Record<string, WebSocket> = {}
-  const wsBaseUrl = process.env.NEXT_PUBLIC_WS_BASE_URL || 'ws://localhost:3000/proxy'
+  const wsBaseUrl = process.env.NEXT_PUBLIC_WS_BASE_URL || 'ws://api/proxy'
   
   const createWebSocketConnection = (endpoint: string) => {
     try {

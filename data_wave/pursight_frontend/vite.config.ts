@@ -31,6 +31,18 @@ export default defineConfig({
         secure: false,
         rewrite: (p) => p.replace(/^\/api\/proxy/, ""),
       },
+      // Proxy health check endpoints directly
+      "/health": {
+        target: "http://localhost:8000",
+        changeOrigin: true,
+        secure: false,
+      },
+      // Proxy racine integration endpoints
+      "/api/racine": {
+        target: "http://localhost:8000",
+        changeOrigin: true,
+        secure: false,
+      },
     },
   },
 });

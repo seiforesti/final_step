@@ -91,5 +91,50 @@ export interface AuthenticationContext {
   error: AuthError | null;
 }
 
+export interface MFAMethod {
+  id: number;
+  type: 'totp' | 'sms' | 'email' | 'backup_codes' | 'biometric';
+  enabled: boolean;
+  created_at: string;
+  last_used?: string;
+  metadata?: any;
+}
+
+export interface BackupCode {
+  id: number;
+  code: string;
+  used: boolean;
+  used_at?: string;
+  created_at: string;
+}
+
+export interface BiometricCredential {
+  id: number;
+  credential_id: string;
+  type: 'fingerprint' | 'face' | 'touch';
+  created_at: string;
+  last_used?: string;
+  metadata?: any;
+}
+
+export interface MFAChallenge {
+  id: string;
+  method: string;
+  expires_at: string;
+  attempts: number;
+  max_attempts: number;
+}
+
+export interface SecurityEvent {
+  id: number;
+  type: string;
+  description: string;
+  timestamp: string;
+  user_id: number;
+  metadata?: any;
+  ip_address?: string;
+  user_agent?: string;
+}
+
 // Re-import User type from user.types.ts to avoid circular dependencies
 import type { User } from './user.types';

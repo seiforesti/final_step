@@ -1386,7 +1386,7 @@ export const RBACSystemSPA: React.FC = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button className="w-full" onClick={() => window.location.href = '/auth/login'}>
+            <Button className="w-full" onClick={() => window.location.href = '/signin'}>
               Go to Login
             </Button>
           </CardContent>
