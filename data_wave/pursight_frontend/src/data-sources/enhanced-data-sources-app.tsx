@@ -2023,7 +2023,7 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
       // Try multiple health check endpoints
       const healthEndpoints = [
         '/api/proxy/health',
-        '/api/proxy/api/racine/integration/health'
+        '/api/racine/integration/health'
       ]
       
       let response = null

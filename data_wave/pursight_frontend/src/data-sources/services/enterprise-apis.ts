@@ -43,7 +43,7 @@ export {
 // ============================================================================
 
 // In enterprise-apis.ts
-const API_BASE_URL = (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_API_BASE_URL) || '/api/proxy'
+const API_BASE_URL = (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_API_BASE_URL) || '/proxy'
 const enterpriseApi = axios.create({
   baseURL: API_BASE_URL,
   headers: {

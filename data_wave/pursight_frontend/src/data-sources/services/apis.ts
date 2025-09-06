@@ -26,8 +26,9 @@ import {
   ColumnProfileRequest
 } from '../types';
 
-// Configure axios base URL - use proxy for all API calls
-const API_BASE_URL = (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_API_BASE_URL) || '/api/proxy';
+// Configure axios base URL - use proxy for all API calls  
+// FIXED: Correct proxy path to prevent double /proxy in URLs
+const API_BASE_URL = (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_API_BASE_URL) || '/proxy';
 
 const api = axios.create({
   baseURL: API_BASE_URL,

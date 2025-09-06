@@ -53,12 +53,12 @@ interface UserManagementAPIConfig {
  * Default configuration
  */
 const DEFAULT_CONFIG: UserManagementAPIConfig = {
-  baseURL: (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_API_BASE_URL) || '/api/proxy',
-  timeout: 5000, // Reduced to 5 seconds to prevent hanging
-  retryAttempts: 0, // Disable retries to prevent database overload
-  retryDelay: 5000, // Increased delay
-  enableWebSocket: false, // Disable WebSocket by default to prevent connection issues
-  websocketURL: (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_WS_URL) || 'ws://localhost:8000/ws'
+  baseURL: (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_API_BASE_URL) || '/proxy',
+  timeout: 10000, // 10 seconds timeout
+  retryAttempts: 0, // CRITICAL: Disable retries to prevent database overload
+  retryDelay: 10000, // Increased delay if retries are enabled
+  enableWebSocket: false, // CRITICAL: Disable WebSocket by default to prevent connection loops
+  websocketURL: undefined // CRITICAL: Disable WebSocket URL to prevent connection attempts
 };
 
 /**
@@ -316,7 +316,8 @@ class UserManagementAPI {
   }
 
   async updateUserProfile(request: UpdateUserProfileRequest): Promise<UserProfileResponse> {
-    return this.makeRequestWithRetry<UserProfileResponse>('/auth/profile', {
+    // FIXED: Use correct backend endpoint for profile updates
+    return this.makeRequestWithRetry<UserProfileResponse>('/auth/me', {
       method: 'PUT',
       body: JSON.stringify(request)
     });
@@ -534,7 +535,8 @@ class UserManagementAPI {
   }
 
   async revokePermission(permissionId: UUID): Promise<void> {
-    await this.makeRequestWithRetry<void>(`/rbac/user/permissions/${permissionId}`, {
+    // FIXED: Use correct RBAC endpoint structure
+    await this.makeRequestWithRetry<void>(`/rbac/permissions/${permissionId}`, {
       method: 'DELETE'
     });
   }

@@ -55,12 +55,12 @@ interface OrchestrationAPIConfig {
  * Default configuration
  */
 const DEFAULT_CONFIG: OrchestrationAPIConfig = {
-  baseURL: (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_API_BASE_URL) || '/api/proxy',
-  timeout: 5000, // Reduced to 5 seconds to prevent hanging
-  retryAttempts: 0, // Disable retries to prevent database overload
-  retryDelay: 5000, // Increased delay
-  enableWebSocket: false, // Disabled by default to prevent WebSocket errors in development
-  websocketURL: (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_WS_URL) || 'ws://localhost:8000/ws'
+  baseURL: (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_API_BASE_URL) || '/proxy',
+  timeout: 10000, // 10 seconds timeout
+  retryAttempts: 0, // CRITICAL: Disable retries to prevent database overload
+  retryDelay: 10000, // Increased delay if retries are enabled
+  enableWebSocket: false, // CRITICAL: Disabled to prevent WebSocket connection loops
+  websocketURL: undefined // CRITICAL: Disable WebSocket URL to prevent connection attempts
 };
 
 /**
@@ -1435,12 +1435,15 @@ export class RacineOrchestrationAPI {
 
   /**
    * Global search: get user's saved searches (used by useGlobalSearch hook)
+   * FIXED: Properly bound method to prevent "is not a function" errors
    */
-  async getSavedSearches(): Promise<any[]> {
+  getSavedSearches = async (): Promise<any[]> => {
     try {
-      // Endpoint not available in backend; gate feature to prevent loops
+      // Endpoint not available in backend; return empty to prevent loops
+      console.log('getSavedSearches: returning empty array (backend endpoint not implemented)');
       return [];
-    } catch (_e) {
+    } catch (error) {
+      console.warn('getSavedSearches error:', error);
       return [];
     }
   }

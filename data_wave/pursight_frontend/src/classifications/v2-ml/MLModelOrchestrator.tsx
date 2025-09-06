@@ -952,8 +952,9 @@ export const MLModelOrchestrator: React.FC<MLModelOrchestratorProps> = ({
   }, [stateModels, stateTrainingJobs, stateMetrics])
 
   useEffect(() => {
-    // Setup real-time monitoring
-    if (enableRealTimeMonitoring && isConnected) {
+    // DISABLED: Real-time monitoring WebSocket to prevent connection loops
+    // TODO: Re-enable when backend WebSocket routes are properly configured
+    if (false && enableRealTimeMonitoring && isConnected) {
       const ws = new WebSocket('ws://localhost:8000/ws/ml-monitoring')
       
       ws.onmessage = (event) => {
