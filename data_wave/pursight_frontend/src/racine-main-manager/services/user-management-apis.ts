@@ -529,8 +529,10 @@ class UserManagementAPI {
   }
 
   async revokeRole(roleId: UUID): Promise<void> {
-    await this.makeRequestWithRetry<void>(`/rbac/user/roles/${roleId}`, {
-      method: 'DELETE'
+    // FIXED: Use correct RBAC endpoint structure
+    await this.makeRequestWithRetry<void>(`/rbac/users/${this.currentUserId}/remove-role`, {
+      method: 'POST',
+      body: JSON.stringify({ role_id: roleId })
     });
   }
 

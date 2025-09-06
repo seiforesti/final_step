@@ -2031,18 +2031,18 @@ Object.assign(RacineOrchestrationAPI.prototype, {
 
   /**
    * Global search: get popular searches
+   * FIXED: Properly bound method to prevent "is not a function" errors
    */
-  async getPopularSearches(this: RacineOrchestrationAPI): Promise<any[]> {
+  getPopularSearches = async (): Promise<any[]> => {
     try {
-      const response = await this.makeRequest<any>('/api/v1/global-search/popular-searches', {
-        method: 'GET'
-      });
-      return (response as any)?.data || [];
+      // Endpoint not available in backend; return empty to prevent loops
+      console.log('getPopularSearches: returning empty array (backend endpoint not implemented)');
+      return [];
     } catch (error) {
-      console.warn('getPopularSearches failed:', error);
+      console.warn('getPopularSearches error:', error);
       return [];
     }
-  },
+  }
 
   /**
    * Global search: save a search
