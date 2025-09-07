@@ -588,6 +588,8 @@ import { AnalyticsWorkbench } from "./ui/analytics/analytics-workbench"
 import { WorkflowDesigner } from "./ui/workflow/workflow-designer"
 import { AdvancedWorkflowOrchestrator } from "./components/advanced-workflow-orchestrator"
 import { ComponentOrchestrationManager } from "./components/component-orchestration-manager"
+import { ComponentIntegrationManager } from "./components/component-integration-manager"
+import { MasterWorkflowAutomation } from "./components/master-workflow-automation"
 
 // Import remaining components with enterprise features - FIXED DEFAULT EXPORTS
 const DataSourceComplianceView = React.lazy(() => import("./data-source-compliance-view").then(module => ({ default: module.DataSourceComplianceView })))
@@ -1035,10 +1037,12 @@ const enterpriseNavigationStructure = {
     items: [
       { id: "workflow-designer", label: "Workflow Designer", icon: WorkflowIcon, component: "workflow-designer", description: "Visual workflow design studio", shortcut: "⌘+Shift+W", premium: true, features: ["workflows", "ai"] },
       { id: "workflow-orchestrator", label: "Workflow Orchestrator", icon: Workflow, component: "workflow-orchestrator", description: "Advanced workflow automation and execution", shortcut: "⌘+Shift+O", premium: true, features: ["workflows", "automation"] },
+      { id: "master-workflow", label: "Master Workflow", icon: Zap, component: "master-workflow", description: "Complete component orchestration and automation", shortcut: "⌘+Shift+Z", premium: true, features: ["workflows", "orchestration", "automation"] },
       { id: "component-manager", label: "Component Manager", icon: Layers, component: "component-manager", description: "Component orchestration and monitoring", shortcut: "⌘+Shift+M", premium: true, features: ["orchestration", "monitoring"] },
+      { id: "integration-manager", label: "Integration Manager", icon: Settings, component: "integration-manager", description: "Component integration and workflow automation", shortcut: "⌘+Shift+N", premium: true, features: ["integration", "automation"] },
       { id: "correlation-engine", label: "Correlation Engine", icon: GitBranch, component: "correlation-engine", description: "Advanced data correlation analysis", shortcut: "⌘+Shift+E", premium: true, features: ["ai", "analytics"] },
       { id: "realtime-collaboration", label: "Real-time Collaboration", icon: MessageSquare, component: "realtime-collaboration", description: "Live collaboration features", shortcut: "⌘+Shift+R", premium: true, features: ["collaboration", "realTime"] },
-      { id: "enterprise-integration", label: "Enterprise Integration", icon: Boxes, component: "enterprise-integration", description: "Enterprise system integration hub", shortcut: "⌘+Shift+I", premium: true, features: ["workflows", "integrations"] },
+      { id: "enterprise-integration", label: "Enterprise Integration", icon: Boxes, component: "enterprise-integration", description: "Enterprise system integration hub", shortcut: "⌘+Shift+X", premium: true, features: ["workflows", "integrations"] },
     ]
   }
 }
@@ -2880,6 +2884,27 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
             />
           </Suspense>
         )
+      case "master-workflow":
+        return (
+          <Suspense fallback={<ComponentLoader />}>
+            <MasterWorkflowAutomation 
+              dataSource={selectedDataSource}
+              onWorkflowComplete={(workflowId, results) => {
+                console.log('Master workflow completed:', workflowId, results)
+              }}
+              onWorkflowError={(workflowId, error) => {
+                console.error('Master workflow error:', workflowId, error)
+              }}
+              onComponentTrigger={(componentId, action) => {
+                console.log('Component triggered:', componentId, action)
+                // Trigger component navigation if needed
+                if (action === 'workflow-step-start') {
+                  setActiveView(componentId)
+                }
+              }}
+            />
+          </Suspense>
+        )
       case "component-manager":
         return (
           <Suspense fallback={<ComponentLoader />}>
@@ -2891,6 +2916,20 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
               }}
               onComponentError={(componentId, error) => {
                 console.error('Component error:', componentId, error)
+              }}
+            />
+          </Suspense>
+        )
+      case "integration-manager":
+        return (
+          <Suspense fallback={<ComponentLoader />}>
+            <ComponentIntegrationManager 
+              dataSource={selectedDataSource}
+              onComponentIntegration={(componentId, status) => {
+                console.log('Component integration:', componentId, status)
+              }}
+              onWorkflowTrigger={(componentId, workflowType) => {
+                console.log('Workflow triggered:', componentId, workflowType)
               }}
             />
           </Suspense>
