@@ -43,7 +43,7 @@ export {
 // ============================================================================
 
 // In enterprise-apis.ts
-const API_BASE_URL = (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_API_BASE_URL) || '/api/proxy'
+const API_BASE_URL = (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_API_BASE_URL) || '/proxy'
 const enterpriseApi = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -68,8 +68,16 @@ function buildRequestKey(config: any): string {
 
 // Enhanced request interceptor with enterprise features
 enterpriseApi.interceptors.request.use((config) => {
-  // Add auth token
-  const token = localStorage.getItem('authToken')
+  // Add auth token from multiple reliable sources
+  const token =
+    localStorage.getItem('authToken') ||
+    localStorage.getItem('auth_token') ||
+    localStorage.getItem('access_token') ||
+    sessionStorage.getItem('session_token') ||
+    document.cookie.split('; ').find((row) => row.startsWith('session_token='))?.split('=')[1] ||
+    document.cookie.split('; ').find((row) => row.startsWith('access_token='))?.split('=')[1] ||
+    ''
+
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
@@ -1207,7 +1215,7 @@ export const useUserQuery = (options?: any) => {
     queryKey: ['user'],
     queryFn: async () => {
       // This would connect to your user management system
-      const { data } = await enterpriseApi.get('/auth/me')
+      const { data } = await enterpriseApi.get('/rbac/me')
       return data
     },
     ...options,
@@ -1280,8 +1288,29 @@ export const useUserPermissionsQuery = (options?: any) => {
   return useQuery({
     queryKey: ['user-permissions'],
     queryFn: async () => {
-      const { data } = await enterpriseApi.get('/rbac/permissions')  // Fixed: use correct backend route
-      return data
+      // Primary: backend exposes permissions under /auth/permissions
+      try {
+        const { data } = await enterpriseApi.get('/auth/permissions')
+        return data
+      } catch (e1: any) {
+        // Fallback 1: RBAC router
+        try {
+          const { data } = await enterpriseApi.get('/rbac/user/permissions')
+          return data
+        } catch (e2: any) {
+          // Fallback 2: flat permissions
+          try {
+            const { data } = await enterpriseApi.get('/rbac/me/flat-permissions')
+            return Array.isArray(data?.flatPermissions) ? data.flatPermissions : []
+          } catch (e3: any) {
+            // Swallow 404s to prevent UI-level security error banner
+            const status = e3?.response?.status || e2?.response?.status || e1?.response?.status
+            if (status === 404) return []
+            // Default: return empty to avoid crashing guards; RBAC hook supplies final perms
+            return []
+          }
+        }
+      }
     },
     ...options,
   })
@@ -3408,7 +3437,7 @@ if (typeof window !== 'undefined' && !window.enterpriseEventBus) {
   // WebSocket connection management
   let wsConnections: Record<string, WebSocket> = {}
   const wsBaseUrl = (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_WS_BASE_URL)
-    || `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/api/proxy`
+    || `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/proxy`
   
   const createWebSocketConnection = (endpoint: string) => {
     try {

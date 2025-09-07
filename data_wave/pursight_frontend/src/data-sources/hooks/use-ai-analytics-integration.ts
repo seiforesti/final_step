@@ -416,7 +416,7 @@ const aiAnalyticsApi = {
   },
 
   async generateInsights(dataSourceId: number, analysisType: string, parameters: any) {
-    const response = await fetch('/api/ai-analytics/generate-insights', {
+    const response = await fetch('/proxy/ai-analytics/generate-insights', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -476,13 +476,13 @@ const aiAnalyticsApi = {
   },
 
   async getAnalyticsSettings() {
-    const response = await fetch('/api/ai-analytics/settings')
+    const response = await fetch('/proxy/ai-analytics/settings')
     if (!response.ok) throw new Error('Failed to fetch analytics settings')
     return response.json()
   },
 
   async updateAnalyticsSettings(settings: Partial<AIAnalyticsConfig>) {
-    const response = await fetch('/api/ai-analytics/settings', {
+    const response = await fetch('/proxy/ai-analytics/settings', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(settings)

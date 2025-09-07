@@ -28,6 +28,8 @@ from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from sensitivity_labeling.api import router as sensitivity_labeling_router
 from sensitivity_labeling.api import rbac_router
+# Ensure core RBAC routes from app are exposed under /rbac as well
+from app.api.routes.rbac.rbac_routes import router as core_rbac_router
 from sensitivity_labeling.analytics import router as analytics_router
 from sensitivity_labeling.notifications import router as notifications_router
 from sensitivity_labeling.ml_feedback import router as ml_feedback_router
@@ -359,7 +361,9 @@ app.include_router(ml_routes)
 app.include_router(classify.router)
 app.include_router(role_admin_router)
 app.include_router(sensitivity_labeling_router)
-app.include_router(rbac_router, prefix="/rbac", tags=["rbac"])  # Add RBAC router for /rbac/* endpoints
+app.include_router(rbac_router, prefix="/rbac", tags=["rbac"])  # Sensitivity RBAC (existing)
+# Core RBAC router already defines prefix="/rbac" internally; include without extra prefix
+app.include_router(core_rbac_router, tags=["rbac-core"])  # exposes /rbac/* endpoints
 app.include_router(analytics_router)
 app.include_router(notifications_router, prefix="/notifications", tags=["Notifications"])
 app.include_router(ml_feedback_router)

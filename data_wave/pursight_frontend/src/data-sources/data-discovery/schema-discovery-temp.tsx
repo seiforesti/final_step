@@ -288,7 +288,7 @@ export function SchemaDiscovery({
     if (node.type !== 'table' && node.type !== 'view') return
 
     try {
-      const response = await fetch('/api/data-discovery/data-sources/preview-table', {
+      const response = await fetch('/proxy/data-discovery/data-sources/preview-table', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

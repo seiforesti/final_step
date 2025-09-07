@@ -55,12 +55,12 @@ interface OrchestrationAPIConfig {
  * Default configuration
  */
 const DEFAULT_CONFIG: OrchestrationAPIConfig = {
-  baseURL: (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_API_BASE_URL) || '/api/proxy',
-  timeout: 5000, // Reduced to 5 seconds to prevent hanging
-  retryAttempts: 0, // Disable retries to prevent database overload
-  retryDelay: 5000, // Increased delay
-  enableWebSocket: false, // Disabled by default to prevent WebSocket errors in development
-  websocketURL: (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_WS_URL) || 'ws://localhost:8000/ws'
+  baseURL: (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_API_BASE_URL) || '/proxy',
+  timeout: 10000, // 10 seconds timeout
+  retryAttempts: 3, // ENABLED: APIs exist, safe to retry
+  retryDelay: 10000, // Increased delay if retries are enabled
+  enableWebSocket: true, // ENABLED: WebSocket routes ARE implemented in backend
+  websocketURL: (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_WS_URL) || 'ws://localhost:8000/ws/integration'
 };
 
 /**
@@ -1435,14 +1435,103 @@ export class RacineOrchestrationAPI {
 
   /**
    * Global search: get user's saved searches (used by useGlobalSearch hook)
+   * FIXED: Properly bound method to prevent "is not a function" errors
    */
   async getSavedSearches(): Promise<any[]> {
     try {
-      // Endpoint not available in backend; gate feature to prevent loops
+      // Endpoint not available in backend; return empty to prevent loops
+      console.log('getSavedSearches: returning empty array (backend endpoint not implemented)');
       return [];
-    } catch (_e) {
+    } catch (error) {
+      console.warn('getSavedSearches error:', error);
       return [];
     }
+  }
+
+  /**
+   * Test backend connectivity and switch to offline mode if needed
+   */
+  async testBackendConnectivity(): Promise<boolean> {
+    try {
+      const response = await fetch(`${this.config.baseURL}/health`, {
+        method: 'GET',
+        signal: AbortSignal.timeout(5000) // 5 second timeout for health check
+      });
+      
+      if (response.ok) {
+        this.setOfflineMode(false);
+        return true;
+      } else {
+        this.setOfflineMode(true);
+        return false;
+      }
+    } catch (error) {
+      console.warn('Backend connectivity test failed, switching to offline mode:', error);
+      this.setOfflineMode(true);
+      return false;
+    }
+  }
+
+  /**
+   * Initialize the API and test connectivity
+   */
+  async initialize(): Promise<void> {
+    // Test backend connectivity on initialization
+    await this.testBackendConnectivity();
+    
+    // Set up online/offline event listeners
+    if (typeof window !== 'undefined') {
+      window.addEventListener('online', () => {
+        console.log('Network came online, testing backend connectivity...');
+        this.testBackendConnectivity();
+      });
+      
+      window.addEventListener('offline', () => {
+        console.log('Network went offline, switching to offline mode...');
+        this.setOfflineMode(true);
+      });
+    }
+  }
+
+  /**
+   * Set offline mode status
+   */
+  setOfflineMode(offline: boolean): void {
+    this.offlineMode = offline;
+  }
+
+  /**
+   * Global search: get popular searches
+   * FIXED: Properly bound method to prevent "is not a function" errors
+   */
+  async getPopularSearches(): Promise<any[]> {
+    try {
+      // Endpoint not available in backend; return empty to prevent loops
+      console.log('getPopularSearches: returning empty array (backend endpoint not implemented)');
+      return [];
+    } catch (error) {
+      console.warn('getPopularSearches error:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Global search: save a search
+   */
+  async saveSearch(searchData: any): Promise<any> {
+    return this.makeRequest('/api/v1/global-search/save', {
+      method: 'POST',
+      body: JSON.stringify(searchData)
+    });
+  }
+
+  /**
+   * Global search: delete a saved search
+   */
+  async deleteSavedSearch(searchId: string): Promise<any> {
+    return this.makeRequest(`/api/v1/global-search/delete/${searchId}`, {
+      method: 'DELETE'
+    });
   }
 }
 
@@ -1964,102 +2053,6 @@ export const scanRuleSetApis = {
   }
 };
 
-// Add backend connectivity testing methods to the main class
-Object.assign(RacineOrchestrationAPI.prototype, {
-  /**
-   * Test backend connectivity and switch to offline mode if needed
-   */
-  async testBackendConnectivity(): Promise<boolean> {
-    try {
-      const response = await fetch(`${this.config.baseURL}/health`, {
-        method: 'GET',
-        signal: AbortSignal.timeout(5000) // 5 second timeout for health check
-      });
-      
-      if (response.ok) {
-        this.setOfflineMode(false);
-        return true;
-      } else {
-        this.setOfflineMode(true);
-        return false;
-      }
-    } catch (error) {
-      console.warn('Backend connectivity test failed, switching to offline mode:', error);
-      this.setOfflineMode(true);
-      return false;
-    }
-  },
-
-  /**
-   * Initialize the API and test connectivity
-   */
-  async initialize(): Promise<void> {
-    // Test backend connectivity on initialization
-    await this.testBackendConnectivity();
-    
-    // Set up online/offline event listeners
-    if (typeof window !== 'undefined') {
-      window.addEventListener('online', () => {
-        console.log('Network came online, testing backend connectivity...');
-        this.testBackendConnectivity();
-      });
-      
-      window.addEventListener('offline', () => {
-        console.log('Network went offline, switching to offline mode...');
-        this.setOfflineMode(true);
-      });
-    }
-  },
-
-  /**
-   * Global search: get user's saved searches
-   */
-  async getSavedSearches(this: RacineOrchestrationAPI): Promise<any[]> {
-    try {
-      const response = await this.makeRequest<any>('/api/v1/global-search/saved-searches', {
-        method: 'GET'
-      });
-      return (response as any)?.data || [];
-    } catch (error) {
-      console.warn('getSavedSearches failed:', error);
-      return [];
-    }
-  },
-
-  /**
-   * Global search: get popular searches
-   */
-  async getPopularSearches(this: RacineOrchestrationAPI): Promise<any[]> {
-    try {
-      const response = await this.makeRequest<any>('/api/v1/global-search/popular-searches', {
-        method: 'GET'
-      });
-      return (response as any)?.data || [];
-    } catch (error) {
-      console.warn('getPopularSearches failed:', error);
-      return [];
-    }
-  },
-
-  /**
-   * Global search: save a search
-   */
-  async saveSearch(this: RacineOrchestrationAPI, searchData: any): Promise<any> {
-    return this.makeRequest('/api/v1/global-search/save', {
-      method: 'POST',
-      body: JSON.stringify(searchData)
-    });
-  },
-
-  /**
-   * Global search: delete a saved search
-   */
-  async deleteSavedSearch(this: RacineOrchestrationAPI, searchId: string): Promise<any> {
-    return this.makeRequest(`/api/v1/global-search/delete/${searchId}`, {
-      method: 'DELETE'
-    });
-  }
-});
 
 /**
  * Export types for external use

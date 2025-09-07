@@ -31,14 +31,14 @@ export class AuthService {
   // OAuth authentication
   async initiateGoogleLogin(): Promise<void> {
     if (typeof window !== 'undefined') {
-      const backendBase = (process.env.RACINE_BACKEND_URL || 'api/proxy').replace(/\/$/, '');
+      const backendBase = (process.env.RACINE_BACKEND_URL || '/proxy').replace(/\/$/, '');
       window.location.href = `${backendBase}${AUTH_ENDPOINTS.GOOGLE_LOGIN}`;
     }
   }
 
   async initiateMicrosoftLogin(): Promise<void> {
     if (typeof window !== 'undefined') {
-      const backendBase = (process.env.RACINE_BACKEND_URL || 'api/proxy').replace(/\/$/, '');
+      const backendBase = (process.env.RACINE_BACKEND_URL || '/proxy').replace(/\/$/, '');
       window.location.href = `${backendBase}${AUTH_ENDPOINTS.MICROSOFT_LOGIN}`;
     }
   }
@@ -46,7 +46,7 @@ export class AuthService {
   // OAuth popup handling
   async handleOAuthPopup(provider: 'google' | 'microsoft'): Promise<AuthResponse> {
     return new Promise((resolve, reject) => {
-      const backendBase = (process.env.RACINE_BACKEND_URL || 'api/proxy').replace(/\/$/, '');
+      const backendBase = (process.env.RACINE_BACKEND_URL || '/proxy').replace(/\/$/, '');
       const popup = window.open(
         `${backendBase}${provider === 'google' ? AUTH_ENDPOINTS.GOOGLE_LOGIN : AUTH_ENDPOINTS.MICROSOFT_LOGIN}`,
         'oauth',
@@ -72,7 +72,7 @@ export class AuthService {
       // Listen for OAuth success message
       const messageHandler = (event: MessageEvent) => {
         try {
-          const backendBase = (process.env.RACINE_BACKEND_URL || 'api/proxy').replace(/\/$/, '');
+          const backendBase = (process.env.RACINE_BACKEND_URL || '/proxy').replace(/\/$/, '');
           const backendOrigin = new URL(backendBase).origin;
           const allowedOrigins = new Set([window.location.origin, backendOrigin]);
           if (!allowedOrigins.has(event.origin)) return;

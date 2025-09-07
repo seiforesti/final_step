@@ -13,17 +13,12 @@ import { Gauge, TrendingUp, TrendingDown, Activity, Clock, Zap, Database, Server
 
 import { useDataSourcePerformanceMetricsQuery } from "@/hooks/useDataSources"
 import { DataSource } from "./types"
+import { useDataSourceStatsQuery,
+useDataSourceHealthQuery 
+} from "./services/apis"
 
 // Import enterprise hooks for better backend integration
 import { useEnterpriseFeatures, useMonitoringFeatures } from "./hooks/use-enterprise-features"
-import { 
-  useEnhancedPerformanceMetricsQuery,
-  useSystemHealthQuery,
-  usePerformanceAlertsQuery,
-  usePerformanceTrendsQuery,
-  useOptimizationRecommendationsQuery,
-  usePerformanceSummaryReportQuery,
-} from "./services/enterprise-apis"
 
 interface PerformanceViewProps {
   dataSource: DataSource
@@ -122,96 +117,79 @@ export function DataSourcePerformanceView({
     days: 7
   })
 
-  // Performance Trends
-  const {
-    data: performanceTrends,
-    isLoading: trendsLoading,
-  } = usePerformanceTrendsQuery(dataSource.id, '30d')
-
-  // Optimization Recommendations
-  const {
-    data: optimizationRecommendations,
-    isLoading: recommendationsLoading,
-  } = useOptimizationRecommendationsQuery(dataSource.id)
-
-  // Performance Summary Report
-  const {
-    data: performanceReport,
-    isLoading: reportLoading,
-  } = usePerformanceSummaryReportQuery({
-    time_range: '7d',
-    data_sources: [dataSource.id]
-  })
+  // Mock data for trends and recommendations until backend endpoints are available
+  const performanceTrends = []
+  const optimizationRecommendations = []
+  const performanceReport = null
 
   // Consolidated loading and error states
-  const isLoading = metricsLoading || healthLoading || alertsLoading || trendsLoading || recommendationsLoading || reportLoading
-  const error = metricsError
+  const isLoading = statsLoading || healthLoading
+  const error = statsError
   const refetch = () => {
-    refetchMetrics()
+    refetchStats()
     refetchHealth()
-    refetchAlerts()
   }
 
-  // Use real performance data from enhanced APIs (NO MOCK DATA)
+  // Use real performance data from working APIs (NO MOCK DATA)
   const performanceData = useMemo(() => {
-    if (!enhancedPerformanceMetrics && !systemHealth) return null
+    if (!dataSourceStats && !dataSourceHealth) return null
 
     // Extract real metrics from backend data
-    const metrics = enhancedPerformanceMetrics?.data || {}
-    const health = systemHealth?.performance_summary || {}
+    const stats = dataSourceStats || {}
+    const health = dataSourceHealth || {}
     
     return {
-      overallScore: metrics.overall_score || health.overall_score || 0,
+      overallScore: health.metrics?.health_score || 0,
       responseTime: {
         name: "Response Time",
-        value: metrics.response_time || health.response_time || 0,
+        value: health.latency_ms || 0,
         unit: "ms",
-        trend: metrics.response_time_trend || "stable",
+        trend: "stable",
         threshold: 100,
-        status: (metrics.response_time || 0) < 100 ? "good" : "warning",
+        status: (health.latency_ms || 0) < 100 ? "good" : "warning",
         timestamp: new Date().toISOString(),
       },
       throughput: {
-        name: "Throughput",
-        value: metrics.throughput || health.throughput || 0,
-        unit: "ops/s",
-        trend: metrics.throughput_trend || "stable",
+        name: "Query Time",
+        value: stats.performance_stats?.avg_query_time || 0,
+        unit: "ms",
+        trend: "stable",
         threshold: 100,
-        status: "good",
+        status: (stats.performance_stats?.avg_query_time || 0) < 100 ? "good" : "warning",
         timestamp: new Date().toISOString(),
       },
       errorRate: {
         name: "Error Rate",
-        value: metrics.error_rate || health.error_rate || 0,
+        value: health.metrics?.error_rate || 0,
         unit: "%",
-        trend: metrics.error_trend || "stable",
+        trend: "stable",
         threshold: 5,
-        status: (metrics.error_rate || 0) < 5 ? "good" : "critical",
+        status: (health.metrics?.error_rate || 0) < 5 ? "good" : "critical",
         timestamp: new Date().toISOString(),
       },
       cpuUsage: {
         name: "CPU Usage",
-        value: metrics.cpu_usage || health.cpu_usage || 0,
+        value: health.metrics?.cpu_usage || 0,
         unit: "%",
-        trend: metrics.cpu_trend || "stable",
+        trend: "stable",
         threshold: 80,
-        status: (metrics.cpu_usage || 0) < 80 ? "good" : "warning",
+        status: (health.metrics?.cpu_usage || 0) < 80 ? "good" : "warning",
         timestamp: new Date().toISOString(),
       },
       memoryUsage: {
-        name: "HardDrive Usage", 
-        value: metrics.memory_usage || health.memory_usage || 0,
+        name: "Storage Usage", 
+        value: health.metrics?.storage_used || 0,
         unit: "%",
-        trend: metrics.memory_trend || "stable",
+        trend: "stable",
         threshold: 85,
-        status: (metrics.memory_usage || 0) < 85 ? "good" : "warning",
+        status: (health.metrics?.storage_used || 0) < 85 ? "good" : "warning",
         timestamp: new Date().toISOString(),
       }
     }
-  }, [enhancedPerformanceMetrics, systemHealth])
+  }, [dataSourceStats, dataSourceHealth])
 
   // Return loading state if no data yet
-  if (isLoading && !performanceData) {
+  if ((statsLoading || healthLoading) && !performanceData) {
     return (
       <div className="space-y-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

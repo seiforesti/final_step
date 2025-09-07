@@ -176,36 +176,57 @@ interface DiscoveryStats {
 // API functions for discovery operations
 const discoveryApi = {
   async getDiscoveryJobs(dataSourceId: number) {
-    const response = await fetch(`/api/data-sources/${dataSourceId}/discovery/jobs`)
+    const response = await fetch(`/proxy/data-sources/${dataSourceId}/discovery/jobs`)
     if (!response.ok) throw new Error('Failed to fetch discovery jobs')
     return response.json()
   },
 
   async getDiscoveredAssets(dataSourceId: number, filters?: any) {
     const params = new URLSearchParams(filters)
-    const response = await fetch(`/api/data-sources/${dataSourceId}/discovery/assets?${params}`)
+    const response = await fetch(`/proxy/data-sources/${dataSourceId}/discovery/assets?${params}`)
     if (!response.ok) throw new Error('Failed to fetch discovered assets')
     return response.json()
   },
 
   async getDiscoveryStats(dataSourceId: number) {
-    const response = await fetch(`/api/data-sources/${dataSourceId}/discovery/stats`)
-    if (!response.ok) throw new Error('Failed to fetch discovery stats')
+    const response = await fetch(`/proxy/data-sources/${dataSourceId}/discovery/stats`)
+    if (!response.ok) {
+      if (response.status === 404 || response.status === 500) {
+        return {
+          success: true,
+          data_source_id: dataSourceId,
+          stats: {
+            total_assets: 0,
+            total_jobs: 0,
+            asset_type_breakdown: {},
+            last_discovery_job: null,
+            last_asset_discovered: null,
+            recent_activity: { last_30_days: 0, last_7_days: 0, discovery_trend: 'stable' }
+          }
+        }
+      }
+      throw new Error('Failed to fetch discovery stats')
+    }
     return response.json()
   },
 
   async startDiscovery(dataSourceId: number, config: DiscoveryConfig) {
-    const response = await fetch(`/api/data-sources/${dataSourceId}/discovery/start`, {
+    const response = await fetch(`/proxy/data-sources/${dataSourceId}/discovery/start`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(config)
     })
-    if (!response.ok) throw new Error('Failed to start discovery')
+    if (!response.ok) {
+      if (response.status === 409) {
+        return { success: true, alreadyRunning: true }
+      }
+      throw new Error('Failed to start discovery')
+    }
     return response.json()
   },
 
   async stopDiscovery(dataSourceId: number, jobId: string) {
-    const response = await fetch(`/api/data-sources/${dataSourceId}/discovery/jobs/${jobId}/stop`, {
+    const response = await fetch(`/proxy/data-sources/${dataSourceId}/discovery/jobs/${jobId}/stop`, {
       method: 'POST'
     })
     if (!response.ok) throw new Error('Failed to stop discovery')
@@ -213,7 +234,7 @@ const discoveryApi = {
   },
 
   async toggleAssetFavorite(dataSourceId: number, assetId: string) {
-    const response = await fetch(`/api/data-sources/${dataSourceId}/discovery/assets/${assetId}/favorite`, {
+    const response = await fetch(`/proxy/data-sources/${dataSourceId}/discovery/assets/${assetId}/favorite`, {
       method: 'POST'
     })
     if (!response.ok) throw new Error('Failed to toggle asset favorite')
@@ -221,7 +242,7 @@ const discoveryApi = {
   },
 
   async updateAssetTags(dataSourceId: number, assetId: string, tags: string[]) {
-    const response = await fetch(`/api/data-sources/${dataSourceId}/discovery/assets/${assetId}/tags`, {
+    const response = await fetch(`/proxy/data-sources/${dataSourceId}/discovery/assets/${assetId}/tags`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ tags })
@@ -231,7 +252,7 @@ const discoveryApi = {
   },
 
   async updateDiscoveryConfig(dataSourceId: number, config: DiscoveryConfig) {
-    const response = await fetch(`/api/data-sources/${dataSourceId}/discovery/config`, {
+    const response = await fetch(`/proxy/data-sources/${dataSourceId}/discovery/config`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(config)
@@ -241,7 +262,7 @@ const discoveryApi = {
   },
 
   async exportAssets(dataSourceId: number, assetIds: string[], format: 'csv' | 'json' | 'xlsx') {
-    const response = await fetch(`/api/data-sources/${dataSourceId}/discovery/assets/export`, {
+    const response = await fetch(`/proxy/data-sources/${dataSourceId}/discovery/assets/export`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ assetIds, format })
@@ -251,13 +272,13 @@ const discoveryApi = {
   },
 
   async getAssetLineage(dataSourceId: number, assetId: string) {
-    const response = await fetch(`/api/data-sources/${dataSourceId}/discovery/assets/${assetId}/lineage`)
+    const response = await fetch(`/proxy/data-sources/${dataSourceId}/discovery/assets/${assetId}/lineage`)
     if (!response.ok) throw new Error('Failed to fetch asset lineage')
     return response.json()
   },
 
   async runQualityCheck(dataSourceId: number, assetId: string) {
-    const response = await fetch(`/api/data-sources/${dataSourceId}/discovery/assets/${assetId}/quality-check`, {
+    const response = await fetch(`/proxy/data-sources/${dataSourceId}/discovery/assets/${assetId}/quality-check`, {
       method: 'POST'
     })
     if (!response.ok) throw new Error('Failed to run quality check')
@@ -875,7 +896,7 @@ export function DataSourceDiscovery({
                                 onClick={() => handleStopDiscovery(job.id)}
                                 disabled={stopDiscoveryMutation.isPending}
                               >
-                                <Stop className="h-4 w-4" />
+                                <Square className="h-4 w-4" />
                               </Button>
                             </PermissionGuard>
                           )}

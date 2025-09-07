@@ -274,7 +274,7 @@ export const API_ENDPOINTS = {
       UPDATE: '/api/racine/workspace/{id}/update',
       DELETE: '/api/racine/workspace/{id}/delete',
       GET: '/api/racine/workspace/{id}',
-      LIST: '/api/racine/workspace/list',
+      LIST: '/api/racine/workspace/',
       RESOURCES: '/api/racine/workspace/{id}/resources',
       MEMBERS: '/api/racine/workspace/{id}/members',
       ANALYTICS: '/api/racine/workspace/{id}/analytics',

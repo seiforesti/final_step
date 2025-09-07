@@ -572,8 +572,8 @@ export const LoginForm: React.FC = () => {
     try {
       // Use Vite proxy to redirect to backend
       const oauthUrl = provider === 'google' 
-        ? `/api/proxy/auth/google`
-        : `/api/proxy/auth/microsoft`;
+        ? `/proxy/auth/google`
+        : `/proxy/auth/microsoft`;
       
       // Open OAuth window
       const oauthWindow = window.open(

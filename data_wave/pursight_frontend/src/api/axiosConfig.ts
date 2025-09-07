@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // Use Vite proxy for all API calls
-axios.defaults.baseURL = "/api/proxy";
+axios.defaults.baseURL = "/proxy";
 
 // Do not send cookies by default (use bearer token headers instead)
 axios.defaults.withCredentials = false;
@@ -13,8 +13,8 @@ axios.defaults.timeout = 15000; // 15 seconds
 axios.interceptors.request.use(
   (config) => {
     // Prevent double API prefix issues
-    if (config.url?.startsWith('/api/proxy/api/')) {
-      config.url = config.url.replace('/api/proxy/api/', '/api/proxy/');
+    if (config.url?.startsWith('/proxy/api/')) {
+      config.url = config.url.replace('/proxy/api/', '/proxy/');
       console.warn('Fixed double API prefix:', config.url);
     }
     

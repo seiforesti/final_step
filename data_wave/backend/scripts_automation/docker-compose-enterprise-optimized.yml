@@ -21,6 +21,11 @@ services:
       - ENVIRONMENT=development
       # PgBouncer optimization settings
       - DB_USE_PGBOUNCER=true
+      # Fail-fast DB timeouts to avoid backend hangs on stuck queries
+      - DB_CONNECT_TIMEOUT=10
+      - DB_STATEMENT_TIMEOUT_MS=15000
+      - DB_IDLE_IN_TXN_TIMEOUT_MS=15000
+      - DB_APPLICATION_NAME=data_governance_backend
       - LOG_LEVEL=INFO
       # DB pool & concurrency safety - OPTIMIZED FOR ENTERPRISE LOAD
       - DB_POOL_SIZE=25                    # Reduced since PgBouncer handles pooling
@@ -95,7 +100,8 @@ services:
       - RESERVE_POOL_TIMEOUT=5
       - SERVER_CONNECT_TIMEOUT=15
       - SERVER_LOGIN_RETRY=15
-      - QUERY_TIMEOUT=0
+      # Avoid infinite query time; set a finite timeout (ms)
+      - QUERY_TIMEOUT=30000
       - QUERY_WAIT_TIMEOUT=120
       - CLIENT_IDLE_TIMEOUT=0
       - CLIENT_LOGIN_TIMEOUT=60

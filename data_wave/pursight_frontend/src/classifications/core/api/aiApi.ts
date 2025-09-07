@@ -818,7 +818,7 @@ class AIApiClient {
 
 // Default configuration
 const defaultAIApiConfig: AIApiConfig = {
-  baseURL: (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_API_BASE_URL) || '/api/proxy',
+  baseURL: (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_API_BASE_URL) || '/proxy',
   timeout: 60000, // 60 seconds for AI operations
   streaming: {
     enabled: true,

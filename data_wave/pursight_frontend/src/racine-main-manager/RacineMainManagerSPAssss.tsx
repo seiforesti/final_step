@@ -1984,7 +1984,7 @@ const useAdvancedAnalytics = () => {
       try {
         setIsLoading(true);
         const response = await fetch(
-          "/api/proxy/racine/analytics/comprehensive"
+          "/proxy/racine/analytics/comprehensive"
         );
         if (response.ok) {
           const data = await response.json();
@@ -2332,7 +2332,7 @@ const useSystemIntelligence = () => {
       inFlightRef.current = true;
       try {
         const response = await fetch(
-          "/api/proxy/racine/intelligence/comprehensive"
+          "/proxy/racine/intelligence/comprehensive"
         );
         if (response.ok) {
           const data = await response.json();

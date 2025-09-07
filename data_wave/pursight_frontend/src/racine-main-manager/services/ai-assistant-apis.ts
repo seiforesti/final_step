@@ -80,7 +80,7 @@ interface AIAssistantAPIConfig {
  * Default configuration
  */
 const DEFAULT_CONFIG: AIAssistantAPIConfig = {
-  baseURL: (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_API_BASE_URL) || '/api/proxy',
+  baseURL: (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_API_BASE_URL) || '/proxy',
   timeout: 5000, // Reduced to 5 seconds to prevent hanging
   retryAttempts: 0, // Disable retries to prevent database overload
   retryDelay: 5000, // Increased delay

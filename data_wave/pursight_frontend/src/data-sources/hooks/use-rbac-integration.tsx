@@ -72,7 +72,7 @@ interface PermissionCheckOptions {
 }
 
 // API Configuration
-const API_BASE_URL = (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_API_BASE_URL) || '/api/proxy'
+const API_BASE_URL = (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_API_BASE_URL) || '/proxy'
 
 const rbacApi = axios.create({
   baseURL: `${API_BASE_URL}/rbac`,
@@ -101,8 +101,7 @@ rbacApi.interceptors.request.use((config) => {
 const rbacApiFunctions = {
   // Authentication
   getCurrentUser: async (): Promise<User> => {
-    // Use relative path to avoid duplicating baseURL
-    const response = await axios.get(`/auth/me`, {
+    const response = await axios.get(`/rbac/me`, {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${localStorage.getItem('authToken') || sessionStorage.getItem('session_token') || document.cookie.split('; ').find(row => row.startsWith('session_token='))?.split('=')[1] || ''}`
@@ -140,9 +139,67 @@ const rbacApiFunctions = {
     return response.data
   },
 
-  getUserEffectivePermissions: async (userId: number): Promise<any[]> => {
-    const response = await rbacApi.get(`/user/permissions`)
-    return response.data
+  getUserEffectivePermissions: async (userId: number): Promise<string[]> => {
+    const normalize = (input: any): string[] => {
+      const normalizeResource = (r: string) => (r === 'data_sources' || r === 'datasource' ? 'data_source' : r)
+      const addSynthesized = (perms: string[]) => {
+        const hasDsReadLike = perms.some((p) => p.startsWith('data_source:') && (
+          p === 'data_source:read' ||
+          p === 'data_source:view' ||
+          p === 'data_source:view_catalog' ||
+          p === 'data_source:view_reports' ||
+          p === 'data_source:view_analytics' ||
+          p === 'data_source:view_discovery' ||
+          p === 'data_source:view_lineage' ||
+          p === 'data_source:view_monitoring' ||
+          p === 'data_source:view_performance' ||
+          p === 'data_source:view_compliance' ||
+          p === 'data_source:view_security'
+        ))
+        if (hasDsReadLike && !perms.includes('data_source:read')) perms.push('data_source:read')
+        return Array.from(new Set(perms))
+      }
+      if (Array.isArray(input)) {
+        const perms = input
+          .map((p: any) => {
+            if (typeof p === 'string') return p.includes('.') ? p.replace('.', ':') : p
+            if (p && typeof p === 'object' && p.resource && p.action) {
+              return `${normalizeResource(String(p.resource))}:${String(p.action)}`
+            }
+            return null
+          })
+          .filter(Boolean) as string[]
+        return addSynthesized(perms)
+      }
+      if (input && Array.isArray(input.flatPermissions)) {
+        const perms = (input.flatPermissions as string[]).map((s) => s.includes('.') ? s.replace('.', ':') : s)
+        return addSynthesized(perms)
+      }
+      return []
+    }
+
+    try {
+      // Primary: /rbac/user/permissions (confirmed working)
+      const p2 = await axios.get(`/rbac/user/permissions`)
+      const n2 = normalize(p2.data)
+      if (n2.length) return n2
+    } catch {}
+
+    try {
+      // Fallback 1: /auth/permissions
+      const p1 = await axios.get(`/auth/permissions`)
+      const n1 = normalize(p1.data)
+      if (n1.length) return n1
+    } catch {}
+
+    try {
+      // Fallback 2: /rbac/me/flat-permissions
+      const p3 = await axios.get(`/rbac/me/flat-permissions`)
+      const n3 = normalize(p3.data)
+      return n3
+    } catch {
+      return []
+    }
   },
 
   checkUserPermission: async (userId: number, permission: string, options?: PermissionCheckOptions): Promise<boolean> => {
@@ -230,7 +287,7 @@ export function useRBACIntegration() {
     setRBACState(prev => ({
       ...prev,
       currentUser: currentUser || null,
-      permissions: userPermissions?.map(p => p.action) || [],
+      permissions: (userPermissions as unknown as string[]) || [],
       loading: userLoading || permissionsLoading,
       error: userError ? String(userError) : null
     }))

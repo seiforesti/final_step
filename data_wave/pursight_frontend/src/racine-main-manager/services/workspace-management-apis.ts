@@ -71,14 +71,14 @@ interface WorkspaceAPIConfig {
  * Default configuration
  */
 const DEFAULT_CONFIG: WorkspaceAPIConfig = {
-  baseURL: (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_API_BASE_URL) || '/api/proxy',
+  baseURL: (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_API_BASE_URL) || '/proxy',
   timeout: 30000,
   retryAttempts: 3,
   retryDelay: 1000,
   enableRealTimeSync: true, // Enable real-time sync by default
   // Prefer proxied WS path if not explicitly set
   websocketURL: (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_WS_URL)
-    || (typeof window !== 'undefined' ? `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}/api/proxy/ws` : 'ws://localhost:5173/api/proxy/ws')
+    || (typeof window !== 'undefined' ? `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}/proxy/ws` : 'ws://localhost:8000/ws/workspace')
 };
 
 /**
@@ -285,7 +285,7 @@ class WorkspaceManagementAPI {
 
   /**
    * List user's workspaces with filtering and pagination
-   * Maps to: GET /api/racine/workspace/list
+   * Maps to: GET /api/racine/workspace/
    */
   async listWorkspaces(
     pagination?: PaginationRequest,
@@ -366,7 +366,7 @@ class WorkspaceManagementAPI {
    * Maps to: GET /api/racine/workspace/{id}/resources
    */
   async getWorkspaceResources(workspaceId: UUID): Promise<WorkspaceResourceResponse[]> {
-    const response = await fetch(`${this.config.baseURL}/api/racine/workspace/${workspaceId}/resources`, {
+    const response = await fetch(`${this.config.baseURL}/racine/workspace/${workspaceId}/resources`, {
       method: 'GET',
       headers: this.getAuthHeaders()
     });
@@ -383,7 +383,7 @@ class WorkspaceManagementAPI {
    * Maps to: GET /api/racine/workspace/{id}/members
    */
   async getWorkspaceMembers(workspaceId: UUID): Promise<WorkspaceMemberResponse[]> {
-    const response = await fetch(`${this.config.baseURL}/api/racine/workspace/${workspaceId}/members`, {
+    const response = await fetch(`${this.config.baseURL}/racine/workspace/${workspaceId}/members`, {
       method: 'GET',
       headers: this.getAuthHeaders()
     });
@@ -402,7 +402,7 @@ class WorkspaceManagementAPI {
   async getWorkspaceAnalytics(workspaceId: UUID): Promise<WorkspaceAnalyticsResponse> {
     return withGracefulErrorHandling(
       async () => {
-        const response = await fetch(`${this.config.baseURL}/api/racine/workspace/${workspaceId}/analytics`, {
+        const response = await fetch(`${this.config.baseURL}/racine/workspace/${workspaceId}/analytics`, {
           method: 'GET',
           headers: this.getAuthHeaders()
         });
@@ -434,7 +434,7 @@ class WorkspaceManagementAPI {
   ): Promise<any> {
     return withGracefulErrorHandling(
       async () => {
-        const response = await fetch(`${this.config.baseURL}/api/racine/workspace/${workspaceId}/tabs/${tabId}/configuration`, {
+        const response = await fetch(`${this.config.baseURL}/racine/workspace/${workspaceId}/tabs/${tabId}/configuration`, {
           method: 'GET',
           headers: this.getAuthHeaders()
         });
@@ -462,7 +462,7 @@ class WorkspaceManagementAPI {
   ): Promise<any> {
     return withGracefulErrorHandling(
       async () => {
-        const response = await fetch(`${this.config.baseURL}/api/racine/workspace/${workspaceId}/tabs/configuration`, {
+        const response = await fetch(`${this.config.baseURL}/racine/workspace/${workspaceId}/tabs/configuration`, {
           method: 'POST',
           headers: this.getAuthHeaders(),
           body: JSON.stringify({
@@ -496,7 +496,7 @@ class WorkspaceManagementAPI {
   ): Promise<any> {
     return withGracefulErrorHandling(
       async () => {
-        const response = await fetch(`${this.config.baseURL}/api/racine/workspace/${workspaceId}/tabs/${tabId}/configuration`, {
+        const response = await fetch(`${this.config.baseURL}/racine/workspace/${workspaceId}/tabs/${tabId}/configuration`, {
           method: 'PUT',
           headers: this.getAuthHeaders(),
           body: JSON.stringify({
@@ -529,7 +529,7 @@ class WorkspaceManagementAPI {
   ): Promise<void> {
     return withGracefulErrorHandling(
       async () => {
-        const response = await fetch(`${this.config.baseURL}/api/racine/workspace/${workspaceId}/tabs/${tabId}/configuration`, {
+        const response = await fetch(`${this.config.baseURL}/racine/workspace/${workspaceId}/tabs/${tabId}/configuration`, {
           method: 'DELETE',
           headers: this.getAuthHeaders()
         });
@@ -555,7 +555,7 @@ class WorkspaceManagementAPI {
   }): Promise<any> {
     return withGracefulErrorHandling(
       async () => {
-        const response = await fetch(`${this.config.baseURL}/api/racine/workspace/${request.workspaceId}/tabs/groups`, {
+        const response = await fetch(`${this.config.baseURL}/racine/workspace/${request.workspaceId}/tabs/groups`, {
           method: 'POST',
           headers: this.getAuthHeaders(),
           body: JSON.stringify({
@@ -589,7 +589,7 @@ class WorkspaceManagementAPI {
   ): Promise<any> {
     return withGracefulErrorHandling(
       async () => {
-        const response = await fetch(`${this.config.baseURL}/api/racine/workspace/${workspaceId}/tabs/groups/${groupId}`, {
+        const response = await fetch(`${this.config.baseURL}/racine/workspace/${workspaceId}/tabs/groups/${groupId}`, {
           method: 'PUT',
           headers: this.getAuthHeaders(),
           body: JSON.stringify({
@@ -622,7 +622,7 @@ class WorkspaceManagementAPI {
   ): Promise<void> {
     return withGracefulErrorHandling(
       async () => {
-        const response = await fetch(`${this.config.baseURL}/api/racine/workspace/${workspaceId}/tabs/groups/${groupId}`, {
+        const response = await fetch(`${this.config.baseURL}/racine/workspace/${workspaceId}/tabs/groups/${groupId}`, {
           method: 'DELETE',
           headers: this.getAuthHeaders()
         });
@@ -648,7 +648,7 @@ class WorkspaceManagementAPI {
   async createWorkspaceFromTemplate(request: any): Promise<WorkspaceResponse> {
     return withGracefulErrorHandling(
       async () => {
-        const response = await fetch(`${this.config.baseURL}/api/racine/workspace/templates/create`, {
+        const response = await fetch(`${this.config.baseURL}/racine/workspace/templates/create`, {
           method: 'POST',
           headers: this.getAuthHeaders(),
           body: JSON.stringify(request)
@@ -673,7 +673,7 @@ class WorkspaceManagementAPI {
   async getWorkspaceTemplates(): Promise<any[]> {
     return withGracefulErrorHandling(
       async () => {
-        const response = await fetch(`${this.config.baseURL}/api/racine/workspace/templates`, {
+        const response = await fetch(`${this.config.baseURL}/racine/workspace/templates`, {
           method: 'GET',
           headers: this.getAuthHeaders()
         });
@@ -704,7 +704,7 @@ class WorkspaceManagementAPI {
   async createWorkspaceTemplate(request: any): Promise<any> {
     return withGracefulErrorHandling(
       async () => {
-        const response = await fetch(`${this.config.baseURL}/api/racine/workspace/templates`, {
+        const response = await fetch(`${this.config.baseURL}/racine/workspace/templates`, {
           method: 'POST',
           headers: this.getAuthHeaders(),
           body: JSON.stringify(request)

@@ -351,7 +351,7 @@ const getDefaultNavigationItems = (): NavigationGroup[] => [
       {
         id: 'permissions',
         label: 'Permissions',
-        href: '/rbac/permissions',
+        href: '/sensitivity-labels/rbac/permissions',
         icon: <Key className="w-4 h-4" />,
         permission: 'permissions:read',
         description: 'Manage permissions'

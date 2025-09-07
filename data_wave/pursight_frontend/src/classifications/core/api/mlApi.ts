@@ -623,7 +623,7 @@ class MLApiClient {
 
 // Default configuration
 const defaultMLApiConfig: MLApiConfig = {
-  baseURL: (typeof window !== 'undefined' && (window as any).ENV?.REACT_APP_API_BASE_URL) || '/api/proxy',
+  baseURL: (typeof window !== 'undefined' && (window as any).ENV?.REACT_APP_API_BASE_URL) || '/proxy',
   timeout: 30000,
   retryConfig: {
     retries: 3,

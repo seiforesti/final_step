@@ -174,8 +174,8 @@ const pathToBreadcrumbMap: Record<string, PathSegment> = {
     permission: 'roles:read',
     isDynamic: true
   },
-  '/rbac/permissions': {
-    path: '/rbac/permissions',
+  '/sensitivity-labels/rbac/permissions': {
+    path: '/sensitivity-labels/rbac/permissions',
     label: 'Permissions',
     icon: <Key className="w-4 h-4" />,
     permission: 'permissions:read'

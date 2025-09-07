@@ -961,29 +961,46 @@ async def get_discovery_jobs(
                 detail=f"Data source {data_source_id} not found"
             )
         
-        # Get discovery jobs from database
-        from app.models.advanced_catalog_models import DiscoveryJob
+        # Get discovery jobs from database with safe import guard
+        try:
+            from app.models.advanced_catalog_models import DiscoveryJob  # type: ignore
+            _DiscoveryJob = DiscoveryJob
+            _fallback = False
+        except Exception:
+            # Fallback to discovery history if advanced models are unavailable
+            from app.models.scan_models import DiscoveryHistory as _DiscoveryJob  # type: ignore
+            _fallback = True
         
-        jobs_query = select(DiscoveryJob).where(
-            DiscoveryJob.data_source_id == data_source_id
-        ).order_by(DiscoveryJob.created_at.desc())
+        jobs_query = select(_DiscoveryJob).where(
+            _DiscoveryJob.data_source_id == data_source_id
+        ).order_by(_DiscoveryJob.created_at.desc())
         
         discovery_jobs = session.execute(jobs_query).scalars().all()
         
         # Convert to response format
         jobs = []
         for job in discovery_jobs:
+            # Map fields safely for either model
+            name = getattr(job, 'name', f"Discovery Job {getattr(job, 'id', '')}")
+            status_val = getattr(job, 'status', getattr(job, 'status', 'unknown'))
+            strategy = getattr(job, 'strategy', getattr(job, 'discovery_method', 'comprehensive'))
+            created_at = getattr(job, 'created_at', getattr(job, 'started_at', None))
+            started_at = getattr(job, 'started_at', None)
+            completed_at = getattr(job, 'completed_at', None)
+            created_by = getattr(job, 'created_by', None)
+            total_assets_found = getattr(job, 'total_assets_found', getattr(job, 'assets_discovered', 0)) or 0
+            progress_percentage = getattr(job, 'progress_percentage', None) or 0
             job_info = {
-                "id": job.id,
-                "name": job.name,
-                "status": job.status,
-                "strategy": job.strategy,
-                "created_at": job.created_at.isoformat(),
-                "started_at": job.started_at.isoformat() if job.started_at else None,
-                "completed_at": job.completed_at.isoformat() if job.completed_at else None,
-                "created_by": job.created_by,
-                "total_assets_found": job.total_assets_found or 0,
-                "progress_percentage": job.progress_percentage or 0
+                "id": getattr(job, 'id', None),
+                "name": name,
+                "status": status_val,
+                "strategy": strategy,
+                "created_at": created_at.isoformat() if created_at else None,
+                "started_at": started_at.isoformat() if started_at else None,
+                "completed_at": completed_at.isoformat() if completed_at else None,
+                "created_by": created_by,
+                "total_assets_found": total_assets_found,
+                "progress_percentage": progress_percentage
             }
             jobs.append(job_info)
         
@@ -1125,70 +1142,127 @@ async def get_discovery_stats(
                 detail=f"Data source {data_source_id} not found"
             )
         
-        # Get discovery statistics from database
-        from app.models.advanced_catalog_models import DiscoveredAsset, DiscoveryJob
+        # Get discovery statistics from database with safe import guard
+        _DiscoveredAsset = None
+        _DiscoveryJob = None
+        try:
+            from app.models.advanced_catalog_models import DiscoveredAsset as _DA, DiscoveryJob as _DJ  # type: ignore
+            _DiscoveredAsset = _DA
+            _DiscoveryJob = _DJ
+        except Exception:
+            # Advanced models unavailable; fall back to DiscoveryHistory only
+            _DiscoveredAsset = None
+            _DiscoveryJob = None
         
         # Get total assets count
-        total_assets_query = select(func.count(DiscoveredAsset.id)).where(
-            DiscoveredAsset.data_source_id == data_source_id
-        )
-        total_assets = session.execute(total_assets_query).scalar() or 0
+        total_assets = 0
+        asset_type_counts = []
+        last_asset_discovered = None
+        if _DiscoveredAsset is not None:
+            total_assets_query = select(func.count(_DiscoveredAsset.id)).where(
+                _DiscoveredAsset.data_source_id == data_source_id
+            )
+            total_assets = session.execute(total_assets_query).scalar() or 0
         
         # Get asset type breakdown
-        asset_types_query = select(
-            DiscoveredAsset.asset_type,
-            func.count(DiscoveredAsset.id)
-        ).where(
-            DiscoveredAsset.data_source_id == data_source_id
-        ).group_by(DiscoveredAsset.asset_type)
-        
-        asset_type_counts = session.execute(asset_types_query).all()
+            asset_types_query = select(
+                _DiscoveredAsset.asset_type,
+                func.count(_DiscoveredAsset.id)
+            ).where(
+                _DiscoveredAsset.data_source_id == data_source_id
+            ).group_by(_DiscoveredAsset.asset_type)
+            asset_type_counts = session.execute(asset_types_query).all()
         
         # Get discovery jobs statistics
-        jobs_query = select(
-            func.count(DiscoveryJob.id),
-            func.max(DiscoveryJob.created_at)
-        ).where(
-            DiscoveryJob.data_source_id == data_source_id
-        )
-        
-        job_stats = session.execute(jobs_query).first()
-        total_jobs = job_stats[0] or 0
-        last_discovery = job_stats[1].isoformat() if job_stats[1] else None
+        total_jobs = 0
+        last_discovery = None
+        if _DiscoveryJob is not None:
+            jobs_query = select(
+                func.count(_DiscoveryJob.id),
+                func.max(_DiscoveryJob.created_at)
+            ).where(
+                _DiscoveryJob.data_source_id == data_source_id
+            )
+            job_stats = session.execute(jobs_query).first()
+            total_jobs = job_stats[0] or 0
+            last_discovery = job_stats[1].isoformat() if job_stats[1] else None
+        else:
+            # Fallback: derive job count from DiscoveryHistory entries
+            try:
+                from app.models.scan_models import DiscoveryHistory  # type: ignore
+                fh_count = session.execute(
+                    select(func.count(DiscoveryHistory.id)).where(DiscoveryHistory.data_source_id == data_source_id)
+                ).scalar() or 0
+                total_jobs = fh_count
+                last_time = session.execute(
+                    select(func.max(DiscoveryHistory.discovery_time)).where(DiscoveryHistory.data_source_id == data_source_id)
+                ).scalar()
+                last_discovery = last_time.isoformat() if last_time else None
+            except Exception:
+                pass
         
         # Get recent discovery activity
-        recent_assets_query = select(
-            DiscoveredAsset.discovered_at
-        ).where(
-            DiscoveredAsset.data_source_id == data_source_id
-        ).order_by(DiscoveredAsset.discovered_at.desc()).limit(1)
-        
-        last_asset_discovered = session.execute(recent_assets_query).scalar()
-        last_asset_discovered = last_asset_discovered.isoformat() if last_asset_discovered else None
+        if _DiscoveredAsset is not None:
+            recent_assets_query = select(
+                _DiscoveredAsset.discovered_at
+            ).where(
+                _DiscoveredAsset.data_source_id == data_source_id
+            ).order_by(_DiscoveredAsset.discovered_at.desc()).limit(1)
+            last_asset_discovered = session.execute(recent_assets_query).scalar()
+            last_asset_discovered = last_asset_discovered.isoformat() if last_asset_discovered else None
+        else:
+            # Fallback: use DiscoveryHistory completed_time
+            try:
+                from app.models.scan_models import DiscoveryHistory  # type: ignore
+                last_time = session.execute(
+                    select(func.max(DiscoveryHistory.completed_time)).where(DiscoveryHistory.data_source_id == data_source_id)
+                ).scalar()
+                last_asset_discovered = last_time.isoformat() if last_time else None
+            except Exception:
+                last_asset_discovered = None
         
         # Calculate discovery trends
         from datetime import datetime, timedelta
         
-        # Get assets discovered in last 30 days
+        # Get activity windows using DiscoveredAsset if available; else DiscoveryHistory tables_discovered
+        recent_assets_count = 0
+        weekly_assets_count = 0
         thirty_days_ago = datetime.now() - timedelta(days=30)
-        recent_assets_query = select(func.count(DiscoveredAsset.id)).where(
-            DiscoveredAsset.data_source_id == data_source_id,
-            DiscoveredAsset.discovered_at >= thirty_days_ago
-        )
-        recent_assets_count = session.execute(recent_assets_query).scalar() or 0
-        
-        # Get assets discovered in last 7 days
         seven_days_ago = datetime.now() - timedelta(days=7)
-        weekly_assets_query = select(func.count(DiscoveredAsset.id)).where(
-            DiscoveredAsset.data_source_id == data_source_id,
-            DiscoveredAsset.discovered_at >= seven_days_ago
-        )
-        weekly_assets_count = session.execute(weekly_assets_query).scalar() or 0
+        if _DiscoveredAsset is not None:
+            recent_assets_query = select(func.count(_DiscoveredAsset.id)).where(
+                _DiscoveredAsset.data_source_id == data_source_id,
+                _DiscoveredAsset.discovered_at >= thirty_days_ago
+            )
+            recent_assets_count = session.execute(recent_assets_query).scalar() or 0
+            weekly_assets_query = select(func.count(_DiscoveredAsset.id)).where(
+                _DiscoveredAsset.data_source_id == data_source_id,
+                _DiscoveredAsset.discovered_at >= seven_days_ago
+            )
+            weekly_assets_count = session.execute(weekly_assets_query).scalar() or 0
+        else:
+            try:
+                from app.models.scan_models import DiscoveryHistory  # type: ignore
+                # Approximate activity using number of completed discoveries in windows
+                recent_assets_count = session.execute(
+                    select(func.count(DiscoveryHistory.id)).where(
+                        DiscoveryHistory.data_source_id == data_source_id,
+                        DiscoveryHistory.discovery_time >= thirty_days_ago
+                    )
+                ).scalar() or 0
+                weekly_assets_count = session.execute(
+                    select(func.count(DiscoveryHistory.id)).where(
+                        DiscoveryHistory.data_source_id == data_source_id,
+                        DiscoveryHistory.discovery_time >= seven_days_ago
+                    )
+                ).scalar() or 0
+            except Exception:
+                pass
         
         stats = {
             "total_assets": total_assets,
             "total_jobs": total_jobs,
-            "asset_type_breakdown": dict(asset_type_counts),
+            "asset_type_breakdown": {str(k): int(v) for k, v in (asset_type_counts or [])},
             "last_discovery_job": last_discovery,
             "last_asset_discovered": last_asset_discovered,
             "recent_activity": {
@@ -1254,13 +1328,24 @@ async def start_discovery(
                 detail=f"Invalid strategy. Must be one of: {valid_strategies}"
             )
         
-        # Check if there's already an active discovery job
-        from app.models.advanced_catalog_models import DiscoveryJob
+        # Check if there's already an active discovery job (safe import)
+        try:
+            from app.models.advanced_catalog_models import DiscoveryJob  # type: ignore
+            _DiscoveryJob = DiscoveryJob
+            _use_advanced = True
+        except Exception:
+            from app.models.scan_models import DiscoveryHistory as _DiscoveryJob  # type: ignore
+            _use_advanced = False
         
-        active_job_query = select(DiscoveryJob).where(
-            DiscoveryJob.data_source_id == data_source_id,
-            DiscoveryJob.status.in_(["running", "queued", "starting"])
-        )
+        conditions = [_DiscoveryJob.data_source_id == data_source_id]
+        if hasattr(_DiscoveryJob, 'status'):
+            if _use_advanced:
+                # Advanced model (string statuses like running/queued/starting)
+                conditions.append(_DiscoveryJob.status.in_(["running", "queued", "starting"]))
+            else:
+                # Fallback DiscoveryHistory uses enum values: RUNNING/PENDING/...
+                conditions.append(_DiscoveryJob.status.in_(["RUNNING", "PENDING"]))
+        active_job_query = select(_DiscoveryJob).where(*conditions)
         
         active_jobs = session.execute(active_job_query).scalars().all()
         if active_jobs:
@@ -1270,15 +1355,26 @@ async def start_discovery(
             )
         
         # Create new discovery job
-        new_job = DiscoveryJob(
+        # Build job payload; for fallback model include required discovery_id
+        payload = dict(
             name=f"Discovery Job {data_source.name} - {datetime.now().strftime('%Y-%m-%d %H:%M')}",
             data_source_id=data_source_id,
-            strategy=strategy,
-            status="queued",
+            strategy=strategy if hasattr(_DiscoveryJob, 'strategy') else None,
+            status=("queued" if _use_advanced else "PENDING") if hasattr(_DiscoveryJob, 'status') else None,
             created_at=datetime.now(),
             created_by=current_user.get("username") or current_user.get("email"),
-            configuration=discovery_config
+            configuration=discovery_config if hasattr(_DiscoveryJob, 'configuration') else None
         )
+        if not _use_advanced and hasattr(_DiscoveryJob, 'discovery_id'):
+            payload['discovery_id'] = f"job_{data_source_id}_{int(datetime.now().timestamp())}"
+        # Required fields for fallback DiscoveryHistory
+        if not _use_advanced and hasattr(_DiscoveryJob, 'triggered_by'):
+            payload['triggered_by'] = current_user.get("username") or current_user.get("email") or "system"
+        if not _use_advanced and hasattr(_DiscoveryJob, 'discovery_metadata'):
+            payload['discovery_metadata'] = {}
+        if not _use_advanced and hasattr(_DiscoveryJob, 'discovery_details'):
+            payload['discovery_details'] = {}
+        new_job = _DiscoveryJob(**{k: v for k, v in payload.items() if v is not None})
         
         session.add(new_job)
         session.commit()
@@ -1289,21 +1385,25 @@ async def start_discovery(
         
         discovery_service = IntelligentDiscoveryService()
         
-        # Create discovery context
-        from app.models.advanced_catalog_models import DiscoveryContext, DiscoveryStrategy
-        
-        context = DiscoveryContext(
-            data_source_id=data_source_id,
-            strategy=DiscoveryStrategy(strategy),
-            user_id=current_user.get("username") or current_user.get("email"),
-            configuration=discovery_config
-        )
+        # Create discovery context (optional)
+        try:
+            from app.models.advanced_catalog_models import DiscoveryContext, DiscoveryStrategy  # type: ignore
+            context = DiscoveryContext(
+                data_source_id=data_source_id,
+                strategy=DiscoveryStrategy(strategy),
+                user_id=current_user.get("username") or current_user.get("email"),
+                configuration=discovery_config
+            )
+        except Exception:
+            context = None
         
         # Start discovery in background
         # Note: In a real implementation, this would use background tasks
         # For now, we'll simulate the start
-        new_job.status = "starting"
-        new_job.started_at = datetime.now()
+        if hasattr(new_job, 'status'):
+            new_job.status = ("starting" if _use_advanced else "RUNNING")
+        if hasattr(new_job, 'started_at'):
+            new_job.started_at = datetime.now()
         session.commit()
         
         return {

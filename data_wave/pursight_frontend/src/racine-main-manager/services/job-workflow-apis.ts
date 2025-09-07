@@ -78,7 +78,7 @@ interface WorkflowAPIConfig {
  * Default configuration
  */
 const DEFAULT_CONFIG: WorkflowAPIConfig = {
-  baseURL: (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_API_BASE_URL) || '/api/proxy',
+  baseURL: (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_API_BASE_URL) || '/proxy',
   timeout: 60000, // Longer timeout for workflow operations
   retryAttempts: 3,
   retryDelay: 1000,

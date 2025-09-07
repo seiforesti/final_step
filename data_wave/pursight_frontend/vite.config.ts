@@ -24,12 +24,12 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      // Proxy frontend calls to backend, stripping the /api/proxy prefix
-      "/api/proxy": {
+      // Proxy frontend calls to backend, stripping the /proxy prefix
+      "/proxy": {
         target: "http://localhost:8000",
         changeOrigin: true,
         secure: false,
-        rewrite: (p) => p.replace(/^\/api\/proxy/, ""),
+        rewrite: (p) => p.replace(/^\/proxy/, ""),
       },
       // Proxy health check endpoints directly
       "/health": {

@@ -114,6 +114,30 @@ def _create_engine(database_url: str, *, pool_size_override: int | None = None, 
 
     # Initialize connect_args for all database types
     connect_args = {}
+    # Add conservative Postgres-specific safeguards to avoid stuck connections/transactions
+    if database_url.startswith("postgresql"):
+        try:
+            # Optional config source; fall back to sane defaults
+            from app.db_config import DB_CONFIG as _DBC2  # type: ignore
+        except Exception:
+            _DBC2 = {}
+        # Keep timeouts modest to fail fast instead of hanging the API
+        statement_timeout_ms = int(str(_DBC2.get("statement_timeout_ms", os.getenv("DB_STATEMENT_TIMEOUT_MS", "15000"))))
+        idle_xact_timeout_ms = int(str(_DBC2.get("idle_in_txn_timeout_ms", os.getenv("DB_IDLE_IN_TXN_TIMEOUT_MS", "15000"))))
+        connect_timeout_s = int(str(_DBC2.get("connect_timeout", os.getenv("DB_CONNECT_TIMEOUT", "10"))))
+        connect_args.update({
+            "connect_timeout": connect_timeout_s,
+            "application_name": os.getenv("DB_APPLICATION_NAME", "data_governance_backend"),
+            # TCP keepalives to detect dead connections fast
+            "keepalives": 1,
+            "keepalives_idle": int(os.getenv("DB_KEEPALIVES_IDLE", "30")),
+            "keepalives_interval": int(os.getenv("DB_KEEPALIVES_INTERVAL", "10")),
+            "keepalives_count": int(os.getenv("DB_KEEPALIVES_COUNT", "5")),
+        })
+        # PgBouncer does not support the startup parameter "options"; only apply when connecting directly to Postgres
+        if not use_pgbouncer:
+            options_flags = f"-c statement_timeout={statement_timeout_ms} -c idle_in_transaction_session_timeout={idle_xact_timeout_ms}"
+            connect_args["options"] = options_flags
     
     # Allow SQLITE for tests if provided
     if database_url.startswith("sqlite"):
@@ -131,6 +155,25 @@ def _create_engine(database_url: str, *, pool_size_override: int | None = None, 
     
     try:
         engine = create_engine(database_url, connect_args=connect_args, **pool_kwargs)
+
+        # Apply per-connection server-side timeouts for Postgres when possible
+        try:
+            if database_url.startswith("postgresql"):
+                # Reuse values computed above if available, otherwise fall back to env
+                stm_ms = int(os.getenv("DB_STATEMENT_TIMEOUT_MS", "15000"))
+                idle_ms = int(os.getenv("DB_IDLE_IN_TXN_TIMEOUT_MS", "15000"))
+
+                @event.listens_for(engine, "connect")
+                def _set_pg_timeouts(dbapi_connection, connection_record):
+                    try:
+                        with dbapi_connection.cursor() as cur:
+                            cur.execute(f"SET statement_timeout = {stm_ms}")
+                            cur.execute(f"SET idle_in_transaction_session_timeout = {idle_ms}")
+                    except Exception:
+                        # Non-fatal if PgBouncer/Postgres rejects; we still proceed
+                        pass
+        except Exception:
+            pass
         
         # Verify the pool was created correctly
         if hasattr(engine, 'pool'):

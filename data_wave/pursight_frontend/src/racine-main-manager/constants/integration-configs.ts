@@ -125,8 +125,8 @@ export const INTEGRATION_API_ENDPOINTS = {
   SYNC_MONITORING: '/api/racine/integration/sync/monitor',
   
   // Health monitoring
-  INTEGRATION_HEALTH: '/api/racine/integration/health',
-  GROUP_HEALTH: '/api/racine/integration/health/groups',
+  INTEGRATION_HEALTH: '/api/racine/orchestration/health',
+  GROUP_HEALTH: '/api/racine/orchestration/health',
   METRICS: '/api/racine/integration/metrics',
   
   // Analytics
@@ -461,9 +461,9 @@ export const TIMEOUT_CONFIGS = {
 
 export const WEBSOCKET_CONFIGS = {
   INTEGRATION_EVENTS: {
-    url: (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_WS_URL) || 'ws://localhost:8000/ws/integration',
+    url: 'ws://localhost:8000/ws/integration', // ENABLED: Correct backend endpoint
     reconnectInterval: 5000,
-    maxReconnectAttempts: 10,
+    maxReconnectAttempts: 3, // ENABLED: Safe to retry
     heartbeatInterval: 30000,
     subscriptionTopics: [
       'sync.progress',
@@ -474,7 +474,7 @@ export const WEBSOCKET_CONFIGS = {
     ]
   },
   MONITORING: {
-    url: (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_WS_URL) || 'ws://localhost:8000/ws/monitoring',
+    url: 'ws://localhost:8000/ws/monitoring', // ENABLED: Correct backend endpoint
     reconnectInterval: 3000,
     maxReconnectAttempts: 15,
     heartbeatInterval: 15000,

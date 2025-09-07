@@ -80,7 +80,7 @@ interface PipelineAPIConfig {
  * Default configuration
  */
 const DEFAULT_CONFIG: PipelineAPIConfig = {
-  baseURL: (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_API_BASE_URL) || '/api/proxy',
+  baseURL: (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_API_BASE_URL) || '/proxy',
   timeout: 60000,
   retryAttempts: 3,
   retryDelay: 1000,

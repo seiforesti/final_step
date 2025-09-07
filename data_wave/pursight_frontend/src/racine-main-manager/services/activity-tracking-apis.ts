@@ -81,7 +81,7 @@ interface ActivityAPIConfig {
  * Default configuration
  */
 const DEFAULT_CONFIG: ActivityAPIConfig = {
-  baseURL: (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_API_BASE_URL) || '/api/proxy',
+  baseURL: (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_API_BASE_URL) || '/proxy',
   timeout: 30000,
   retryAttempts: 3,
   retryDelay: 1000,

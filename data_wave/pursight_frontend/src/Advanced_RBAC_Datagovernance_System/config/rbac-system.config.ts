@@ -290,7 +290,7 @@ export const RBAC_SYSTEM_CONFIG = {
       auth: '/auth',
       users: '/rbac/users',
       roles: '/rbac/roles',
-      permissions: '/rbac/permissions',
+      permissions: '/sensitivity-labels/rbac/permissions',
       resources: '/rbac/resources',
       groups: '/rbac/groups',
       audit: '/rbac/audit-logs',

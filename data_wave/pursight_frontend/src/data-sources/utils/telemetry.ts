@@ -152,7 +152,7 @@ export interface TelemetryUser {
 // Default configuration
 const DEFAULT_CONFIG: TelemetryConfig = {
   enabled: true,
-  endpoint: '/api/telemetry',
+  endpoint: '/proxy/telemetry',
   batchSize: 50,
   batchTimeout: 5000,
   maxRetries: 3,

@@ -1,7 +1,7 @@
 // API Endpoint Constants - Maps to backend route definitions
 
 // Base API URL - should be configurable via environment variables
-export const API_BASE_URL = (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_API_BASE_URL) || 'api/proxy';
+export const API_BASE_URL = (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_API_BASE_URL) || '/proxy';
 
 // Authentication endpoints
 export const AUTH_ENDPOINTS = {
@@ -19,7 +19,7 @@ export const AUTH_ENDPOINTS = {
 // RBAC endpoints
 export const RBAC_ENDPOINTS = {
   // Current user
-  ME: '/auth/me',
+  ME: '/auth/profile',
   ME_FLAT_PERMISSIONS: '/rbac/me/flat-permissions',
   
   // Users
@@ -48,7 +48,7 @@ export const RBAC_ENDPOINTS = {
   ROLES_BULK_REMOVE_PERMISSIONS_EFFICIENT: '/rbac/roles/bulk-remove-permissions-efficient',
   
   // Permissions
-  PERMISSIONS: '/rbac/permissions',
+  PERMISSIONS: '/sensitivity-labels/rbac/permissions',
   PERMISSION: (permissionId: number) => `/rbac/permissions/${permissionId}`,
   
   // Groups

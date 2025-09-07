@@ -652,7 +652,7 @@ const NewPermissionsPage: React.FC = () => {
         subtitle="Manage permissions for the RBAC system"
         breadcrumbs={[
           { label: "RBAC System", href: "/rbac" },
-          { label: "Permissions", href: "/rbac/permissions" },
+          { label: "Permissions", href: "/sensitivity-labels/rbac/permissions" },
         ]}
       />
 

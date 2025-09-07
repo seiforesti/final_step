@@ -47,7 +47,7 @@ export const useBackendHealthSync = () => {
   const healthCheckCountRef = useRef(0)
   const consecutiveFailuresRef = useRef(0)
   const maxConsecutiveFailures = 3
-  const baseURL = (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_API_BASE_URL) || '/api/proxy'
+  const baseURL = (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_API_BASE_URL) || '/proxy'
   
   // Fetch backend health configuration
   const fetchBackendHealth = useCallback(async () => {
@@ -72,7 +72,7 @@ export const useBackendHealthSync = () => {
       } catch (error) {
         // Fallback to basic health check if main endpoint fails
         console.warn('Main health endpoint failed, trying basic health check')
-        response = await fetch('/api/proxy/health/frontend-config', {
+        response = await fetch('/proxy/health/frontend-config', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

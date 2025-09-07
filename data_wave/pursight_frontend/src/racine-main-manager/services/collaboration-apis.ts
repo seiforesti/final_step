@@ -59,7 +59,7 @@ interface CollaborationAPIConfig {
  * Default configuration
  */
 const DEFAULT_CONFIG: CollaborationAPIConfig = {
-  baseURL: (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_API_BASE_URL) || '/api/proxy',
+  baseURL: (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_API_BASE_URL) || '/proxy',
   timeout: 30000, // 30s for both dev and prod
   retryAttempts: 3, // Standard retry attempts
   retryDelay: 1000,

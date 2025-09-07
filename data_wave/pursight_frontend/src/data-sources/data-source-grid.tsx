@@ -141,7 +141,7 @@ const dataSourceApi = {
       const params = new URLSearchParams(filters)
       console.log('Fetching data sources with params:', params.toString())
       
-      const response = await fetch(`/api/data-sources?${params}`)
+      const response = await fetch(`/proxy/scan/data-sources?${params}`)
       if (!response.ok) {
         console.error('API response not ok:', response.status, response.statusText)
         throw new Error(`Failed to fetch data sources: ${response.status} ${response.statusText}`)
@@ -196,7 +196,7 @@ const dataSourceApi = {
 
   async getDataSourceHealth(dataSourceId: number) {
     try {
-      const response = await fetch(`/api/data-sources/${dataSourceId}/health`)
+      const response = await fetch(`/proxy/scan/data-sources/${dataSourceId}/health`)
       if (!response.ok) throw new Error('Failed to fetch data source health')
       return response.json()
     } catch (error) {
@@ -212,13 +212,13 @@ const dataSourceApi = {
   },
 
   async getDataSourceMetrics(dataSourceId: number) {
-    const response = await fetch(`/api/data-sources/${dataSourceId}/metrics`)
+    const response = await fetch(`/proxy/scan/data-sources/${dataSourceId}/stats`)
     if (!response.ok) throw new Error('Failed to fetch data source metrics')
     return response.json()
   },
 
   async updateDataSource(dataSourceId: number, data: any) {
-    const response = await fetch(`/api/data-sources/${dataSourceId}`, {
+    const response = await fetch(`/proxy/scan/data-sources/${dataSourceId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
@@ -228,7 +228,7 @@ const dataSourceApi = {
   },
 
   async deleteDataSource(dataSourceId: number) {
-    const response = await fetch(`/api/data-sources/${dataSourceId}`, {
+    const response = await fetch(`/proxy/scan/data-sources/${dataSourceId}`, {
       method: 'DELETE'
     })
     if (!response.ok) throw new Error('Failed to delete data source')
@@ -236,7 +236,7 @@ const dataSourceApi = {
   },
 
   async testConnection(dataSourceId: number) {
-    const response = await fetch(`/api/data-sources/${dataSourceId}/test-connection`, {
+    const response = await fetch(`/proxy/scan/data-sources/${dataSourceId}/test-connection`, {
       method: 'POST'
     })
     if (!response.ok) throw new Error('Failed to test connection')
@@ -244,7 +244,7 @@ const dataSourceApi = {
   },
 
   async duplicateDataSource(dataSourceId: number) {
-    const response = await fetch(`/api/data-sources/${dataSourceId}/duplicate`, {
+    const response = await fetch(`/proxy/scan/data-sources/${dataSourceId}/duplicate`, {
       method: 'POST'
     })
     if (!response.ok) throw new Error('Failed to duplicate data source')
@@ -252,7 +252,7 @@ const dataSourceApi = {
   },
 
   async bulkUpdate(dataSourceIds: number[], data: any) {
-    const response = await fetch('/api/data-sources/bulk-update', {
+    const response = await fetch('/proxy/scan/data-sources/bulk-update', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ids: dataSourceIds, data })
@@ -262,7 +262,7 @@ const dataSourceApi = {
   },
 
   async bulkDelete(dataSourceIds: number[]) {
-    const response = await fetch('/api/data-sources/bulk-delete', {
+    const response = await fetch('/proxy/scan/data-sources/bulk-delete', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ids: dataSourceIds })

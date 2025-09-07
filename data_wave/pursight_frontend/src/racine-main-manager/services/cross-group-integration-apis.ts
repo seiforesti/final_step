@@ -96,14 +96,14 @@ interface IntegrationAPIConfig {
 const DEFAULT_CONFIG: IntegrationAPIConfig = {
   baseURL: (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_API_BASE_URL) || 'http://localhost:3000/proxy',
   timeout: 45000,
-  retryAttempts: 3,
+  retryAttempts: 0, // CRITICAL: Disable retries to prevent database overload
   retryDelay: 1000,
   enableRealTimeSync: true,
   enableConflictDetection: true,
   enableAutoResolution: false,
   syncInterval: 15000,
   healthCheckInterval: 30000,
-  websocketURL: (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_WS_URL) || 'ws://localhost:8000/ws',
+  websocketURL: 'ws://localhost:8000/ws/integration', // ENABLED: Correct backend endpoint
   maxRetryAttempts: 5
 };
 
@@ -621,10 +621,10 @@ class CrossGroupIntegrationAPI {
 
   /**
    * Get integration health across all groups
-   * Maps to: GET /api/racine/integration/health
+   * Maps to: GET /api/racine/orchestration/health
    */
   async getIntegrationHealth(): Promise<IntegrationHealthResponse> {
-    const response = await fetch(`${this.config.baseURL}/api/racine/integration/health`, {
+    const response = await fetch(`${this.config.baseURL}/api/racine/orchestration/health`, {
       method: 'GET',
       headers: this.getAuthHeaders()
     });
@@ -638,10 +638,10 @@ class CrossGroupIntegrationAPI {
 
   /**
    * Get group-specific health status
-   * Maps to: GET /api/racine/integration/health/{group}
+   * Maps to: GET /api/racine/orchestration/health
    */
   async getGroupHealth(group: SupportedGroup): Promise<GroupHealthStatus> {
-    const response = await fetch(`${this.config.baseURL}/api/racine/integration/health/${group}`, {
+    const response = await fetch(`${this.config.baseURL}/api/racine/orchestration/health`, {
       method: 'GET',
       headers: this.getAuthHeaders()
     });
@@ -1159,7 +1159,7 @@ class CrossGroupIntegrationAPI {
     return withGracefulErrorHandling(
       async () => {
         const candidates = [
-          '/api/racine/integration/health',
+          '/racine/orchestration/health',
           '/api/integration/health',
           '/integration/health',
           '/api/v1/racine/integration/health'

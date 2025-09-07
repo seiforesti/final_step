@@ -391,7 +391,7 @@ export function SchemaDiscovery({
         timeout_seconds: 30         // Configure timeout for large tables
       }
 
-      const response = await fetch('/api/data-discovery/data-sources/preview-table', {
+      const response = await fetch('/proxy/data-discovery/data-sources/preview-table', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -225,9 +225,13 @@ class DataSourceService:
                 encrypted_password = f.encrypt(password.encode()).decode()
                 
                 # Update the encrypted password
+                if not getattr(data_source, 'password_secret', None) or data_source.password_secret.strip() == '':
+                    data_source.password_secret = f"datasource_{uuid.uuid4()}"
                 set_secret(data_source.password_secret, encrypted_password)
             else:
                 # Update the password directly
+                if not getattr(data_source, 'password_secret', None) or data_source.password_secret.strip() == '' or data_source.password_secret == password:
+                    data_source.password_secret = f"datasource_{uuid.uuid4()}"
                 set_secret(data_source.password_secret, password)
         
         # Update fields
@@ -268,6 +272,13 @@ class DataSourceService:
         """Get the password for a data source."""
         # Get the password from the secret manager
         password = get_secret(data_source.password_secret)
+        
+        # Fallback for legacy/raw storage: if secret lookup failed but the reference isn't a generated name,
+        # treat the stored reference as a plaintext password (dev-friendly safety net)
+        if not password and getattr(data_source, 'password_secret', None):
+            ref = data_source.password_secret
+            if not str(ref).startswith('datasource_'):
+                password = ref
         
         # Decrypt the password if it's encrypted
         if data_source.use_encryption and app_secret and password:
@@ -584,8 +595,8 @@ class DataSourceService:
             select(DataSource)
             .join(UserFavorite)
             .where(UserFavorite.user_id == user_id)
-        ).all()
-        return list(favorites)
+        ).scalars().all()
+        return favorites
 
     @staticmethod
     def bulk_update_data_sources(

@@ -134,7 +134,7 @@ const reportsApi = {
   },
 
   async getReportTemplates() {
-    const response = await fetch('/api/report-templates')
+    const response = await fetch('/proxy/reports/templates')
     if (!response.ok) throw new Error('Failed to fetch report templates')
     return response.json()
   },

@@ -82,35 +82,54 @@ class LocalSecretManager(SecretManagerBase):
         return self.secrets.get(secret_name)
     
     def set_secret(self, secret_name: str, secret_value: str) -> bool:
-        """Set a secret in the secrets file."""
-        if not self.secrets_file:
-            logger.warning("No secrets file specified, cannot set secret")
-            return False
-        
+        """Set a secret persistently when possible; otherwise use in-memory/env fallback."""
+        # Always update in-memory cache so the running process can read it back
         self.secrets[secret_name] = secret_value
         
+        # If a secrets file is configured, persist to disk
+        if self.secrets_file:
+            try:
+                with open(self.secrets_file, 'w') as f:
+                    json.dump(self.secrets, f, indent=2)
+                return True
+            except Exception as e:
+                logger.error(f"Error saving secret to file: {str(e)}")
+                # Fall through to env fallback
+        
+        # Fallback: set as environment variable for this process (non-persistent across restarts)
         try:
-            with open(self.secrets_file, 'w') as f:
-                json.dump(self.secrets, f, indent=2)
-            return True
+            os.environ[secret_name] = secret_value
         except Exception as e:
-            logger.error(f"Error saving secret to file: {str(e)}")
-            return False
+            logger.error(f"Error setting secret in environment: {str(e)}")
+            # Still return True since in-memory cache holds the value
+        return True
     
     def delete_secret(self, secret_name: str) -> bool:
-        """Delete a secret from the secrets file."""
-        if not self.secrets_file or secret_name not in self.secrets:
-            return False
+        """Delete a secret from the configured store or in-memory/env fallback."""
+        # Remove from in-memory cache
+        removed = False
+        if secret_name in self.secrets:
+            del self.secrets[secret_name]
+            removed = True
         
-        del self.secrets[secret_name]
+        # If file persistence is configured, rewrite the file
+        if self.secrets_file:
+            try:
+                with open(self.secrets_file, 'w') as f:
+                    json.dump(self.secrets, f, indent=2)
+                removed = True
+            except Exception as e:
+                logger.error(f"Error saving secrets file after deletion: {str(e)}")
         
+        # Best-effort: also clear environment variable
         try:
-            with open(self.secrets_file, 'w') as f:
-                json.dump(self.secrets, f, indent=2)
-            return True
-        except Exception as e:
-            logger.error(f"Error saving secrets file after deletion: {str(e)}")
-            return False
+            if secret_name in os.environ:
+                os.environ.pop(secret_name, None)
+                removed = True
+        except Exception:
+            pass
+        
+        return removed
 
 
 class HashiCorpVaultManager(SecretManagerBase):

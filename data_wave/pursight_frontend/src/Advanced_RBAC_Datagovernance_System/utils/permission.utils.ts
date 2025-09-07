@@ -67,7 +67,7 @@ export async function createPermission(
   try {
     const correlationId = generateCorrelationId();
     
-    const response = await rbacApiService.post<Permission>('/rbac/permissions', {
+    const response = await rbacApiService.post<Permission>('/sensitivity-labels/rbac/permissions', {
       ...permissionData,
       correlation_id: correlationId
     });

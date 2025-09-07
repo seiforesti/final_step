@@ -485,7 +485,11 @@ export function useRacineOrchestration(
     }
     
     try {
-      const response = await racineOrchestrationAPI.getSystemHealth();
+      const orchestrationId = state.currentOrchestration?.id
+      if (!orchestrationId) {
+        return { status: 'unknown', components: {}, timestamp: new Date().toISOString() } as any
+      }
+      const response = await racineOrchestrationAPI.getSystemHealth(orchestrationId);
       
       if (response.success && response.data) {
         setState(prev => ({

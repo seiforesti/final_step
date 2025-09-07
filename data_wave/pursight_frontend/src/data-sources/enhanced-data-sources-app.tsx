@@ -21,16 +21,16 @@ class APIRequestManager {
   private requestQueue: globalThis.Map<string, { timestamp: number; count: number }>
   private activeRequests: globalThis.Set<string>
   private requestDelays: globalThis.Map<string, number>
-  private maxConcurrentRequests = 1 // ULTRA AGGRESSIVE: Only 1 concurrent request
-  private requestTimeout = 10000 // REDUCED to 10 seconds
-  private retryDelays = [5000, 10000, 20000, 30000] // Much longer delays
+  private maxConcurrentRequests = 6
+  private requestTimeout = 30000
+  private retryDelays = [500, 1000, 2000]
   private circuitBreakerOpen = false
   private circuitBreakerFailures = 0
-  private maxFailures = 2 // Very low failure threshold
+  private maxFailures = 5
   private lastFailureTime = 0
-  private cooldownPeriod = 60000 // 60 seconds cooldown
+  private cooldownPeriod = 15000
   private requestCount = 0
-  private maxRequestsPerMinute = 5 // ULTRA AGGRESSIVE: Only 5 requests per minute
+  private maxRequestsPerMinute = 120
   private requestTimestamps: number[] = []
   private isEmergencyMode = false
 
@@ -70,28 +70,28 @@ class APIRequestManager {
       }
     }
     
-    // RATE LIMITING: Maximum 5 requests per minute globally
+    // RATE LIMITING: reasonable global limit
     this.requestTimestamps = this.requestTimestamps.filter(timestamp => now - timestamp < 60000)
     if (this.requestTimestamps.length >= this.maxRequestsPerMinute) {
       console.warn('⏰ Rate limit exceeded: Maximum requests per minute reached')
       return false
     }
     
-    // CONCURRENT LIMIT: Only 1 concurrent request allowed
+    // CONCURRENT LIMIT: allow multiple concurrent requests
     if (this.activeRequests.size >= this.maxConcurrentRequests) {
       console.warn('🚫 Concurrent limit: Maximum concurrent requests reached')
       return false
     }
     
     // ENDPOINT-SPECIFIC THROTTLING: Very strict per endpoint
-    const queueKey = `${endpoint}_${Math.floor(now / 10000)}` // Group by 10 seconds
+    const queueKey = `${endpoint}_${Math.floor(now / 1000)}` // group by 1s
     const queueItem = this.requestQueue.get(queueKey)
     if (!queueItem) {
       this.requestQueue.set(queueKey, { timestamp: now, count: 1 })
     } else {
-      // Only 1 request per 10 seconds per endpoint
-      if (queueItem.count >= 1) {
-        console.warn(`⏳ Endpoint throttled: ${endpoint} - only 1 request per 10 seconds`)
+      // up to 3 req/sec per endpoint window
+      if (queueItem.count >= 3) {
+        console.warn(`⏳ Endpoint throttled: ${endpoint} - per-second limit reached`)
         return false
       }
       queueItem.count++
@@ -267,17 +267,17 @@ const useThrottledQuery = (queryKey: any[], queryFn: () => Promise<any>, options
 const setupAPIThrottling = () => {
   const requestManager = APIRequestManager.getInstance()
 
-  // ULTRA AGGRESSIVE delays for all endpoints
-  requestManager.addRequestDelay('data-sources', 10000) // 10 second delay
-  requestManager.addRequestDelay('system-health', 15000) // 15 second delay
-  requestManager.addRequestDelay('performance-metrics', 12000) // 12 second delay
-  requestManager.addRequestDelay('security-audit', 10000) // 10 second delay
-  requestManager.addRequestDelay('collaboration-workspaces', 8000) // 8 second delay
-  requestManager.addRequestDelay('workflow-definitions', 10000) // 10 second delay
-  requestManager.addRequestDelay('notifications', 5000) // 5 second delay
-  requestManager.addRequestDelay('workspace', 8000) // 8 second delay
-  requestManager.addRequestDelay('scan', 15000) // 15 second delay
-  requestManager.addRequestDelay('data-discovery', 12000) // 12 second delay
+  // light per-endpoint delays
+  requestManager.addRequestDelay('data-sources', 0)
+  requestManager.addRequestDelay('system-health', 0)
+  requestManager.addRequestDelay('performance-metrics', 0)
+  requestManager.addRequestDelay('security-audit', 0)
+  requestManager.addRequestDelay('collaboration-workspaces', 0)
+  requestManager.addRequestDelay('workflow-definitions', 0)
+  requestManager.addRequestDelay('notifications', 0)
+  requestManager.addRequestDelay('workspace', 0)
+  requestManager.addRequestDelay('scan', 0)
+  requestManager.addRequestDelay('data-discovery', 0)
 
   // Override fetch to add ULTRA AGGRESSIVE throttling
   const originalFetch = window.fetch
@@ -300,7 +300,7 @@ const setupAPIThrottling = () => {
     // Check for too many concurrent requests
     if (requestManager.hasTooManyConcurrentRequests()) {
       console.warn('🚫 Too many concurrent requests, delaying...')
-      await new Promise(resolve => setTimeout(resolve, 5000)) // 5 second delay
+      await new Promise(resolve => setTimeout(resolve, 250))
     }
 
     const requestId = `${endpoint}_${Date.now()}`
@@ -561,6 +561,7 @@ import { bulkOperationsManager } from './workflows/bulk-operations'
 import { DataSourceList } from "./data-source-list"
 import { DataSourceGrid } from "./data-source-grid"
 import { DataSourceDetails } from "./data-source-details"
+import { DataSourceOverview } from "./data-source-overview"
 import { DataSourceCreateModal } from "./data-source-create-modal"
 import { DataSourceEditModal } from "./data-source-edit-modal"
 import { DataSourceConnectionTestModal } from "./data-source-connection-test-modal"
@@ -585,11 +586,13 @@ import { AIPoweredDashboard } from "./ui/dashboard/ai-powered-dashboard"
 import { CollaborationStudio } from "./ui/collaboration/collaboration-studio"
 import { AnalyticsWorkbench } from "./ui/analytics/analytics-workbench"
 import { WorkflowDesigner } from "./ui/workflow/workflow-designer"
+import { AdvancedWorkflowOrchestrator } from "./components/advanced-workflow-orchestrator"
+import { ComponentOrchestrationManager } from "./components/component-orchestration-manager"
 
 // Import remaining components with enterprise features - FIXED DEFAULT EXPORTS
 const DataSourceComplianceView = React.lazy(() => import("./data-source-compliance-view").then(module => ({ default: module.DataSourceComplianceView })))
 const DataSourceSecurityView = React.lazy(() => import("./data-source-security-view").then(module => ({ default: module.DataSourceSecurityView })))
-const DataSourcePerformanceView = React.lazy(() => import("./data-source-performance-view").then(module => ({ default: module.DataSourcePerformanceView })))
+const DataSourcePerformanceView = React.lazy(() => import("./data-source-performance-view-simple").then(module => ({ default: module.DataSourcePerformanceView })))
 const DataSourceScanResults = React.lazy(() => import("./data-source-scan-results").then(module => ({ default: module.DataSourceScanResults })))
 const DataSourceTagsManager = React.lazy(() => import("./data-source-tags-manager").then(module => ({ default: module.DataSourceTagsManager })))
 const DataSourceVersionHistory = React.lazy(() => import("./data-source-version-history").then(module => ({ default: module.DataSourceVersionHistory })))
@@ -952,7 +955,7 @@ const enterpriseNavigationStructure = {
     icon: Database,
     category: "primary",
     items: [
-      { id: "dashboard", label: "Enterprise Dashboard", icon: BarChart3, component: "enterprise-dashboard", description: "Unified enterprise dashboard with AI insights", shortcut: "⌘+D", premium: true },
+      { id: "enterprise-dashboard", label: "Enterprise Dashboard", icon: BarChart3, component: "enterprise-dashboard", description: "Unified enterprise dashboard with AI insights", shortcut: "⌘+D", premium: true },
       { id: "ai-dashboard", label: "AI-Powered Dashboard", icon: Brain, component: "ai-dashboard", description: "Advanced AI analytics and predictive insights", shortcut: "⌘+Shift+D", premium: true },
       { id: "overview", label: "Overview", icon: Eye, component: "overview", description: "Comprehensive data sources overview", shortcut: "⌘+1" },
       { id: "grid", label: "Grid View", icon: Grid, component: "grid", description: "Visual grid layout with real-time updates", shortcut: "⌘+2" },
@@ -1020,6 +1023,8 @@ const enterpriseNavigationStructure = {
       { id: "bulk-actions", label: "Bulk Operations", icon: Layers, component: "bulk-actions", description: "Mass operations with workflows", shortcut: "⌘+Y", features: ["workflows"] },
       { id: "integrations", label: "Integrations", icon: Boxes, component: "integrations", description: "Third-party integrations", shortcut: "⌘+I" },
       { id: "catalog", label: "Data Catalog", icon: Package, component: "catalog", description: "Enterprise data catalog", shortcut: "⌘+Shift+D", features: ["ai", "analytics"] },
+      { id: "connection-test", label: "Connection Testing", icon: TestTube, component: "connection-test", description: "Advanced connection testing suite", shortcut: "⌘+Shift+T", features: ["testing", "workflows"] },
+      { id: "filters", label: "Advanced Filters", icon: Filter, component: "filters", description: "Dynamic filtering and search", shortcut: "⌘+Shift+F", features: ["search", "workflows"] },
     ]
   },
   
@@ -1029,8 +1034,11 @@ const enterpriseNavigationStructure = {
     category: "advanced",
     items: [
       { id: "workflow-designer", label: "Workflow Designer", icon: WorkflowIcon, component: "workflow-designer", description: "Visual workflow design studio", shortcut: "⌘+Shift+W", premium: true, features: ["workflows", "ai"] },
-      { id: "connection-test", label: "Connection Testing", icon: TestTube, component: "connection-test", description: "Advanced connection testing suite", shortcut: "⌘+T", features: ["testing"] },
-      { id: "filters", label: "Advanced Filters", icon: Filter, component: "filters", description: "Dynamic filtering and search", shortcut: "⌘+F", features: ["search"] },
+      { id: "workflow-orchestrator", label: "Workflow Orchestrator", icon: Workflow, component: "workflow-orchestrator", description: "Advanced workflow automation and execution", shortcut: "⌘+Shift+O", premium: true, features: ["workflows", "automation"] },
+      { id: "component-manager", label: "Component Manager", icon: Layers, component: "component-manager", description: "Component orchestration and monitoring", shortcut: "⌘+Shift+M", premium: true, features: ["orchestration", "monitoring"] },
+      { id: "correlation-engine", label: "Correlation Engine", icon: GitBranch, component: "correlation-engine", description: "Advanced data correlation analysis", shortcut: "⌘+Shift+E", premium: true, features: ["ai", "analytics"] },
+      { id: "realtime-collaboration", label: "Real-time Collaboration", icon: MessageSquare, component: "realtime-collaboration", description: "Live collaboration features", shortcut: "⌘+Shift+R", premium: true, features: ["collaboration", "realTime"] },
+      { id: "enterprise-integration", label: "Enterprise Integration", icon: Boxes, component: "enterprise-integration", description: "Enterprise system integration hub", shortcut: "⌘+Shift+I", premium: true, features: ["workflows", "integrations"] },
     ]
   }
 }
@@ -1052,11 +1060,11 @@ const enterpriseLayoutConfigurations = {
     panels: [{ id: "main", size: 70 }, { id: "secondary", size: 30 }],
     description: "Two panel horizontal split"
   },
-  dashboard: { 
-    name: "Dashboard", 
+  "enterprise-dashboard": { 
+    name: "Enterprise Dashboard", 
     icon: BarChart3, 
     panels: [{ id: "overview", size: 40 }, { id: "details", size: 35 }, { id: "metrics", size: 25 }],
-    description: "Multi-panel dashboard layout"
+    description: "Multi-panel enterprise dashboard layout"
   },
   analysis: { 
     name: "Analysis", 
@@ -1125,8 +1133,8 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
   
   const [selectedDataSource, setSelectedDataSource] = useState<DataSource | null>(null)
   const [activeView, setActiveView] = useState("enterprise-dashboard")
-  const [layout, setLayout] = useState<keyof typeof enterpriseLayoutConfigurations>("dashboard")
-  const [panels, setPanels] = useState(enterpriseLayoutConfigurations.dashboard.panels)
+  const [layout, setLayout] = useState<keyof typeof enterpriseLayoutConfigurations>("enterprise-dashboard")
+  const [panels, setPanels] = useState(enterpriseLayoutConfigurations["enterprise-dashboard"].panels)
   
   // ========================================================================
   // UI STATE WITH ENTERPRISE FEATURES
@@ -2022,9 +2030,8 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
     try {
       // Try multiple health check endpoints
       const healthEndpoints = [
-        '/api/proxy/health',
-        '/api/proxy/api/racine/integration/health'
-      ]
+        '/proxy/health',
+        '/proxy/api/racine/orchestration/health'      ]
       
       let response = null
       let workingEndpoint = null
@@ -2191,7 +2198,8 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
   // ========================================================================
   
   useEffect(() => {
-    if (dataSources && dataSources.length > 0 && !selectedDataSource) {
+    // Ensure dataSources is an array before calling find
+    if (dataSources && Array.isArray(dataSources) && dataSources.length > 0 && !selectedDataSource) {
       const defaultDataSource = dataSources.find(ds => ds.status === 'active') || dataSources[0]
       setSelectedDataSource(defaultDataSource)
     }
@@ -2528,6 +2536,8 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
       // Enterprise components
       case "enterprise-dashboard":
         return <EnterpriseDashboard />
+      case "ai-dashboard":
+        return <AIPoweredDashboard />
       case "analytics-workbench":
         return <AnalyticsWorkbench />
       case "collaboration-studio":
@@ -2537,7 +2547,7 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
 
       // Core components
       case "overview":
-        return <DataSourceDetails 
+        return <DataSourceOverview 
           dataSourceId={selectedDataSource?.id || 0}
           onEdit={() => Promise.resolve()}
           onDelete={() => Promise.resolve()}
@@ -2791,6 +2801,99 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
           <div className="p-8 text-center">
             <p className="text-muted-foreground">Select a data source to view catalog</p>
           </div>
+        )
+
+      // Advanced Testing & Filtering
+      case "connection-test":
+        return selectedDataSource ? (
+          <Suspense fallback={<ComponentLoader />}>
+            <DataSourceConnectionTestModal 
+              open={true}
+              onClose={() => {}}
+              dataSource={selectedDataSource}
+            />
+          </Suspense>
+        ) : (
+          <div className="p-8 text-center">
+            <p className="text-muted-foreground">Select a data source to test connection</p>
+          </div>
+        )
+      case "filters":
+        return (
+          <Suspense fallback={<ComponentLoader />}>
+            <DataSourceFilters 
+              filters={filters}
+              onFiltersChange={setFilters}
+              onApplyFilters={() => {}}
+            />
+          </Suspense>
+        )
+
+      // Advanced Analytics & Collaboration
+      case "correlation-engine":
+        return selectedDataSource ? (
+          <Suspense fallback={<ComponentLoader />}>
+            <div className="p-8">
+              <h2 className="text-2xl font-bold mb-4">Correlation Engine</h2>
+              <p className="text-muted-foreground">Advanced data correlation analysis for {selectedDataSource.name}</p>
+              {/* TODO: Implement CorrelationEngine component */}
+            </div>
+          </Suspense>
+        ) : (
+          <div className="p-8 text-center">
+            <p className="text-muted-foreground">Select a data source to run correlation analysis</p>
+          </div>
+        )
+      case "realtime-collaboration":
+        return (
+          <Suspense fallback={<ComponentLoader />}>
+            <div className="p-8">
+              <h2 className="text-2xl font-bold mb-4">Real-time Collaboration</h2>
+              <p className="text-muted-foreground">Live collaboration features and real-time updates</p>
+              {/* TODO: Implement RealtimeCollaboration component */}
+            </div>
+          </Suspense>
+        )
+      case "enterprise-integration":
+        return (
+          <Suspense fallback={<ComponentLoader />}>
+            <div className="p-8">
+              <h2 className="text-2xl font-bold mb-4">Enterprise Integration</h2>
+              <p className="text-muted-foreground">Enterprise system integration hub and workflow automation</p>
+              {/* TODO: Implement EnterpriseIntegration component */}
+            </div>
+          </Suspense>
+        )
+
+      // Advanced Orchestration Components
+      case "workflow-orchestrator":
+        return (
+          <Suspense fallback={<ComponentLoader />}>
+            <AdvancedWorkflowOrchestrator 
+              dataSource={selectedDataSource}
+              onWorkflowComplete={(workflowId, results) => {
+                console.log('Workflow completed:', workflowId, results)
+              }}
+              onWorkflowError={(workflowId, error) => {
+                console.error('Workflow error:', workflowId, error)
+              }}
+            />
+          </Suspense>
+        )
+      case "component-manager":
+        return (
+          <Suspense fallback={<ComponentLoader />}>
+            <ComponentOrchestrationManager 
+              dataSource={selectedDataSource}
+              onComponentSelect={(componentId) => {
+                console.log('Component selected:', componentId)
+                setActiveView(componentId)
+              }}
+              onComponentError={(componentId, error) => {
+                console.error('Component error:', componentId, error)
+              }}
+            />
+          </Suspense>
         )
 
       default:
@@ -3150,8 +3253,27 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
     )
   }
   
-  // Handle no permissions
-  if (!dataSourcePermissions.canView) {
+  // Handle RBAC loading state first to avoid false "Access Denied"
+  if (rbacLoading) {
+    return (
+      <TooltipProvider>
+        <div className={`min-h-screen bg-background ${className}`}>
+          <div className="flex items-center justify-center h-screen">
+            <Alert className="max-w-md">
+              <Shield className="h-4 w-4" />
+              <AlertTitle>Checking Permissions</AlertTitle>
+              <AlertDescription>
+                Verifying your access rights for the Data Sources module...
+              </AlertDescription>
+            </Alert>
+          </div>
+        </div>
+      </TooltipProvider>
+    )
+  }
+
+  // Handle no permissions after RBAC finished loading
+  if (!safeDataSourcePermissions.canView) {
     return (
       <TooltipProvider>
         <div className={`min-h-screen bg-background ${className}`}>

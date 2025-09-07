@@ -1049,7 +1049,7 @@ const isCacheableRoute = (path: string, method: string): boolean => {
   const cacheableRoutes = [
     '/api/racine/dashboard/metrics',
     '/api/racine/analytics/summary',
-    '/api/racine/workspace/list',
+    '/api/racine/workspace/',
     '/api/racine/users/profile',
     '/api/racine/system/health'
   ];
@@ -1104,7 +1104,7 @@ const getCacheTTL = (path: string): number => {
     '/api/racine/system/health': 60000, // 1 minute
     '/api/racine/dashboard/metrics': 300000, // 5 minutes
     '/api/racine/analytics/summary': 600000, // 10 minutes
-    '/api/racine/workspace/list': 180000, // 3 minutes
+    '/api/racine/workspace/': 180000, // 3 minutes
     '/api/racine/users/profile': 900000 // 15 minutes
   };
 

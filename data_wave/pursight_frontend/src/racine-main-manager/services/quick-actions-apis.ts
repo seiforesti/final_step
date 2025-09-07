@@ -58,14 +58,14 @@ interface QuickActionsAPIConfig {
  * Default configuration
  */
 const DEFAULT_CONFIG: QuickActionsAPIConfig = {
-  baseURL: (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_API_BASE_URL) || '/api/proxy',
+  baseURL: (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_API_BASE_URL) || '/proxy',
   timeout: 5000, // Reduced to 5 seconds to prevent hanging
   retryAttempts: 0, // Disable retries to prevent database overload
   retryDelay: 5000, // Increased delay
   enableWebSocket: false, // Disable WebSocket to prevent connection issues
   // Use proxied ws URL by default
   websocketURL: (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_WS_URL)
-    || `${typeof window !== 'undefined' && window.location.protocol === 'https:' ? 'wss' : 'ws'}://${typeof window !== 'undefined' ? window.location.host : 'localhost:5173'}/api/proxy/ws`,
+    || `${typeof window !== 'undefined' && window.location.protocol === 'https:' ? 'wss' : 'ws'}://${typeof window !== 'undefined' ? window.location.host : 'localhost:8000'}/ws`,
   maxHistoryItems: 50, // Reduced to prevent memory issues
   enableAnalytics: false // Disable analytics to reduce API calls
 };

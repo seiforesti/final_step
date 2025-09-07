@@ -1924,6 +1924,16 @@ class RedisConnector(BaseConnector):
 class CloudAwarePostgreSQLConnector(PostgreSQLConnector, LocationAwareConnector):
     """PostgreSQL connector with cloud and hybrid deployment support"""
     
+    def _get_location(self):
+        try:
+            # Prefer explicit attribute if the mixin set it
+            if hasattr(self, 'location') and self.location is not None:
+                return self.location
+        except Exception:
+            pass
+        # Fallback to data source field
+        return getattr(self.data_source, 'location', None)
+
     async def _initialize_primary(self):
         """Initialize primary PostgreSQL connection for hybrid setup"""
         connection_args = self._get_connection_args()
@@ -1957,7 +1967,8 @@ class CloudAwarePostgreSQLConnector(PostgreSQLConnector, LocationAwareConnector)
         connection_args = self._get_connection_args()
         cloud_creds = self._get_cloud_credentials()
         
-        if self.location == DataSourceLocation.CLOUD:
+        loc = self._get_location()
+        if loc == DataSourceLocation.CLOUD:
             if cloud_creds.get('managed_identity'):
                 # Use Azure managed identity
                 credential = DefaultAzureCredential()
@@ -1973,7 +1984,8 @@ class CloudAwarePostgreSQLConnector(PostgreSQLConnector, LocationAwareConnector)
     
     def _build_connection_string(self, is_primary: bool = True) -> str:
         """Build connection string based on location type"""
-        if self.location == DataSourceLocation.HYBRID and not is_primary:
+        loc = self._get_location()
+        if loc == DataSourceLocation.HYBRID and not is_primary:
             # Use replica host for secondary connection
             host = self.data_source.connection_properties.get('replica_host')
             port = self.data_source.connection_properties.get('replica_port', self.data_source.port)
