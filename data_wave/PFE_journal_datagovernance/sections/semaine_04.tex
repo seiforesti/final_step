@@ -1,0 +1,144 @@
+\subsection{Semaine 4 : 10-14 Mars 2025 - Module Scan-Rule-Sets et Personnalisation}
+
+\subsubsection{Lundi 10 Mars 2025 - Architecture Scan-Rule-Sets}
+
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Conception de l'architecture du module Scan-Rule-Sets
+    \item Analyse des besoins utilisateur pour les règles personnalisées
+    \item Développement des modèles de données dans \texttt{scan\_rule\_set\_models.py}
+    \item Création de l'interface de gestion des règles
+    \item Définition du format JSON pour les règles personnalisées
+\end{itemize}
+
+\textbf{Apprentissages :}
+La gestion des règles de scan nécessite une approche flexible permettant aux utilisateurs de définir des critères complexes. J'ai appris l'importance de créer des abstractions simples pour des logiques complexes.
+
+\textbf{Compétences mobilisées :}
+Conception d'APIs flexibles, modélisation de données complexes, UX design pour utilisateurs techniques.
+
+\textbf{Défis rencontrés :}
+Équilibrage entre simplicité d'utilisation et puissance d'expression des règles. Les utilisateurs métier ont besoin d'interfaces intuitives pour des logiques sophistiquées.
+
+\subsubsection{Mardi 11 Mars 2025 - Moteur de Règles}
+
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Implémentation du moteur d'exécution des règles personnalisées
+    \item Développement du système de validation des règles
+    \item Création des services dans \texttt{custom\_scan\_rule\_service.py}
+    \item Intégration avec le module Classifications
+    \item Tests de performance du moteur de règles
+\end{itemize}
+
+\textbf{Apprentissages :}
+Le développement d'un moteur de règles performant nécessite une attention particulière à l'optimisation des expressions régulières et à la mise en cache des résultats. J'ai appris les techniques d'optimisation des parsers de règles.
+
+\textbf{Compétences mobilisées :}
+Développement de moteurs de règles, optimisation d'algorithmes, expressions régulières avancées.
+
+\textbf{Code développé :}
+\begin{lstlisting}[language=Python, caption=Moteur de règles personnalisées]
+class ScanRuleEngine:
+    def __init__(self):
+        self.compiled_rules = {}
+        self.performance_cache = LRUCache(maxsize=1000)
+    
+    async def execute_rule_set(self, data: Any, rule_set: ScanRuleSet):
+        rule_key = self.get_rule_cache_key(rule_set)
+        if rule_key in self.compiled_rules:
+            compiled_rule = self.compiled_rules[rule_key]
+        else:
+            compiled_rule = self.compile_rule_set(rule_set)
+            self.compiled_rules[rule_key] = compiled_rule
+        
+        return await compiled_rule.execute(data)
+\end{lstlisting}
+
+\subsubsection{Mercredi 12 Mars 2025 - Interface Utilisateur Avancée}
+
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Développement de l'interface de création de règles dans le frontend
+    \item Implémentation du drag-and-drop pour la composition de règles
+    \item Création des composants de validation en temps réel
+    \item Intégration avec les APIs backend
+    \item Tests utilisateur avec l'équipe métier
+\end{itemize}
+
+\textbf{Apprentissages :}
+Le développement d'interfaces pour la création de règles complexes nécessite une approche UX innovante. J'ai appris l'importance du feedback visuel immédiat et de la validation en temps réel.
+
+\textbf{Compétences mobilisées :}
+React.js avancé, UX design, composants interactifs, validation côté client.
+
+\textbf{Réflexions :}
+L'interface développée permet aux utilisateurs métier de créer des règles sophistiquées sans connaissances techniques approfondies. Cette approche démocratise l'utilisation du système.
+
+\subsubsection{Jeudi 13 Mars 2025 - Intégration et Tests}
+
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Intégration complète du module Scan-Rule-Sets avec les autres modules
+    \item Tests d'intégration avec le module Classifications
+    \item Validation des performances système avec règles personnalisées
+    \item Développement des tests automatisés pour le moteur de règles
+    \item Documentation technique du module
+\end{itemize}
+
+\textbf{Apprentissages :}
+L'intégration de modules complexes révèle l'importance d'une architecture bien conçue. Les interfaces bien définies facilitent grandement l'intégration et la maintenance.
+
+\textbf{Compétences mobilisées :}
+Tests d'intégration, architecture modulaire, documentation technique.
+
+\textbf{Métriques obtenues :}
+\begin{itemize}
+    \item Temps d'exécution règle simple : 5ms
+    \item Temps d'exécution règle complexe : 45ms
+    \item Capacité : 1000 règles simultanées
+    \item Précision validation : 99.2\%
+\end{itemize}
+
+\subsubsection{Vendredi 14 Mars 2025 - Workshop Équipe}
+
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Workshop interne sur l'utilisation du module Scan-Rule-Sets
+    \item Formation de l'équipe aux nouvelles fonctionnalités
+    \item Collecte des retours utilisateur et suggestions d'amélioration
+    \item Planification des développements futurs
+    \item Démonstration complète du système jusqu'à présent
+\end{itemize}
+
+\textbf{Apprentissages :}
+Les workshops internes sont essentiels pour valider l'utilisabilité du système et identifier les améliorations nécessaires. J'ai appris l'importance de l'adoption utilisateur dès les phases de développement.
+
+\textbf{Compétences mobilisées :}
+Formation utilisateur, collecte de feedback, amélioration continue.
+
+\textbf{Retours équipe :}
+\begin{itemize}
+    \item Interface intuitive et puissante
+    \item Performances excellentes
+    \item Suggestion : ajout de templates de règles prédéfinies
+    \item Demande : intégration avec outils de monitoring existants
+\end{itemize}
+
+\textbf{Résumé de la semaine :}
+Cette quatrième semaine consolide l'approche modulaire avec le développement complet du module Scan-Rule-Sets. L'interface utilisateur avancée permet une adoption facilitée par les équipes métier.
+
+\textbf{Réalisations techniques majeures :}
+\begin{itemize}
+    \item Moteur de règles personnalisées haute performance
+    \item Interface drag-and-drop pour création de règles
+    \item Intégration transparente avec les modules existants
+    \item Validation en temps réel des règles créées
+\end{itemize}
+
+\textbf{Objectifs pour la semaine suivante :}
+\begin{itemize}
+    \item Développer le module ScanLogic
+    \item Implémenter l'orchestration intelligente des scans
+    \item Optimiser les performances pour les gros volumes de données
+\end{itemize}

@@ -1,0 +1,220 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage{geometry}
+\geometry{a4paper, margin=2.5cm}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{tcolorbox}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{rotating}
+
+% Configuration des couleurs
+\definecolor{primaryblue}{RGB}{0,102,204}
+\definecolor{secondarygreen}{RGB}{34,139,34}
+\definecolor{warningorange}{RGB}{255,140,0}
+
+% Configuration des en-têtes et pieds de page
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Journal de Bord PFE - Data Governance}
+\fancyhead[R]{\small NXCI - 2025}
+\fancyfoot[C]{\thepage}
+
+% Configuration des titres
+\titleformat{\section}{\Large\bfseries\color{primaryblue}}{\thesection}{1em}{}
+\titleformat{\subsection}{\large\bfseries\color{secondarygreen}}{\thesubsection}{1em}{}
+\titleformat{\subsubsection}{\normalsize\bfseries}{\thesubsubsection}{1em}{}
+
+% Configuration des listings de code
+\lstset{
+    basicstyle=\ttfamily\footnotesize,
+    backgroundcolor=\color{gray!10},
+    frame=single,
+    breaklines=true,
+    captionpos=b
+}
+
+% Titre du document
+\title{\Huge\textbf{Journal de Bord}\\
+\Large Projet de Fin d'Études\\
+\large Système Avancé de Gouvernance des Données\\
+\normalsize Intégration Microsoft Purview et Databricks}
+
+\author{Étudiant en Ingénierie Informatique\\
+Entreprise d'accueil: NXCI\\
+Lieu: Berges du Lac 1, Tunis\\
+Partenariat Canado-Tunisien}
+
+\date{Période de stage: 17 février 2025 - 17 août 2025}
+
+\begin{document}
+
+\maketitle
+
+\newpage
+\tableofcontents
+
+\newpage
+
+\section{Introduction}
+
+\subsection{Présentation de l'entreprise NXCI}
+
+L'entreprise NXCI, située aux Berges du Lac 1 à Tunis, est une société innovante issue d'un partenariat canado-tunisien spécialisée dans les solutions technologiques avancées. L'entreprise se distingue par son expertise dans le domaine de la gouvernance des données et des solutions d'intégration cloud, particulièrement avec les technologies Microsoft Azure et les plateformes de données modernes.
+
+\subsection{Objectifs du Projet de Fin d'Études}
+
+Mon Projet de Fin d'Études (PFE) s'inscrit dans le cadre d'un stage de six mois au sein de NXCI, du 17 février 2025 au 17 août 2025. L'objectif principal consiste à développer un système avancé de gouvernance des données qui résout les limitations actuelles de Microsoft Purview concernant l'extraction de schémas, la classification des données, la traçabilité (data lineage) et le catalogage.
+
+\subsection{Problématique du Projet}
+
+Les serveurs de bases de données Microsoft présentent plusieurs défis majeurs :
+\begin{itemize}
+    \item \textbf{Extraction de schémas limitée} : Les outils natifs ne supportent pas efficacement l'extraction automatisée des schémas pour certains types de bases de données
+    \item \textbf{Classification insuffisante} : Les classificateurs intégrés ne traitent pas adéquatement la diversité des types de données
+    \item \textbf{Traçabilité des données déficiente} : Le data lineage n'est pas complet pour les architectures complexes
+    \item \textbf{Catalogage incomplet} : Le catalogage automatique ne couvre pas tous les cas d'usage entreprise
+\end{itemize}
+
+Notre solution vise à développer nativement une application avancée combinant les fonctionnalités de Microsoft Purview et Databricks pour surmonter ces limitations.
+
+\section{Architecture du Système}
+
+Le projet est structuré autour de sept modules interconnectés et intégrés, formant un écosystème complexe de gouvernance des données :
+
+\subsection{Les Sept Modules Principaux}
+
+\begin{enumerate}
+    \item \textbf{DataSource} : Gestion et connexion aux sources de données multiples
+    \item \textbf{DataCatalog} : Catalogage intelligent et découverte automatisée des données
+    \item \textbf{Classifications} : Classification avancée des données avec machine learning
+    \item \textbf{Scan-Rule-Sets} : Définition et gestion des règles de scan personnalisées
+    \item \textbf{ScanLogic} : Moteur de scan intelligent avec optimisation des performances
+    \item \textbf{Compliance} : Conformité réglementaire et audit automatisé
+    \item \textbf{RBAC/Control System} : Système de contrôle d'accès basé sur les rôles
+\end{enumerate}
+
+\subsection{Technologies et Outils Utilisés}
+
+\begin{itemize}
+    \item \textbf{Backend} : Python FastAPI, SQLAlchemy, PostgreSQL
+    \item \textbf{Frontend} : React.js, TypeScript, Tailwind CSS
+    \item \textbf{Orchestration} : Docker, Docker Compose
+    \item \textbf{Base de données} : PostgreSQL avec PgBouncer pour l'optimisation
+    \item \textbf{Machine Learning} : Modèles de classification personnalisés
+    \item \textbf{Intégration} : Microsoft Azure APIs, Databricks APIs
+\end{itemize}
+
+\section{Journal Quotidien}
+
+\input{sections/semaine_01}
+\input{sections/semaine_02}
+\input{sections/semaine_03}
+\input{sections/semaine_04}
+\input{sections/semaine_05}
+\input{sections/semaine_06}
+\input{sections/semaine_07}
+\input{sections/semaine_08}
+\input{sections/semaine_09}
+\input{sections/semaine_10}
+\input{sections/semaine_11}
+\input{sections/semaine_12}
+\input{sections/semaine_13}
+\input{sections/semaine_14}
+\input{sections/semaine_15}
+\input{sections/semaine_16}
+\input{sections/semaine_17}
+\input{sections/semaine_18}
+\input{sections/semaine_19}
+\input{sections/semaine_20}
+\input{sections/semaine_21}
+\input{sections/semaine_22}
+\input{sections/semaine_23}
+\input{sections/semaine_24}
+\input{sections/semaine_25}
+\input{sections/semaine_26}
+
+\section{Réalisations Techniques Majeures}
+
+\subsection{Architecture Backend Avancée}
+
+Le développement du backend a nécessité la mise en place d'une architecture sophistiquée avec plus de 80 services interconnectés, 50+ modèles de données et 200+ endpoints API. L'organisation modulaire permet une scalabilité horizontale et une maintenance efficace.
+
+\subsection{Optimisation des Performances}
+
+\begin{itemize}
+    \item Implémentation de PgBouncer pour l'optimisation des connexions à la base de données
+    \item Mise en place d'un système de cache distribué avec Redis
+    \item Optimisation des requêtes SQL avec des index intelligents
+    \item Monitoring en temps réel des performances système
+\end{itemize}
+
+\subsection{Sécurité et Conformité}
+
+\begin{itemize}
+    \item Système RBAC avancé avec granularité fine des permissions
+    \item Chiffrement des données sensibles en transit et au repos
+    \item Audit trail complet des opérations
+    \item Conformité RGPD et standards internationaux
+\end{itemize}
+
+\section{Défis Rencontrés et Solutions Apportées}
+
+\subsection{Défis Techniques}
+
+\begin{itemize}
+    \item \textbf{Intégration Microsoft Purview} : Complexité des APIs et limitations de documentation
+    \item \textbf{Performance des scans} : Optimisation pour traiter des volumes massifs de données
+    \item \textbf{Classification ML} : Entraînement de modèles précis pour différents types de données
+\end{itemize}
+
+\subsection{Solutions Développées}
+
+\begin{itemize}
+    \item Développement d'adaptateurs personnalisés pour l'intégration Purview
+    \item Implémentation d'un système de scan parallélisé et intelligent
+    \item Création de modèles ML hybrides combinant règles et apprentissage automatique
+\end{itemize}
+
+\section{Compétences Développées}
+
+\subsection{Compétences Techniques}
+
+\begin{itemize}
+    \item Maîtrise approfondie de FastAPI et de l'écosystème Python
+    \item Expertise en architecture microservices et conteneurisation
+    \item Développement d'APIs RESTful complexes
+    \item Optimisation de bases de données et requêtes SQL avancées
+    \item Intégration de services cloud Microsoft Azure
+\end{itemize}
+
+\subsection{Compétences Métier}
+
+\begin{itemize}
+    \item Compréhension approfondie de la gouvernance des données
+    \item Expertise en conformité réglementaire (RGPD, SOX, etc.)
+    \item Maîtrise des concepts de data lineage et catalogage
+    \item Gestion de projet agile et collaboration en équipe
+\end{itemize}
+
+\section{Conclusion}
+
+Ce Projet de Fin d'Études m'a permis de développer une solution innovante répondant aux défis actuels de la gouvernance des données. L'expérience acquise chez NXCI a été enrichissante tant sur le plan technique que professionnel, me préparant efficacement aux enjeux du secteur IT moderne.
+
+Le projet développé représente une avancée significative dans le domaine de la gouvernance des données, offrant une alternative native aux limitations des outils Microsoft existants. L'architecture modulaire et les technologies avancées utilisées positionnent cette solution comme une référence pour les entreprises cherchant à optimiser leur gestion des données.
+
+Les compétences acquises durant ces six mois de stage constituent un atout majeur pour ma future carrière d'ingénieur informatique, particulièrement dans les domaines émergents de la data science et de la gouvernance des données.
+
+\end{document}

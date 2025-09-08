@@ -1,0 +1,132 @@
+\subsection{Semaine 2 : 24-28 Février 2025 - Architecture et Développement Initial}
+
+\subsubsection{Lundi 24 Février 2025 - Conception Architecture}
+
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Conception détaillée de l'architecture logicielle du système
+    \item Définition des 7 modules principaux et de leurs interactions
+    \item Création des diagrammes d'architecture (vue d'ensemble, modules, flux de données)
+    \item Choix des technologies : FastAPI, PostgreSQL, SQLAlchemy, Docker
+    \item Mise en place de la structure de projet dans le répertoire \texttt{data\_wave/backend/}
+\end{itemize}
+
+\textbf{Apprentissages :}
+J'ai approfondi ma compréhension des architectures microservices et de la séparation des responsabilités. La conception modulaire avec 7 composants interconnectés nécessite une réflexion approfondie sur les interfaces et les contrats entre services.
+
+\textbf{Compétences mobilisées :}
+Architecture logicielle, conception de systèmes distribués, modélisation UML, choix technologiques.
+
+\textbf{Défis rencontrés :}
+La complexité de l'interconnexion entre les 7 modules nécessite une attention particulière aux dépendances circulaires et à la cohérence des données partagées.
+
+\subsubsection{Mardi 25 Février 2025 - Développement Backend Initial}
+
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Initialisation du projet FastAPI dans \texttt{scripts\_automation/app/}
+    \item Configuration de la base de données PostgreSQL
+    \item Développement des premiers modèles SQLAlchemy (DataSource, DataCatalog)
+    \item Création de la structure des routes API
+    \item Mise en place du système de migration avec Alembic
+    \item Configuration de l'environnement Docker
+\end{itemize}
+
+\textbf{Apprentissages :}
+La mise en place d'un projet FastAPI complexe avec SQLAlchemy nécessite une attention particulière à la configuration des connexions de base de données et à la gestion des sessions. J'ai appris l'importance de la structure modulaire du code pour maintenir la lisibilité.
+
+\textbf{Compétences mobilisées :}
+Développement Python avancé, FastAPI, SQLAlchemy, gestion des migrations de base de données.
+
+\textbf{Code développé :}
+\begin{lstlisting}[language=Python, caption=Structure initiale main.py]
+from fastapi import FastAPI
+from app.core.cors import add_cors_middleware
+from app.api.routes import extract, metrics, classify
+from app.db_session import init_db
+
+app = FastAPI(title="Data Governance System")
+add_cors_middleware(app)
+
+# Initialisation des modules principaux
+app.include_router(extract.router, prefix="/api/v1")
+app.include_router(classify.router, prefix="/api/v1")
+\end{lstlisting}
+
+\subsubsection{Mercredi 26 Février 2025 - Tests et Validation}
+
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Développement des premiers tests unitaires
+    \item Tests locaux des APIs de base (DataSource, extraction de métadonnées)
+    \item Validation des connexions aux bases de données de test
+    \item Configuration des logs et monitoring de base
+    \item Documentation des APIs avec Swagger/OpenAPI
+\end{itemize}
+
+\textbf{Apprentissages :}
+L'importance des tests automatisés dès le début du développement. J'ai appris à utiliser pytest avec FastAPI et à configurer des bases de données de test isolées.
+
+\textbf{Compétences mobilisées :}
+Tests automatisés, pytest, documentation API, debugging.
+
+\textbf{Réflexions :}
+Les premiers tests révèlent la robustesse de l'architecture choisie. Les performances initiales sont prometteuses pour la suite du développement.
+
+\subsubsection{Jeudi 27 Février 2025 - Développement Frontend}
+
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Initialisation du projet React.js dans \texttt{pursight\_frontend/}
+    \item Configuration de TypeScript et Tailwind CSS
+    \item Création des premières interfaces utilisateur (dashboard, navigation)
+    \item Développement des composants de base (DataSource management)
+    \item Intégration avec les APIs backend développées
+\end{itemize}
+
+\textbf{Apprentissages :}
+Le développement d'interfaces utilisateur pour la gouvernance des données nécessite une approche UX spécifique. Les utilisateurs métier ont des besoins différents des utilisateurs techniques.
+
+\textbf{Compétences mobilisées :}
+React.js, TypeScript, Tailwind CSS, intégration API, UX design.
+
+\textbf{Défis rencontrés :}
+L'équilibrage entre simplicité d'utilisation et richesse fonctionnelle pour les interfaces de gouvernance des données.
+
+\subsubsection{Vendredi 28 Février 2025 - Réunion Superviseur}
+
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Présentation des progrès réalisés durant la semaine
+    \item Démonstration des premières fonctionnalités développées
+    \item Discussion sur les défis techniques rencontrés
+    \item Ajustement du planning en fonction des premiers résultats
+    \item Validation des choix architecturaux et technologiques
+\end{itemize}
+
+\textbf{Apprentissages :}
+La communication régulière avec l'encadrant est essentielle pour maintenir l'alignement sur les objectifs. J'ai appris l'importance de présenter les résultats techniques de manière accessible.
+
+\textbf{Compétences mobilisées :}
+Communication technique, présentation de projet, gestion des retours.
+
+\textbf{Retours de l'encadrant :}
+Satisfaction sur la qualité du code développé et la rigueur de l'approche. Recommandation de maintenir la même cadence de développement.
+
+\textbf{Résumé de la semaine :}
+Cette deuxième semaine marque le début concret du développement. L'architecture définie est solide et les premiers développements confirment la faisabilité technique du projet. La mise en place simultanée du backend et du frontend permet une validation continue des fonctionnalités.
+
+\textbf{Métriques de la semaine :}
+\begin{itemize}
+    \item 15 modèles SQLAlchemy créés
+    \item 8 endpoints API fonctionnels
+    \item 5 composants React développés
+    \item 95\% de couverture de tests sur le code développé
+\end{itemize}
+
+\textbf{Objectifs pour la semaine suivante :}
+\begin{itemize}
+    \item Développer le module Classifications avec machine learning
+    \item Implémenter les premiers classificateurs automatiques
+    \item Intégrer les APIs Microsoft Purview
+\end{itemize}
