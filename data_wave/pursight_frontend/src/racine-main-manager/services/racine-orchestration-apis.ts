@@ -244,7 +244,7 @@ export class RacineOrchestrationAPI {
               } else if (error.message && error.message.includes('fetch')) {
                 // Network error - switch to offline mode
                 console.warn(`Network error for ${url}, switching to offline mode`);
-                this.setOfflineMode(true);
+                this.setOfflineModeInternal(true);
                 return this.getOfflineFallback<T>(url);
               }
               }
@@ -1291,9 +1291,9 @@ export class RacineOrchestrationAPI {
   }
 
   /**
-   * Set offline mode
+   * Set offline mode (internal)
    */
-  private setOfflineMode(offline: boolean): void {
+  private setOfflineModeInternal(offline: boolean): void {
     this.offlineMode = offline;
     if (offline) {
       console.log('Switching to offline mode - backend unavailable');
@@ -1459,15 +1459,15 @@ export class RacineOrchestrationAPI {
       });
       
       if (response.ok) {
-        this.setOfflineMode(false);
+        this.setOfflineModeInternal(false);
         return true;
       } else {
-        this.setOfflineMode(true);
+        this.setOfflineModeInternal(true);
         return false;
       }
     } catch (error) {
       console.warn('Backend connectivity test failed, switching to offline mode:', error);
-      this.setOfflineMode(true);
+      this.setOfflineModeInternal(true);
       return false;
     }
   }
@@ -1488,7 +1488,7 @@ export class RacineOrchestrationAPI {
       
       window.addEventListener('offline', () => {
         console.log('Network went offline, switching to offline mode...');
-        this.setOfflineMode(true);
+        this.setOfflineModeInternal(true);
       });
     }
   }
@@ -1497,7 +1497,7 @@ export class RacineOrchestrationAPI {
    * Set offline mode status
    */
   setOfflineMode(offline: boolean): void {
-    this.offlineMode = offline;
+    this.setOfflineModeInternal(offline);
   }
 
   /**

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -71,9 +71,37 @@ export function DataSourceCreateModal({
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [preflightDiagnostics, setPreflightDiagnostics] = useState<any | null>(null);
+  const [preflightToken, setPreflightToken] = useState<string | null>(null);
   const [showDiscovery, setShowDiscovery] = useState(false);
   const [createdDataSource, setCreatedDataSource] = useState<any>(null);
   const [showConnectionTest, setShowConnectionTest] = useState(false);
+  const [currentStep, setCurrentStep] = useState<'details' | 'preflight_ok' | 'created'>('details');
+  const API_BASE_URL = (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_API_BASE_URL) || "/proxy";
+  const [enumOptions, setEnumOptions] = useState<{ source_types: string[]; locations: string[]; environments: string[]; criticalities: string[]; data_classifications: string[]; scan_frequencies: string[]; } | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/scan/data-sources/enums`, {
+          headers: { "Authorization": `Bearer ${localStorage.getItem('authToken') || ''}` }
+        });
+        const json = await res.json().catch(() => ({}));
+        if (!cancelled && res.ok && json) {
+          setEnumOptions({
+            source_types: json.source_types || [],
+            locations: json.locations || [],
+            environments: json.environments || [],
+            criticalities: json.criticalities || [],
+            data_classifications: json.data_classifications || [],
+            scan_frequencies: json.scan_frequencies || []
+          });
+        }
+      } catch {}
+    })();
+    return () => { cancelled = true; };
+  }, [API_BASE_URL]);
 
   const validateForm = () => {
     if (!formData.name.trim()) {
@@ -113,12 +141,37 @@ export function DataSourceCreateModal({
 
     setIsSubmitting(true);
     setSubmitError(null);
+    setPreflightDiagnostics(null);
 
     try {
-      if (onSuccess) {
-        const result = await onSuccess(formData);
-        setCreatedDataSource(result);
+      // Require successful preflight before creating
+      if (!preflightToken) {
+        throw new Error("Please run Preflight and ensure it succeeds before creating.");
       }
+      // Create with preflight token enforcement
+      const createRes = await fetch(`${API_BASE_URL}/scan/data-sources`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${localStorage.getItem('authToken') || ''}` },
+        body: JSON.stringify({
+          ...formData,
+          preflight_token: preflightToken
+        })
+      });
+      if (!createRes.ok) {
+        const err = await createRes.json().catch(() => ({}));
+        throw new Error(err?.detail || err?.message || "Failed to create data source");
+      }
+      const created = await createRes.json();
+      setCreatedDataSource(created);
+      setCurrentStep('created');
+
+      // 3) Post-create validate connection & baseline (non-blocking)
+      try {
+        await fetch(`${API_BASE_URL}/scan/data-sources/${created.id}/validate`, {
+          method: "POST",
+          headers: { "Authorization": `Bearer ${localStorage.getItem('authToken') || ''}` }
+        });
+      } catch {}
 
       // Reset form
       setFormData({
@@ -133,12 +186,55 @@ export function DataSourceCreateModal({
         description: "",
         connection_properties: {},
       });
+      setPreflightToken(null);
+      setPreflightDiagnostics(null);
 
       // Show option to start discovery
       setIsSubmitting(false);
       // Don't close immediately, show discovery option
     } catch (error: any) {
       setSubmitError(error?.message || "Failed to create data source");
+      setIsSubmitting(false);
+    }
+  };
+
+  const handlePreflight = async () => {
+    if (!validateForm()) return;
+    setIsSubmitting(true);
+    setSubmitError(null);
+    setPreflightDiagnostics(null);
+    setPreflightToken(null);
+    try {
+      const preflightRes = await fetch(`${API_BASE_URL}/scan/validate-connection-preflight`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${localStorage.getItem('authToken') || ''}` },
+        body: JSON.stringify({
+          name: formData.name,
+          source_type: formData.source_type,
+          location: formData.location,
+          host: formData.host,
+          port: formData.port,
+          username: formData.username,
+          password: formData.password,
+          database_name: formData.database_name,
+          connection_properties: formData.connection_properties,
+          environment: formData.environment,
+          criticality: formData.criticality,
+          data_classification: formData.data_classification,
+          scan_frequency: formData.scan_frequency
+        })
+      });
+      const preflightJson = await preflightRes.json().catch(() => ({}));
+      if (!preflightRes.ok || !preflightJson?.success) {
+        setPreflightDiagnostics(preflightJson?.diagnostics || null);
+        throw new Error(preflightJson?.detail || preflightJson?.message || "Preflight validation failed");
+      }
+      setPreflightDiagnostics(preflightJson?.diagnostics || null);
+      setPreflightToken(preflightJson?.preflight_token || null);
+      setCurrentStep('preflight_ok');
+    } catch (e: any) {
+      setSubmitError(e?.message || 'Preflight failed');
+    } finally {
       setIsSubmitting(false);
     }
   };
@@ -207,7 +303,7 @@ export function DataSourceCreateModal({
   return (
     <>
       <Dialog open={open} onOpenChange={handleClose}>
-        <DialogContent className="sm:max-w-[600px]">
+        <DialogContent className="sm:max-w-[700px]">
           <DialogHeader>
             <DialogTitle>Add New Data Source</DialogTitle>
             <DialogDescription>
@@ -223,6 +319,24 @@ export function DataSourceCreateModal({
                   <AlertTriangle className="h-4 w-4" />
                   <AlertDescription>{submitError}</AlertDescription>
                 </Alert>
+              )}
+              {preflightDiagnostics && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-sm">Preflight Diagnostics</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div><span className="text-muted-foreground">Success:</span> <span className="font-medium">{String(preflightDiagnostics?.success ?? true)}</span></div>
+                      <div><span className="text-muted-foreground">Latency:</span> <span className="font-medium">{preflightDiagnostics?.latency_ms ?? 'n/a'} ms</span></div>
+                      <div><span className="text-muted-foreground">Version:</span> <span className="font-medium">{preflightDiagnostics?.version || 'n/a'}</span></div>
+                      <div><span className="text-muted-foreground">SSL Enabled:</span> <span className="font-medium">{String(preflightDiagnostics?.ssl_enabled ?? 'n/a')}</span></div>
+                      {preflightDiagnostics?.warnings?.length ? (
+                        <div className="col-span-2"><span className="text-muted-foreground">Warnings:</span> <span className="font-medium">{preflightDiagnostics.warnings.join(', ')}</span></div>
+                      ) : null}
+                    </div>
+                  </CardContent>
+                </Card>
               )}
 
               <div className="grid grid-cols-2 gap-4">
@@ -251,12 +365,20 @@ export function DataSourceCreateModal({
                       <SelectValue placeholder="Select source type" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="postgresql">PostgreSQL</SelectItem>
-                      <SelectItem value="mysql">MySQL</SelectItem>
-                      <SelectItem value="mongodb">MongoDB</SelectItem>
-                      <SelectItem value="snowflake">Snowflake</SelectItem>
-                      <SelectItem value="s3">Amazon S3</SelectItem>
-                      <SelectItem value="redis">Redis</SelectItem>
+                      {enumOptions?.source_types?.length ? (
+                        enumOptions.source_types.map((t) => (
+                          <SelectItem key={t} value={t}>{t}</SelectItem>
+                        ))
+                      ) : (
+                        <>
+                          <SelectItem value="postgresql">PostgreSQL</SelectItem>
+                          <SelectItem value="mysql">MySQL</SelectItem>
+                          <SelectItem value="mongodb">MongoDB</SelectItem>
+                          <SelectItem value="snowflake">Snowflake</SelectItem>
+                          <SelectItem value="s3">Amazon S3</SelectItem>
+                          <SelectItem value="redis">Redis</SelectItem>
+                        </>
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
@@ -369,9 +491,17 @@ export function DataSourceCreateModal({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="cloud">Cloud</SelectItem>
-                      <SelectItem value="on_prem">On-Premise</SelectItem>
-                      <SelectItem value="hybrid">Hybrid</SelectItem>
+                      {enumOptions?.locations?.length ? (
+                        enumOptions.locations.map((l) => (
+                          <SelectItem key={l} value={l}>{l}</SelectItem>
+                        ))
+                      ) : (
+                        <>
+                          <SelectItem value="cloud">Cloud</SelectItem>
+                          <SelectItem value="on_prem">On-Premise</SelectItem>
+                          <SelectItem value="hybrid">Hybrid</SelectItem>
+                        </>
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
@@ -412,10 +542,18 @@ export function DataSourceCreateModal({
                       <SelectValue placeholder="Select environment" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="development">Development</SelectItem>
-                      <SelectItem value="test">Test</SelectItem>
-                      <SelectItem value="staging">Staging</SelectItem>
-                      <SelectItem value="production">Production</SelectItem>
+                      {enumOptions?.environments?.length ? (
+                        enumOptions.environments.map((e) => (
+                          <SelectItem key={e} value={e}>{e}</SelectItem>
+                        ))
+                      ) : (
+                        <>
+                          <SelectItem value="development">Development</SelectItem>
+                          <SelectItem value="test">Test</SelectItem>
+                          <SelectItem value="staging">Staging</SelectItem>
+                          <SelectItem value="production">Production</SelectItem>
+                        </>
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
@@ -436,10 +574,18 @@ export function DataSourceCreateModal({
                       <SelectValue placeholder="Select criticality" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="low">Low</SelectItem>
-                      <SelectItem value="medium">Medium</SelectItem>
-                      <SelectItem value="high">High</SelectItem>
-                      <SelectItem value="critical">Critical</SelectItem>
+                      {enumOptions?.criticalities?.length ? (
+                        enumOptions.criticalities.map((c) => (
+                          <SelectItem key={c} value={c}>{c}</SelectItem>
+                        ))
+                      ) : (
+                        <>
+                          <SelectItem value="low">Low</SelectItem>
+                          <SelectItem value="medium">Medium</SelectItem>
+                          <SelectItem value="high">High</SelectItem>
+                          <SelectItem value="critical">Critical</SelectItem>
+                        </>
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
@@ -460,10 +606,18 @@ export function DataSourceCreateModal({
                       <SelectValue placeholder="Select classification" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="public">Public</SelectItem>
-                      <SelectItem value="internal">Internal</SelectItem>
-                      <SelectItem value="confidential">Confidential</SelectItem>
-                      <SelectItem value="restricted">Restricted</SelectItem>
+                      {enumOptions?.data_classifications?.length ? (
+                        enumOptions.data_classifications.map((dc) => (
+                          <SelectItem key={dc} value={dc}>{dc}</SelectItem>
+                        ))
+                      ) : (
+                        <>
+                          <SelectItem value="public">Public</SelectItem>
+                          <SelectItem value="internal">Internal</SelectItem>
+                          <SelectItem value="confidential">Confidential</SelectItem>
+                          <SelectItem value="restricted">Restricted</SelectItem>
+                        </>
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
@@ -547,8 +701,16 @@ export function DataSourceCreateModal({
                 >
                   Cancel
                 </Button>
-                <Button type="submit" disabled={isSubmitting || !isFormValid}>
-                  {isSubmitting ? "Creating..." : "Create Data Source"}
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handlePreflight}
+                  disabled={isSubmitting || !isFormValid}
+                >
+                  {isSubmitting && !preflightToken ? 'Checking...' : 'Run Preflight'}
+                </Button>
+                <Button type="submit" disabled={isSubmitting || !isFormValid || !preflightToken}>
+                  {isSubmitting && preflightToken ? "Creating..." : "Create Data Source"}
                 </Button>
               </DialogFooter>
             </form>

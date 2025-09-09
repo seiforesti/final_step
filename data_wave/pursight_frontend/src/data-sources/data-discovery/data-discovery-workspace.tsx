@@ -60,10 +60,14 @@ export function DataDiscoveryWorkspace({
   const [error, setError] = useState<string | null>(null)
   const [showSaveDialog, setShowSaveDialog] = useState(false)
   const [activeTab, setActiveTab] = useState('discovery')
+  const API_BASE_URL = (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_API_BASE_URL) || "/proxy"
+  const [initialSelectionManifest, setInitialSelectionManifest] = useState<any | null>(null)
 
   useEffect(() => {
     if (isOpen && dataSource) {
       testConnection()
+      // Load any existing selection manifest for preselection
+      loadSelectionManifest()
     }
   }, [isOpen, dataSource])
 
@@ -100,6 +104,22 @@ export function DataDiscoveryWorkspace({
     }
   }
 
+  const loadSelectionManifest = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/scan/data-sources/${dataSource.id}/selection-manifest`, {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}` }
+      })
+      const json = await res.json().catch(() => ({}))
+      if (res.ok && json?.success && json?.data) {
+        setInitialSelectionManifest(json.data)
+      } else {
+        setInitialSelectionManifest(null)
+      }
+    } catch {
+      setInitialSelectionManifest(null)
+    }
+  }
+
   const handleSchemaDiscoveryComplete = (schemaData: any) => {
     setDiscoveryData(schemaData)
     setCurrentStep('selection')
@@ -114,6 +134,64 @@ export function DataDiscoveryWorkspace({
     
     if (selection.length > 0) {
       setCurrentStep('workspace')
+      // Persist selection immediately for production integrity
+      saveSelectionManifest()
+    }
+  }
+
+  const buildSelectionManifest = (items: any[]) => {
+    // items may include tables and columns; group into db->schemas->tables->columns
+    const manifest: any = { databases: [] }
+    const dbMap: Record<string, any> = {}
+    for (const it of items) {
+      const db = (it.database || it.db || 'default') as string
+      const schema = (it.schema || 'public') as string
+      const table = (it.table || it.name || '') as string
+      const column = it.column
+      if (!dbMap[db]) {
+        dbMap[db] = { name: db, schemas: [], _sch: {} }
+        manifest.databases.push(dbMap[db])
+      }
+      const dbNode = dbMap[db]
+      if (!dbNode._sch[schema]) {
+        dbNode._sch[schema] = { name: schema, tables: [], _tbl: {} }
+        dbNode.schemas.push(dbNode._sch[schema])
+      }
+      const schNode = dbNode._sch[schema]
+      if (!schNode._tbl[table]) {
+        schNode._tbl[table] = { name: table, columns: [] as string[] }
+        schNode.tables.push(schNode._tbl[table])
+      }
+      if (column) {
+        if (!schNode._tbl[table].columns.includes(column)) {
+          schNode._tbl[table].columns.push(column)
+        }
+      }
+    }
+    // cleanup helpers
+    for (const dbNode of manifest.databases) {
+      delete dbNode._sch
+      for (const sch of dbNode.schemas) {
+        delete sch._tbl
+      }
+    }
+    return manifest
+  }
+
+  const saveSelectionManifest = async () => {
+    try {
+      const manifest = buildSelectionManifest(selectedItems)
+      const res = await fetch(`${API_BASE_URL}/scan/data-sources/${dataSource.id}/selection-manifest`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}` },
+        body: JSON.stringify(manifest)
+      })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err?.detail || 'Failed to save selection')
+      }
+    } catch (e: any) {
+      setError(e?.message || 'Failed to save selection')
     }
   }
 
@@ -440,6 +518,7 @@ export function DataDiscoveryWorkspace({
                 dataSourceName={dataSource?.name}
                 onSelectionChange={handleSelectionChange}
                 onClose={() => setCurrentStep('connection')}
+                initialSelectionManifest={initialSelectionManifest}
               />
             )}
             
@@ -449,6 +528,7 @@ export function DataDiscoveryWorkspace({
                 dataSourceName={dataSource?.name}
                 onSelectionChange={handleSelectionChange}
                 onClose={() => setCurrentStep('discovery')}
+                initialSelectionManifest={initialSelectionManifest}
               />
             )}
             

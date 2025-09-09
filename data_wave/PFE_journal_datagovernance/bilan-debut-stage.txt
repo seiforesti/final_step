@@ -1,0 +1,73 @@
+Bilan périodique 
+Début de stage (6ème semaine)
+Nom et Prénom :	Seif Eddine Abdaoui
+Spécialité :	SE1
+Organisme d’accueil :	NXCI international -lac 1
+
+Qu’est-ce qui vous plaît et vous motive dans votre stage ?
+- L'impact concret sur un système réel de gouvernance des données.
+- L'encadrement disponible et la culture technique exigeante.
+- L'opportunité d'apprendre Microsoft/Azure, Databricks et bonnes pratiques.
+
+Décrivez une situation de travail marquante que vous avez vécu pendant votre stage.
+- Mise en place d’un pipeline de scan + classification avec vérifications de qualité.
+- Après des tests itératifs, le pipeline a détecté correctement des schémas et tags.
+
+Avez-vous vécu pendant votre stage une situation difficile ou problématique ? Si oui, comment avez-vous réagi ?
+- Perte de connexion base/erreurs pool.
+- Diagnostic via logs/monitoring, ajustement du pool et des timeouts, retests et documentation.
+
+Que retirez-vous comme apprentissages depuis le début de votre stage (culture d’entreprise, particularité du secteur, du métier…) ?
+- Culture de qualité/traçabilité, sécurité des données et conformité.
+- Collaboration agile, revues de code et importance des métriques.
+
+Comment gérez-vous les délais dans votre travail ?
+- Découpage en tâches, priorisation quotidienne, jalons hebdomadaires.
+- Buffer de risques et communication proactive en cas de blocage.
+
+De quelle(s) manière(s) utilisez-vous vos capacités/talents dans votre stage ?
+Donnez des exemples concrets
+- Esprit d’analyse et autonomie pour investiguer les incidents.
+- Exemple : optimisation d’index et requêtes pour réduire la latence des scans.
+- Exemple : conception de règles de classification et mise en cache des résultats pour accélérer l’analyse.
+
+À combien évaluez-vous votre capacité à :
+(1 plus mauvaise note – 4 meilleure note) 
+Travailler en équipe ? 
+4	
+Pourquoi vous êtes-vous attribué cette note ? Donnez un exemple concret :
+Je facilite le travail collectif en aidant et en demandant de l’aide quand c’est pertinent. Par exemple, sur une fonctionnalité sensible (vérifications de qualité et performances de scan), j’ai d’abord sollicité un collègue pour clarifier un point métier, puis j’ai partagé une solution technique (revu des règles et métriques), accompagnée d’une courte démo. Résultat : nous avons débloqué la tâche plus vite, amélioré la qualité et capitalisé la solution dans la documentation.
+
+Être autonome ? 
+4	
+Pourquoi vous êtes-vous attribué cette note ? Donnez un exemple concret :
+Je gère les sujets de bout en bout et propose des PoC quand il faut. Par exemple, j’ai mis en place un cache sélectif pour les requêtes de lignée, suivi par des métriques et une brève note de décision, ce qui a permis une intégration rapide et fiable sans micro‑gestion.
+
+Être résilient ? 
+4	
+Pourquoi vous êtes-vous attribué cette note ? Donnez un exemple concret :
+Face aux échecs, je rebondis vite en diagnostiquant la cause et en mettant en place un plan B pragmatique. Lors d’erreurs pool/timeout en local, j’ai isolé le cas minimal, ajusté timeouts et backoff, relancé des tests, puis documenté la procédure. Résultat : incident circonscrit et trajectoire projet maintenue.
+
+Organiser votre travail dans les délais ? 
+3		
+Pourquoi vous êtes-vous attribué cette note ? Donnez un exemple concret :
+Globalement dans les temps, mais quelques sous‑estimations initiales ont montré la nécessité d’un cadre plus strict. J’ai donc instauré des checklists quotidiennes, une ré‑estimation en fin de journée et un buffer hebdomadaire. Par exemple, l’intégration de nouvelles règles de classification a été découpée en sous‑tâches avec critères de done, ce qui a sécurisé la livraison.
+
+Prendre des initiatives ? 
+      4	
+Pourquoi vous êtes-vous attribué cette note ? Donnez un exemple concret :
+Je propose régulièrement des améliorations pragmatiques à fort impact. Par exemple, j’ai suggéré et mis en place des métriques de santé (latence API, taux d’erreurs, saturation pool) avec alertes ciblées. Adoptées par l’équipe, elles réduisent le temps de détection et de résolution des incidents.
+
+Réaliser un travail de qualité (rigueur professionnel, être appliqué…)?
+      3	
+Pourquoi vous êtes-vous attribué cette note ? Donnez un exemple concret :
+Mon travail est rigoureux et testé, mais certaines revues ont pointé des axes d’amélioration (normalisation des réponses, commentaires plus explicites). J’ai mis en place une checklist qualité (tests, logs, messages d’erreur clairs, mini‑docs) que j’ai appliquée lors de l’optimisation des requêtes catalogues, réduisant les allers‑retours.
+
+Souhaitez-vous me contacter pour échanger sur le déroulement de votre stage ?
+ Oui
+ Non
+Par quel moyen (par téléphone, mail, rendez-vous…) ?
+- Par mail ou rendez-vous (présentiel/Teams) selon disponibilité.
+	
+
+

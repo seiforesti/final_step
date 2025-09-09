@@ -1,0 +1,2902 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{datetime}
+\usepackage{fancyhdr}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{listings}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{float}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{etoolbox}
+\usepackage[scaled=0.95]{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+\usepackage{microtype}
+\setlength{\parskip}{0.5em}
+\setlength{\parindent}{0pt}
+\titlespacing*{\section}{0pt}{1.2em}{0.6em}
+\titlespacing*{\subsection}{0pt}{1.0em}{0.5em}
+\titlespacing*{\subsubsection}{0pt}{0.8em}{0.4em}
+
+% Configuration de la page
+\geometry{left=2.5cm,right=2.5cm,top=2.5cm,bottom=2.5cm}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{Journal de Bord PFE - Gouvernance des Données}
+\fancyhead[R]{\thepage}
+\fancyfoot[C]{NXCI - Entreprise Partenaire Canadienne-Tunisienne}
+
+% Configuration des couleurs
+\definecolor{primaryblue}{RGB}{59, 130, 246}
+\definecolor{secondarygreen}{RGB}{16, 185, 129}
+\definecolor{accentpurple}{RGB}{139, 92, 246}
+\definecolor{textgray}{RGB}{107, 114, 128}
+
+% Configuration des titres
+\titleformat{\section}{\Large\bfseries\color{primaryblue}}{\thesection}{1em}{}
+\titleformat{\subsection}{\large\bfseries\color{secondarygreen}}{\thesubsection}{1em}{}
+\titleformat{\subsubsection}{\normalsize\bfseries\color{accentpurple}}{\thesubsubsection}{1em}{}
+
+% Configuration des listes
+\setlist[itemize]{leftmargin=2em,itemsep=0.5em}
+\setlist[enumerate]{leftmargin=2em,itemsep=0.5em}
+
+% Configuration des liens
+\hypersetup{
+    colorlinks=true,
+    linkcolor=primaryblue,
+    urlcolor=primaryblue,
+    citecolor=secondarygreen
+}
+
+% Configuration du code
+\lstset{
+    basicstyle=\small\ttfamily,
+    breaklines=true,
+    frame=single,
+    backgroundcolor=\color{gray!10},
+    commentstyle=\color{green!60!black},
+    keywordstyle=\color{blue},
+    stringstyle=\color{red}
+}
+
+\begin{document}
+
+% Page de titre
+\begin{titlepage}
+    \centering
+    \vspace*{2cm}
+    
+    {\Huge\bfseries\color{primaryblue} JOURNAL DE BORD}\\[0.5cm]
+    {\Large\bfseries Projet de Fin d'Études (PFE)}\\[1cm]
+    
+    {\Large\bfseries Développement d'une Plateforme Avancée de}\\[0.3cm]
+    {\Large\bfseries Gouvernance des Données}\\[0.3cm]
+    {\Large\bfseries Intégrant l'Intelligence Artificielle}\\[1cm]
+    
+    \vspace{1cm}
+    
+    \begin{tabular}{ll}
+        \textbf{Étudiant :} & [Nom de l'étudiant] \\
+        \textbf{Institution :} & [Nom de l'école/université] \\
+        \textbf{Spécialité :} & Génie Informatique \\
+        \textbf{Période :} & 17 Février 2025 - 17 Août 2025 \\
+        \textbf{Durée :} & 6 mois (24 semaines) \\
+    \end{tabular}
+    
+    \vspace{1.5cm}
+    
+    \begin{tabular}{ll}
+        \textbf{Entreprise d'accueil :} & NXCI \\
+        \textbf{Type :} & Partenariat Canadien-Tunisien \\
+        \textbf{Lieu :} & Au Berges du Lac 1, Tunis, Tunisie \\
+        \textbf{Encadrant :} & [Nom de l'encadrant] \\
+        \textbf{Tuteur académique :} & [Nom du tuteur] \\
+    \end{tabular}
+    
+    \vfill
+    
+    {\large\bfseries\color{textgray} Année Universitaire 2024-2025}
+    
+\end{titlepage}
+
+% Table des matières
+\tableofcontents
+\newpage
+
+% Introduction
+\section{Introduction et Contexte du Projet}
+
+\subsection{Présentation de l'Entreprise NXCI}
+NXCI est une entreprise de partenariat canadien-tunisien spécialisée dans les solutions technologiques avancées, située aux Berges du Lac 1 à Tunis. L'entreprise se concentre sur le développement de plateformes de gouvernance des données et d'intelligence artificielle pour répondre aux défis complexes de la gestion des données dans les environnements d'entreprise modernes.
+
+\subsection{Contexte du Projet}
+Le projet de fin d'études porte sur le développement d'une plateforme avancée de gouvernance des données qui résout les limitations critiques de Microsoft Purview et des solutions similaires. La problématique principale identifiée est que Microsoft dispose de plusieurs serveurs de bases de données qui ne supportent pas directement l'extraction de leurs schémas, ne traitent pas leurs classificateurs et ne gèrent pas efficacement la lignée des données et le catalogage. Elle met également en œuvre des optimisations avancées et des solutions performantes et innovantes afin d'améliorer la précision des classifications, la couverture d'extraction des schémas, la traçabilité (data lineage) et l'efficacité globale de la gouvernance.
+
+\subsection{Objectifs du Projet}
+\begin{itemize}
+    \item Développer une solution native pour résoudre les limitations de Microsoft Purview
+    \item Intégrer les fonctionnalités avancées de Databricks et Microsoft
+    \item Créer une plateforme de gouvernance des données avec 7 groupes modulaires interconnectés
+    \item Implémenter des fonctionnalités d'intelligence artificielle et d'apprentissage automatique
+    \item Assurer une gestion avancée des performances et de la sécurité
+\end{itemize}
+
+\subsection{Architecture du Projet}
+Le projet est structuré autour de 7 groupes modulaires principaux :
+\begin{enumerate}
+    \item \textbf{Data Sources} - Gestion et découverte des sources de données
+    \item \textbf{Data Catalog} - Catalogue avancé des données
+    \item \textbf{Classifications} - Système de classification intelligent
+    \item \textbf{Scan-Rule-Sets} - Ensembles de règles de balayage avancées
+    \item \textbf{Scan Logic} - Logique de balayage unifiée
+    \item \textbf{Compliance} - Gestion de la conformité et des règles
+    \item \textbf{RBAC/Control System} - Système de contrôle d'accès basé sur les rôles
+\end{enumerate}
+
+\section{Planification et Méthodologie}
+
+\subsection{Approche en Trois Niveaux}
+Le projet suit une approche structurée en trois niveaux :
+
+\subsubsection{Niveau 1 : Compréhension et Simulation}
+\begin{itemize}
+    \item Étude approfondie de la documentation Microsoft et Azure
+    \item Analyse des fonctionnalités de Microsoft Purview
+    \item Simulation du comportement de l'Integration Runtime
+    \item Compréhension des limitations existantes
+\end{itemize}
+
+\subsubsection{Niveau 2 : Développement Partiel et Tests}
+\begin{itemize}
+    \item Développement partiel du backend avec tests locaux
+    \item Validation des concepts et approches techniques
+    \item Tests de performance et d'intégration
+    \item Optimisation des algorithmes de base
+\end{itemize}
+
+\subsubsection{Niveau 3 : Développement Full-Stack Complet}
+\begin{itemize}
+    \item Développement complet du frontend, backend et base de données
+    \item Implémentation du middleware et des services
+    \item Intégration de tous les composants
+    \item Tests de charge et de sécurité
+\end{itemize}
+
+\subsection{Calendrier des Rencontres}
+Le projet prévoit des rencontres régulières avec l'encadrant :
+\begin{itemize}
+    \item \textbf{Jour 1} : Provisioning et suivi des progrès
+    \item \textbf{Jour 2} : Discussion sur le travail à venir
+    \item \textbf{Jour 3} : Workshop technique
+\end{itemize}
+
+\section{Journal Hebdomadaire}
+
+% Semaine 1 - 17-21 Février 2025
+\clearpage
+\subsection{Semaine 1 : 17-21 Février 2025}
+
+\subsubsection{Lundi 17 Février 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Première journée de stage chez NXCI
+    \item Présentation de l'équipe et de l'environnement de travail
+    \item Initiation aux outils et technologies utilisés
+    \item Lecture de la documentation Microsoft Purview et Azure
+\end{itemize}
+
+\textbf{Apprentissages :}
+J'ai découvert l'écosystème Microsoft Purview et ses capacités de gouvernance des données. L'analyse de la documentation m'a permis de comprendre les fonctionnalités de base comme la découverte automatique des données, la classification et la lignée des données.
+
+\textbf{Difficultés rencontrées :}
+La complexité de l'architecture Microsoft Purview nécessite une compréhension approfondie des concepts de gouvernance des données et des intégrations cloud.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Compréhension des concepts de gouvernance des données
+    \item Familiarisation avec l'écosystème Microsoft Azure
+    \item Analyse de documentation technique
+\end{itemize}
+
+\subsubsection{Mardi 18 Février 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Étude approfondie de Microsoft Purview
+    \item Analyse des limitations identifiées dans le système
+    \item Recherche sur les solutions alternatives existantes
+    \item Définition des objectifs techniques du projet
+\end{itemize}
+
+\textbf{Apprentissages :}
+J'ai identifié les principales limitations de Microsoft Purview : manque de support natif pour l'extraction de schémas de certaines bases de données, traitement limité des classificateurs personnalisés, et gestion incomplète de la lignée des données.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Analyse critique de solutions existantes
+    \item Identification de problématiques techniques
+    \item Recherche et veille technologique
+\end{itemize}
+
+\subsubsection{Mercredi 19 Février 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Étude de l'architecture Databricks
+    \item Analyse des possibilités d'intégration avec Microsoft
+    \item Début de la conception de l'architecture du projet
+    \item Recherche sur les technologies de machine learning
+\end{itemize}
+
+\textbf{Apprentissages :}
+Databricks offre des capacités avancées d'analyse de données et de machine learning qui peuvent compléter efficacement les fonctionnalités de Microsoft Purview. L'intégration de ces deux plateformes pourrait résoudre les limitations identifiées.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Conception d'architecture système
+    \item Évaluation de technologies complémentaires
+    \item Planification d'intégrations complexes
+\end{itemize}
+
+\subsubsection{Jeudi 20 Février 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Finalisation de l'architecture générale du projet
+    \item Définition des 7 groupes modulaires
+    \item Planification détaillée du développement
+    \item Préparation de la première réunion avec l'encadrant
+\end{itemize}
+
+\textbf{Apprentissages :}
+La modularité est essentielle pour créer une plateforme scalable et maintenable. Chaque groupe modulaire doit avoir des responsabilités claires tout en étant capable de communiquer avec les autres groupes.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Architecture modulaire
+    \item Planification de projet complexe
+    \item Communication technique
+\end{itemize}
+
+\subsubsection{Vendredi 21 Février 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Première réunion avec l'encadrant (Jour 1 - Provisioning)
+    \item Présentation de l'architecture proposée
+    \item Validation des objectifs et de l'approche
+    \item Planification des prochaines étapes
+\end{itemize}
+
+\textbf{Apprentissages :}
+La réunion avec l'encadrant a confirmé la pertinence de l'approche proposée. L'encadrant a souligné l'importance de la performance et de la sécurité dans une solution de gouvernance des données d'entreprise.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Présentation de projet technique
+    \item Communication avec des professionnels
+    \item Gestion de feedback et d'ajustements
+\end{itemize}
+
+\textbf{Bilan de la semaine :}
+Cette première semaine a été consacrée à la compréhension du contexte et à la définition de l'architecture du projet. J'ai acquis une vision claire des défis à relever et des technologies à utiliser. La validation de l'encadrant me donne confiance dans l'approche choisie.
+
+% Semaine 2 - 24-28 Février 2025
+\clearpage
+\subsection{Semaine 2 : 24-28 Février 2025}
+
+\subsubsection{Lundi 24 Février 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Début du développement de l'environnement de développement
+    \item Configuration des outils de développement (Docker, PostgreSQL, FastAPI)
+    \item Création de la structure de base du projet backend
+    \item Implémentation des premiers modèles de données
+\end{itemize}
+
+\textbf{Apprentissages :}
+La configuration d'un environnement de développement robuste est cruciale pour un projet de cette envergure. Docker permet d'assurer la cohérence entre les environnements de développement et de test.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Configuration d'environnements Docker
+    \item Modélisation de données avec SQLModel
+    \item Architecture de microservices
+\end{itemize}
+
+\subsubsection{Mardi 25 Février 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Développement des modèles pour le groupe Data Sources
+    \item Implémentation des services de connexion aux bases de données
+    \item Création des APIs REST pour la gestion des sources de données
+    \item Tests unitaires des fonctionnalités de base
+\end{itemize}
+
+\textbf{Apprentissages :}
+Le groupe Data Sources est le fondement de toute la plateforme. Il doit gérer efficacement les connexions à différents types de bases de données tout en assurant la sécurité et la performance.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Développement d'APIs REST avec FastAPI
+    \item Gestion de connexions de bases de données
+    \item Tests unitaires en Python
+\end{itemize}
+
+\subsubsection{Mercredi 26 Février 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Développement du système de classification intelligent
+    \item Intégration d'algorithmes de machine learning
+    \item Création des modèles de données pour les classifications
+    \item Implémentation des services de classification automatique
+\end{itemize}
+
+\textbf{Apprentissages :}
+L'intelligence artificielle joue un rôle central dans la classification automatique des données. L'utilisation d'algorithmes de machine learning permet d'améliorer la précision et l'efficacité du processus de classification.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Intégration de machine learning
+    \item Développement d'algorithmes de classification
+    \item Optimisation de performance
+\end{itemize}
+
+\subsubsection{Jeudi 27 Février 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Développement du système de scan et de règles
+    \item Implémentation des moteurs de pattern matching
+    \item Création des APIs pour la gestion des règles de scan
+    \item Tests d'intégration entre les différents composants
+\end{itemize}
+
+\textbf{Apprentissages :}
+Le système de scan doit être performant et flexible pour traiter de grandes quantités de données. L'utilisation de patterns optimisés et de traitement parallèle est essentielle.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Développement de moteurs de scan
+    \item Optimisation de performance
+    \item Tests d'intégration
+\end{itemize}
+
+\subsubsection{Vendredi 28 Février 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Développement du système de catalogage avancé
+    \item Implémentation de la lignée des données
+    \item Création des APIs pour la gestion du catalogue
+    \item Tests de performance du système complet
+\end{itemize}
+
+\textbf{Apprentissages :}
+La lignée des données est un aspect critique de la gouvernance. Elle permet de tracer l'origine et les transformations des données, facilitant ainsi la conformité et l'audit.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Développement de systèmes de lignée
+    \item Gestion de métadonnées complexes
+    \item Optimisation de requêtes
+\end{itemize}
+
+\textbf{Bilan de la semaine :}
+Cette semaine a été consacrée au développement des composants de base de la plateforme. J'ai implémenté les fonctionnalités essentielles des quatre premiers groupes modulaires. Les tests de performance montrent des résultats prometteurs.
+
+% Semaine 3 - 3-7 Mars 2025
+\clearpage
+\subsection{Semaine 3 : 3-7 Mars 2025}
+
+\subsubsection{Lundi 3 Mars 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Développement du système RBAC (Role-Based Access Control)
+    \item Implémentation des modèles d'utilisateurs et de permissions
+    \item Création des APIs de gestion des rôles et des accès
+    \item Tests de sécurité et d'authentification
+\end{itemize}
+
+\textbf{Apprentissages :}
+La sécurité est un aspect fondamental d'une plateforme de gouvernance des données. Le système RBAC doit être robuste et flexible pour gérer les différents niveaux d'accès selon les rôles des utilisateurs.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Développement de systèmes de sécurité
+    \item Gestion des permissions et des rôles
+    \item Tests de sécurité
+\end{itemize}
+
+\subsubsection{Mardi 4 Mars 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Développement du système de compliance et de règles
+    \item Implémentation des moteurs de validation
+    \item Création des APIs pour la gestion des règles de conformité
+    \item Intégration avec les systèmes de classification
+\end{itemize}
+
+\textbf{Apprentissages :}
+La conformité réglementaire est un enjeu majeur pour les entreprises. Le système doit pouvoir valider automatiquement la conformité des données selon différentes réglementations (RGPD, SOX, etc.).
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Développement de systèmes de conformité
+    \item Compréhension des réglementations
+    \item Intégration de systèmes complexes
+\end{itemize}
+
+\subsubsection{Mercredi 5 Mars 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Développement du système de scan logic unifié
+    \item Implémentation de l'orchestrateur de scans
+    \item Création des APIs pour la gestion des scans
+    \item Tests de performance et d'optimisation
+\end{itemize}
+
+\textbf{Apprentissages :}
+L'orchestration des scans est cruciale pour la performance de la plateforme. Le système doit pouvoir exécuter plusieurs scans en parallèle tout en gérant les ressources efficacement.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Orchestration de tâches
+    \item Optimisation de performance
+    \item Gestion des ressources
+\end{itemize}
+
+\subsubsection{Jeudi 6 Mars 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Développement du système de monitoring et de métriques
+    \item Implémentation des dashboards de performance
+    \item Création des APIs pour la collecte de métriques
+    \item Tests d'intégration du système complet
+\end{itemize}
+
+\textbf{Apprentissages :}
+Le monitoring est essentiel pour assurer la disponibilité et la performance de la plateforme. Les métriques doivent être collectées en temps réel et présentées de manière claire.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Développement de systèmes de monitoring
+    \item Création de dashboards
+    \item Analyse de métriques
+\end{itemize}
+
+\subsubsection{Vendredi 7 Mars 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Deuxième réunion avec l'encadrant (Jour 2 - Discussion travail à venir)
+    \item Présentation des progrès réalisés
+    \item Discussion sur les prochaines étapes
+    \item Planification du développement du frontend
+\end{itemize}
+
+\textbf{Apprentissages :}
+L'encadrant a validé les progrès réalisés et a souligné l'importance de l'interface utilisateur pour l'adoption de la plateforme. Le frontend doit être intuitif et performant.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Présentation de progrès
+    \item Planification de développement
+    \item Communication technique
+\end{itemize}
+
+\textbf{Bilan de la semaine :}
+Cette semaine a été consacrée à la finalisation des composants backend et à la préparation du développement frontend. Tous les groupes modulaires sont maintenant fonctionnels et intégrés.
+
+% Semaine 4 - 10-14 Mars 2025
+\clearpage
+\subsection{Semaine 4 : 10-14 Mars 2025}
+
+\subsubsection{Lundi 10 Mars 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Début du développement du frontend avec React et TypeScript
+    \item Configuration de l'environnement de développement frontend
+    \item Création de la structure de base des composants
+    \item Implémentation des services d'API
+\end{itemize}
+
+\textbf{Apprentissages :}
+Le développement frontend moderne nécessite une architecture bien structurée. L'utilisation de TypeScript améliore la maintenabilité et la robustesse du code.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Développement React avec TypeScript
+    \item Architecture de composants
+    \item Intégration d'APIs
+\end{itemize}
+
+\subsubsection{Mardi 11 Mars 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Développement de l'interface de gestion des sources de données
+    \item Création des composants de connexion aux bases de données
+    \item Implémentation des formulaires de configuration
+    \item Tests d'intégration frontend-backend
+\end{itemize}
+
+\textbf{Apprentissages :}
+L'interface utilisateur doit être intuitive et guidée pour faciliter la configuration des sources de données. Les formulaires doivent valider les données en temps réel.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Développement d'interfaces utilisateur
+    \item Validation de formulaires
+    \item Tests d'intégration
+\end{itemize}
+
+\subsubsection{Mercredi 12 Mars 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Développement de l'interface de classification des données
+    \item Création des composants de visualisation des classifications
+    \item Implémentation des outils de configuration des règles
+    \item Tests de performance de l'interface
+\end{itemize}
+
+\textbf{Apprentissages :}
+La visualisation des classifications doit être claire et informative. Les utilisateurs doivent pouvoir comprendre facilement comment leurs données sont classifiées.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Développement de visualisations
+    \item Interface utilisateur avancée
+    \item Optimisation de performance
+\end{itemize}
+
+\subsubsection{Jeudi 13 Mars 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Développement de l'interface de gestion des scans
+    \item Création des composants de monitoring en temps réel
+    \item Implémentation des tableaux de bord de performance
+    \item Tests de l'interface complète
+\end{itemize}
+
+\textbf{Apprentissages :}
+Le monitoring en temps réel est essentiel pour la gestion opérationnelle de la plateforme. Les tableaux de bord doivent présenter les informations de manière claire et actionnable.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Développement de tableaux de bord
+    \item Monitoring en temps réel
+    \item Interface utilisateur complexe
+\end{itemize}
+
+\subsubsection{Vendredi 14 Mars 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Développement de l'interface de gestion de la conformité
+    \item Création des composants de reporting
+    \item Implémentation des outils d'audit
+    \item Tests de l'interface complète
+\end{itemize}
+
+\textbf{Apprentissages :}
+Les outils de reporting et d'audit sont cruciaux pour la conformité réglementaire. Ils doivent permettre de générer des rapports détaillés et de tracer toutes les actions.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Développement d'outils de reporting
+    \item Systèmes d'audit
+    \item Interface utilisateur complète
+\end{itemize}
+
+\textbf{Bilan de la semaine :}
+Cette semaine a été consacrée au développement du frontend. L'interface utilisateur est maintenant fonctionnelle et intégrée avec le backend. Les tests montrent une bonne performance et une expérience utilisateur satisfaisante.
+
+% Semaine 5 - 17-21 Mars 2025
+\clearpage
+\subsection{Semaine 5 : 17-21 Mars 2025}
+
+\subsubsection{Lundi 17 Mars 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Développement des fonctionnalités avancées d'IA
+    \item Intégration d'algorithmes de machine learning avancés
+    \item Création des composants d'analyse prédictive
+    \item Tests des fonctionnalités d'IA
+\end{itemize}
+
+\textbf{Apprentissages :}
+L'intelligence artificielle peut considérablement améliorer l'efficacité de la gouvernance des données. Les algorithmes de machine learning permettent d'automatiser de nombreuses tâches complexes.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Intégration d'IA avancée
+    \item Algorithmes de machine learning
+    \item Analyse prédictive
+\end{itemize}
+
+\subsubsection{Mardi 18 Mars 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Développement du système de lignée des données avancé
+    \item Implémentation de la visualisation graphique de la lignée
+    \item Création des outils d'analyse d'impact
+    \item Tests de performance de la lignée
+\end{itemize}
+
+\textbf{Apprentissages :}
+La lignée des données est un aspect complexe qui nécessite des algorithmes sophistiqués pour tracer les relations entre les données. La visualisation graphique facilite la compréhension.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Développement de systèmes de lignée
+    \item Visualisation graphique
+    \item Analyse d'impact
+\end{itemize}
+
+\subsubsection{Mercredi 19 Mars 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Développement du système de collaboration
+    \item Implémentation des fonctionnalités de partage et de commentaires
+    \item Création des outils de gestion d'équipe
+    \item Tests de collaboration en temps réel
+\end{itemize}
+
+\textbf{Apprentissages :}
+La collaboration est essentielle dans un environnement d'entreprise. Le système doit permettre aux utilisateurs de travailler ensemble efficacement sur la gouvernance des données.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Développement de systèmes de collaboration
+    \item Fonctionnalités temps réel
+    \item Gestion d'équipe
+\end{itemize}
+
+\subsubsection{Jeudi 20 Mars 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Développement du système de notifications
+    \item Implémentation des alertes en temps réel
+    \item Création des outils de gestion des notifications
+    \item Tests du système de notifications
+\end{itemize}
+
+\textbf{Apprentissages :}
+Les notifications sont cruciales pour maintenir les utilisateurs informés des changements et des problèmes. Elles doivent être pertinentes et non intrusives.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Développement de systèmes de notifications
+    \item Alertes temps réel
+    \item Gestion des notifications
+\end{itemize}
+
+\subsubsection{Vendredi 21 Mars 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Troisième réunion avec l'encadrant (Jour 3 - Workshop)
+    \item Workshop technique sur l'optimisation des performances
+    \item Discussion sur les améliorations possibles
+    \item Planification des tests de charge
+\end{itemize}
+
+\textbf{Apprentissages :}
+Le workshop a permis d'identifier plusieurs points d'optimisation. L'encadrant a souligné l'importance des tests de charge pour valider la performance de la plateforme.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Participation à des workshops techniques
+    \item Optimisation de performance
+    \item Planification de tests
+\end{itemize}
+
+\textbf{Bilan de la semaine :}
+Cette semaine a été consacrée au développement des fonctionnalités avancées. La plateforme est maintenant complète avec toutes les fonctionnalités prévues. Le workshop a permis d'identifier des axes d'amélioration.
+
+% Semaine 6 - 24-28 Mars 2025
+\clearpage
+\subsection{Semaine 6 : 24-28 Mars 2025}
+
+\subsubsection{Lundi 24 Mars 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Développement des tests de charge
+    \item Implémentation des tests de performance
+    \item Création des scripts de test automatisés
+    \item Exécution des premiers tests de charge
+\end{itemize}
+
+\textbf{Apprentissages :}
+Les tests de charge sont essentiels pour valider la performance de la plateforme sous charge. Ils permettent d'identifier les goulots d'étranglement et d'optimiser le système.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Développement de tests de charge
+    \item Tests de performance
+    \item Automatisation de tests
+\end{itemize}
+
+\subsubsection{Mardi 25 Mars 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Optimisation des performances identifiées
+    \item Amélioration des algorithmes de scan
+    \item Optimisation des requêtes de base de données
+    \item Tests de performance après optimisation
+\end{itemize}
+
+\textbf{Apprentissages :}
+L'optimisation des performances est un processus itératif. Chaque amélioration doit être testée pour s'assurer qu'elle apporte un bénéfice réel.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Optimisation de performance
+    \item Optimisation de requêtes
+    \item Analyse de performance
+\end{itemize}
+
+\subsubsection{Mercredi 26 Mars 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Développement des tests de sécurité
+    \item Implémentation des tests de pénétration
+    \item Création des tests de vulnérabilité
+    \item Exécution des tests de sécurité
+\end{itemize}
+
+\textbf{Apprentissages :}
+La sécurité est un aspect critique qui doit être testé rigoureusement. Les tests de sécurité permettent d'identifier et de corriger les vulnérabilités.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Tests de sécurité
+    \item Tests de pénétration
+    \item Analyse de vulnérabilités
+\end{itemize}
+
+\subsubsection{Jeudi 27 Mars 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Correction des vulnérabilités identifiées
+    \item Amélioration des mesures de sécurité
+    \item Implémentation de nouvelles protections
+    \item Tests de sécurité après corrections
+\end{itemize}
+
+\textbf{Apprentissages :}
+La correction des vulnérabilités de sécurité est un processus délicat qui nécessite une compréhension approfondie des risques et des contre-mesures.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Correction de vulnérabilités
+    \item Amélioration de sécurité
+    \item Implémentation de protections
+\end{itemize}
+
+\subsubsection{Vendredi 28 Mars 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Développement de la documentation technique
+    \item Création des guides d'utilisation
+    \item Rédaction de la documentation API
+    \item Tests de la documentation
+\end{itemize}
+
+\textbf{Apprentissages :}
+La documentation est essentielle pour la maintenance et l'évolution de la plateforme. Elle doit être claire, complète et à jour.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Rédaction de documentation technique
+    \item Création de guides utilisateur
+    \item Documentation d'API
+\end{itemize}
+
+\textbf{Bilan de la semaine :}
+Cette semaine a été consacrée aux tests et à l'optimisation. La plateforme a été testée sous charge et les vulnérabilités de sécurité ont été corrigées. La documentation technique a été créée.
+
+% Semaine 7 - 31 Mars - 4 Avril 2025
+\clearpage
+\subsection{Semaine 7 : 31 Mars - 4 Avril 2025}
+
+\subsubsection{Lundi 31 Mars 2025}
+\textbf{Jour férié / jour non travaillé}
+
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Journée non travaillée. Revue personnelle et planification pour la reprise.
+\end{itemize}
+
+\textbf{Apprentissages :}
+Consolidation des points clés et priorisation des tâches à venir.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Organisation
+    \item Planification
+\end{itemize}
+
+\subsubsection{Mardi 1er Avril 2025}
+\textbf{Jour férié / jour non travaillé}
+
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Journée non travaillée. Préparation d'une liste de priorités pour la reprise.
+\end{itemize}
+
+\textbf{Apprentissages :}
+Structuration des tâches prioritaires et clarification des objectifs.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Priorisation
+    \item Planification
+\end{itemize}
+
+\subsubsection{Mercredi 2 Avril 2025}
+\textbf{Jour férié / jour non travaillé}
+
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Journée non travaillée. Rédaction de notes personnelles de compréhension.
+\end{itemize}
+
+\textbf{Apprentissages :}
+Mise à plat des points techniques clés pour accélérer la reprise.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Synthèse
+    \item Documentation rapide
+\end{itemize}
+
+\subsubsection{Jeudi 3 Avril 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Développement des fonctionnalités de backup et de récupération
+    \item Implémentation des stratégies de sauvegarde
+    \item Création des outils de récupération
+    \item Tests de backup et de récupération
+\end{itemize}
+
+\textbf{Apprentissages :}
+La sauvegarde et la récupération sont essentielles pour la continuité d'activité. Les stratégies doivent être testées régulièrement pour s'assurer de leur efficacité.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Stratégies de backup
+    \item Outils de récupération
+    \item Tests de continuité
+\end{itemize}
+
+\subsubsection{Vendredi 4 Avril 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Développement des fonctionnalités de migration
+    \item Implémentation des outils de migration de données
+    \item Création des scripts de migration
+    \item Tests de migration
+\end{itemize}
+
+\textbf{Apprentissages :}
+La migration des données est un processus complexe qui nécessite une planification minutieuse. Les outils de migration doivent être robustes et testés.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Outils de migration
+    \item Scripts de migration
+    \item Tests de migration
+\end{itemize}
+
+\textbf{Bilan de la semaine :}
+Cette semaine a été consacrée aux tests avancés et aux fonctionnalités de monitoring. La plateforme est maintenant complète avec toutes les fonctionnalités de base nécessaires pour les tests et la validation.
+
+% Semaine 8 - 7-11 Avril 2025
+\clearpage
+\subsection{Semaine 8 : 7-11 Avril 2025}
+
+\subsubsection{Lundi 7 Avril 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Développement des fonctionnalités de conteneurisation avancée
+    \item Implémentation des scripts Docker optimisés
+    \item Création des configurations d'environnement de test
+    \item Tests de conteneurisation en environnement de développement
+\end{itemize}
+
+\textbf{Apprentissages :}
+La conteneurisation est cruciale pour la maintenance et l'évolution de la plateforme. Docker permet d'assurer la cohérence entre les environnements de développement et de test.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Conteneurisation avancée
+    \item Configuration Docker
+    \item Gestion d'environnements
+\end{itemize}
+
+\subsubsection{Mardi 8 Avril 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Développement des fonctionnalités de monitoring avancé
+    \item Implémentation des alertes intelligentes
+    \item Création des tableaux de bord de monitoring
+    \item Tests de monitoring en environnement de test
+\end{itemize}
+
+\textbf{Apprentissages :}
+Le monitoring avancé nécessite des outils robustes et fiables. Les alertes doivent être configurées pour détecter les problèmes avant qu'ils n'affectent les utilisateurs.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Monitoring avancé
+    \item Configuration d'alertes
+    \item Tableaux de bord de monitoring
+\end{itemize}
+
+\subsubsection{Mercredi 9 Avril 2025}
+\textbf{Jour férié / jour non travaillé}
+
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Journée non travaillée. Revue des objectifs techniques et réalignement.
+\end{itemize}
+
+\textbf{Apprentissages :}
+Consolidation des priorités techniques et risques.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Organisation
+    \item Clarification des objectifs
+\end{itemize}
+
+\subsubsection{Jeudi 10 Avril 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Développement des fonctionnalités de synchronisation
+    \item Implémentation des algorithmes de synchronisation
+    \item Création des outils de synchronisation
+    \item Tests des fonctionnalités de synchronisation
+\end{itemize}
+
+\textbf{Apprentissages :}
+La synchronisation est essentielle pour maintenir la cohérence des données. Les algorithmes doivent être efficaces et fiables.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Synchronisation de données
+    \item Algorithmes de synchronisation
+    \item Outils de synchronisation
+\end{itemize}
+
+\textbf{Bilan de la semaine :}
+Cette semaine a été consacrée aux fonctionnalités d'analyse et de gestion des données. La plateforme offre maintenant des capacités complètes d'analyse et de reporting.
+
+% Semaine 9 - 14-18 Avril 2025
+\clearpage
+\subsection{Semaine 9 : 14-18 Avril 2025}
+
+\subsubsection{Lundi 14 Avril 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Développement des fonctionnalités d'analyse avancée
+    \item Implémentation des algorithmes d'analyse prédictive
+    \item Création des composants d'analyse
+    \item Tests des fonctionnalités d'analyse
+\end{itemize}
+
+\textbf{Apprentissages :}
+L'analyse avancée permet d'extraire des insights précieux des données. Les algorithmes d'analyse prédictive peuvent aider à anticiper les tendances.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Analyse avancée
+    \item Algorithmes prédictifs
+    \item Composants d'analyse
+\end{itemize}
+
+\subsubsection{Mardi 15 Avril 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Développement des fonctionnalités de reporting avancé
+    \item Implémentation des générateurs de rapports
+    \item Création des templates de rapports
+    \item Tests des fonctionnalités de reporting
+\end{itemize}
+
+\textbf{Apprentissages :}
+Le reporting avancé est essentiel pour la prise de décision. Les templates de rapports doivent être flexibles et personnalisables.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Reporting avancé
+    \item Générateurs de rapports
+    \item Templates de rapports
+\end{itemize}
+
+\subsubsection{Mercredi 16 Avril 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Développement des fonctionnalités d'export de données
+    \item Implémentation des formats d'export multiples
+    \item Création des outils d'export
+    \item Tests des fonctionnalités d'export
+\end{itemize}
+
+\textbf{Apprentissages :}
+L'export de données est crucial pour l'intégration avec d'autres systèmes. Les formats d'export doivent être standards et compatibles.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Export de données
+    \item Formats d'export
+    \item Outils d'export
+\end{itemize}
+
+\subsubsection{Jeudi 17 Avril 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Développement des fonctionnalités d'import de données
+    \item Implémentation des validateurs d'import
+    \item Création des outils d'import
+    \item Tests des fonctionnalités d'import
+\end{itemize}
+
+\textbf{Apprentissages :}
+L'import de données nécessite une validation rigoureuse pour assurer la qualité des données. Les validateurs doivent être robustes et informatifs.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Import de données
+    \item Validation d'import
+    \item Outils d'import
+\end{itemize}
+
+\subsubsection{Vendredi 18 Avril 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Développement des fonctionnalités de synchronisation
+    \item Implémentation des algorithmes de synchronisation
+    \item Création des outils de synchronisation
+    \item Tests des fonctionnalités de synchronisation
+\end{itemize}
+
+\textbf{Apprentissages :}
+La synchronisation est essentielle pour maintenir la cohérence des données. Les algorithmes doivent être efficaces et fiables.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Synchronisation de données
+    \item Algorithmes de synchronisation
+    \item Outils de synchronisation
+\end{itemize}
+
+\textbf{Bilan de la semaine :}
+Cette semaine a été consacrée aux fonctionnalités d'analyse et de gestion des données. La plateforme offre maintenant des capacités complètes d'analyse et de reporting.
+
+% Semaine 10 - 21-25 Avril 2025
+\clearpage
+\subsection{Semaine 10 : 21-25 Avril 2025}
+
+\subsubsection{Lundi 21 Avril 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Développement des fonctionnalités de workflow avancé
+    \item Implémentation des moteurs de workflow
+    \item Création des composants de workflow
+    \item Tests des fonctionnalités de workflow
+\end{itemize}
+
+\textbf{Apprentissages :}
+Les workflows avancés permettent d'automatiser les processus complexes. Les moteurs de workflow doivent être flexibles et performants.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Workflows avancés
+    \item Moteurs de workflow
+    \item Composants de workflow
+\end{itemize}
+
+\subsubsection{Mardi 22 Avril 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Développement des fonctionnalités d'approbation
+    \item Implémentation des systèmes d'approbation
+    \item Création des composants d'approbation
+    \item Tests des fonctionnalités d'approbation
+\end{itemize}
+
+\textbf{Apprentissages :}
+Les systèmes d'approbation sont essentiels pour la gouvernance des données. Ils doivent être configurables et auditables.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Systèmes d'approbation
+    \item Composants d'approbation
+    \item Configuration d'approbation
+\end{itemize}
+
+\subsubsection{Mercredi 23 Avril 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Développement des fonctionnalités de notification avancée
+    \item Implémentation des canaux de notification
+    \item Création des composants de notification
+    \item Tests des fonctionnalités de notification
+\end{itemize}
+
+\textbf{Apprentissages :}
+Les notifications avancées améliorent l'expérience utilisateur. Les canaux de notification doivent être multiples et configurables.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Notifications avancées
+    \item Canaux de notification
+    \item Composants de notification
+\end{itemize}
+
+\subsubsection{Jeudi 24 Avril 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Développement des fonctionnalités de collaboration avancée
+    \item Implémentation des outils de collaboration
+    \item Création des composants de collaboration
+    \item Tests des fonctionnalités de collaboration
+\end{itemize}
+
+\textbf{Apprentissages :}
+La collaboration avancée améliore la productivité des équipes. Les outils doivent être intuitifs et performants.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Collaboration avancée
+    \item Outils de collaboration
+    \item Composants de collaboration
+\end{itemize}
+
+\subsubsection{Vendredi 25 Avril 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Développement des fonctionnalités de versioning
+    \item Implémentation des systèmes de versioning
+    \item Création des composants de versioning
+    \item Tests des fonctionnalités de versioning
+\end{itemize}
+
+\textbf{Apprentissages :}
+Le versioning est essentiel pour la traçabilité et la récupération. Les systèmes de versioning doivent être robustes et performants.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Systèmes de versioning
+    \item Composants de versioning
+    \item Traçabilité des versions
+\end{itemize}
+
+\textbf{Bilan de la semaine :}
+Cette semaine a été consacrée aux fonctionnalités avancées de workflow et de collaboration. La plateforme offre maintenant des capacités complètes de gestion des processus.
+
+% Semaine 11 - 28 Avril - 2 Mai 2025
+\clearpage
+\subsection{Semaine 11 : 28 Avril - 2 Mai 2025}
+
+\subsubsection{Lundi 28 Avril 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Développement des fonctionnalités de machine learning avancé
+    \item Implémentation des modèles de ML
+    \item Création des composants de ML
+    \item Tests des fonctionnalités de ML
+\end{itemize}
+
+\textbf{Apprentissages :}
+Le machine learning avancé peut considérablement améliorer l'efficacité de la plateforme. Les modèles doivent être entraînés et validés régulièrement.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Machine learning avancé
+    \item Modèles de ML
+    \item Composants de ML
+\end{itemize}
+
+\subsubsection{Mardi 29 Avril 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Développement des fonctionnalités d'IA conversationnelle
+    \item Implémentation des chatbots
+    \item Création des composants d'IA
+    \item Tests des fonctionnalités d'IA
+\end{itemize}
+
+\textbf{Apprentissages :}
+L'IA conversationnelle améliore l'expérience utilisateur. Les chatbots doivent être intelligents et utiles.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item IA conversationnelle
+    \item Chatbots
+    \item Composants d'IA
+\end{itemize}
+
+\subsubsection{Mercredi 30 Avril 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Développement des fonctionnalités de recommandation
+    \item Implémentation des algorithmes de recommandation
+    \item Création des composants de recommandation
+    \item Tests des fonctionnalités de recommandation
+\end{itemize}
+
+\textbf{Apprentissages :}
+Les systèmes de recommandation aident les utilisateurs à découvrir des données pertinentes. Les algorithmes doivent être précis et performants.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Systèmes de recommandation
+    \item Algorithmes de recommandation
+    \item Composants de recommandation
+\end{itemize}
+
+\subsubsection{Jeudi 1er Mai 2025}
+\textbf{Jour férié / jour non travaillé}
+
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Journée non travaillée (Fête du Travail). Revue des objectifs hebdomadaires.
+\end{itemize}
+
+\textbf{Apprentissages :}
+Réalignement des priorités et synchronisation avec la feuille de route.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Planification
+    \item Organisation
+\end{itemize}
+
+\subsubsection{Vendredi 2 Mai 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Développement des fonctionnalités de visualisation avancée
+    \item Implémentation des composants de visualisation
+    \item Création des graphiques interactifs
+    \item Tests des fonctionnalités de visualisation
+\end{itemize}
+
+\textbf{Apprentissages :}
+La visualisation avancée facilite la compréhension des données. Les graphiques doivent être interactifs et informatifs.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Visualisation avancée
+    \item Composants de visualisation
+    \item Graphiques interactifs
+\end{itemize}
+
+\textbf{Bilan de la semaine :}
+Cette semaine a été consacrée aux fonctionnalités d'IA et de visualisation avancées. La plateforme offre maintenant des capacités d'IA complètes.
+
+% Semaine 12 - 5-9 Mai 2025
+\clearpage
+\subsection{Semaine 12 : 5-9 Mai 2025}
+
+\subsubsection{Lundi 5 Mai 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Développement des fonctionnalités de sécurité avancée
+    \item Implémentation des systèmes de sécurité
+    \item Création des composants de sécurité
+    \item Tests des fonctionnalités de sécurité
+\end{itemize}
+
+\textbf{Apprentissages :}
+La sécurité avancée est cruciale pour la protection des données. Les systèmes de sécurité doivent être robustes et à jour.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Sécurité avancée
+    \item Systèmes de sécurité
+    \item Composants de sécurité
+\end{itemize}
+
+\subsubsection{Mardi 6 Mai 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Développement des fonctionnalités de chiffrement
+    \item Implémentation des algorithmes de chiffrement
+    \item Création des composants de chiffrement
+    \item Tests des fonctionnalités de chiffrement
+\end{itemize}
+
+\textbf{Apprentissages :}
+Le chiffrement est essentiel pour la protection des données sensibles. Les algorithmes doivent être robustes et conformes aux standards.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Chiffrement de données
+    \item Algorithmes de chiffrement
+    \item Composants de chiffrement
+\end{itemize}
+
+\subsubsection{Mercredi 7 Mai 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Développement des fonctionnalités d'audit avancé
+    \item Implémentation des systèmes d'audit
+    \item Création des composants d'audit
+    \item Tests des fonctionnalités d'audit
+\end{itemize}
+
+\textbf{Apprentissages :}
+L'audit avancé est essentiel pour la conformité réglementaire. Les systèmes d'audit doivent être complets et traçables.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Audit avancé
+    \item Systèmes d'audit
+    \item Composants d'audit
+\end{itemize}
+
+\subsubsection{Jeudi 8 Mai 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Développement des fonctionnalités de conformité avancée
+    \item Implémentation des frameworks de conformité
+    \item Création des composants de conformité
+    \item Tests des fonctionnalités de conformité
+\end{itemize}
+
+\textbf{Apprentissages :}
+La conformité avancée est cruciale pour les entreprises réglementées. Les frameworks doivent être complets et à jour.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Conformité avancée
+    \item Frameworks de conformité
+    \item Composants de conformité
+\end{itemize}
+
+\subsubsection{Vendredi 9 Mai 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Développement des fonctionnalités de gouvernance avancée
+    \item Implémentation des systèmes de gouvernance
+    \item Création des composants de gouvernance
+    \item Tests des fonctionnalités de gouvernance
+\end{itemize}
+
+\textbf{Apprentissages :}
+La gouvernance avancée est le cœur de la plateforme. Les systèmes doivent être complets et intégrés.
+
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Gouvernance avancée
+    \item Systèmes de gouvernance
+    \item Composants de gouvernance
+\end{itemize}
+
+\textbf{Bilan de la semaine :}
+Cette semaine a été consacrée aux fonctionnalités de sécurité et de gouvernance avancées. La plateforme offre maintenant des capacités complètes de sécurité et de conformité.
+
+% Semaines 13-24 : Mai - Août 2025
+% [Les semaines suivantes suivent le même format avec des activités de développement,
+% tests, optimisation et finalisation de la plateforme de gouvernance des données]
+
+\section{Détails Techniques du Projet}
+
+\subsection{Architecture Technique de la Plateforme}
+
+\subsubsection{Backend - Architecture Microservices}
+La plateforme utilise une architecture microservices basée sur FastAPI et Python, avec les composants suivants :
+
+\begin{itemize}
+    \item \textbf{API Gateway} : Point d'entrée unique pour toutes les requêtes
+    \item \textbf{Services de Données} : Gestion des sources de données et extraction de métadonnées
+    \item \textbf{Services de Classification} : Intelligence artificielle pour la classification automatique
+    \item \textbf{Services de Scan} : Orchestration et exécution des scans de données
+    \item \textbf{Services de Conformité} : Validation et gestion des règles de conformité
+    \item \textbf{Services de Catalogue} : Gestion du catalogue de données et de la lignée
+    \item \textbf{Services RBAC} : Gestion des rôles et des permissions
+\end{itemize}
+
+\subsubsection{Base de Données}
+\begin{itemize}
+    \item \textbf{PostgreSQL} : Base de données principale pour les métadonnées
+    \item \textbf{MongoDB} : Stockage des données non-structurées et des logs
+    \item \textbf{Redis} : Cache et gestion des sessions
+    \item \textbf{MySQL} : Base de données de test et de développement
+\end{itemize}
+
+\subsubsection{Frontend - Architecture React}
+\begin{itemize}
+    \item \textbf{React 18} avec TypeScript pour la robustesse du code
+    \item \textbf{Next.js} pour le rendu côté serveur et l'optimisation
+    \item \textbf{Tailwind CSS} pour le design system
+    \item \textbf{React Query} pour la gestion des états serveur
+    \item \textbf{Zustand} pour la gestion des états locaux
+\end{itemize}
+
+\subsection{Les 7 Groupes Modulaires}
+
+\subsubsection{1. Data Sources}
+\textbf{Fonctionnalités :}
+\begin{itemize}
+    \item Connexion à plus de 20 types de bases de données
+    \item Découverte automatique des schémas
+    \item Extraction de métadonnées en temps réel
+    \item Gestion des pools de connexions
+    \item Monitoring de la santé des connexions
+\end{itemize}
+
+\textbf{Technologies :}
+\begin{itemize}
+    \item SQLAlchemy pour l'ORM
+    \item Connection pooling avec SQLAlchemy
+    \item Drivers natifs pour chaque type de base de données
+    \item API REST pour la gestion des connexions
+\end{itemize}
+
+\subsubsection{2. Data Catalog}
+\textbf{Fonctionnalités :}
+\begin{itemize}
+    \item Catalogue intelligent des actifs de données
+    \item Métadonnées enrichies avec IA
+    \item Recherche sémantique avancée
+    \item Lignée des données avec visualisation graphique
+    \item Impact analysis et dépendances
+\end{itemize}
+
+\textbf{Technologies :}
+\begin{itemize}
+    \item Elasticsearch pour la recherche
+    \item NetworkX pour la gestion des graphes de lignée
+    \item Algorithmes de machine learning pour l'enrichissement
+    \item Visualisation avec D3.js et React
+\end{itemize}
+
+\subsubsection{3. Classifications}
+\textbf{Fonctionnalités :}
+\begin{itemize}
+    \item Classification automatique avec IA
+    \item Taxonomies personnalisables
+    \item Détection de données sensibles
+    \item Règles de classification configurables
+    \item Apprentissage continu des modèles
+\end{itemize}
+
+\textbf{Technologies :}
+\begin{itemize}
+    \item Scikit-learn pour les algorithmes de ML
+    \item TensorFlow pour les modèles avancés
+    \item NLP avec spaCy et NLTK
+    \item Entraînement automatique des modèles
+\end{itemize}
+
+\subsubsection{4. Scan-Rule-Sets}
+\textbf{Fonctionnalités :}
+\begin{itemize}
+    \item Règles de scan configurables
+    \item Patterns de détection avancés
+    \item Exécution parallèle des scans
+    \item Optimisation automatique des performances
+    \item Versioning des règles
+\end{itemize}
+
+\textbf{Technologies :}
+\begin{itemize}
+    \item Regex optimisé avec re2
+    \item Exécution asynchrone avec asyncio
+    \item Cache intelligent des résultats
+    \item Monitoring des performances
+\end{itemize}
+
+\subsubsection{5. Scan Logic}
+\textbf{Fonctionnalités :}
+\begin{itemize}
+    \item Orchestrateur de scans unifié
+    \item Planification intelligente des tâches
+    \item Gestion des ressources et de la charge
+    \item Récupération automatique d'erreurs
+    \item Métriques de performance en temps réel
+\end{itemize}
+
+\textbf{Technologies :}
+\begin{itemize}
+    \item Celery pour la gestion des tâches
+    \item Redis pour la queue des tâches
+    \item Monitoring avec Prometheus
+    \item Logging structuré avec ELK Stack
+\end{itemize}
+
+\subsubsection{6. Compliance}
+\textbf{Fonctionnalités :}
+\begin{itemize}
+    \item Frameworks de conformité (RGPD, SOX, HIPAA)
+    \item Validation automatique des règles
+    \item Rapports de conformité
+    \item Alertes de non-conformité
+    \item Workflows d'approbation
+\end{itemize}
+
+\textbf{Technologies :}
+\begin{itemize}
+    \item Moteur de règles personnalisables
+    \item Templates de rapports avec Jinja2
+    \item Notifications avec WebSockets
+    \item Audit trails complets
+\end{itemize}
+
+\subsubsection{7. RBAC/Control System}
+\textbf{Fonctionnalités :}
+\begin{itemize}
+    \item Gestion des utilisateurs et des rôles
+    \item Permissions granulaires
+    \item Authentification multi-facteurs
+    \item Audit des accès
+    \item Intégration LDAP/Active Directory
+\end{itemize}
+
+\textbf{Technologies :}
+\begin{itemize}
+    \item JWT pour l'authentification
+    \item OAuth2 pour l'autorisation
+    \item Chiffrement des mots de passe avec bcrypt
+    \item Sessions sécurisées
+\end{itemize}
+
+\subsection{Intégrations et APIs}
+
+\subsubsection{Microsoft Purview}
+\begin{itemize}
+    \item Extraction des métadonnées existantes
+    \item Synchronisation bidirectionnelle
+    \item Migration des configurations
+    \item API REST pour l'intégration
+\end{itemize}
+
+\subsubsection{Databricks}
+\begin{itemize}
+    \item Intégration avec les workspaces Databricks
+    \item Exécution de jobs de scan
+    \item Récupération des métadonnées
+    \item Synchronisation des résultats
+\end{itemize}
+
+\subsubsection{Cloud Providers}
+\begin{itemize}
+    \item Azure : Intégration native avec les services Azure
+    \item AWS : Support des services S3, RDS, Redshift
+    \item GCP : Intégration avec BigQuery et Cloud SQL
+\end{itemize}
+
+\subsection{Performance et Scalabilité}
+
+\subsubsection{Optimisations Backend}
+\begin{itemize}
+    \item Cache Redis pour les requêtes fréquentes
+    \item Indexation optimisée des bases de données
+    \item Pagination intelligente des résultats
+    \item Compression des données
+    \item Pool de connexions optimisé
+\end{itemize}
+
+\subsubsection{Optimisations Frontend}
+\begin{itemize}
+    \item Lazy loading des composants
+    \item Virtualisation des listes longues
+    \item Cache des données avec React Query
+    \item Optimisation des bundles avec Webpack
+    \item Service Workers pour le cache offline
+\end{itemize}
+
+\subsubsection{Métriques de Performance}
+\begin{itemize}
+    \item Temps de réponse API < 500ms en moyenne
+    \item Support de 100+ utilisateurs simultanés en test
+    \item Scan de 10,000+ enregistrements en < 1 heure
+    \item Disponibilité élevée en environnement de test
+    \item Récupération automatique en cas d'erreur
+\end{itemize}
+
+\subsection{Sécurité et Conformité}
+
+\subsubsection{Mesures de Sécurité}
+\begin{itemize}
+    \item Chiffrement AES-256 pour les données au repos
+    \item TLS 1.3 pour les communications
+    \item Validation stricte des entrées
+    \item Protection contre les injections SQL
+    \item Rate limiting et protection DDoS
+\end{itemize}
+
+\subsubsection{Conformité Réglementaire}
+\begin{itemize}
+    \item RGPD : Gestion des données personnelles
+    \item SOX : Contrôles financiers
+    \item HIPAA : Données de santé
+    \item ISO 27001 : Sécurité de l'information
+    \item SOC 2 : Contrôles de sécurité
+\end{itemize}
+
+\subsection{Monitoring et Observabilité}
+
+\subsubsection{Métriques Techniques}
+\begin{itemize}
+    \item Performance des APIs
+    \item Utilisation des ressources
+    \item Erreurs et exceptions
+    \item Temps de réponse des scans
+    \item Qualité des données
+\end{itemize}
+
+\subsubsection{Métriques Métier}
+\begin{itemize}
+    \item Nombre d'actifs catalogués
+    \item Taux de classification automatique
+    \item Conformité des données
+    \item Utilisation des fonctionnalités
+    \item Satisfaction utilisateur
+\end{itemize}
+
+\subsubsection{Alertes et Notifications}
+\begin{itemize}
+    \item Alertes de performance
+    \item Notifications de sécurité
+    \item Alertes de conformité
+    \item Notifications de maintenance
+    \item Rapports automatiques
+\end{itemize}
+
+\section{Réflexions et Apprentissages}
+
+\subsection{Compétences Techniques Développées}
+Au cours de ce projet, j'ai développé de nombreuses compétences techniques :
+
+\begin{itemize}
+    \item \textbf{Architecture de systèmes complexes} : Conception et implémentation d'une plateforme modulaire avec 7 groupes interconnectés
+    \item \textbf{Développement Full-Stack} : Backend avec FastAPI et Python, Frontend avec React et TypeScript
+    \item \textbf{Gestion de bases de données} : PostgreSQL, MySQL, MongoDB avec optimisation des performances
+    \item \textbf{Intelligence Artificielle} : Intégration d'algorithmes de machine learning pour la classification automatique
+    \item \textbf{DevOps et Conteneurisation} : Docker, orchestration de services, conteneurisation avancée
+    \item \textbf{Sécurité} : Implémentation de RBAC, chiffrement, audit trails
+\end{itemize}
+
+\subsection{Compétences Transversales}
+\begin{itemize}
+    \item \textbf{Gestion de projet} : Planification, suivi, gestion des délais
+    \item \textbf{Communication} : Présentation technique, documentation, collaboration
+    \item \textbf{Résolution de problèmes} : Analyse critique, débogage, optimisation
+    \item \textbf{Apprentissage continu} : Veille technologique, adaptation aux nouvelles technologies
+\end{itemize}
+
+\subsection{Défis Rencontrés et Solutions}
+\begin{itemize}
+    \item \textbf{Complexité de l'architecture} : Résolu par une approche modulaire et une documentation détaillée
+    \item \textbf{Performance} : Optimisé par l'utilisation de techniques de cache et de traitement parallèle
+    \item \textbf{Intégration} : Résolu par l'utilisation d'APIs REST et de microservices
+    \item \textbf{Sécurité} : Implémenté un système RBAC robuste avec audit trails
+\end{itemize}
+
+\section{Conclusion}
+
+Ce projet de fin d'études a été une expérience enrichissante qui m'a permis de développer des compétences techniques avancées dans le domaine de la gouvernance des données. La collaboration avec NXCI m'a donné l'opportunité de travailler sur un projet d'envergure industrielle et de comprendre les défis réels de l'entreprise.
+
+Le développement de cette plateforme de gouvernance des données, avec ses 7 groupes modulaires interconnectés, représente une solution innovante aux limitations des outils existants comme Microsoft Purview. L'intégration de l'intelligence artificielle et des technologies modernes de développement en fait un projet à la pointe de la technologie.
+
+Cette expérience m'a confirmé mon intérêt pour le développement de solutions complexes et l'innovation technologique. Elle m'a également permis de développer des compétences essentielles pour ma future carrière dans le domaine de l'informatique.
+
+\section{Bilan Final du Projet}
+
+\subsection{Réalisations Techniques}
+Au cours de ces 6 mois de stage, j'ai réussi à développer une plateforme complète de gouvernance des données qui résout les limitations identifiées de Microsoft Purview. Les principales réalisations incluent :
+
+\begin{itemize}
+    \item \textbf{Architecture modulaire} : 7 groupes interconnectés avec de nombreux composants
+    \item \textbf{Backend robuste} : Services FastAPI avec de nombreux endpoints
+    \item \textbf{Frontend moderne} : Interface React avec de nombreux composants TypeScript
+    \item \textbf{Intelligence artificielle} : Intégration d'algorithmes de ML
+    \item \textbf{Sécurité avancée} : Système RBAC complet avec audit trails
+    \item \textbf{Performance optimisée} : Support de nombreux utilisateurs simultanés en test
+    \item \textbf{Conformité} : Support de plusieurs frameworks réglementaires
+\end{itemize}
+
+\subsection{Impact et Valeur Ajoutée}
+\begin{itemize}
+    \item \textbf{Innovation} : Première solution native résolvant les limitations de Microsoft Purview
+    \item \textbf{Efficacité} : Réduction significative du temps de classification des données
+    \item \textbf{Automatisation} : Automatisation de nombreuses tâches de gouvernance
+    \item \textbf{Conformité} : Amélioration de la conformité des données aux réglementations
+    \item \textbf{Performance} : Amélioration significative par rapport aux solutions existantes
+\end{itemize}
+
+\subsection{Apprentissages Personnels}
+Ce projet m'a permis de développer des compétences techniques et personnelles essentielles :
+
+\subsubsection{Compétences Techniques}
+\begin{itemize}
+    \item Maîtrise des architectures microservices et des patterns de design
+    \item Expertise en développement full-stack avec des technologies modernes
+    \item Compétences avancées en intelligence artificielle et machine learning
+    \item Connaissance approfondie de la gouvernance des données et de la conformité
+    \item Expérience en DevOps, monitoring et conteneurisation avancée
+\end{itemize}
+
+\subsubsection{Compétences Transversales}
+\begin{itemize}
+    \item Gestion de projet complexe avec des contraintes techniques et temporelles
+    \item Communication technique avec des équipes multidisciplinaires
+    \item Résolution de problèmes complexes et débogage avancé
+    \item Apprentissage continu et adaptation aux nouvelles technologies
+    \item Leadership technique et mentorat
+\end{itemize}
+
+\subsection{Défis et Solutions}
+\begin{itemize}
+    \item \textbf{Complexité technique} : Résolu par une approche modulaire et une documentation détaillée
+    \item \textbf{Performance} : Optimisé par des techniques de cache et de traitement parallèle
+    \item \textbf{Sécurité} : Implémenté un système de sécurité multicouche
+    \item \textbf{Intégration} : Développé des APIs robustes pour l'intégration avec les systèmes existants
+    \item \textbf{Conformité} : Créé des frameworks flexibles pour différentes réglementations
+\end{itemize}
+
+\subsection{Perspectives d'Évolution}
+La plateforme développée offre de nombreuses possibilités d'évolution :
+\begin{itemize}
+    \item Extension à d'autres types de sources de données
+    \item Intégration avec de nouveaux frameworks de conformité
+    \item Amélioration des algorithmes d'IA et de ML
+    \item Développement d'API publiques pour l'écosystème
+    \item Extension à d'autres domaines de la gouvernance des données
+\end{itemize}
+
+\section{Conclusion}
+
+Ce projet de fin d'études a été une expérience extraordinairement enrichissante qui m'a permis de développer des compétences techniques avancées dans le domaine de la gouvernance des données. La collaboration avec NXCI m'a donné l'opportunité unique de travailler sur un projet d'envergure industrielle et de comprendre les défis réels de l'entreprise dans un contexte de partenariat international.
+
+Le développement de cette plateforme de gouvernance des données, avec ses 7 groupes modulaires interconnectés, représente une solution innovante et complète aux limitations des outils existants comme Microsoft Purview. L'intégration de l'intelligence artificielle, des technologies modernes de développement et des meilleures pratiques de sécurité en fait un projet à la pointe de la technologie.
+
+Cette expérience m'a non seulement confirmé mon intérêt pour le développement de solutions complexes et l'innovation technologique, mais elle m'a également permis de développer des compétences essentielles pour ma future carrière dans le domaine de l'informatique. J'ai appris à gérer des projets complexes, à travailler en équipe, à communiquer efficacement et à résoudre des problèmes techniques difficiles.
+
+Le projet a également renforcé ma compréhension de l'importance de la gouvernance des données dans les entreprises modernes et de la nécessité de solutions robustes et évolutives pour répondre aux défis croissants de la gestion des données.
+
+Cette expérience de stage chez NXCI restera un moment clé de ma formation d'ingénieur et m'a préparé efficacement pour les défis professionnels à venir.
+
+\vspace{1cm}
+
+\textbf{Remerciements :}
+Je tiens à remercier chaleureusement l'équipe de NXCI, mon encadrant de stage, et tous ceux qui ont contribué à la réussite de ce projet. Leur expertise, leur soutien et leur confiance ont été essentiels pour la réalisation de cette plateforme innovante.
+
+\vspace{0.5cm}
+
+\textbf{Date de fin de stage :} 17 Août 2025\\
+\textbf{Lieu :} NXCI, Au Berges du Lac 1, Tunis, Tunisie\\
+\textbf{Signature de l'étudiant :}
+
+% Semaine 13 - 12-16 Mai 2025
+\clearpage
+\subsection{Semaine 13 : 12-16 Mai 2025}
+
+\subsubsection{Lundi 12 Mai 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Revue des exigences client mises à jour (fonctionnalités de gouvernance et conformité)
+    \item Ajustement des modèles \textit{Racine} (orchestration et workspace) pour supporter de nouveaux liens cross-group
+    \item Tests de cohérence des schémas dans Postgres (migrations locales)
+\end{itemize}
+\textbf{Apprentissages :} L'évolution des besoins impose une modularité stricte et des versions stables des schémas.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Gestion d'exigences
+    \item Conception modulaire
+    \item Validation de schémas
+\end{itemize}
+
+\subsubsection{Mardi 13 Mai 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Amélioration du service de classification (règles + ML hybride) pour couvrir des taxonomies client
+    \item Ajout de validations dans les routes \texttt{/classification} et \texttt{/scan-rule-sets}
+    \item Benchmarks rapides sur l'impact des nouvelles règles
+\end{itemize}
+\textbf{Apprentissages :} Le couplage faible entre règles et moteur ML facilite l'évolution.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Conception de règles
+    \item Intégration ML
+    \item Tests de non-régression
+\end{itemize}
+
+\subsubsection{Mercredi 14 Mai 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Renforcement du service de lignée de données (modèles + API de consultation)
+    \item Ajout de contrôles de cohérence et indexation ciblée pour requêtes fréquentes
+    \item Mise à jour du cache applicatif sur les graphes de lignée
+\end{itemize}
+\textbf{Apprentissages :} L'indexation et le cache réduisent fortement le coût des requêtes graphe.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Modélisation de lignée
+    \item Optimisation DB
+    \item Caching applicatif
+\end{itemize}
+
+\subsubsection{Jeudi 15 Mai 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Consolidation RBAC: permissions granulaires cross-group et vérifications middleware
+    \item Amélioration des tests d'autorisation sur routes sensibles
+    \item Revue sécurité (entrées, limites, traces d'audit)
+\end{itemize}
+\textbf{Apprentissages :} Le RBAC centralisé simplifie la gouvernance multi-modules.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Sécurité applicative
+    \item Tests d'autorisation
+    \item Traçabilité
+\end{itemize}
+
+\subsubsection{Vendredi 16 Mai 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Réunion encadrant (progrès + prochaines priorités)
+    \item Planification Databricks: jobs d'analyse/ML à intégrer côté gouvernance
+    \item Mise à jour backlog et risques
+\end{itemize}
+\textbf{Apprentissages :} La coordination hebdomadaire aligne technique et besoins.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Communication technique
+    \item Planification
+    \item Gestion des risques
+\end{itemize}
+\textbf{Bilan de la semaine :} Consolidation gouvernance (RBAC, lignée, classification) et cadrage Databricks.
+
+% Semaine 14 - 19-23 Mai 2025
+\clearpage
+\subsection{Semaine 14 : 19-23 Mai 2025}
+
+\subsubsection{Lundi 19 Mai 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Extension du catalogue avancé (métadonnées enrichies)
+    \item Ajout de filtres de recherche et tri multi-critères
+    \item Vérification API \texttt{/catalog} et tests d'usage
+\end{itemize}
+\textbf{Apprentissages :} Les métadonnées enrichies améliorent la découverte et l'impact analysis.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Modèles de métadonnées
+    \item Conception API
+    \item UX de recherche
+\end{itemize}
+
+\subsubsection{Mardi 20 Mai 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Orchestration de scans: amélioration du scheduler et files de travail
+    \item Contrôles de reprise sur erreur et journalisation fine
+    \item Tests de montée en charge locale
+\end{itemize}
+\textbf{Apprentissages :} La résilience naît de petites garanties locales bien testées.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Orchestration
+    \item Observabilité
+    \item Tests de charge
+\end{itemize}
+
+\subsubsection{Mercredi 21 Mai 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Intégration Databricks (conception): mapping sorties jobs vers modèles de gouvernance
+    \item Définition contrats d'API pour ingestion de métriques ML
+    \item PoC transformation résultats en lignées et métriques qualité
+\end{itemize}
+\textbf{Apprentissages :} Les contrats d'API stabilisent l'intégration progressive.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Design d'intégration
+    \item Contrats API
+    \item Modélisation qualité/ML
+\end{itemize}
+
+\subsubsection{Jeudi 22 Mai 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Amélioration règles de conformité: paramétrage et remédiations guidées
+    \item Ajout d'audits détaillés sur violations
+    \item Tests de conformité sur jeux variés
+\end{itemize}
+\textbf{Apprentissages :} La remédiation guidée accélère les corrections.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Gouvernance conformité
+    \item Audit
+    \item Tests fonctionnels
+\end{itemize}
+
+\subsubsection{Vendredi 23 Mai 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Réunion encadrant et retour client: priorités Databricks + performance scan
+    \item Mise à jour du plan technique (lot suivant)
+    \item Documentation synthèse avancée
+\end{itemize}
+\textbf{Apprentissages :} Les retours clients guident l'ordre des chantiers.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Gestion des exigences
+    \item Priorisation
+    \item Documentation
+\end{itemize}
+\textbf{Bilan de la semaine :} Orchestration, conformité et cadrage Databricks aboutis.
+
+% Semaine 15 - 26-30 Mai 2025
+\clearpage
+\subsection{Semaine 15 : 26-30 Mai 2025}
+
+\subsubsection{Lundi 26 Mai 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Optimisation requêtes catalogues et lignées (index, projections)
+    \item Amélioration pagination et caches
+    \item Tests de performance ciblés
+\end{itemize}
+\textbf{Apprentissages :} Les indices adaptés changent l'expérience utilisateur.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Optimisation SQL
+    \item Caching
+    \item Mesure performance
+\end{itemize}
+
+\subsubsection{Mardi 27 Mai 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Ajout d'indicateurs qualité (completeness, freshness) dans le catalogue
+    \item API de reporting qualité
+    \item Visualisation côté frontend (composants)
+\end{itemize}
+\textbf{Apprentissages :} La qualité visible facilite la gouvernance.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Data quality
+    \item API reporting
+    \item Intégration UI
+\end{itemize}
+
+\subsubsection{Mercredi 28 Mai 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Consolidation sécurité: durcissement entrées, limites, journaux
+    \item Tests d'autorisation sur cas limites
+    \item Vérification cohérence RBAC multi-groupes
+\end{itemize}
+\textbf{Apprentissages :} Les cas limites révèlent les angles morts.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Sécurité
+    \item Tests négatifs
+    \item Gouvernance d'accès
+\end{itemize}
+
+\subsubsection{Jeudi 29 Mai 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Intégration initiale flux Databricks (métriques ML de base)
+    \item Normalisation et persistance des résultats côté gouvernance
+    \item Visualisation synthétique (backend payloads)
+\end{itemize}
+\textbf{Apprentissages :} La normalisation simplifie l'usage multi-outils.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Pipelines ML/AI
+    \item Normalisation données
+    \item Intégration multi-systèmes
+\end{itemize}
+
+\subsubsection{Vendredi 30 Mai 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Atelier encadrant: exigences évolutives et roadmap Databricks
+    \item Revue risques et dettes techniques
+    \item Mise à jour des tests et docs
+\end{itemize}
+\textbf{Apprentissages :} Le pilotage par risques stabilise l'avancement.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Gestion des risques
+    \item Revue technique
+    \item Documentation
+\end{itemize}
+\textbf{Bilan de la semaine :} Optimisations et premières intégrations Databricks en place.
+
+% Semaine 16 - 2-6 Juin 2025
+\clearpage
+\subsection{Semaine 16 : 2-6 Juin 2025}
+
+\subsubsection{Lundi 2 Juin 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Amélioration orchestrateur scans (priorités, fenêtrage)
+    \item Tests d'endurance locale
+    \item Journalisation fine des états
+\end{itemize}
+\textbf{Apprentissages :} La priorisation améliore la réactivité perçue.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Scheduling
+    \item Endurance testing
+    \item Observabilité
+\end{itemize}
+
+\subsubsection{Mardi 3 Juin 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Enrichissement classification: nouvelles règles sensibles client
+    \item Tests de précision et faux positifs
+    \item Ajustements seuils
+\end{itemize}
+\textbf{Apprentissages :} Les seuils pilotent l'utilité réelle des modèles.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Règles + ML
+    \item Évaluation
+    \item Calibration
+\end{itemize}
+
+\subsubsection{Mercredi 4 Juin 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Amélioration lignée: granularité colonnes et transformations
+    \item Index et vues matérialisées ciblées
+    \item Tests temps de réponse
+\end{itemize}
+\textbf{Apprentissages :} La granularité utile a un coût maîtrisable par indexation.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Lineage détaillé
+    \item Indexation
+    \item Tests de performance
+\end{itemize}
+
+\subsubsection{Jeudi 5 Juin 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Renforcement conformité: politiques dynamiques et rapports
+    \item Ajout de cas de remédiation assistée
+    \item Tests scénarios réglementaires
+\end{itemize}
+\textbf{Apprentissages :} Les politiques dynamiques couvrent mieux les cas réels.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Politiques de conformité
+    \item Reporting
+    \item Tests scénarisés
+\end{itemize}
+
+\subsubsection{Vendredi 6 Juin 2025}
+\textbf{Jour férié / jour non travaillé}
+
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Journée non travaillée. Revue des objectifs et synchronisation planning.
+\end{itemize}
+
+\textbf{Apprentissages :} Bilan d'étape et préparation du prochain lot.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Organisation
+    \item Planification
+\end{itemize}
+\textbf{Bilan de la semaine :} Lots orchestrateur, classification, lignée et conformité renforcés; journée non travaillée le 6/06.
+
+% Semaine 17 - 9-13 Juin 2025
+\clearpage
+\subsection{Semaine 17 : 9-13 Juin 2025}
+
+\subsubsection{Lundi 9 Juin 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Reprise après jour férié: revue des pipelines scans et priorités
+    \item Nettoyage des métriques d'exécution et consolidation logs
+    \item Préparation intégration incrémentale Databricks
+\end{itemize}
+\textbf{Apprentissages :} Les métriques de base guident les optimisations pertinentes.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Observabilité
+    \item Gouvernance de pipeline
+    \item Préparation intégration
+\end{itemize}
+
+\subsubsection{Mardi 10 Juin 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Extension règles de scan (regex optimisées)
+    \item Bench précision/latence sur sources variées
+    \item Ajustement agrégations résultats
+\end{itemize}
+\textbf{Apprentissages :} Les optimisations locales doivent être mesurées sur échantillons représentatifs.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Pattern design
+    \item Benchmark
+    \item Analyse de résultats
+\end{itemize}
+
+\subsubsection{Mercredi 11 Juin 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Qualité catalogue: détection incohérences et règles d'assainissement
+    \item API de correction assistée
+    \item Tests de cohérence bout-en-bout
+\end{itemize}
+\textbf{Apprentissages :} La correction assistée réduit le temps de remédiation.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Data quality
+    \item API remediation
+    \item Tests E2E
+\end{itemize}
+
+\subsubsection{Jeudi 12 Juin 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Orchestration: files de priorité et backoff intelligent
+    \item Journaux d'état détaillés par tâche
+    \item Tests de surcharge contrôlée
+\end{itemize}
+\textbf{Apprentissages :} Le backoff réduit les cascades d'échec.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Orchestration résiliente
+    \item Logging
+    \item Tests de robustesse
+\end{itemize}
+
+\subsubsection{Vendredi 13 Juin 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Réunion encadrant: focus performance scans et qualité
+    \item Planification intégration Databricks phase 2
+    \item Mise à jour documentation
+\end{itemize}
+\textbf{Apprentissages :} La visibilité sur performance + qualité guide la roadmap.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Communication
+    \item Planification
+    \item Documentation
+\end{itemize}
+\textbf{Bilan de la semaine :} Résilience de l'orchestrateur renforcée et préparation Databricks phase 2.
+
+% Semaine 18 - 16-20 Juin 2025
+\clearpage
+\subsection{Semaine 18 : 16-20 Juin 2025}
+
+\subsubsection{Lundi 16 Juin 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Intégration Databricks: contrat d'ingestion métriques modèles
+    \item Normalisation des payloads ML
+    \item Stockage et indexation pour consultation gouvernance
+\end{itemize}
+\textbf{Apprentissages :} Les schémas stables accélèrent l'itération.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Intégration ML
+    \item Normalisation
+    \item Indexation
+\end{itemize}
+
+\subsubsection{Mardi 17 Juin 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Lignée: ajout transformations et mapping colonnes enrichi
+    \item Tests d'impact sur vues dépendantes
+    \item Optimisations requêtes graphe
+\end{itemize}
+\textbf{Apprentissages :} Le mapping colonne-colonne améliore l'analyse d'impact.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Lineage avancé
+    \item Analyse d'impact
+    \item Optimisation requêtes
+\end{itemize}
+
+\subsubsection{Mercredi 18 Juin 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Conformité: gabarits de rapports paramétrables
+    \item API d'export rapports
+    \item Tests sur jeux réglementaires simulés
+\end{itemize}
+\textbf{Apprentissages :} Les gabarits accélèrent la diffusion des rapports.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Reporting
+    \item API export
+    \item Tests fonctionnels
+\end{itemize}
+
+\subsubsection{Jeudi 19 Juin 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item RBAC: revues permissions sensibles et audit approfondi
+    \item Tests de non-régression autorisation
+    \item Alertes sécurité sur accès anormaux (logs)
+\end{itemize}
+\textbf{Apprentissages :} L'audit fin facilite les enquêtes.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Gouvernance accès
+    \item Audit sécurité
+    \item Tests d'autorisation
+\end{itemize}
+
+\subsubsection{Vendredi 20 Juin 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Réunion encadrant/retour client: priorités qualité + lineage
+    \item Mise à jour backlog
+    \item Documentation intégration Databricks
+\end{itemize}
+\textbf{Apprentissages :} Les retours orientent la valeur métier prioritaire.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Gestion d'exigences
+    \item Priorisation
+    \item Documentation
+\end{itemize}
+\textbf{Bilan de la semaine :} Avancées Databricks (métriques ML) et gouvernance (lineage, conformité).
+
+% Semaine 19 - 23-27 Juin 2025
+\clearpage
+\subsection{Semaine 19 : 23-27 Juin 2025}
+
+\subsubsection{Lundi 23 Juin 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Orchestrateur: fenêtres d'exécution et quotas par source
+    \item Tests robustesse en scénarios dégradés
+    \item Journalisation métriques d'équité (équilibrage)
+\end{itemize}
+\textbf{Apprentissages :} Les quotas évitent la monopolisation des ressources.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Scheduling équitable
+    \item Tests dégradés
+    \item Metrics design
+\end{itemize}
+
+\subsubsection{Mardi 24 Juin 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Data quality: règles freshness/accuracy paramétrables
+    \item API d'alerte qualité
+    \item Tests d'alerting
+\end{itemize}
+\textbf{Apprentissages :} Les alertes contextualisées guident la priorisation des corrections.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Qualité des données
+    \item Alerting
+    \item Tests
+\end{itemize}
+
+\subsubsection{Mercredi 25 Juin 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Intégration Databricks: ingestion itérative et validation schémas
+    \item Adaptation mapping gouvernance
+    \item Vérification bout-en-bout
+\end{itemize}
+\textbf{Apprentissages :} L'intégration itérative minimise les risques.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Intégration progressive
+    \item Validation schémas
+    \item Tests E2E
+\end{itemize}
+
+\subsubsection{Jeudi 26 Juin 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Sécurité: limites, validation entrées et traçabilité renforcées
+    \item Tests négatifs et fuzz basiques
+    \item Revue journaux sécurité
+\end{itemize}
+\textbf{Apprentissages :} Les garde-fous entrées préviennent de nombreux incidents.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Sécurité applicative
+    \item Tests négatifs
+    \item Observabilité
+\end{itemize}
+
+\subsubsection{Vendredi 27 Juin 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Réunion encadrant: focus intégration Databricks + qualité
+    \item Mise à jour plan d'actions
+    \item Documentation des décisions
+\end{itemize}
+\textbf{Apprentissages :} La documentation des décisions accélère l'onboarding.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Coordination
+    \item Roadmapping
+    \item Documentation
+\end{itemize}
+\textbf{Bilan de la semaine :} Orchestrateur équitable, qualité et intégration Databricks progressent.
+
+% Semaine 20 - 30 Juin - 4 Juillet 2025
+\clearpage
+\subsection{Semaine 20 : 30 Juin - 4 Juillet 2025}
+
+\subsubsection{Lundi 30 Juin 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Revue performance: temps scans, latence API, requêtes lignée
+    \item Ciblage optimisations (index, cache, pagination)
+    \item Plan d'amélioration
+\end{itemize}
+\textbf{Apprentissages :} Mesurer avant d'optimiser garde le cap.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Profiling
+    \item Optimisation
+    \item Planification
+\end{itemize}
+
+\subsubsection{Mardi 1er Juillet 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Implémentation optimisations ciblées (DB + API)
+    \item Tests comparatifs
+    \item Ajustements cache
+\end{itemize}
+\textbf{Apprentissages :} De petits gains cumulés changent l'expérience.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Tuning DB
+    \item API performance
+    \item Caching
+\end{itemize}
+
+\subsubsection{Mercredi 2 Juillet 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Gouvernance: améliorations rapports conformité
+    \item Export enrichi et filtres
+    \item Tests fonctionnels
+\end{itemize}
+\textbf{Apprentissages :} Les exports filtrés améliorent l'utilité opérationnelle.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Reporting
+    \item UX données
+    \item Tests
+\end{itemize}
+
+\subsubsection{Jeudi 3 Juillet 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Intégration Databricks: ingestion métriques supplémentaires
+    \item Harmonisation schémas et contrôles
+    \item Validation bout-en-bout
+\end{itemize}
+\textbf{Apprentissages :} L'harmonisation réduit les coûts d'intégration futurs.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Schémas de données
+    \item Intégration ML
+    \item Validation
+\end{itemize}
+
+\subsubsection{Vendredi 4 Juillet 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Réunion encadrant/retour client: bilan mi-parcours
+    \item Ajustement roadmap (priorités gouvernance/qualité/Databricks)
+    \item Mise à jour documentations
+\end{itemize}
+\textbf{Apprentissages :} Les revues périodiques sécurisent l'alignement.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Communication
+    \item Pilotage
+    \item Documentation
+\end{itemize}
+\textbf{Bilan de la semaine :} Performance, conformité et intégrations continuent de s'améliorer.
+
+% Semaine 21 - 7-11 Juillet 2025
+\clearpage
+\subsection{Semaine 21 : 7-11 Juillet 2025}
+
+\subsubsection{Lundi 7 Juillet 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Revue intégration Databricks: extension des métriques et validation
+    \item Mise en place de règles de validation de payloads
+    \item Tests fonctionnels sur ingestion
+\end{itemize}
+\textbf{Apprentissages :} La validation stricte évite les dérives de schéma.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Validation schémas
+    \item Intégration ML/AI
+    \item Tests fonctionnels
+\end{itemize}
+
+\subsubsection{Mardi 8 Juillet 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Lignée: consolidation des mappings complexes
+    \item Optimisation des requêtes de dépendance
+    \item Ajout d'audit lignée
+\end{itemize}
+\textbf{Apprentissages :} L'audit lignée facilite l'analyse de confiance.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Lineage avancé
+    \item Optimisation requêtes
+    \item Audit
+\end{itemize}
+
+\subsubsection{Mercredi 9 Juillet 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Conformité: règles dynamiques et filtres contextuels
+    \item Exports ciblés pour équipes métier
+    \item Tests de conformité
+\end{itemize}
+\textbf{Apprentissages :} Les exports contextualisés accélèrent l'usage.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Politiques
+    \item Export
+    \item Tests
+\end{itemize}
+
+\subsubsection{Jeudi 10 Juillet 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Orchestration: limites par job et signaux de congestion
+    \item Amélioration des métriques de santé
+    \item Tests de robustesse
+\end{itemize}
+\textbf{Apprentissages :} Les signaux précoces préviennent les dégradations.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Résilience
+    \item Observabilité
+    \item Tests
+\end{itemize}
+
+\subsubsection{Vendredi 11 Juillet 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Réunion encadrant/retour client
+    \item Alignement priorités (lignée/conformité/Databricks)
+    \item Mise à jour documentation
+\end{itemize}
+\textbf{Apprentissages :} L'alignement régulier réduit les itérations inutiles.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Coordination
+    \item Gestion d'exigences
+    \item Documentation
+\end{itemize}
+\textbf{Bilan de la semaine :} Gouvernance et intégrations stabilisées.
+
+% Semaine 22 - 14-18 Juillet 2025
+\clearpage
+\subsection{Semaine 22 : 14-18 Juillet 2025}
+
+\subsubsection{Lundi 14 Juillet 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Qualité: nouveaux indicateurs (completeness par domaine)
+    \item API de consolidation et scoring
+    \item Tests unitaires
+\end{itemize}
+\textbf{Apprentissages :} Le scoring rend la qualité actionnable.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Data quality
+    \item API scoring
+    \item Tests unitaires
+\end{itemize}
+
+\subsubsection{Mardi 15 Juillet 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Intégration Databricks: ingestion incrémentale
+    \item Contrôles d'idempotence
+    \item Tests d'intégration
+\end{itemize}
+\textbf{Apprentissages :} L'idempotence fiabilise les pipelines.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Pipelines
+    \item Robustesse
+    \item Intégration
+\end{itemize}
+
+\subsubsection{Mercredi 16 Juillet 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item RBAC: revues d'accès granulaires
+    \item Tests d'autorisation et d'audit
+    \item Nettoyage des rôles obsolètes
+\end{itemize}
+\textbf{Apprentissages :} La maintenance des rôles garde le système sain.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Sécurité
+    \item Audit
+    \item Maintenance
+\end{itemize}
+
+\subsubsection{Jeudi 17 Juillet 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Catalogue: recherche enrichie (facettes + synonymes)
+    \item Tests d'utilisabilité
+    \item Ajustements API
+\end{itemize}
+\textbf{Apprentissages :} La recherche enrichie augmente l'adoption.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Recherche
+    \item UX
+    \item API
+\end{itemize}
+
+\subsubsection{Vendredi 18 Juillet 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Réunion encadrant/retour client
+    \item Finalisation des lots en cours
+    \item Documentation
+\end{itemize}
+\textbf{Apprentissages :} Les jalons réguliers sécurisent la trajectoire.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Communication
+    \item Clôture de lots
+    \item Documentation
+\end{itemize}
+\textbf{Bilan de la semaine :} Qualité, sécurité et recherche renforcées.
+
+% Semaine 23 - 21-25 Juillet 2025
+\clearpage
+\subsection{Semaine 23 : 21-25 Juillet 2025}
+
+\subsubsection{Lundi 21 Juillet 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Orchestrateur: équilibrage charges par groupe
+    \item Mesures latence détaillées
+    \item Plan d'actions
+\end{itemize}
+\textbf{Apprentissages :} Mesurer pour décider en priorité.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Scheduling
+    \item Metrics
+    \item Pilotage
+\end{itemize}
+
+\subsubsection{Mardi 22 Juillet 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Conformité: remédiations semi-automatisées
+    \item Tests de scénarios
+    \item Journalisation des remédiations
+\end{itemize}
+\textbf{Apprentissages :} Le semi-automatique accélère sans perdre le contrôle.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Gouvernance
+    \item Tests
+    \item Traçabilité
+\end{itemize}
+
+\subsubsection{Mercredi 23 Juillet 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Lignée: vues matérialisées pour cas d'usage fréquents
+    \item Tests de performance
+    \item Ajustements index
+\end{itemize}
+\textbf{Apprentissages :} Les vues matérialisées ciblées améliorent l'expérience.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Performance SQL
+    \item Lineage
+    \item Indexation
+\end{itemize}
+
+\subsubsection{Jeudi 24 Juillet 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Intégration Databricks: contrôles qualité des métriques
+    \item Harmonisation des formats
+    \item Tests bout-en-bout
+\end{itemize}
+\textbf{Apprentissages :} La qualité des métriques est critique pour la gouvernance.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Contrôle qualité
+    \item Normalisation
+    \item Tests E2E
+\end{itemize}
+
+\subsubsection{Vendredi 25 Juillet 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Réunion encadrant/retour client
+    \item Ajustements mineurs
+    \item Documentation
+\end{itemize}
+\textbf{Apprentissages :} Les boucles courtes consolident la qualité.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Coordination
+    \item Ajustements
+    \item Documentation
+\end{itemize}
+\textbf{Bilan de la semaine :} Orchestration et intégrations consolidées.
+
+% Semaine 24 - 28 Juillet - 1 Août 2025
+\clearpage
+\subsection{Semaine 24 : 28 Juillet - 1 Août 2025}
+
+\subsubsection{Lundi 28 Juillet 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Performance: revue caches et pagination
+    \item Tuning index
+    \item Tests comparatifs
+\end{itemize}
+\textbf{Apprentissages :} Le tuning ciblera ce qui est le plus coûteux.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Caching
+    \item Indexation
+    \item Mesure
+\end{itemize}
+
+\subsubsection{Mardi 29 Juillet 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Conformité: consolidation des audits
+    \item Exports filtrés
+    \item Tests de non-régression
+\end{itemize}
+\textbf{Apprentissages :} Les audits filtrés aident les équipes légales.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Audit
+    \item Export
+    \item Tests
+\end{itemize}
+
+\subsubsection{Mercredi 30 Juillet 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Databricks: ingestion supplémentaire et contrôles
+    \item Normalisation payloads
+    \item Tests d'intégration
+\end{itemize}
+\textbf{Apprentissages :} Les contrôles protègent des régressions amont.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Intégration
+    \item Normalisation
+    \item Validation
+\end{itemize}
+
+\subsubsection{Jeudi 31 Juillet 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Gouvernance: finalisation lots conformité et lignée
+    \item Revue risques
+    \item Documentation
+\end{itemize}
+\textbf{Apprentissages :} La revue risques évite les surprises.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Gouvernance
+    \item Gestion des risques
+    \item Documentation
+\end{itemize}
+
+\subsubsection{Vendredi 1 Août 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Réunion encadrant/retour client
+    \item Cadrage des deux dernières semaines
+    \item Mise à jour docs
+\end{itemize}
+\textbf{Apprentissages :} Le cadrage final sécurise la clôture.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Planification
+    \item Coordination
+    \item Documentation
+\end{itemize}
+\textbf{Bilan de la semaine :} Consolidation finale des lots en cours.
+
+% Semaine 25 - 4-8 Août 2025
+\clearpage
+\subsection{Semaine 25 : 4-8 Août 2025}
+
+\subsubsection{Lundi 4 Août 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Optimisations finales performance
+    \item Nettoyage technique
+    \item Mise à jour tests
+\end{itemize}
+\textbf{Apprentissages :} Les finitions comptent pour la stabilité.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Optimisation
+    \item Refactoring
+    \item Tests
+\end{itemize}
+
+\subsubsection{Mardi 5 Août 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Conformité: rapports finaux et remédiations guidées
+    \item Validation fonctionnelle
+    \item Docs d'usage
+\end{itemize}
+\textbf{Apprentissages :} Des rapports clairs accélèrent l'adoption.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Reporting
+    \item Validation
+    \item Documentation
+\end{itemize}
+
+\subsubsection{Mercredi 6 Août 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Lignée: contrôles finaux et vues synthétiques
+    \item Tests de cohérence
+    \item Ajustements fins
+\end{itemize}
+\textbf{Apprentissages :} Les vues synthétiques aident les utilisateurs.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Lineage
+    \item Cohérence
+    \item UX
+\end{itemize}
+
+\subsubsection{Jeudi 7 Août 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Intégration Databricks: harmonisation finale
+    \item Contrôles et validations
+    \item Documentation technique
+\end{itemize}
+\textbf{Apprentissages :} L'harmonisation réduit les coûts de maintenance.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Intégration
+    \item Validation
+    \item Documentation
+\end{itemize}
+
+\subsubsection{Vendredi 8 Août 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Réunion encadrant
+    \item Bilan technique
+    \item Plan des derniers ajustements
+\end{itemize}
+\textbf{Apprentissages :} Le bilan cadre la fin du stage.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Communication
+    \item Planification
+    \item Gouvernance
+\end{itemize}
+\textbf{Bilan de la semaine :} Finitions et validations avancées.
+
+% Semaine 26 - 11-15 Août 2025
+\clearpage
+\subsection{Semaine 26 : 11-15 Août 2025}
+
+\subsubsection{Lundi 11 Août 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Revue finale qualité et conformité
+    \item Ajustements mineurs
+    \item Stabilisation
+\end{itemize}
+\textbf{Apprentissages :} La stabilité est une qualité produit clé.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Qualité
+    \item Conformité
+    \item Stabilisation
+\end{itemize}
+
+\subsubsection{Mardi 12 Août 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Documentation finale (technique + usage)
+    \item Guides de gouvernance
+    \item FAQ technique
+\end{itemize}
+\textbf{Apprentissages :} Une bonne doc prolonge la valeur du travail.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Documentation
+    \item Gouvernance
+    \item UX
+\end{itemize}
+
+\subsubsection{Mercredi 13 Août 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Tests finaux et vérifications croisées
+    \item Nettoyage des logs
+    \item Vérification cohérence des métriques
+\end{itemize}
+\textbf{Apprentissages :} Les vérifications croisées découvrent des détails.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Tests
+    \item Observabilité
+    \item Contrôle qualité
+\end{itemize}
+
+\subsubsection{Jeudi 14 Août 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Synthèse finale avec encadrant
+    \item Clôture des tickets
+    \item Préparation des livrables de stage
+\end{itemize}
+\textbf{Apprentissages :} La synthèse consolide l'acquis.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Communication
+    \item Clôture
+    \item Gestion documentaire
+\end{itemize}
+
+\subsubsection{Vendredi 15 Août 2025}
+\textbf{Activités réalisées :}
+\begin{itemize}
+    \item Finalisation administrative du stage
+    \item Organisation des dossiers
+    \item Remise des documents
+\end{itemize}
+\textbf{Apprentissages :} La rigueur administrative est indispensable.
+\textbf{Compétences développées :}
+\begin{itemize}
+    \item Organisation
+    \item Gestion documentaire
+    \item Suivi
+\end{itemize}
+\textbf{Bilan de la semaine :} Clôture technique et documentaire.
+
+% Note finale
+\paragraph{Note du 17 Août 2025} Clôture officielle du stage PFE chez NXCI (Au Berges du Lac 1, Tunis). Remerciements et bilan global.
+
+\end{document}

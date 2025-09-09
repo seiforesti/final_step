@@ -3307,15 +3307,20 @@ export const discoverSchemaWithOptions = async (
   return data
 }
 
-export const getDataSourceCatalog = async (dataSourceId: number): Promise<any> => {
-  const { data } = await enterpriseApi.get(`/scan/data-sources/${dataSourceId}/catalog`)
+export const getDataSourceCatalog = async (dataSourceId: number, opts?: { selectionOnly?: boolean }): Promise<any> => {
+  const params: any = {}
+  if (opts?.selectionOnly) {
+    params.tag = 'selection:selected'
+  }
+  const { data } = await enterpriseApi.get(`/scan/data-sources/${dataSourceId}/catalog`, { params })
   return data
 }
 
-export const useDataSourceCatalogQuery = (dataSourceId: number, options = {}) => {
+export const useDataSourceCatalogQuery = (dataSourceId: number, options: any = {}) => {
+  const selectionOnly = options.selectionOnly === true
   return useQuery({
-    queryKey: ['data-source-catalog', dataSourceId],
-    queryFn: () => getDataSourceCatalog(dataSourceId),
+    queryKey: ['data-source-catalog', dataSourceId, selectionOnly ? 'selected' : 'all'],
+    queryFn: () => getDataSourceCatalog(dataSourceId, { selectionOnly }),
     enabled: !!dataSourceId,
     staleTime: 300000, // 5 minutes
     refetchInterval: 600000, // 10 minutes

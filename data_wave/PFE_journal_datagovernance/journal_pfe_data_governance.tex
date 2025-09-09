@@ -1,0 +1,279 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage{geometry}
+\geometry{a4paper, margin=2.5cm}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{tcolorbox}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{rotating}
+\usepackage[scaled=0.95]{helvet} % Calibri-like sans serif fallback
+\renewcommand{\familydefault}{\sfdefault}
+\usepackage{microtype}
+\usepackage{tocloft}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+% TOC formatting
+\renewcommand{\contentsname}{Sommaire}
+\setlength{\cftbeforesecskip}{6pt}
+\setlength{\cftbeforesubsecskip}{2pt}
+\renewcommand{\cftsecfont}{\bfseries}
+\renewcommand{\cftsecpagefont}{\bfseries}
+\renewcommand{\cftdot}{.}
+\renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}
+% Paragraph and title spacing for clarity
+\setlength{\parskip}{0.5em}
+\setlength{\parindent}{0pt}
+\titlespacing*{\section}{0pt}{1.2em}{0.6em}
+\titlespacing*{\subsection}{0pt}{1.0em}{0.5em}
+\titlespacing*{\subsubsection}{0pt}{0.8em}{0.4em}
+
+% Couleurs
+\definecolor{primaryblue}{RGB}{0,102,204}
+\definecolor{secondarygreen}{RGB}{34,139,34}
+\definecolor{warningorange}{RGB}{255,140,0}
+\definecolor{textgray}{RGB}{90,90,90}
+
+% En-têtes / pieds
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Journal de Bord PFE - Data Governance}
+\fancyhead[R]{\small NXCI - 2025}
+\fancyfoot[C]{\thepage}
+
+% Titres
+\titleformat{\section}{\Large\bfseries\color{primaryblue}}{\thesection}{1em}{}
+\titleformat{\subsection}{\large\bfseries\color{secondarygreen}}{\thesubsection}{1em}{}
+\titleformat{\subsubsection}{\normalsize\bfseries}{\thesubsubsection}{1em}{}
+
+% Listings
+\lstset{
+    basicstyle=\ttfamily\footnotesize,
+    backgroundcolor=\color{gray!10},
+    frame=single,
+    breaklines=true,
+    captionpos=b
+}
+
+\begin{document}
+
+% --------- PAGE DE TITRE PERSONNALISÉE ----------
+\begin{titlepage}
+  \centering
+  \vspace*{1.2cm}
+
+  % Overlay images (do not affect layout)
+  \begin{tikzpicture}[remember picture,overlay]
+    % Top-left image (slightly inset from the corner)
+    \node[anchor=north west] at ($ (current page.north west) + (1.5cm,-1.5cm) $) {\includegraphics[width=0.22\textwidth]{image.png}};
+    % Top-right image (slightly lower than the left image)
+    \node[anchor=north east] at ($ (current page.north east) + (-1.5cm,-2.3cm) $) {\includegraphics[width=0.22\textwidth]{image_2.png}};
+  \end{tikzpicture}
+
+    {\LARGE\bfseries\color{primaryblue} Journal de Bord — Projet de Fin d'Études\par}
+  \vspace{0.6cm}
+  {\Large Système Avancé de Gouvernance des Données\par}
+  {\normalsize Résolution et amélioration des lacunes de Microsoft Purview et Databricks\par}
+  {\normalsize Intégration Microsoft Purview et Databricks\par}
+
+  \vspace{1.2cm}
+  \begin{tcolorbox}[colback=white,colframe=primaryblue,boxrule=0.8pt,arc=1mm,enhanced,width=0.9\textwidth]
+    \renewcommand{\arraystretch}{1.35}% extra row spacing
+    \setlength{\tabcolsep}{6pt}% column padding
+    \begin{tabular}{@{}p{6.0cm} p{9.2cm}@{}}
+      \textbf{Étudiant :} & Seif Eddine Abdaoui \\[4pt]
+      \textbf{Spécialité :} & Génie Informatique \\[4pt]
+      \textbf{Durée du stage :} & 6 mois (24 semaines) \\[4pt]
+      \textbf{Période :} & 17 février 2025 — 17 août 2025 \\[4pt]
+      \textbf{Entreprise d'accueil :} & NXCI Internantional \\[4pt]
+      \textbf{Lieu :} & Berges du Lac 1, Tunis \\[4pt]
+      \textbf{Encadrant de l'entreprise :} & Mr. Youssef Trabelsi \\[4pt]
+      \textbf{Encadrant académique :} & Mr. Bssem Ben Saleh \\
+    \end{tabular}
+  \end{tcolorbox}
+
+  \vspace{0.9cm}
+  \begin{tcolorbox}[colback=white,colframe=secondarygreen,boxrule=0.8pt,arc=1mm,enhanced,width=0.9\textwidth]
+    \centering
+    \begin{minipage}{0.92\textwidth}
+      \begin{center}
+        \textbf{Résumé du projet}\\[2pt]
+      \end{center}
+      \small
+      Développement d’un système avancé de gouvernance des données, adressant les limites de Microsoft Purview
+      (extraction de schémas hétérogènes, classification, data lineage, catalogage).\\[4pt]
+      Intégration des capacités Databricks (ML/AI, métriques, analyse), en vue d’une meilleure traçabilité,
+      qualité et conformité.
+    \end{minipage}
+  \end{tcolorbox}
+
+  \vfill
+  {\small\color{textgray} Année universitaire 2024–2025}
+\end{titlepage}
+% -----------------------------------------------
+
+% Styled Table of Contents
+\begin{tcolorbox}[colback=white,colframe=primaryblue,boxrule=0.8pt,arc=1mm,enhanced,width=\textwidth]
+  \vspace{-0.3em}
+  {\large\bfseries\color{primaryblue} Sommaire}\par\vspace{0.4em}
+  \tableofcontents
+  \vspace{-0.6em}
+\end{tcolorbox}
+\newpage
+
+\section{Introduction}
+
+\subsection{Présentation de l'entreprise NXCI}
+L'entreprise NXCI, située aux Berges du Lac 1 à Tunis, est une société innovante issue d'un partenariat canado-tunisien spécialisée dans les solutions technologiques avancées. L'entreprise se distingue par son expertise dans le domaine de la technologie de l'information et des solutions d'intégration cloud, particulièrement avec les technologies Microsoft Azure et les plateformes de données modernes, avec la recherche et l'implémentation de solutions ML et AI.
+
+\subsection{Objectifs du Projet de Fin d'Études}
+Mon Projet de Fin d'Études (PFE) s'inscrit dans le cadre d'un stage de six mois au sein de NXCI, du 17 février 2025 au 17 août 2025. L'objectif principal consiste à développer un système avancé de gouvernance des données qui résout les limitations actuelles et lacunes de Microsoft Purview concernant l'extraction de schémas, la classification des données, la traçabilité (data lineage) et le catalogage avancé, avec l'ajout de fonctionnalités innovantes requises par Databricks.
+
+\subsection{Problématique du Projet}
+Les serveurs et écosystèmes de bases de données présentent plusieurs défis majeurs :
+\begin{itemize}[leftmargin=1.2em]
+  \item \textbf{Extraction de schémas limitée} : couverture hétérogène selon les moteurs (p.~ex. MySQL, MongoDB, PostgreSQL, Oracle, \dots)
+  \item \textbf{Classification insuffisante} : les classificateurs intégrés traitent mal la diversité des types/variantes
+  \item \textbf{Traçabilité déficiente} : data lineage incomplet pour des architectures et transformations complexes
+  \item \textbf{Catalogage incomplet} : couverture partielle des cas d’usage entreprise et de la qualité des métadonnées
+\end{itemize}
+Notre solution vise à développer nativement une application combinant les fonctionnalités pertinentes de Microsoft Purview et Databricks pour surmonter ces limitations. Elle met également en œuvre des optimisations avancées et des solutions performantes et innovantes afin d'améliorer la précision des classifications, la couverture d'extraction des schémas, la traçabilité (data lineage) et l'efficacité globale de la gouvernance.
+
+\section{Architecture du Système}
+Le projet est structuré autour de sept modules interconnectés et intégrés, formant un écosystème cohérent de gouvernance des données.
+
+\subsection{Les Sept Modules Principaux}
+\begin{enumerate}[leftmargin=1.2em]
+  \item \textbf{DataSource} : Gestion et connexion aux sources de données multiples
+  \item \textbf{DataCatalog} : Catalogage intelligent et découverte automatisée des données
+  \item \textbf{Classifications} : Classification avancée des données avec machine learning
+  \item \textbf{Scan-Rule-Sets} : Définition et gestion des règles de scan personnalisées
+  \item \textbf{ScanLogic} : Moteur de scan intelligent avec optimisation des performances
+  \item \textbf{Compliance} : Conformité réglementaire et audit automatisé
+  \item \textbf{RBAC/Control System} : Système de contrôle d'accès basé sur les rôles
+\end{enumerate}
+
+\subsection{Technologies et Outils Utilisés}
+\begin{itemize}[leftmargin=1.2em]
+  \item \textbf{Backend} : Python FastAPI, SQLAlchemy, PostgreSQL
+  \item \textbf{Frontend} : React.js, TypeScript, Tailwind CSS
+  \item \textbf{Orchestration} : Docker, Docker Compose
+  \item \textbf{Base de données} : PostgreSQL avec PgBouncer pour l'optimisation
+  \item \textbf{Machine Learning} : Modèles de classification personnalisés
+  \item \textbf{Intégration} : Microsoft Azure APIs, Databricks APIs
+\end{itemize}
+
+
+\section{Journal Quotidien}
+
+\input{sections/semaine_01}
+\input{sections/semaine_02}
+\input{sections/semaine_03}
+\input{sections/semaine_04}
+\input{sections/semaine_05}
+\input{sections/semaine_06}
+\input{sections/semaine_07}
+\input{sections/semaine_08}
+\input{sections/semaine_09}
+\input{sections/semaine_10}
+\input{sections/semaine_11}
+\input{sections/semaine_12}
+\input{sections/semaine_13}
+\input{sections/semaine_14}
+\input{sections/semaine_15}
+\input{sections/semaine_16}
+\input{sections/semaine_17}
+\input{sections/semaine_18}
+\input{sections/semaine_19}
+\input{sections/semaine_20}
+\input{sections/semaine_21}
+\input{sections/semaine_22}
+\input{sections/semaine_23}
+\input{sections/semaine_24}
+\input{sections/semaine_25}
+\input{sections/semaine_26}
+
+\section{Réalisations Techniques Majeures}
+
+\subsection{Architecture Backend Avancée}
+
+Le développement du backend a nécessité la mise en place d'une architecture sophistiquée avec plus de 80 services interconnectés, 50+ modèles de données et 200+ endpoints API. L'organisation modulaire permet une scalabilité horizontale et une maintenance efficace.
+
+\subsection{Optimisation des Performances}
+
+\begin{itemize}
+    \item Implémentation de PgBouncer pour l'optimisation des connexions à la base de données
+    \item Mise en place d'un système de cache distribué avec Redis
+    \item Optimisation des requêtes SQL avec des index intelligents
+    \item Monitoring en temps réel des performances système
+\end{itemize}
+
+\subsection{Sécurité et Conformité}
+
+\begin{itemize}
+    \item Système RBAC avancé avec granularité fine des permissions
+    \item Chiffrement des données sensibles en transit et au repos
+    \item Audit trail complet des opérations
+    \item Conformité RGPD et standards internationaux
+\end{itemize}
+
+\section{Défis Rencontrés et Solutions Apportées}
+
+\subsection{Défis Techniques}
+
+\begin{itemize}
+    \item \textbf{Intégration Microsoft Purview} : Complexité des APIs et limitations de documentation
+    \item \textbf{Performance des scans} : Optimisation pour traiter des volumes massifs de données
+    \item \textbf{Classification ML} : Entraînement de modèles précis pour différents types de données
+\end{itemize}
+
+\subsection{Solutions Développées}
+
+\begin{itemize}
+    \item Développement d'adaptateurs personnalisés pour l'intégration Purview
+    \item Implémentation d'un système de scan parallélisé et intelligent
+    \item Création de modèles ML hybrides combinant règles et apprentissage automatique
+\end{itemize}
+
+\section{Compétences Développées}
+
+\subsection{Compétences Techniques}
+
+\begin{itemize}
+    \item Maîtrise approfondie de FastAPI et de l'écosystème Python
+    \item Expertise en architecture microservices et conteneurisation
+    \item Développement d'APIs RESTful complexes
+    \item Optimisation de bases de données et requêtes SQL avancées
+    \item Intégration de services cloud Microsoft Azure
+\end{itemize}
+
+\subsection{Compétences Métier}
+
+\begin{itemize}
+    \item Compréhension approfondie de la gouvernance des données
+    \item Expertise en conformité réglementaire (RGPD, SOX, etc.)
+    \item Maîtrise des concepts de data lineage et catalogage
+    \item Gestion de projet agile et collaboration en équipe
+\end{itemize}
+
+\section{Conclusion}
+
+Ce Projet de Fin d'Études m'a permis de développer une solution innovante répondant aux défis actuels de la gouvernance des données. L'expérience acquise chez NXCI a été enrichissante tant sur le plan technique que professionnel, me préparant efficacement aux enjeux du secteur IT moderne.
+
+Le projet développé représente une avancée significative dans le domaine de la gouvernance des données, offrant une alternative native aux limitations des outils Microsoft existants. L'architecture modulaire et les technologies avancées utilisées positionnent cette solution comme une référence pour les entreprises cherchant à optimiser leur gestion des données.
+
+Les compétences acquises durant ces six mois de stage constituent un atout majeur pour ma future carrière d'ingénieur informatique, particulièrement dans les domaines émergents de la data science et de la gouvernance des données.
+
+\end{document}

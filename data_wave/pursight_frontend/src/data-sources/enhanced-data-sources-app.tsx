@@ -590,6 +590,9 @@ import { AdvancedWorkflowOrchestrator } from "./components/advanced-workflow-orc
 import { ComponentOrchestrationManager } from "./components/component-orchestration-manager"
 import { ComponentIntegrationManager } from "./components/component-integration-manager"
 import { MasterWorkflowAutomation } from "./components/master-workflow-automation"
+import { DiscoveryOrchestration } from "./components/discovery-orchestration"
+import { GovernanceOrchestration } from "./components/governance-orchestration"
+import { LifecycleOrchestration } from "./components/lifecycle-orchestration"
 
 // Import remaining components with enterprise features - FIXED DEFAULT EXPORTS
 const DataSourceComplianceView = React.lazy(() => import("./data-source-compliance-view").then(module => ({ default: module.DataSourceComplianceView })))
@@ -984,6 +987,7 @@ const enterpriseNavigationStructure = {
     category: "governance",
     items: [
       { id: "discovery", label: "Data Discovery", icon: Scan, component: "discovery", description: "AI-powered data asset discovery", shortcut: "⌘+F", features: ["ai", "analytics"] },
+      { id: "orchestrate-discovery", label: "Discovery Orchestration", icon: Scan, component: "orchestrate-discovery", description: "Orchestrate discovery, schema, catalog, lineage, scans", shortcut: "⌘+Shift+L", features: ["workflows", "analytics"] },
       { id: "discovery-workspace", label: "Discovery Workspace", icon: FolderOpen, component: "discovery-workspace", description: "Collaborative discovery workspace", shortcut: "⌘+W", features: ["collaboration"] },
       { id: "schema-discovery", label: "Schema Discovery", icon: TreePine, component: "schema-discovery", description: "Automated schema mapping", shortcut: "⌘+H" },
       { id: "data-lineage", label: "Data Lineage", icon: WorkflowIcon, component: "data-lineage", description: "Interactive lineage visualization", shortcut: "⌘+L", features: ["analytics"] },
@@ -1035,6 +1039,8 @@ const enterpriseNavigationStructure = {
     icon: Sparkles,
     category: "advanced",
     items: [
+      { id: "orchestrate-governance", label: "Governance Orchestration", icon: ShieldCheckIcon, component: "orchestrate-governance", description: "Compliance, security, access, reports, tags", shortcut: "⌘+Shift+G", premium: true, features: ["workflows", "governance"] },
+      { id: "orchestrate-lifecycle", label: "Lifecycle Orchestration", icon: Settings, component: "orchestrate-lifecycle", description: "Config, scheduler, backup, versions, integrations", shortcut: "⌘+Shift+Y", premium: true, features: ["workflows", "management"] },
       { id: "workflow-designer", label: "Workflow Designer", icon: WorkflowIcon, component: "workflow-designer", description: "Visual workflow design studio", shortcut: "⌘+Shift+W", premium: true, features: ["workflows", "ai"] },
       { id: "workflow-orchestrator", label: "Workflow Orchestrator", icon: Workflow, component: "workflow-orchestrator", description: "Advanced workflow automation and execution", shortcut: "⌘+Shift+O", premium: true, features: ["workflows", "automation"] },
       { id: "master-workflow", label: "Master Workflow", icon: Zap, component: "master-workflow", description: "Complete component orchestration and automation", shortcut: "⌘+Shift+Z", premium: true, features: ["workflows", "orchestration", "automation"] },
@@ -2615,6 +2621,18 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
           </div>
         )
 
+      // Discovery orchestration
+      case "orchestrate-discovery":
+        return selectedDataSource ? (
+          <Suspense fallback={<ComponentLoader />}>
+            <DiscoveryOrchestration dataSource={selectedDataSource} />
+          </Suspense>
+        ) : (
+          <div className="p-8 text-center">
+            <p className="text-muted-foreground">Select a data source to orchestrate discovery</p>
+          </div>
+        )
+
       // Discovery components
       case "discovery":
         return selectedDataSource ? (
@@ -2919,6 +2937,26 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
               }}
             />
           </Suspense>
+        )
+      case "orchestrate-governance":
+        return selectedDataSource ? (
+          <Suspense fallback={<ComponentLoader />}>
+            <GovernanceOrchestration dataSource={selectedDataSource} />
+          </Suspense>
+        ) : (
+          <div className="p-8 text-center">
+            <p className="text-muted-foreground">Select a data source to orchestrate governance</p>
+          </div>
+        )
+      case "orchestrate-lifecycle":
+        return selectedDataSource ? (
+          <Suspense fallback={<ComponentLoader />}>
+            <LifecycleOrchestration dataSource={selectedDataSource} />
+          </Suspense>
+        ) : (
+          <div className="p-8 text-center">
+            <p className="text-muted-foreground">Select a data source to orchestrate lifecycle</p>
+          </div>
         )
       case "integration-manager":
         return (

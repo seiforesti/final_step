@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
-import { useDataSourceComplianceStatusQuery } from "@/components/racine-main-manager/hooks/useDataSources"
+import { useDataSourceComplianceStatusQuery } from "@/racine-main-manager/hooks/useDataSources"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"

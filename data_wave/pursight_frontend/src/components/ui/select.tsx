@@ -64,6 +64,21 @@ const Select = React.memo(({
     }
   }, [open]);
 
+  const injectPropsDeep = (node: React.ReactNode): React.ReactNode => {
+    if (!React.isValidElement(node)) return node
+    const childProps: any = {
+      isOpen,
+      selectedValue,
+      onOpenChange: handleOpenChange,
+      onValueChange: handleValueChange,
+      ...node.props,
+    }
+    if (node.props && node.props.children) {
+      childProps.children = React.Children.map(node.props.children, injectPropsDeep)
+    }
+    return React.cloneElement(node as any, childProps)
+  }
+
   return (
     <div 
       ref={selectRef}
@@ -73,18 +88,7 @@ const Select = React.memo(({
       data-value={selectedValue}
       {...props}
     >
-      {React.Children.map(children, (child) => {
-        if (React.isValidElement(child)) {
-          return React.cloneElement(child, {
-            isOpen,
-            selectedValue,
-            onOpenChange: handleOpenChange,
-            onValueChange: handleValueChange,
-            ...child.props
-          });
-        }
-        return child;
-      })}
+      {React.Children.map(children, injectPropsDeep)}
     </div>
   );
 });
@@ -146,7 +150,11 @@ const SelectTrigger = React.memo(({
       )}
       {...props}
     >
-      {children}
+      {React.Children.map(children, (child) => {
+        if (!React.isValidElement(child)) return child
+        // Ensure nested SelectValue sees selectedValue
+        return React.cloneElement(child as any, { selectedValue, ...child.props })
+      })}
       <ChevronDown className={cn("h-4 w-4 opacity-50 transition-transform", isOpen && "rotate-180")} />
     </button>
   );
@@ -218,7 +226,17 @@ const SelectContent = React.memo(({
       {...props}
     >
       <div className="p-1 max-h-80 overflow-y-auto">
-        {children}
+        {React.Children.map(children, (child) => {
+          if (!React.isValidElement(child)) return child
+          // Inject selection handlers and current value to items
+          return React.cloneElement(child as any, {
+            selectedValue,
+            onValueChange,
+            isOpen,
+            onOpenChange,
+            ...child.props,
+          })
+        })}
       </div>
     </div>
   );
@@ -261,6 +279,17 @@ const SelectItem = React.memo(({
     }
   }, [value, onValueChange]);
 
+  const handleKeyDown = React.useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      if (value && onValueChange) onValueChange(value)
+    }
+    if (e.key === 'Escape' && onOpenChange) {
+      e.stopPropagation();
+      onOpenChange(false)
+    }
+  }, [value, onValueChange, onOpenChange])
+
   return (
     <div
       className={cn(
@@ -273,6 +302,7 @@ const SelectItem = React.memo(({
       data-radix-select-item
       data-state={isSelected ? "checked" : "unchecked"}
       onClick={handleClick}
+      onKeyDown={handleKeyDown}
       role="option"
       aria-selected={isSelected}
       {...props}

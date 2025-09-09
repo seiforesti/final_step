@@ -82,15 +82,17 @@ interface SchemaNode {
 interface SchemaDiscoveryProps {
   dataSourceId: number
   dataSourceName: string
-  onSelectionChange: (selection: SchemaNode[]) => void
+  onSelectionChange: (selection: any[]) => void
   onClose: () => void
+  initialSelectionManifest?: any
 }
 
 export function SchemaDiscovery({ 
   dataSourceId, 
   dataSourceName, 
   onSelectionChange, 
-  onClose 
+  onClose,
+  initialSelectionManifest
 }: SchemaDiscoveryProps) {
   const [schemaTree, setSchemaTree] = useState<SchemaNode[]>([])
   const [isLoading, setIsLoading] = useState(false)
@@ -104,6 +106,7 @@ export function SchemaDiscovery({
   const [previewData, setPreviewData] = useState<any>(null)
   const [showPreviewDialog, setShowPreviewDialog] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [pathIndex, setPathIndex] = useState<Record<string, string>>({})
 
   useEffect(() => {
     if (dataSourceId) {
@@ -120,9 +123,11 @@ export function SchemaDiscovery({
 
     try {
       // Set up progress tracking with WebSocket or EventSource for real-time updates
-      const progressTracker = setupProgressTracking(dataSourceId, (progress) => {
-        setDiscoveryProgress(progress.percentage)
-        setDiscoveryStatus(progress.status)
+      const progressTracker: any = (setupProgressTracking as any)(dataSourceId, (progress: any) => {
+        if (progress) {
+          if (typeof progress.percentage === 'number') setDiscoveryProgress(progress.percentage)
+          if (typeof progress.status === 'string') setDiscoveryStatus(progress.status)
+        }
       })
 
       // Use the enterprise API for schema discovery with advanced options
@@ -140,15 +145,18 @@ export function SchemaDiscovery({
         throw new Error(result.error || "Discovery failed with unknown error")
       }
       
-      // Clean up progress tracking
-      progressTracker.disconnect()
+      // Clean up progress tracking if available
+      if (progressTracker && typeof progressTracker.disconnect === 'function') {
+        progressTracker.disconnect()
+      }
       
       setDiscoveryProgress(100)
       setDiscoveryStatus("Discovery completed successfully!")
 
       // Transform the schema structure into tree nodes with enhanced metadata
-      const treeNodes = transformSchemaToTree(result.data.schema_structure)
+      const { nodes: treeNodes, index: builtIndex } = transformSchemaToTree(result.data.schema_structure)
       setSchemaTree(treeNodes)
+      setPathIndex(builtIndex)
       setSchemaStats(result.data.summary)
 
       // Auto-expand first level for better UX
@@ -181,8 +189,9 @@ export function SchemaDiscovery({
     }
   }
 
-  const transformSchemaToTree = (schemaStructure: any): SchemaNode[] => {
+  const transformSchemaToTree = (schemaStructure: any): { nodes: SchemaNode[]; index: Record<string, string> } => {
     const nodes: SchemaNode[] = []
+    const index: Record<string, string> = {}
 
     if (schemaStructure.databases) {
       schemaStructure.databases.forEach((database: any, dbIndex: number) => {
@@ -193,10 +202,10 @@ export function SchemaDiscovery({
           children: [],
           metadata: { 
             type: 'database', 
-            itemCount: database.schemas?.length || 0,
             lastUpdated: database.last_updated || new Date().toISOString()
           }
         }
+        index[`${database.name}`] = dbNode.id
 
         if (database.schemas) {
           database.schemas.forEach((schema: any, schemaIndex: number) => {
@@ -217,6 +226,7 @@ export function SchemaDiscovery({
                 description: schema.description || ''
               }
             }
+            index[`${database.name}.${schema.name}`] = schemaNode.id
 
             // Add tables with enhanced metadata
             if (schema.tables) {
@@ -241,6 +251,7 @@ export function SchemaDiscovery({
                     description: table.description || ''
                   }
                 }
+                index[`${database.name}.${schema.name}.${table.name}`] = tableNode.id
 
                 // Add columns with enhanced metadata
                 if (table.columns) {
@@ -264,13 +275,16 @@ export function SchemaDiscovery({
                         statistics: column.statistics || {}
                       }
                     }
+                    index[`${database.name}.${schema.name}.${table.name}.${column.name}`] = columnNode.id
                     tableNode.children!.push(columnNode)
                   })
                   
                   // Sort columns - primary keys first, then alphabetically
                   tableNode.children!.sort((a, b) => {
-                    if (a.metadata.primaryKey && !b.metadata.primaryKey) return -1
-                    if (!a.metadata.primaryKey && b.metadata.primaryKey) return 1
+                    const aPK = (a.metadata as any)?.primaryKey
+                    const bPK = (b.metadata as any)?.primaryKey
+                    if (aPK && !bPK) return -1
+                    if (!aPK && bPK) return 1
                     return a.name.localeCompare(b.name)
                   })
                 }
@@ -345,8 +359,46 @@ export function SchemaDiscovery({
       })
     }
 
-    return nodes
+    return { nodes, index }
   }
+
+  // Preselect nodes from manifest when tree and index are ready
+  useEffect(() => {
+    if (!initialSelectionManifest || !schemaTree.length || !Object.keys(pathIndex).length) return
+    const toSelect = new Set<string>()
+    try {
+      for (const db of initialSelectionManifest.databases || []) {
+        // If whole database chosen (no schemas?), select db
+        if (!db.schemas || db.schemas.length === 0) {
+          const id = pathIndex[`${db.name}`]
+          if (id) toSelect.add(id)
+          continue
+        }
+        for (const sch of db.schemas) {
+          // If whole schema
+          if (!sch.tables || sch.tables.length === 0) {
+            const id = pathIndex[`${db.name}.${sch.name}`]
+            if (id) toSelect.add(id)
+            continue
+          }
+          for (const tbl of sch.tables) {
+            const tableId = pathIndex[`${db.name}.${sch.name}.${tbl.name}`]
+            if (tableId) toSelect.add(tableId)
+            // Columns
+            if (Array.isArray(tbl.columns) && tbl.columns.length > 0) {
+              for (const col of tbl.columns) {
+                const colId = pathIndex[`${db.name}.${sch.name}.${tbl.name}.${col}`]
+                if (colId) toSelect.add(colId)
+              }
+            }
+          }
+        }
+      }
+      if (toSelect.size > 0) {
+        setSelectedNodes(toSelect)
+      }
+    } catch {}
+  }, [initialSelectionManifest, schemaTree, pathIndex])
 
   const handleNodeToggle = (nodeId: string) => {
     setExpandedNodes(prev => {
@@ -490,10 +542,6 @@ export function SchemaDiscovery({
     return null
   }
 
-  const filteredTree = searchTerm ? 
-    filterTree(schemaTree, searchTerm.toLowerCase()) : 
-    schemaTree
-
   const filterTree = (nodes: SchemaNode[], term: string): SchemaNode[] => {
     return nodes.filter(node => {
       const matches = node.name.toLowerCase().includes(term)
@@ -509,6 +557,10 @@ export function SchemaDiscovery({
       return false
     }).filter(Boolean) as SchemaNode[]
   }
+
+  const filteredTree = searchTerm ? 
+    filterTree(schemaTree, searchTerm.toLowerCase()) : 
+    schemaTree
 
   const renderTreeNode = (node: SchemaNode, level: number = 0) => {
     const hasChildren = node.children && node.children.length > 0
@@ -538,11 +590,8 @@ export function SchemaDiscovery({
           {!hasChildren && <div className="w-4" />}
           
           <Checkbox
-            checked={selectionState === 'checked'}
-            ref={(el) => {
-              if (el) el.indeterminate = selectionState === 'indeterminate'
-            }}
-            onCheckedChange={(checked) => handleNodeSelect(node.id, checked as boolean)}
+            checked={selectionState === 'indeterminate' ? 'indeterminate' : selectionState === 'checked'}
+            onCheckedChange={(checked) => handleNodeSelect(node.id, Boolean(checked))}
           />
           
           {getNodeIcon(node)}
@@ -734,10 +783,44 @@ export function SchemaDiscovery({
                   <Button 
                     size="sm"
                     onClick={() => {
-                      const selectedItems = Array.from(selectedNodes).map(id => 
-                        findNodeById(schemaTree, id)
-                      ).filter(Boolean) as SchemaNode[]
-                      onSelectionChange(selectedItems)
+                      const selections: any[] = []
+                      const addTable = (dbName: string, schemaName: string, tableName: string) => {
+                        selections.push({ database: dbName, schema: schemaName, table: tableName })
+                      }
+                      const addColumn = (dbName: string, schemaName: string, tableName: string, columnName: string) => {
+                        selections.push({ database: dbName, schema: schemaName, table: tableName, column: columnName })
+                      }
+                      const visitedTables = new Set<string>()
+                      for (const id of Array.from(selectedNodes)) {
+                        const node = findNodeById(schemaTree, id)
+                        if (!node) continue
+                        if (node.type === 'table') {
+                          const dbName = dataSourceName
+                          const schemaName = node.metadata?.schemaName || ''
+                          const tableName = node.metadata?.tableName || node.name
+                          const key = `${schemaName}.${tableName}`
+                          if (!visitedTables.has(key)) {
+                            visitedTables.add(key)
+                            addTable(dbName, schemaName, tableName)
+                          }
+                        } else if (node.type === 'column') {
+                          const schemaName = node.metadata?.schemaName || ''
+                          const tableName = node.metadata?.tableName || ''
+                          const columnName = node.metadata?.columnName || node.name
+                          addColumn(dataSourceName, schemaName, tableName, columnName)
+                        } else if (node.type === 'schema') {
+                          // include all tables under schema
+                          node.children?.filter(c => c.type === 'table').forEach(tbl => {
+                            addTable(dataSourceName, tbl.metadata?.schemaName || '', tbl.metadata?.tableName || tbl.name)
+                          })
+                        } else if (node.type === 'database') {
+                          // include all tables under database
+                          node.children?.forEach(sch => sch.children?.filter(c => c.type === 'table').forEach(tbl => {
+                            addTable(node.name, tbl.metadata?.schemaName || '', tbl.metadata?.tableName || tbl.name)
+                          }))
+                        }
+                      }
+                      onSelectionChange(selections)
                     }}
                   >
                     Continue with Selection

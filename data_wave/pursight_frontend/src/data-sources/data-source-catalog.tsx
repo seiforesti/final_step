@@ -169,7 +169,7 @@ export function DataSourceCatalog({
     isLoading: catalogLoading,
     error: catalogError,
     refetch: refetchCatalog 
-  } = useDataSourceCatalogQuery(dataSourceId)
+  } = useDataSourceCatalogQuery(dataSourceId, { selectionOnly: true })
 
   const { 
     data: performanceMetrics,
@@ -1402,7 +1402,12 @@ export function DataSourceCatalog({
                       Advanced Filters
                     </span>
                     <span className="text-xs text-muted-foreground">
-                      {Object.values(filters).filter(v => v !== "all" && v !== "" && v !== [0, 100]).length} active
+                      {Object.values(filters).filter(v => {
+                        if (Array.isArray(v)) {
+                          return !(v.length === 2 && v[0] === 0 && v[1] === 100);
+                        }
+                        return v !== "all" && v !== "";
+                      }).length} active
                     </span>
                   </Button>
                 </CollapsibleTrigger>
@@ -1835,7 +1840,12 @@ export function DataSourceCatalog({
                 </div>
                 <h3 className="text-xl font-semibold mb-2">No Catalog Items Found</h3>
                 <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                  {filters.searchTerm || Object.values(filters).some(v => v !== "all" && v !== "" && v !== [0, 100])
+                  {filters.searchTerm || Object.values(filters).some(v => {
+                    if (Array.isArray(v)) {
+                      return !(v.length === 2 && v[0] === 0 && v[1] === 100);
+                    }
+                    return v !== "all" && v !== "";
+                  })
                     ? "No items match your current filters. Try adjusting your search criteria."
                     : "Start by discovering and cataloging data assets from your data source"}
                 </p>

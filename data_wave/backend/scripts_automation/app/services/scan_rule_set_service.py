@@ -72,7 +72,174 @@ class ScanRuleSetService:
     @staticmethod
     def get_all_scan_rule_sets(session: Session) -> List[ScanRuleSet]:
         """Get all scan rule sets."""
-        return session.execute(select(ScanRuleSet)).all()
+        result = session.execute(select(ScanRuleSet)).scalars().all()
+        if not result:
+            # Create default rule sets if none exist
+            ScanRuleSetService._create_default_rule_sets(session)
+            result = session.execute(select(ScanRuleSet)).scalars().all()
+        return result
+    
+    @staticmethod
+    def _create_default_rule_sets(session: Session):
+        """Create integrated scan rule sets with real data source integration."""
+        try:
+            # Get all existing data sources to create integrated rule sets
+            from app.models.scan_models import DataSource
+            from sqlmodel import select
+            
+            data_sources = session.execute(select(DataSource)).scalars().all()
+            
+            rule_sets = []
+            
+            # Create rule sets for each data source
+            for data_source in data_sources:
+                # Get database-specific schemas and patterns
+                schemas_info = ScanRuleSetService._get_database_schemas_info(data_source)
+                
+                # Comprehensive Discovery Rule Set for this data source
+                comprehensive_rule = ScanRuleSet(
+                    name=f"Comprehensive Discovery - {data_source.name}",
+                    description=f"Complete discovery of all database objects for {data_source.name} including tables, views, functions, and system catalogs",
+                    data_source_id=data_source.id,
+                    include_schemas=schemas_info.get('include_schemas'),
+                    exclude_schemas=schemas_info.get('exclude_schemas'),
+                    include_tables=None,
+                    exclude_tables=None,
+                    include_columns=None,
+                    exclude_columns=None,
+                    sample_data=True,
+                    sample_size=1000
+                )
+                
+                # Business Data Rule Set for this data source
+                business_rule = ScanRuleSet(
+                    name=f"Business Data Focus - {data_source.name}",
+                    description=f"Focus on business-relevant tables and views for {data_source.name}, excluding system catalogs",
+                    data_source_id=data_source.id,
+                    include_schemas=schemas_info.get('business_schemas'),
+                    exclude_schemas=schemas_info.get('system_schemas'),
+                    include_tables=None,
+                    exclude_tables=schemas_info.get('system_table_patterns'),
+                    include_columns=None,
+                    exclude_columns=None,
+                    sample_data=True,
+                    sample_size=500
+                )
+                
+                # System Monitoring Rule Set for this data source
+                system_rule = ScanRuleSet(
+                    name=f"System Monitoring - {data_source.name}",
+                    description=f"Monitor system tables and performance views for {data_source.name} health and metrics",
+                    data_source_id=data_source.id,
+                    include_schemas=schemas_info.get('system_schemas'),
+                    exclude_schemas=None,
+                    include_tables=schemas_info.get('monitoring_table_patterns'),
+                    exclude_tables=None,
+                    include_columns=None,
+                    exclude_columns=None,
+                    sample_data=False,
+                    sample_size=100
+                )
+                
+                # Security Audit Rule Set for this data source
+                security_rule = ScanRuleSet(
+                    name=f"Security Audit - {data_source.name}",
+                    description=f"Audit security-related tables and user permissions for {data_source.name}",
+                    data_source_id=data_source.id,
+                    include_schemas=schemas_info.get('security_schemas'),
+                    exclude_schemas=None,
+                    include_tables=schemas_info.get('security_table_patterns'),
+                    exclude_tables=None,
+                    include_columns=schemas_info.get('security_column_patterns'),
+                    exclude_columns=None,
+                    sample_data=False,
+                    sample_size=50
+                )
+                
+                rule_sets.extend([comprehensive_rule, business_rule, system_rule, security_rule])
+            
+            # Add generic rule sets if no data sources exist
+            if not data_sources:
+                generic_rule = ScanRuleSet(
+                    name="Generic Discovery",
+                    description="Generic discovery rule set for any database type",
+                    data_source_id=None,
+                    include_schemas=None,
+                    exclude_schemas=None,
+                    include_tables=None,
+                    exclude_tables=None,
+                    include_columns=None,
+                    exclude_columns=None,
+                    sample_data=True,
+                    sample_size=1000
+                )
+                rule_sets.append(generic_rule)
+            
+            session.add_all(rule_sets)
+            session.commit()
+            logger.info(f"Created {len(rule_sets)} integrated scan rule sets")
+        except Exception as e:
+            session.rollback()
+            logger.error(f"Error creating integrated rule sets: {str(e)}")
+    
+    @staticmethod
+    def _get_database_schemas_info(data_source: DataSource) -> Dict[str, Any]:
+        """Get database-specific schema information for rule set creation."""
+        try:
+            source_type = data_source.source_type.lower()
+            
+            if source_type == 'postgresql':
+                return {
+                    'include_schemas': ['public', 'pg_catalog', 'information_schema'],
+                    'exclude_schemas': ['pg_toast', 'pg_temp'],
+                    'business_schemas': ['public'],
+                    'system_schemas': ['pg_catalog', 'information_schema'],
+                    'security_schemas': ['pg_catalog', 'public'],
+                    'system_table_patterns': ['pg_*', 'information_schema.*'],
+                    'monitoring_table_patterns': ['pg_stat_*', 'pg_class', 'pg_database', 'pg_user'],
+                    'security_table_patterns': ['pg_user', 'pg_roles', 'pg_authid', 'pg_database'],
+                    'security_column_patterns': ['*password*', '*secret*', '*key*', '*token*']
+                }
+            elif source_type == 'mysql':
+                return {
+                    'include_schemas': ['information_schema', 'mysql', 'performance_schema', 'sys'],
+                    'exclude_schemas': [],
+                    'business_schemas': ['information_schema'],
+                    'system_schemas': ['mysql', 'performance_schema', 'sys'],
+                    'security_schemas': ['mysql', 'information_schema'],
+                    'system_table_patterns': ['mysql.*', 'performance_schema.*', 'sys.*'],
+                    'monitoring_table_patterns': ['performance_schema.*', 'sys.*'],
+                    'security_table_patterns': ['mysql.user', 'mysql.db', 'mysql.tables_priv'],
+                    'security_column_patterns': ['*password*', '*secret*', '*key*', '*token*']
+                }
+            elif source_type == 'mongodb':
+                return {
+                    'include_schemas': ['admin', 'local', 'config'],
+                    'exclude_schemas': [],
+                    'business_schemas': ['admin'],
+                    'system_schemas': ['local', 'config'],
+                    'security_schemas': ['admin', 'local'],
+                    'system_table_patterns': ['system.*', 'local.*', 'config.*'],
+                    'monitoring_table_patterns': ['system.*', 'local.*'],
+                    'security_table_patterns': ['admin.users', 'admin.system.users'],
+                    'security_column_patterns': ['*password*', '*secret*', '*key*', '*token*']
+                }
+            else:
+                # Generic fallback
+                return {
+                    'include_schemas': None,
+                    'exclude_schemas': None,
+                    'business_schemas': None,
+                    'system_schemas': None,
+                    'security_schemas': None,
+                    'system_table_patterns': None,
+                    'monitoring_table_patterns': None,
+                    'security_table_patterns': None,
+                    'security_column_patterns': None
+                }
+        except Exception as e:
+            logger.error(f"Error getting database schemas info: {str(e)}")
+            return {}
     
     @staticmethod
     def get_scan_rule_sets_by_data_source(session: Session, data_source_id: int) -> List[ScanRuleSet]:
