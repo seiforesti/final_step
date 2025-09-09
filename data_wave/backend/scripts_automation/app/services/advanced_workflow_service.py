@@ -6,6 +6,7 @@ import logging
 import asyncio
 import uuid
 from collections import defaultdict
+import re
 
 from app.models.workflow_models import (
     Workflow, WorkflowStep, WorkflowExecution, StepExecution,
@@ -1247,7 +1248,30 @@ class AdvancedWorkflowService:
             
             # Add filters
             if workflow_id:
-                query = query.where(WorkflowExecution.workflow_id == workflow_id)
+                normalized_workflow_id: Optional[int] = None
+                # Try direct integer cast
+                try:
+                    normalized_workflow_id = int(workflow_id)
+                except (TypeError, ValueError):
+                    # Try to extract trailing integer from slugs like "catalog_11"
+                    match = re.search(r"(\d+)$", str(workflow_id))
+                    if match:
+                        try:
+                            normalized_workflow_id = int(match.group(1))
+                        except ValueError:
+                            normalized_workflow_id = None
+                
+                # As a fallback, try to resolve by exact workflow name
+                if normalized_workflow_id is None:
+                    wf_row = session.execute(
+                        select(Workflow.id).where(Workflow.name == str(workflow_id))
+                    ).first()
+                    if wf_row:
+                        normalized_workflow_id = wf_row[0]
+
+                # Only apply filter if we successfully resolved to an integer id
+                if normalized_workflow_id is not None:
+                    query = query.where(WorkflowExecution.workflow_id == normalized_workflow_id)
             
             if status:
                 query = query.where(WorkflowExecution.status == WorkflowStatus(status))
@@ -1270,9 +1294,7 @@ class AdvancedWorkflowService:
                     "started_at": execution.started_at.isoformat() if execution.started_at else None,
                     "completed_at": execution.completed_at.isoformat() if execution.completed_at else None,
                     "duration_minutes": execution.duration_minutes,
-                    "success_rate": execution.success_rate,
-                    "error_message": execution.error_message,
-                    "created_by": execution.created_by
+                    "error_message": execution.error_message
                 })
             
             return {

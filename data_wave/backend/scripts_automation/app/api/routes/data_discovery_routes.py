@@ -4,16 +4,21 @@ Provides endpoints for schema discovery, data exploration, and metadata browsing
 Similar to Microsoft Purview's data discovery capabilities
 """
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Body, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Body, status, WebSocket, WebSocketDisconnect
+from fastapi.responses import StreamingResponse
 from sqlmodel import Session, select
 from sqlalchemy import desc
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, AsyncGenerator
 from datetime import datetime
+import asyncio
+import json
 import logging
+from threading import Lock
 
 from app.db_session import get_session
 from app.services.data_source_service import DataSourceService
 from app.services.data_source_connection_service import DataSourceConnectionService
+from app.services.progress_bus import ProgressBus
 from app.api.security import get_current_user, require_permission
 from app.api.security.rbac import (
     PERMISSION_SCAN_VIEW, PERMISSION_SCAN_EDIT
@@ -26,6 +31,10 @@ from pydantic import BaseModel, Field, conint, constr
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/data-discovery", tags=["data-discovery"])
+
+# Global discovery lock to prevent multiple simultaneous discovery operations
+_discovery_lock = Lock()
+_active_discoveries: Dict[int, str] = {}  # data_source_id -> user_id
 
 # Initialize services
 connection_service = DataSourceConnectionService()
@@ -92,6 +101,18 @@ async def discover_data_source_schema(
     Discover the complete schema structure of a data source
     Returns hierarchical structure: databases -> schemas -> tables -> columns
     """
+    # Check if discovery is already running for this data source
+    with _discovery_lock:
+        if data_source_id in _active_discoveries:
+            return StandardResponse(
+                success=False,
+                message="Schema discovery is already running for this data source",
+                error="Discovery already in progress",
+                data={"active_user": _active_discoveries[data_source_id]}
+            )
+        # Mark this discovery as active
+        _active_discoveries[data_source_id] = current_user.get("username", "unknown")
+    
     try:
         # Get data source
         data_source = DataSourceService.get_data_source(session, data_source_id)
@@ -169,6 +190,58 @@ async def discover_data_source_schema(
             error=str(e),
             data=None
         )
+    finally:
+        # Always clean up the discovery lock
+        with _discovery_lock:
+            _active_discoveries.pop(data_source_id, None)
+
+@router.get("/data-sources/{data_source_id}/discovery-status")
+async def get_discovery_status(
+    data_source_id: int,
+    current_user: Dict[str, Any] = Depends(require_permission(PERMISSION_SCAN_VIEW))
+):
+    """
+    Get the current discovery status for a data source
+    """
+    with _discovery_lock:
+        is_running = data_source_id in _active_discoveries
+        active_user = _active_discoveries.get(data_source_id)
+    
+    return StandardResponse(
+        success=True,
+        message="Discovery status retrieved",
+        data={
+            "data_source_id": data_source_id,
+            "is_running": is_running,
+            "active_user": active_user,
+            "can_start": not is_running
+        },
+        error=None
+    )
+
+@router.post("/data-sources/{data_source_id}/stop-discovery")
+async def stop_discovery(
+    data_source_id: int,
+    current_user: Dict[str, Any] = Depends(require_permission(PERMISSION_SCAN_EDIT))
+):
+    """
+    Stop any running discovery for a data source
+    """
+    with _discovery_lock:
+        was_running = data_source_id in _active_discoveries
+        if was_running:
+            _active_discoveries.pop(data_source_id, None)
+    
+    return StandardResponse(
+        success=True,
+        message="Discovery stopped" if was_running else "No discovery was running",
+        data={
+            "data_source_id": data_source_id,
+            "was_running": was_running,
+            "stopped_by": current_user.get("username", "unknown")
+        },
+        error=None
+    )
 
 @router.post("/data-sources/{data_source_id}/discover-and-catalog", response_model=StandardResponse)
 async def discover_and_catalog_schema(
@@ -202,7 +275,6 @@ async def discover_and_catalog_schema(
             current_user.get("username", "system"),
             force_refresh=force_refresh
         )
-        
         return StandardResponse(
             success=discovery_result.success,
             message="Schema discovery and cataloging completed" if discovery_result.success else "Discovery failed",
@@ -213,11 +285,10 @@ async def discover_and_catalog_schema(
                 "processing_time_seconds": discovery_result.processing_time_seconds,
                 "errors": discovery_result.errors,
                 "warnings": discovery_result.warnings,
-                "cached": not force_refresh and discovery_result.processing_time_seconds < 1.0
+                "cached": not force_refresh and (discovery_result.processing_time_seconds or 0) < 1.0
             },
-            error="; ".join(discovery_result.errors) if discovery_result.errors else None
+            error="; ".join(discovery_result.errors) if getattr(discovery_result, 'errors', None) else None
         )
-        
     except Exception as e:
         logger.error(f"Error in discovery and cataloging: {str(e)}")
         return StandardResponse(
@@ -226,6 +297,121 @@ async def discover_and_catalog_schema(
             error=str(e),
             data=None
         )
+# =============================
+# Real-time discovery progress
+# =============================
+
+@router.get("/data-sources/{data_source_id}/discover-schema/progress")
+async def stream_discovery_progress(
+    data_source_id: int,
+    session: Session = Depends(get_session),
+    current_user: Dict[str, Any] = Depends(require_permission(PERMISSION_SCAN_VIEW))
+):
+    """
+    Server-Sent Events stream for discovery progress.
+    Emits JSON lines with fields: percentage, status, timestamp.
+    """
+    async def event_generator() -> AsyncGenerator[str, None]:
+        try:
+            # Send last known event immediately if exists (better UX)
+            last = ProgressBus.last_event(data_source_id)
+            if last:
+                yield f"data: {json.dumps(last)}\n\n"
+            async for evt in ProgressBus.subscribe(data_source_id):
+                yield f"data: {json.dumps(evt)}\n\n"
+        except asyncio.CancelledError:
+            return
+        except Exception as e:
+            logger.error(f"SSE discovery progress error: {e}")
+            yield f"data: {json.dumps({'error': str(e)})}\n\n"
+
+    return StreamingResponse(event_generator(), media_type="text/event-stream", headers={
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "X-Accel-Buffering": "no"
+    })
+
+
+async def validate_websocket_token(token: str, db: Session) -> Dict[str, Any]:
+    """Validate JWT token for WebSocket connections using the same logic as get_current_user"""
+    if not token:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    # Use the same session validation as the main authentication system
+    from app.services.auth_service import get_session_by_token
+    user_session = get_session_by_token(db, token)
+    if not user_session or not getattr(user_session, "user", None):
+        raise HTTPException(status_code=401, detail="Invalid session")
+    
+    user = user_session.user
+    return {
+        "id": user.id,
+        "email": user.email,
+        "username": getattr(user, "display_name", user.email),
+        "role": user.role,
+        "department": getattr(user, "department", None),
+        "region": getattr(user, "region", None)
+    }
+
+@router.websocket("/data-sources/{data_source_id}/discover-schema/progress/ws")
+async def websocket_discovery_progress(
+    websocket: WebSocket,
+    data_source_id: int
+):
+    """
+    WebSocket for discovery progress. Sends JSON messages with percentage and status.
+    """
+    # Extract token from query parameters
+    token = websocket.query_params.get("token")
+    if not token:
+        await websocket.close(code=1008, reason="Missing authentication token")
+        return
+    
+    # Validate token using proper JWT/session validation
+    try:
+        from app.db_session import get_session
+        db = next(get_session())
+        current_user = await validate_websocket_token(token, db)
+        
+        # Check if user has permission to access data discovery
+        from app.api.security.rbac import check_permission
+        if not check_permission("scan.view", current_user, db):
+            await websocket.close(code=1008, reason="Insufficient permissions")
+            return
+            
+    except Exception as e:
+        logger.error(f"WebSocket authentication failed: {str(e)}")
+        await websocket.close(code=1008, reason="Invalid authentication token")
+        return
+    
+    await websocket.accept()
+    try:
+        # Send initial connection confirmation
+        await websocket.send_json({
+            "type": "connection",
+            "status": "connected",
+            "data_source_id": data_source_id,
+            "user": {
+                "id": current_user["id"],
+                "username": current_user["username"],
+                "role": current_user["role"]
+            },
+            "timestamp": datetime.now().isoformat()
+        })
+        
+        # Subscribe to progress events
+        async for evt in ProgressBus.subscribe(data_source_id):
+            await websocket.send_json(evt)
+    except WebSocketDisconnect:
+        # Client gone; just return
+        return
+    except Exception as e:
+        logger.error(f"WS discovery progress error: {e}")
+        try:
+            await websocket.send_json({"error": str(e)})
+        except Exception:
+            pass
+        return
 
 @router.post("/data-sources/{data_source_id}/sync-catalog", response_model=StandardResponse)
 async def sync_catalog_with_data_source(
@@ -359,7 +545,8 @@ async def preview_table_data(
             "data_source_id": data_source_id,
             "schema_name": request.schema_name,
             "table_name": request.table_name,
-            "preview_data": preview_result["data"]
+            "preview_data": preview_result["preview_data"],
+            "execution_time_ms": preview_result.get("execution_time_ms", 0)
         }
         
     except HTTPException:

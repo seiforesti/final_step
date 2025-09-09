@@ -479,6 +479,8 @@ export interface TablePreviewRequest {
   limit?: number;
   offset?: number;
   columns?: string[];
+  include_statistics?: boolean;
+  apply_data_masking?: boolean;
 }
 
 // Column profile

@@ -71,6 +71,12 @@ RATE_LIMITS = {
     "/api/v1/global-search/saved-searches": (50, 60),  # 50 requests per minute
     "/api/v1/global-search/popular-searches": (100, 60),  # 100 requests per minute
     "/api/v1/global-search/search": (200, 60),  # 200 requests per minute
+    # Catalog endpoints (can trigger heavy metadata reflection)
+    "/api/v1/catalog": (30, 60),
+    # Data discovery/schema endpoints (noisy under polling)
+    "/data-discovery": (20, 60),  # prefix match via startswith
+    # Data sources routes (multiple routers use this prefix)
+    "/data-sources": (60, 60),  # prefix match via startswith
     
     # Racine orchestration endpoints
     "/racine/orchestration/active": (100, 60),  # 100 requests per minute
@@ -103,8 +109,8 @@ RATE_LIMITS = {
     "/performance/thresholds": (100, 60),  # 100 requests per minute
     "/performance/metrics": (200, 60),  # 200 requests per minute
     
-    # Default rate limit for all other endpoints
-    "default": (1000, 60),  # 1000 requests per minute
+    # Default rate limit for all other endpoints (tighten to reduce floods)
+    "default": (300, 60),  # 300 requests per minute per-IP per-path
 }
 
 def get_rate_limit_for_path(path: str) -> Tuple[int, int]:

@@ -40,6 +40,7 @@ from sqlmodel import Session, select, func, text, Column, JSON, String
 from app.models.scan_models import DataSource, DataSourceType, DataSourceLocation, CloudProvider
 from app.core.config import settings
 from app.services.data_source_service import DataSourceService
+from app.services.progress_bus import ProgressBus
 
 # Type variables for better type hints
 T = TypeVar('T')
@@ -384,7 +385,16 @@ class PostgreSQLConnector(BaseConnector):
                 return {"success": False, "error": "Failed to retrieve password"}
 
             connection_string = self._build_connection_string()
-            engine = create_engine(connection_string)
+            # Add connection retry logic for PostgreSQL
+            engine = create_engine(
+                connection_string,
+                pool_pre_ping=True,
+                pool_recycle=300,  # Recycle connections every 5 minutes
+                connect_args={
+                    "connect_timeout": 10,
+                    "application_name": "data_governance_discovery"
+                }
+            )
             inspector = inspect(engine)
             
             databases = []
@@ -395,7 +405,19 @@ class PostgreSQLConnector(BaseConnector):
             
             # Get all schemas
             schema_names = inspector.get_schema_names()
+            try:
+                await ProgressBus.publish(self.data_source.id, {
+                    "percentage": 20,
+                    "status": "discovering",
+                    "step": "schemas_listed",
+                    "schemas_total": len(schema_names),
+                    "timestamp": datetime.now().isoformat()
+                })
+            except Exception:
+                pass
             
+            processed_schemas = 0
+            total_tables_overall = 0
             for schema_name in schema_names:
                 if schema_name in ('pg_catalog', 'information_schema'):
                     continue
@@ -408,9 +430,24 @@ class PostgreSQLConnector(BaseConnector):
                 
                 # Get tables in schema
                 table_names = inspector.get_table_names(schema=schema_name)
-                for table_name in table_names:
+                total_tables_overall += len(table_names)
+                for idx, table_name in enumerate(table_names, start=1):
                     table_info = await self._get_table_info(inspector, schema_name, table_name, engine)
                     schema_info["tables"].append(table_info)
+                    # Emit per-table progress roughly
+                    try:
+                        await ProgressBus.publish(self.data_source.id, {
+                            "percentage": 20 + int(60 * (idx / max(1, len(table_names)))),
+                            "status": "discovering",
+                            "step": "tables_discovered",
+                            "schema": schema_name,
+                            "table": table_name,
+                            "table_index": idx,
+                            "tables_in_schema": len(table_names),
+                            "timestamp": datetime.now().isoformat()
+                        })
+                    except Exception:
+                        pass
                 
                 # Get views in schema
                 view_names = inspector.get_view_names(schema=schema_name)
@@ -419,9 +456,33 @@ class PostgreSQLConnector(BaseConnector):
                     schema_info["views"].append(view_info)
                 
                 current_db["schemas"].append(schema_info)
+                processed_schemas += 1
+                try:
+                    await ProgressBus.publish(self.data_source.id, {
+                        "percentage": min(90, 20 + int(60 * (processed_schemas / max(1, len(schema_names))))),
+                        "status": "discovering",
+                        "step": "schema_completed",
+                        "schema": schema_name,
+                        "schemas_completed": processed_schemas,
+                        "schemas_total": len(schema_names),
+                        "timestamp": datetime.now().isoformat()
+                    })
+                except Exception:
+                    pass
             
             databases.append(current_db)
             
+            try:
+                await ProgressBus.publish(self.data_source.id, {
+                    "percentage": 95,
+                    "status": "processing",
+                    "step": "aggregate",
+                    "schemas_total": len(schema_names),
+                    "tables_total": total_tables_overall,
+                    "timestamp": datetime.now().isoformat()
+                })
+            except Exception:
+                pass
             return {"databases": databases}
             
         except Exception as e:
@@ -504,14 +565,19 @@ class PostgreSQLConnector(BaseConnector):
         """Get preview of table data"""
         try:
             connection_string = self._build_connection_string()
+            logger.info(f"PostgreSQL table preview: {schema_name}.{table_name} (limit: {limit})")
+            
             engine = create_engine(connection_string)
             
             with engine.connect() as conn:
                 query = text(f'SELECT * FROM "{schema_name}"."{table_name}" LIMIT :limit')
+                logger.info(f"Executing query: {query}")
                 result = conn.execute(query, {"limit": limit})
                 
                 columns = [str(col) for col in result.keys()]
                 rows: List[RowDict] = []
+                
+                logger.info(f"Found {len(columns)} columns: {columns}")
                 
                 for row in result:
                     row_dict: RowDict = {}
@@ -522,8 +588,10 @@ class PostgreSQLConnector(BaseConnector):
                         else:
                             row_dict[columns[i]] = str(value) if value is not None else None
                     rows.append(row_dict)
+                
+                logger.info(f"Retrieved {len(rows)} rows from {schema_name}.{table_name}")
 
-              # Ensure the return type matches List[Dict] for rows, and columns is a List[str]
+                # Ensure the return type matches List[Dict] for rows, and columns is a List[str]
                 return [{
                     "columns": columns,
                     "rows": rows,
@@ -531,7 +599,8 @@ class PostgreSQLConnector(BaseConnector):
                 }]
 
         except Exception as e:
-            logger.error(f"Table preview failed: {str(e)}")
+            logger.error(f"Table preview failed for {schema_name}.{table_name}: {str(e)}")
+            logger.error(f"Connection string: {connection_string}")
             raise
     
     async def get_column_profile(self, schema_name: str, table_name: str, column_name: str) -> ColumnProfileResult:
@@ -681,13 +750,28 @@ class MySQLConnector(BaseConnector):
             
             inspector = inspect(engine)
             schemas = []
+
+            # Emit schemas_listed
+            try:
+                schema_names_all = inspector.get_schema_names()
+                await ProgressBus.publish(self.data_source.id, {
+                    "percentage": 20,
+                    "status": "discovering",
+                    "step": "schemas_listed",
+                    "schemas_total": len(schema_names_all),
+                    "timestamp": datetime.now().isoformat()
+                })
+            except Exception:
+                schema_names_all = inspector.get_schema_names()
             
+            processed_schemas = 0
             for schema_name in inspector.get_schema_names():
                 if schema_name in ('information_schema', 'performance_schema', 'mysql'):
                     continue
                 
                 tables = []
-                for table_name in inspector.get_table_names(schema=schema_name):
+                table_names = inspector.get_table_names(schema=schema_name)
+                for idx, table_name in enumerate(table_names, start=1):
                     columns = []
                     for column in inspector.get_columns(table_name, schema=schema_name):
                         columns.append({
@@ -715,11 +799,37 @@ class MySQLConnector(BaseConnector):
                         "size_bytes": result["total_bytes"] if result else None,
                         "has_primary_key": bool(inspector.get_pk_constraint(table_name, schema=schema_name)["constrained_columns"])
                     })
+                    # Emit table progress
+                    try:
+                        await ProgressBus.publish(self.data_source.id, {
+                            "percentage": 20 + int(60 * (idx / max(1, len(table_names)))),
+                            "status": "discovering",
+                            "step": "tables_discovered",
+                            "schema": schema_name,
+                            "table": table_name,
+                            "tables_in_schema": len(table_names),
+                            "timestamp": datetime.now().isoformat()
+                        })
+                    except Exception:
+                        pass
                 
                 schemas.append({
                     "name": schema_name,
                     "tables": tables
                 })
+                processed_schemas += 1
+                try:
+                    await ProgressBus.publish(self.data_source.id, {
+                        "percentage": min(90, 20 + int(60 * (processed_schemas / max(1, len(schema_names_all))))),
+                        "status": "discovering",
+                        "step": "schema_completed",
+                        "schema": schema_name,
+                        "schemas_completed": processed_schemas,
+                        "schemas_total": len(schema_names_all),
+                        "timestamp": datetime.now().isoformat()
+                    })
+                except Exception:
+                    pass
             
             return {
                 "success": True,
@@ -885,8 +995,19 @@ class MongoDBConnector(BaseConnector):
             
             # Get database names
             db_names = client.list_database_names()
+            try:
+                await ProgressBus.publish(self.data_source.id, {
+                    "percentage": 20,
+                    "status": "discovering",
+                    "step": "schemas_listed",
+                    "schemas_total": len(db_names),
+                    "timestamp": datetime.now().isoformat()
+                })
+            except Exception:
+                pass
             
             databases = []
+            processed_dbs = 0
             for db_name in db_names:
                 if db_name in ('admin', 'local', 'config'):
                     continue
@@ -899,7 +1020,7 @@ class MongoDBConnector(BaseConnector):
                 # Get collection names for each database
                 collection_names = client[db_name].list_collection_names()
                 
-                for collection_name in collection_names:
+                for idx, collection_name in enumerate(collection_names, start=1):
                     # Get collection metadata
                     collection_info = {
                         "name": collection_name,
@@ -915,6 +1036,20 @@ class MongoDBConnector(BaseConnector):
                         collection_info["row_count_estimate"] = client[db_name][collection_name].count_documents({})
                     except Exception as e:
                         logger.warning(f"Could not get size/row count for collection {collection_name}: {e}")
+                    # Emit per-collection progress
+                    try:
+                        await ProgressBus.publish(self.data_source.id, {
+                            "percentage": 20 + int(60 * (idx / max(1, len(collection_names)))),
+                            "status": "discovering",
+                            "step": "tables_discovered",
+                            "schema": db_name,
+                            "table": collection_name,
+                            "table_index": idx,
+                            "tables_in_schema": len(collection_names),
+                            "timestamp": datetime.now().isoformat()
+                        })
+                    except Exception:
+                        pass
                     
                     # Attempt to get primary key if available
                     try:
@@ -927,6 +1062,19 @@ class MongoDBConnector(BaseConnector):
                     db_info["collections"].append(collection_info)
                 
                 databases.append(db_info)
+                processed_dbs += 1
+                try:
+                    await ProgressBus.publish(self.data_source.id, {
+                        "percentage": min(90, 20 + int(60 * (processed_dbs / max(1, len(db_names))))),
+                        "status": "discovering",
+                        "step": "schema_completed",
+                        "schema": db_name,
+                        "schemas_completed": processed_dbs,
+                        "schemas_total": len(db_names),
+                        "timestamp": datetime.now().isoformat()
+                    })
+                except Exception:
+                    pass
             
             return {
                 "success": True,
@@ -2344,26 +2492,84 @@ class DataSourceConnectionService:
         return result
     
     async def discover_schema(self, data_source: DataSource) -> Dict[str, Any]:
-        """Discover full schema structure of the data source"""
-        try:
-            connector = self._get_connector(data_source)
-            schema_info = await connector.discover_schema()
-            
-            return {
-                "success": True,
-                "data_source_id": data_source.id,
-                "discovery_time": datetime.now().isoformat(),
-                "schema": schema_info,
-                "summary": self._generate_schema_summary(schema_info)
-            }
-            
-        except Exception as e:
-            logger.error(f"Schema discovery failed for data source {data_source.id}: {str(e)}")
-            return {
-                "success": False,
-                "error": str(e),
-                "data_source_id": data_source.id
-            }
+        """Discover full schema structure of the data source with retry logic"""
+        max_retries = 3
+        retry_delay = 2  # seconds
+        
+        for attempt in range(max_retries):
+            try:
+                # Emit initial progress
+                try:
+                    await ProgressBus.publish(data_source.id, {
+                        "percentage": 1,
+                        "status": "starting",
+                        "step": "initialize",
+                        "timestamp": datetime.now().isoformat()
+                    })
+                except Exception:
+                    pass
+                connector = self._get_connector(data_source)
+                try:
+                    await ProgressBus.publish(data_source.id, {
+                        "percentage": 10,
+                        "status": "connecting",
+                        "step": "connect",
+                        "timestamp": datetime.now().isoformat()
+                    })
+                except Exception:
+                    pass
+                schema_info = await connector.discover_schema()
+                try:
+                    await ProgressBus.publish(data_source.id, {
+                        "percentage": 70,
+                        "status": "processing",
+                        "step": "build_summary",
+                        "timestamp": datetime.now().isoformat()
+                    })
+                except Exception:
+                    pass
+                
+                result = {
+                    "success": True,
+                    "data_source_id": data_source.id,
+                    "discovery_time": datetime.now().isoformat(),
+                    "schema": schema_info,
+                    "summary": self._generate_schema_summary(schema_info)
+                }
+                try:
+                    await ProgressBus.publish(data_source.id, {
+                        "percentage": 100,
+                        "status": "completed",
+                        "step": "done",
+                        "timestamp": datetime.now().isoformat()
+                    })
+                except Exception:
+                    pass
+                return result
+                
+            except Exception as e:
+                logger.warning(f"Schema discovery attempt {attempt + 1} failed for data source {data_source.id}: {str(e)}")
+                if attempt < max_retries - 1:
+                    logger.info(f"Retrying schema discovery in {retry_delay} seconds...")
+                    await asyncio.sleep(retry_delay)
+                    retry_delay *= 2  # Exponential backoff
+                else:
+                    logger.error(f"All {max_retries} attempts failed for data source {data_source.id}")
+                    try:
+                        await ProgressBus.publish(data_source.id, {
+                            "percentage": 100,
+                            "status": "failed",
+                            "step": "error",
+                            "error": str(e),
+                            "timestamp": datetime.now().isoformat()
+                        })
+                    except Exception:
+                        pass
+                    return {
+                        "success": False,
+                        "error": str(e),
+                        "data_source_id": data_source.id
+                    }
     
     async def get_table_preview(self, data_source: DataSource, schema_name: str, table_name: str, limit: int = 100) -> Dict[str, Any]:
         """Get preview of table data"""
@@ -2371,11 +2577,18 @@ class DataSourceConnectionService:
             connector = self._get_connector(data_source)
             preview_data = await connector.get_table_preview(schema_name, table_name, limit)
             
+            # Extract actual data from the list returned by connectors
+            if isinstance(preview_data, list) and len(preview_data) > 0:
+                actual_data = preview_data[0]
+            else:
+                actual_data = preview_data
+            
             return {
                 "success": True,
                 "schema_name": schema_name,
                 "table_name": table_name,
-                "data": preview_data
+                "preview_data": actual_data,
+                "execution_time_ms": 0  # Will be calculated by the API endpoint
             }
             
         except Exception as e:

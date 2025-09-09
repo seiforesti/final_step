@@ -395,6 +395,14 @@ app.middleware("http")(error_handling_middleware)
 
 # Rate Limiting Middleware - Prevent API loops and excessive requests
 from app.middleware.rate_limiting_middleware import rate_limiting_middleware, circuit_breaker_middleware
+from app.middleware.request_collapse_middleware import request_collapse_middleware
+from app.middleware.response_cache_middleware import response_cache_middleware
+from app.middleware.endpoint_concurrency_middleware import endpoint_concurrency_middleware
+from app.middleware.adaptive_throttle_middleware import adaptive_throttle_middleware
+app.middleware("http")(request_collapse_middleware)
+app.middleware("http")(response_cache_middleware)
+app.middleware("http")(adaptive_throttle_middleware)
+app.middleware("http")(endpoint_concurrency_middleware)
 app.middleware("http")(rate_limiting_middleware)
 app.middleware("http")(circuit_breaker_middleware)
 

@@ -1,19 +1,17 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
-import { ChevronRight, ChevronDown, Database, Table, Columns, Search, Filter, Eye, Download, RefreshCw, Check, Square, MinusSquare, CheckSquare, FileText, Folder, FolderOpen, Info, BarChart3, Activity } from 'lucide-react'
+import { useState, useEffect } from "react"
+import { ChevronRight, ChevronDown, Database, Table, Columns, Search, Eye, RefreshCw, FileText, Folder, FolderOpen } from 'lucide-react'
 
 // Import enterprise services and utilities
-import { discoverSchemaWithOptions, SchemaDiscoveryRequest } from "../services/enterprise-apis"
+import { discoverSchemaWithOptions, getDiscoveryStatus, stopDiscovery as stopDiscoveryApi, SchemaDiscoveryRequest } from "../services/enterprise-apis"
 import { setupProgressTracking } from "../../shared/utils/progress-tracking"
 import { logDiscoveryTelemetry, logPreviewTelemetry } from "../../shared/utils/telemetry"
 
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { Separator } from "@/components/ui/separator"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -30,9 +28,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
 import { Table as TableComponent, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
 interface SchemaNode {
@@ -102,31 +98,80 @@ export function SchemaDiscovery({
   const [discoveryProgress, setDiscoveryProgress] = useState(0)
   const [discoveryStatus, setDiscoveryStatus] = useState<string>("")
   const [schemaStats, setSchemaStats] = useState<any>(null)
-  const [activeTab, setActiveTab] = useState("tree")
+  const [subProgress, setSubProgress] = useState<{ schema?: string; table?: string; current?: number; total?: number } | null>(null)
+  // const [activeTab, setActiveTab] = useState("tree") // Removed unused state
   const [previewData, setPreviewData] = useState<any>(null)
   const [showPreviewDialog, setShowPreviewDialog] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [pathIndex, setPathIndex] = useState<Record<string, string>>({})
+  const [isStarted, setIsStarted] = useState(false)
+  const [abortController, setAbortController] = useState<AbortController | null>(null)
 
+  // Cleanup effect to prevent memory leaks
   useEffect(() => {
-    if (dataSourceId) {
-      discoverSchema()
+    return () => {
+      // Clean up any ongoing requests when component unmounts
+      if (abortController) {
+        abortController.abort()
+      }
     }
-  }, [dataSourceId])
+  }, [abortController])
 
-  // Real enterprise-grade schema discovery implementation
+  // Real enterprise-grade schema discovery implementation with proper cancellation
   const discoverSchema = async () => {
+    // Prevent multiple simultaneous executions
+    if (isLoading) {
+      console.warn('Discovery already in progress, ignoring duplicate request')
+      return
+    }
+
+    // Check if discovery is already running on the backend
+    try {
+      const statusResponse = await getDiscoveryStatus(dataSourceId)
+      if (statusResponse.success && statusResponse.data?.is_running) {
+        setError(`Discovery is already running by user: ${statusResponse.data.active_user}`)
+        return
+      }
+    } catch (err) {
+      console.warn('Could not check discovery status:', err)
+    }
+
     setIsLoading(true)
+    setIsStarted(true)
     setError(null)
     setDiscoveryProgress(0)
     setDiscoveryStatus("Initializing connection to data source...")
+
+    // Create abort controller for cancellation
+    const controller = new AbortController()
+    setAbortController(controller)
 
     try {
       // Set up progress tracking with WebSocket or EventSource for real-time updates
       const progressTracker: any = (setupProgressTracking as any)(dataSourceId, (progress: any) => {
         if (progress) {
           if (typeof progress.percentage === 'number') setDiscoveryProgress(progress.percentage)
-          if (typeof progress.status === 'string') setDiscoveryStatus(progress.status)
+          if (typeof progress.status === 'string') {
+            // Build rich status string
+            let label = progress.status
+            if (progress.step === 'schemas_listed' && typeof progress.schemas_total === 'number') {
+              label = `Schemas listed: ${progress.schemas_total}`
+            } else if (progress.step === 'tables_discovered' && progress.schema && progress.table && typeof progress.tables_in_schema === 'number') {
+              label = `Schema ${progress.schema} (${Math.min(progress.percentage, 99)}%): ${progress.table} (${progress.tables_in_schema} total)`
+              // Update sub-progress for per-schema table completion
+              const current = typeof progress.table_index === 'number' ? progress.table_index : undefined
+              setSubProgress({ schema: progress.schema, table: progress.table, current, total: progress.tables_in_schema })
+            } else if (progress.step === 'schema_completed' && typeof progress.schemas_completed === 'number' && typeof progress.schemas_total === 'number') {
+              label = `Completed ${progress.schemas_completed}/${progress.schemas_total} schemas`
+              setSubProgress(null)
+            } else if (progress.step === 'aggregate' && typeof progress.tables_total === 'number') {
+              label = `Aggregating (${progress.tables_total} tables)`
+            } else if (progress.status === 'completed') {
+              label = 'Discovery completed'
+              setSubProgress(null)
+            }
+            setDiscoveryStatus(label)
+          }
         }
       })
 
@@ -138,8 +183,8 @@ export function SchemaDiscovery({
         max_tables_per_schema: 1000 // Support larger schemas in production
       }
 
-      // Call the enterprise API service
-      const result = await discoverSchemaWithOptions(dataSourceId, discoveryOptions)
+      // Call the enterprise API service with abort signal
+      const result = await discoverSchemaWithOptions(dataSourceId, discoveryOptions, { signal: controller.signal })
 
       if (!result.success) {
         throw new Error(result.error || "Discovery failed with unknown error")
@@ -154,7 +199,8 @@ export function SchemaDiscovery({
       setDiscoveryStatus("Discovery completed successfully!")
 
       // Transform the schema structure into tree nodes with enhanced metadata
-      const { nodes: treeNodes, index: builtIndex } = transformSchemaToTree(result.data.schema_structure)
+      const { nodes: treeNodes, index: builtIndex } = transformSchemaTo
+      (result.data.schema_structure)
       setSchemaTree(treeNodes)
       setPathIndex(builtIndex)
       setSchemaStats(result.data.summary)
@@ -173,6 +219,12 @@ export function SchemaDiscovery({
       })
 
     } catch (err: any) {
+      // Don't show error if it was cancelled
+      if (err.name === 'AbortError') {
+        setDiscoveryStatus("Discovery cancelled")
+        return
+      }
+      
       setError(err.message || "Schema discovery failed")
       setDiscoveryProgress(0)
       setDiscoveryStatus("Discovery failed")
@@ -186,7 +238,25 @@ export function SchemaDiscovery({
       })
     } finally {
       setIsLoading(false)
+      setAbortController(null)
     }
+  }
+
+  // Stop discovery function
+  const stopDiscovery = async () => {
+    try {
+      // Stop discovery on the backend
+      await stopDiscoveryApi(dataSourceId)
+    } catch (err) {
+      console.warn('Could not stop discovery on backend:', err)
+    }
+    
+    if (abortController) {
+      abortController.abort()
+      setAbortController(null)
+    }
+    setIsLoading(false)
+    setDiscoveryStatus("Discovery stopped")
   }
 
   const transformSchemaToTree = (schemaStructure: any): { nodes: SchemaNode[]; index: Record<string, string> } => {
@@ -435,18 +505,20 @@ export function SchemaDiscovery({
       // Use the enterprise API service for data preview with advanced options
       const previewOptions = {
         data_source_id: dataSourceId,
-        schema_name: node.metadata.schemaName,
-        table_name: node.metadata.tableName || node.metadata.viewName,
+        schema_name: node.metadata?.schemaName || '',
+        table_name: node.metadata?.tableName || node.metadata?.viewName || node.name,
         limit: 50,
         include_statistics: true,  // Include column statistics for enterprise insights
         apply_data_masking: true,   // Apply data masking for sensitive data
         timeout_seconds: 30         // Configure timeout for large tables
       }
 
-      const response = await fetch('/proxy/data-discovery/data-sources/preview-table', {
+      const token = (typeof window !== 'undefined' && localStorage.getItem('authToken')) || ''
+      const response = await fetch(`/proxy/data-discovery/data-sources/${dataSourceId}/preview-table`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         },
         body: JSON.stringify(previewOptions)
       })
@@ -477,8 +549,8 @@ export function SchemaDiscovery({
       // Log telemetry for enterprise monitoring
       logPreviewTelemetry && logPreviewTelemetry({
         dataSourceId,
-        schemaName: node.metadata.schemaName,
-        tableName: node.metadata.tableName || node.metadata.viewName,
+        schemaName: node.metadata?.schemaName,
+        tableName: node.metadata?.tableName || node.metadata?.viewName || node.name,
         rowCount: result.preview_data.rows.length,
         success: true
       })
@@ -489,8 +561,8 @@ export function SchemaDiscovery({
       // Log error telemetry
       logPreviewTelemetry && logPreviewTelemetry({
         dataSourceId,
-        schemaName: node.metadata.schemaName,
-        tableName: node.metadata.tableName || node.metadata.viewName,
+        schemaName: node.metadata?.schemaName,
+        tableName: node.metadata?.tableName || node.metadata?.viewName || node.name,
         error: err,
         success: false
       })
@@ -666,12 +738,37 @@ export function SchemaDiscovery({
           <p className="text-sm text-muted-foreground">
             Explore and select data from {dataSourceName}
           </p>
+          {subProgress && (
+            <div className="mt-2 text-xs text-muted-foreground flex items-center gap-2">
+              <span>Current: {subProgress.schema}.{subProgress.table}</span>
+              {typeof subProgress.current === 'number' && typeof subProgress.total === 'number' && (
+                <>
+                  <span>({subProgress.current}/{subProgress.total})</span>
+                  <div className="w-40">
+                    <Progress value={Math.round(100 * (subProgress.current / Math.max(1, subProgress.total)))} />
+                  </div>
+                </>
+              )}
+            </div>
+          )}
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={discoverSchema} disabled={isLoading}>
-            <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-            Refresh
-          </Button>
+          {!isStarted ? (
+            <Button onClick={discoverSchema} disabled={isLoading}>
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Start Discovery
+            </Button>
+          ) : isLoading ? (
+            <Button variant="destructive" onClick={stopDiscovery}>
+              <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+              Stop Discovery
+            </Button>
+          ) : (
+            <Button onClick={discoverSchema} disabled={isLoading}>
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Restart Discovery
+            </Button>
+          )}
           <Button variant="outline" onClick={onClose}>
             Close
           </Button>

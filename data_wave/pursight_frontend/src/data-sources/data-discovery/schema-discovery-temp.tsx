@@ -1,17 +1,14 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
-import { ChevronRight, ChevronDown, Database, Table, Columns, Search, Filter, Eye, Download, RefreshCw, Check, Square, MinusSquare, CheckSquare, FileText, Folder, FolderOpen, Info, BarChart3, Activity } from 'lucide-react'
+import { useState, useEffect, useRef } from "react"
+import { ChevronRight, ChevronDown, Database, Table, Columns, Search, Eye, FileText, Folder, FolderOpen, RefreshCw } from 'lucide-react'
 
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { Separator } from "@/components/ui/separator"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Checkbox } from "@/components/ui/checkbox"
 import { 
   Tooltip,
@@ -27,6 +24,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Table as TableComponent, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+// Prefer enterprise wrapper for consistent normalization and telemetry compatibility
+import { discoverSchemaWithOptions, getDiscoveryStatus, stopDiscovery as stopDiscoveryApi } from "../services/enterprise-apis"
+import { previewTable as previewTableApi } from "../services/apis"
+import type { SchemaDiscoveryRequest, TablePreviewRequest } from "../types"
 
 interface SchemaNode {
   id: string
@@ -60,75 +61,227 @@ export function SchemaDiscovery({
   const [discoveryProgress, setDiscoveryProgress] = useState(0)
   const [discoveryStatus, setDiscoveryStatus] = useState<string>("")
   const [schemaStats, setSchemaStats] = useState<any>(null)
-  const [activeTab, setActiveTab] = useState("tree")
   const [previewData, setPreviewData] = useState<any>(null)
   const [showPreviewDialog, setShowPreviewDialog] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [discoveryDiagnostics, setDiscoveryDiagnostics] = useState<{ durationMs?: number; endpoint?: string; request?: any }>({})
+  const [previewDiagnostics, setPreviewDiagnostics] = useState<{ durationMs?: number; endpoint?: string; request?: any }>({})
+  const [autoPicked, setAutoPicked] = useState<{ db: string; schema: string; table: string } | null>(null)
+  const [isStarted, setIsStarted] = useState(false)
+  const [abortController, setAbortController] = useState<AbortController | null>(null)
 
+  // Progress streaming refs
+  const sseRef = useRef<EventSource | null>(null)
+  const wsRef = useRef<WebSocket | null>(null)
+
+  // Define filterTree before first use to avoid hoisting issues
+  function filterTree(nodes: SchemaNode[], term: string): SchemaNode[] {
+    return nodes.filter(node => {
+      const matches = node.name.toLowerCase().includes(term)
+      const hasMatchingChildren = node.children ? 
+        filterTree(node.children, term).length > 0 : false
+      if (matches || hasMatchingChildren) {
+        return {
+          ...node,
+          children: node.children ? filterTree(node.children, term) : undefined
+        } as any
+      }
+      return false as any
+    }).filter(Boolean) as unknown as SchemaNode[]
+  }
+
+  // Cleanup effect to prevent memory leaks
   useEffect(() => {
-    if (dataSourceId) {
-      discoverSchema()
+    return () => {
+      // Clean up any ongoing requests when component unmounts
+      if (abortController) {
+        abortController.abort()
+      }
+      try { sseRef.current?.close() } catch {}
+      try { wsRef.current?.close() } catch {}
     }
-  }, [dataSourceId])
+  }, [abortController])
+
+  const startProgressStreams = () => {
+    // Try SSE first
+    try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : ''
+      const sseUrl = `/proxy/data-discovery/data-sources/${dataSourceId}/discover-schema/progress${token ? `?token=${encodeURIComponent(token)}` : ''}`
+      const es = new EventSource(sseUrl)
+      sseRef.current = es
+      es.onmessage = (evt) => {
+        try {
+          const msg = JSON.parse(evt.data)
+          if (typeof msg.percentage === 'number') setDiscoveryProgress(msg.percentage)
+          if (typeof msg.status === 'string') setDiscoveryStatus(msg.status)
+        } catch {}
+      }
+      es.onerror = () => {
+        try { es.close() } catch {}
+        sseRef.current = null
+        // Fallback to WS
+        startWsProgress()
+      }
+    } catch {
+      startWsProgress()
+    }
+  }
+
+  const startWsProgress = () => {
+    try {
+      const proto = typeof window !== 'undefined' && window.location.protocol === 'https:' ? 'wss' : 'ws'
+      const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : ''
+      const wsUrl = `${proto}://${window.location.host}/proxy/data-discovery/data-sources/${dataSourceId}/discover-schema/progress/ws${token ? `?token=${encodeURIComponent(token)}` : ''}`
+      const ws = new WebSocket(wsUrl)
+      wsRef.current = ws
+      ws.onmessage = (evt) => {
+        try {
+          const msg = JSON.parse(evt.data)
+          if (typeof msg.percentage === 'number') setDiscoveryProgress(msg.percentage)
+          if (typeof msg.status === 'string') setDiscoveryStatus(msg.status)
+        } catch {}
+      }
+      ws.onerror = () => {
+        try { ws.close() } catch {}
+        wsRef.current = null
+      }
+    } catch {}
+  }
+
+  const stopProgressStreams = () => {
+    try { sseRef.current?.close() } catch {}
+    try { wsRef.current?.close() } catch {}
+    sseRef.current = null
+    wsRef.current = null
+  }
 
   const discoverSchema = async () => {
+    // Prevent multiple simultaneous executions
+    if (isLoading) {
+      console.warn('Discovery already in progress, ignoring duplicate request')
+      return
+    }
+
+    // Check if discovery is already running on the backend
+    try {
+      const statusResponse = await getDiscoveryStatus(dataSourceId)
+      if (statusResponse.success && statusResponse.data?.is_running) {
+        setError(`Discovery is already running by user: ${statusResponse.data.active_user}`)
+        return
+      }
+    } catch (err) {
+      console.warn('Could not check discovery status:', err)
+    }
+
     setIsLoading(true)
+    setIsStarted(true)
     setError(null)
     setDiscoveryProgress(0)
     setDiscoveryStatus("Connecting to data source...")
 
+    // Create abort controller for cancellation
+    const controller = new AbortController()
+    setAbortController(controller)
+
     try {
-      // Simulate progress updates
+      // Start real-time progress streams if available
+      startProgressStreams()
+
+      // Simulate progress baseline to avoid frozen bar if streams not available
       const progressInterval = setInterval(() => {
         setDiscoveryProgress(prev => {
           if (prev >= 90) {
             clearInterval(progressInterval)
             return prev
           }
-          return prev + 10
+          return Math.max(prev, prev + 5)
         })
-      }, 200)
+      }, 400)
 
       setDiscoveryStatus("Discovering schema structure...")
 
-      const response = await fetch(`/api/data-discovery/data-sources/${dataSourceId}/discover-schema`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          data_source_id: dataSourceId,
-          include_data_preview: false,
-          max_tables_per_schema: 100
-        })
-      })
-
-      if (!response.ok) {
-        throw new Error(`Discovery failed: ${response.statusText}`)
+      // Use centralized service wrapper (handles /proxy, auth, retries)
+      const t0 = Date.now()
+      const req: SchemaDiscoveryRequest = {
+        data_source_id: dataSourceId,
+        include_data_preview: false,
+        max_tables_per_schema: 100,
       }
+      const normalized = await discoverSchemaWithOptions(dataSourceId, req, { signal: controller.signal })
+      const payload = (normalized as any).data || {}
+      const t1 = Date.now()
+      setDiscoveryDiagnostics({ durationMs: t1 - t0, endpoint: `/proxy/data-discovery/data-sources/${dataSourceId}/discover-schema`, request: req })
 
-      const result = await response.json()
-      
       clearInterval(progressInterval)
       setDiscoveryProgress(100)
       setDiscoveryStatus("Discovery completed!")
+      stopProgressStreams()
 
       // Transform the schema structure into tree nodes
-      const treeNodes = transformSchemaToTree(result.schema_structure)
+      const treeNodes = transformSchemaToTree(payload.schema_structure)
       setSchemaTree(treeNodes)
-      setSchemaStats(result.summary)
+      setSchemaStats(payload.summary)
 
       // Auto-expand first level
       const firstLevelIds = treeNodes.map(node => node.id)
       setExpandedNodes(new Set(firstLevelIds))
 
+      // Auto pick a populated table for UX
+      try {
+        const databases = payload?.schema_structure?.databases || []
+        let selected: { db: string; schema: string; table: string } | null = null
+        for (const db of databases) {
+          for (const sch of (db?.schemas || [])) {
+            const tables = sch?.tables || []
+            const withRows = tables.find((t: any) => typeof t?.row_count === 'number' && t.row_count > 0)
+            if (withRows) { selected = { db: db.name, schema: sch.name, table: withRows.name }; break }
+          }
+          if (selected) break
+        }
+        if (!selected) {
+          outer: for (const db of databases) {
+            for (const sch of (db?.schemas || [])) {
+              const tables = sch?.tables || []
+              if (tables.length > 0) { selected = { db: db.name, schema: sch.name, table: tables[0].name }; break outer }
+            }
+          }
+        }
+        if (selected) setAutoPicked(selected)
+      } catch {}
+
     } catch (err: any) {
+      // Don't show error if it was cancelled
+      if (err.name === 'AbortError') {
+        setDiscoveryStatus("Discovery cancelled")
+        return
+      }
+      
       setError(err.message || "Schema discovery failed")
       setDiscoveryProgress(0)
       setDiscoveryStatus("Discovery failed")
+      stopProgressStreams()
     } finally {
       setIsLoading(false)
+      setAbortController(null)
     }
+  }
+
+  // Stop discovery function
+  const stopDiscovery = async () => {
+    try {
+      // Stop discovery on the backend
+      await stopDiscoveryApi(dataSourceId)
+    } catch (err) {
+      console.warn('Could not stop discovery on backend:', err)
+    }
+    
+    if (abortController) {
+      abortController.abort()
+      setAbortController(null)
+    }
+    stopProgressStreams()
+    setIsLoading(false)
+    setDiscoveryStatus("Discovery stopped")
   }
 
   const transformSchemaToTree = (schemaStructure: any): SchemaNode[] => {
@@ -276,10 +429,6 @@ export function SchemaDiscovery({
       } else {
         newSet.delete(nodeId)
       }
-      
-      // Update parent selection based on children
-      // This would need more complex logic for hierarchical selection
-      
       return newSet
     })
   }
@@ -288,25 +437,19 @@ export function SchemaDiscovery({
     if (node.type !== 'table' && node.type !== 'view') return
 
     try {
-      const response = await fetch('/proxy/data-discovery/data-sources/preview-table', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          data_source_id: dataSourceId,
-          schema_name: node.metadata.schemaName,
-          table_name: node.metadata.tableName || node.metadata.viewName,
-          limit: 50
-        })
-      })
-
-      if (!response.ok) {
-        throw new Error('Preview failed')
+      const req: TablePreviewRequest = {
+        data_source_id: dataSourceId,
+        schema_name: node.metadata.schemaName,
+        table_name: node.metadata.tableName || node.metadata.viewName,
+        limit: 100,
+        include_statistics: true,
+        apply_data_masking: false,
       }
-
-      const result = await response.json()
-      setPreviewData(result)
+      const t0 = Date.now()
+      const result = await previewTableApi(req)
+      const t1 = Date.now()
+      setPreviewDiagnostics({ durationMs: t1 - t0, endpoint: `/proxy/data-discovery/data-sources/${dataSourceId}/preview-table`, request: req })
+      setPreviewData((result as any)?.data || result)
       setShowPreviewDialog(true)
 
     } catch (err) {
@@ -335,8 +478,6 @@ export function SchemaDiscovery({
 
   const getSelectionState = (nodeId: string): 'checked' | 'unchecked' | 'indeterminate' => {
     if (selectedNodes.has(nodeId)) return 'checked'
-    
-    // Check if any children are selected (indeterminate state)
     const node = findNodeById(schemaTree, nodeId)
     if (node?.children) {
       const hasSelectedChildren = node.children.some(child => 
@@ -344,7 +485,6 @@ export function SchemaDiscovery({
       )
       if (hasSelectedChildren) return 'indeterminate'
     }
-    
     return 'unchecked'
   }
 
@@ -362,22 +502,6 @@ export function SchemaDiscovery({
   const filteredTree = searchTerm ? 
     filterTree(schemaTree, searchTerm.toLowerCase()) : 
     schemaTree
-
-  const filterTree = (nodes: SchemaNode[], term: string): SchemaNode[] => {
-    return nodes.filter(node => {
-      const matches = node.name.toLowerCase().includes(term)
-      const hasMatchingChildren = node.children ? 
-        filterTree(node.children, term).length > 0 : false
-      
-      if (matches || hasMatchingChildren) {
-        return {
-          ...node,
-          children: node.children ? filterTree(node.children, term) : undefined
-        }
-      }
-      return false
-    }).filter(Boolean) as SchemaNode[]
-  }
 
   const renderTreeNode = (node: SchemaNode, level: number = 0) => {
     const hasChildren = node.children && node.children.length > 0
@@ -403,21 +527,13 @@ export function SchemaDiscovery({
               }
             </Button>
           )}
-          
           {!hasChildren && <div className="w-4" />}
-          
           <Checkbox
             checked={selectionState === 'checked'}
-            ref={(el) => {
-              if (el) el.indeterminate = selectionState === 'indeterminate'
-            }}
             onCheckedChange={(checked) => handleNodeSelect(node.id, checked as boolean)}
           />
-          
           {getNodeIcon(node)}
-          
           <span className="flex-1 text-sm font-medium">{node.name}</span>
-          
           {node.metadata && (
             <div className="flex items-center gap-2">
               {node.type === 'table' && node.metadata.rowCount && (
@@ -425,13 +541,11 @@ export function SchemaDiscovery({
                   {node.metadata.rowCount.toLocaleString()} rows
                 </Badge>
               )}
-              
               {(node.type === 'table' || node.type === 'view') && node.metadata.columnCount && (
                 <Badge variant="secondary" className="text-xs">
                   {node.metadata.columnCount} cols
                 </Badge>
               )}
-              
               {node.type === 'column' && (
                 <Badge variant="outline" className="text-xs">
                   {node.metadata.dataType}
@@ -440,7 +554,6 @@ export function SchemaDiscovery({
                   )}
                 </Badge>
               )}
-              
               {(node.type === 'table' || node.type === 'view') && (
                 <TooltipProvider>
                   <Tooltip>
@@ -463,7 +576,6 @@ export function SchemaDiscovery({
             </div>
           )}
         </div>
-        
         {hasChildren && isExpanded && (
           <div>
             {node.children!.map(child => renderTreeNode(child, level + 1))}
@@ -488,10 +600,22 @@ export function SchemaDiscovery({
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={discoverSchema} disabled={isLoading}>
-            <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-            Refresh
-          </Button>
+          {!isStarted ? (
+            <Button onClick={discoverSchema} disabled={isLoading}>
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Start Discovery
+            </Button>
+          ) : isLoading ? (
+            <Button variant="destructive" onClick={stopDiscovery}>
+              <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+              Stop Discovery
+            </Button>
+          ) : (
+            <Button onClick={discoverSchema} disabled={isLoading}>
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Restart Discovery
+            </Button>
+          )}
           <Button variant="outline" onClick={onClose}>
             Close
           </Button>
@@ -503,7 +627,7 @@ export function SchemaDiscovery({
         <div className="p-4 border-b">
           <div className="space-y-2">
             <div className="flex items-center justify-between text-sm">
-              <span>{discoveryStatus}</span>
+              <span>{discoveryStatus || 'Initializing...'}</span>
               <span>{discoveryProgress}%</span>
             </div>
             <Progress value={discoveryProgress} />
@@ -544,6 +668,15 @@ export function SchemaDiscovery({
                   <div className="text-xs text-muted-foreground">Columns</div>
                 </div>
               </div>
+              {/* Diagnostics */}
+              {(discoveryDiagnostics.durationMs || discoveryDiagnostics.endpoint) && (
+                <div className="mt-3 text-xs text-muted-foreground">
+                  <div>Endpoint: {discoveryDiagnostics.endpoint}</div>
+                  {typeof discoveryDiagnostics.durationMs === 'number' && (
+                    <div>Duration: {discoveryDiagnostics.durationMs} ms</div>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
@@ -559,7 +692,9 @@ export function SchemaDiscovery({
                   className="pl-10"
                 />
               </div>
-              
+              {autoPicked && (
+                <Badge variant="outline" className="text-xs">Auto-selected: {autoPicked.schema}.{autoPicked.table}</Badge>
+              )}
               {getSelectedCount() > 0 && (
                 <Badge variant="secondary">
                   {getSelectedCount()} items selected
@@ -627,33 +762,80 @@ export function SchemaDiscovery({
               {previewData && `${previewData.schema_name}.${previewData.table_name}`}
             </DialogDescription>
           </DialogHeader>
-          
+
           {previewData && (
-            <div className="overflow-auto max-h-[60vh]">
+            <div className="overflow-auto max-h-[60vh] space-y-3">
+              {/* Preview summary */}
+              <div className="text-xs text-muted-foreground">
+                <div>Columns: {Array.isArray(previewData.preview_data?.columns) ? previewData.preview_data.columns.length : 0}</div>
+                <div>Rows (sample): {Array.isArray(previewData.preview_data?.rows) ? previewData.preview_data.rows.length : 0}</div>
+                {typeof previewData.execution_time_ms === 'number' && (
+                  <div>Execution time: {(previewData.execution_time_ms / 1000).toFixed(2)}s</div>
+                )}
+                {(previewDiagnostics.durationMs || previewDiagnostics.endpoint) && (
+                  <div className="mt-1">Fetched in {previewDiagnostics.durationMs} ms via {previewDiagnostics.endpoint}</div>
+                )}
+              </div>
+
               <TableComponent>
                 <TableHeader>
                   <TableRow>
-                    {previewData.preview_data.columns.map((column: string) => (
-                      <TableHead key={column}>{column}</TableHead>
+                    {previewData.preview_data.columns.map((column: any) => (
+                      <TableHead key={typeof column === 'string' ? column : (column.name || String(column))} className="whitespace-nowrap">
+                        <div className="flex flex-col">
+                          <span>{typeof column === 'string' ? column : (column.name || String(column))}</span>
+                          <span className="text-xs text-muted-foreground">{typeof column === 'string' ? '' : (column.dataType || '')}</span>
+                        </div>
+                      </TableHead>
                     ))}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {previewData.preview_data.rows.slice(0, 20).map((row: any, index: number) => (
                     <TableRow key={index}>
-                      {previewData.preview_data.columns.map((column: string) => (
-                        <TableCell key={column} className="font-mono text-xs">
-                          {row[column] || '-'}
-                        </TableCell>
-                      ))}
+                      {previewData.preview_data.columns.map((column: any) => {
+                        const colName = typeof column === 'string' ? column : (column.name || String(column));
+                        const value = row[colName];
+                        const isNull = value === null || value === undefined;
+                        return (
+                          <TableCell key={colName} className={`font-mono text-xs ${isNull ? 'text-muted-foreground italic' : ''}`}>
+                            {isNull ? 'NULL' : String(value)}
+                          </TableCell>
+                        );
+                      })}
                     </TableRow>
                   ))}
                 </TableBody>
               </TableComponent>
-              
-              {previewData.preview_data.rows.length > 20 && (
-                <div className="p-4 text-center text-sm text-muted-foreground">
-                  Showing first 20 rows of {previewData.preview_data.total_rows} total
+
+              {/* Optional stats (first 5 columns) */}
+              {previewData.column_statistics && (
+                <div className="pt-2">
+                  <div className="text-xs font-medium mb-2">Column statistics (sample)</div>
+                  <TableComponent>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Column</TableHead>
+                        <TableHead>Distinct</TableHead>
+                        <TableHead>Nulls</TableHead>
+                        <TableHead>Min</TableHead>
+                        <TableHead>Max</TableHead>
+                        <TableHead>Avg</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {Object.entries(previewData.column_statistics).slice(0, 5).map(([col, stats]: any) => (
+                        <TableRow key={col}>
+                          <TableCell>{col}</TableCell>
+                          <TableCell>{stats?.distinctCount ?? 'N/A'}</TableCell>
+                          <TableCell>{stats?.nullCount ?? 'N/A'}</TableCell>
+                          <TableCell>{stats?.min ?? 'N/A'}</TableCell>
+                          <TableCell>{stats?.max ?? 'N/A'}</TableCell>
+                          <TableCell>{stats?.avg ?? 'N/A'}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </TableComponent>
                 </div>
               )}
             </div>

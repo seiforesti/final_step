@@ -2,6 +2,7 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import { Database, Scan, TreePine, GitBranch, Package } from "lucide-react"
 
 import { DataSource } from "../types"
@@ -51,33 +52,49 @@ export function DiscoveryOrchestration({ dataSource, className = "" }: Discovery
 					</TabsContent>
 
 					<TabsContent value="schema" className="mt-4">
-						<div className="grid md:grid-cols-2 gap-4">
-							<Card>
-								<CardHeader>
-									<CardTitle>Schema Discovery</CardTitle>
-								</CardHeader>
-								<CardContent>
-									<SchemaDiscoveryStable 
-										dataSourceId={dataSource.id}
-										dataSourceName={dataSource.name}
-										onSelectionChange={() => {}}
-										onClose={() => {}}
-									/>
-								</CardContent>
-							</Card>
-							<Card>
-								<CardHeader>
-									<CardTitle>Schema Discovery (Temp)</CardTitle>
-								</CardHeader>
-								<CardContent>
-									<SchemaDiscoveryTemp 
-										dataSourceId={dataSource.id}
-										dataSourceName={dataSource.name}
-										onSelectionChange={() => {}}
-										onClose={() => {}}
-									/>
-								</CardContent>
-							</Card>
+						<div className="space-y-4">
+							<div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+								<div>
+									<h3 className="font-semibold">Schema Discovery Components</h3>
+									<p className="text-sm text-muted-foreground">
+										Choose one component to run at a time to prevent database exhaustion
+									</p>
+								</div>
+							</div>
+							<div className="grid md:grid-cols-2 gap-4">
+								<Card>
+									<CardHeader>
+										<CardTitle className="flex items-center justify-between">
+											<span>Schema Discovery (Enterprise)</span>
+											<Badge variant="secondary">Production</Badge>
+										</CardTitle>
+									</CardHeader>
+									<CardContent>
+										<SchemaDiscoveryStable 
+											dataSourceId={dataSource.id}
+											dataSourceName={dataSource.name}
+											onSelectionChange={() => {}}
+											onClose={() => {}}
+										/>
+									</CardContent>
+								</Card>
+								<Card>
+									<CardHeader>
+										<CardTitle className="flex items-center justify-between">
+											<span>Schema Discovery (Temp)</span>
+											<Badge variant="outline">Testing</Badge>
+										</CardTitle>
+									</CardHeader>
+									<CardContent>
+										<SchemaDiscoveryTemp 
+											dataSourceId={dataSource.id}
+											dataSourceName={dataSource.name}
+											onSelectionChange={() => {}}
+											onClose={() => {}}
+										/>
+									</CardContent>
+								</Card>
+							</div>
 						</div>
 					</TabsContent>
 

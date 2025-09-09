@@ -44,17 +44,17 @@ def _create_engine(database_url: str, *, pool_size_override: int | None = None, 
         
         if is_using_pgbouncer:
             # Use smaller pool sizes when PgBouncer is handling connection pooling
-            default_pool_size = "2"
-            default_max_overflow = "1"
+            default_pool_size = "10"
+            default_max_overflow = "5"
         else:
             # Use normal pool sizes when connecting directly to PostgreSQL
-            default_pool_size = "2"
-            default_max_overflow = "1"
+            default_pool_size = "10"
+            default_max_overflow = "5"
         
         _DBC = {
             "pool_size": int(os.getenv("DB_POOL_SIZE", default_pool_size)),
             "max_overflow": int(os.getenv("DB_MAX_OVERFLOW", default_max_overflow)),
-            "pool_timeout": int(os.getenv("DB_POOL_TIMEOUT", "60")),
+            "pool_timeout": int(os.getenv("DB_POOL_TIMEOUT", "120")),
             "pool_recycle": int(os.getenv("DB_POOL_RECYCLE", "900")),
             "pool_pre_ping": True,
             "pool_reset_on_return": "commit",
@@ -276,12 +276,12 @@ def _desired_pool_targets() -> tuple[int, int]:
         
         if is_using_pgbouncer:
             # Use smaller pool sizes when PgBouncer is handling connection pooling
-            default_pool_size = "2"
-            default_max_overflow = "1"
+            default_pool_size = "10"
+            default_max_overflow = "5"
         else:
             # Use normal pool sizes when connecting directly to PostgreSQL
-            default_pool_size = "2"
-            default_max_overflow = "1"
+            default_pool_size = "10"
+            default_max_overflow = "5"
         
         return int(os.getenv("DB_POOL_SIZE", default_pool_size)), int(os.getenv("DB_MAX_OVERFLOW", default_max_overflow))
 
@@ -473,7 +473,20 @@ try:
     _circuit_open_until = 0.0
 except ImportError:
     # Fallback values
-    _max_concurrent_db_requests = int(os.getenv("MAX_CONCURRENT_DB_REQUESTS", "15"))
+    # Align default concurrency with pool capacity to avoid overloads
+    try:
+        # Attempt to read effective pool capacity
+        from sqlalchemy import inspect as _insp  # noqa: F401
+        # If engine not yet created, fallback below
+        pool_capacity = 0
+        try:
+            pool_capacity = (engine.pool.size() if hasattr(engine, 'pool') else 0) + (engine.pool.overflow() if hasattr(engine, 'pool') else 0)
+        except Exception:
+            pool_capacity = 0
+        default_cap = pool_capacity if pool_capacity > 0 else 10
+    except Exception:
+        default_cap = 10
+    _max_concurrent_db_requests = int(os.getenv("MAX_CONCURRENT_DB_REQUESTS", str(default_cap)))
     _db_semaphore = threading.BoundedSemaphore(value=max(1, _max_concurrent_db_requests))
     _failure_window_seconds = 30
     _failure_threshold = 5
@@ -510,7 +523,17 @@ def _to_async_url(database_url: str) -> str:
 
 
 ASYNC_DATABASE_URL = _to_async_url(DATABASE_URL)
-async_engine: AsyncEngine = create_async_engine(ASYNC_DATABASE_URL, pool_pre_ping=True)
+# Respect PgBouncer for async engine too (use NullPool to avoid double pooling)
+_async_use_pgbouncer = (
+    os.getenv("DB_USE_PGBOUNCER", "false").lower() == "true"
+    or os.getenv("PGBOUNCER_POOL_MODE", "").lower() in {"transaction", "statement"}
+    or "pgbouncer" in ASYNC_DATABASE_URL.lower()
+)
+if _async_use_pgbouncer:
+    from sqlalchemy.pool import NullPool
+    async_engine: AsyncEngine = create_async_engine(ASYNC_DATABASE_URL, poolclass=NullPool, pool_pre_ping=False)
+else:
+    async_engine: AsyncEngine = create_async_engine(ASYNC_DATABASE_URL, pool_pre_ping=True)
 AsyncSessionLocal = sessionmaker(bind=async_engine, class_=AsyncSession, autoflush=False, expire_on_commit=False)
 
 

@@ -3296,15 +3296,50 @@ export const syncCatalogWithDataSource = async (dataSourceId: number): Promise<S
   return data
 }
 
+export const getDiscoveryStatus = async (dataSourceId: number): Promise<StandardResponse> => {
+  const { data } = await enterpriseApi.get(`/data-discovery/data-sources/${dataSourceId}/discovery-status`)
+  return data
+}
+
+export const stopDiscovery = async (dataSourceId: number): Promise<StandardResponse> => {
+  const { data } = await enterpriseApi.post(`/data-discovery/data-sources/${dataSourceId}/stop-discovery`)
+  return data
+}
+
 export const discoverSchemaWithOptions = async (
   dataSourceId: number, 
-  options: SchemaDiscoveryRequest
+  options: SchemaDiscoveryRequest,
+  config?: { signal?: AbortSignal }
 ): Promise<StandardResponse> => {
   const { data } = await enterpriseApi.post(
     `/data-discovery/data-sources/${dataSourceId}/discover-schema`,
-    options
+    options,
+    config
   )
-  return data
+  // Normalize response to { success, data: { schema_structure, summary, discovery_time } }
+  const hasEnvelope = typeof data === 'object' && data !== null && 'success' in data && 'data' in data
+  if (hasEnvelope) {
+    const payload = data.data || {}
+    return {
+      success: data.success === true,
+      message: data.message || 'ok',
+      data: {
+        schema_structure: payload.schema_structure || payload.schema || {},
+        summary: payload.summary || {},
+        discovery_time: payload.discovery_time || new Date().toISOString(),
+      }
+    }
+  }
+  // Raw response (legacy) -> wrap
+  return {
+    success: true,
+    message: 'ok',
+    data: {
+      schema_structure: data?.schema_structure || data?.schema || {},
+      summary: data?.summary || {},
+      discovery_time: new Date().toISOString(),
+    }
+  }
 }
 
 export const getDataSourceCatalog = async (dataSourceId: number, opts?: { selectionOnly?: boolean }): Promise<any> => {
