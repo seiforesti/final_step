@@ -327,11 +327,28 @@ export const AnalyticsWorkbench: React.FC = () => {
     enableHealthChecks: true
   })
 
-  // Backend data queries
-  const { data: dataSources, isLoading: dataSourcesLoading } = useDataSourcesQuery()
-  const { data: dataSourceStats } = useDataSourceStatsQuery()
-  const { data: metadataStats } = useMetadataStatsQuery()
-  const { data: performanceMetrics } = usePerformanceMetricsQuery('analytics')
+  // Backend data queries - only when component is visible
+  const isVisible = typeof document !== 'undefined' ? !document.hidden : true
+  const { data: dataSources, isLoading: dataSourcesLoading } = useDataSourcesQuery({
+    enabled: isVisible,
+    refetchInterval: 300000, // Only refetch every 5 minutes
+    staleTime: 180000 // 3 minutes stale time
+  })
+  const { data: dataSourceStats } = useDataSourceStatsQuery(undefined, '30d', {
+    enabled: isVisible,
+    refetchInterval: 300000, // Only refetch every 5 minutes
+    staleTime: 180000 // 3 minutes stale time
+  })
+  const { data: metadataStats } = useMetadataStatsQuery(undefined, '30d', {
+    enabled: isVisible,
+    refetchInterval: 300000, // Only refetch every 5 minutes
+    staleTime: 180000 // 3 minutes stale time
+  })
+  const { data: performanceMetrics } = usePerformanceMetricsQuery('analytics', {
+    enabled: isVisible,
+    refetchInterval: 300000, // Only refetch every 5 minutes
+    staleTime: 180000 // 3 minutes stale time
+  })
 
   // Analytics queries
   const { data: correlations, isLoading: correlationsLoading } = useAnalyticsCorrelationsQuery(selectedDataset)

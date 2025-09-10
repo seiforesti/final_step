@@ -226,12 +226,21 @@ export function SchemaDiscovery({
     } catch {}
   }
 
+  const progressIntervalRef = useRef<any>(null)
+
   const stopProgressStreams = () => {
     try { sseRef.current?.close() } catch {}
     try { wsRef.current?.close() } catch {}
     sseRef.current = null
     wsRef.current = null
   }
+
+  useEffect(() => {
+    return () => {
+      try { progressIntervalRef.current && clearInterval(progressIntervalRef.current) } catch {}
+      progressIntervalRef.current = null
+    }
+  }, [])
 
   const discoverSchema = async () => {
     // Prevent multiple simultaneous executions
@@ -275,6 +284,7 @@ export function SchemaDiscovery({
           return Math.max(prev, prev + 5)
         })
       }, 400)
+      progressIntervalRef.current = progressInterval
 
       setDiscoveryStatus("Discovering schema structure...")
 
@@ -290,7 +300,8 @@ export function SchemaDiscovery({
       const t1 = Date.now()
       setDiscoveryDiagnostics({ durationMs: t1 - t0, endpoint: `/proxy/data-discovery/data-sources/${dataSourceId}/discover-schema`, request: req })
 
-      clearInterval(progressInterval)
+      try { clearInterval(progressInterval) } catch {}
+      progressIntervalRef.current = null
       setDiscoveryProgress(100)
       setDiscoveryStatus("Discovery completed!")
       stopProgressStreams()
@@ -340,6 +351,8 @@ export function SchemaDiscovery({
       stopProgressStreams()
     } finally {
       setIsLoading(false)
+      try { progressIntervalRef.current && clearInterval(progressIntervalRef.current) } catch {}
+      progressIntervalRef.current = null
       setAbortController(null)
     }
   }
@@ -358,6 +371,8 @@ export function SchemaDiscovery({
       setAbortController(null)
     }
     stopProgressStreams()
+    try { progressIntervalRef.current && clearInterval(progressIntervalRef.current) } catch {}
+    progressIntervalRef.current = null
     setIsLoading(false)
     setDiscoveryStatus("Discovery stopped")
   }

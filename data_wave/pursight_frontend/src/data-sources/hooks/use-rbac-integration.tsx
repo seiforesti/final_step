@@ -254,7 +254,7 @@ export const DATA_SOURCE_PERMISSIONS = {
 } as const
 
 // Main RBAC Integration Hook
-export function useRBACIntegration() {
+export function useRBACIntegration(enabled: boolean = true) {
   const queryClient = useQueryClient()
   const [rbacState, setRBACState] = useState<RBACState>({
     currentUser: null,
@@ -265,21 +265,31 @@ export function useRBACIntegration() {
     error: null
   })
 
-  // Current user query
+  // Current user query - MADE COMPLETELY COLD TO PREVENT LOOPS
   const { data: currentUser, isLoading: userLoading, error: userError } = useQuery({
     queryKey: ['rbac', 'currentUser'],
     queryFn: rbacApiFunctions.getCurrentUser,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    retry: 2,
-    refetchOnWindowFocus: false
+    enabled: enabled,
+    staleTime: 30 * 60 * 1000, // 30 minutes - much longer
+    retry: 1, // Reduced retries
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
+    refetchInterval: false, // Explicitly disable polling
+    refetchIntervalInBackground: false
   })
 
-  // User permissions query
+  // User permissions query - MADE COMPLETELY COLD TO PREVENT LOOPS
   const { data: userPermissions, isLoading: permissionsLoading } = useQuery({
     queryKey: ['rbac', 'permissions', currentUser?.id],
     queryFn: () => currentUser ? rbacApiFunctions.getUserEffectivePermissions(currentUser.id) : Promise.resolve([]),
-    enabled: !!currentUser?.id,
-    staleTime: 5 * 60 * 1000
+    enabled: enabled && !!currentUser?.id,
+    staleTime: 30 * 60 * 1000, // 30 minutes - much longer
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
+    refetchInterval: false, // Explicitly disable polling
+    refetchIntervalInBackground: false
   })
 
   // Update RBAC state when data changes

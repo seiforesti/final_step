@@ -194,19 +194,14 @@ const createThrottledQueryClient = () => {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
-        retry: (failureCount, error: any) => {
-          // Don't retry on 4xx errors
-          if (error?.response?.status >= 400 && error?.response?.status < 500) {
-            return false
-          }
-          // Retry up to 3 times with exponential backoff
-          return failureCount < 3
-        },
-        retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+        // Disable automatic retries to avoid backend stampedes under failure
+        retry: 0,
+        retryDelay: 0,
         staleTime: 5 * 60 * 1000, // 5 minutes
         refetchOnWindowFocus: false,
-        refetchOnReconnect: true,
-        refetchOnMount: true,
+        refetchOnReconnect: false,
+        refetchOnMount: false,
+        refetchIntervalInBackground: false,
       },
       mutations: {
         retry: 1,
@@ -340,12 +335,7 @@ const setupAPIThrottling = () => {
           error.message.includes('Failed to fetch') || error.message.includes('database_unavailable')) {
         requestManager.handleRequestFailure()
         console.error(`🔴 Network/Database error for ${endpoint}:`, error.message)
-        
-        // If too many database errors, enable emergency mode
-        if (error.message.includes('database_unavailable') || error.message.includes('too many clients')) {
-          requestManager.enableEmergencyMode()
-          console.error('🚨🚨🚨 DATABASE OVERLOAD DETECTED - EMERGENCY MODE ENABLED 🚨🚨🚨')
-        }
+        // NOTE: Do not auto-enable emergency mode; avoid locking the UI
       }
       throw error
     } finally {
@@ -1124,21 +1114,6 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
   // Additional enterprise feature hooks for comprehensive functionality - will be initialized after dataSourceId
 
   // ========================================================================
-  // RBAC INTEGRATION - ENTERPRISE SECURITY
-  // ========================================================================
-  
-  const { 
-    currentUser, 
-    hasPermission, 
-    hasRole,
-    dataSourcePermissions, 
-    logUserAction, 
-    PermissionGuard,
-    isLoading: rbacLoading,
-    error: rbacError
-  } = useRBACIntegration()
-
-  // ========================================================================
   // CORE STATE MANAGEMENT
   // ========================================================================
   
@@ -1146,6 +1121,13 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
   const [activeView, setActiveView] = useState("enterprise-dashboard")
   const [layout, setLayout] = useState<keyof typeof enterpriseLayoutConfigurations>("enterprise-dashboard")
   const [panels, setPanels] = useState(enterpriseLayoutConfigurations["enterprise-dashboard"].panels)
+  
+  // ========================================================================
+  // COMPONENT INITIALIZATION
+  // ========================================================================
+  
+  // Use component initialization hook
+  const { isInitialized, initializationPhase } = useComponentInitialization()
   
   // ========================================================================
   // UI STATE WITH ENTERPRISE FEATURES
@@ -1164,21 +1146,88 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
   const [refreshInterval, setRefreshInterval] = useState(30)
   
   // ========================================================================
+  // VIEW-BASED GATING - MUST BE DECLARED BEFORE RBAC INTEGRATION
+  // ========================================================================
+  
+  // View-based gating to prevent unnecessary API calls
+  const isDiscoveryView = useMemo(() => (
+    ['data-discovery', 'schema-discovery', 'data-lineage', 'data-catalog', 'metadata-management'].includes(activeView)
+  ), [activeView])
+  const isPerformanceView = useMemo(() => (
+    ['performance-monitoring', 'performance-analytics', 'performance-optimization', 'system-health', 'performance-alerts'].includes(activeView)
+  ), [activeView])
+  const isSecurityView = useMemo(() => (
+    ['security-audit', 'compliance-monitoring', 'vulnerability-assessment', 'threat-detection', 'security-analytics'].includes(activeView)
+  ), [activeView])
+  const isCollaborationView = useMemo(() => (
+    ['collaboration-workspace', 'shared-documents', 'team-collaboration', 'document-management'].includes(activeView)
+  ), [activeView])
+  const isWorkflowView = useMemo(() => (
+    ['workflow-designer', 'workflow-orchestrator', 'master-workflow', 'orchestrate-governance', 'orchestrate-lifecycle'].includes(activeView)
+  ), [activeView])
+
+  // ========================================================================
+  // RBAC INTEGRATION - MUST BE CALLED BEFORE ANY PERMISSION-DEPENDENT CODE
+  // ========================================================================
+  
+  // Determine if RBAC should be loaded based on initialization state
+  const shouldLoadRBAC = useMemo(() => {
+    // Load RBAC immediately when component mounts, don't wait for initialization phases
+    const shouldLoad = true
+    console.log('RBAC Loading Check:', { isInitialized, initializationPhase, shouldLoad, activeView })
+    return shouldLoad
+  }, [isInitialized, initializationPhase, activeView])
+  
+  // Load RBAC integration
+  const {
+    currentUser, 
+    hasPermission, 
+    hasRole,
+    dataSourcePermissions, 
+    logUserAction, 
+    PermissionGuard,
+    isLoading: rbacLoading,
+    error: rbacError
+  } = useRBACIntegration(shouldLoadRBAC)
+
+  // Debug RBAC state
+  console.log('RBAC State:', { 
+    shouldLoadRBAC, 
+    rbacLoading, 
+    rbacError, 
+    currentUser: !!currentUser, 
+    dataSourcePermissions,
+    canView: dataSourcePermissions?.canView
+  })
+
+  // ========================================================================
   // RBAC-FILTERED NAVIGATION
   // ========================================================================
   
-  const safeDataSourcePermissions = useMemo(() => ({
-    canView: true,
-    canEdit: false,
-    canCreate: false,
-    canDelete: false,
-    canGenerateReports: false,
-    canViewDiscovery: true,
-    canTestConnection: true,
-    canManageBackup: false,
-    canViewPerformance: true,
-    ...(dataSourcePermissions || {})
-  }), [dataSourcePermissions])
+  const safeDataSourcePermissions = useMemo(() => {
+    const defaultPermissions = {
+      canView: true,
+      canEdit: false,
+      canCreate: false,
+      canDelete: false,
+      canGenerateReports: false,
+      canViewDiscovery: true,
+      canTestConnection: true,
+      canManageBackup: false,
+      canViewPerformance: true,
+    }
+    const finalPermissions = {
+      ...defaultPermissions,
+      ...(dataSourcePermissions || {})
+    }
+    console.log('Safe Data Source Permissions:', { 
+      defaultPermissions, 
+      dataSourcePermissions, 
+      finalPermissions,
+      canView: finalPermissions.canView
+    })
+    return finalPermissions
+  }, [dataSourcePermissions])
   
   const getFilteredNavigation = useCallback(() => {
     if (!currentUser) return {}
@@ -1352,14 +1401,11 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
   // COMPREHENSIVE BACKEND DATA INTEGRATION - ALL ENTERPRISE APIs WITH THROTTLING
   // ========================================================================
   
-  // Use component initialization hook
-  const { isInitialized, initializationPhase } = useComponentInitialization()
-  
   // Core Data Sources Integration - WITH THROTTLING AND ERROR HANDLING
   const { data: dataSources, isLoading: dataSourcesLoading, error: dataSourcesError, refetch: refetchDataSources } = useDataSourcesQuery({
     enabled: isInitialized && initializationPhase >= 1,
-    refetchInterval: 60000, // Only refetch every minute
-    staleTime: 30000 // 30 seconds stale time
+    refetchInterval: 300000, // Only refetch every 5 minutes
+    staleTime: 180000 // 3 minutes stale time
   })
   
   // Create datasource mutation (real backend)
@@ -1385,38 +1431,47 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
   })
   
   const { data: metrics, error: metricsError } = useDataSourceMetricsQuery(selectedDataSource?.id, {
-    enabled: isInitialized && initializationPhase >= 2 && !!selectedDataSource?.id,
-    refetchInterval: 60000, // Only refetch every minute
-    staleTime: 30000 // 30 seconds stale time
+    enabled: isInitialized && initializationPhase >= 2 && !!selectedDataSource?.id && isPerformanceView,
+    refetchInterval: 300000, // Only refetch every 5 minutes
+    staleTime: 180000 // 3 minutes stale time
   })
   
   // Core data source backend integrations - WITH THROTTLING AND ERROR BOUNDARIES
   const { data: dataSourceHealth, error: healthError } = useDataSourceHealthQuery(selectedDataSource?.id || 0, {
-    enabled: isInitialized && initializationPhase >= 3 && !!selectedDataSource?.id,
-    refetchInterval: 120000, // Only refetch every 2 minutes
-    staleTime: 60000 // 1 minute stale time
+    enabled: isInitialized && initializationPhase >= 3 && !!selectedDataSource?.id && isPerformanceView,
+    refetchInterval: 300000, // Only refetch every 5 minutes
+    staleTime: 180000 // 3 minutes stale time
   })
   
   const { data: connectionPoolStats, error: poolError } = useConnectionPoolStatsQuery(selectedDataSource?.id || 0, {
-    enabled: isInitialized && initializationPhase >= 3 && !!selectedDataSource?.id,
-    refetchInterval: 180000, // Only refetch every 3 minutes
-    staleTime: 90000 // 1.5 minutes stale time
+    enabled: isInitialized && initializationPhase >= 3 && !!selectedDataSource?.id && isPerformanceView,
+    refetchInterval: 300000, // Only refetch every 5 minutes
+    staleTime: 180000 // 3 minutes stale time
   })
   
+  // Memoize data source ID to prevent unnecessary re-renders
+  const dataSourceId = useMemo(() => selectedDataSource?.id, [selectedDataSource?.id])
+  const workspaceId = useMemo(() => workspace?.id, [workspace?.id])
+  
+  // View-scoped gating is already declared above
+
+  // ========================================================================
+  // RBAC INTEGRATION - ENTERPRISE SECURITY
+  // ========================================================================
+  
+  // RBAC integration is already loaded above
+
   const { data: discoveryHistory, error: discoveryError } = useDiscoveryHistoryQuery(selectedDataSource?.id || 0, {
-    enabled: isInitialized && initializationPhase >= 3 && !!selectedDataSource?.id,
+    enabled: isInitialized && initializationPhase >= 3 && !!selectedDataSource?.id && isDiscoveryView,
     refetchInterval: 300000, // Only refetch every 5 minutes
     staleTime: 180000 // 3 minutes stale time
   })
   
   const { data: scanResults, error: scanError } = useScanResultsQuery(selectedDataSource?.id || 0, {
-    enabled: isInitialized && initializationPhase >= 3 && !!selectedDataSource?.id,
+    enabled: isInitialized && initializationPhase >= 3 && !!selectedDataSource?.id && isDiscoveryView,
     refetchInterval: 300000, // Only refetch every 5 minutes
     staleTime: 180000 // 3 minutes stale time
   })
-  // Memoize data source ID to prevent unnecessary re-renders
-  const dataSourceId = useMemo(() => selectedDataSource?.id, [selectedDataSource?.id])
-  const workspaceId = useMemo(() => workspace?.id, [workspace?.id])
 
   // Additional enterprise feature hooks for comprehensive functionality - WITH THROTTLING
   const monitoringFeatures = useMonitoringFeatures(dataSourceId)
@@ -1427,31 +1482,31 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
   const analyticsIntegration = useAnalyticsIntegration('data-sources-app', dataSourceId)
   
   const { data: qualityMetrics, error: qualityError } = useQualityMetricsQuery(dataSourceId || 0, {
-    enabled: isInitialized && initializationPhase >= 4 && !!dataSourceId,
+    enabled: isInitialized && initializationPhase >= 4 && !!dataSourceId && isPerformanceView,
     refetchInterval: 300000, // Only refetch every 5 minutes
     staleTime: 180000 // 3 minutes stale time
   })
   
   const { data: growthMetrics, error: growthError } = useGrowthMetricsQuery(dataSourceId || 0, {
-    enabled: isInitialized && initializationPhase >= 4 && !!dataSourceId,
+    enabled: isInitialized && initializationPhase >= 4 && !!dataSourceId && isPerformanceView,
     refetchInterval: 300000, // Only refetch every 5 minutes
     staleTime: 180000 // 3 minutes stale time
   })
   
   const { data: schemaDiscoveryData, error: schemaError } = useSchemaDiscoveryQuery(dataSourceId, {
-    enabled: isInitialized && initializationPhase >= 4 && !!dataSourceId,
+    enabled: isInitialized && initializationPhase >= 4 && !!dataSourceId && isDiscoveryView,
     refetchInterval: 600000, // Only refetch every 10 minutes
     staleTime: 300000 // 5 minutes stale time
   })
   
   const { data: dataLineage, error: lineageError } = useDataLineageQuery(dataSourceId, {
-    enabled: isInitialized && initializationPhase >= 4 && !!dataSourceId,
+    enabled: isInitialized && initializationPhase >= 4 && !!dataSourceId && isDiscoveryView,
     refetchInterval: 600000, // Only refetch every 10 minutes
     staleTime: 300000 // 5 minutes stale time
   })
   
   const { data: backupStatus, error: backupError } = useBackupStatusQuery(dataSourceId, {
-    enabled: isInitialized && initializationPhase >= 4 && !!dataSourceId,
+    enabled: isInitialized && initializationPhase >= 4 && !!dataSourceId && isPerformanceView,
     refetchInterval: 300000, // Only refetch every 5 minutes
     staleTime: 180000 // 3 minutes stale time
   })
@@ -1460,21 +1515,25 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
   const isVisible = typeof document !== 'undefined' ? !document.hidden : true
   
   const { data: scheduledTasks, error: tasksError } = useScheduledTasksQuery(dataSourceId, {
-    enabled: isInitialized && initializationPhase >= 4 && !!dataSourceId && isVisible,
+    enabled: isInitialized && initializationPhase >= 4 && !!dataSourceId && isVisible && isWorkflowView,
     refetchInterval: isVisible ? 300000 : false, // Only refetch every 5 minutes when visible
     staleTime: 120000 // 2 minutes stale time
   })
   
   const { data: auditLogs, error: auditError } = useAuditLogsQuery(dataSourceId, {
-    enabled: isInitialized && initializationPhase >= 4 && !!dataSourceId && isVisible,
+    enabled: isInitialized && initializationPhase >= 4 && !!dataSourceId && isVisible && isSecurityView,
     refetchInterval: isVisible ? 600000 : false, // Only refetch every 10 minutes when visible
     staleTime: 300000 // 5 minutes stale time
   })
   
   const { data: userPermissions, error: permissionsError } = useUserPermissionsQuery({
     enabled: isInitialized && initializationPhase >= 2,
-    refetchInterval: 600000, // Only refetch every 10 minutes
-    staleTime: 300000 // 5 minutes stale time
+    refetchInterval: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
+    refetchIntervalInBackground: false,
+    staleTime: 30 * 60 * 1000 // 30 minutes - make it very cold
   })
   
   const { data: dataCatalog, error: catalogError } = useDataCatalogQuery({
@@ -1488,23 +1547,24 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
   // =====================================================================================
   
   // COLLABORATION APIs - WITH THROTTLING
-  const { data: collaborationWorkspaces } = useCollaborationWorkspacesQuery({
-    enabled: isInitialized && initializationPhase >= 3,
+  const { data: collaborationWorkspaces } = useCollaborationWorkspacesQuery({}, {
+    enabled: isInitialized && initializationPhase >= 3 && isCollaborationView,
     refetchInterval: 300000, // Only refetch every 5 minutes
     staleTime: 180000 // 3 minutes stale time
   })
   
-  const { data: activeCollaborationSessions } = useActiveCollaborationSessionsQuery({
-    enabled: isInitialized && initializationPhase >= 3,
+  const { data: activeCollaborationSessions } = useActiveCollaborationSessionsQuery({}, {
+    enabled: isInitialized && initializationPhase >= 3 && isCollaborationView,
     refetchInterval: 180000, // Only refetch every 3 minutes
     staleTime: 120000 // 2 minutes stale time
   })
   
+  const sharedDocsParams = useMemo(() => ({ document_type: 'all' }), [])
   const { data: sharedDocuments } = useSharedDocumentsQuery(
     dataSourceId?.toString() || '', 
-    { document_type: 'all' },
+    sharedDocsParams,
     {
-      enabled: isInitialized && initializationPhase >= 4 && !!dataSourceId,
+      enabled: isInitialized && initializationPhase >= 4 && !!dataSourceId && isCollaborationView,
       refetchInterval: 600000, // Only refetch every 10 minutes
       staleTime: 300000 // 5 minutes stale time
     }
@@ -1519,138 +1579,147 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
   })
   
   const { data: workspaceActivity } = useWorkspaceActivityQuery(workspaceId?.toString() || '', 7, {
-    enabled: isInitialized && initializationPhase >= 3 && !!workspaceId,
+    enabled: isInitialized && initializationPhase >= 3 && !!workspaceId && isCollaborationView,
     refetchInterval: 600000, // Only refetch every 10 minutes
     staleTime: 300000 // 5 minutes stale time
   })
   
   // WORKFLOW APIs - WITH THROTTLING
-  const { data: workflowDefinitions } = useWorkflowDefinitionsQuery({
-    enabled: isInitialized && initializationPhase >= 3,
+  const { data: workflowDefinitions } = useWorkflowDefinitionsQuery({}, {
+    enabled: isInitialized && initializationPhase >= 3 && isWorkflowView,
     refetchInterval: 600000, // Only refetch every 10 minutes
     staleTime: 300000 // 5 minutes stale time
   })
   
-  const { data: workflowExecutions } = useWorkflowExecutionsQuery({ days: 7 }, {
-    enabled: isInitialized && initializationPhase >= 4,
+  const workflowExecutionsParams = useMemo(() => ({ days: 7 }), [])
+  const { data: workflowExecutions } = useWorkflowExecutionsQuery(workflowExecutionsParams, {
+    enabled: isInitialized && initializationPhase >= 4 && isWorkflowView,
     refetchInterval: 900000, // Only refetch every 15 minutes
     staleTime: 600000 // 10 minutes stale time
   })
   
-  const { data: pendingApprovals } = usePendingApprovalsQuery({
-    enabled: isInitialized && initializationPhase >= 3,
+  const { data: pendingApprovals } = usePendingApprovalsQuery('', {
+    enabled: isInitialized && initializationPhase >= 3 && isWorkflowView,
     refetchInterval: 300000, // Only refetch every 5 minutes
     staleTime: 180000 // 3 minutes stale time
   })
   
-  const { data: workflowTemplates } = useWorkflowTemplatesQuery({
-    enabled: isInitialized && initializationPhase >= 3,
+  const { data: workflowTemplates } = useWorkflowTemplatesQuery('', {
+    enabled: isInitialized && initializationPhase >= 3 && isWorkflowView,
     refetchInterval: 900000, // Only refetch every 15 minutes
     staleTime: 600000 // 10 minutes stale time
   })
   
   const { data: bulkOperationStatus } = useBulkOperationStatusQuery('', {
-    enabled: isInitialized && initializationPhase >= 3,
+    enabled: isInitialized && initializationPhase >= 3 && isWorkflowView,
     refetchInterval: 300000, // Only refetch every 5 minutes
     staleTime: 180000 // 3 minutes stale time
   })
   
   // ENHANCED PERFORMANCE APIs - WITH THROTTLING
   const { data: systemHealth } = useSystemHealthQuery({
-    enabled: isInitialized && initializationPhase >= 3 && isVisible,
+    enabled: isInitialized && initializationPhase >= 3 && isVisible && isPerformanceView,
     refetchInterval: isVisible ? 120000 : false, // Only refetch every 2 minutes when visible
     staleTime: 60000 // 1 minute stale time
   })
   
+  const perfMetricsParams = useMemo(() => ({ time_range: '24h', metric_types: ['cpu', 'memory', 'io', 'network'] }), [])
   const { data: enhancedPerformanceMetrics } = useEnhancedPerformanceMetricsQuery(
     dataSourceId || 0,
-    { time_range: '24h', metric_types: ['cpu', 'memory', 'io', 'network'] },
+    perfMetricsParams,
     {
-      enabled: isInitialized && initializationPhase >= 4 && !!dataSourceId,
+      enabled: isInitialized && initializationPhase >= 4 && !!dataSourceId && isPerformanceView,
       refetchInterval: 300000, // Only refetch every 5 minutes
       staleTime: 180000 // 3 minutes stale time
     }
   )
   
-  const { data: performanceAlerts } = usePerformanceAlertsQuery({ severity: 'all', days: 7 }, {
-    enabled: isInitialized && initializationPhase >= 3,
+  const performanceAlertsParams = useMemo(() => ({ severity: 'all', days: 7 }), [])
+  const { data: performanceAlerts } = usePerformanceAlertsQuery(performanceAlertsParams, {
+    enabled: isInitialized && initializationPhase >= 3 && isPerformanceView,
     refetchInterval: 180000, // Only refetch every 3 minutes
     staleTime: 120000 // 2 minutes stale time
   })
   
   const { data: performanceTrends } = usePerformanceTrendsQuery(dataSourceId, '30d', {
-    enabled: isInitialized && initializationPhase >= 4 && !!dataSourceId,
+    enabled: isInitialized && initializationPhase >= 4 && !!dataSourceId && isPerformanceView,
     refetchInterval: 600000, // Only refetch every 10 minutes
     staleTime: 300000 // 5 minutes stale time
   })
   
   const { data: optimizationRecommendations } = useOptimizationRecommendationsQuery(dataSourceId, {
-    enabled: isInitialized && initializationPhase >= 5 && !!dataSourceId,
+    enabled: isInitialized && initializationPhase >= 5 && !!dataSourceId && isPerformanceView,
     refetchInterval: 900000, // Only refetch every 15 minutes
     staleTime: 600000 // 10 minutes stale time
   })
   
-  const { data: performanceSummaryReport } = usePerformanceSummaryReportQuery({ time_range: '7d' }, {
-    enabled: isInitialized && initializationPhase >= 4,
+  const perfSummaryParams = useMemo(() => ({ time_range: '7d' }), [])
+  const { data: performanceSummaryReport } = usePerformanceSummaryReportQuery(perfSummaryParams, {
+    enabled: isInitialized && initializationPhase >= 4 && isPerformanceView,
     refetchInterval: 900000, // Only refetch every 15 minutes
     staleTime: 600000 // 10 minutes stale time
   })
   
   const { data: performanceThresholds } = usePerformanceThresholdsQuery(dataSourceId, {
-    enabled: isInitialized && initializationPhase >= 4 && !!dataSourceId,
+    enabled: isInitialized && initializationPhase >= 4 && !!dataSourceId && isPerformanceView,
     refetchInterval: 900000, // Only refetch every 15 minutes
     staleTime: 600000 // 10 minutes stale time
   })
   
   // ENHANCED SECURITY APIs - WITH THROTTLING
+  const enhancedSecurityAuditParams = useMemo(() => ({ include_vulnerabilities: true, include_compliance: true }), [])
   const { data: enhancedSecurityAudit } = useEnhancedSecurityAuditQuery(
     dataSourceId || 0,
-    { include_vulnerabilities: true, include_compliance: true },
+    enhancedSecurityAuditParams,
     {
-      enabled: isInitialized && initializationPhase >= 4 && !!dataSourceId,
+      enabled: isInitialized && initializationPhase >= 4 && !!dataSourceId && isSecurityView,
       refetchInterval: 600000, // Only refetch every 10 minutes
       staleTime: 300000 // 5 minutes stale time
     }
   )
   
-  const { data: vulnerabilityAssessments } = useVulnerabilityAssessmentsQuery({ severity: 'all' }, {
-    enabled: isInitialized && initializationPhase >= 4,
+  const vulnerabilityParams = useMemo(() => ({ severity: 'all' }), [])
+  const { data: vulnerabilityAssessments } = useVulnerabilityAssessmentsQuery(vulnerabilityParams, {
+    enabled: isInitialized && initializationPhase >= 4 && isSecurityView,
     refetchInterval: 600000, // Only refetch every 10 minutes
     staleTime: 300000 // 5 minutes stale time
   })
   
-  const { data: securityIncidents } = useSecurityIncidentsQuery({ days: 30 }, {
-    enabled: isInitialized && initializationPhase >= 3,
+  const securityIncidentsParams = useMemo(() => ({ days: 30 }), [])
+  const { data: securityIncidents } = useSecurityIncidentsQuery(securityIncidentsParams, {
+    enabled: isInitialized && initializationPhase >= 3 && isSecurityView,
     refetchInterval: 300000, // Only refetch every 5 minutes
     staleTime: 180000 // 3 minutes stale time
   })
   
-  const { data: complianceChecks } = useComplianceChecksQuery({
-    enabled: isInitialized && initializationPhase >= 4,
+  const { data: complianceChecks } = useComplianceChecksQuery({}, {
+    enabled: isInitialized && initializationPhase >= 4 && isSecurityView,
     refetchInterval: 900000, // Only refetch every 15 minutes
     staleTime: 600000 // 10 minutes stale time
   })
   
-  const { data: threatDetection } = useThreatDetectionQuery({ days: 7 }, {
-    enabled: isInitialized && initializationPhase >= 3,
+  const threatDetectionParams = useMemo(() => ({ days: 7 }), [])
+  const { data: threatDetection } = useThreatDetectionQuery(threatDetectionParams, {
+    enabled: isInitialized && initializationPhase >= 3 && isSecurityView,
     refetchInterval: 300000, // Only refetch every 5 minutes
     staleTime: 180000 // 3 minutes stale time
   })
   
   const { data: securityAnalyticsDashboard } = useSecurityAnalyticsDashboardQuery('7d', {
-    enabled: isInitialized && initializationPhase >= 4,
+    enabled: isInitialized && initializationPhase >= 4 && isSecurityView,
     refetchInterval: 600000, // Only refetch every 10 minutes
     staleTime: 300000 // 5 minutes stale time
   })
   
-  const { data: riskAssessmentReport } = useRiskAssessmentReportQuery({
-    enabled: isInitialized && initializationPhase >= 4,
+  const { data: riskAssessmentReport } = useRiskAssessmentReportQuery({}, {
+    enabled: isInitialized && initializationPhase >= 4 && isSecurityView,
     refetchInterval: 900000, // Only refetch every 15 minutes
     staleTime: 600000 // 10 minutes stale time
   })
   
-  const { data: securityScans } = useSecurityScansQuery({ days: 30 }, {
-    enabled: isInitialized && initializationPhase >= 4,
+  const securityScansParams = useMemo(() => ({ days: 30 }), [])
+  const { data: securityScans } = useSecurityScansQuery(securityScansParams, {
+    enabled: isInitialized && initializationPhase >= 4 && isSecurityView,
     refetchInterval: 600000, // Only refetch every 10 minutes
     staleTime: 300000 // 5 minutes stale time
   })
@@ -3612,7 +3681,43 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
 // ============================================================================
 
 export function EnhancedDataSourcesApp({ className, initialConfig }: EnhancedDataSourcesAppProps) {
-  const queryClient = createEnterpriseQueryClient()
+  const queryClient = createThrottledQueryClient()
+  const requestManager = APIRequestManager.getInstance()
+  
+  // Globally pause polling when tab hidden or when emergency mode is active
+  React.useEffect(() => {
+    const originalIntervals = new Map<string, number | false | undefined>()
+
+    const applyPollingPolicy = () => {
+      const isHidden = typeof document !== 'undefined' && document.hidden
+      const inEmergency = requestManager.isInEmergencyMode()
+      const shouldPause = isHidden || inEmergency
+
+      queryClient.getQueryCache().getAll().forEach(q => {
+        const key = q.queryHash
+        const current = (q.options as any)?.refetchInterval as number | false | undefined
+        // Force-disable background polling for data-sources view to avoid loops
+        if (!originalIntervals.has(key)) originalIntervals.set(key, current)
+        q.setOptions({ refetchInterval: false, retry: 0 })
+        // If we ever restore in the future, clamp to >= 120s
+        if (!shouldPause && originalIntervals.has(key)) {
+          let prev = originalIntervals.get(key)
+          if (typeof prev === 'number' && prev < 120000) prev = 120000
+          // Keep disabled by default; uncomment to restore: q.setOptions({ refetchInterval: prev ?? false })
+        }
+      })
+    }
+
+    const onVisibility = () => applyPollingPolicy()
+    document.addEventListener('visibilitychange', onVisibility)
+
+    // Apply once on mount
+    applyPollingPolicy()
+
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibility)
+    }
+  }, [queryClient, requestManager])
   
   return (
     <QueryClientProvider client={queryClient}>

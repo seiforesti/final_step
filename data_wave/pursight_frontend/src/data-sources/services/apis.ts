@@ -1026,8 +1026,8 @@ export const useAuditLogsQuery = (options = {}) => {
   })
 }
 
-// User Permissions Hook
-export const useUserPermissionsQuery = (options = {}) => {
+// User Permissions Hook - MADE ULTRA-COLD TO PREVENT LOOPS
+export const useUserPermissionsQuery = (options: any = {}) => {
   return useQuery({
     queryKey: ['user-permissions'],
     queryFn: async () => {
@@ -1041,6 +1041,15 @@ export const useUserPermissionsQuery = (options = {}) => {
         return [];
       }
     },
+    // Make permissions query ultra-cold by default; callers can override
+    refetchInterval: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
+    refetchIntervalInBackground: false,
+    staleTime: Math.max(options?.staleTime ?? 30 * 60 * 1000, 30 * 60 * 1000), // 30 minutes minimum
+    enabled: options?.enabled !== false,
+    retry: 1, // Reduced retries to prevent loops
     ...options,
   })
 }

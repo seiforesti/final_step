@@ -1,0 +1,22 @@
+{
+  "databases": [
+    {
+      "schemas": [
+        {
+          "tables": [
+            {
+              "name": "sessions",
+              "columns": []
+            },
+            {
+              "name": "users",
+              "columns": []
+            }
+          ],
+          "name": "public"
+        }
+      ],
+      "name": "data_governance"
+    }
+  ]
+}
