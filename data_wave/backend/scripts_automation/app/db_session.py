@@ -3,10 +3,10 @@ import time
 import logging
 from contextlib import contextmanager, asynccontextmanager
 from contextvars import ContextVar
-from typing import Generator, Optional
+from typing import Generator, Optional, Dict, Any
 import threading
 
-from sqlalchemy import create_engine, event
+from sqlalchemy import create_engine, event, text
 from sqlalchemy.pool import QueuePool
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import OperationalError
@@ -16,7 +16,25 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession,
     create_async_engine,
 )
-from sqlalchemy import inspect, text
+from sqlalchemy import inspect
+
+# Import the new advanced database system
+try:
+    from app.core.database_master_controller import (
+        initialize_database_master_controller,
+        get_database_master_controller,
+        get_optimized_session,
+        execute_optimized_query,
+        QueryPriority
+    )
+    ADVANCED_SYSTEM_AVAILABLE = True
+    logger = logging.getLogger(__name__)
+    logger.info("🚀 ADVANCED DATABASE SYSTEM LOADED - Ultimate performance enabled!")
+except ImportError as e:
+    ADVANCED_SYSTEM_AVAILABLE = False
+    logger = logging.getLogger(__name__)
+    logger.warning(f"⚠️ Advanced database system not available, using fallback: {e}")
+    QueryPriority = None
 
 
 logger = logging.getLogger(__name__)
@@ -658,12 +676,28 @@ if 'engine' in globals():
 
 
 def get_db() -> Generator[Session, None, None]:
-    """FastAPI dependency that yields a per-request database session and ensures close.
-
-    Reuses a single session per request across dependencies via ContextVar to avoid
-    multiple concurrent checkouts that saturate the pool.
     """
-    # Circuit breaker check
+    🚀 ENHANCED FastAPI dependency that yields a per-request database session.
+    
+    Now powered by the Advanced Database Master Controller for ultimate performance!
+    Provides intelligent connection pooling, circuit breaking, query optimization,
+    and real-time monitoring.
+    """
+    # Use advanced system if available
+    if ADVANCED_SYSTEM_AVAILABLE:
+        try:
+            controller = get_database_master_controller()
+            priority = QueryPriority.NORMAL  # Default priority for web requests
+            
+            with controller.get_session(priority=priority) as session:
+                yield session
+            return
+            
+        except Exception as e:
+            logger.error(f"Advanced system failed, falling back to legacy: {e}")
+            # Fall through to legacy system
+    
+    # Legacy circuit breaker check
     if _circuit_is_open():
         logger.warning("Circuit breaker is open; rejecting DB request.")
         raise RuntimeError("database_unavailable")

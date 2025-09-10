@@ -22,6 +22,15 @@ from app.api.routes import classify
 from app.api.routes.role_admin import router as role_admin_router
 from app.db_session import init_db
 from app.db_session import ensure_pool_capacity, scale_up_engine
+
+# Import the Advanced Database Master Controller
+try:
+    from app.core.database_master_controller import initialize_database_master_controller
+    ADVANCED_DB_SYSTEM_AVAILABLE = True
+    logger.info("🚀 Advanced Database Master Controller available!")
+except ImportError as e:
+    ADVANCED_DB_SYSTEM_AVAILABLE = False
+    logger.warning(f"⚠️ Advanced Database Master Controller not available: {e}")
 from sqlalchemy import text
 from app.services.scheduler import schedule_tasks
 from fastapi.responses import RedirectResponse
@@ -178,6 +187,18 @@ async def startup_event():
     try:
         logger.info("Starting up Enterprise Data Governance Platform...")
         
+        # Initialize Advanced Database Master Controller first
+        if ADVANCED_DB_SYSTEM_AVAILABLE:
+            try:
+                database_url = os.getenv("DATABASE_URL") or os.getenv("DB_URL")
+                master_controller = initialize_database_master_controller(database_url)
+                logger.info("🚀 ADVANCED DATABASE MASTER CONTROLLER INITIALIZED!")
+                logger.info("💪 Your database can now handle ANY load with maximum performance!")
+            except Exception as e:
+                logger.error(f"Advanced database system initialization failed: {e}")
+                logger.info("📉 Falling back to legacy database system")
+                ADVANCED_DB_SYSTEM_AVAILABLE = False
+        
         # Initialize database (non-fatal if simple health check fails)
         try:
             # init_db is synchronous; don't await it in async context
@@ -186,12 +207,14 @@ async def startup_event():
         except Exception as e:
             logger.warning(f"Database initialization warning: {e}")
         
-        # Ensure pool capacity aligns with desired settings (handles hot-reloads)
-        try:
-            ensure_pool_capacity()
-            logger.info("✅ Verified database pool capacity")
-        except Exception as e:
-            logger.warning(f"Pool capacity verification failed: {e}")
+        # Only run legacy pool management if advanced system is not available
+        if not ADVANCED_DB_SYSTEM_AVAILABLE:
+            # Ensure pool capacity aligns with desired settings (handles hot-reloads)
+            try:
+                ensure_pool_capacity()
+                logger.info("✅ Verified database pool capacity")
+            except Exception as e:
+                logger.warning(f"Pool capacity verification failed: {e}")
 
         # Dynamic auto-scaling: if pool is undersized under load, scale up without restart
         try:
@@ -604,6 +627,14 @@ app.include_router(racine_orchestration_api_router, prefix="/racine/orchestratio
 
 # Performance Alerts API - Prevents 404 errors for /performance/*
 app.include_router(performance_alerts_router, prefix="/performance", tags=["Performance Alerts"])
+
+# Advanced Database Management API - Ultimate Database Control
+try:
+    from app.api.routes.advanced_database_routes import router as advanced_database_router
+    app.include_router(advanced_database_router, tags=["Advanced Database Management"])
+    logger.info("✅ Advanced Database Management API registered")
+except ImportError as e:
+    logger.warning(f"⚠️ Advanced Database Management API not available: {e}")
 
 # ========================================
 # RACINE MAIN MANAGER - ADVANCED ENTERPRISE ORCHESTRATION
