@@ -147,15 +147,15 @@ export function DataSourceList({
 
   return (
     <TooltipProvider>
-      <div className="space-y-6">
+      <div className="space-y-6 bg-[#1e1e1e] text-[#cccccc] p-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Data Sources</h1>
-            <p className="text-muted-foreground">Manage and monitor your data source connections</p>
+            <h1 className="text-3xl font-bold tracking-tight text-[#cccccc]">Data Sources</h1>
+            <p className="text-[#858585]">Manage and monitor your data source connections</p>
           </div>
           {canCreateDataSource && (
-            <Button onClick={() => setShowCreateModal(true)} className="gap-2">
+            <Button onClick={() => setShowCreateModal(true)} className="gap-2 bg-[#007acc] hover:bg-[#005a9e] text-white">
               <Plus className="h-4 w-4" />
               Add Data Source
             </Button>
@@ -163,17 +163,17 @@ export function DataSourceList({
         </div>
 
         {/* Filters and Search */}
-        <Card>
-          <CardContent className="pt-6">
+        <Card className="bg-[#252526] border-[#3c3c3c]">
+          <CardContent className="pt-6 bg-[#252526]">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div className="flex flex-1 gap-4">
                 <div className="relative flex-1 max-w-sm">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#858585]" />
                   <Input
                     placeholder="Search data sources..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
+                    className="pl-10 bg-[#3c3c3c] border-[#464647] text-[#cccccc] placeholder-[#858585] focus:bg-[#1e1e1e] focus:border-[#007acc]"
                   />
                 </div>
 
