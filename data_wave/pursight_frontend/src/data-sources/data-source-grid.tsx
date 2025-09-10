@@ -611,31 +611,32 @@ export function DataSourceGrid({
 
     return (
       <Card 
-        className={`group hover:shadow-lg transition-all duration-200 cursor-pointer border-2 ${
-          isSelected ? "border-primary shadow-md" : "border-border hover:border-primary/50"
+        className={`group hover:shadow-lg transition-all duration-200 cursor-pointer border bg-[#252526] border-[#3c3c3c] hover:border-[#007acc] ${
+          isSelected ? "border-[#007acc] shadow-md bg-[#2d2d30]" : ""
         }`}
         onClick={() => onSelectDataSource?.(dataSource)}
       >
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-3 bg-[#252526]">
           <div className="flex items-start justify-between">
             <div className="flex items-center space-x-2">
               <Checkbox
                 checked={isSelected}
                 onCheckedChange={(checked) => handleSelectItem(dataSource.id.toString(), checked as boolean)}
                 onClick={(e) => e.stopPropagation()}
+                className="border-[#858585] data-[state=checked]:bg-[#007acc] data-[state=checked]:border-[#007acc]"
               />
-              <div className={`p-2 rounded-lg ${status?.bg}`}>
-                <TypeIcon className="h-4 w-4" />
+              <div className="p-2 rounded-lg bg-[#007acc]/20 border border-[#007acc]/30">
+                <TypeIcon className="h-4 w-4 text-[#007acc]" />
               </div>
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100">
+                <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 text-[#cccccc] hover:bg-[#2d2d30] hover:text-white">
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuContent align="end" className="bg-[#252526] border-[#3c3c3c]">
+                <DropdownMenuLabel className="text-[#cccccc]">Actions</DropdownMenuLabel>
                 <PermissionGuard permission={DATA_SOURCE_PERMISSIONS.VIEW}>
                   <DropdownMenuItem onClick={() => onSelectDataSource?.(dataSource)}>
                     <Eye className="h-4 w-4 mr-2" />
@@ -682,19 +683,19 @@ export function DataSourceGrid({
           </div>
           
           <div className="space-y-2">
-            <CardTitle className="text-lg truncate" title={dataSource.name}>
+            <CardTitle className="text-lg truncate text-[#cccccc]" title={dataSource.name}>
               {dataSource.name}
             </CardTitle>
             <div className="flex items-center space-x-2">
-              <Badge variant={status?.badge} className="text-xs">
+              <Badge variant={status?.badge} className="text-xs bg-[#007acc]/20 text-[#007acc] border-[#007acc]/30">
                 <StatusIcon className="h-3 w-3 mr-1" />
                 {dataSource.status}
               </Badge>
-              <Badge variant="outline" className="text-xs">
+              <Badge variant="outline" className="text-xs bg-[#3c3c3c] text-[#cccccc] border-[#858585]">
                 {dataSource.source_type}
               </Badge>
               {dataSource.environment && (
-                <Badge variant="secondary" className="text-xs">
+                <Badge variant="secondary" className="text-xs bg-[#2d2d30] text-[#cccccc] border-[#3c3c3c]">
                   {dataSource.environment}
                 </Badge>
               )}
@@ -702,12 +703,12 @@ export function DataSourceGrid({
           </div>
         </CardHeader>
 
-        <CardContent className="pt-0">
+        <CardContent className="pt-0 bg-[#252526]">
           <div className="space-y-4">
             {/* Health Score - Real backend data */}
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Health Score</span>
+                <span className="text-[#858585]">Health Score</span>
                 <span className={`font-medium ${getHealthColor(healthScore)}`}>
                   {Math.round(healthScore)}%
                 </span>
@@ -853,16 +854,16 @@ export function DataSourceGrid({
   }
 
   return (
-    <div className={`space-y-6 ${className}`}>
+    <div className={`space-y-6 bg-[#1e1e1e] text-[#cccccc] p-6 ${className}`}>
       {/* Header Controls */}
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
         <div className="flex items-center space-x-4">
-          <h2 className="text-2xl font-bold">Data Sources</h2>
-          <Badge variant="outline" className="text-sm">
+          <h2 className="text-2xl font-bold text-[#cccccc]">Data Sources</h2>
+          <Badge variant="outline" className="text-sm bg-[#3c3c3c] text-[#cccccc] border-[#858585]">
             {filteredDataSources.length} total
           </Badge>
           {selectedItems.length > 0 && (
-            <Badge variant="default" className="text-sm">
+            <Badge variant="default" className="text-sm bg-[#007acc] text-white border-[#007acc]">
               {selectedItems.length} selected
             </Badge>
           )}
@@ -874,17 +875,19 @@ export function DataSourceGrid({
             size="sm"
             onClick={() => refetchDataSources()}
             disabled={dataSourcesLoading}
+            className="bg-[#3c3c3c] border-[#858585] text-[#cccccc] hover:bg-[#2d2d30] hover:text-white"
           >
             <RefreshCw className={`h-4 w-4 ${dataSourcesLoading ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
           
           {/* View Mode Toggle */}
-          <div className="flex items-center border rounded-lg p-1">
+          <div className="flex items-center border border-[#3c3c3c] rounded-lg p-1 bg-[#252526]">
             <Button
               variant={viewMode === "grid" ? "default" : "ghost"}
               size="sm"
               onClick={() => onViewModeChange?.("grid")}
+              className={viewMode === "grid" ? "bg-[#007acc] text-white" : "text-[#cccccc] hover:bg-[#2d2d30] hover:text-white"}
             >
               <Grid3X3 className="h-4 w-4" />
             </Button>
@@ -892,6 +895,7 @@ export function DataSourceGrid({
               variant={viewMode === "list" ? "default" : "ghost"}
               size="sm"
               onClick={() => onViewModeChange?.("list")}
+              className={viewMode === "list" ? "bg-[#007acc] text-white" : "text-[#cccccc] hover:bg-[#2d2d30] hover:text-white"}
             >
               <List className="h-4 w-4" />
             </Button>
@@ -920,7 +924,7 @@ export function DataSourceGrid({
             placeholder="Search data sources..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full"
+            className="w-full bg-[#3c3c3c] border-[#464647] text-[#cccccc] placeholder-[#858585] focus:bg-[#1e1e1e] focus:border-[#007acc]"
           />
         </div>
         
