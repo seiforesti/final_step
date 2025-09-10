@@ -9,7 +9,7 @@ import React, { useState, useEffect, Suspense, useCallback, useMemo, createConte
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import { Toaster } from "sonner"
-import { Database, Settings, Activity, TrendingUp, Users, Shield, Cloud, Search, BarChart3, Eye, Zap, Target, Bell, Menu, X, ChevronLeft, ChevronRight, Plus, Filter, Download, Upload, RefreshCw, HelpCircle, User, LogOut, Monitor, Palette, Globe, Lock, Building, FileText, MessageSquare, Star, Grid, List, Layers, GitBranch, Workflow, Calendar, Clock, AlertTriangle, CheckCircle, Info, Play, Pause, Square, Edit, Trash2, Copy, Share2, ExternalLink, MoreHorizontal, ChevronDown, ChevronUp, Maximize2, Minimize2, PanelLeftOpen, PanelRightOpen, SplitSquareHorizontal, Layout, Command, Cpu, HardDrive, Network, Gauge, LineChart, PieChart, AreaChart, TestTube, Beaker, Microscope, Cog, Wrench, Package, Server, CircuitBoard, Boxes, Archive, FolderOpen, Folder, File, Code2, Terminal, Bug, Sparkles, Rocket, Flame, Lightbulb, Brain, Bot, Radar, Crosshair, Focus, Scan, SearchX, ScanLine, Binary, Hash, Type, Key, ShieldCheckIcon, UserCheck, Crown, Badge as BadgeIcon, Award, Medal, Trophy, Flag, Bookmark, Heart, ThumbsUp, Smile, Frown, AlertCircle, XCircle, Wifi, WifiOff, Signal, SignalHigh, SignalLow, SignalMedium, Route, Map as MapIcon, MapPin, Navigation, Compass, TreePine, Workflow as WorkflowIcon, Camera, Video, Mic, MicOff, Maximize, Minimize, RotateCcw, RotateCw, ZoomIn, ZoomOut, Expand, Shrink, Move, PinIcon, Bookmark as BookmarkIcon, Tag, Tags, Hash as HashIcon, Percent, DollarSign, Euro, ArrowDown } from 'lucide-react'
+import { Database, Settings, Activity, TrendingUp, Users, Shield, Cloud, Search, BarChart3, Eye, Zap, Target, Bell, Menu, X, ChevronLeft, ChevronRight, Plus, Filter, Download, Upload, RefreshCw, HelpCircle, User, LogOut, Monitor, Palette, Globe, Lock, Building, FileText, MessageSquare, Star, Grid, List, Layers, GitBranch, Workflow, Calendar, Clock, AlertTriangle, CheckCircle, Info, Play, Pause, Square, Edit, Trash2, Copy, Share2, ExternalLink, MoreHorizontal, ChevronDown, ChevronUp, Maximize2, Minimize2, PanelLeftOpen, PanelRightOpen, SplitSquareHorizontal, Layout, Command, Cpu, HardDrive, Network, Gauge, LineChart, PieChart, AreaChart, TestTube, Beaker, Microscope, Cog, Wrench, Package, Server, CircuitBoard, Boxes, Archive, FolderOpen, Folder, File, Code2, Terminal, Bug, Sparkles, Rocket, Flame, Lightbulb, Brain, Bot, Radar, Crosshair, Focus, Scan, SearchX, ScanLine, Binary, Hash, Type, Key, ShieldCheckIcon, UserCheck, Crown, BadgeIcon, Award, Medal, Trophy, Flag, Bookmark, Heart, ThumbsUp, Smile, Frown, AlertCircle, XCircle, Wifi, WifiOff, Signal, SignalHigh, SignalLow, SignalMedium, Route, MapIcon, MapPin, Navigation, Compass, TreePine, WorkflowIcon, Camera, Video, Mic, MicOff, Maximize, Minimize, RotateCcw, RotateCw, ZoomIn, ZoomOut, Expand, Shrink, Move, PinIcon, BookmarkIcon, Tag, Tags, HashIcon, Percent, DollarSign, Euro, ArrowDown } from 'lucide-react'
 
 // ============================================================================
 // API REQUEST THROTTLING AND DEBOUNCING SYSTEM
@@ -439,6 +439,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { ErrorBoundary } from 'react-error-boundary'
 
 // Import enterprise integration
 import { 
@@ -3370,940 +3371,238 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
   
   return (
     <TooltipProvider>
-      <GracefulErrorBoundary 
-        errorType="api"
-        showReloadButton={true}
-        showRetryButton={true}
-        onError={(error, errorInfo) => {
-          console.error('Data Sources App Error:', error, errorInfo)
-          // Log error for telemetry with safety check
-          try {
-            if (typeof window !== 'undefined' && window.enterpriseEventBus && typeof window.enterpriseEventBus.emit === 'function') {
-              window.enterpriseEventBus.emit('app:error:caught', {
-                error: error.message,
-                componentStack: errorInfo.componentStack,
-                timestamp: new Date()
-              })
-            }
-          } catch (telemetryError) {
-            console.warn('Failed to emit telemetry event:', telemetryError)
-          }
-        }}
-      >
-        <div className={`min-h-screen bg-background ${className}`}>
-          
-          {/* Enhanced Header with Enterprise Features - Cursor/VSCode Style */}
-          <header className="border-b bg-card/50 backdrop-blur-sm border-border/50">
-          <div className="flex h-16 items-center px-4">
-            
-            {/* Left: Logo and Navigation */}
-            <div className="flex items-center space-x-4">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-                className="hover:bg-accent/50 transition-colors"
-              >
-                <Menu className="h-5 w-5" />
-              </Button>
-              
-              <div className="flex items-center space-x-2">
-                <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600">
-                  <Database className="h-5 w-5 text-white" />
-                </div>
-                <div className="flex flex-col">
-                  <span className="font-semibold text-lg bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-                    Data Sources
-                  </span>
-                  <span className="text-xs text-muted-foreground">Enterprise Platform</span>
-                </div>
-                <Badge variant="secondary" className="text-xs bg-gradient-to-r from-blue-500/20 to-purple-500/20 border-blue-500/30 text-blue-600">
-                  Enterprise
-                </Badge>
+      <ErrorBoundary 
+        fallback={
+          <div className="dark">
+            <div className="min-h-screen bg-zinc-950 text-zinc-100 flex items-center justify-center">
+              <div className="text-center space-y-4">
+                <AlertTriangle className="h-12 w-12 text-red-400 mx-auto" />
+                <h2 className="text-xl font-semibold">Application Error</h2>
+                <p className="text-zinc-400">Something went wrong. Please refresh the page.</p>
               </div>
-            </div>
-
-            {/* Center: Search and Command Palette */}
-            <div className="flex-1 flex justify-center px-4">
-              <div className="relative w-full max-w-md">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="Search data sources... (⌘K for commands)"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onFocus={() => setCommandPaletteOpen(true)}
-                  className="pl-10 bg-background/50 backdrop-blur-sm border-border/50 focus:bg-background transition-all duration-200"
-                />
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
-                  onClick={() => setCommandPaletteOpen(true)}
-                >
-                  ⌘K
-                </Button>
-              </div>
-            </div>
-
-            {/* Right: Enterprise Features and User */}
-            <div className="flex items-center space-x-3">
-              
-              {/* AI Insights Indicator */}
-              {enterpriseFeatures.realTimeInsights && aiInsights.length > 0 && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="relative">
-                      <Brain className="h-5 w-5 text-purple-600" />
-                      <Badge variant="secondary" className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
-                        {aiInsights.length}
-                      </Badge>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-80">
-                    <DropdownMenuLabel className="flex items-center gap-2">
-                      <Brain className="h-4 w-4" />
-                      AI Insights
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <ScrollArea className="h-48">
-                      {aiInsights.map((insight) => (
-                        <div key={insight.id} className="p-3 border-b last:border-b-0">
-                          <div className="font-medium text-sm">{insight.title}</div>
-                          <div className="text-xs text-muted-foreground mt-1">{insight.message}</div>
-                          <div className="flex items-center gap-2 mt-2">
-                            <Badge variant="outline" className="text-xs">
-                              {Math.round(insight.confidence * 100)}% confidence
-                            </Badge>
-                            {insight.actionable && (
-                              <Badge variant="secondary" className="text-xs">Actionable</Badge>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </ScrollArea>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
-              
-              {/* Orchestration Metrics */}
-              {enterpriseFeatures.smartResourceAllocation && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="gap-2">
-                      <Activity className="h-4 w-4" />
-                      <span className="text-xs">
-                        {orchestrationMetrics.activeComponents}/{orchestrationMetrics.totalComponents}
-                      </span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-64">
-                    <DropdownMenuLabel>System Orchestration</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <div className="p-3 space-y-3">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm">Active Components</span>
-                        <Badge variant="secondary">
-                          {orchestrationMetrics.activeComponents}/{orchestrationMetrics.totalComponents}
-                        </Badge>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm">Workflows Executed</span>
-                        <Badge variant="outline">{orchestrationMetrics.workflowsExecuted}</Badge>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm">User Engagement</span>
-                        <Badge variant="secondary">{orchestrationMetrics.userEngagement}</Badge>
-                      </div>
-                      {orchestrationMetrics.avgResponseTime > 0 && (
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm">Avg Response</span>
-                          <Badge variant="outline">{orchestrationMetrics.avgResponseTime}ms</Badge>
-                        </div>
-                      )}
-                    </div>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
-              
-              {/* System Health */}
-              <SystemHealthIndicator />
-              
-              {/* Collaboration Status */}
-              {collaborationSessions.length > 0 && <CollaborationIndicator />}
-              
-              {/* Smart Recommendations */}
-              {enterpriseFeatures.intelligentRecommendations && smartRecommendations.length > 0 && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="relative">
-                      <Lightbulb className="h-5 w-5 text-yellow-600" />
-                      <Badge variant="destructive" className="absolute -top-1 -right-1 h-4 w-4 rounded-full p-0 flex items-center justify-center text-xs">
-                        {smartRecommendations.length}
-                      </Badge>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-72">
-                    <DropdownMenuLabel className="flex items-center gap-2">
-                      <Lightbulb className="h-4 w-4" />
-                      Smart Recommendations
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <ScrollArea className="h-40">
-                      {smartRecommendations.map((rec, index) => (
-                        <div key={index} className="p-3 border-b last:border-b-0">
-                          <div className="font-medium text-sm">{rec.title}</div>
-                          <div className="text-xs text-muted-foreground mt-1">{rec.description}</div>
-                          <Button size="sm" variant="outline" className="mt-2 text-xs">
-                            Apply
-                          </Button>
-                        </div>
-                      ))}
-                    </ScrollArea>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
-              
-              {/* Contextual Actions for Current View */}
-              {enterpriseFeatures.contextAwareActions && contextualActions[activeView]?.length > 0 && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm" className="gap-2">
-                      <Target className="h-4 w-4" />
-                      Context
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuLabel>Actions for {activeView}</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    {contextualActions[activeView]?.map((action) => (
-                      <DropdownMenuItem key={action.id}>
-                        <action.icon className="mr-2 h-4 w-4" />
-                        {action.label}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
-              
-              {/* Workflow Actions */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-2">
-                    <Workflow className="h-4 w-4" />
-                    Actions
-                    {workflowActions.length > 0 && (
-                      <Badge variant="secondary" className="ml-1 px-1 text-xs">
-                        {workflowActions.length}
-                      </Badge>
-                    )}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-80">
-                  <DropdownMenuLabel className="flex items-center gap-2">
-                    <Sparkles className="h-4 w-4" />
-                    Advanced Workflow Actions
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <ScrollArea className="h-64">
-                    {workflowActions.map((action) => (
-                      <DropdownMenuItem
-                        key={action.id}
-                        className="flex items-start gap-3 p-3"
-                        onClick={() => executeWorkflowAction(action.id)}
-                        disabled={!action.enabled}
-                      >
-                        <action.icon className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <div className="font-medium text-sm">{action.label}</div>
-                          <div className="text-xs text-muted-foreground">{action.description}</div>
-                          <div className="flex items-center gap-2 mt-1">
-                            <Badge variant="outline" className="text-xs">{action.category}</Badge>
-                            <Badge variant={action.priority === 'critical' ? 'destructive' : action.priority === 'high' ? 'default' : 'secondary'} className="text-xs">
-                              {action.priority}
-                            </Badge>
-                            {action.shortcut && (
-                              <kbd className="text-xs bg-muted px-1 rounded">{action.shortcut}</kbd>
-                            )}
-                          </div>
-                        </div>
-                      </DropdownMenuItem>
-                    ))}
-                  </ScrollArea>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              
-              {/* Component Manager */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                    <Grid className="h-5 w-5" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-64">
-                  <DropdownMenuLabel>Component Manager</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => setModals(prev => ({ ...prev, componentManager: true }))}>
-                    <Eye className="mr-2 h-4 w-4" />
-                    View All Components
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Star className="mr-2 h-4 w-4" />
-                    Pinned Components
-                    <Badge variant="secondary" className="ml-auto">
-                      {pinnedComponents.length}
-                    </Badge>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <BarChart3 className="mr-2 h-4 w-4" />
-                    Usage Statistics
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              
-              {/* Notifications */}
-              <Button variant="ghost" size="icon">
-                <NotificationBadge />
-              </Button>
-
-              {/* Settings */}
-              <Button variant="ghost" size="icon">
-                <Settings className="h-5 w-5" />
-              </Button>
-
-              {/* User Menu with RBAC Context */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center gap-2 px-3">
-                    <Avatar className="h-6 w-6">
-                      <AvatarImage src={currentUser?.avatar || ''} />
-                      <AvatarFallback className="text-xs">
-                        {currentUser?.name?.split(' ').map((n: string) => n[0]).join('').toUpperCase() || 'U'}
-                      </AvatarFallback>
-                    </Avatar>
-                    {!sidebarCollapsed && (
-                      <div className="flex flex-col items-start">
-                        <span className="text-sm font-medium">{currentUser?.name || 'User'}</span>
-                        <span className="text-xs text-gray-500">{currentUser?.roles?.[0]?.toString() || 'Member'}</span>
-                      </div>
-                    )}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-64">
-                  <DropdownMenuLabel className="pb-2">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src={currentUser?.avatar || ''} />
-                        <AvatarFallback>
-                          {currentUser?.name?.split(' ').map((n: string) => n[0]).join('').toUpperCase() || 'U'}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="font-medium">{currentUser?.name || 'User'}</div>
-                        <div className="text-xs text-gray-500">{currentUser?.email}</div>
-                      </div>
-                    </div>
-                  </DropdownMenuLabel>
-                  
-                  {/* User Roles */}
-                  <div className="px-2 py-1">
-                    <div className="text-xs text-gray-500 mb-1">Roles</div>
-                    <div className="flex flex-wrap gap-1">
-                      {currentUser?.roles?.map((role: string) => (
-                        <Badge key={role} variant="secondary" className="text-xs">
-                          {role}
-                        </Badge>
-                      )) || <Badge variant="outline" className="text-xs">Member</Badge>}
-                    </div>
-                  </div>
-                  
-                  {/* Permission Summary */}
-                  <div className="px-2 py-1">
-                    <div className="text-xs text-gray-500 mb-1">Data Source Permissions</div>
-                    <div className="grid grid-cols-2 gap-1 text-xs">
-                      <div className="flex items-center gap-1">
-                        {dataSourcePermissions.canView ? (
-                          <CheckCircle className="h-3 w-3 text-green-500" />
-                        ) : (
-                          <XCircle className="h-3 w-3 text-red-500" />
-                        )}
-                        <span>View</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        {dataSourcePermissions.canEdit ? (
-                          <CheckCircle className="h-3 w-3 text-green-500" />
-                        ) : (
-                          <XCircle className="h-3 w-3 text-red-500" />
-                        )}
-                        <span>Edit</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        {dataSourcePermissions.canCreate ? (
-                          <CheckCircle className="h-3 w-3 text-green-500" />
-                        ) : (
-                          <XCircle className="h-3 w-3 text-red-500" />
-                        )}
-                        <span>Create</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        {dataSourcePermissions.canDelete ? (
-                          <CheckCircle className="h-3 w-3 text-green-500" />
-                        ) : (
-                          <XCircle className="h-3 w-3 text-red-500" />
-                        )}
-                        <span>Delete</span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem>
-                    <Settings className="mr-2 h-4 w-4" />
-                    Settings
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Shield className="mr-2 h-4 w-4" />
-                    Security Preferences
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <HelpCircle className="mr-2 h-4 w-4" />
-                    Help & Support
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem 
-                    onClick={() => logUserAction('user_logout', 'system', 0)}
-                  >
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Sign Out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
             </div>
           </div>
-        </header>
-
-        {/* Main Content with Resizable Panels */}
-        <div className="flex h-[calc(100vh-4rem)]">
-          
-          {/* Enhanced Sidebar - Cursor/VSCode Style */}
-          <aside className={`border-r bg-card/30 backdrop-blur-sm border-border/50 transition-all duration-300 ${sidebarCollapsed ? 'w-16' : 'w-64'}`}>
-            <ScrollArea className="h-full">
-              <div className="p-4 space-y-6">
+        }
+      >
+        <div className="dark">
+          <div className={`min-h-screen bg-zinc-950 text-zinc-100 ${className}`}>
+            
+            <header className="border-b border-zinc-800/50 bg-zinc-900/50 backdrop-blur-sm">
+              <div className="flex h-12 items-center px-3">
                 
-                {Object.entries(filteredNavigation).map(([categoryKey, category]) => (
-                  <div key={categoryKey} className="space-y-2">
-                    {!sidebarCollapsed && (
-                      <div className="flex items-center space-x-2 px-2 py-1">
-                        <div className="p-1.5 rounded-md bg-gradient-to-br from-muted/50 to-muted/30">
-                          <category.icon className="h-3.5 w-3.5 text-muted-foreground" />
-                        </div>
-                        <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                          {category.label}
-                        </h3>
-                        {category.category === 'analytics' && (
-                          <Badge variant="outline" className="text-xs bg-purple-500/10 border-purple-500/20 text-purple-600">
-                            AI
-                          </Badge>
-                        )}
-                      </div>
-                    )}
-                    
-                    <div className="space-y-1">
-                      {category.items.map((item: any) => (
-                        <Tooltip key={item.id} delayDuration={sidebarCollapsed ? 0 : 1000}>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant={activeView === item.id ? "secondary" : "ghost"}
-                              className={`w-full justify-start group transition-all duration-200 ${
-                                sidebarCollapsed ? 'px-2' : 'px-3'
-                              } ${
-                                activeView === item.id 
-                                  ? 'bg-gradient-to-r from-blue-500/20 to-purple-500/20 border-blue-500/30 shadow-sm' 
-                                  : 'hover:bg-accent/50 hover:shadow-sm'
-                              }`}
-                              onClick={() => handleViewChange(item.id)}
-                            >
-                              <div className={`p-1 rounded-md transition-colors ${
-                                activeView === item.id 
-                                  ? 'bg-gradient-to-br from-blue-500 to-purple-600' 
-                                  : 'bg-muted/50 group-hover:bg-muted/70'
-                              }`}>
-                                <item.icon className={`h-3.5 w-3.5 ${
-                                  activeView === item.id ? 'text-white' : 'text-muted-foreground'
-                                }`} />
-                              </div>
-                              {!sidebarCollapsed && (
-                                <div className="flex items-center justify-between w-full ml-2">
-                                  <span className={`text-sm font-medium ${
-                                    activeView === item.id ? 'text-foreground' : 'text-muted-foreground'
-                                  }`}>
-                                    {item.label}
-                                  </span>
-                                  <div className="flex items-center space-x-1">
-                                    {item.premium && (
-                                      <div className="p-0.5 rounded bg-gradient-to-r from-yellow-400 to-orange-500">
-                                        <Crown className="h-2.5 w-2.5 text-white" />
-                                      </div>
-                                    )}
-                                    {item.features?.includes('ai') && (
-                                      <div className="p-0.5 rounded bg-gradient-to-r from-purple-400 to-pink-500">
-                                        <Brain className="h-2.5 w-2.5 text-white" />
-                                      </div>
-                                    )}
-                                    {item.features?.includes('realTime') && (
-                                      <div className="p-0.5 rounded bg-gradient-to-r from-green-400 to-teal-500">
-                                        <Zap className="h-2.5 w-2.5 text-white" />
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                              )}
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent side={sidebarCollapsed ? "right" : "bottom"} className="bg-popover/95 backdrop-blur-sm border-border/50">
-                            <div className="space-y-1">
-                              <p className="font-medium">{item.label}</p>
-                              <p className="text-xs text-muted-foreground">{item.description}</p>
-                              {item.shortcut && (
-                                <p className="text-xs font-mono bg-muted/50 px-1.5 py-0.5 rounded border border-border/30">
-                                  {item.shortcut}
-                                </p>
-                              )}
-                            </div>
-                          </TooltipContent>
-                        </Tooltip>
-                      ))}
+                {/* Left: Sidebar toggle and logo */}
+                <div className="flex items-center space-x-3">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                    className="h-8 w-8 p-0 hover:bg-zinc-800/50 text-zinc-400 hover:text-zinc-100"
+                  >
+                    <Menu className="h-4 w-4" />
+                  </Button>
+                  
+                  <div className="flex items-center space-x-2">
+                    <div className="p-1.5 rounded bg-blue-500/20 border border-blue-500/30">
+                      <Database className="h-3.5 w-3.5 text-blue-400" />
                     </div>
+                    {!sidebarCollapsed && (
+                      <span className="text-sm font-medium text-zinc-200">DataSources</span>
+                    )}
                   </div>
-                ))}
-              </div>
-            </ScrollArea>
-          </aside>
+                </div>
 
-          {/* Main Content Area - Cursor/VSCode Style */}
-          <main className="flex-1 overflow-hidden bg-gradient-to-br from-background via-background to-muted/20">
-            <ResizablePanelGroup direction="horizontal" className="h-full">
+                <div className="flex-1 flex justify-center px-6">
+                  <div className="relative w-full max-w-lg">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-zinc-500" />
+                    <Input
+                      placeholder="Search everything... (⌘K)"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onFocus={() => setCommandPaletteOpen(true)}
+                      className="h-8 pl-9 pr-12 bg-zinc-800/50 border-zinc-700/50 text-zinc-200 placeholder:text-zinc-500 focus:bg-zinc-800 focus:border-zinc-600 text-sm"
+                    />
+                    <kbd className="absolute right-2 top-1/2 transform -translate-y-1/2 px-1.5 py-0.5 text-xs text-zinc-500 bg-zinc-800 border border-zinc-700 rounded">
+                      ⌘K
+                    </kbd>
+                  </div>
+                </div>
+
+                {/* Right: Minimal controls */}
+                <div className="flex items-center space-x-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0 hover:bg-zinc-800/50 text-zinc-400 hover:text-zinc-100"
+                  >
+                    <Bell className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0 hover:bg-zinc-800/50 text-zinc-400 hover:text-zinc-100"
+                  >
+                    <Settings className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              </div>
+            </header>
+
+            {/* Main Content */}
+            <div className="flex h-[calc(100vh-3rem)]">
               
-              {panels.map((panel, index) => (
-                <React.Fragment key={panel.id}>
-                  <ResizablePanel defaultSize={panel.size} className="relative">
-                    <div className="h-full overflow-auto bg-card/30 backdrop-blur-sm border-r border-border/30 last:border-r-0">
-                      {index === 0 ? (
-                        <div className="relative">
-                          {/* Content Header */}
-                          <div className="sticky top-0 z-10 bg-card/80 backdrop-blur-sm border-b border-border/30 px-6 py-3">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center space-x-3">
-                                <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-blue-500/30">
-                                  <Eye className="h-4 w-4 text-blue-600" />
-                                </div>
-                                <div>
-                                  <h2 className="text-lg font-semibold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-                                    {activeView.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
-                                  </h2>
-                                  <p className="text-xs text-muted-foreground">
-                                    {enterpriseNavigationStructure[Object.keys(enterpriseNavigationStructure).find(key => 
-                                      enterpriseNavigationStructure[key].items.some((item: any) => item.id === activeView)
-                                    ) || 'core']?.label || 'Core Management'}
-                                  </p>
-                                </div>
-                              </div>
-                              
-                              {/* Quick Actions */}
-                              <div className="flex items-center space-x-2">
-                                {contextualActions[activeView]?.map((action) => (
-                                  <Button
-                                    key={action.id}
-                                    size="sm"
-                                    variant="outline"
-                                    className="text-xs bg-gradient-to-r from-muted/50 to-muted/30 border-border/50 hover:bg-accent/50"
-                                  >
-                                    <action.icon className="h-3 w-3 mr-1" />
-                                    {action.label}
-                                  </Button>
-                                ))}
-                              </div>
-                            </div>
-                          </div>
-                          
-                          {/* Main Content */}
-                          <div className="p-6">
-                            {renderActiveComponent()}
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="p-4">
-                          <div className="flex items-center space-x-2 mb-4">
-                            <div className="p-2 rounded-lg bg-gradient-to-br from-muted/50 to-muted/30">
-                              {panel.id === 'metrics' && <BarChart3 className="h-4 w-4 text-blue-600" />}
-                              {panel.id === 'activity' && <Activity className="h-4 w-4 text-green-600" />}
-                              {panel.id === 'chat' && <MessageSquare className="h-4 w-4 text-purple-600" />}
-                              {panel.id === 'alerts' && <AlertTriangle className="h-4 w-4 text-orange-600" />}
-                            </div>
-                            <h3 className="text-lg font-medium capitalize">
-                              {panel.id === 'metrics' ? 'Metrics' : 
-                               panel.id === 'activity' ? 'Activity' : 
-                               panel.id === 'chat' ? 'Chat' : 
-                               panel.id === 'alerts' ? 'Alerts' : 
-                               `Panel ${index + 1}`}
+              <aside className={`border-r border-zinc-800/50 bg-zinc-900/30 backdrop-blur-sm transition-all duration-200 ${sidebarCollapsed ? 'w-12' : 'w-64'}`}>
+                <ScrollArea className="h-full">
+                  <div className={`${sidebarCollapsed ? 'p-2' : 'p-3'} space-y-4`}>
+                    
+                    {Object.entries(filteredNavigation).map(([categoryKey, category]) => (
+                      <div key={categoryKey} className="space-y-1">
+                        {!sidebarCollapsed && (
+                          <div className="flex items-center space-x-2 px-2 py-1.5">
+                            <category.icon className="h-3 w-3 text-zinc-500" />
+                            <h3 className="text-xs font-medium text-zinc-400 uppercase tracking-wider">
+                              {category.label}
                             </h3>
                           </div>
-                          
-                          {/* Panel-specific content */}
-                          {panel.id === 'metrics' && (
-                            <div className="space-y-4">
-                              <div className="grid grid-cols-2 gap-4">
-                                <Card className="bg-gradient-to-br from-blue-500/10 to-blue-500/5 border-blue-500/20">
-                                  <CardContent className="p-4">
-                                    <div className="text-2xl font-bold text-blue-600">98%</div>
-                                    <div className="text-sm text-muted-foreground">System Health</div>
-                                  </CardContent>
-                                </Card>
-                                <Card className="bg-gradient-to-br from-green-500/10 to-green-500/5 border-green-500/20">
-                                  <CardContent className="p-4">
-                                    <div className="text-2xl font-bold text-green-600">24</div>
-                                    <div className="text-sm text-muted-foreground">Active Sources</div>
-                                  </CardContent>
-                                </Card>
-                              </div>
-                            </div>
-                          )}
-                          {panel.id === 'activity' && (
-                            <div className="space-y-3">
-                              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                                <span>Data source scan completed</span>
-                              </div>
-                              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                                <span>New user permissions granted</span>
-                              </div>
-                              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                                <span>AI insights generated</span>
-                              </div>
-                            </div>
-                          )}
-                          {panel.id === 'chat' && (
-                            <div className="text-center text-muted-foreground py-8">
-                              <MessageSquare className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                              <p>Collaboration chat will appear here</p>
-                            </div>
-                          )}
-                          {panel.id === 'alerts' && (
-                            <div className="space-y-3">
-                              <Alert className="bg-orange-500/10 border-orange-500/20">
-                                <AlertTriangle className="h-4 w-4 text-orange-600" />
-                                <AlertTitle>Performance Alert</AlertTitle>
-                                <AlertDescription>Database response time increased by 15%</AlertDescription>
-                              </Alert>
-                            </div>
-                          )}
+                        )}
+                        
+                        <div className="space-y-0.5">
+                          {category.items.map((item: any) => (
+                            <Tooltip key={item.id} delayDuration={sidebarCollapsed ? 0 : 1000}>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  className={`w-full justify-start h-8 transition-all duration-150 ${
+                                    sidebarCollapsed ? 'px-2' : 'px-2'
+                                  } ${
+                                    activeView === item.id 
+                                      ? 'bg-blue-500/20 text-blue-300 border-l-2 border-blue-400' 
+                                      : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50'
+                                  }`}
+                                  onClick={() => handleViewChange(item.id)}
+                                >
+                                  <item.icon className={`h-3.5 w-3.5 ${sidebarCollapsed ? '' : 'mr-2'} ${
+                                    activeView === item.id ? 'text-blue-300' : 'text-zinc-500'
+                                  }`} />
+                                  {!sidebarCollapsed && (
+                                    <div className="flex items-center justify-between w-full">
+                                      <span className="text-xs font-medium truncate">
+                                        {item.label}
+                                      </span>
+                                      <div className="flex items-center space-x-1">
+                                        {item.premium && (
+                                          <Crown className="h-2.5 w-2.5 text-yellow-400" />
+                                        )}
+                                        {item.features?.includes('ai') && (
+                                          <Brain className="h-2.5 w-2.5 text-purple-400" />
+                                        )}
+                                        {item.features?.includes('realTime') && (
+                                          <Zap className="h-2.5 w-2.5 text-green-400" />
+                                        )}
+                                      </div>
+                                    </div>
+                                  )}
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent side={sidebarCollapsed ? "right" : "bottom"} className="bg-zinc-800 border-zinc-700 text-zinc-200">
+                                <div className="space-y-1">
+                                  <p className="font-medium text-xs">{item.label}</p>
+                                  <p className="text-xs text-zinc-400">{item.description}</p>
+                                  {item.shortcut && (
+                                    <kbd className="text-xs font-mono bg-zinc-700 px-1.5 py-0.5 rounded border border-zinc-600">
+                                      {item.shortcut}
+                                    </kbd>
+                                  )}
+                                </div>
+                              </TooltipContent>
+                            </Tooltip>
+                          ))}
                         </div>
-                      )}
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </aside>
+
+              <main className="flex-1 overflow-hidden bg-zinc-950">
+                <ResizablePanelGroup direction="horizontal" className="h-full">
+                  
+                  {/* Primary Panel */}
+                  <ResizablePanel defaultSize={70} className="relative">
+                    <div className="h-full overflow-auto bg-zinc-950 border-r border-zinc-800/50">
+                      <div className="relative">
+                        <div className="sticky top-0 z-10 bg-zinc-900/80 backdrop-blur-sm border-b border-zinc-800/50 px-4 py-2">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-2">
+                              <Eye className="h-4 w-4 text-zinc-400" />
+                              <h2 className="text-sm font-medium text-zinc-200">
+                                {filteredNavigation[Object.keys(filteredNavigation)[0]]?.items?.find((item: any) => item.id === activeView)?.label || 'Dashboard'}
+                              </h2>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 px-2 text-xs text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50"
+                              >
+                                <RefreshCw className="h-3 w-3 mr-1" />
+                                Refresh
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Content */}
+                        <div className="p-4">
+                          <Suspense fallback={
+                            <div className="flex items-center justify-center h-64">
+                              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400"></div>
+                            </div>
+                          }>
+                            {renderActiveComponent()}
+                          </Suspense>
+                        </div>
+                      </div>
                     </div>
                   </ResizablePanel>
                   
-                  {index < panels.length - 1 && (
-                    <ResizableHandle className="bg-border/50 hover:bg-border transition-colors" />
-                  )}
-                </React.Fragment>
-              ))}
-              
-            </ResizablePanelGroup>
-          </main>
-        </div>
-
-        {/* Advanced Floating Action Buttons - Enhanced Cursor Style */}
-        <div className="fixed bottom-6 right-6 flex flex-col space-y-3 z-50">
-          
-          {/* Main Quick Actions */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button size="icon" className="rounded-full h-14 w-14 shadow-2xl bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-110">
-                <Plus className="h-6 w-6 text-white" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-80 bg-popover/95 backdrop-blur-sm border-border/50">
-              <DropdownMenuLabel className="flex items-center gap-2">
-                <Sparkles className="h-4 w-4" />
-                Quick Actions
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => setModals(prev => ({ ...prev, create: true }))}>
-                <Database className="mr-2 h-4 w-4" />
-                <div>
-                  <div className="font-medium">Add Data Source</div>
-                  <div className="text-xs text-muted-foreground">Connect new data source</div>
-                </div>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setModals(prev => ({ ...prev, workflow: true }))}>
-                <Workflow className="mr-2 h-4 w-4" />
-                <div>
-                  <div className="font-medium">Create Workflow</div>
-                  <div className="text-xs text-muted-foreground">Design automated process</div>
-                </div>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setModals(prev => ({ ...prev, collaboration: true }))}>
-                <Users className="mr-2 h-4 w-4" />
-                <div>
-                  <div className="font-medium">Start Collaboration</div>
-                  <div className="text-xs text-muted-foreground">Begin team session</div>
-                </div>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => executeWorkflowAction('comprehensive-scan')}>
-                <Scan className="mr-2 h-4 w-4" />
-                <div>
-                  <div className="font-medium">Comprehensive Scan</div>
-                  <div className="text-xs text-muted-foreground">AI-powered data scan</div>
-                </div>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => executeWorkflowAction('security-assessment')}>
-                <ShieldCheckIcon className="mr-2 h-4 w-4" />
-                <div>
-                  <div className="font-medium">Security Assessment</div>
-                  <div className="text-xs text-muted-foreground">Complete security audit</div>
-                </div>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => executeWorkflowAction('intelligent-orchestration')}>
-                <Bot className="mr-2 h-4 w-4" />
-                <div>
-                  <div className="font-medium">AI Orchestration</div>
-                  <div className="text-xs text-muted-foreground">Intelligent system-wide orchestration</div>
-                </div>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => executeWorkflowAction('adaptive-workspace')}>
-                <Sparkles className="mr-2 h-4 w-4" />
-                <div>
-                  <div className="font-medium">Adaptive Workspace</div>
-                  <div className="text-xs text-muted-foreground">ML-powered workspace optimization</div>
-                </div>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          
-          {/* AI Insights */}
-          {enterpriseFeatures.aiInsightsEnabled && (
-            <Button
-              size="icon"
-              variant="outline"
-              className="rounded-full h-12 w-12 shadow-xl bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500 hover:from-purple-600 hover:via-pink-600 hover:to-rose-600 text-white border-0 transition-all duration-300 transform hover:scale-105"
-              onClick={() => setModals(prev => ({ ...prev, aiInsights: true }))}
-            >
-              <Brain className="h-5 w-5" />
-            </Button>
-          )}
-          
-          {/* Performance Optimizer */}
-          {enterpriseFeatures.autoOptimization && (
-            <Button
-              size="icon"
-              variant="outline"
-              className="rounded-full h-12 w-12 shadow-xl bg-gradient-to-r from-green-500 via-teal-500 to-cyan-500 hover:from-green-600 hover:via-teal-600 hover:to-cyan-600 text-white border-0 transition-all duration-300 transform hover:scale-105"
-              onClick={() => executeWorkflowAction('performance-optimization')}
-            >
-              <Zap className="h-5 w-5" />
-            </Button>
-          )}
-          
-          {/* Real-time Monitoring */}
-          {enterpriseFeatures.advancedMonitoring && (
-            <Button
-              size="icon"
-              variant="outline"
-              className="rounded-full h-12 w-12 shadow-xl bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 hover:from-orange-600 hover:via-red-600 hover:to-pink-600 text-white border-0 transition-all duration-300 transform hover:scale-105"
-              onClick={() => executeWorkflowAction('real-time-monitoring')}
-            >
-              <Activity className="h-5 w-5" />
-            </Button>
-          )}
-          
-          {/* Collaboration */}
-          {enterpriseFeatures.collaborativeWorkspaces && collaborationSessions.length === 0 && (
-            <Button
-              size="icon"
-              variant="outline"
-              className="rounded-full h-12 w-12 shadow-xl bg-gradient-to-r from-indigo-500 via-blue-500 to-cyan-500 hover:from-indigo-600 hover:via-blue-600 hover:to-cyan-600 text-white border-0 transition-all duration-300 transform hover:scale-105"
-              onClick={() => executeWorkflowAction('collaboration-workspace')}
-            >
-              <Users className="h-5 w-5" />
-            </Button>
-          )}
-
-          {/* AI Orchestration */}
-          {enterpriseFeatures.aiOrchestration && (
-            <Button
-              size="icon"
-              variant="outline"
-              className="rounded-full h-12 w-12 shadow-xl bg-gradient-to-r from-violet-500 via-purple-500 to-pink-500 hover:from-violet-600 hover:via-purple-600 hover:to-pink-600 text-white border-0 transition-all duration-300 transform hover:scale-105"
-              onClick={() => executeWorkflowAction('intelligent-orchestration')}
-            >
-              <Bot className="h-5 w-5" />
-            </Button>
-          )}
-
-          {/* Adaptive Interface */}
-          {enterpriseFeatures.adaptiveUserInterface && (
-            <Button
-              size="icon"
-              variant="outline"
-              className="rounded-full h-10 w-10 shadow-lg bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500 hover:from-cyan-600 hover:via-blue-600 hover:to-indigo-600 text-white border-0 transition-all duration-300 transform hover:scale-105"
-              onClick={() => executeWorkflowAction('adaptive-workspace')}
-            >
-              <Sparkles className="h-4 w-4" />
-            </Button>
-          )}
-
-          {/* Cross-Component Correlation */}
-          {enterpriseFeatures.crossComponentCorrelation && (
-            <Button
-              size="icon"
-              variant="outline"
-              className="rounded-full h-10 w-10 shadow-lg bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-600 hover:via-teal-600 hover:to-cyan-600 text-white border-0 transition-all duration-300 transform hover:scale-105"
-              onClick={() => executeWorkflowAction('cross-platform-sync')}
-            >
-              <Radar className="h-4 w-4" />
-            </Button>
-          )}
-
-          {/* System Health Monitor */}
-          <Button
-            size="icon"
-            variant="outline"
-            className="rounded-full h-10 w-10 shadow-lg bg-gradient-to-r from-slate-500 via-gray-500 to-zinc-500 hover:from-slate-600 hover:via-gray-600 hover:to-zinc-600 text-white border-0 transition-all duration-300 transform hover:scale-105"
-            onClick={() => setModals(prev => ({ ...prev, systemHealth: true }))}
-          >
-            <Activity className="h-4 w-4" />
-          </Button>
-        </div>
-
-        {/* Command Palette */}
-        {commandPaletteOpen && (
-          <Dialog open={commandPaletteOpen} onOpenChange={setCommandPaletteOpen}>
-            <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden">
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-2">
-                  <Command className="h-5 w-5" />
-                  Command Palette
-                </DialogTitle>
-                <DialogDescription>
-                  Quick access to all features and actions
-                </DialogDescription>
-              </DialogHeader>
-              
-              <div className="space-y-4">
-                <Command className="rounded-lg border shadow-md">
-                  <CommandInput placeholder="Type a command or search..." />
-                  <CommandList className="max-h-96">
-                    <CommandEmpty>No results found.</CommandEmpty>
-                    
-                    {/* Quick Actions */}
-                    <CommandGroup heading="Quick Actions">
-                      <CommandItem onSelect={() => {
-                        setModals(prev => ({ ...prev, create: true }))
-                        setCommandPaletteOpen(false)
-                      }}>
-                        <Plus className="mr-2 h-4 w-4" />
-                        <span>Add Data Source</span>
-                        <kbd className="ml-auto text-xs bg-muted px-1 rounded">⌘+N</kbd>
-                      </CommandItem>
-                      <CommandItem onSelect={() => {
-                        setActiveView("enterprise-dashboard")
-                        setCommandPaletteOpen(false)
-                      }}>
-                        <BarChart3 className="mr-2 h-4 w-4" />
-                        <span>Go to Dashboard</span>
-                        <kbd className="ml-auto text-xs bg-muted px-1 rounded">⌘+D</kbd>
-                      </CommandItem>
-                      <CommandItem onSelect={() => {
-                        setActiveView("analytics-workbench")
-                        setCommandPaletteOpen(false)
-                      }}>
-                        <Brain className="mr-2 h-4 w-4" />
-                        <span>Open Analytics</span>
-                        <kbd className="ml-auto text-xs bg-muted px-1 rounded">⌘+A</kbd>
-                      </CommandItem>
-                    </CommandGroup>
-
-                    {/* Navigation */}
-                    <CommandGroup heading="Navigation">
-                      {Object.entries(filteredNavigation).map(([categoryKey, category]) => (
-                        <div key={categoryKey}>
-                          {category.items.map((item: any) => (
-                            <CommandItem
-                              key={item.id}
-                              onSelect={() => {
-                                handleViewChange(item.id)
-                                setCommandPaletteOpen(false)
-                              }}
-                            >
-                              <item.icon className="mr-2 h-4 w-4" />
-                              <span>{item.label}</span>
-                              {item.shortcut && (
-                                <kbd className="ml-auto text-xs bg-muted px-1 rounded">{item.shortcut}</kbd>
-                              )}
-                            </CommandItem>
-                          ))}
+                  <ResizableHandle className="w-px bg-zinc-800/50 hover:bg-zinc-700 transition-colors" />
+                  
+                  {/* Secondary Panel */}
+                  <ResizablePanel defaultSize={30} className="relative">
+                    <div className="h-full overflow-auto bg-zinc-950">
+                      <div className="sticky top-0 z-10 bg-zinc-900/80 backdrop-blur-sm border-b border-zinc-800/50 px-4 py-2">
+                        <h3 className="text-sm font-medium text-zinc-200">Details</h3>
+                      </div>
+                      <div className="p-4">
+                        <div className="space-y-4">
+                          <div className="p-3 rounded-lg bg-zinc-900/50 border border-zinc-800/50">
+                            <h4 className="text-xs font-medium text-zinc-300 mb-2">Quick Stats</h4>
+                            <div className="space-y-2">
+                              <div className="flex justify-between text-xs">
+                                <span className="text-zinc-400">Active Sources</span>
+                                <span className="text-zinc-200">24</span>
+                              </div>
+                              <div className="flex justify-between text-xs">
+                                <span className="text-zinc-400">Health Score</span>
+                                <span className="text-green-400">98%</span>
+                              </div>
+                              <div className="flex justify-between text-xs">
+                                <span className="text-zinc-400">Last Sync</span>
+                                <span className="text-zinc-200">2m ago</span>
+                              </div>
+                            </div>
+                          </div>
                         </div>
-                      ))}
-                    </CommandGroup>
-
-                    {/* Workflow Actions */}
-                    <CommandGroup heading="Workflow Actions">
-                      {workflowActions.slice(0, 5).map((action) => (
-                        <CommandItem
-                          key={action.id}
-                          onSelect={() => {
-                            executeWorkflowAction(action.id)
-                            setCommandPaletteOpen(false)
-                          }}
-                        >
-                          <action.icon className="mr-2 h-4 w-4" />
-                          <span>{action.label}</span>
-                          <Badge variant="outline" className="ml-auto text-xs">
-                            {action.category}
-                          </Badge>
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </div>
-            </DialogContent>
-          </Dialog>
-        )}
-
-        {/* Modals */}
-        {modals.create && (
-          <DataSourceCreateModal
-            open={modals.create}
-            onClose={() => setModals(prev => ({ ...prev, create: false }))}
-            onSuccess={async (payload) => {
-              const created = await createDataSourceMutation.mutateAsync(payload)
-              // Refresh list and select the newly created datasource in UI
-              await refetchDataSources()
-              try {
-                if (created && created.id) {
-                  setSelectedDataSource(created)
-                }
-              } catch (_) {}
-              return created
-            }}
-          />
-        )}
-
-        {modals.edit && selectedDataSource && (
-          <DataSourceEditModal
-            open={modals.edit}
-            onOpenChange={(open) => setModals(prev => ({ ...prev, edit: open }))}
-            dataSource={selectedDataSource}
-          />
-        )}
-
-        {/* Toast Notifications */}
-        <Toaster position="top-right" />
+                      </div>
+                    </div>
+                  </ResizablePanel>
+                  
+                </ResizablePanelGroup>
+              </main>
+            </div>
+          </div>
         </div>
-      </GracefulErrorBoundary>
+      </ErrorBoundary>
     </TooltipProvider>
   )
 }

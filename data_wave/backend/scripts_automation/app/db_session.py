@@ -44,12 +44,12 @@ def _create_engine(database_url: str, *, pool_size_override: int | None = None, 
         
         if is_using_pgbouncer:
             # Use smaller pool sizes when PgBouncer is handling connection pooling
-            default_pool_size = "10"
-            default_max_overflow = "5"
+            default_pool_size = "5"
+            default_max_overflow = "3"
         else:
             # Use normal pool sizes when connecting directly to PostgreSQL
-            default_pool_size = "10"
-            default_max_overflow = "5"
+            default_pool_size = "5"
+            default_max_overflow = "3"
         
         _DBC = {
             "pool_size": int(os.getenv("DB_POOL_SIZE", default_pool_size)),
@@ -276,12 +276,12 @@ def _desired_pool_targets() -> tuple[int, int]:
         
         if is_using_pgbouncer:
             # Use smaller pool sizes when PgBouncer is handling connection pooling
-            default_pool_size = "10"
-            default_max_overflow = "5"
+            default_pool_size = "5"
+            default_max_overflow = "3"
         else:
             # Use normal pool sizes when connecting directly to PostgreSQL
-            default_pool_size = "10"
-            default_max_overflow = "5"
+            default_pool_size = "5"
+            default_max_overflow = "3"
         
         return int(os.getenv("DB_POOL_SIZE", default_pool_size)), int(os.getenv("DB_MAX_OVERFLOW", default_max_overflow))
 
