@@ -46,6 +46,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 
 import { SchemaDiscovery } from "./schema-discovery"
 import { DataLineageGraph } from "./data-lineage-graph"
+import { SchemaDiscoveryProvider } from "../shared/contexts/schema-discovery-context"
 
 interface DataDiscoveryWorkspaceProps {
   dataSource: any
@@ -1056,23 +1057,27 @@ export function DataDiscoveryWorkspace({
             {currentStep === 'connection' && renderConnectionStep()}
             
             {currentStep === 'discovery' && (
-              <SchemaDiscovery
-                dataSourceId={dataSource?.id}
-                dataSourceName={dataSource?.name}
-                onSelectionChange={handleSelectionChange}
-                onClose={() => setCurrentStep('connection')}
-                initialSelectionManifest={initialSelectionManifest}
-              />
+              <SchemaDiscoveryProvider>
+                <SchemaDiscovery
+                  dataSourceId={dataSource?.id}
+                  dataSourceName={dataSource?.name}
+                  onSelectionChange={handleSelectionChange}
+                  onClose={() => setCurrentStep('connection')}
+                  initialSelectionManifest={initialSelectionManifest}
+                />
+              </SchemaDiscoveryProvider>
             )}
             
             {currentStep === 'selection' && (
-              <SchemaDiscovery
-                dataSourceId={dataSource?.id}
-                dataSourceName={dataSource?.name}
-                onSelectionChange={handleSelectionChange}
-                onClose={() => setCurrentStep('discovery')}
-                initialSelectionManifest={initialSelectionManifest}
-              />
+              <SchemaDiscoveryProvider>
+                <SchemaDiscovery
+                  dataSourceId={dataSource?.id}
+                  dataSourceName={dataSource?.name}
+                  onSelectionChange={handleSelectionChange}
+                  onClose={() => setCurrentStep('discovery')}
+                  initialSelectionManifest={initialSelectionManifest}
+                />
+              </SchemaDiscoveryProvider>
             )}
             
             {currentStep === 'workspace' && renderWorkspaceStep()}

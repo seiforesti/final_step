@@ -85,20 +85,8 @@ class EnhancedCatalogService:
             query = select(CatalogItem).where(CatalogItem.data_source_id == data_source_id)
             catalog_items = session.execute(query).scalars().all()
             
-            # Convert to response models
-            return [
-                CatalogItemResponse(
-                    id=item.id,
-                    name=item.name,
-                    type=item.type,
-                    description=item.description,
-                    metadata=item.metadata,
-                    data_source_id=item.data_source_id,
-                    created_at=item.created_at,
-                    updated_at=item.updated_at
-                )
-                for item in catalog_items
-            ]
+            # Convert to response models with full fields using ORM mapping
+            return [CatalogItemResponse.from_orm(item) for item in catalog_items]
         except Exception as e:
             logger.error(f"Error getting catalog items for data source {data_source_id}: {e}")
             return []
@@ -111,20 +99,8 @@ class EnhancedCatalogService:
             query = select(CatalogItem)
             catalog_items = session.execute(query).scalars().all()
             
-            # Convert to response models
-            return [
-                CatalogItemResponse(
-                    id=item.id,
-                    name=item.name,
-                    type=item.type,
-                    description=item.description,
-                    metadata=item.metadata,
-                    data_source_id=item.data_source_id,
-                    created_at=item.created_at,
-                    updated_at=item.updated_at
-                )
-                for item in catalog_items
-            ]
+            # Convert to response models with full fields using ORM mapping
+            return [CatalogItemResponse.from_orm(item) for item in catalog_items]
         except Exception as e:
             logger.error(f"Error getting all catalog items: {e}")
             return []
@@ -274,7 +250,7 @@ class EnhancedCatalogService:
     # REAL-TIME SCHEMA DISCOVERY AND SYNCHRONIZATION
     # ============================================================================
     
-    async def discover_and_catalog_schema(self, session: Session, data_source_id: int, discovered_by: str, force_refresh: bool = False) -> SchemaDiscoveryResult:
+    async def discover_and_catalog_schema(self, session: Session, data_source_id: int, discovered_by: str, force_refresh: bool = False, selected_items: Optional[List[Dict[str, Any]]] = None) -> SchemaDiscoveryResult:
         """
         Discover schema from data source and automatically create catalog entries.
         This replaces the mock discover_schema method with real integration.
@@ -312,7 +288,7 @@ class EnhancedCatalogService:
                 result.errors.append(f"Connection test failed: {connection_test['message']}")
                 return result
             
-            # Discover schema
+            # Discover schema using enterprise discovery
             schema_discovery = await self.connection_service.discover_schema(data_source)
             if not schema_discovery["success"]:
                 result.errors.append("Schema discovery failed")
@@ -322,13 +298,34 @@ class EnhancedCatalogService:
                 "name": data_source.name,
                 "type": data_source.source_type.value,
                 "host": data_source.host,
-                "connection_time_ms": connection_test["connection_time_ms"]
+                "connection_time_ms": connection_test["connection_time_ms"],
+                "discovery_type": schema_discovery.get("discovery_type", "unknown"),
+                "total_tables": schema_discovery.get("total_tables", 0)
             }
             
-            # Process discovered schema
-            discovered_count = await self._process_discovered_schema(
-                session, data_source, schema_discovery["schema"], discovered_by, result
-            )
+            # Process schema based on whether we have selected items or not
+            if selected_items:
+                # Process only selected items
+                if schema_discovery.get("discovery_type") == "postgresql_enterprise":
+                    discovered_count = await self._process_selected_schema_items(
+                        session, data_source, schema_discovery["schema_structure"], selected_items, discovered_by, result
+                    )
+                    result.warnings.append(f"Enterprise discovery completed - processed {len(selected_items)} selected items")
+                else:
+                    discovered_count = await self._process_selected_schema_items(
+                        session, data_source, schema_discovery["schema"], selected_items, discovered_by, result
+                    )
+            else:
+                # Process all discovered schema
+                if schema_discovery.get("discovery_type") == "postgresql_enterprise":
+                    # Enterprise discovery already handles the schema processing
+                    discovered_count = schema_discovery.get("total_tables", 0)
+                    result.warnings.append("Enterprise discovery completed - schema data processed by enterprise service")
+                else:
+                    # Process discovered schema for non-enterprise discovery
+                    discovered_count = await self._process_discovered_schema(
+                        session, data_source, schema_discovery["schema"], discovered_by, result
+                    )
             
             result.discovered_items = discovered_count
             result.success = True
@@ -411,6 +408,454 @@ class EnhancedCatalogService:
             raise e
         
         return discovered_count
+    
+    async def _process_selected_schema_items(self, session: Session, data_source: DataSource, schema_data: Dict[str, Any], selected_items: List[Dict[str, Any]], discovered_by: str, result: SchemaDiscoveryResult, action: str = 'add_new') -> int:
+        """Process only the selected schema items and create catalog entries."""
+        discovered_count = 0
+        
+        try:
+            # Build a lookup structure for efficient searching
+            schema_lookup = self._build_schema_lookup(schema_data)
+            
+            for selected_item in selected_items:
+                try:
+                    database_name = selected_item.get("database", "default")
+                    schema_name = selected_item.get("schema", "public")
+                    table_name = selected_item.get("table")
+                    column_name = selected_item.get("column")
+                    
+                    # Find the corresponding schema data
+                    db_data = schema_lookup.get(database_name, {})
+                    schema_data = db_data.get(schema_name, {})
+                    
+                    if not schema_data:
+                        result.warnings.append(f"Schema {database_name}.{schema_name} not found in discovered data")
+                        continue
+                    
+                    if table_name and not column_name:
+                        # Process entire table
+                        table_data = schema_data.get("tables", {}).get(table_name)
+                        if table_data:
+                            # Create/update table based on action
+                            if action == 'add_new':
+                                existing = session.execute(
+                                    select(CatalogItem).where(
+                                        CatalogItem.data_source_id == data_source.id,
+                                        CatalogItem.schema_name == schema_name,
+                                        CatalogItem.table_name == table_name,
+                                        CatalogItem.item_type == CatalogItemType.TABLE
+                                    )
+                                ).first()
+                                if not existing:
+                                    table_item = await self._create_table_catalog_item(
+                                        session, data_source, schema_name, table_data, discovered_by
+                                    )
+                                    if table_item:
+                                        discovered_count += 1
+                            else:
+                                table_item = await self._create_table_catalog_item(
+                                    session, data_source, schema_name, table_data, discovered_by
+                                )
+                                if table_item:
+                                    discovered_count += 1
+                            
+                            # Process all columns in the table
+                            for col_data in table_data.get("columns", []):
+                                if action == 'add_new':
+                                    existing_col = session.execute(
+                                        select(CatalogItem).where(
+                                            CatalogItem.data_source_id == data_source.id,
+                                            CatalogItem.schema_name == schema_name,
+                                            CatalogItem.table_name == table_name,
+                                            CatalogItem.column_name == col_data.get("name"),
+                                            CatalogItem.item_type == CatalogItemType.COLUMN
+                                        )
+                                    ).first()
+                                    if not existing_col:
+                                        column_item = await self._create_column_catalog_item(
+                                            session, data_source, schema_name, table_name, col_data, discovered_by
+                                        )
+                                        if column_item:
+                                            discovered_count += 1
+                                else:
+                                    column_item = await self._create_column_catalog_item(
+                                        session, data_source, schema_name, table_name, col_data, discovered_by
+                                    )
+                                    if column_item:
+                                        discovered_count += 1
+                        else:
+                            result.warnings.append(f"Table {schema_name}.{table_name} not found in discovered data")
+                    
+                    elif table_name and column_name:
+                        # Process specific column
+                        table_data = schema_data.get("tables", {}).get(table_name)
+                        if table_data:
+                            # Ensure table is cataloged first
+                            if action == 'add_new':
+                                existing = session.execute(
+                                    select(CatalogItem).where(
+                                        CatalogItem.data_source_id == data_source.id,
+                                        CatalogItem.schema_name == schema_name,
+                                        CatalogItem.table_name == table_name,
+                                        CatalogItem.item_type == CatalogItemType.TABLE
+                                    )
+                                ).first()
+                                if not existing:
+                                    table_item = await self._create_table_catalog_item(
+                                        session, data_source, schema_name, table_data, discovered_by
+                                    )
+                                    if table_item:
+                                        discovered_count += 1
+                            else:
+                                table_item = await self._create_table_catalog_item(
+                                    session, data_source, schema_name, table_data, discovered_by
+                                )
+                                if table_item:
+                                    discovered_count += 1
+                            
+                            # Find and process the specific column
+                            column_data = next((col for col in table_data.get("columns", []) if col["name"] == column_name), None)
+                            if column_data:
+                                if action == 'add_new':
+                                    existing_col = session.execute(
+                                        select(CatalogItem).where(
+                                            CatalogItem.data_source_id == data_source.id,
+                                            CatalogItem.schema_name == schema_name,
+                                            CatalogItem.table_name == table_name,
+                                            CatalogItem.column_name == column_name,
+                                            CatalogItem.item_type == CatalogItemType.COLUMN
+                                        )
+                                    ).first()
+                                    if not existing_col:
+                                        column_item = await self._create_column_catalog_item(
+                                            session, data_source, schema_name, table_name, column_data, discovered_by
+                                        )
+                                        if column_item:
+                                            discovered_count += 1
+                                else:
+                                    column_item = await self._create_column_catalog_item(
+                                        session, data_source, schema_name, table_name, column_data, discovered_by
+                                    )
+                                    if column_item:
+                                        discovered_count += 1
+                            else:
+                                result.warnings.append(f"Column {schema_name}.{table_name}.{column_name} not found in discovered data")
+                        else:
+                            result.warnings.append(f"Table {schema_name}.{table_name} not found in discovered data")
+                    
+                    elif not table_name and not column_name:
+                        # Process entire schema
+                        for table_name, table_data in schema_data.get("tables", {}).items():
+                            # Create table catalog entry
+                            table_item = await self._create_table_catalog_item(
+                                session, data_source, schema_name, table_data, discovered_by
+                            )
+                            if table_item:
+                                discovered_count += 1
+                            
+                            # Process all columns in the table
+                            for col_data in table_data.get("columns", []):
+                                column_item = await self._create_column_catalog_item(
+                                    session, data_source, schema_name, table_name, col_data, discovered_by
+                                )
+                                if column_item:
+                                    discovered_count += 1
+                        
+                        # Process views in the schema
+                        for view_name, view_data in schema_data.get("views", {}).items():
+                            if action == 'add_new':
+                                existing_view = session.execute(
+                                    select(CatalogItem).where(
+                                        CatalogItem.data_source_id == data_source.id,
+                                        CatalogItem.schema_name == schema_name,
+                                        CatalogItem.table_name == view_name,
+                                        CatalogItem.item_type == CatalogItemType.VIEW
+                                    )
+                                ).first()
+                                if not existing_view:
+                                    view_item = await self._create_view_catalog_item(
+                                        session, data_source, schema_name, view_data, discovered_by
+                                    )
+                                    if view_item:
+                                        discovered_count += 1
+                            else:
+                                view_item = await self._create_view_catalog_item(
+                                    session, data_source, schema_name, view_data, discovered_by
+                                )
+                                if view_item:
+                                    discovered_count += 1
+                
+                except Exception as e:
+                    result.warnings.append(f"Failed to process selected item {selected_item}: {str(e)}")
+            
+            session.commit()
+            logger.info(f"Successfully processed {len(selected_items)} selected items, created {discovered_count} catalog entries")
+            
+        except Exception as e:
+            session.rollback()
+            logger.error(f"Error processing selected schema items: {e}")
+            raise e
+        
+        return discovered_count
+    
+    def _build_schema_lookup(self, schema_data: Dict[str, Any]) -> Dict[str, Dict[str, Dict[str, Any]]]:
+        """Build a lookup structure for efficient schema data access."""
+        lookup = {}
+        
+        for database in schema_data.get("databases", []):
+            db_name = database["name"]
+            lookup[db_name] = {}
+            
+            for schema in database.get("schemas", []):
+                schema_name = schema["name"]
+                lookup[db_name][schema_name] = {
+                    "tables": {table["name"]: table for table in schema.get("tables", [])},
+                    "views": {view["name"]: view for view in schema.get("views", [])}
+                }
+        
+        return lookup
+    
+    async def validate_selected_items(self, session: Session, data_source_id: int, selected_items: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Validate selected items against existing catalog entries and generate recommendations."""
+        try:
+            # Get existing catalog items for this data source
+            existing_items = self.get_catalog_items_by_data_source(session, data_source_id)
+            
+            # Build lookup for existing items
+            existing_lookup = {}
+            for item in existing_items:
+                key = f"{item.schema_name}.{item.table_name}"
+                if item.column_name:
+                    key += f".{item.column_name}"
+                existing_lookup[key] = item
+            
+            # Analyze selected items
+            validation_result = {
+                "total_selected": len(selected_items),
+                "existing_items": [],
+                "new_items": [],
+                "conflicts": [],
+                "recommendations": [],
+                "critical_items": [],
+                "business_value_score": 0,
+                "validation_summary": {}
+            }
+            
+            for item in selected_items:
+                database_name = item.get("database", "default")
+                schema_name = item.get("schema", "public")
+                table_name = item.get("table")
+                column_name = item.get("column")
+                
+                # Build lookup key
+                if column_name:
+                    lookup_key = f"{schema_name}.{table_name}.{column_name}"
+                    item_type = "column"
+                elif table_name:
+                    lookup_key = f"{schema_name}.{table_name}"
+                    item_type = "table"
+                else:
+                    lookup_key = f"{schema_name}"
+                    item_type = "schema"
+                
+                # Check if item exists
+                existing_item = existing_lookup.get(lookup_key)
+                
+                if existing_item:
+                    # Item already exists
+                    validation_result["existing_items"].append({
+                        "item": item,
+                        "existing_catalog_item": {
+                            "id": existing_item.id,
+                            "name": existing_item.name,
+                            "type": existing_item.type,
+                            "created_at": existing_item.created_at.isoformat(),
+                            "updated_at": existing_item.updated_at.isoformat(),
+                            "metadata": existing_item.metadata
+                        },
+                        "conflict_type": "exists"
+                    })
+                else:
+                    # New item
+                    validation_result["new_items"].append({
+                        "item": item,
+                        "item_type": item_type,
+                        "priority": self._calculate_item_priority(item, item_type)
+                    })
+            
+            # Generate AI recommendations for critical items
+            validation_result["recommendations"] = await self._generate_ai_recommendations(
+                validation_result["new_items"], existing_items
+            )
+            
+            # Identify critical items
+            validation_result["critical_items"] = [
+                item for item in validation_result["new_items"] 
+                if item["priority"] >= 8  # High priority items
+            ]
+            
+            # Calculate business value score
+            validation_result["business_value_score"] = self._calculate_business_value_score(
+                validation_result["new_items"], validation_result["existing_items"]
+            )
+            
+            # Generate validation summary
+            validation_result["validation_summary"] = {
+                "existing_count": len(validation_result["existing_items"]),
+                "new_count": len(validation_result["new_items"]),
+                "critical_count": len(validation_result["critical_items"]),
+                "recommendation_count": len(validation_result["recommendations"]),
+                "business_value": validation_result["business_value_score"],
+                "requires_user_decision": len(validation_result["existing_items"]) > 0
+            }
+            
+            return validation_result
+            
+        except Exception as e:
+            logger.error(f"Error validating selected items: {e}")
+            raise e
+    
+    def _calculate_item_priority(self, item: Dict[str, Any], item_type: str) -> int:
+        """Calculate priority score for an item (1-10, higher is more critical)."""
+        priority = 5  # Base priority
+        
+        # Check for critical keywords
+        critical_keywords = [
+            "user", "customer", "client", "account", "payment", "transaction",
+            "order", "product", "inventory", "financial", "security", "auth",
+            "login", "password", "email", "phone", "address", "personal"
+        ]
+        
+        table_name = item.get("table", "").lower()
+        column_name = item.get("column", "").lower()
+        
+        # Check table name for critical keywords
+        for keyword in critical_keywords:
+            if keyword in table_name:
+                priority += 2
+                break
+        
+        # Check column name for critical keywords
+        for keyword in critical_keywords:
+            if keyword in column_name:
+                priority += 3
+                break
+        
+        # Higher priority for tables vs columns
+        if item_type == "table":
+            priority += 1
+        elif item_type == "column":
+            priority += 0.5
+        
+        # Check for data types that suggest sensitive information
+        if any(dt in column_name for dt in ["id", "key", "token", "hash", "secret"]):
+            priority += 2
+        
+        return min(10, max(1, int(priority)))
+    
+    def _calculate_business_value_score(self, new_items: List[Dict], existing_items: List[Dict]) -> int:
+        """Calculate overall business value score (0-100)."""
+        if not new_items:
+            return 0
+        
+        total_priority = sum(item["priority"] for item in new_items)
+        max_possible_priority = len(new_items) * 10
+        return int((total_priority / max_possible_priority) * 100)
+    
+    async def _generate_ai_recommendations(self, new_items: List[Dict], existing_items: List) -> List[Dict]:
+        """Generate diverse, sensitivity-aware recommendations.
+        Strategy:
+        - Base on priority, but enforce diversity across schemas/tables.
+        - Boost items with sensitive/PII indicators or business-critical keywords.
+        - Mix of tables and columns; cap per-schema to avoid clustering.
+        """
+        if not new_items:
+            return []
+
+        # Sensitivity and business keywords
+        sensitive_terms = {
+            "email", "phone", "address", "ssn", "social", "credit", "card", "token", "secret", "passwd",
+            "password", "amount", "price", "medical", "health"
+        }
+        business_terms = {"user", "customer", "client", "account", "order", "transaction", "product", "inventory"}
+
+        def boost_score(item: Dict) -> float:
+            base = float(item.get("priority", 5))
+            subject = (item.get("item", {}) or {})
+            table_name = str(subject.get("table", "")).lower()
+            column_name = str(subject.get("column", "")).lower()
+            # sensitivity boosts
+            if any(k in column_name for k in sensitive_terms):
+                base += 2.5
+            if any(k in table_name for k in sensitive_terms):
+                base += 1.5
+            # business boosts
+            if any(k in table_name for k in business_terms):
+                base += 1.0
+            if subject.get("column") and any(k in column_name for k in business_terms):
+                base += 0.5
+            # prefer tables slightly for coverage
+            if subject.get("table") and not subject.get("column"):
+                base += 0.5
+            return base
+
+        # Score with boosts
+        scored = [(boost_score(it), it) for it in new_items]
+        scored.sort(key=lambda x: x[0], reverse=True)
+
+        # Enforce diversity: max 2 per schema, and mix tables/columns
+        seen_per_schema: Dict[str, int] = {}
+        out: List[Dict] = []
+        for score, item in scored:
+            subj = item.get("item", {}) or {}
+            schema = subj.get("schema", "") or "public"
+            if seen_per_schema.get(schema, 0) >= 2:
+                continue
+            seen_per_schema[schema] = seen_per_schema.get(schema, 0) + 1
+
+            action = "catalog_immediately" if score >= 8 else ("catalog_soon" if score >= 6 else "catalog_when_free")
+            confidence = int(min(97, max(60, 65 + (score - 6) * 10)))
+            out.append({
+                "item": subj,
+                "priority": int(min(10, round(score))),
+                "reason": self._get_recommendation_reason(item),
+                "action": action,
+                "confidence": confidence
+            })
+            if len(out) >= 10:
+                break
+
+        # Ensure at least one column if available
+        if not any(o["item"].get("column") for o in out):
+            for score, item in scored:
+                if item.get("item", {}).get("column"):
+                    subj = item.get("item")
+                    out.append({
+                        "item": subj,
+                        "priority": int(min(10, round(score))),
+                        "reason": self._get_recommendation_reason(item),
+                        "action": "catalog_soon",
+                        "confidence": 70
+                    })
+                    break
+
+        return out
+    
+    def _get_recommendation_reason(self, item: Dict) -> str:
+        """Generate human-readable reason for recommendation."""
+        priority = item["priority"]
+        item_type = item["item_type"]
+        table_name = item["item"].get("table", "")
+        column_name = item["item"].get("column", "")
+        
+        if priority >= 8:
+            return f"Critical {item_type} '{table_name}' contains sensitive business data requiring immediate cataloging"
+        elif priority >= 6:
+            return f"High-value {item_type} '{table_name}' should be prioritized for data governance"
+        elif priority >= 4:
+            return f"Standard {item_type} '{table_name}' recommended for complete data catalog"
+        else:
+            return f"Optional {item_type} '{table_name}' for comprehensive data coverage"
     
     async def _create_table_catalog_item(self, session: Session, data_source: DataSource, schema_name: str, table_data: Dict[str, Any], discovered_by: str) -> Optional[CatalogItem]:
         """Create catalog item for a discovered table."""

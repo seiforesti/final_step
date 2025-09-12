@@ -11,8 +11,12 @@ from typing import Dict, List, Optional, Any, Union, cast, Sequence, TypeVar, It
 from datetime import datetime
 import traceback
 import os
+import numpy as np
 
 logger = logging.getLogger(__name__)
+
+# Global semaphore to limit concurrent schema discovery operations
+_schema_discovery_semaphore = asyncio.Semaphore(1)  # Allow only 1 concurrent schema discovery
 
 # Database connectors
 import psycopg2
@@ -30,6 +34,10 @@ try:
     import boto3
 except ImportError:
     boto3 = None
+try:
+    from azure.identity import DefaultAzureCredential
+except ImportError:
+    DefaultAzureCredential = None
 from sqlalchemy import create_engine, MetaData, inspect, text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.engine import Row, RowMapping, CursorResult
@@ -41,6 +49,7 @@ from app.models.scan_models import DataSource, DataSourceType, DataSourceLocatio
 from app.core.config import settings
 from app.services.data_source_service import DataSourceService
 from app.services.progress_bus import ProgressBus
+from app.services.enterprise_schema_discovery import EnterpriseSchemaDiscovery
 
 # Type variables for better type hints
 T = TypeVar('T')
@@ -66,6 +75,24 @@ def ensure_list(value: Union[List[T], T, None]) -> List[T]:
     if isinstance(value, list):
         return value
     return [value]
+
+def _generate_connection_recommendations(diagnostics: Dict[str, Any]) -> List[str]:
+    """Generate connection recommendations based on diagnostics."""
+    recommendations = []
+    
+    if diagnostics.get("connection_quality") == "fair":
+        recommendations.append("Consider optimizing network connection or using connection pooling")
+    
+    if diagnostics.get("avg_stability_ms", 0) > 100:
+        recommendations.append("High latency detected. Check network stability and consider geographic proximity")
+    
+    if diagnostics.get("stability_variance", 0) > 50:
+        recommendations.append("Inconsistent connection performance. Consider network optimization")
+    
+    if not recommendations:
+        recommendations.append("Connection performance is optimal")
+    
+    return recommendations
 
 def dict_to_list(d: Dict[str, Any]) -> List[RowDict]:
     """Convert a dictionary to a list of row dictionaries."""
@@ -379,118 +406,215 @@ class PostgreSQLConnector(BaseConnector):
             }
     
     async def discover_schema(self) -> Dict[str, Any]:
+        """Enterprise-grade PostgreSQL schema discovery with advanced resource management"""
         try:
             password = self._get_password()
             if not password:
                 return {"success": False, "error": "Failed to retrieve password"}
 
             connection_string = self._build_connection_string()
-            # Add connection retry logic for PostgreSQL
-            engine = create_engine(
-                connection_string,
-                pool_pre_ping=True,
-                pool_recycle=300,  # Recycle connections every 5 minutes
-                connect_args={
-                    "connect_timeout": 10,
-                    "application_name": "data_governance_discovery"
-                }
+            
+            # Use enterprise schema discovery
+            enterprise_discovery = EnterpriseSchemaDiscovery(
+                data_source_id=str(self.data_source.id),
+                connection_string=connection_string
             )
-            inspector = inspect(engine)
             
-            databases = []
-            current_db = {
-                "name": self.data_source.database_name or "default",
-                "schemas": []
-            }
-            
-            # Get all schemas
-            schema_names = inspector.get_schema_names()
             try:
-                await ProgressBus.publish(self.data_source.id, {
-                    "percentage": 20,
-                    "status": "discovering",
-                    "step": "schemas_listed",
-                    "schemas_total": len(schema_names),
-                    "timestamp": datetime.now().isoformat()
-                })
-            except Exception:
-                pass
-            
-            processed_schemas = 0
-            total_tables_overall = 0
-            for schema_name in schema_names:
-                if schema_name in ('pg_catalog', 'information_schema'):
-                    continue
-                
-                schema_info = {
-                    "name": schema_name,
-                    "tables": [],
-                    "views": []
-                }
-                
-                # Get tables in schema
-                table_names = inspector.get_table_names(schema=schema_name)
-                total_tables_overall += len(table_names)
-                for idx, table_name in enumerate(table_names, start=1):
-                    table_info = await self._get_table_info(inspector, schema_name, table_name, engine)
-                    schema_info["tables"].append(table_info)
-                    # Emit per-table progress roughly
-                    try:
-                        await ProgressBus.publish(self.data_source.id, {
-                            "percentage": 20 + int(60 * (idx / max(1, len(table_names)))),
-                            "status": "discovering",
-                            "step": "tables_discovered",
-                            "schema": schema_name,
-                            "table": table_name,
-                            "table_index": idx,
-                            "tables_in_schema": len(table_names),
-                            "timestamp": datetime.now().isoformat()
-                        })
-                    except Exception:
-                        pass
-                
-                # Get views in schema
-                view_names = inspector.get_view_names(schema=schema_name)
-                for view_name in view_names:
-                    view_info = await self._get_view_info(inspector, schema_name, view_name)
-                    schema_info["views"].append(view_info)
-                
-                current_db["schemas"].append(schema_info)
-                processed_schemas += 1
+                # Emit initial progress
                 try:
                     await ProgressBus.publish(self.data_source.id, {
-                        "percentage": min(90, 20 + int(60 * (processed_schemas / max(1, len(schema_names))))),
-                        "status": "discovering",
-                        "step": "schema_completed",
-                        "schema": schema_name,
-                        "schemas_completed": processed_schemas,
-                        "schemas_total": len(schema_names),
+                        "percentage": 10,
+                        "status": "initializing",
+                        "step": "enterprise_discovery_start",
                         "timestamp": datetime.now().isoformat()
                     })
                 except Exception:
                     pass
-            
-            databases.append(current_db)
-            
-            try:
-                await ProgressBus.publish(self.data_source.id, {
-                    "percentage": 95,
-                    "status": "processing",
-                    "step": "aggregate",
-                    "schemas_total": len(schema_names),
-                    "tables_total": total_tables_overall,
-                    "timestamp": datetime.now().isoformat()
-                })
-            except Exception:
-                pass
-            return {"databases": databases}
+                
+                # Execute enterprise discovery
+                result = await enterprise_discovery.discover_schemas()
+                
+                # Add success flag and discovery type
+                result["success"] = True
+                result["discovery_type"] = "postgresql_enterprise"
+                result["total_tables"] = result["discovery_metrics"]["tables_discovered"]
+                
+                # Emit final progress
+                try:
+                    await ProgressBus.publish(self.data_source.id, {
+                        "percentage": 100,
+                        "status": "completed",
+                        "step": "enterprise_discovery_completed",
+                        "metrics": result["discovery_metrics"],
+                        "timestamp": datetime.now().isoformat()
+                    })
+                except Exception:
+                    pass
+                
+                return result
+                
+            except Exception as e:
+                logger.error(f"Enterprise discovery failed: {e}")
+                raise
+            finally:
+                # Cleanup enterprise discovery resources
+                try:
+                    enterprise_discovery.cleanup()
+                except Exception as cleanup_error:
+                    logger.warning(f"Error during enterprise discovery cleanup: {cleanup_error}")
             
         except Exception as e:
-            logger.error(f"PostgreSQL schema discovery failed: {str(e)}")
+            logger.error(f"Enterprise PostgreSQL schema discovery failed: {str(e)}")
             raise
     
+    async def _get_batch_table_info_optimized(self, inspector, schema_name: str, table_names: List[str], engine) -> Dict[str, Any]:
+        """Get basic table information for multiple tables with minimal queries"""
+        if not table_names:
+            return {}
+        
+        result = {}
+        
+        # Use a single connection for all queries in this batch
+        with engine.connect() as conn:
+            # Build a single query to get all table metadata at once
+            table_list = "', '".join(table_names)
+            
+            # Get row counts and sizes for all tables in one query
+            metadata_query = text(f"""
+                SELECT 
+                    c.relname as table_name,
+                    c.reltuples::bigint as row_count,
+                    pg_total_relation_size(c.oid) as size_bytes
+                FROM pg_class c
+                JOIN pg_namespace n ON n.oid = c.relnamespace
+                WHERE n.nspname = :schema_name 
+                AND c.relname IN ('{table_list}')
+                AND c.relkind = 'r'
+            """)
+            
+            try:
+                metadata_result = conn.execute(metadata_query, {"schema_name": schema_name}).fetchall()
+                metadata_dict = {row.table_name: {"row_count": row.row_count, "size_bytes": row.size_bytes} for row in metadata_result}
+            except Exception as e:
+                logger.warning(f"Failed to get metadata for tables in {schema_name}: {e}")
+                metadata_dict = {}
+            
+            # For each table, get only basic column info (skip indexes and foreign keys for now)
+            for table_name in table_names:
+                try:
+                    # Get only basic column information
+                    columns = []
+                    for column in inspector.get_columns(table_name, schema=schema_name):
+                        columns.append({
+                            "name": column["name"],
+                            "data_type": str(column["type"]),
+                            "nullable": column.get("nullable", True),
+                            "default": str(column.get("default", "")),
+                            "primary_key": column.get("primary_key", False)
+                        })
+                    
+                    # Get metadata from our batch query
+                    metadata = metadata_dict.get(table_name, {"row_count": 0, "size_bytes": 0})
+                    
+                    result[table_name] = {
+                        "name": table_name,
+                        "columns": columns,
+                        "indexes": [],  # Skip for now to reduce queries
+                        "foreign_keys": [],  # Skip for now to reduce queries
+                        "row_count": metadata["row_count"],
+                        "size_bytes": metadata["size_bytes"]
+                    }
+                except Exception as e:
+                    # If individual table fails, provide basic info
+                    result[table_name] = {
+                        "name": table_name,
+                        "columns": [],
+                        "indexes": [],
+                        "foreign_keys": [],
+                        "row_count": 0,
+                        "size_bytes": 0,
+                        "error": str(e)
+                    }
+        
+        return result
+
+    async def _get_batch_table_info(self, inspector, schema_name: str, table_names: List[str], engine) -> Dict[str, Any]:
+        """Get detailed table information for multiple tables in one efficient query"""
+        if not table_names:
+            return {}
+        
+        result = {}
+        
+        # Use a single connection for all queries in this batch
+        with engine.connect() as conn:
+            # Build a single query to get all table metadata at once
+            table_list = "', '".join(table_names)
+            
+            # Get row counts and sizes for all tables in one query
+            metadata_query = text(f"""
+                SELECT 
+                    c.relname as table_name,
+                    c.reltuples::bigint as row_count,
+                    pg_total_relation_size(c.oid) as size_bytes
+                FROM pg_class c
+                JOIN pg_namespace n ON n.oid = c.relnamespace
+                WHERE n.nspname = :schema_name 
+                AND c.relname IN ('{table_list}')
+                AND c.relkind = 'r'
+            """)
+            
+            metadata_result = conn.execute(metadata_query, {"schema_name": schema_name}).fetchall()
+            metadata_dict = {row.table_name: {"row_count": row.row_count, "size_bytes": row.size_bytes} for row in metadata_result}
+            
+            # Process each table individually for columns, indexes, and foreign keys
+            # but with connection reuse
+            for table_name in table_names:
+                try:
+                    # Get columns
+                    columns = []
+                    for column in inspector.get_columns(table_name, schema=schema_name):
+                        columns.append({
+                            "name": column["name"],
+                            "data_type": str(column["type"]),
+                            "nullable": column.get("nullable", True),
+                            "default": str(column.get("default", "")),
+                            "primary_key": column.get("primary_key", False)
+                        })
+                    
+                    # Get indexes
+                    indexes = inspector.get_indexes(table_name, schema=schema_name)
+                    
+                    # Get foreign keys
+                    foreign_keys = inspector.get_foreign_keys(table_name, schema=schema_name)
+                    
+                    # Get metadata from our batch query
+                    metadata = metadata_dict.get(table_name, {"row_count": 0, "size_bytes": 0})
+                    
+                    result[table_name] = {
+                        "name": table_name,
+                        "columns": columns,
+                        "indexes": indexes,
+                        "foreign_keys": foreign_keys,
+                        "row_count": metadata["row_count"],
+                        "size_bytes": metadata["size_bytes"]
+                    }
+                except Exception as e:
+                    # If individual table fails, provide basic info
+                    result[table_name] = {
+                        "name": table_name,
+                        "columns": [],
+                        "indexes": [],
+                        "foreign_keys": [],
+                        "row_count": 0,
+                        "size_bytes": 0,
+                        "error": str(e)
+                    }
+        
+        return result
+
     async def _get_table_info(self, inspector, schema_name: str, table_name: str, engine) -> Dict[str, Any]:
-        """Get detailed table information"""
+        """Get detailed table information (legacy method for single table)"""
         columns = []
         for column in inspector.get_columns(table_name, schema=schema_name):
             columns.append({
@@ -1415,6 +1539,10 @@ class SnowflakeConnector(BaseConnector):
     async def get_table_preview(self, db_name: str, schema_name: str, table_name: str, limit: int = 100) -> List[Dict]:
         """Get preview of table data"""
         try:
+            password = self._get_password()
+            if not password:
+                raise ValueError("Failed to retrieve password")
+                
             connection_string = self._build_connection_string()
             conn = snowflake.connector.connect(
                 user=self.data_source.username,
@@ -1458,6 +1586,10 @@ class SnowflakeConnector(BaseConnector):
     async def get_column_profile(self, db_name: str, schema_name: str, table_name: str, column_name: str) -> Dict[str, Any]:
         """Get detailed column profile and statistics"""
         try:
+            password = self._get_password()
+            if not password:
+                raise ValueError("Failed to retrieve password")
+                
             connection_string = self._build_connection_string()
             conn = snowflake.connector.connect(
                 user=self.data_source.username,
@@ -2492,84 +2624,87 @@ class DataSourceConnectionService:
         return result
     
     async def discover_schema(self, data_source: DataSource) -> Dict[str, Any]:
-        """Discover full schema structure of the data source with retry logic"""
-        max_retries = 3
-        retry_delay = 2  # seconds
-        
-        for attempt in range(max_retries):
-            try:
-                # Emit initial progress
+        """Discover full schema structure of the data source with retry logic and concurrency control"""
+        # Use semaphore to limit concurrent schema discovery operations
+        async with _schema_discovery_semaphore:
+            max_retries = 3
+            retry_delay = 2  # seconds
+            
+            for attempt in range(max_retries):
                 try:
-                    await ProgressBus.publish(data_source.id, {
-                        "percentage": 1,
-                        "status": "starting",
-                        "step": "initialize",
-                        "timestamp": datetime.now().isoformat()
-                    })
-                except Exception:
-                    pass
-                connector = self._get_connector(data_source)
-                try:
-                    await ProgressBus.publish(data_source.id, {
-                        "percentage": 10,
-                        "status": "connecting",
-                        "step": "connect",
-                        "timestamp": datetime.now().isoformat()
-                    })
-                except Exception:
-                    pass
-                schema_info = await connector.discover_schema()
-                try:
-                    await ProgressBus.publish(data_source.id, {
-                        "percentage": 70,
-                        "status": "processing",
-                        "step": "build_summary",
-                        "timestamp": datetime.now().isoformat()
-                    })
-                except Exception:
-                    pass
-                
-                result = {
-                    "success": True,
-                    "data_source_id": data_source.id,
-                    "discovery_time": datetime.now().isoformat(),
-                    "schema": schema_info,
-                    "summary": self._generate_schema_summary(schema_info)
-                }
-                try:
-                    await ProgressBus.publish(data_source.id, {
-                        "percentage": 100,
-                        "status": "completed",
-                        "step": "done",
-                        "timestamp": datetime.now().isoformat()
-                    })
-                except Exception:
-                    pass
-                return result
-                
-            except Exception as e:
-                logger.warning(f"Schema discovery attempt {attempt + 1} failed for data source {data_source.id}: {str(e)}")
-                if attempt < max_retries - 1:
-                    logger.info(f"Retrying schema discovery in {retry_delay} seconds...")
-                    await asyncio.sleep(retry_delay)
-                    retry_delay *= 2  # Exponential backoff
-                else:
-                    logger.error(f"All {max_retries} attempts failed for data source {data_source.id}")
+                    # Emit initial progress
                     try:
                         await ProgressBus.publish(data_source.id, {
-                            "percentage": 100,
-                            "status": "failed",
-                            "step": "error",
-                            "error": str(e),
+                            "percentage": 1,
+                            "status": "starting",
+                            "step": "initialize",
                             "timestamp": datetime.now().isoformat()
                         })
                     except Exception:
                         pass
-                    return {
-                        "success": False,
-                        "error": str(e),
-                        "data_source_id": data_source.id
+                    connector = self._get_connector(data_source)
+                    try:
+                        await ProgressBus.publish(data_source.id, {
+                            "percentage": 10,
+                            "status": "connecting",
+                            "step": "connect",
+                            "timestamp": datetime.now().isoformat()
+                        })
+                    except Exception:
+                        pass
+                    schema_info = await connector.discover_schema()
+                    try:
+                        await ProgressBus.publish(data_source.id, {
+                            "percentage": 70,
+                            "status": "processing",
+                            "step": "build_summary",
+                            "timestamp": datetime.now().isoformat()
+                        })
+                    except Exception:
+                        pass
+                    
+                    result = {
+                        "success": True,
+                        "data_source_id": data_source.id,
+                        "discovery_time": datetime.now().isoformat(),
+                        "schema": schema_info,
+                        "summary": self._generate_schema_summary(schema_info)
                     }
+                    try:
+                        await ProgressBus.publish(data_source.id, {
+                            "percentage": 100,
+                            "status": "completed",
+                            "step": "done",
+                            "timestamp": datetime.now().isoformat()
+                        })
+                    except Exception:
+                        pass
+                    
+                    return result
+                    
+                except Exception as e:
+                    logger.warning(f"Schema discovery attempt {attempt + 1} failed for data source {data_source.id}: {str(e)}")
+                    if attempt < max_retries - 1:
+                        logger.info(f"Retrying schema discovery in {retry_delay} seconds...")
+                        await asyncio.sleep(retry_delay)
+                        retry_delay *= 2  # Exponential backoff
+                    else:
+                        logger.error(f"All {max_retries} attempts failed for data source {data_source.id}")
+                        try:
+                            await ProgressBus.publish(data_source.id, {
+                                "percentage": 100,
+                                "status": "failed",
+                                "step": "error",
+                                "error": str(e),
+                                "timestamp": datetime.now().isoformat()
+                            })
+                        except Exception:
+                            pass
+                        return {
+                            "success": False,
+                            "error": str(e),
+                            "data_source_id": data_source.id
+                        }
     
     async def get_table_preview(self, data_source: DataSource, schema_name: str, table_name: str, limit: int = 100) -> Dict[str, Any]:
         """Get preview of table data"""

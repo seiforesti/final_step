@@ -1,3 +1,4 @@
+import { cachedGet } from "../shared/utils/http-cache"
 // ============================================================================
 // ENTERPRISE BACKEND API INTEGRATION - COMPREHENSIVE BACKEND BINDING
 // ============================================================================
@@ -80,6 +81,9 @@ enterpriseApi.interceptors.request.use((config) => {
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
+    console.log('🔑 Auth token found and added to request:', config.url)
+  } else {
+    console.warn('⚠️ No auth token found for request:', config.url)
   }
   
   // Add request tracking
@@ -118,6 +122,8 @@ enterpriseApi.interceptors.request.use((config) => {
 // Enhanced response interceptor with enterprise error handling
 enterpriseApi.interceptors.response.use(
   (response) => {
+    console.log('✅ API Response received:', response.config.url, 'Status:', response.status)
+    
     // Calculate request duration
     const duration = Date.now() - (response.config.metadata?.startTime || Date.now())
     if (response.config.metadata) {
@@ -142,6 +148,8 @@ enterpriseApi.interceptors.response.use(
     return response
   },
   (error) => {
+    console.error('❌ API Error:', error.config?.url, 'Status:', error.response?.status, 'Message:', error.message)
+    
     // Calculate request duration
     const duration = Date.now() - (error.config?.metadata?.startTime || Date.now())
     
@@ -366,18 +374,21 @@ export interface ComplianceFramework {
 
 // Security APIs - UPDATED TO USE CORRECT ENDPOINTS
 export const getSecurityAudit = async (dataSourceId: number): Promise<any> => {
-  const { data } = await enterpriseApi.get(`/scan/data-sources/${dataSourceId}/security-audit`);
-  return data;
+  const token = (typeof window !== 'undefined' && (localStorage.getItem('authToken') || localStorage.getItem('auth_token'))) || ''
+  const url = `/proxy/scan/data-sources/${dataSourceId}/security-audit`
+  return cachedGet(url, { ttlMs: 30000, headers: token ? { Authorization: `Bearer ${token}` } : {} })
 };
 
 export const getSecurityScans = async (): Promise<any[]> => {
-  const { data } = await enterpriseApi.get('/security/scans');
-  return data;
+  const token = (typeof window !== 'undefined' && (localStorage.getItem('authToken') || localStorage.getItem('auth_token'))) || ''
+  const url = `/proxy/security/scans`
+  return cachedGet(url, { ttlMs: 30000, headers: token ? { Authorization: `Bearer ${token}` } : {} })
 };
 
 export const getComplianceChecks = async (): Promise<any[]> => {
-  const { data } = await enterpriseApi.get('/security/compliance/checks');
-  return data;
+  const token = (typeof window !== 'undefined' && (localStorage.getItem('authToken') || localStorage.getItem('auth_token'))) || ''
+  const url = `/proxy/security/compliance/checks`
+  return cachedGet(url, { ttlMs: 60000, headers: token ? { Authorization: `Bearer ${token}` } : {} })
 };
 
 export const getThreatDetection = async (): Promise<any[]> => {
@@ -458,9 +469,9 @@ export const getPerformanceMetrics = async (request: PerformanceMetricsRequest):
   const params = new URLSearchParams()
   if (request.time_range) params.append('time_range', request.time_range)
   if (request.metric_types) request.metric_types.forEach(type => params.append('metric_types', type))
-  
-  const { data } = await enterpriseApi.get(`/performance/metrics/${request.data_source_id}?${params.toString()}`)
-  return data
+  const token = (typeof window !== 'undefined' && (localStorage.getItem('authToken') || localStorage.getItem('auth_token'))) || ''
+  const url = `/proxy/performance/metrics/${request.data_source_id}?${params.toString()}`
+  return cachedGet(url, { ttlMs: 30000, headers: token ? { Authorization: `Bearer ${token}` } : {} })
 }
 
 export const createPerformanceMetric = async (metric: Omit<PerformanceMetric, 'id' | 'created_at' | 'updated_at'>): Promise<PerformanceMetric> => {
@@ -652,8 +663,9 @@ export const executeTask = async (task_id: number, triggered_by: string): Promis
 
 export const getTaskStats = async (data_source_id?: number): Promise<TaskStats> => {
   const params = data_source_id ? `?data_source_id=${data_source_id}` : ''
-  const { data } = await enterpriseApi.get(`/scan/tasks/stats${params}`)
-  return data
+  const token = (typeof window !== 'undefined' && (localStorage.getItem('authToken') || localStorage.getItem('auth_token'))) || ''
+  const url = `/proxy/scan/tasks/stats${params}`
+  return cachedGet(url, { ttlMs: 30000, headers: token ? { Authorization: `Bearer ${token}` } : {} })
 }
 
 // ============================================================================
@@ -816,8 +828,9 @@ export interface ReportStats {
 // Report APIs - UPDATED TO USE CORRECT ENDPOINTS
 export const getReports = async (data_source_id?: number): Promise<ReportResponse[]> => {
   const params = data_source_id ? `?data_source_id=${data_source_id}` : ''
-        const { data } = await enterpriseApi.get(`/reports${params}`)  // Fixed: use correct backend route
-  return data
+  const token = (typeof window !== 'undefined' && (localStorage.getItem('authToken') || localStorage.getItem('auth_token'))) || ''
+  const url = `/proxy/reports${params}`
+  return cachedGet(url, { ttlMs: 45000, headers: token ? { Authorization: `Bearer ${token}` } : {} })
 }
 
 export const createReport = async (report: Omit<ReportResponse, 'id' | 'status' | 'created_at' | 'updated_at'>): Promise<ReportResponse> => {
@@ -832,8 +845,9 @@ export const generateReport = async (report_id: number, user_id: string): Promis
 
 export const getReportStats = async (data_source_id?: number): Promise<ReportStats> => {
   const params = data_source_id ? `?data_source_id=${data_source_id}` : ''
-  const { data } = await enterpriseApi.get(`/reports/stats${params}`)  // Fixed: use correct backend route
-  return data
+  const token = (typeof window !== 'undefined' && (localStorage.getItem('authToken') || localStorage.getItem('auth_token'))) || ''
+  const url = `/proxy/reports/stats${params}`
+  return cachedGet(url, { ttlMs: 45000, headers: token ? { Authorization: `Bearer ${token}` } : {} })
 }
 
 // ============================================================================
@@ -883,8 +897,9 @@ export interface VersionStats {
 
 // Version APIs - UPDATED TO USE CORRECT ENDPOINTS
 export const getVersionHistory = async (data_source_id: number): Promise<VersionResponse[]> => {
-        const { data } = await enterpriseApi.get(`/versions/${data_source_id}`)  // Fixed: use correct backend route
-  return data
+  const token = (typeof window !== 'undefined' && (localStorage.getItem('authToken') || localStorage.getItem('auth_token'))) || ''
+  const url = `/proxy/versions/${data_source_id}`
+  return cachedGet(url, { ttlMs: 60000, headers: token ? { Authorization: `Bearer ${token}` } : {} })
 }
 
 export const createVersion = async (version: Omit<VersionResponse, 'id' | 'created_at' | 'is_current'>): Promise<VersionResponse> => {
@@ -1854,14 +1869,15 @@ export const getWorkflowExecutions = async (filters?: {
   if (filters?.workflow_id) params.append('workflow_id', filters.workflow_id)
   if (filters?.status) params.append('status', filters.status)
   if (filters?.days) params.append('days', filters.days.toString())
-  
-  const { data } = await enterpriseApi.get(`/workflow/executions?${params.toString()}`)
-  return data.data || data
+  const token = (typeof window !== 'undefined' && (localStorage.getItem('authToken') || localStorage.getItem('auth_token'))) || ''
+  const url = `/proxy/workflow/executions?${params.toString()}`
+  return cachedGet(url, { ttlMs: 30000, headers: token ? { Authorization: `Bearer ${token}` } : {} })
 }
 
 export const getWorkflowExecutionDetails = async (executionId: string): Promise<WorkflowExecution> => {
-  const { data } = await enterpriseApi.get(`/workflow/executions/${executionId}`)
-  return data.data || data
+  const token = (typeof window !== 'undefined' && (localStorage.getItem('authToken') || localStorage.getItem('auth_token'))) || ''
+  const url = `/proxy/workflow/executions/${executionId}`
+  return cachedGet(url, { ttlMs: 30000, headers: token ? { Authorization: `Bearer ${token}` } : {} })
 }
 
 export const createApprovalWorkflow = async (approvalData: {
@@ -2187,9 +2203,9 @@ export interface PerformanceReport {
 export const getSystemHealth = async (include_detailed: boolean = false): Promise<SystemHealth> => {
   const params = new URLSearchParams()
   if (include_detailed) params.append('include_detailed', 'true')
-  
-  const { data } = await enterpriseApi.get(`/performance/system/health?${params.toString()}`)
-  return data.data || data
+  const token = (typeof window !== 'undefined' && (localStorage.getItem('authToken') || localStorage.getItem('auth_token'))) || ''
+  const url = `/proxy/performance/system/health?${params.toString()}`
+  return cachedGet(url, { ttlMs: 30000, headers: token ? { Authorization: `Bearer ${token}` } : {} })
 }
 
 export const getEnhancedPerformanceMetrics = async (dataSourceId: number, options?: {
@@ -2201,9 +2217,9 @@ export const getEnhancedPerformanceMetrics = async (dataSourceId: number, option
   if (options?.metric_types) {
     options.metric_types.forEach(type => params.append('metric_types', type))
   }
-  
-  const { data } = await enterpriseApi.get(`/performance/metrics/${dataSourceId}?${params.toString()}`)
-  return data.data || data
+  const token = (typeof window !== 'undefined' && (localStorage.getItem('authToken') || localStorage.getItem('auth_token'))) || ''
+  const url = `/proxy/performance/metrics/${dataSourceId}?${params.toString()}`
+  return cachedGet(url, { ttlMs: 30000, headers: token ? { Authorization: `Bearer ${token}` } : {} })
 }
 
 export const getPerformanceAlerts = async (filters?: {
@@ -2216,9 +2232,9 @@ export const getPerformanceAlerts = async (filters?: {
     if (filters?.severity) params.append('severity', filters.severity)
     if (filters?.status) params.append('status', filters.status)
     if (filters?.days) params.append('days', filters.days.toString())
-    
-    const { data } = await enterpriseApi.get(`/performance/alerts?${params.toString()}`)
-    return data.data || data
+    const token = (typeof window !== 'undefined' && (localStorage.getItem('authToken') || localStorage.getItem('auth_token'))) || ''
+    const url = `/proxy/performance/alerts?${params.toString()}`
+    return cachedGet(url, { ttlMs: 15000, headers: token ? { Authorization: `Bearer ${token}` } : {} })
   } catch (error) {
     console.error('Error fetching performance alerts:', error)
     return []
@@ -2244,9 +2260,9 @@ export const getPerformanceThresholds = async (dataSourceId?: number): Promise<P
   try {
     const params = new URLSearchParams()
     if (dataSourceId) params.append('data_source_id', dataSourceId.toString())
-    
-    const { data } = await enterpriseApi.get(`/performance/thresholds?${params.toString()}`)
-    return data.data || data
+    const token = (typeof window !== 'undefined' && (localStorage.getItem('authToken') || localStorage.getItem('auth_token'))) || ''
+    const url = `/proxy/performance/thresholds?${params.toString()}`
+    return cachedGet(url, { ttlMs: 60000, headers: token ? { Authorization: `Bearer ${token}` } : {} })
   } catch (error) {
     console.error('Error fetching performance thresholds:', error)
     return []
@@ -2269,9 +2285,9 @@ export const getPerformanceTrends = async (dataSourceId?: number, time_range: st
     const params = new URLSearchParams()
     if (dataSourceId) params.append('data_source_id', dataSourceId.toString())
     params.append('time_range', time_range)
-    
-    const { data } = await enterpriseApi.get(`/performance/analytics/trends?${params.toString()}`)
-    return data.data || data
+    const token = (typeof window !== 'undefined' && (localStorage.getItem('authToken') || localStorage.getItem('auth_token'))) || ''
+    const url = `/proxy/performance/analytics/trends?${params.toString()}`
+    return cachedGet(url, { ttlMs: 45000, headers: token ? { Authorization: `Bearer ${token}` } : {} })
   } catch (error) {
     console.error('Error fetching performance trends:', error)
     return []
@@ -3249,10 +3265,17 @@ export const useStartSecurityMonitoringMutation = () => {
 // ============================================================================
 
 export interface SchemaDiscoveryRequest {
-  data_source_id: number
+  data_source_id?: number // Optional since it can be passed as URL parameter
   include_data_preview?: boolean
   auto_catalog?: boolean
   max_tables_per_schema?: number
+  include_views?: boolean
+  include_stored_procedures?: boolean
+  sample_size?: number
+  include_columns?: boolean
+  include_indexes?: boolean
+  include_constraints?: boolean
+  timeout_seconds?: number
 }
 
 export interface SchemaDiscoveryResult {
@@ -3305,8 +3328,11 @@ export const syncCatalogWithDataSource = async (dataSourceId: number): Promise<S
 }
 
 export const getDiscoveryStatus = async (dataSourceId: number): Promise<StandardResponse> => {
-  const { data } = await enterpriseApi.get(`/data-discovery/data-sources/${dataSourceId}/discovery-status`)
-  return data
+  // Use cached GET to avoid repeated hits on navigation
+  const token = (typeof window !== 'undefined' && (localStorage.getItem('authToken') || localStorage.getItem('auth_token'))) || ''
+  const url = `/proxy/data-discovery/data-sources/${dataSourceId}/discovery-status`
+  const res = await cachedGet(url, { ttlMs: 15000, headers: token ? { Authorization: `Bearer ${token}` } : {} })
+  return res
 }
 
 export const stopDiscovery = async (dataSourceId: number): Promise<StandardResponse> => {
@@ -3319,33 +3345,75 @@ export const discoverSchemaWithOptions = async (
   options: SchemaDiscoveryRequest,
   config?: { signal?: AbortSignal }
 ): Promise<StandardResponse> => {
-  const { data } = await enterpriseApi.post(
-    `/data-discovery/data-sources/${dataSourceId}/discover-schema`,
-    options,
-    config
-  )
-  // Normalize response to { success, data: { schema_structure, summary, discovery_time } }
-  const hasEnvelope = typeof data === 'object' && data !== null && 'success' in data && 'data' in data
-  if (hasEnvelope) {
-    const payload = data.data || {}
-    return {
-      success: data.success === true,
-      message: data.message || 'ok',
+  console.log('🚀 discoverSchemaWithOptions called with:', { dataSourceId, options, config })
+  
+  // Check authentication token
+  const token = localStorage.getItem('authToken') || localStorage.getItem('auth_token') || ''
+  console.log('🔑 Auth token available:', token ? 'YES' : 'NO')
+  console.log('🔑 Token preview:', token ? token.substring(0, 20) + '...' : 'NONE')
+  
+  // Override timeout for long-running discovery operations
+  const requestConfig = {
+    ...config,
+    timeout: 600000, // 10 minutes timeout for enterprise discovery
+  }
+  
+  console.log('📡 Making API request to:', `/data-discovery/data-sources/${dataSourceId}/discover-schema`)
+  console.log('📊 Request options:', options)
+  console.log('⏱️ Request config:', requestConfig)
+  console.log('🌐 API Base URL:', API_BASE_URL)
+  
+  try {
+    const { data } = await enterpriseApi.post(
+      `/data-discovery/data-sources/${dataSourceId}/discover-schema`,
+      options,
+      requestConfig
+    )
+    
+    console.log('✅ API Response received:', data)
+    
+    // Normalize response to { success, data: { schema_structure, summary, discovery_time } }
+    const hasEnvelope = typeof data === 'object' && data !== null && 'success' in data && 'data' in data
+    if (hasEnvelope) {
+      const payload = data.data || {}
+      const result = {
+        success: data.success === true,
+        message: data.message || 'ok',
+        data: {
+          schema_structure: payload.schema_structure || payload.schema || {},
+          summary: payload.summary || {},
+          discovery_time: payload.discovery_time || new Date().toISOString(),
+        }
+      }
+      console.log('📦 Normalized response:', result)
+      return result
+    }
+    // Raw response (legacy) -> wrap
+    const result = {
+      success: true,
+      message: 'ok',
       data: {
-        schema_structure: payload.schema_structure || payload.schema || {},
-        summary: payload.summary || {},
-        discovery_time: payload.discovery_time || new Date().toISOString(),
+        schema_structure: data?.schema_structure || data?.schema || {},
+        summary: data?.summary || {},
+        discovery_time: data?.discovery_time || new Date().toISOString(),
       }
     }
-  }
-  // Raw response (legacy) -> wrap
-  return {
-    success: true,
-    message: 'ok',
-    data: {
-      schema_structure: data?.schema_structure || data?.schema || {},
-      summary: data?.summary || {},
-      discovery_time: new Date().toISOString(),
+    console.log('📦 Legacy response wrapped:', result)
+    return result
+  } catch (error: any) {
+    console.error('❌ API Error:', error)
+    console.error('❌ Error details:', {
+      message: error.message,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      config: error.config
+    })
+    
+    return {
+      success: false,
+      message: error.message || 'Enterprise discovery failed',
+      error: error.response?.data || error.message
     }
   }
 }
@@ -3355,8 +3423,10 @@ export const getDataSourceCatalog = async (dataSourceId: number, opts?: { select
   if (opts?.selectionOnly) {
     params.tag = 'selection:selected'
   }
-  const { data } = await enterpriseApi.get(`/scan/data-sources/${dataSourceId}/catalog`, { params })
-  return data
+  const token = (typeof window !== 'undefined' && (localStorage.getItem('authToken') || localStorage.getItem('auth_token'))) || ''
+  const query = new URLSearchParams(params).toString()
+  const url = `/proxy/scan/data-sources/${dataSourceId}/catalog${query ? `?${query}` : ''}`
+  return cachedGet(url, { ttlMs: 60000, headers: token ? { Authorization: `Bearer ${token}` } : {} })
 }
 
 export const useDataSourceCatalogQuery = (dataSourceId: number, options: any = {}) => {
@@ -3366,7 +3436,9 @@ export const useDataSourceCatalogQuery = (dataSourceId: number, options: any = {
     queryFn: () => getDataSourceCatalog(dataSourceId, { selectionOnly }),
     enabled: !!dataSourceId,
     staleTime: 300000, // 5 minutes
-    refetchInterval: 600000, // 10 minutes
+    refetchInterval: false,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
     ...options,
   })
 }

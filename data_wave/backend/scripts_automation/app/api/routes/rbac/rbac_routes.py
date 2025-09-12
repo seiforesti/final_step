@@ -1,6 +1,7 @@
 print("=== rbac_routes.py loaded ===")
 # --- Advanced CRUD for Condition Templates (append at end) ---
 from pydantic import BaseModel
+import logging
 
 from sqlalchemy.orm import Session
 from typing import List, Optional
@@ -14,8 +15,10 @@ from fastapi import APIRouter, Depends, Body, HTTPException
 
 
 
-from fastapi import APIRouter, Depends, HTTPException, Body, Cookie, Request, Header
+from fastapi import APIRouter, Depends, HTTPException, Body, Cookie, Request, Header, WebSocket, WebSocketDisconnect
 from app.db_session import get_session
+import asyncio
+import json
 from app.services.auth_service import get_session_by_token, assign_role_to_user
 from app.models.auth_models import User, Role, UserRole, Permission, ResourceRole, AccessRequest, RbacAuditLog
 from app.services.role_service import (
@@ -24,10 +27,54 @@ from app.services.role_service import (
     assign_resource_role, list_resource_roles, create_access_request, review_access_request, log_rbac_action, list_rbac_audit_logs
 )
 
+# Create logger instance
+logger = logging.getLogger(__name__)
 
-import logging
+# RBAC WebSocket connection manager for real-time permission updates
+class RbacWebSocketManager:
+    def __init__(self):
+        self.active_connections: List[WebSocket] = []
+        self.lock = asyncio.Lock()
+    
+    async def connect(self, websocket: WebSocket):
+        await websocket.accept()
+        async with self.lock:
+            self.active_connections.append(websocket)
+        logger.info("RBAC WebSocket connected")
+    
+    async def disconnect(self, websocket: WebSocket):
+        async with self.lock:
+            if websocket in self.active_connections:
+                self.active_connections.remove(websocket)
+        logger.info("RBAC WebSocket disconnected")
+    
+    async def broadcast_permission_update(self, resource: str, permissions: dict):
+        async with self.lock:
+            disconnected = []
+            for websocket in self.active_connections:
+                try:
+                    message = {
+                        "type": "permission_update",
+                        "resource": resource,
+                        "permissions": permissions,
+                        "timestamp": datetime.now().isoformat()
+                    }
+                    await websocket.send_text(json.dumps(message))
+                except Exception as e:
+                    logger.warning(f"Failed to send RBAC WebSocket message: {e}")
+                    disconnected.append(websocket)
+            
+            # Remove disconnected websockets
+            for ws in disconnected:
+                self.active_connections.remove(ws)
+
+# Global RBAC WebSocket manager
+rbac_websocket_manager = RbacWebSocketManager()
+
 from datetime import datetime
 from app.models.auth_models import ConditionTemplate
+import json
+import asyncio
 from sqlalchemy import func
 
 # Pydantic model for role update
@@ -89,6 +136,46 @@ class RoleCreate(BaseModel):
 
 
 router = APIRouter(prefix="/rbac", tags=["RBAC"])
+
+@router.websocket("/permissions")
+async def websocket_rbac_permissions(websocket: WebSocket):
+    """WebSocket endpoint for real-time RBAC permission updates"""
+    await rbac_websocket_manager.connect(websocket)
+    try:
+        while True:
+            # Keep connection alive and handle any incoming messages
+            try:
+                data = await websocket.receive_text()
+                message = json.loads(data)
+                
+                # Handle different message types
+                if message.get("type") == "ping":
+                    await websocket.send_text(json.dumps({"type": "pong", "timestamp": datetime.now().isoformat()}))
+                elif message.get("type") == "get_permissions":
+                    # Send current permissions for the requested resource
+                    resource = message.get("resource", "")
+                    # This would typically query the database for current permissions
+                    # For now, send a placeholder response
+                    permissions = {
+                        "resource": resource,
+                        "hasPermission": True,  # This should be determined by actual RBAC logic
+                        "permissions": ["scan.view", "scan.edit"],  # Example permissions
+                        "timestamp": datetime.now().isoformat()
+                    }
+                    await websocket.send_text(json.dumps({
+                        "type": "permission_update",
+                        "resource": resource,
+                        "permissions": permissions
+                    }))
+                    
+            except WebSocketDisconnect:
+                break
+            except Exception as e:
+                logger.warning(f"RBAC WebSocket error: {e}")
+                break
+                
+    finally:
+        await rbac_websocket_manager.disconnect(websocket)
 
 # --- Condition Templates Endpoint ---
 

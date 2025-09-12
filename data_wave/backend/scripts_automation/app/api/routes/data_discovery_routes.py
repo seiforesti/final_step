@@ -36,18 +36,62 @@ router = APIRouter(prefix="/data-discovery", tags=["data-discovery"])
 _discovery_lock = Lock()
 _active_discoveries: Dict[int, str] = {}  # data_source_id -> user_id
 
+# WebSocket connection manager for real-time updates
+class DiscoveryWebSocketManager:
+    def __init__(self):
+        self.active_connections: Dict[int, List[WebSocket]] = {}  # data_source_id -> [websockets]
+        self.lock = asyncio.Lock()
+    
+    async def connect(self, websocket: WebSocket, data_source_id: int):
+        await websocket.accept()
+        async with self.lock:
+            if data_source_id not in self.active_connections:
+                self.active_connections[data_source_id] = []
+            self.active_connections[data_source_id].append(websocket)
+        logger.info(f"WebSocket connected for data source {data_source_id}")
+    
+    async def disconnect(self, websocket: WebSocket, data_source_id: int):
+        async with self.lock:
+            if data_source_id in self.active_connections:
+                self.active_connections[data_source_id].remove(websocket)
+                if not self.active_connections[data_source_id]:
+                    del self.active_connections[data_source_id]
+        logger.info(f"WebSocket disconnected for data source {data_source_id}")
+    
+    async def broadcast_to_data_source(self, data_source_id: int, message: dict):
+        async with self.lock:
+            if data_source_id in self.active_connections:
+                disconnected = []
+                for websocket in self.active_connections[data_source_id]:
+                    try:
+                        await websocket.send_text(json.dumps(message))
+                    except Exception as e:
+                        logger.warning(f"Failed to send WebSocket message: {e}")
+                        disconnected.append(websocket)
+                
+                # Remove disconnected websockets
+                for ws in disconnected:
+                    self.active_connections[data_source_id].remove(ws)
+
+# Global WebSocket manager
+websocket_manager = DiscoveryWebSocketManager()
+
 # Initialize services
 connection_service = DataSourceConnectionService()
 
 # Enhanced Request/Response Models
 class SchemaDiscoveryRequest(BaseModel):
-    data_source_id: int = Field(..., description="ID of the data source to discover")
     include_data_preview: bool = Field(default=False, description="Whether to include data previews")
     auto_catalog: bool = Field(default=False, description="Whether to automatically catalog discovered schema")
     max_tables_per_schema: int = Field(
-        default=100, ge=1, le=1000,
+        default=100, ge=1, le=5000,
         description="Maximum number of tables to discover per schema"
     )
+    include_columns: bool = Field(default=True, description="Whether to include column information")
+    include_indexes: bool = Field(default=True, description="Whether to include index information")
+    include_constraints: bool = Field(default=True, description="Whether to include constraint information")
+    sample_size: int = Field(default=1000, ge=1, le=10000, description="Sample size for data previews")
+    timeout_seconds: int = Field(default=300, ge=30, le=3600, description="Timeout in seconds")
 
 class TablePreviewRequest(BaseModel):
     data_source_id: int = Field(..., description="ID of the data source")
@@ -90,6 +134,40 @@ class StandardResponse(BaseModel):
     data: Optional[Dict[str, Any]] = Field(default=None, description="Response data")
     error: Optional[str] = Field(default=None, description="Error message if any")
 
+@router.websocket("/data-sources/{data_source_id}/discovery-status")
+async def websocket_discovery_status(websocket: WebSocket, data_source_id: int):
+    """WebSocket endpoint for real-time discovery status updates"""
+    await websocket_manager.connect(websocket, data_source_id)
+    try:
+        while True:
+            # Keep connection alive and handle any incoming messages
+            try:
+                data = await websocket.receive_text()
+                message = json.loads(data)
+                
+                # Handle different message types
+                if message.get("type") == "ping":
+                    await websocket.send_text(json.dumps({"type": "pong", "timestamp": datetime.now().isoformat()}))
+                elif message.get("type") == "get_status":
+                    # Send current discovery status
+                    status = {
+                        "type": "status_update",
+                        "data_source_id": data_source_id,
+                        "is_running": data_source_id in _active_discoveries,
+                        "active_user": _active_discoveries.get(data_source_id),
+                        "timestamp": datetime.now().isoformat()
+                    }
+                    await websocket.send_text(json.dumps(status))
+                    
+            except WebSocketDisconnect:
+                break
+            except Exception as e:
+                logger.warning(f"WebSocket error: {e}")
+                break
+                
+    finally:
+        await websocket_manager.disconnect(websocket, data_source_id)
+
 @router.post("/data-sources/{data_source_id}/discover-schema", response_model=StandardResponse)
 async def discover_data_source_schema(
     data_source_id: int,
@@ -112,6 +190,14 @@ async def discover_data_source_schema(
             )
         # Mark this discovery as active
         _active_discoveries[data_source_id] = current_user.get("username", "unknown")
+        
+        # Broadcast discovery started via WebSocket
+        await websocket_manager.broadcast_to_data_source(data_source_id, {
+            "type": "discovery_started",
+            "data_source_id": data_source_id,
+            "user": current_user.get("username", "unknown"),
+            "timestamp": datetime.now().isoformat()
+        })
     
     try:
         # Get data source
@@ -193,7 +279,16 @@ async def discover_data_source_schema(
     finally:
         # Always clean up the discovery lock
         with _discovery_lock:
+            was_running = data_source_id in _active_discoveries
             _active_discoveries.pop(data_source_id, None)
+        
+        # Broadcast discovery completed via WebSocket
+        if was_running:
+            await websocket_manager.broadcast_to_data_source(data_source_id, {
+                "type": "discovery_completed",
+                "data_source_id": data_source_id,
+                "timestamp": datetime.now().isoformat()
+            })
 
 @router.get("/data-sources/{data_source_id}/discovery-status")
 async def get_discovery_status(
@@ -232,6 +327,15 @@ async def stop_discovery(
         if was_running:
             _active_discoveries.pop(data_source_id, None)
     
+    # Broadcast discovery stopped via WebSocket
+    if was_running:
+        await websocket_manager.broadcast_to_data_source(data_source_id, {
+            "type": "discovery_stopped",
+            "data_source_id": data_source_id,
+            "stopped_by": current_user.get("username", "unknown"),
+            "timestamp": datetime.now().isoformat()
+        })
+    
     return StandardResponse(
         success=True,
         message="Discovery stopped" if was_running else "No discovery was running",
@@ -242,6 +346,162 @@ async def stop_discovery(
         },
         error=None
     )
+
+@router.post("/data-sources/{data_source_id}/catalog-selected-items", response_model=StandardResponse)
+async def catalog_selected_schema_items(
+    data_source_id: int,
+    payload: Any = Body(..., description="Either a list of items or an object with {selected_items, action}"),
+    session: Session = Depends(get_session),
+    current_user: Dict[str, Any] = Depends(require_permission(PERMISSION_SCAN_EDIT))
+):
+    """
+    Catalog only the selected schema items instead of all discovered items.
+    This allows users to selectively catalog specific tables, columns, or schemas.
+    """
+    try:
+        # Get data source
+        data_source = DataSourceService.get_data_source(session, data_source_id)
+        if not data_source:
+            return StandardResponse(
+                success=False,
+                message="Data source not found",
+                error="Data source not found",
+                data=None
+            )
+        
+        # Support both legacy (array) and new (object) payloads
+        if isinstance(payload, list):
+            selected_items = payload
+            action = 'add_new'
+        elif isinstance(payload, dict):
+            selected_items = payload.get('selected_items') or payload.get('items') or []
+            action = payload.get('action') or 'add_new'
+        else:
+            selected_items = []
+            action = 'add_new'
+
+        # Validate selected items
+        if not selected_items:
+            return StandardResponse(
+                success=False,
+                message="No items selected for cataloging",
+                error="Selected items list is empty",
+                data=None
+            )
+        
+        # Use catalog service to process selected items
+        from app.services.catalog_service import EnhancedCatalogService
+        catalog_service = EnhancedCatalogService()
+        
+        # Discover schema first to get the full schema data
+        discovery_result = await connection_service.discover_schema(data_source)
+        if not discovery_result["success"]:
+            return StandardResponse(
+                success=False,
+                message="Schema discovery failed",
+                error=discovery_result.get("error", "Unknown discovery error"),
+                data=None
+            )
+        
+        # Process only selected items with action semantics
+        catalog_result = await catalog_service.discover_and_catalog_schema(
+            session,
+            data_source_id,
+            current_user.get("username", "system"),
+            force_refresh=True,
+            selected_items=selected_items
+        )
+        
+        if catalog_result.success:
+            resp = StandardResponse(
+                success=True,
+                message=f"Successfully cataloged {catalog_result.discovered_items} selected items",
+                data={
+                    "discovered_items": catalog_result.discovered_items,
+                    "selected_items_count": len(selected_items),
+                    "processing_time_seconds": catalog_result.processing_time_seconds,
+                    "warnings": catalog_result.warnings,
+                    "data_source_info": catalog_result.data_source_info,
+                    "action": action
+                },
+                error=None
+            )
+            return resp
+        else:
+            return StandardResponse(
+                success=False,
+                message="Failed to catalog selected items",
+                error="; ".join(catalog_result.errors),
+                data={
+                    "discovered_items": catalog_result.discovered_items,
+                    "warnings": catalog_result.warnings
+                }
+            )
+    
+    except Exception as e:
+        logger.error(f"Error cataloging selected items for data source {data_source_id}: {e}")
+        return StandardResponse(
+            success=False,
+            message="Internal server error during cataloging",
+            error=str(e),
+            data=None
+        )
+
+@router.post("/data-sources/{data_source_id}/validate-selected-items", response_model=StandardResponse)
+async def validate_selected_items(
+    data_source_id: int,
+    selected_items: List[Dict[str, Any]] = Body(..., description="List of selected schema items to validate"),
+    session: Session = Depends(get_session),
+    current_user: Dict[str, Any] = Depends(require_permission(PERMISSION_SCAN_VIEW))
+):
+    """
+    Validate selected items against existing catalog entries.
+    Returns detailed information about conflicts and recommendations.
+    """
+    try:
+        # Get data source
+        data_source = DataSourceService.get_data_source(session, data_source_id)
+        if not data_source:
+            return StandardResponse(
+                success=False,
+                message="Data source not found",
+                error="Data source not found",
+                data=None
+            )
+        
+        # Validate selected items
+        if not selected_items:
+            return StandardResponse(
+                success=False,
+                message="No items selected for validation",
+                error="Selected items list is empty",
+                data=None
+            )
+        
+        # Use catalog service to validate items
+        from app.services.catalog_service import EnhancedCatalogService
+        catalog_service = EnhancedCatalogService()
+        
+        # Check existing items and generate recommendations
+        validation_result = await catalog_service.validate_selected_items(
+            session, data_source_id, selected_items
+        )
+        
+        return StandardResponse(
+            success=True,
+            message="Validation completed successfully",
+            data=validation_result,
+            error=None
+        )
+    
+    except Exception as e:
+        logger.error(f"Error validating selected items for data source {data_source_id}: {e}")
+        return StandardResponse(
+            success=False,
+            message="Internal server error during validation",
+            error=str(e),
+            data=None
+        )
 
 @router.post("/data-sources/{data_source_id}/discover-and-catalog", response_model=StandardResponse)
 async def discover_and_catalog_schema(

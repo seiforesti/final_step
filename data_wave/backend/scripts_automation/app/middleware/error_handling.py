@@ -46,6 +46,14 @@ async def error_handling_middleware(request: Request, call_next):
                 content=safe_json_response(error_details)
             )
         
+        # Handle client disconnect errors
+        if ("ClientDisconnect" in error_msg or 
+            "EndOfStream" in error_msg or 
+            "WouldBlock" in error_msg):
+            logger.warning(f"Client disconnected: {error_msg}")
+            # Don't return a response for client disconnects
+            return Response(status_code=499)  # Client Closed Request
+        
         # Handle database connection errors
         if "database" in error_msg.lower() or "connection" in error_msg.lower():
             logger.error(f"Database error: {error_msg}")

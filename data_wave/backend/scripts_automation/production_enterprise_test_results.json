@@ -1,0 +1,19 @@
+{
+  "start_time": "2025-09-10T22:43:51.017028",
+  "tests": {
+    "enterprise_discovery": {
+      "status": "error",
+      "error": "Class <class 'sqlalchemy.sql.elements.SQLCoreOperations'> directly inherits TypingOnly but has additional attributes {'__firstlineno__', '__static_attributes__'}."
+    },
+    "exhaustion_prevention": {
+      "status": "error",
+      "error": "Class <class 'sqlalchemy.sql.elements.SQLCoreOperations'> directly inherits TypingOnly but has additional attributes {'__firstlineno__', '__static_attributes__'}."
+    },
+    "enterprise_metrics": {
+      "status": "error",
+      "error": "Class <class 'sqlalchemy.sql.elements.SQLCoreOperations'> directly inherits TypingOnly but has additional attributes {'__firstlineno__', '__static_attributes__'}."
+    }
+  },
+  "end_time": "2025-09-10T22:43:51.294845",
+  "status": "completed"
+}

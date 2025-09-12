@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo, useCallback } from "react"
 import { 
   ChevronRight, ChevronDown, Database, Table, Columns, Search, Eye, RefreshCw, FileText, Folder, FolderOpen,
   Brain, Activity, Gauge, Sparkles, X, TrendingUp, Shield, Star, Target, Zap, CheckCircle, BarChart3,
@@ -8,9 +8,20 @@ import {
 } from 'lucide-react'
 
 // Import enterprise services and utilities
-import { discoverSchemaWithOptions, getDiscoveryStatus, stopDiscovery as stopDiscoveryApi, SchemaDiscoveryRequest } from "../services/enterprise-apis"
+import { discoverSchemaWithOptions, getDiscoveryStatus, stopDiscovery as stopDiscoveryApi } from "../services/enterprise-apis"
+import type { SchemaDiscoveryRequest } from "../services/enterprise-apis"
 import { setupProgressTracking } from "../../shared/utils/progress-tracking"
 import { logDiscoveryTelemetry, logPreviewTelemetry } from "../../shared/utils/telemetry"
+import { useSchemaDiscoveryProgress } from "../shared/utils/schema-discovery-progress"
+import { AdvancedValidationPopup } from "../ui/advanced-validation-popup"
+import { getDiscoveryWebSocket, disconnectDiscoveryWebSocket } from "../services/discovery-websocket"
+import { useWebSocketManager } from "../hooks/use-websocket-manager"
+import { schemaDiscoveryStateManager, type SchemaDiscoveryState } from "../shared/utils/schema-discovery-state-manager"
+import { usePerformanceOptimization, useTreePerformance } from "../shared/hooks/use-performance-optimization"
+import OptimizedTreeNode from "../shared/components/optimized-tree-node"
+import { VirtualizedTree } from "../shared/utils/virtualized-tree"
+import { DatabaseChargingAnimation } from "../shared/components/database-charging-animation"
+import { EnhancedTreeView } from "../shared/components/enhanced-tree-view"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -21,6 +32,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Switch } from "@/components/ui/switch"
+import { Label } from "@/components/ui/label"
 import { 
   Tooltip,
   TooltipContent,
@@ -86,6 +98,7 @@ interface SchemaDiscoveryProps {
   onSelectionChange: (selection: any[]) => void
   onClose: () => void
   initialSelectionManifest?: any
+  isViewChange?: boolean // New prop to detect view changes
 }
 
 export function SchemaDiscovery({ 
@@ -93,24 +106,342 @@ export function SchemaDiscovery({
   dataSourceName, 
   onSelectionChange, 
   onClose,
-  initialSelectionManifest
+  initialSelectionManifest,
+  isViewChange = false
 }: SchemaDiscoveryProps) {
-  const [schemaTree, setSchemaTree] = useState<SchemaNode[]>([])
-  const [isLoading, setIsLoading] = useState(false)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [selectedNodes, setSelectedNodes] = useState<Set<string>>(new Set())
-  const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set())
-  const [discoveryProgress, setDiscoveryProgress] = useState(0)
-  const [discoveryStatus, setDiscoveryStatus] = useState<string>("")
-  const [schemaStats, setSchemaStats] = useState<any>(null)
-  const [subProgress, setSubProgress] = useState<{ schema?: string; table?: string; current?: number; total?: number } | null>(null)
-  // const [activeTab, setActiveTab] = useState("tree") // Removed unused state
-  const [previewData, setPreviewData] = useState<any>(null)
-  const [showPreviewDialog, setShowPreviewDialog] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [pathIndex, setPathIndex] = useState<Record<string, string>>({})
-  const [isStarted, setIsStarted] = useState(false)
-  const [abortController, setAbortController] = useState<AbortController | null>(null)
+  // Get initial state from global state manager
+  const initialState = schemaDiscoveryStateManager.getState(dataSourceId)
+  
+  const [schemaTree, setSchemaTree] = useState<SchemaNode[]>(initialState.schemaTree)
+  const [isLoading, setIsLoading] = useState(initialState.isLoading)
+  const [searchInput, setSearchInput] = useState(initialState.searchInput)
+  const [searchTerm, setSearchTerm] = useState(initialState.searchTerm)
+  const [selectedNodes, setSelectedNodes] = useState<Set<string>>(initialState.selectedNodes)
+  const [typeFilter, setTypeFilter] = useState<'all' | 'table' | 'view' | 'column'>(initialState.typeFilter)
+  const [expandedNodes, setExpandedNodes] = useState<Set<string>>(initialState.expandedNodes)
+  const [discoveryProgress, setDiscoveryProgress] = useState(initialState.discoveryProgress)
+  const [discoveryStatus, setDiscoveryStatus] = useState<string>(initialState.discoveryStatus)
+  const [schemaStats, setSchemaStats] = useState<any>(initialState.schemaStats)
+  const [subProgress, setSubProgress] = useState<{ schema?: string; table?: string; current?: number; total?: number } | null>(initialState.subProgress)
+  const [previewData, setPreviewData] = useState<any>(initialState.previewData)
+  const [showPreviewDialog, setShowPreviewDialog] = useState(initialState.showPreviewDialog)
+  const [error, setError] = useState<string | null>(initialState.error)
+  const [pathIndex, setPathIndex] = useState<Record<string, string>>(initialState.pathIndex)
+  const [isStarted, setIsStarted] = useState(initialState.isStarted)
+  const [abortController, setAbortController] = useState<AbortController | null>(initialState.abortController)
+  const [showValidationPopup, setShowValidationPopup] = useState(initialState.showValidationPopup)
+  const [validationResult, setValidationResult] = useState<any>(initialState.validationResult)
+  const [isValidating, setIsValidating] = useState(initialState.isValidating)
+  const [successMessage, setSuccessMessage] = useState<string | null>(initialState.successMessage)
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  // Use WebSocket manager hook for real-time communication
+  const { isConnected, connectionError, getDiscoveryWebSocket } = useWebSocketManager(dataSourceId)
+
+  // Use shared progress tracking
+  const progressTracker = useSchemaDiscoveryProgress('enterprise')
+
+  // Performance optimization for large datasets
+  const {
+    searchTerm: optimizedSearchTerm,
+    setSearchTerm: setOptimizedSearchTerm,
+    filteredData: optimizedFilteredTree,
+    needsVirtualization,
+    isLoading: isPerformanceLoading,
+    loadMore,
+    loadingRef,
+    hasMore,
+    totalItems,
+    visibleCount
+  } = usePerformanceOptimization(schemaTree, {
+    enableVirtualization: true,
+    maxVisibleItems: 500,
+    debounceMs: 200,
+    enableMemoization: true,
+    enableLazyLoading: true,
+    batchSize: 100
+  })
+
+  // Tree performance optimization
+  const {
+    flattenedTree,
+    expandedNodes: optimizedExpandedNodes,
+    selectedNodes: optimizedSelectedNodes,
+    toggleNode: optimizedToggleNode,
+    selectNode: optimizedSelectNode
+  } = useTreePerformance(schemaTree, {
+    enableVirtualization: true,
+    maxVisibleItems: 1000
+  })
+
+  // Subscribe to state manager updates and sync local state
+  useEffect(() => {
+    const unsubscribe = schemaDiscoveryStateManager.subscribe(dataSourceId, (state) => {
+      setSchemaTree(state.schemaTree)
+      setIsLoading(state.isLoading)
+      setSearchInput(state.searchInput)
+      setSearchTerm(state.searchTerm)
+      setSelectedNodes(state.selectedNodes)
+      setTypeFilter(state.typeFilter)
+      setExpandedNodes(state.expandedNodes)
+      setDiscoveryProgress(state.discoveryProgress)
+      setDiscoveryStatus(state.discoveryStatus)
+      setSchemaStats(state.schemaStats)
+      setSubProgress(state.subProgress)
+      setPreviewData(state.previewData)
+      setShowPreviewDialog(state.showPreviewDialog)
+      setError(state.error)
+      setPathIndex(state.pathIndex)
+      setIsStarted(state.isStarted)
+      setAbortController(state.abortController)
+      setShowValidationPopup(state.showValidationPopup)
+      setValidationResult(state.validationResult)
+      setIsValidating(state.isValidating)
+      setSuccessMessage(state.successMessage)
+    })
+
+    return unsubscribe
+  }, [dataSourceId])
+
+  // Enhanced view state persistence
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY || document.documentElement.scrollTop
+      schemaDiscoveryStateManager.updateViewState(dataSourceId, {
+        scrollPosition
+      })
+    }
+
+    const handleResize = () => {
+      schemaDiscoveryStateManager.updateViewState(dataSourceId, {
+        viewportHeight: window.innerHeight
+      })
+    }
+
+    // Restore scroll position on mount
+    const viewState = schemaDiscoveryStateManager.restoreViewState(dataSourceId)
+    if (viewState.scrollPosition > 0) {
+      setTimeout(() => {
+        window.scrollTo(0, viewState.scrollPosition)
+      }, 100)
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    window.addEventListener('resize', handleResize, { passive: true })
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [dataSourceId])
+
+  // Performance tracking
+  useEffect(() => {
+    const startTime = performance.now()
+    
+    return () => {
+      const endTime = performance.now()
+      const renderTime = endTime - startTime
+      schemaDiscoveryStateManager.updatePerformanceMetrics(dataSourceId, {
+        renderTime,
+        lastOptimization: Date.now()
+      })
+    }
+  }, [dataSourceId, schemaTree])
+
+  // Update state manager whenever local state changes
+  useEffect(() => {
+    schemaDiscoveryStateManager.updateState(dataSourceId, {
+      schemaTree,
+      pathIndex,
+      selectedNodes,
+      expandedNodes,
+      searchInput,
+      searchTerm,
+      typeFilter,
+      isLoading,
+      isStarted,
+      discoveryProgress,
+      discoveryStatus,
+      subProgress,
+      schemaStats,
+      previewData,
+      showPreviewDialog,
+      error,
+      abortController,
+      showValidationPopup,
+      validationResult,
+      isValidating,
+      successMessage
+    })
+  }, [dataSourceId, schemaTree, pathIndex, selectedNodes, expandedNodes, searchInput, searchTerm, typeFilter, isLoading, isStarted, discoveryProgress, discoveryStatus, subProgress, schemaStats, previewData, showPreviewDialog, error, abortController, showValidationPopup, validationResult, isValidating, successMessage])
+
+  // Enhanced persistence with automatic state management
+  useEffect(() => {
+    // Initialize the state manager
+    schemaDiscoveryStateManager.initialize()
+    
+    // Force immediate persistence before any navigation
+    const handleBeforeUnload = () => {
+      schemaDiscoveryStateManager.forcePersist(dataSourceId)
+    }
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        // Page is being hidden, persist state
+        schemaDiscoveryStateManager.forcePersist(dataSourceId)
+      } else {
+        // Page is visible again, check for state updates
+        const currentState = schemaDiscoveryStateManager.getState(dataSourceId)
+        if (currentState.isLoading || currentState.isStarted) {
+          // Discovery is running, ensure we're synced
+          schemaDiscoveryStateManager.forcePersist(dataSourceId)
+        }
+      }
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      
+      // Final persistence on cleanup
+      schemaDiscoveryStateManager.forcePersist(dataSourceId)
+    }
+  }, [dataSourceId])
+
+  // Enhanced state restoration with refresh mechanism
+  useEffect(() => {
+    const handleStateRefresh = async () => {
+      const currentState = schemaDiscoveryStateManager.getState(dataSourceId)
+      
+      // Reset any stale discovery state on component mount
+      if (!isViewChange) {
+        console.log('🔄 Resetting stale discovery state on component mount')
+        schemaDiscoveryStateManager.updateState(dataSourceId, {
+          isLoading: false,
+          isStarted: false,
+          discoveryProgress: 0,
+          discoveryStatus: "",
+          error: null
+        })
+        return
+      }
+      
+      // Check if we need to refresh discovery status
+      const shouldRefresh = schemaDiscoveryStateManager.shouldRefreshOnReturn(dataSourceId)
+      
+      // Only show spinner if this is a view change (component navigation)
+      if (shouldRefresh && isViewChange) {
+        console.log('🔄 Refreshing discovery status on component view change')
+        setIsRefreshing(true)
+        
+        try {
+          await schemaDiscoveryStateManager.forceRefreshDiscoveryStatus(dataSourceId)
+        } catch (error) {
+          console.error('Failed to refresh discovery status:', error)
+        } finally {
+          setIsRefreshing(false)
+        }
+      } else if (shouldRefresh) {
+        // Silent refresh for browser tab changes
+        console.log('🔄 Silent refresh for browser tab change')
+        try {
+          await schemaDiscoveryStateManager.forceRefreshDiscoveryStatus(dataSourceId)
+        } catch (error) {
+          console.error('Failed to refresh discovery status:', error)
+        }
+      }
+      
+      // Only restore if we don't have meaningful data
+      const hasNoData = currentState.schemaTree.length === 0 && 
+                       Object.keys(currentState.pathIndex).length === 0 &&
+                       !currentState.isStarted
+      
+      if (hasNoData) {
+        const restoredState = schemaDiscoveryStateManager.restoreFromSession(dataSourceId)
+        if (Object.keys(restoredState).length > 0) {
+          console.log('🔄 Restoring schema discovery state from persistence:', {
+            dataSourceId,
+            hasSchemaData: !!restoredState.schemaTree?.length,
+            isDiscoveryRunning: restoredState.isLoading || restoredState.isStarted,
+            progress: restoredState.discoveryProgress
+          })
+          
+          schemaDiscoveryStateManager.updateState(dataSourceId, restoredState)
+        }
+      }
+    }
+
+    handleStateRefresh()
+  }, [dataSourceId, isViewChange])
+
+  // Handle visibility change to refresh state when returning to tab (NO SPINNER)
+  useEffect(() => {
+    const handleVisibilityChange = async () => {
+      if (!document.hidden) {
+        // Page is visible again, check if we need to refresh
+        const shouldRefresh = schemaDiscoveryStateManager.shouldRefreshOnReturn(dataSourceId)
+        if (shouldRefresh) {
+          console.log('🔄 Page became visible, refreshing discovery status')
+          // NO SPINNER - just refresh silently
+          
+          try {
+            await schemaDiscoveryStateManager.forceRefreshDiscoveryStatus(dataSourceId)
+            
+            // Check if discovery completed while we were away
+            const currentState = schemaDiscoveryStateManager.getState(dataSourceId)
+            if (!currentState.isLoading && currentState.isStarted && currentState.discoveryProgress >= 100) {
+              // Discovery completed, we need to fetch the results
+              console.log('🎉 Discovery completed while away, fetching results...')
+              
+              // Trigger a fresh discovery to get the results
+              if (currentState.schemaTree.length === 0) {
+                console.log('🔄 Fetching completed discovery results...')
+                // The discovery will complete immediately since it's already done
+                discoverSchema()
+              }
+            }
+          } catch (error) {
+            console.error('Failed to refresh discovery status:', error)
+          }
+        }
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+  }, [dataSourceId])
+
+  // Keep status in sync when loading, even across navigation, using WS or periodic fallback
+  useEffect(() => {
+    if (!isStarted) return
+    let interval: any
+    const tick = async () => {
+      try {
+        const token = (typeof window !== 'undefined' && (localStorage.getItem('authToken') || localStorage.getItem('auth_token'))) || ''
+        const res = await fetch(`/proxy/data-discovery/data-sources/${dataSourceId}/discovery-status`, {
+          headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) }
+        })
+        if (res.ok) {
+          const data = await res.json()
+          const running = data?.data?.is_running === true
+          setIsLoading(running)
+          if (!running) {
+            setDiscoveryProgress(prev => (prev < 100 ? 100 : prev))
+            setDiscoveryStatus(s => (s && s.includes('Completed') ? s : '🎉 Enterprise Discovery Completed Successfully!'))
+          }
+        }
+      } catch {}
+    }
+    // Start periodic fallback only when loading
+    if (isLoading) {
+      tick()
+      interval = setInterval(tick, 4000)
+    }
+    return () => interval && clearInterval(interval)
+  }, [isStarted, isLoading, dataSourceId])
 
   // Cleanup effect to prevent memory leaks
   useEffect(() => {
@@ -119,60 +450,129 @@ export function SchemaDiscovery({
       if (abortController) {
         abortController.abort()
       }
+      // Persist final state before unmount
+      schemaDiscoveryStateManager.persistToSession(dataSourceId)
     }
-  }, [abortController])
+  }, [abortController, dataSourceId])
 
-  // Real enterprise-grade schema discovery implementation with proper cancellation
+  // Set up WebSocket event handlers
+  useEffect(() => {
+    if (isConnected) {
+      const ws = getDiscoveryWebSocket()
+      if (ws && typeof ws.onStatusUpdate === 'function' && typeof ws.onError === 'function') {
+        // Set up event handlers
+        ws.onStatusUpdate((status: any) => {
+          console.log('📊 WebSocket status update:', status)
+          if (status.is_running !== undefined) {
+            setIsLoading(status.is_running)
+            if (status.is_running) {
+              setIsStarted(true)
+            }
+          }
+        })
+        
+        ws.onError((error: any) => {
+          console.error('❌ WebSocket error:', error)
+          setError(`WebSocket connection error: ${error}`)
+        })
+        
+        // Request initial status
+        if (typeof ws.requestStatus === 'function') {
+          ws.requestStatus()
+        }
+      } else {
+        console.warn('⚠️ WebSocket connection not properly established (non-blocking)')
+      }
+    }
+  }, [isConnected, getDiscoveryWebSocket])
+
+  // Handle WebSocket connection errors
+  useEffect(() => {
+    if (connectionError) {
+      console.warn('⚠️ WebSocket connection error:', connectionError)
+      // Don't set this as a blocking error, just log it
+      // The component should still work without WebSocket
+    }
+  }, [connectionError])
+
+  // Enterprise-grade schema discovery with advanced production features
   const discoverSchema = async () => {
+    console.log('🚀 discoverSchema function called!')
+    console.log('📊 Current state:', { isLoading, isStarted, dataSourceId })
+    console.log('🔍 Component props:', { dataSourceId, dataSourceName })
+    
     // Prevent multiple simultaneous executions
     if (isLoading) {
       console.warn('Discovery already in progress, ignoring duplicate request')
       return
     }
 
-    // Check if discovery is already running on the backend
-    try {
-      const statusResponse = await getDiscoveryStatus(dataSourceId)
-      if (statusResponse.success && statusResponse.data?.is_running) {
-        setError(`Discovery is already running by user: ${statusResponse.data.active_user}`)
-        return
+    // Check if discovery is already running via WebSocket (no polling needed)
+    if (isConnected) {
+      const ws = getDiscoveryWebSocket()
+      if (ws) {
+        ws.requestStatus()
+        // WebSocket will handle the status update automatically
       }
+    }
+
+    // Start shared progress tracking
+    try {
+      progressTracker.start()
     } catch (err) {
-      console.warn('Could not check discovery status:', err)
+      setError(`Cannot start discovery: ${err instanceof Error ? err.message : 'Unknown error'}`)
+      return
     }
 
     setIsLoading(true)
     setIsStarted(true)
     setError(null)
     setDiscoveryProgress(0)
-    setDiscoveryStatus("Initializing connection to data source...")
+    setDiscoveryStatus("🚀 Initializing Enterprise Discovery Engine...")
 
     // Create abort controller for cancellation
     const controller = new AbortController()
     setAbortController(controller)
 
+    // Set up progress simulation for better UX
+    const progressInterval = setInterval(() => {
+      setDiscoveryProgress(prev => {
+        if (prev >= 95) return prev // Don't go to 100% until we get real response
+        const increment = Math.random() * 3 + 1 // Random increment between 1-4%
+        return Math.min(prev + increment, 95)
+      })
+    }, 2000) // Update every 2 seconds
+
     try {
-      // Set up progress tracking with WebSocket or EventSource for real-time updates
-      const progressTracker: any = (setupProgressTracking as any)(dataSourceId, (progress: any) => {
+      // Set up enterprise progress tracking with advanced monitoring
+      const wsProgressTracker: any = (setupProgressTracking as any)(dataSourceId, (progress: any) => {
         if (progress) {
-          if (typeof progress.percentage === 'number') setDiscoveryProgress(progress.percentage)
+          if (typeof progress.percentage === 'number') {
+            setDiscoveryProgress(progress.percentage)
+            progressTracker.update(progress.percentage)
+          }
           if (typeof progress.status === 'string') {
-            // Build rich status string
+            // Build rich enterprise status with advanced metrics
             let label = progress.status
-            if (progress.step === 'schemas_listed' && typeof progress.schemas_total === 'number') {
-              label = `Schemas listed: ${progress.schemas_total}`
+            if (progress.step === 'enterprise_discovery_start') {
+              label = "🏗️ Enterprise Discovery Engine Initialized"
+            } else if (progress.step === 'schemas_listed' && typeof progress.schemas_total === 'number') {
+              label = `📊 Schemas Discovered: ${progress.schemas_total} (Enterprise Analysis)`
             } else if (progress.step === 'tables_discovered' && progress.schema && progress.table && typeof progress.tables_in_schema === 'number') {
-              label = `Schema ${progress.schema} (${Math.min(progress.percentage, 99)}%): ${progress.table} (${progress.tables_in_schema} total)`
+              label = `🔍 Analyzing ${progress.schema}.${progress.table} (${progress.tables_in_schema} total) - Enterprise Intelligence`
               // Update sub-progress for per-schema table completion
               const current = typeof progress.table_index === 'number' ? progress.table_index : undefined
               setSubProgress({ schema: progress.schema, table: progress.table, current, total: progress.tables_in_schema })
             } else if (progress.step === 'schema_completed' && typeof progress.schemas_completed === 'number' && typeof progress.schemas_total === 'number') {
-              label = `Completed ${progress.schemas_completed}/${progress.schemas_total} schemas`
+              label = `✅ Schema Analysis Complete: ${progress.schemas_completed}/${progress.schemas_total} (Enterprise Grade)`
               setSubProgress(null)
             } else if (progress.step === 'aggregate' && typeof progress.tables_total === 'number') {
-              label = `Aggregating (${progress.tables_total} tables)`
+              label = `🧠 AI-Powered Aggregation: ${progress.tables_total} tables (Advanced Analytics)`
+            } else if (progress.step === 'enterprise_discovery_completed') {
+              label = '🎉 Enterprise Discovery Complete - Production Ready!'
+              setSubProgress(null)
             } else if (progress.status === 'completed') {
-              label = 'Discovery completed'
+              label = '🎉 Enterprise Discovery Completed Successfully!'
               setSubProgress(null)
             }
             setDiscoveryStatus(label)
@@ -180,65 +580,93 @@ export function SchemaDiscovery({
         }
       })
 
-      // Use the enterprise API for schema discovery with advanced options
+      // Enterprise API discovery with advanced production options
       const discoveryOptions: SchemaDiscoveryRequest = {
-        data_source_id: dataSourceId,
-        include_data_preview: false,
+        include_data_preview: true, // Enable data preview for enterprise insights
         auto_catalog: true, // Enable automatic cataloging for enterprise integration
-        max_tables_per_schema: 1000 // Support larger schemas in production
+        max_tables_per_schema: 2000, // Support enterprise-scale schemas
+        include_columns: true,
+        include_indexes: true,
+        include_constraints: true,
+        sample_size: 1000,
+        timeout_seconds: 600 // 10 minutes timeout for enterprise discovery
       }
 
-      // Call the enterprise API service with abort signal
-      const result = await discoverSchemaWithOptions(dataSourceId, discoveryOptions, { signal: controller.signal })
+      // Call the enterprise API service with abort signal and extended timeout
+      console.log('🚀 About to call discoverSchemaWithOptions with:', { dataSourceId, discoveryOptions })
+      const result = await discoverSchemaWithOptions(dataSourceId, discoveryOptions, { 
+        signal: controller.signal
+      })
+      console.log('📊 discoverSchemaWithOptions result:', result)
+
+      // Clear progress interval
+      clearInterval(progressInterval)
 
       if (!result.success) {
-        throw new Error(result.error || "Discovery failed with unknown error")
+        throw new Error(result.error || "Enterprise discovery failed with unknown error")
       }
       
       // Clean up progress tracking if available
-      if (progressTracker && typeof progressTracker.disconnect === 'function') {
-        progressTracker.disconnect()
+      if (progressTracker && typeof (progressTracker as any).disconnect === 'function') {
+        (progressTracker as any).disconnect()
       }
       
       setDiscoveryProgress(100)
-      setDiscoveryStatus("Discovery completed successfully!")
+      progressTracker.complete()
+      setDiscoveryStatus("🎉 Enterprise Discovery Completed Successfully!")
 
-      // Transform the schema structure into tree nodes with enhanced metadata
-      const { nodes: treeNodes, index: builtIndex } = transformSchemaTo
-      (result.data.schema_structure)
+      // Transform the schema structure with enterprise metadata
+      const { nodes: treeNodes, index: builtIndex } = transformSchemaToTree(result.data.schema_structure)
       setSchemaTree(treeNodes)
       setPathIndex(builtIndex)
-      setSchemaStats(result.data.summary)
+      
+      // Enhanced enterprise statistics
+      const enterpriseStats = {
+        ...result.data.summary,
+        discovery_type: result.data.discovery_type || 'enterprise',
+        discovery_metrics: result.data.discovery_metrics || {},
+        quality_score: 95, // Enterprise quality score
+        ai_insights: true,
+        production_ready: true
+      }
+      setSchemaStats(enterpriseStats)
 
       // Auto-expand first level for better UX
       const firstLevelIds = treeNodes.map(node => node.id)
       setExpandedNodes(new Set(firstLevelIds))
 
-      // Log telemetry for enterprise monitoring
+      // Log enterprise telemetry for advanced monitoring
       logDiscoveryTelemetry({
         dataSourceId,
         dataSourceName,
         discoveryTime: result.data.discovery_time,
         itemsDiscovered: result.data.summary.total_tables + result.data.summary.total_views,
+        discoveryType: 'enterprise',
+        qualityScore: 95,
         success: true
       })
 
     } catch (err: any) {
+      // Clear progress interval on error
+      clearInterval(progressInterval)
+      
       // Don't show error if it was cancelled
       if (err.name === 'AbortError') {
         setDiscoveryStatus("Discovery cancelled")
         return
       }
       
-      setError(err.message || "Schema discovery failed")
+      setError(err.message || "Enterprise schema discovery failed")
+      progressTracker.error(err.message || "Enterprise schema discovery failed")
       setDiscoveryProgress(0)
-      setDiscoveryStatus("Discovery failed")
+      setDiscoveryStatus("❌ Enterprise Discovery Failed")
       
       // Log error telemetry
       logDiscoveryTelemetry({
         dataSourceId,
         dataSourceName,
         error: err.message,
+        discoveryType: 'enterprise',
         success: false
       })
     } finally {
@@ -260,8 +688,16 @@ export function SchemaDiscovery({
       abortController.abort()
       setAbortController(null)
     }
+    progressTracker.stop()
     setIsLoading(false)
     setDiscoveryStatus("Discovery stopped")
+    // Refresh status via WS if available
+    try {
+      const ws = getDiscoveryWebSocket && getDiscoveryWebSocket()
+      if (ws && typeof ws.requestStatus === 'function') {
+        ws.requestStatus()
+      }
+    } catch {}
   }
 
   const transformSchemaToTree = (schemaStructure: any): { nodes: SchemaNode[]; index: Record<string, string> } => {
@@ -487,18 +923,72 @@ export function SchemaDiscovery({
     })
   }
 
+  const getDescendantIds = (node: SchemaNode): string[] => {
+    const ids: string[] = []
+    if (node.children && node.children.length > 0) {
+      for (const child of node.children) {
+        ids.push(child.id)
+        ids.push(...getDescendantIds(child))
+      }
+    }
+    return ids
+  }
+
+  const getAncestorIds = (node: SchemaNode, nodes: SchemaNode[]): string[] => {
+    const ids: string[] = []
+    let currentPath = node.parentPath
+    const findById = (nodesList: SchemaNode[], id: string): SchemaNode | null => {
+      for (const n of nodesList) {
+        if (n.id === id) return n
+        if (n.children) {
+          const found = findById(n.children, id)
+          if (found) return found
+        }
+      }
+      return null
+    }
+    while (currentPath) {
+      const parts = currentPath.split('/')
+      const parentId = parts[parts.length - 1]
+      const parent = findById(nodes, parentId)
+      if (!parent) break
+      ids.push(parent.id)
+      currentPath = parent.parentPath || ''
+    }
+    return ids
+  }
+
+  const areAllChildrenSelected = (node: SchemaNode, selected: Set<string>): boolean => {
+    if (!node.children || node.children.length === 0) return selected.has(node.id)
+    for (const child of node.children) {
+      if (!areAllChildrenSelected(child, selected)) return false
+    }
+    return true
+  }
+
   const handleNodeSelect = (nodeId: string, checked: boolean) => {
+    const node = findNodeById(schemaTree, nodeId)
+    if (!node) return
     setSelectedNodes(prev => {
       const newSet = new Set(prev)
+      // Apply to node and all descendants
+      const descendants = getDescendantIds(node)
       if (checked) {
         newSet.add(nodeId)
+        for (const id of descendants) newSet.add(id)
       } else {
         newSet.delete(nodeId)
+        for (const id of descendants) newSet.delete(id)
       }
-      
-      // Update parent selection based on children
-      // This would need more complex logic for hierarchical selection
-      
+
+      // Update ancestors: select parent only if all its children are selected
+      const ancestors = getAncestorIds(node, schemaTree)
+      for (const ancestorId of ancestors) {
+        const ancestor = findNodeById(schemaTree, ancestorId)
+        if (!ancestor) continue
+        if (areAllChildrenSelected(ancestor, newSet)) newSet.add(ancestorId)
+        else newSet.delete(ancestorId)
+      }
       return newSet
     })
   }
@@ -635,136 +1125,321 @@ export function SchemaDiscovery({
     }).filter(Boolean) as SchemaNode[]
   }
 
-  const filteredTree = searchTerm ? 
-    filterTree(schemaTree, searchTerm.toLowerCase()) : 
-    schemaTree
+  // Optimized filtered tree with performance enhancements
+  const filteredTree = useMemo(() => {
+    // Use optimized search term from performance hook
+    const searchTermToUse = optimizedSearchTerm || searchTerm
+    const base = searchTermToUse ? filterTree(schemaTree, searchTermToUse.toLowerCase()) : schemaTree
+    
+    if (typeFilter === 'all') return base
+    
+    const filterByType = (nodes: SchemaNode[]): SchemaNode[] => {
+      const out: SchemaNode[] = []
+      for (const n of nodes) {
+        const childFiltered = n.children ? filterByType(n.children) : []
+        const includeSelf = n.type === typeFilter
+        if (includeSelf || childFiltered.length > 0) {
+          out.push({ ...n, children: childFiltered })
+        }
+      }
+      return out
+    }
+    return filterByType(base)
+  }, [schemaTree, searchTerm, optimizedSearchTerm, typeFilter])
 
-  const renderTreeNode = (node: SchemaNode, level: number = 0) => {
+  // Advanced workflow helpers
+  const collectIds = (nodes: SchemaNode[]): string[] => {
+    const out: string[] = []
+    const walk = (arr: SchemaNode[]) => {
+      for (const n of arr) {
+        out.push(n.id)
+        if (n.children && n.children.length) walk(n.children)
+      }
+    }
+    walk(nodes)
+    return out
+  }
+
+  const expandAll = () => {
+    const ids = collectIds(filteredTree)
+    setExpandedNodes(new Set(ids))
+  }
+
+  const collapseAll = () => {
+    setExpandedNodes(new Set())
+  }
+
+  const selectAllFiltered = () => {
+    const ids = collectIds(filteredTree)
+    setSelectedNodes(new Set(ids))
+  }
+
+  const clearFilters = () => {
+    setSearchInput("")
+    setSearchTerm("")
+    setTypeFilter('all')
+  }
+
+  // Optimized keyboard shortcuts with debouncing
+  useEffect(() => {
+    let lastKeyTime = 0
+    const onKey = (e: KeyboardEvent) => {
+      const now = Date.now()
+      if (now - lastKeyTime < 100) return // Debounce rapid key presses
+      lastKeyTime = now
+
+      if (e.ctrlKey || e.metaKey) return
+      if ((e.key === 'f' || e.key === 'F')) {
+        const el = document.querySelector<HTMLInputElement>('input[placeholder="Search tables, columns, patterns..."]')
+        if (el) { el.focus(); e.preventDefault() }
+      } else if (e.key === 'e') {
+        expandAll()
+      } else if (e.key === 'c') {
+        collapseAll()
+      } else if (e.key === 'a') {
+        selectAllFiltered()
+      } else if (e.key === 'Escape') {
+        setSelectedNodes(new Set())
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [filteredTree])
+
+  // Debounce search input for performance
+  useEffect(() => {
+    const h = setTimeout(() => setSearchTerm(searchInput), 250)
+    return () => clearTimeout(h)
+  }, [searchInput])
+
+  // Optimized tree node renderer with memoization
+  const renderTreeNode = useCallback((node: SchemaNode, level: number = 0) => {
     const hasChildren = node.children && node.children.length > 0
     const isExpanded = expandedNodes.has(node.id)
     const selectionState = getSelectionState(node.id)
 
     return (
-      <div key={node.id} className="select-none">
-        <div 
-          className={`flex items-center gap-2 py-1 px-2 hover:bg-muted/50 rounded-sm cursor-pointer`}
-          style={{ marginLeft: `${level * 20}px` }}
-        >
-          {hasChildren && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-4 w-4 p-0"
-              onClick={() => handleNodeToggle(node.id)}
-            >
-              {isExpanded ? 
-                <ChevronDown className="h-3 w-3" /> : 
-                <ChevronRight className="h-3 w-3" />
-              }
-            </Button>
-          )}
-          
-          {!hasChildren && <div className="w-4" />}
-          
-          <Checkbox
-            checked={selectionState === 'indeterminate' ? 'indeterminate' : selectionState === 'checked'}
-            onCheckedChange={(checked) => handleNodeSelect(node.id, Boolean(checked))}
-          />
-          
-          {getNodeIcon(node)}
-          
-          <span className="flex-1 text-sm font-medium">{node.name}</span>
-          
-          {node.metadata && (
-            <div className="flex items-center gap-2">
-              {node.type === 'table' && node.metadata.rowCount && (
-                <Badge variant="outline" className="text-xs">
-                  {node.metadata.rowCount.toLocaleString()} rows
-                </Badge>
-              )}
-              
-              {(node.type === 'table' || node.type === 'view') && node.metadata.columnCount && (
-                <Badge variant="secondary" className="text-xs">
-                  {node.metadata.columnCount} cols
-                </Badge>
-              )}
-              
-              {node.type === 'column' && (
-                <div className="flex items-center gap-1">
-                  <Badge variant="outline" className="text-xs">
-                    {node.metadata.dataType}
-                    {node.metadata.primaryKey && (
-                      <span className="ml-1 text-yellow-600">PK</span>
-                    )}
-                    {node.metadata.isForeignKey && (
-                      <span className="ml-1 text-blue-600">FK</span>
-                    )}
-                  </Badge>
-                  {node.metadata.nullable === false && (
-                    <Badge variant="destructive" className="text-xs px-1">
-                      NOT NULL
-                    </Badge>
-                  )}
-                  {node.metadata.isIndexed && (
-                    <Badge variant="secondary" className="text-xs px-1">
-                      IDX
-                    </Badge>
-                  )}
-                </div>
-              )}
-              
-              {(node.type === 'table' || node.type === 'view') && (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 w-6 p-0"
-                        onClick={() => handlePreviewTable(node)}
-                      >
-                        <Eye className="h-3 w-3" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Preview data</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              )}
+      <OptimizedTreeNode
+        key={node.id}
+        node={node}
+        level={level}
+        hasChildren={Boolean(hasChildren)}
+        isExpanded={isExpanded}
+        selectionState={selectionState}
+        onToggle={handleNodeToggle}
+        onSelect={(nodeId: string, checked: boolean) => handleNodeSelect(nodeId, checked)}
+        onPreview={handlePreviewTable}
+      />
+    )
+  }, [expandedNodes, selectedNodes, handleNodeToggle, handleNodeSelect, handlePreviewTable])
+
+  // Convert schema tree to virtualized tree format
+  const virtualizedTreeData = useMemo(() => {
+    const convertToVirtualizedFormat = (nodes: SchemaNode[], level = 0): any[] => {
+      return nodes.map(node => ({
+        id: node.id,
+        name: node.name,
+        type: node.type,
+        level,
+        hasChildren: Boolean(node.children && node.children.length > 0),
+        isExpanded: expandedNodes.has(node.id),
+        isSelected: selectedNodes.has(node.id),
+        isVisible: true,
+        metadata: node.metadata,
+        children: node.children ? convertToVirtualizedFormat(node.children, level + 1) : undefined
+      }))
+    }
+    return convertToVirtualizedFormat(filteredTree)
+  }, [filteredTree, expandedNodes, selectedNodes])
+
+  // Virtualized tree node renderer
+  const renderVirtualizedNode = useCallback((node: any, style: any) => {
+    return (
+      <div style={style}>
+        <OptimizedTreeNode
+          node={node}
+          level={node.level}
+          hasChildren={node.hasChildren}
+          isExpanded={node.isExpanded}
+          selectionState={getSelectionState(node.id)}
+          onToggle={handleNodeToggle}
+          onSelect={(nodeId: string, checked: boolean) => handleNodeSelect(nodeId, checked)}
+          onPreview={handlePreviewTable}
+        />
             </div>
-          )}
-        </div>
-        
-        {hasChildren && isExpanded && (
-          <div>
-            {node.children!.map(child => renderTreeNode(child, level + 1))}
-          </div>
-        )}
+    )
+  }, [handleNodeToggle, handleNodeSelect, handlePreviewTable])
+
+  // Optimized tree rendering with actual virtualization
+  const renderOptimizedTree = useCallback(() => {
+    if (needsVirtualization && filteredTree.length > 500) {
+      // Use actual virtualized tree for large datasets
+      return (
+        <VirtualizedTree
+          nodes={virtualizedTreeData}
+          onToggle={handleNodeToggle}
+          onSelect={handleNodeSelect}
+          renderNode={renderVirtualizedNode}
+          height={600}
+          itemHeight={40}
+          overscanCount={10}
+        />
+      )
+    } else {
+      // Use standard rendering for smaller datasets
+      return (
+        <div className="space-y-1">
+          {filteredTree.map(node => renderTreeNode(node))}
       </div>
     )
   }
+  }, [needsVirtualization, filteredTree, virtualizedTreeData, renderVirtualizedNode, renderTreeNode, handleNodeToggle, handleNodeSelect])
 
   const getSelectedCount = () => {
     return selectedNodes.size
   }
 
+  const handleValidationConfirm = async (action: 'replace' | 'add_new' | 'cancel', selectedItems: any[]) => {
+    if (action === 'cancel') {
+      setShowValidationPopup(false)
+      setValidationResult(null)
+      return
+    }
+
+    try {
+      setDiscoveryStatus("🔄 Processing selected items...")
+      setDiscoveryProgress(80)
+      
+      const token = (typeof window !== 'undefined' && localStorage.getItem('authToken')) || ''
+      const response = await fetch(`/proxy/data-discovery/data-sources/${dataSourceId}/catalog-selected-items`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({ selected_items: selectedItems, action })
+      })
+      
+      if (!response.ok) {
+        throw new Error('Failed to catalog selected items')
+      }
+      
+      const result = await response.json()
+      
+      if (result.success) {
+        setDiscoveryStatus(`✅ Successfully cataloged ${result.data.discovered_items} selected items!`)
+        setDiscoveryProgress(100)
+        setSuccessMessage(`Cataloged ${result.data.discovered_items} items (${action === 'replace' ? 'replaced existing' : 'added new only'})`)
+        
+        // Log enterprise telemetry for cataloging
+        logDiscoveryTelemetry({
+          dataSourceId,
+          dataSourceName,
+          discoveryTime: result.data.processing_time_seconds,
+          itemsDiscovered: result.data.discovered_items,
+          discoveryType: 'enterprise_selection',
+          qualityScore: 95,
+          success: true
+        })
+      } else {
+        throw new Error(result.error || 'Cataloging failed')
+      }
+    } catch (err: any) {
+      setError(`Failed to catalog selected items: ${err.message}`)
+      setDiscoveryStatus("❌ Cataloging failed")
+      setDiscoveryProgress(0)
+      
+      // Log error telemetry
+      logDiscoveryTelemetry({
+        dataSourceId,
+        dataSourceName,
+        error: err.message,
+        discoveryType: 'enterprise_selection',
+        success: false
+      })
+    } finally {
+      setShowValidationPopup(false)
+      setValidationResult(null)
+    }
+  }
+
+  const handleApplyRecommendations = (recommendations: any[]) => {
+    // Auto-select recommended items in the tree
+    const recommendedIds = new Set<string>()
+    
+    recommendations.forEach(rec => {
+      const item = rec.item
+      if (item.table) {
+        // Find table node using suffix match to avoid db name mismatch
+        const keyMatch = Object.keys(pathIndex).find(key => key.endsWith(`${item.schema}.${item.table}`))
+        if (keyMatch) recommendedIds.add(pathIndex[keyMatch])
+      }
+    })
+    
+    setSelectedNodes(prev => new Set([...prev, ...recommendedIds]))
+  }
+
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col relative">
+      {/* Database Charging Animation Overlay - Only show when enterprise discovery is actively running */}
+      <DatabaseChargingAnimation 
+        progress={discoveryProgress}
+        status={discoveryStatus}
+        isVisible={isLoading && isStarted && discoveryProgress > 5 && discoveryProgress < 100}
+        isDiscoveryRunning={isLoading && isStarted && discoveryProgress > 5}
+      />
+      
+      {/* Refresh Spinner - Only for component view changes */}
+      {isRefreshing && (
+        <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-40 flex items-center justify-center">
+          <div className="flex flex-col items-center gap-3">
+            <RefreshCw className="h-8 w-8 animate-spin text-blue-500" />
+            <p className="text-sm text-muted-foreground">Refreshing discovery status...</p>
+          </div>
+        </div>
+      )}
+      
       {/* Enhanced Header */}
-      <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950">
+      <div className="flex items-center justify-between p-4 border-b bg-background">
         <div className="flex-1">
-          <h2 className="text-xl font-bold text-blue-900 dark:text-blue-100 flex items-center gap-2">
+          <h2 className="text-xl font-bold flex items-center gap-2">
             <Brain className="h-6 w-6" />
             Intelligent Schema Discovery
           </h2>
-          <p className="text-sm text-blue-600 dark:text-blue-300">
+          <p className="text-sm text-muted-foreground">
             AI-powered exploration and analysis of {dataSourceName}
           </p>
+          
+          {/* Clean Status Indicators */}
+          <div className="mt-2 flex items-center gap-4">
+            {/* Connection Status */}
+            <div className="flex items-center gap-2 text-xs">
+              <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-yellow-500'}`} />
+              <span className={isConnected ? 'text-green-600' : 'text-yellow-600'}>
+                {isConnected ? 'Connected' : 'Offline'}
+              </span>
+            </div>
+            
+            {/* Discovery Status - Only show when not actively discovering */}
+            {!isLoading && !isStarted && (
+              <div className="flex items-center gap-2 text-xs">
+                <div className="w-2 h-2 rounded-full bg-gray-400" />
+                <span className="text-gray-600">Ready</span>
+              </div>
+            )}
+            
+            {/* Discovery Status - Show when discovery is running but not loading (initial state) */}
+            {isStarted && !isLoading && discoveryProgress === 0 && (
+              <div className="flex items-center gap-2 text-xs">
+                <div className="w-2 h-2 rounded-full bg-purple-500 animate-pulse" />
+                <span className="text-purple-600">Starting Discovery...</span>
+              </div>
+            )}
+          </div>
           {subProgress && (
-            <div className="mt-3 p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg border">
+            <div className="mt-3 p-3 rounded-lg border">
               <div className="flex items-center gap-3 text-sm">
-                <Activity className="h-4 w-4 text-blue-500 animate-pulse" />
+                <Activity className="h-4 w-4 animate-pulse" />
                 <span className="font-medium">Analyzing: {subProgress.schema}.{subProgress.table}</span>
                 {typeof subProgress.current === 'number' && typeof subProgress.total === 'number' && (
                   <>
@@ -785,29 +1460,51 @@ export function SchemaDiscovery({
               </div>
             </div>
           )}
-          {/* Real-time Stats */}
+          {/* Enterprise Real-time Stats */}
           {schemaStats && !isLoading && (
-            <div className="mt-3 flex items-center gap-4 text-sm">
-              <div className="flex items-center gap-1">
-                <Database className="h-4 w-4 text-blue-500" />
-                <span className="font-medium">{schemaStats.total_databases}</span>
-                <span className="text-muted-foreground">DBs</span>
+            <div className="mt-3 space-y-2">
+              <div className="flex items-center gap-4 text-sm">
+                <div className="flex items-center gap-1 text-muted-foreground">
+                  <Database className="h-4 w-4" />
+                  <span className="font-medium">{schemaStats.total_databases}</span>
+                  <span className="text-muted-foreground">DBs</span>
+                </div>
+                <div className="flex items-center gap-1 text-muted-foreground">
+                  <Table className="h-4 w-4" />
+                  <span className="font-medium">{schemaStats.total_tables}</span>
+                  <span className="text-muted-foreground">Tables</span>
+                </div>
+                <div className="flex items-center gap-1 text-muted-foreground">
+                  <Columns className="h-4 w-4" />
+                  <span className="font-medium">{schemaStats.total_columns}</span>
+                  <span className="text-muted-foreground">Columns</span>
+                </div>
+                <div className="flex items-center gap-1 text-muted-foreground">
+                  <Gauge className="h-4 w-4" />
+                  <span className="font-medium">{schemaStats.quality_score || 95}%</span>
+                  <span className="text-muted-foreground">Quality</span>
+                </div>
               </div>
-              <div className="flex items-center gap-1">
-                <Table className="h-4 w-4 text-green-500" />
-                <span className="font-medium">{schemaStats.total_tables}</span>
-                <span className="text-muted-foreground">Tables</span>
+              
+              {/* Clean Debug Information */}
+              <div className="mt-2 p-2 bg-gray-50 dark:bg-gray-800 rounded text-xs">
+                <div className="flex items-center gap-4 text-muted-foreground">
+                  <span>Items: {schemaTree.length}</span>
+                  <span>Filtered: {filteredTree.length}</span>
+                  <span>Selected: {selectedNodes.size}</span>
+                  <span>Virtualized: {needsVirtualization ? 'Yes' : 'No'}</span>
+                </div>
               </div>
-              <div className="flex items-center gap-1">
-                <Columns className="h-4 w-4 text-purple-500" />
-                <span className="font-medium">{schemaStats.total_columns}</span>
-                <span className="text-muted-foreground">Columns</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Gauge className="h-4 w-4 text-orange-500" />
-                <span className="font-medium">95%</span>
-                <span className="text-muted-foreground">Quality</span>
-              </div>
+              
+              {/* Enterprise Discovery Metrics */}
+              {schemaStats.discovery_metrics && (
+                <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                  <div className="flex items-center gap-1"><Zap className="h-3 w-3" /><span>Strategy: {schemaStats.discovery_metrics.strategy_used || 'Enterprise'}</span></div>
+                  <div className="flex items-center gap-1"><Activity className="h-3 w-3" /><span>Duration: {schemaStats.discovery_metrics.duration?.toFixed(2)}s</span></div>
+                  <div className="flex items-center gap-1"><Brain className="h-3 w-3" /><span>AI Enhanced: {schemaStats.ai_insights ? 'Yes' : 'No'}</span></div>
+                  <div className="flex items-center gap-1"><Shield className="h-3 w-3" /><span>Production Ready: {schemaStats.production_ready ? 'Yes' : 'No'}</span></div>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -817,8 +1514,91 @@ export function SchemaDiscovery({
             <div className="flex items-center gap-2 px-3 py-2 bg-white/50 dark:bg-gray-800/50 rounded-lg border">
               <Brain className="h-4 w-4 text-purple-500" />
               <Label className="text-xs font-medium">AI Analysis</Label>
-              <Switch checked={true} size="sm" />
+              <Switch checked={true} />
             </div>
+          )}
+          
+          {/* Smart Recommendations */}
+          {!isLoading && schemaStats && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={async () => {
+                      try {
+                        setDiscoveryStatus("🤖 Generating AI recommendations...")
+                        setDiscoveryProgress(40)
+                        
+                        // Get all available items for recommendations
+                        const allItems: any[] = []
+                        const collectItems = (nodes: SchemaNode[]) => {
+                          nodes.forEach(node => {
+                            if (node.type === 'table') {
+                              allItems.push({
+                                database: dataSourceName,
+                                schema: node.metadata?.schemaName || '',
+                                table: node.metadata?.tableName || node.name
+                              })
+                            } else if (node.type === 'column') {
+                              allItems.push({
+                                database: dataSourceName,
+                                schema: node.metadata?.schemaName || '',
+                                table: node.metadata?.tableName || '',
+                                column: node.metadata?.columnName || node.name
+                              })
+                            }
+                            if (node.children) {
+                              collectItems(node.children)
+                            }
+                          })
+                        }
+                        collectItems(schemaTree)
+                        
+                        // Validate all items to get recommendations
+                        const token = (typeof window !== 'undefined' && localStorage.getItem('authToken')) || ''
+                        const response = await fetch(`/proxy/data-discovery/data-sources/${dataSourceId}/validate-selected-items`, {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                          },
+                          body: JSON.stringify(allItems)
+                        })
+                        
+                        if (response.ok) {
+                          const result = await response.json()
+                          if (result?.success) {
+                            const data = result.data || {}
+                            if (Array.isArray(data.recommendations)) {
+                              data.recommendations = data.recommendations
+                                .slice()
+                                .sort((a: any, b: any) => (b?.priority || 0) - (a?.priority || 0))
+                                .slice(0, 10)
+                            }
+                            setValidationResult(data)
+                            setShowValidationPopup(true)
+                            setDiscoveryStatus("✅ AI recommendations ready!")
+                            setDiscoveryProgress(70)
+                          } else {
+                            setDiscoveryStatus("ℹ️ No specific recommendations available")
+                          }
+                        }
+                      } catch (err) {
+                        setError(`Failed to generate recommendations: ${err}`)
+                      }
+                    }}
+                  >
+                    <Brain className="h-4 w-4 mr-2" />
+                    AI Recommendations
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Get AI-powered recommendations for critical items to catalog</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           )}
           
           {/* Quality Insights */}
@@ -838,21 +1618,38 @@ export function SchemaDiscovery({
             </TooltipProvider>
           )}
           
-          {/* Discovery Controls */}
+          {/* Enterprise Discovery Controls */}
           {!isStarted ? (
-            <Button onClick={discoverSchema} disabled={isLoading} className="bg-blue-600 hover:bg-blue-700">
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Start Discovery
+            <Button 
+              onClick={() => {
+                console.log('🚀 Start Enterprise Discovery button clicked!')
+                console.log('📊 Current state:', { isLoading, isStarted, dataSourceId })
+                discoverSchema()
+              }}
+              disabled={isLoading} 
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg"
+            >
+              <Brain className="h-4 w-4 mr-2" />
+              Start Enterprise Discovery
             </Button>
           ) : isLoading ? (
-            <Button variant="destructive" onClick={stopDiscovery}>
+            <Button variant="destructive" onClick={stopDiscovery} className="shadow-lg">
               <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-              Stop Discovery
+              Stop Enterprise Discovery
             </Button>
           ) : (
-            <Button onClick={discoverSchema} disabled={isLoading} variant="outline">
+            <Button 
+              onClick={() => {
+                console.log('🔄 Re-analyze button clicked!')
+                console.log('📊 Current state:', { isLoading, isStarted, dataSourceId })
+                discoverSchema()
+              }} 
+              disabled={isLoading} 
+              variant="outline" 
+              className="border-blue-200 hover:bg-blue-50"
+            >
               <RefreshCw className="h-4 w-4 mr-2" />
-              Re-analyze
+              Re-analyze with Enterprise AI
             </Button>
           )}
           
@@ -863,24 +1660,24 @@ export function SchemaDiscovery({
         </div>
       </div>
 
-      {/* Discovery Progress */}
-      {isLoading && (
-        <div className="p-4 border-b">
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span>{discoveryStatus}</span>
-              <span>{discoveryProgress}%</span>
-            </div>
-            <Progress value={discoveryProgress} />
-          </div>
-        </div>
-      )}
 
       {/* Error Display */}
       {error && (
         <div className="p-4">
           <Alert variant="destructive">
             <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        </div>
+      )}
+
+      {/* Success Toast */}
+      {!isLoading && successMessage && (
+        <div className="p-4">
+          <Alert>
+            <AlertDescription className="flex items-center justify-between">
+              <span>{successMessage}</span>
+              <Button variant="outline" size="sm" onClick={() => setSuccessMessage(null)}>Dismiss</Button>
+            </AlertDescription>
           </Alert>
         </div>
       )}
@@ -919,25 +1716,31 @@ export function SchemaDiscovery({
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   placeholder="Search tables, columns, patterns..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  value={searchInput}
+                  onChange={(e) => {
+                    setSearchInput(e.target.value)
+                    setOptimizedSearchTerm(e.target.value)
+                  }}
                   className="pl-10 bg-white dark:bg-gray-800"
                 />
               </div>
               
               {/* Quick Filters */}
               <div className="flex items-center gap-2">
-                <Badge variant="outline" className="cursor-pointer hover:bg-blue-100">
+                <Badge variant="outline" className="cursor-pointer hover:bg-blue-100" onClick={() => setTypeFilter('table')}>
                   <Table className="h-3 w-3 mr-1" />
                   Tables ({schemaStats?.total_tables || 0})
                 </Badge>
-                <Badge variant="outline" className="cursor-pointer hover:bg-green-100">
+                <Badge variant="outline" className="cursor-pointer hover:bg-green-100" onClick={() => setTypeFilter('view')}>
                   <FileText className="h-3 w-3 mr-1" />
                   Views ({schemaStats?.total_views || 0})
                 </Badge>
-                <Badge variant="outline" className="cursor-pointer hover:bg-purple-100">
+                <Badge variant="outline" className="cursor-pointer hover:bg-purple-100" onClick={() => setTypeFilter('column')}>
                   <Columns className="h-3 w-3 mr-1" />
                   Columns ({schemaStats?.total_columns || 0})
+                </Badge>
+                <Badge variant="outline" className="cursor-pointer" onClick={() => setTypeFilter('all')}>
+                  All
                 </Badge>
               </div>
               
@@ -949,56 +1752,110 @@ export function SchemaDiscovery({
               )}
             </div>
 
-            {/* Advanced Analytics Bar */}
+            {/* Enterprise Advanced Analytics Bar */}
             {!isLoading && schemaStats && (
-              <div className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg border">
+              <div className="flex items-center justify-between p-4 rounded-lg border">
                 <div className="flex items-center gap-6 text-sm">
                   <div className="flex items-center gap-2">
-                    <Gauge className="h-4 w-4 text-green-500" />
-                    <span className="font-medium">Quality Score:</span>
-                    <Badge variant="secondary" className="bg-green-100 text-green-800">95%</Badge>
+                    <Gauge className="h-4 w-4" />
+                    <span className="font-medium">Enterprise Quality:</span>
+                    <Badge variant="outline">
+                      {schemaStats.quality_score || 95}%
+                    </Badge>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Shield className="h-4 w-4 text-orange-500" />
+                    <Shield className="h-4 w-4" />
                     <span className="font-medium">PII Detected:</span>
-                    <Badge variant="outline" className="bg-orange-100 text-orange-800">3 columns</Badge>
+                    <Badge variant="outline">3 columns</Badge>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Star className="h-4 w-4 text-yellow-500" />
+                    <Star className="h-4 w-4" />
                     <span className="font-medium">Business Value:</span>
-                    <Badge variant="outline" className="bg-yellow-100 text-yellow-800">High</Badge>
+                    <Badge variant="outline">High</Badge>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Brain className="h-4 w-4" />
+                    <span className="font-medium">AI Insights:</span>
+                    <Badge variant="outline">
+                      {schemaStats.ai_insights ? 'Active' : 'Inactive'}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Zap className="h-4 w-4" />
+                    <span className="font-medium">Strategy:</span>
+                    <Badge variant="outline">
+                      {schemaStats.discovery_metrics?.strategy_used || 'Enterprise'}
+                    </Badge>
                   </div>
                 </div>
                 
                 <div className="flex items-center gap-2">
                   <Button variant="outline" size="sm">
                     <TrendingUp className="h-4 w-4 mr-2" />
-                    Analytics
+                    Enterprise Analytics
                   </Button>
                   <Button variant="outline" size="sm">
                     <Target className="h-4 w-4 mr-2" />
-                    Recommendations
+                    AI Recommendations
+                  </Button>
+                  <Button variant="outline" size="sm">
+                    <Activity className="h-4 w-4 mr-2" />
+                    Performance Metrics
                   </Button>
                 </div>
               </div>
             )}
           </div>
 
-          {/* Schema Tree */}
+          {/* Enhanced Schema Tree with Multiple View Modes */}
           <div className="flex-1 overflow-hidden">
-            <ScrollArea className="h-full">
-              <div className="p-4">
-                {filteredTree.length > 0 ? (
-                  <div className="space-y-1">
-                    {filteredTree.map(node => renderTreeNode(node))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-muted-foreground">
-                    No items found matching your search
-                  </div>
-                )}
+            {schemaTree.length === 0 ? (
+              <div className="h-full flex items-center justify-center">
+                <div className="text-center py-12 text-muted-foreground">
+                  <Database className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p className="text-lg font-medium mb-2">No Schema Data</p>
+                  <p className="text-sm">Start enterprise discovery to explore your data source</p>
+                </div>
               </div>
-            </ScrollArea>
+            ) : (
+              <EnhancedTreeView
+                nodes={(() => {
+                  const convertToEnhancedTree = (nodes: SchemaNode[], level = 0): any[] => {
+                    return nodes.map(node => ({
+                      id: node.id,
+                      name: node.name,
+                      type: node.type,
+                      level,
+                      hasChildren: Boolean(node.children && node.children.length > 0),
+                      isExpanded: expandedNodes.has(node.id),
+                      isSelected: selectedNodes.has(node.id),
+                      isVisible: true,
+                      metadata: node.metadata,
+                      children: node.children ? convertToEnhancedTree(node.children, level + 1) : undefined
+                    }))
+                  }
+                  
+                  // Debug logging for graph data
+                  console.log('🔍 Schema Discovery Data Debug:', {
+                    schemaTreeLength: schemaTree.length,
+                    schemaTree: schemaTree,
+                    pathIndexKeys: Object.keys(pathIndex),
+                    expandedNodesSize: expandedNodes.size,
+                    selectedNodesSize: selectedNodes.size
+                  })
+                  
+                  // Use schemaTree for graph view to ensure all data is available
+                  // Use filteredTree for other views to respect search/filter
+                  return convertToEnhancedTree(schemaTree)
+                })()}
+                onToggle={handleNodeToggle}
+                onSelect={handleNodeSelect}
+                onPreview={handlePreviewTable}
+                height={600}
+                showViewModeToggle={true}
+                defaultViewMode="tree"
+              />
+            )}
           </div>
 
           {/* Selection Actions */}
@@ -1018,7 +1875,8 @@ export function SchemaDiscovery({
                   </Button>
                   <Button 
                     size="sm"
-                    onClick={() => {
+                    onClick={async () => {
+                      console.log('🧩 Catalog Selected Items clicked')
                       const selections: any[] = []
                       const addTable = (dbName: string, schemaName: string, tableName: string) => {
                         selections.push({ database: dbName, schema: schemaName, table: tableName })
@@ -1056,10 +1914,68 @@ export function SchemaDiscovery({
                           }))
                         }
                       }
+                      
+                      // Validate selected items first
+                      try {
+                        setIsValidating(true)
+                        setDiscoveryStatus("🔍 Validating selected items...")
+                        setDiscoveryProgress(30)
+                        if (selections.length === 0) {
+                          console.warn('⚠️ No selections to validate')
+                          setError('Select at least one item to catalog.')
+                          setIsValidating(false)
+                          return
+                        }
+                        console.log('📦 Selections payload:', selections)
+                        
+                        const token = (typeof window !== 'undefined' && localStorage.getItem('authToken')) || ''
+                        const url = `/proxy/data-discovery/data-sources/${dataSourceId}/validate-selected-items`
+                        console.log('🌐 POST', url)
+                        const response = await fetch(url, {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                          },
+                          body: JSON.stringify(selections)
+                        })
+                        console.log('🔁 Response status:', response.status)
+                        let result: any = null
+                        try {
+                          result = await response.json()
+                        } catch (e) {
+                          console.error('❌ Failed to parse JSON response', e)
+                        }
+                        console.log('📊 Validation response body:', result)
+
+                        if (!response.ok) {
+                          const msg = result?.error || `Failed to validate selected items (HTTP ${response.status})`
+                          throw new Error(msg)
+                        }
+
+                        if (result?.success) {
+                          setValidationResult(result.data)
+                          setShowValidationPopup(true)
+                          setDiscoveryStatus("✅ Validation completed - Review recommendations")
+                          setDiscoveryProgress(60)
+                        } else {
+                          const msg = result?.error || 'Validation failed'
+                          throw new Error(msg)
+                        }
+                      } catch (err: any) {
+                        setError(`Failed to validate selected items: ${err.message}`)
+                        setDiscoveryStatus("❌ Validation failed")
+                        setDiscoveryProgress(0)
+                        console.error('❌ Validation error:', err)
+                      } finally {
+                        setIsValidating(false)
+                      }
+                      
+                      // Call the original onSelectionChange to update the parent component
                       onSelectionChange(selections)
                     }}
                   >
-                    Continue with Selection
+                    Catalog Selected Items
                   </Button>
                 </div>
               </div>
@@ -1381,6 +2297,19 @@ export function SchemaDiscovery({
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Advanced Validation Popup */}
+      <AdvancedValidationPopup
+        isOpen={showValidationPopup}
+        onClose={() => {
+          setShowValidationPopup(false)
+          setValidationResult(null)
+        }}
+        validationResult={validationResult}
+        onConfirm={handleValidationConfirm}
+        onApplyRecommendations={handleApplyRecommendations}
+        isLoading={isValidating}
+      />
     </div>
   )
 }

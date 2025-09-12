@@ -1788,8 +1788,11 @@ export const RouteGuard: React.FC<RouteGuardProps> = ({
         requestId: `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
       };
 
-      // Get user context (this would come from auth hook in real implementation)
+      // Get user context (prefer live; fallback to cached RBAC from sessionStorage)
       const authToken = localStorage.getItem('auth_token');
+      const readCached = (key: string): any | null => {
+        try { const raw = sessionStorage.getItem(key); return raw ? JSON.parse(raw) : null } catch { return null }
+      }
       if (authToken) {
         try {
           const userResponse = await fetch('/api/racine/auth/user', {
@@ -1805,9 +1808,35 @@ export const RouteGuard: React.FC<RouteGuardProps> = ({
             context.permissions = userData.permissions || [];
             context.roles = userData.roles || [];
             context.workspace = userData.currentWorkspace || null;
+          } else {
+            // Fallback to cached RBAC
+            const cachedMe = readCached('rbac:me');
+            if (cachedMe) {
+              const me = cachedMe.user || cachedMe;
+              context.user = me || null;
+              context.permissions = (me?.permissions?.map((p: any) => p.key || `${p.resource}.${p.action}`)) || (cachedMe.flatPermissions || []);
+              context.roles = Array.isArray(me?.roles) ? me.roles.map((r: any) => (typeof r === 'string' ? r : r.name)).filter(Boolean) : [];
+            }
           }
         } catch (error) {
           console.error('Failed to get user context:', error);
+          // Fallback to cached RBAC on network error
+          const cachedMe = readCached('rbac:me');
+          if (cachedMe) {
+            const me = cachedMe.user || cachedMe;
+            context.user = me || null;
+            context.permissions = (me?.permissions?.map((p: any) => p.key || `${p.resource}.${p.action}`)) || (cachedMe.flatPermissions || []);
+            context.roles = Array.isArray(me?.roles) ? me.roles.map((r: any) => (typeof r === 'string' ? r : r.name)).filter(Boolean) : [];
+          }
+        }
+      } else {
+        // No token; still attempt to use cached RBAC to avoid false denials in offline modes
+        const cachedMe = readCached('rbac:me');
+        if (cachedMe) {
+          const me = cachedMe.user || cachedMe;
+          context.user = me || null;
+          context.permissions = (me?.permissions?.map((p: any) => p.key || `${p.resource}.${p.action}`)) || (cachedMe.flatPermissions || []);
+          context.roles = Array.isArray(me?.roles) ? me.roles.map((r: any) => (typeof r === 'string' ? r : r.name)).filter(Boolean) : [];
         }
       }
 

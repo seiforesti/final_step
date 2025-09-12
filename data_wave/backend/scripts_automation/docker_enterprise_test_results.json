@@ -1,0 +1,32 @@
+{
+  "start_time": "2025-09-10T22:45:07.971061",
+  "tests": {
+    "backend_health": true,
+    "enterprise_integration": {
+      "status": "success",
+      "message": "Enterprise discovery integration test completed",
+      "backend_healthy": true,
+      "platform_accessible": true,
+      "database_accessible": true,
+      "metrics_accessible": true
+    },
+    "components_availability": {
+      "status": "success",
+      "available_endpoints": [
+        "/data-discovery/data-sources/1/discovery-status",
+        "/data-discovery/data-sources/1/discover-schema/progress"
+      ],
+      "total_endpoints_tested": 3,
+      "enterprise_discovery_available": true
+    },
+    "connection_management": {
+      "status": "success",
+      "successful_requests": 5,
+      "failed_requests": 0,
+      "total_requests": 5,
+      "connection_management_working": true
+    }
+  },
+  "end_time": "2025-09-10T22:45:09.158179",
+  "status": "completed"
+}

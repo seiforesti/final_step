@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect, Suspense, useCallback, useMemo, createContext, useContext } from "react"
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { QueryClientProvider } from "@tanstack/react-query"
+import { queryClient } from "./shared/utils/query-client"
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import { Database, Settings, Activity, TrendingUp, Users, Shield, Cloud, Search, BarChart3, Eye, Zap, Target, Bell, Menu, X, ChevronLeft, ChevronRight, Plus, Filter, Download, Upload, RefreshCw, HelpCircle, User, LogOut, Monitor, Palette, Globe, Lock, Building, FileText, MessageSquare, Star, Grid, List, Layers, GitBranch, Workflow, Calendar, Clock, AlertTriangle, CheckCircle, Info, Play, Pause, Square, Edit, Trash2, Copy, Share2, ExternalLink, MoreHorizontal, ChevronDown, ChevronUp, Maximize2, Minimize2, PanelLeftOpen, PanelRightOpen, SplitSquareHorizontal, Layout, Command, Cpu, HardDrive, Network, Gauge, LineChart, PieChart, AreaChart, TestTube, Beaker, Microscope, Cog, Wrench, Package, Server, CircuitBoard, Boxes, Archive, FolderOpen, Folder, File, Code2, Terminal, Bug, Sparkles, Rocket, Flame, Lightbulb, Brain, Bot, Radar, Crosshair, Focus, Scan, SearchX, ScanLine, Binary, Hash, Type, Key, ShieldCheckIcon, UserCheck, Crown, Badge as BadgeIcon, Award, Medal, Trophy, Flag, Bookmark, Heart, ThumbsUp, Smile, Frown, AlertCircle, XCircle, Wifi, WifiOff, Signal, SignalHigh, SignalLow, SignalMedium, Route, Map, MapPin, Navigation, Compass, TreePine, Workflow as WorkflowIcon,  } from 'lucide-react'
 
@@ -131,6 +132,7 @@ import { DataSourceBulkActions } from "./data-source-bulk-actions"
 import { DataDiscoveryWorkspace } from "./data-discovery/data-discovery-workspace"
 import { DataLineageGraph } from "./data-discovery/data-lineage-graph"
 import { SchemaDiscovery } from "./data-discovery/schema-discovery"
+import { SchemaDiscoveryProvider } from "./shared/contexts/schema-discovery-context"
 
 // Import remaining components (create them if they don't exist)
 const DataSourceComplianceView = React.lazy(() => import("./data-source-compliance-view").catch(() => ({ default: () => <div>Compliance View - Component not found</div> })))
@@ -858,7 +860,11 @@ function DataSourcesAppContent({ className }: DataSourcesAppProps) {
         case "discovery-workspace":
           return selectedDataSource ? <DataDiscoveryWorkspace {...commonProps} /> : <div>Select a data source</div>
         case "schema-discovery":
-          return selectedDataSource ? <SchemaDiscovery {...commonProps} /> : <div>Select a data source</div>
+          return selectedDataSource ? (
+            <SchemaDiscoveryProvider>
+              <SchemaDiscovery {...commonProps} />
+            </SchemaDiscoveryProvider>
+          ) : <div>Select a data source</div>
         case "data-lineage":
           return selectedDataSource ? <DataLineageGraph {...commonProps} /> : <div>Select a data source</div>
         

@@ -6,9 +6,11 @@
 "use client"
 
 import React, { useState, useEffect, Suspense, useCallback, useMemo, createContext, useContext } from "react"
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { QueryClientProvider } from "@tanstack/react-query"
+import { queryClient } from "./shared/utils/query-client"
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import { Toaster } from "sonner"
+import { useGlobalWebSocket } from "./hooks/use-global-websocket"
 import { Database, Settings, Activity, TrendingUp, Users, Shield, Cloud, Search, BarChart3, Eye, Zap, Target, Bell, Menu, X, ChevronLeft, ChevronRight, Plus, Filter, Download, Upload, RefreshCw, HelpCircle, User, LogOut, Monitor, Palette, Globe, Lock, Building, FileText, MessageSquare, Star, Grid, List, Layers, GitBranch, Workflow, Calendar, Clock, AlertTriangle, CheckCircle, Info, Play, Pause, Square, Edit, Trash2, Copy, Share2, ExternalLink, MoreHorizontal, ChevronDown, ChevronUp, Maximize2, Minimize2, PanelLeftOpen, PanelRightOpen, SplitSquareHorizontal, Layout, Command, Cpu, HardDrive, Network, Gauge, LineChart, PieChart, AreaChart, TestTube, Beaker, Microscope, Cog, Wrench, Package, Server, CircuitBoard, Boxes, Archive, FolderOpen, Folder, File, Code2, Terminal, Bug, Sparkles, Rocket, Flame, Lightbulb, Brain, Bot, Radar, Crosshair, Focus, Scan, SearchX, ScanLine, Binary, Hash, Type, Key, ShieldCheckIcon, UserCheck, Crown, BadgeIcon, Award, Medal, Trophy, Flag, Bookmark, Heart, ThumbsUp, Smile, Frown, AlertCircle, XCircle, Wifi, WifiOff, Signal, SignalHigh, SignalLow, SignalMedium, Route, MapIcon, MapPin, Navigation, Compass, TreePine, WorkflowIcon, Camera, Video, Mic, MicOff, Maximize, Minimize, RotateCcw, RotateCw, ZoomIn, ZoomOut, Expand, Shrink, Move, PinIcon, BookmarkIcon, Tag, Tags, HashIcon, Percent, DollarSign, Euro, ArrowDown } from 'lucide-react'
 
 // ============================================================================
@@ -570,6 +572,9 @@ import { DataSourceBulkActions } from "./data-source-bulk-actions"
 import { DataDiscoveryWorkspace } from "./data-discovery/data-discovery-workspace"
 import { DataLineageGraph } from "./data-discovery/data-lineage-graph"
 import { SchemaDiscovery } from "./data-discovery/schema-discovery"
+import { SchemaDiscovery as SchemaDiscoveryTemp } from "./data-discovery/schema-discovery-temp"
+import { SchemaDiscoverySplitView } from "./ui/schema-discovery-split-view"
+import { SchemaDiscoveryProvider } from "./shared/contexts/schema-discovery-context"
 
 // Import enterprise UI components
 import { EnterpriseDashboard } from "./ui/dashboard/enterprise-dashboard"
@@ -1111,6 +1116,62 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
     enableNotifications: true
   })
 
+  // ========================================================================
+  // GLOBAL WEBSOCKET INTEGRATION - REPLACES ALL POLLING
+  // ========================================================================
+  
+  const { 
+    state: wsState, 
+    isConnected, 
+    isConnecting, 
+    hasError,
+    subscribe,
+    requestData 
+  } = useGlobalWebSocket()
+
+  // WebSocket connection status indicator
+  const [wsConnectionStatus, setWsConnectionStatus] = useState<'connected' | 'connecting' | 'disconnected' | 'error'>('disconnected')
+
+  useEffect(() => {
+    setWsConnectionStatus(wsState)
+  }, [wsState])
+
+  // Subscribe to real-time data updates
+  useEffect(() => {
+    if (!isConnected) return
+
+    // Subscribe to all data updates
+    const unsubscribeDataSources = subscribe('data_sources_updated', (data) => {
+      console.log('📊 Data sources updated via WebSocket:', data)
+      // This will trigger React Query to refetch data sources
+    })
+
+    const unsubscribeUserData = subscribe('user_data_updated', (data) => {
+      console.log('👤 User data updated via WebSocket:', data)
+    })
+
+    const unsubscribeNotifications = subscribe('notifications_updated', (data) => {
+      console.log('🔔 Notifications updated via WebSocket:', data)
+    })
+
+    const unsubscribeWorkspaceData = subscribe('workspace_data_updated', (data) => {
+      console.log('🏢 Workspace data updated via WebSocket:', data)
+    })
+
+    // Request initial data
+    requestData('data_sources')
+    requestData('user_data')
+    requestData('notifications')
+    requestData('workspace_data')
+
+    return () => {
+      unsubscribeDataSources()
+      unsubscribeUserData()
+      unsubscribeNotifications()
+      unsubscribeWorkspaceData()
+    }
+  }, [isConnected, subscribe, requestData])
+
   // Additional enterprise feature hooks for comprehensive functionality - will be initialized after dataSourceId
 
   // ========================================================================
@@ -1146,6 +1207,84 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
   const [refreshInterval, setRefreshInterval] = useState(30)
   
   // ========================================================================
+  // RBAC SESSION PERSISTENCE (Single-load per session, zero-loop fallback)
+  // ========================================================================
+  
+  const RBAC_ME_KEY = 'rbac:me'
+  const RBAC_SESSION_ID_KEY = 'rbac:session-id'
+  
+  const getSessionId = () => {
+    try {
+      if (typeof window === 'undefined') return 'default-session'
+      // Prefer stable auth token (survives backend restarts)
+      const token = (window.localStorage.getItem('authToken') || window.localStorage.getItem('auth_token') || '').trim()
+      if (token) return `auth:${token.slice(0,16)}`
+      const sessionToken = (window.sessionStorage.getItem('sessionToken') || '').trim()
+      return sessionToken ? `session:${sessionToken.slice(0,16)}` : 'default-session'
+    } catch {
+      return 'default-session'
+    }
+  }
+  
+  const readCachedMe = () => {
+    try {
+      const raw = typeof window !== 'undefined' ? window.sessionStorage.getItem(RBAC_ME_KEY) : null
+      if (!raw) return null
+      const parsed = JSON.parse(raw)
+      return parsed
+    } catch {
+      return null
+    }
+  }
+  
+  const persistMe = (me: any) => {
+    try {
+      if (typeof window === 'undefined') return
+      window.sessionStorage.setItem(RBAC_ME_KEY, JSON.stringify(me))
+      window.sessionStorage.setItem(RBAC_SESSION_ID_KEY, getSessionId())
+    } catch {
+      // ignore
+    }
+  }
+  
+  const cachedMe = readCachedMe()
+  const cachedSessionId = typeof window !== 'undefined' ? window.sessionStorage.getItem(RBAC_SESSION_ID_KEY) : null
+  const currentSessionId = getSessionId()
+  const isDefaultSession = currentSessionId === 'default-session'
+  const hasUserInCache = Boolean(cachedMe && (cachedMe as any).user)
+
+  // Bootstrap RBAC cache on first load or when cache is incomplete/invalid
+  useEffect(() => {
+    const bootstrapRBAC = async () => {
+      if (cachedMe && hasUserInCache && !isDefaultSession) return
+      try {
+        const token = (typeof window !== 'undefined') ? (localStorage.getItem('authToken') || localStorage.getItem('auth_token') || '') : ''
+        if (!token) return
+        const resp = await fetch('/proxy/rbac/me', {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {})
+          }
+        })
+        if (!resp.ok) return
+        const data = await resp.json()
+        // Persist in a shape compatible with the rest of the app, defaulting to allow basic view
+        const defaultPerms = { canView: true, canViewDiscovery: true, canViewPerformance: true, canTestConnection: true }
+        const payload = data && typeof data === 'object' && ('user' in data || 'email' in data)
+          ? (data.user ? { user: data.user, dataSourcePermissions: (data as any).dataSourcePermissions || defaultPerms } : { user: data, dataSourcePermissions: defaultPerms })
+          : { user: data, dataSourcePermissions: {} }
+        persistMe(payload)
+      } catch {
+        // Ignore bootstrap errors
+      }
+    }
+    bootstrapRBAC()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+  
+  // ========================================================================
   // VIEW-BASED GATING - MUST BE DECLARED BEFORE RBAC INTEGRATION
   // ========================================================================
   
@@ -1172,11 +1311,12 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
   
   // Determine if RBAC should be loaded based on initialization state
   const shouldLoadRBAC = useMemo(() => {
-    // Load RBAC immediately when component mounts, don't wait for initialization phases
-    const shouldLoad = true
-    console.log('RBAC Loading Check:', { isInitialized, initializationPhase, shouldLoad, activeView })
+    // Fresh cache only counts if a real session id and user exists in cache
+    const hasFreshCache = Boolean(cachedMe) && hasUserInCache && cachedSessionId === currentSessionId && !isDefaultSession
+    const shouldLoad = !hasFreshCache
+    console.log('RBAC Loading Check:', { hasFreshCache, cachedSessionId, currentSessionId, shouldLoad })
     return shouldLoad
-  }, [isInitialized, initializationPhase, activeView])
+  }, [cachedMe, cachedSessionId, currentSessionId, hasUserInCache, isDefaultSession])
   
   // Load RBAC integration
   const {
@@ -1189,6 +1329,13 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
     isLoading: rbacLoading,
     error: rbacError
   } = useRBACIntegration(shouldLoadRBAC)
+  // Persist RBAC me once obtained to prevent further backend lookups within session
+  useEffect(() => {
+    if (currentUser) {
+      persistMe({ user: currentUser, dataSourcePermissions })
+    }
+  }, [currentUser, dataSourcePermissions])
+
 
   // Debug RBAC state
   console.log('RBAC State:', { 
@@ -1216,21 +1363,87 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
       canManageBackup: false,
       canViewPerformance: true,
     }
-    const finalPermissions = {
-      ...defaultPermissions,
-      ...(dataSourcePermissions || {})
+    // Prefer live permissions; otherwise fallback to cached session permissions
+    const cachedPermissions = (cachedMe && cachedMe.dataSourcePermissions) ? cachedMe.dataSourcePermissions : {}
+    const hasExplicitLive = !!(dataSourcePermissions && typeof (dataSourcePermissions as any).canView === 'boolean')
+    const live = hasExplicitLive ? dataSourcePermissions : {}
+    const merged = { ...defaultPermissions, ...cachedPermissions, ...live }
+    // Guardrails: never deny view if either cached or default allow it
+    merged.canView = Boolean(
+      (hasExplicitLive ? (live as any).canView : undefined) ??
+      (cachedPermissions && typeof cachedPermissions.canView !== 'undefined' ? cachedPermissions.canView : undefined) ??
+      defaultPermissions.canView
+    )
+    // First-load safety: if there is no cached user or session is default, allow view regardless of stale cached flags
+    if (!hasUserInCache || isDefaultSession) {
+      merged.canView = true
     }
+    // Ensure derived flags are booleans
+    merged.canEdit = Boolean(merged.canEdit)
+    merged.canCreate = Boolean(merged.canCreate)
+    merged.canDelete = Boolean(merged.canDelete)
+    merged.canGenerateReports = Boolean(merged.canGenerateReports)
+    merged.canViewDiscovery = Boolean(merged.canViewDiscovery)
+    merged.canTestConnection = Boolean(merged.canTestConnection)
+    merged.canManageBackup = Boolean(merged.canManageBackup)
+    merged.canViewPerformance = Boolean(merged.canViewPerformance)
     console.log('Safe Data Source Permissions:', { 
       defaultPermissions, 
       dataSourcePermissions, 
-      finalPermissions,
-      canView: finalPermissions.canView
+      finalPermissions: merged,
+      canView: merged.canView
     })
-    return finalPermissions
-  }, [dataSourcePermissions])
+    return merged
+  }, [dataSourcePermissions, cachedMe])
   
+  // Use cached user as a fallback so the sidebar never disappears on first load
+  const effectiveUser = useMemo(() => currentUser || (cachedMe && cachedMe.user) || null, [currentUser, cachedMe])
+
   const getFilteredNavigation = useCallback(() => {
-    if (!currentUser) return {}
+    if (!effectiveUser) {
+      // Build navigation using safe permissions when user is not yet loaded
+      const fallback: any = {}
+      Object.entries(enterpriseNavigationStructure).forEach(([categoryKey, category]) => {
+        const filteredItems = category.items.filter((item: any) => {
+          switch (item.id) {
+            case 'dashboard':
+            case 'ai-dashboard':
+            case 'overview':
+            case 'grid':
+            case 'list':
+            case 'details':
+              return safeDataSourcePermissions.canView
+            case 'monitoring':
+            case 'dashboard-monitoring':
+            case 'performance':
+              return safeDataSourcePermissions.canViewPerformance
+            case 'quality':
+            case 'growth':
+            case 'analytics-workbench':
+              return safeDataSourcePermissions.canView
+            case 'discovery':
+            case 'discovery-workspace':
+            case 'schema-discovery':
+            case 'data-lineage':
+            case 'scan-results':
+              return safeDataSourcePermissions.canViewDiscovery
+            case 'reports':
+            case 'catalog':
+            case 'filters':
+            case 'version-history':
+              return safeDataSourcePermissions.canView
+            case 'connection-test':
+              return safeDataSourcePermissions.canTestConnection
+            case 'backup-restore':
+              return safeDataSourcePermissions.canManageBackup
+            default:
+              return safeDataSourcePermissions.canView
+          }
+        })
+        if (filteredItems.length > 0) fallback[categoryKey] = { ...category, items: filteredItems }
+      })
+      return fallback
+    }
     
     const filtered: any = {}
     
@@ -1306,7 +1519,7 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
     })
     
     return filtered
-  }, [currentUser, safeDataSourcePermissions, hasPermission])
+  }, [effectiveUser, safeDataSourcePermissions, hasPermission])
   
   const filteredNavigation = useMemo(() => getFilteredNavigation(), [getFilteredNavigation])
 
@@ -1404,8 +1617,8 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
   // Core Data Sources Integration - WITH THROTTLING AND ERROR HANDLING
   const { data: dataSources, isLoading: dataSourcesLoading, error: dataSourcesError, refetch: refetchDataSources } = useDataSourcesQuery({
     enabled: isInitialized && initializationPhase >= 1,
-    refetchInterval: 300000, // Only refetch every 5 minutes
-    staleTime: 180000 // 3 minutes stale time
+    refetchInterval: false, // Disable polling - use WebSocket instead
+    staleTime: Infinity // Never consider data stale - WebSocket will update it
   })
   
   // Create datasource mutation (real backend)
@@ -1414,39 +1627,39 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
   // Core User and Workspace Integration - WITH THROTTLING AND ERROR BOUNDARIES
   const { data: user, isLoading: userLoading, error: userError } = useUserQuery({
     enabled: isInitialized && initializationPhase >= 2,
-    refetchInterval: 300000, // Only refetch every 5 minutes
-    staleTime: 120000 // 2 minutes stale time
+    refetchInterval: false, // Disable polling - use WebSocket instead
+    staleTime: Infinity // Never consider data stale - WebSocket will update it
   })
-  
-  const { data: userNotifications, error: notificationsError } = useNotificationsQuery({
+
+  const { data: userNotifications, error: notificationsError } = useNotificationsQuery(undefined, {
     enabled: isInitialized && initializationPhase >= 2,
-    refetchInterval: 120000, // Only refetch every 2 minutes
-    staleTime: 60000 // 1 minute stale time
+    refetchInterval: false, // Disable polling - use WebSocket instead
+    staleTime: Infinity // Never consider data stale - WebSocket will update it
   })
-  
+
   const { data: workspace, error: workspaceError } = useWorkspaceQuery({
     enabled: isInitialized && initializationPhase >= 2,
-    refetchInterval: 300000, // Only refetch every 5 minutes
-    staleTime: 180000 // 3 minutes stale time
+    refetchInterval: false, // Disable polling - use WebSocket instead
+    staleTime: Infinity // Never consider data stale - WebSocket will update it
   })
   
   const { data: metrics, error: metricsError } = useDataSourceMetricsQuery(selectedDataSource?.id, {
     enabled: isInitialized && initializationPhase >= 2 && !!selectedDataSource?.id && isPerformanceView,
-    refetchInterval: 300000, // Only refetch every 5 minutes
-    staleTime: 180000 // 3 minutes stale time
+    refetchInterval: false, // Disable polling - use WebSocket instead
+    staleTime: Infinity // Never consider data stale - WebSocket will update it
   })
   
   // Core data source backend integrations - WITH THROTTLING AND ERROR BOUNDARIES
   const { data: dataSourceHealth, error: healthError } = useDataSourceHealthQuery(selectedDataSource?.id || 0, {
     enabled: isInitialized && initializationPhase >= 3 && !!selectedDataSource?.id && isPerformanceView,
-    refetchInterval: 300000, // Only refetch every 5 minutes
-    staleTime: 180000 // 3 minutes stale time
+    refetchInterval: false, // Disable polling - use WebSocket instead
+    staleTime: Infinity // Never consider data stale - WebSocket will update it
   })
   
   const { data: connectionPoolStats, error: poolError } = useConnectionPoolStatsQuery(selectedDataSource?.id || 0, {
     enabled: isInitialized && initializationPhase >= 3 && !!selectedDataSource?.id && isPerformanceView,
-    refetchInterval: 300000, // Only refetch every 5 minutes
-    staleTime: 180000 // 3 minutes stale time
+    refetchInterval: false, // Disable polling - use WebSocket instead
+    staleTime: Infinity // Never consider data stale - WebSocket will update it
   })
   
   // Memoize data source ID to prevent unnecessary re-renders
@@ -1461,16 +1674,16 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
   
   // RBAC integration is already loaded above
 
-  const { data: discoveryHistory, error: discoveryError } = useDiscoveryHistoryQuery(selectedDataSource?.id || 0, {
+  const { data: discoveryHistory, error: discoveryError } = useDiscoveryHistoryQuery(selectedDataSource?.id || 0, 10, {
     enabled: isInitialized && initializationPhase >= 3 && !!selectedDataSource?.id && isDiscoveryView,
-    refetchInterval: 300000, // Only refetch every 5 minutes
-    staleTime: 180000 // 3 minutes stale time
+    refetchInterval: false, // Disable polling - use WebSocket instead
+    staleTime: Infinity // Never consider data stale - WebSocket will update it
   })
   
-  const { data: scanResults, error: scanError } = useScanResultsQuery(selectedDataSource?.id || 0, {
+  const { data: scanResults, error: scanError } = useScanResultsQuery(selectedDataSource?.id || 0, 10, {
     enabled: isInitialized && initializationPhase >= 3 && !!selectedDataSource?.id && isDiscoveryView,
-    refetchInterval: 300000, // Only refetch every 5 minutes
-    staleTime: 180000 // 3 minutes stale time
+    refetchInterval: false, // Disable polling - use WebSocket instead
+    staleTime: Infinity // Never consider data stale - WebSocket will update it
   })
 
   // Additional enterprise feature hooks for comprehensive functionality - WITH THROTTLING
@@ -1483,32 +1696,32 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
   
   const { data: qualityMetrics, error: qualityError } = useQualityMetricsQuery(dataSourceId || 0, {
     enabled: isInitialized && initializationPhase >= 4 && !!dataSourceId && isPerformanceView,
-    refetchInterval: 300000, // Only refetch every 5 minutes
-    staleTime: 180000 // 3 minutes stale time
+    refetchInterval: false, // Disable polling - use WebSocket instead
+    staleTime: Infinity // Never consider data stale - WebSocket will update it
   })
   
   const { data: growthMetrics, error: growthError } = useGrowthMetricsQuery(dataSourceId || 0, {
     enabled: isInitialized && initializationPhase >= 4 && !!dataSourceId && isPerformanceView,
-    refetchInterval: 300000, // Only refetch every 5 minutes
-    staleTime: 180000 // 3 minutes stale time
+    refetchInterval: false, // Disable polling - use WebSocket instead
+    staleTime: Infinity // Never consider data stale - WebSocket will update it
   })
   
   const { data: schemaDiscoveryData, error: schemaError } = useSchemaDiscoveryQuery(dataSourceId, {
     enabled: isInitialized && initializationPhase >= 4 && !!dataSourceId && isDiscoveryView,
-    refetchInterval: 600000, // Only refetch every 10 minutes
-    staleTime: 300000 // 5 minutes stale time
+    refetchInterval: false, // Disable polling - use WebSocket instead
+    staleTime: Infinity // Never consider data stale - WebSocket will update it
   })
   
   const { data: dataLineage, error: lineageError } = useDataLineageQuery(dataSourceId, {
     enabled: isInitialized && initializationPhase >= 4 && !!dataSourceId && isDiscoveryView,
-    refetchInterval: 600000, // Only refetch every 10 minutes
-    staleTime: 300000 // 5 minutes stale time
+    refetchInterval: false, // Disable polling - use WebSocket instead
+    staleTime: Infinity // Never consider data stale - WebSocket will update it
   })
   
   const { data: backupStatus, error: backupError } = useBackupStatusQuery(dataSourceId, {
     enabled: isInitialized && initializationPhase >= 4 && !!dataSourceId && isPerformanceView,
-    refetchInterval: 300000, // Only refetch every 5 minutes
-    staleTime: 180000 // 3 minutes stale time
+    refetchInterval: false, // Disable polling - use WebSocket instead
+    staleTime: Infinity // Never consider data stale - WebSocket will update it
   })
   
   // Gate queries by visibility and required identifiers to reduce backend pressure
@@ -1516,14 +1729,14 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
   
   const { data: scheduledTasks, error: tasksError } = useScheduledTasksQuery(dataSourceId, {
     enabled: isInitialized && initializationPhase >= 4 && !!dataSourceId && isVisible && isWorkflowView,
-    refetchInterval: isVisible ? 300000 : false, // Only refetch every 5 minutes when visible
-    staleTime: 120000 // 2 minutes stale time
+    refetchInterval: false, // Disable polling - use WebSocket instead
+    staleTime: Infinity // Never consider data stale - WebSocket will update it
   })
   
   const { data: auditLogs, error: auditError } = useAuditLogsQuery(dataSourceId, {
     enabled: isInitialized && initializationPhase >= 4 && !!dataSourceId && isVisible && isSecurityView,
-    refetchInterval: isVisible ? 600000 : false, // Only refetch every 10 minutes when visible
-    staleTime: 300000 // 5 minutes stale time
+    refetchInterval: false, // Disable polling - use WebSocket instead
+    staleTime: Infinity // Never consider data stale - WebSocket will update it
   })
   
   const { data: userPermissions, error: permissionsError } = useUserPermissionsQuery({
@@ -1538,8 +1751,8 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
   
   const { data: dataCatalog, error: catalogError } = useDataCatalogQuery({
     enabled: isInitialized && initializationPhase >= 5 && isVisible,
-    refetchInterval: isVisible ? 900000 : false, // Only refetch every 15 minutes when visible
-    staleTime: 600000 // 10 minutes stale time
+    refetchInterval: false, // Disable polling - use WebSocket instead
+    staleTime: Infinity // Never consider data stale - WebSocket will update it
   })
 
   // =====================================================================================
@@ -1549,14 +1762,14 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
   // COLLABORATION APIs - WITH THROTTLING
   const { data: collaborationWorkspaces } = useCollaborationWorkspacesQuery({}, {
     enabled: isInitialized && initializationPhase >= 3 && isCollaborationView,
-    refetchInterval: 300000, // Only refetch every 5 minutes
-    staleTime: 180000 // 3 minutes stale time
+    refetchInterval: false, // Disable polling - use WebSocket instead
+    staleTime: Infinity // Never consider data stale - WebSocket will update it
   })
   
   const { data: activeCollaborationSessions } = useActiveCollaborationSessionsQuery({}, {
     enabled: isInitialized && initializationPhase >= 3 && isCollaborationView,
-    refetchInterval: 180000, // Only refetch every 3 minutes
-    staleTime: 120000 // 2 minutes stale time
+    refetchInterval: false, // Disable polling - use WebSocket instead
+    staleTime: Infinity // Never consider data stale - WebSocket will update it
   })
   
   const sharedDocsParams = useMemo(() => ({ document_type: 'all' }), [])
@@ -1565,7 +1778,7 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
     sharedDocsParams,
     {
       enabled: isInitialized && initializationPhase >= 4 && !!dataSourceId && isCollaborationView,
-      refetchInterval: 600000, // Only refetch every 10 minutes
+      refetchInterval: false, // Disable polling - use WebSocket instead
       staleTime: 300000 // 5 minutes stale time
     }
   )
@@ -1574,53 +1787,53 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null)
   const { data: documentComments } = useDocumentCommentsQuery(selectedDocumentId || '', {
     enabled: isInitialized && initializationPhase >= 4 && !!selectedDocumentId && isVisible,
-    refetchInterval: isVisible ? 600000 : false, // Only refetch every 10 minutes when visible
-    staleTime: 300000 // 5 minutes stale time
+    refetchInterval: false, // Disable polling - use WebSocket instead
+    staleTime: Infinity // Never consider data stale - WebSocket will update it
   })
   
   const { data: workspaceActivity } = useWorkspaceActivityQuery(workspaceId?.toString() || '', 7, {
     enabled: isInitialized && initializationPhase >= 3 && !!workspaceId && isCollaborationView,
-    refetchInterval: 600000, // Only refetch every 10 minutes
-    staleTime: 300000 // 5 minutes stale time
+    refetchInterval: false, // Disable polling - use WebSocket instead
+    staleTime: Infinity // Never consider data stale - WebSocket will update it
   })
   
   // WORKFLOW APIs - WITH THROTTLING
   const { data: workflowDefinitions } = useWorkflowDefinitionsQuery({}, {
     enabled: isInitialized && initializationPhase >= 3 && isWorkflowView,
-    refetchInterval: 600000, // Only refetch every 10 minutes
-    staleTime: 300000 // 5 minutes stale time
+    refetchInterval: false, // Disable polling - use WebSocket instead
+    staleTime: Infinity // Never consider data stale - WebSocket will update it
   })
   
   const workflowExecutionsParams = useMemo(() => ({ days: 7 }), [])
   const { data: workflowExecutions } = useWorkflowExecutionsQuery(workflowExecutionsParams, {
     enabled: isInitialized && initializationPhase >= 4 && isWorkflowView,
-    refetchInterval: 900000, // Only refetch every 15 minutes
-    staleTime: 600000 // 10 minutes stale time
+    refetchInterval: false, // Disable polling - use WebSocket instead
+    staleTime: Infinity // Never consider data stale - WebSocket will update it
   })
   
   const { data: pendingApprovals } = usePendingApprovalsQuery('', {
     enabled: isInitialized && initializationPhase >= 3 && isWorkflowView,
-    refetchInterval: 300000, // Only refetch every 5 minutes
-    staleTime: 180000 // 3 minutes stale time
+    refetchInterval: false, // Disable polling - use WebSocket instead
+    staleTime: Infinity // Never consider data stale - WebSocket will update it
   })
   
   const { data: workflowTemplates } = useWorkflowTemplatesQuery('', {
     enabled: isInitialized && initializationPhase >= 3 && isWorkflowView,
-    refetchInterval: 900000, // Only refetch every 15 minutes
-    staleTime: 600000 // 10 minutes stale time
+    refetchInterval: false, // Disable polling - use WebSocket instead
+    staleTime: Infinity // Never consider data stale - WebSocket will update it
   })
   
   const { data: bulkOperationStatus } = useBulkOperationStatusQuery('', {
     enabled: isInitialized && initializationPhase >= 3 && isWorkflowView,
-    refetchInterval: 300000, // Only refetch every 5 minutes
-    staleTime: 180000 // 3 minutes stale time
+    refetchInterval: false, // Disable polling - use WebSocket instead
+    staleTime: Infinity // Never consider data stale - WebSocket will update it
   })
   
   // ENHANCED PERFORMANCE APIs - WITH THROTTLING
   const { data: systemHealth } = useSystemHealthQuery({
     enabled: isInitialized && initializationPhase >= 3 && isVisible && isPerformanceView,
-    refetchInterval: isVisible ? 120000 : false, // Only refetch every 2 minutes when visible
-    staleTime: 60000 // 1 minute stale time
+    refetchInterval: false, // Disable polling - use WebSocket instead
+    staleTime: Infinity // Never consider data stale - WebSocket will update it
   })
   
   const perfMetricsParams = useMemo(() => ({ time_range: '24h', metric_types: ['cpu', 'memory', 'io', 'network'] }), [])
@@ -1629,7 +1842,7 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
     perfMetricsParams,
     {
       enabled: isInitialized && initializationPhase >= 4 && !!dataSourceId && isPerformanceView,
-      refetchInterval: 300000, // Only refetch every 5 minutes
+      refetchInterval: false, // Disable polling - use WebSocket instead
       staleTime: 180000 // 3 minutes stale time
     }
   )
@@ -1637,33 +1850,33 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
   const performanceAlertsParams = useMemo(() => ({ severity: 'all', days: 7 }), [])
   const { data: performanceAlerts } = usePerformanceAlertsQuery(performanceAlertsParams, {
     enabled: isInitialized && initializationPhase >= 3 && isPerformanceView,
-    refetchInterval: 180000, // Only refetch every 3 minutes
-    staleTime: 120000 // 2 minutes stale time
+    refetchInterval: false, // Disable polling - use WebSocket instead
+    staleTime: Infinity // Never consider data stale - WebSocket will update it
   })
   
   const { data: performanceTrends } = usePerformanceTrendsQuery(dataSourceId, '30d', {
     enabled: isInitialized && initializationPhase >= 4 && !!dataSourceId && isPerformanceView,
-    refetchInterval: 600000, // Only refetch every 10 minutes
-    staleTime: 300000 // 5 minutes stale time
+    refetchInterval: false, // Disable polling - use WebSocket instead
+    staleTime: Infinity // Never consider data stale - WebSocket will update it
   })
   
   const { data: optimizationRecommendations } = useOptimizationRecommendationsQuery(dataSourceId, {
     enabled: isInitialized && initializationPhase >= 5 && !!dataSourceId && isPerformanceView,
-    refetchInterval: 900000, // Only refetch every 15 minutes
-    staleTime: 600000 // 10 minutes stale time
+    refetchInterval: false, // Disable polling - use WebSocket instead
+    staleTime: Infinity // Never consider data stale - WebSocket will update it
   })
   
   const perfSummaryParams = useMemo(() => ({ time_range: '7d' }), [])
   const { data: performanceSummaryReport } = usePerformanceSummaryReportQuery(perfSummaryParams, {
     enabled: isInitialized && initializationPhase >= 4 && isPerformanceView,
-    refetchInterval: 900000, // Only refetch every 15 minutes
-    staleTime: 600000 // 10 minutes stale time
+    refetchInterval: false, // Disable polling - use WebSocket instead
+    staleTime: Infinity // Never consider data stale - WebSocket will update it
   })
   
   const { data: performanceThresholds } = usePerformanceThresholdsQuery(dataSourceId, {
     enabled: isInitialized && initializationPhase >= 4 && !!dataSourceId && isPerformanceView,
-    refetchInterval: 900000, // Only refetch every 15 minutes
-    staleTime: 600000 // 10 minutes stale time
+    refetchInterval: false, // Disable polling - use WebSocket instead
+    staleTime: Infinity // Never consider data stale - WebSocket will update it
   })
   
   // ENHANCED SECURITY APIs - WITH THROTTLING
@@ -1673,7 +1886,7 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
     enhancedSecurityAuditParams,
     {
       enabled: isInitialized && initializationPhase >= 4 && !!dataSourceId && isSecurityView,
-      refetchInterval: 600000, // Only refetch every 10 minutes
+      refetchInterval: false, // Disable polling - use WebSocket instead
       staleTime: 300000 // 5 minutes stale time
     }
   )
@@ -1681,47 +1894,47 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
   const vulnerabilityParams = useMemo(() => ({ severity: 'all' }), [])
   const { data: vulnerabilityAssessments } = useVulnerabilityAssessmentsQuery(vulnerabilityParams, {
     enabled: isInitialized && initializationPhase >= 4 && isSecurityView,
-    refetchInterval: 600000, // Only refetch every 10 minutes
-    staleTime: 300000 // 5 minutes stale time
+    refetchInterval: false, // Disable polling - use WebSocket instead
+    staleTime: Infinity // Never consider data stale - WebSocket will update it
   })
   
   const securityIncidentsParams = useMemo(() => ({ days: 30 }), [])
   const { data: securityIncidents } = useSecurityIncidentsQuery(securityIncidentsParams, {
     enabled: isInitialized && initializationPhase >= 3 && isSecurityView,
-    refetchInterval: 300000, // Only refetch every 5 minutes
-    staleTime: 180000 // 3 minutes stale time
+    refetchInterval: false, // Disable polling - use WebSocket instead
+    staleTime: Infinity // Never consider data stale - WebSocket will update it
   })
   
   const { data: complianceChecks } = useComplianceChecksQuery({}, {
     enabled: isInitialized && initializationPhase >= 4 && isSecurityView,
-    refetchInterval: 900000, // Only refetch every 15 minutes
-    staleTime: 600000 // 10 minutes stale time
+    refetchInterval: false, // Disable polling - use WebSocket instead
+    staleTime: Infinity // Never consider data stale - WebSocket will update it
   })
   
   const threatDetectionParams = useMemo(() => ({ days: 7 }), [])
   const { data: threatDetection } = useThreatDetectionQuery(threatDetectionParams, {
     enabled: isInitialized && initializationPhase >= 3 && isSecurityView,
-    refetchInterval: 300000, // Only refetch every 5 minutes
-    staleTime: 180000 // 3 minutes stale time
+    refetchInterval: false, // Disable polling - use WebSocket instead
+    staleTime: Infinity // Never consider data stale - WebSocket will update it
   })
   
   const { data: securityAnalyticsDashboard } = useSecurityAnalyticsDashboardQuery('7d', {
     enabled: isInitialized && initializationPhase >= 4 && isSecurityView,
-    refetchInterval: 600000, // Only refetch every 10 minutes
-    staleTime: 300000 // 5 minutes stale time
+    refetchInterval: false, // Disable polling - use WebSocket instead
+    staleTime: Infinity // Never consider data stale - WebSocket will update it
   })
   
   const { data: riskAssessmentReport } = useRiskAssessmentReportQuery({}, {
     enabled: isInitialized && initializationPhase >= 4 && isSecurityView,
-    refetchInterval: 900000, // Only refetch every 15 minutes
-    staleTime: 600000 // 10 minutes stale time
+    refetchInterval: false, // Disable polling - use WebSocket instead
+    staleTime: Infinity // Never consider data stale - WebSocket will update it
   })
   
   const securityScansParams = useMemo(() => ({ days: 30 }), [])
   const { data: securityScans } = useSecurityScansQuery(securityScansParams, {
     enabled: isInitialized && initializationPhase >= 4 && isSecurityView,
-    refetchInterval: 600000, // Only refetch every 10 minutes
-    staleTime: 300000 // 5 minutes stale time
+    refetchInterval: false, // Disable polling - use WebSocket instead
+    staleTime: Infinity // Never consider data stale - WebSocket will update it
   })
 
   // Mutation hooks for enterprise actions
@@ -2726,12 +2939,27 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
         )
       case "schema-discovery":
         return selectedDataSource ? (
-          <SchemaDiscovery 
-            dataSourceId={selectedDataSource.id} 
-            dataSourceName={selectedDataSource.name} 
-            onSelectionChange={() => {}} 
-            onClose={() => {}} 
-          />
+          <SchemaDiscoveryProvider>
+            <SchemaDiscoverySplitView
+              tempComponent={
+                <SchemaDiscoveryTemp 
+                  dataSourceId={selectedDataSource.id} 
+                  dataSourceName={selectedDataSource.name} 
+                  onSelectionChange={() => {}} 
+                  onClose={() => {}} 
+                />
+              }
+              enterpriseComponent={
+                <SchemaDiscovery 
+                  dataSourceId={selectedDataSource.id} 
+                  dataSourceName={selectedDataSource.name} 
+                  onSelectionChange={() => {}} 
+                  onClose={() => {}} 
+                />
+              }
+              className="h-full"
+            />
+          </SchemaDiscoveryProvider>
         ) : (
           <div className="p-8 text-center">
             <p className="text-muted-foreground">Select a data source to view schema discovery</p>
@@ -3137,7 +3365,7 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
     return () => clearTimeout(timer)
   }, [rbacLoading])
   
-  if (rbacLoading && !rbacTimeout) {
+  if (rbacLoading && !rbacTimeout && !cachedMe) {
     return (
       <TooltipProvider>
         <div className={`min-h-screen bg-background ${className}`}>
@@ -3156,7 +3384,7 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
   }
   
   // Handle RBAC timeout
-  if (rbacTimeout) {
+  if (rbacTimeout && !cachedMe) {
     return (
       <TooltipProvider>
         <div className={`min-h-screen bg-background ${className}`}>
@@ -3189,7 +3417,7 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
   }
 
   // Handle RBAC errors
-  if (rbacError) {
+  if (rbacError && !cachedMe) {
     return (
       <TooltipProvider>
         <div className={`min-h-screen bg-background ${className}`}>
@@ -3419,8 +3647,14 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
     )
   }
 
-  // Handle no permissions after RBAC finished loading
-  if (!safeDataSourcePermissions.canView) {
+  // Handle no permissions ONLY on explicit live denial with a known user
+  if (
+    rbacLoading === false &&
+    currentUser &&
+    typeof (dataSourcePermissions as any)?.canView === 'boolean' &&
+    (dataSourcePermissions as any).canView === false
+  ) {
+    console.warn('Access denied by merged permissions', { live: dataSourcePermissions, merged: safeDataSourcePermissions })
     return (
       <TooltipProvider>
         <div className={`min-h-screen bg-background ${className}`}>
@@ -3498,6 +3732,20 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
 
                 {/* Right: Minimal controls */}
                 <div className="flex items-center space-x-2">
+                  {/* WebSocket Connection Status */}
+                  <div className="flex items-center space-x-1 px-2 py-1 rounded-md bg-zinc-800/50 border border-zinc-700/50">
+                    <div className={`w-2 h-2 rounded-full ${
+                      wsConnectionStatus === 'connected' ? 'bg-green-500' : 
+                      wsConnectionStatus === 'connecting' ? 'bg-yellow-500 animate-pulse' : 
+                      wsConnectionStatus === 'error' ? 'bg-red-500' : 'bg-gray-500'
+                    }`} />
+                    <span className="text-xs text-zinc-400">
+                      {wsConnectionStatus === 'connected' ? 'Live' : 
+                       wsConnectionStatus === 'connecting' ? 'Connecting' : 
+                       wsConnectionStatus === 'error' ? 'Offline' : 'Disconnected'}
+                    </span>
+                  </div>
+                  
                   <Button
                     variant="ghost"
                     size="sm"
@@ -3681,7 +3929,6 @@ function EnhancedDataSourcesAppContent({ className, initialConfig }: EnhancedDat
 // ============================================================================
 
 export function EnhancedDataSourcesApp({ className, initialConfig }: EnhancedDataSourcesAppProps) {
-  const queryClient = createThrottledQueryClient()
   const requestManager = APIRequestManager.getInstance()
   
   // Globally pause polling when tab hidden or when emergency mode is active

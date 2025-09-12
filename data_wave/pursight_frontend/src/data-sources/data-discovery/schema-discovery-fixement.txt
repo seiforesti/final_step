@@ -1,0 +1,70 @@
+need to fix:
+priority 2;==============logic business side hardcore need step by step advancely fixement for production core level==================================
+task 1 : Discovery Flow (Start/Re-analyze/Stop): Stop: [DONE]
+Click “Stop Enterprise Discovery” → POST /proxy/data-discovery/data-sources/{id}/stop-discovery, aborts controller, halts progress. Status refreshed via WS.
+
+task 2: Search and Filters [DONE]
+Quick filter badges now filter by type (tables/views/columns) in tree. 
+
+task 3: Catalog Selected Items Flow
+3.1: when select items must the tree do it visally correctly between parents-childs: wish mean when slect parent all childs must be all selected in view and in logic and when deselect the inverse correct,
+when parent selected and its all children automatically selected ,when deselect one the parent deselected and only validate the children slected , must business logic hanle it correctly==> u know how mut be done do it as u see it advancely because now it counts the parent as 1 selected and its childs not selected when islect parent, second issue when select chhild of parent it counts as sparated item and add it to count ==> hole logic is correpted of tree management need hardcore fixement , 
+=> [DONE] Cascading parent/child selection implemented; ancestors become checked only when all descendants are selected; counts reflect actual selection.
+3.2 : the selection not valid because after in Advanced Validation Center (Popup) the Summary cards: total selected, new items, existing items shows same because system validate all schema wish i just select few tables, fix it advancely and attentively
+[IN PROGRESS] Validation payload now reflects only selected nodes; popup totals should align. Further verify after recommendations flow fix.
+
+3.3
+after POST /proxy/data-discovery/data-sources/{id}/validate-selected-items with items.
+ and after on sucess and after Sets validationResult and opens the Advanced Validation Center popup
+ after opening "Advanced Validation Center (Popup)" : issue included in task 3.2
+
+ 3.4 :in the *AI Recommendations:
+ Section lists recommended items with priority and confidence: fake (all recommender items has same values for all) not processed advancely as real logic
+
+Simulates steps and, when done, auto-selects recommended items in the popup: not working
+Calls parent onApplyRecommendations to also select them in the tree: not working 
+
+
+3.5 : Actions: not working and not even showed in the popup 
+Add New Only: Process only new items.
+Replace Existing: Replace duplicates (will update catalog entries).
+Cancel: Abort.
+=> [DONE] Backend accepts action (add_new | replace); frontend confirm sends {selected_items, action}. Service respects add_new (skip existing).
+
+
+3.6 : Confirm: not processed because action not even appears in popup and confirm also due the bad view or logic 
+“Confirm Action” collects checked entries in the popup and calls onConfirm(action, items).
+Confirm handler:
+POST /proxy/data-discovery/data-sources/{id}/catalog-selected-items with the chosen items.
+On success:
+Updates status to success, sets progress to 100.
+Logs telemetry.
+On failure:
+Shows error alert; resets progress.
+Popup closes afterwards.
+[DONE] Confirm sends action; next: add final toast after success.
+
+task 4: Recommendations Button (Header) : not work at all 
+“AI Recommendations” (header) generates suggestions across all tree items:
+Collects all tables/columns from the tree.
+POST /proxy/data-discovery/data-sources/{id}/validate-selected-items with the full set.
+If recommendations present, opens Validation Center with them preloaded.
+[PENDING] Ensure stable open and diverse recommendations; sync selection back to tree.
+=> [IN PROGRESS] Recommendations: popup opens reliably; auto-select improved (suffix match); top-10 prioritized by priority.
+
+
+priority 3;===================frontend fixement view has to be aligned and advancely managed for production level core============================
+task1: description issues: inacceptable viex management and its to basic not at level production, many colors are used not acceptable, ui not advaned and not structured, with bad performance , items bar are outside div, and div not flexible even with tree schema when it last_modified
+       there is many texts with items in us wish make 'it so ad and basic and not acceptable, workflow automation ui/ux management bad handled, less features, design must be dark and white, and even if needed for usage colors use it less in ui and use cold colors to be adapted with black and white ui/ux managemnt  for perfomant interfaces like cursor and databricks with small design for every thing, 
+       ui design and management must be modern and contains advanced features ==>do a production level core fixement for every thing, even the Advanced Validation Center (Popup)
+      it has 0% rate for advanced popup entreprise core for production level sure to bad design and less features and many colors and bad structure workflow action automation management 
+
+
+
+
+
+priority 1;======================most critical issue data loads========================================
+the system is bad against data loads whish make the ui/ux freez and move and manipulate hard with difficult usage when components loads data it become heavy freez and stuck and performance become null , and most even critical issue is when load data from bakcend when change view and return to view component the data gone and must again reload to see data and its freez agin and become hardd to manipulate, so this will due and issued from many sources u have to deply 
+searching and check from where issue and impliment advance powerfull logic for this management case, thois a critical production system has to be advancely manged against data availablity, i dont now if that issued from not using local storage or, idont know u has to deeply inpect that
+==> and note this is nit only in the discovery orchestration item in side bar of the enhanceddatasourceSPA.tsx mange page when load schema or any other thing, this is in all components that load data from backend and thas managed by the main spa enhanced-data-sources-app.tsx
+=> [IN PROGRESS] Performance & persistence: debounced search, memoized tree, sessionStorage view state persistence (selected/expanded/search/filter), success toast UI.

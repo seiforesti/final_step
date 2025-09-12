@@ -45,7 +45,9 @@ import { Table as TableComponent, TableBody, TableCell, TableHead, TableHeader, 
 // Prefer enterprise wrapper for consistent normalization and telemetry compatibility
 import { discoverSchemaWithOptions, getDiscoveryStatus, stopDiscovery as stopDiscoveryApi } from "../services/enterprise-apis"
 import { previewTable as previewTableApi } from "../services/apis"
-import type { SchemaDiscoveryRequest, TablePreviewRequest } from "../types"
+import type { TablePreviewRequest } from "../types"
+import type { SchemaDiscoveryRequest } from "../services/enterprise-apis"
+import { useSchemaDiscoveryProgress } from "../shared/utils/schema-discovery-progress"
 
 interface SchemaNode {
   id: string
@@ -127,6 +129,9 @@ export function SchemaDiscovery({
   const [autoPicked, setAutoPicked] = useState<{ db: string; schema: string; table: string } | null>(null)
   const [isStarted, setIsStarted] = useState(false)
   const [abortController, setAbortController] = useState<AbortController | null>(null)
+  
+  // Use shared progress tracking
+  const progressTracker = useSchemaDiscoveryProgress('temp')
   
   // Advanced features state
   const [viewMode, setViewMode] = useState<'tree' | 'table' | 'grid'>('tree')
@@ -260,6 +265,14 @@ export function SchemaDiscovery({
       console.warn('Could not check discovery status:', err)
     }
 
+    // Start shared progress tracking
+    try {
+      progressTracker.start()
+    } catch (err) {
+      setError(`Cannot start discovery: ${err instanceof Error ? err.message : 'Unknown error'}`)
+      return
+    }
+
     setIsLoading(true)
     setIsStarted(true)
     setError(null)
@@ -270,39 +283,44 @@ export function SchemaDiscovery({
     const controller = new AbortController()
     setAbortController(controller)
 
+    // Set up progress simulation for better UX
+    const progressInterval = setInterval(() => {
+      setDiscoveryProgress(prev => {
+        if (prev >= 95) return prev // Don't go to 100% until we get real response
+        const increment = Math.random() * 3 + 1 // Random increment between 1-4%
+        return Math.min(prev + increment, 95)
+      })
+    }, 2000) // Update every 2 seconds
+
     try {
       // Start real-time progress streams if available
       startProgressStreams()
 
-      // Simulate progress baseline to avoid frozen bar if streams not available
-      const progressInterval = setInterval(() => {
-        setDiscoveryProgress(prev => {
-          if (prev >= 90) {
-            clearInterval(progressInterval)
-            return prev
-          }
-          return Math.max(prev, prev + 5)
-        })
-      }, 400)
-      progressIntervalRef.current = progressInterval
-
       setDiscoveryStatus("Discovering schema structure...")
 
-      // Use centralized service wrapper (handles /proxy, auth, retries)
+      // Use centralized service wrapper with extended timeout
       const t0 = Date.now()
       const req: SchemaDiscoveryRequest = {
-        data_source_id: dataSourceId,
         include_data_preview: false,
-        max_tables_per_schema: 100,
+        max_tables_per_schema: 1000, // Increased for enterprise scale
+        include_columns: true,
+        include_indexes: true,
+        include_constraints: true,
+        sample_size: 500,
+        timeout_seconds: 300 // 5 minutes timeout
       }
-      const normalized = await discoverSchemaWithOptions(dataSourceId, req, { signal: controller.signal })
+      const normalized = await discoverSchemaWithOptions(dataSourceId, req, { 
+        signal: controller.signal
+      })
       const payload = (normalized as any).data || {}
       const t1 = Date.now()
       setDiscoveryDiagnostics({ durationMs: t1 - t0, endpoint: `/proxy/data-discovery/data-sources/${dataSourceId}/discover-schema`, request: req })
 
-      try { clearInterval(progressInterval) } catch {}
+      // Clear progress interval
+      clearInterval(progressInterval)
       progressIntervalRef.current = null
       setDiscoveryProgress(100)
+      progressTracker.complete()
       setDiscoveryStatus("Discovery completed!")
       stopProgressStreams()
 
@@ -339,6 +357,9 @@ export function SchemaDiscovery({
       } catch {}
 
     } catch (err: any) {
+      // Clear progress interval on error
+      clearInterval(progressInterval)
+      
       // Don't show error if it was cancelled
       if (err.name === 'AbortError') {
         setDiscoveryStatus("Discovery cancelled")
@@ -346,6 +367,7 @@ export function SchemaDiscovery({
       }
       
       setError(err.message || "Schema discovery failed")
+      progressTracker.error(err.message || "Schema discovery failed")
       setDiscoveryProgress(0)
       setDiscoveryStatus("Discovery failed")
       stopProgressStreams()
@@ -373,6 +395,7 @@ export function SchemaDiscovery({
     stopProgressStreams()
     try { progressIntervalRef.current && clearInterval(progressIntervalRef.current) } catch {}
     progressIntervalRef.current = null
+    progressTracker.stop()
     setIsLoading(false)
     setDiscoveryStatus("Discovery stopped")
   }
@@ -532,8 +555,8 @@ export function SchemaDiscovery({
     try {
       const req: TablePreviewRequest = {
         data_source_id: dataSourceId,
-        schema_name: node.metadata.schemaName,
-        table_name: node.metadata.tableName || node.metadata.viewName,
+        schema_name: node.metadata?.schemaName || '',
+        table_name: node.metadata?.tableName || node.metadata?.viewName || node.name,
         limit: 100,
         include_statistics: true,
         apply_data_masking: false,
@@ -744,7 +767,7 @@ export function SchemaDiscovery({
             <div className="flex items-center gap-2 px-3 py-2 bg-white/60 dark:bg-gray-800/60 rounded-lg border">
               <Brain className="h-4 w-4 text-purple-500" />
               <Label className="text-xs font-medium">AI Analysis</Label>
-              <Switch checked={showAIInsights} onCheckedChange={setShowAIInsights} size="sm" />
+              <Switch checked={showAIInsights} onCheckedChange={setShowAIInsights} />
             </div>
           )}
           
@@ -809,7 +832,14 @@ export function SchemaDiscovery({
           
           {/* Discovery Controls */}
           {!isStarted ? (
-            <Button onClick={discoverSchema} disabled={isLoading} className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600">
+            <Button 
+              onClick={() => {
+                console.log('🚀 Start Discovery button clicked!')
+                discoverSchema()
+              }} 
+              disabled={isLoading} 
+              className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600"
+            >
               <RefreshCw className="h-4 w-4 mr-2" />
               Start Discovery
             </Button>
@@ -820,7 +850,14 @@ export function SchemaDiscovery({
             </Button>
           ) : (
             <div className="flex gap-2">
-              <Button onClick={discoverSchema} disabled={isLoading} variant="outline">
+              <Button 
+                onClick={() => {
+                  console.log('🔄 Re-analyze button clicked!')
+                  discoverSchema()
+                }} 
+                disabled={isLoading} 
+                variant="outline"
+              >
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Re-analyze
               </Button>

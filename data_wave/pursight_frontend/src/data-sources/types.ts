@@ -463,12 +463,17 @@ export interface BulkUpdateRequest {
 
 // Schema discovery
 export interface SchemaDiscoveryRequest {
-  data_source_id: number;
+  data_source_id?: number; // Optional since it can be passed as URL parameter
   include_data_preview?: boolean;
   max_tables_per_schema?: number;
   include_views?: boolean;
   include_stored_procedures?: boolean;
   sample_size?: number;
+  include_columns?: boolean;
+  include_indexes?: boolean;
+  include_constraints?: boolean;
+  timeout_seconds?: number;
+  auto_catalog?: boolean;
 }
 
 // Table preview

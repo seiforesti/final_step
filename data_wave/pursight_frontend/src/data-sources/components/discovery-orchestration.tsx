@@ -9,6 +9,8 @@ import { DataSource } from "../types"
 import { DataSourceDiscovery } from "../data-source-discovery"
 import { SchemaDiscovery as SchemaDiscoveryStable } from "../data-discovery/schema-discovery"
 import { SchemaDiscovery as SchemaDiscoveryTemp } from "../data-discovery/schema-discovery-temp"
+import { SchemaDiscoveryProvider } from "../shared/contexts/schema-discovery-context"
+import { SchemaDiscoverySplitView } from "../ui/schema-discovery-split-view"
 import { DataSourceCatalog } from "../data-source-catalog"
 import { DataLineageGraph } from "../data-discovery/data-lineage-graph"
 import { DataSourceScanResults } from "../data-source-scan-results"
@@ -51,51 +53,28 @@ export function DiscoveryOrchestration({ dataSource, className = "" }: Discovery
 						<DataSourceDiscovery dataSource={dataSource} />
 					</TabsContent>
 
-					<TabsContent value="schema" className="mt-4">
-						<div className="space-y-4">
-							<div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
-								<div>
-									<h3 className="font-semibold">Schema Discovery Components</h3>
-									<p className="text-sm text-muted-foreground">
-										Choose one component to run at a time to prevent database exhaustion
-									</p>
-								</div>
-							</div>
-							<div className="grid md:grid-cols-2 gap-4">
-								<Card>
-									<CardHeader>
-										<CardTitle className="flex items-center justify-between">
-											<span>Schema Discovery (Enterprise)</span>
-											<Badge variant="secondary">Production</Badge>
-										</CardTitle>
-									</CardHeader>
-									<CardContent>
-										<SchemaDiscoveryStable 
-											dataSourceId={dataSource.id}
-											dataSourceName={dataSource.name}
-											onSelectionChange={() => {}}
-											onClose={() => {}}
-										/>
-									</CardContent>
-								</Card>
-								<Card>
-									<CardHeader>
-										<CardTitle className="flex items-center justify-between">
-											<span>Schema Discovery (Temp)</span>
-											<Badge variant="outline">Testing</Badge>
-										</CardTitle>
-									</CardHeader>
-									<CardContent>
-										<SchemaDiscoveryTemp 
-											dataSourceId={dataSource.id}
-											dataSourceName={dataSource.name}
-											onSelectionChange={() => {}}
-											onClose={() => {}}
-										/>
-									</CardContent>
-								</Card>
-							</div>
-						</div>
+					<TabsContent value="schema" className="mt-4 h-[calc(100vh-200px)]">
+						<SchemaDiscoveryProvider>
+							<SchemaDiscoverySplitView
+								tempComponent={
+									<SchemaDiscoveryTemp 
+										dataSourceId={dataSource.id}
+										dataSourceName={dataSource.name}
+										onSelectionChange={() => {}}
+										onClose={() => {}}
+									/>
+								}
+								enterpriseComponent={
+									<SchemaDiscoveryStable 
+										dataSourceId={dataSource.id}
+										dataSourceName={dataSource.name}
+										onSelectionChange={() => {}}
+										onClose={() => {}}
+									/>
+								}
+								className="h-full"
+							/>
+						</SchemaDiscoveryProvider>
 					</TabsContent>
 
 					<TabsContent value="catalog" className="mt-4">

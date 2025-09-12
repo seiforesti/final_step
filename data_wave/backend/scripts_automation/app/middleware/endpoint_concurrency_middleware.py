@@ -45,7 +45,7 @@ class _EndpointConcurrencyController:
 # Conservative per-prefix limits to protect DB under bursts
 CONCURRENCY_LIMITS = {
     "/api/v1/catalog": 6,
-    "/data-discovery": 1,  # CRITICAL: Only 1 discovery operation at a time
+    "/data-discovery": 5,  # Allow multiple discovery operations for enterprise features
     "/data-sources": 8,
     "/performance": 6,
 }

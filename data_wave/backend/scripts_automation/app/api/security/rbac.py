@@ -198,8 +198,35 @@ def check_permission(permission: str, current_user: Dict[str, Any] = Depends(get
     user_id = current_user.get("id")
     if user_id:
         effective_permissions = get_user_effective_permissions_rbac(db, user_id)
+        
+        # Handle both dot notation (scan.view) and resource-based (scan + datasource) permissions
         for perm in effective_permissions:
-            if perm["action"] == permission and perm["is_effective"]:
+            if not perm.get("is_effective"):
+                continue
+                
+            action = perm.get("action", "")
+            resource = perm.get("resource", "")
+            
+            # Direct match
+            if action == permission:
+                return True
+            
+            # Handle dot notation permissions (e.g., "scan.view" -> action="scan", resource="datasource")
+            if "." in permission:
+                action_part, resource_part = permission.split(".", 1)
+                if action == action_part and resource == resource_part:
+                    return True
+            
+            # Handle specific permission mappings
+            if permission == "scan.view" and action == "scan" and resource == "datasource":
+                return True
+            if permission == "scan.edit" and action == "scan" and resource == "datasource":
+                return True
+            if permission == "scan.create" and action == "scan" and resource == "datasource":
+                return True
+            if permission == "scan.delete" and action == "scan" and resource == "datasource":
+                return True
+            if permission == "scan.manage" and action == "scan" and resource == "datasource":
                 return True
     
     return False
@@ -224,7 +251,30 @@ async def _ensure_permissions(current_user: Dict[str, Any], permissions: List[st
     with get_session() as db:
         user_id = current_user.get("id") if current_user else None
         effective = get_user_effective_permissions_rbac(db, user_id) if user_id else []
-        allowed = {f.get("action") for f in effective if f.get("is_effective")}
+        
+        # Build allowed permissions set with both direct and mapped permissions
+        allowed = set()
+        for f in effective:
+            if not f.get("is_effective"):
+                continue
+            action = f.get("action", "")
+            resource = f.get("resource", "")
+            
+            # Add direct action
+            allowed.add(action)
+            
+            # Add dot notation mapping
+            if resource:
+                allowed.add(f"{action}.{resource}")
+            
+            # Add specific mappings
+            if action == "scan" and resource == "datasource":
+                allowed.add("scan.view")
+                allowed.add("scan.edit")
+                allowed.add("scan.create")
+                allowed.add("scan.delete")
+                allowed.add("scan.manage")
+        
         if all(p in allowed for p in permissions):
             return current_user
     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"Not authorized. Required: {permissions}")

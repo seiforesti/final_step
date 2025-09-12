@@ -56,6 +56,7 @@ from app.api.routes.compliance_audit_routes import router as compliance_audit_ro
 from app.api.routes.classification_routes import router as classification_routes
 from app.api.routes.ml_routes import router as ml_routes
 from app.api.routes.ai_routes import router as ai_routes
+from app.api.routes.global_websocket_routes import router as global_websocket_router
 
 # ========================================
 # PRODUCTION-CRITICAL: DATABASE INTEGRITY MANAGEMENT API
@@ -482,6 +483,7 @@ app.include_router(compliance_audit_routes)
 app.include_router(classification_routes)  # Add enterprise classification routes
 app.include_router(ml_routes)  # Add ML classification routes (Version 2)
 app.include_router(ai_routes)  # Add AI classification routes (Version 3)
+app.include_router(global_websocket_router)  # Add global WebSocket routes
 
 # ========================================
 # ENTERPRISE DATA GOVERNANCE CORE ROUTES INTEGRATION
@@ -628,14 +630,27 @@ def read_root():
 
 @app.exception_handler(FastAPIRequestValidationError)
 async def validation_exception_handler(request: Request, exc: FastAPIRequestValidationError):
-    logging.error(f"Validation error for request {request.url}: {exc.errors()} | Body: {await request.body()}")
-    return JSONResponse(
-        status_code=422,
-        content={
-            "detail": exc.errors(),
-            "body": (await request.body()).decode()
-        },
-    )
+    try:
+        body = await request.body()
+        body_str = body.decode() if body else ""
+        logging.error(f"Validation error for request {request.url}: {exc.errors()} | Body: {body_str}")
+        return JSONResponse(
+            status_code=422,
+            content={
+                "detail": exc.errors(),
+                "body": body_str
+            },
+        )
+    except Exception as e:
+        # Handle client disconnect or other errors gracefully
+        logging.error(f"Validation error for request {request.url}: {exc.errors()} | Body read error: {str(e)}")
+        return JSONResponse(
+            status_code=422,
+            content={
+                "detail": exc.errors(),
+                "body": "Unable to read request body (client may have disconnected)"
+            },
+        )
 
 @app.on_event("shutdown")
 def shutdown_event():
