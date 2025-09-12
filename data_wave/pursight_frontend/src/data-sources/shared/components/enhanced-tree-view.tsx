@@ -52,10 +52,62 @@ export function EnhancedTreeView({
   defaultViewMode = 'tree'
 }: EnhancedTreeViewProps) {
   const [viewMode, setViewMode] = useState<'tree' | 'graph' | 'list' | 'grid'>(defaultViewMode)
-  const [graphViewMode, setGraphViewMode] = useState<'centralized' | 'hierarchical' | 'network'>('centralized')
+  const [graphViewMode, setGraphViewMode] = useState<'force-directed' | 'hierarchical' | 'circular' | 'tree'>('force-directed')
   const [showConnections, setShowConnections] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [expandedAll, setExpandedAll] = useState(false)
+
+  // Calculate node importance for graph view
+  const calculateNodeImportance = useCallback((node: EnhancedTreeNode): number => {
+    let importance = 0
+    
+    switch (node.type) {
+      case 'database': importance = 100; break
+      case 'schema': importance = 80; break
+      case 'table': importance = 60; break
+      case 'view': importance = 50; break
+      case 'column': importance = 30; break
+      default: importance = 10
+    }
+    
+    // Add importance based on metadata
+    if (node.metadata?.rowCount) {
+      importance += Math.min(20, Math.log10(node.metadata.rowCount + 1))
+    }
+    
+    if (node.metadata?.columnCount) {
+      importance += Math.min(10, node.metadata.columnCount / 10)
+    }
+    
+    return importance
+  }, [])
+
+  // Convert tree nodes to graph nodes with proper relationships
+  const convertToGraphNodes = useCallback((treeNodes: EnhancedTreeNode[], parentId?: string): any[] => {
+    const graphNodes: any[] = []
+    
+    const processNode = (node: EnhancedTreeNode, parent?: string) => {
+      const graphNode = {
+        ...node,
+        isHovered: false,
+        isHighlighted: false,
+        isClustered: false,
+        importance: calculateNodeImportance(node),
+        parentId: parent,
+        childIds: node.children?.map(child => child.id) || []
+      }
+      
+      graphNodes.push(graphNode)
+      
+      // Process children recursively
+      if (node.children) {
+        node.children.forEach(child => processNode(child, node.id))
+      }
+    }
+    
+    treeNodes.forEach(node => processNode(node))
+    return graphNodes
+  }, [calculateNodeImportance])
 
   // Filter nodes based on search
   const filteredNodes = useMemo(() => {
@@ -516,10 +568,11 @@ export function EnhancedTreeView({
             {viewMode === 'graph' && (
               <div className="flex items-center gap-2">
                 <Tabs value={graphViewMode} onValueChange={(value) => setGraphViewMode(value as any)}>
-                  <TabsList>
-                    <TabsTrigger value="centralized">Centralized</TabsTrigger>
+                  <TabsList className="grid w-full grid-cols-4">
+                    <TabsTrigger value="force-directed">Force</TabsTrigger>
                     <TabsTrigger value="hierarchical">Hierarchical</TabsTrigger>
-                    <TabsTrigger value="network">Network</TabsTrigger>
+                    <TabsTrigger value="circular">Circular</TabsTrigger>
+                    <TabsTrigger value="tree">Tree</TabsTrigger>
                   </TabsList>
                 </Tabs>
                 <Button
@@ -598,13 +651,25 @@ export function EnhancedTreeView({
 
         {viewMode === 'graph' && (
           <AdvancedGraphView
-            nodes={nodes}
+            nodes={convertToGraphNodes(filteredNodes)}
             onToggle={onToggle}
             onSelect={onSelect}
             onPreview={onPreview}
             height={height - 100}
-            viewMode={graphViewMode}
+            viewMode={graphViewMode as any}
             showConnections={showConnections}
+            enableClustering={nodes.length > 100}
+            enableExport={true}
+            enablePhysics={true}
+            theme="auto"
+            maxNodes={5000}
+            clusterThreshold={50}
+            layoutOptions={{
+              algorithm: graphViewMode,
+              iterations: 200,
+              linkDistance: 80,
+              chargeStrength: -200
+            }}
           />
         )}
 
