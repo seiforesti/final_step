@@ -1175,594 +1175,6 @@ export const AdvancedGraphView = forwardRef<any, AdvancedGraphViewProps>(({
     return () => clearInterval(interval)
   }, [processedNodes, isNodeVisible, onPerformanceUpdate])
 
-  // Advanced Canvas Rendering Engine
-  const renderGraph = useCallback(() => {
-    const canvas = canvasRef.current
-    const ctx = canvas?.getContext('2d')
-    if (!canvas || !ctx || dimensions.width === 0 || dimensions.height === 0) return
-
-    const startTime = performance.now()
-
-    // Set up high-DPI rendering
-    const dpr = window.devicePixelRatio || 1
-    canvas.width = dimensions.width * dpr
-    canvas.height = dimensions.height * dpr
-    canvas.style.width = `${dimensions.width}px`
-    canvas.style.height = `${dimensions.height}px`
-    ctx.scale(dpr, dpr)
-
-    // Clear canvas
-    ctx.clearRect(0, 0, dimensions.width, dimensions.height)
-    
-    // Set background
-    ctx.fillStyle = currentTheme.background
-    ctx.fillRect(0, 0, dimensions.width, dimensions.height)
-
-    // Draw grid if enabled
-    if (visual.showGrid) {
-      drawGrid(ctx)
-    }
-
-    // Apply viewport transformation
-    ctx.save()
-    ctx.translate(viewport.x * viewport.zoom, viewport.y * viewport.zoom)
-    ctx.scale(viewport.zoom, viewport.zoom)
-
-    // Draw connections first (behind nodes)
-    if (showConnections) {
-      drawConnections(ctx)
-    }
-
-    // Draw nodes
-    drawNodes(ctx)
-
-    // Draw selection box if active
-    if (interaction.selectionBox) {
-      drawSelectionBox(ctx)
-    }
-
-    ctx.restore()
-
-    // Draw UI overlays (not affected by viewport)
-    drawOverlays(ctx)
-
-    // Update performance metrics
-    const renderTime = performance.now() - startTime
-    performanceMetrics.current.renderTime = renderTime
-    performanceMetrics.current.visibleNodeCount = processedNodes.filter(isNodeVisible).length
-
-  }, [dimensions, currentTheme, visual.showGrid, viewport, showConnections, 
-      interaction.selectionBox, processedNodes, isNodeVisible])
-
-  const drawGrid = useCallback((ctx: CanvasRenderingContext2D) => {
-    const gridSize = 50 * viewport.zoom
-    const offsetX = (viewport.x * viewport.zoom) % gridSize
-    const offsetY = (viewport.y * viewport.zoom) % gridSize
-
-    ctx.strokeStyle = currentTheme.gridColor || '#f0f0f0'
-    ctx.lineWidth = 0.5
-    ctx.setLineDash([2, 2])
-
-    // Vertical lines
-    for (let x = offsetX; x < dimensions.width; x += gridSize) {
-      ctx.beginPath()
-      ctx.moveTo(x, 0)
-      ctx.lineTo(x, dimensions.height)
-      ctx.stroke()
-    }
-
-    // Horizontal lines
-    for (let y = offsetY; y < dimensions.height; y += gridSize) {
-      ctx.beginPath()
-      ctx.moveTo(0, y)
-      ctx.lineTo(dimensions.width, y)
-      ctx.stroke()
-    }
-
-    ctx.setLineDash([])
-  }, [viewport, dimensions, currentTheme])
-
-  const drawConnections = useCallback((ctx: CanvasRenderingContext2D) => {
-    processedConnections.forEach(connection => {
-      const fromNode = processedNodes.find(n => n.id === connection.from)
-      const toNode = processedNodes.find(n => n.id === connection.to)
-
-      if (!fromNode || !toNode || !fromNode.x || !fromNode.y || !toNode.x || !toNode.y) return
-      if (!isNodeVisible(fromNode) && !isNodeVisible(toNode)) return
-
-      // Connection styling
-      ctx.strokeStyle = connection.color || currentTheme.connectionColors[connection.type]
-      ctx.lineWidth = (connection.width || 1) / viewport.zoom
-      ctx.globalAlpha = connection.opacity || visual.connectionOpacity
-
-      // Line style
-      if (connection.style === 'dashed') {
-        ctx.setLineDash([5 / viewport.zoom, 5 / viewport.zoom])
-      } else if (connection.style === 'dotted') {
-        ctx.setLineDash([2 / viewport.zoom, 3 / viewport.zoom])
-      }
-
-      // Draw connection
-      ctx.beginPath()
-      ctx.moveTo(fromNode.x, fromNode.y)
-
-      // Curved connections for better visibility
-      const dx = toNode.x - fromNode.x
-      const dy = toNode.y - fromNode.y
-      const distance = Math.sqrt(dx * dx + dy * dy)
-      
-      if (distance > 50) {
-        const midX = fromNode.x + dx * 0.5
-        const midY = fromNode.y + dy * 0.5
-        const controlOffset = Math.min(50, distance * 0.2)
-        const controlX = midX + dy * controlOffset / distance
-        const controlY = midY - dx * controlOffset / distance
-        
-        ctx.quadraticCurveTo(controlX, controlY, toNode.x, toNode.y)
-      } else {
-        ctx.lineTo(toNode.x, toNode.y)
-      }
-
-      ctx.stroke()
-
-      // Draw arrow head
-      if (connection.type !== 'parent') {
-        drawArrowHead(ctx, fromNode.x, fromNode.y, toNode.x, toNode.y)
-      }
-
-      // Reset line style
-      ctx.setLineDash([])
-      ctx.globalAlpha = 1
-    })
-  }, [processedConnections, processedNodes, isNodeVisible, currentTheme, visual.connectionOpacity, viewport.zoom])
-
-  const drawArrowHead = useCallback((ctx: CanvasRenderingContext2D, fromX: number, fromY: number, toX: number, toY: number) => {
-    const angle = Math.atan2(toY - fromY, toX - fromX)
-    const arrowSize = 8 / viewport.zoom
-    
-    ctx.save()
-    ctx.translate(toX, toY)
-    ctx.rotate(angle)
-    
-    ctx.beginPath()
-    ctx.moveTo(-arrowSize, -arrowSize / 2)
-    ctx.lineTo(0, 0)
-    ctx.lineTo(-arrowSize, arrowSize / 2)
-    ctx.stroke()
-    
-    ctx.restore()
-  }, [viewport.zoom])
-
-  const drawNodes = useCallback((ctx: CanvasRenderingContext2D) => {
-    // Sort nodes by render priority (selected nodes on top)
-    const sortedNodes = [...processedNodes].sort((a, b) => {
-      const aPriority = a.isSelected ? 2 : a.isHovered ? 1 : 0
-      const bPriority = b.isSelected ? 2 : b.isHovered ? 1 : 0
-      return aPriority - bPriority
-    })
-
-    sortedNodes.forEach(node => {
-      if (!node.x || !node.y || !isNodeVisible(node)) return
-
-      const nodeSize = (node.size || 12) / viewport.zoom
-      const opacity = node.opacity || 0.7
-
-      ctx.globalAlpha = opacity
-
-      // Node shadow for depth
-      if (node.isSelected || node.isHovered) {
-        ctx.shadowColor = 'rgba(0,0,0,0.3)'
-        ctx.shadowBlur = 10 / viewport.zoom
-        ctx.shadowOffsetX = 2 / viewport.zoom
-        ctx.shadowOffsetY = 2 / viewport.zoom
-      }
-
-      // Draw node background
-      ctx.fillStyle = node.color || currentTheme.nodeColors[node.type]
-      ctx.beginPath()
-      
-      // Different shapes for different node types
-      switch (node.type) {
-        case 'database':
-          drawDatabaseShape(ctx, node.x, node.y, nodeSize)
-          break
-        case 'schema':
-          drawFolderShape(ctx, node.x, node.y, nodeSize)
-          break
-        case 'table':
-          drawTableShape(ctx, node.x, node.y, nodeSize)
-          break
-        case 'view':
-          drawViewShape(ctx, node.x, node.y, nodeSize)
-          break
-        case 'column':
-          drawColumnShape(ctx, node.x, node.y, nodeSize)
-          break
-        case 'cluster':
-          drawClusterShape(ctx, node.x, node.y, nodeSize, node.clusterSize || 1)
-          break
-        default:
-          ctx.arc(node.x, node.y, nodeSize / 2, 0, Math.PI * 2)
-      }
-      
-      ctx.fill()
-
-      // Node border
-      if (node.strokeWidth && node.strokeWidth > 0) {
-        ctx.strokeStyle = node.strokeColor || currentTheme.selectionColor
-        ctx.lineWidth = node.strokeWidth / viewport.zoom
-        ctx.stroke()
-      }
-
-      // Reset shadow
-      ctx.shadowColor = 'transparent'
-      ctx.shadowBlur = 0
-      ctx.shadowOffsetX = 0
-      ctx.shadowOffsetY = 0
-
-      // Node label
-      if (showLabels && viewport.zoom >= 0.5) {
-        drawNodeLabel(ctx, node, nodeSize)
-      }
-
-      // Node metrics/badges
-      if (node.metadata && viewport.zoom >= 1) {
-        drawNodeMetrics(ctx, node, nodeSize)
-      }
-
-      ctx.globalAlpha = 1
-    })
-  }, [processedNodes, isNodeVisible, viewport.zoom, currentTheme, showLabels])
-
-  const drawDatabaseShape = useCallback((ctx: CanvasRenderingContext2D, x: number, y: number, size: number) => {
-    const radius = size / 2
-    ctx.beginPath()
-    ctx.arc(x, y, radius, 0, Math.PI * 2)
-    // Add database cylinder effect
-    ctx.moveTo(x - radius * 0.8, y - radius * 0.3)
-    ctx.lineTo(x + radius * 0.8, y - radius * 0.3)
-    ctx.moveTo(x - radius * 0.8, y)
-    ctx.lineTo(x + radius * 0.8, y)
-    ctx.moveTo(x - radius * 0.8, y + radius * 0.3)
-    ctx.lineTo(x + radius * 0.8, y + radius * 0.3)
-  }, [])
-
-  const drawFolderShape = useCallback((ctx: CanvasRenderingContext2D, x: number, y: number, size: number) => {
-    const radius = size / 2
-    ctx.beginPath()
-    ctx.roundRect(x - radius, y - radius, size, size, radius * 0.2)
-    // Folder tab
-    ctx.moveTo(x - radius * 0.5, y - radius)
-    ctx.lineTo(x - radius * 0.2, y - radius * 1.3)
-    ctx.lineTo(x + radius * 0.2, y - radius * 1.3)
-    ctx.lineTo(x + radius * 0.5, y - radius)
-  }, [])
-
-  const drawTableShape = useCallback((ctx: CanvasRenderingContext2D, x: number, y: number, size: number) => {
-    const radius = size / 2
-    ctx.beginPath()
-    ctx.roundRect(x - radius, y - radius, size, size, radius * 0.1)
-    // Table grid
-    const cellSize = size / 3
-    for (let i = 1; i < 3; i++) {
-      ctx.moveTo(x - radius + i * cellSize, y - radius)
-      ctx.lineTo(x - radius + i * cellSize, y + radius)
-      ctx.moveTo(x - radius, y - radius + i * cellSize)
-      ctx.lineTo(x + radius, y - radius + i * cellSize)
-    }
-  }, [])
-
-  const drawViewShape = useCallback((ctx: CanvasRenderingContext2D, x: number, y: number, size: number) => {
-    const radius = size / 2
-    ctx.beginPath()
-    // Diamond shape
-    ctx.moveTo(x, y - radius)
-    ctx.lineTo(x + radius, y)
-    ctx.lineTo(x, y + radius)
-    ctx.lineTo(x - radius, y)
-    ctx.closePath()
-  }, [])
-
-  const drawColumnShape = useCallback((ctx: CanvasRenderingContext2D, x: number, y: number, size: number) => {
-    const radius = size / 2
-    ctx.beginPath()
-    ctx.arc(x, y, radius, 0, Math.PI * 2)
-  }, [])
-
-  const drawClusterShape = useCallback((ctx: CanvasRenderingContext2D, x: number, y: number, size: number, clusterSize: number) => {
-    const radius = size / 2
-    // Draw multiple overlapping circles to represent cluster
-    const offset = radius * 0.3
-    for (let i = 0; i < Math.min(3, clusterSize); i++) {
-      ctx.beginPath()
-      ctx.arc(x + (i - 1) * offset, y + (i - 1) * offset, radius * 0.8, 0, Math.PI * 2)
-      ctx.globalAlpha = 0.7 - i * 0.1
-      ctx.fill()
-    }
-    ctx.globalAlpha = 1
-  }, [])
-
-  const drawNodeLabel = useCallback((ctx: CanvasRenderingContext2D, node: GraphNode, nodeSize: number) => {
-    const fontSize = Math.max(10, Math.min(16, 12 / viewport.zoom))
-    ctx.font = `${fontSize}px system-ui, -apple-system, sans-serif`
-    ctx.fillStyle = currentTheme.textColor
-    ctx.textAlign = 'center'
-    ctx.textBaseline = 'top'
-
-    const text = node.name.length > 20 ? node.name.slice(0, 18) + '...' : node.name
-    const textY = node.y! + nodeSize / 2 + 5 / viewport.zoom
-
-    // Text background for better readability
-    const textMetrics = ctx.measureText(text)
-    const textWidth = textMetrics.width
-    const textHeight = fontSize
-    
-    ctx.fillStyle = currentTheme.background
-    ctx.globalAlpha = 0.8
-    ctx.fillRect(
-      node.x! - textWidth / 2 - 2,
-      textY - 2,
-      textWidth + 4,
-      textHeight + 4
-    )
-    
-    ctx.fillStyle = currentTheme.textColor
-    ctx.globalAlpha = 1
-    ctx.fillText(text, node.x!, textY)
-  }, [viewport.zoom, currentTheme])
-
-  const drawNodeMetrics = useCallback((ctx: CanvasRenderingContext2D, node: GraphNode, nodeSize: number) => {
-    if (!node.metadata) return
-
-    const badgeSize = 8 / viewport.zoom
-    const badgeY = node.y! - nodeSize / 2 - badgeSize
-
-    // Business value indicator
-    if (node.metadata.businessValue) {
-      const colors = {
-        'low': '#94a3b8',
-        'medium': '#fbbf24',
-        'high': '#f97316',
-        'critical': '#ef4444'
-      }
-      
-      ctx.fillStyle = colors[node.metadata.businessValue]
-      ctx.beginPath()
-      ctx.arc(node.x! + nodeSize / 2, badgeY, badgeSize / 2, 0, Math.PI * 2)
-      ctx.fill()
-    }
-
-    // Row count indicator
-    if (node.metadata.rowCount && node.metadata.rowCount > 1000) {
-      ctx.fillStyle = '#10b981'
-      ctx.beginPath()
-      ctx.arc(node.x! - nodeSize / 2, badgeY, badgeSize / 2, 0, Math.PI * 2)
-      ctx.fill()
-    }
-  }, [viewport.zoom])
-
-  const drawSelectionBox = useCallback((ctx: CanvasRenderingContext2D) => {
-    if (!interaction.selectionBox) return
-
-    const { x1, y1, x2, y2 } = interaction.selectionBox
-    
-    ctx.strokeStyle = currentTheme.selectionColor
-    ctx.lineWidth = 1
-    ctx.setLineDash([5, 5])
-    ctx.globalAlpha = 0.5
-    
-    ctx.strokeRect(x1, y1, x2 - x1, y2 - y1)
-    
-    ctx.fillStyle = currentTheme.selectionColor
-    ctx.globalAlpha = 0.1
-    ctx.fillRect(x1, y1, x2 - x1, y2 - y1)
-    
-    ctx.setLineDash([])
-    ctx.globalAlpha = 1
-  }, [interaction.selectionBox, currentTheme])
-
-  const drawOverlays = useCallback((ctx: CanvasRenderingContext2D) => {
-    // Mini-map
-    if (showMiniMap) {
-      drawMiniMap(ctx)
-    }
-
-    // Performance monitor
-    if (showPerformanceMonitor) {
-      drawPerformanceMonitor(ctx)
-    }
-
-    // Loading indicator
-    if (isLayouting) {
-      drawLoadingIndicator(ctx)
-    }
-  }, [showMiniMap, showPerformanceMonitor, isLayouting])
-
-  const drawMiniMap = useCallback((ctx: CanvasRenderingContext2D) => {
-    const miniMapSize = 150
-    const miniMapX = dimensions.width - miniMapSize - 20
-    const miniMapY = 20
-
-    // Mini-map background
-    ctx.fillStyle = currentTheme.miniMapBackground || currentTheme.background
-    ctx.globalAlpha = 0.9
-    ctx.fillRect(miniMapX, miniMapY, miniMapSize, miniMapSize)
-    
-    ctx.strokeStyle = currentTheme.textColor
-    ctx.lineWidth = 1
-    ctx.strokeRect(miniMapX, miniMapY, miniMapSize, miniMapSize)
-    ctx.globalAlpha = 1
-
-    // Calculate bounds and scale
-    if (processedNodes.length === 0) return
-
-    const bounds = processedNodes.reduce((acc, node) => {
-      if (!node.x || !node.y) return acc
-      return {
-        minX: Math.min(acc.minX, node.x),
-        maxX: Math.max(acc.maxX, node.x),
-        minY: Math.min(acc.minY, node.y),
-        maxY: Math.max(acc.maxY, node.y)
-      }
-    }, { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity })
-
-    if (!isFinite(bounds.minX)) return
-
-    const boundsWidth = bounds.maxX - bounds.minX
-    const boundsHeight = bounds.maxY - bounds.minY
-    const scale = Math.min(miniMapSize / boundsWidth, miniMapSize / boundsHeight) * 0.8
-
-    ctx.save()
-    ctx.translate(miniMapX + miniMapSize / 2, miniMapY + miniMapSize / 2)
-    ctx.scale(scale, scale)
-    ctx.translate(-(bounds.minX + bounds.maxX) / 2, -(bounds.minY + bounds.maxY) / 2)
-
-    // Draw mini nodes
-    processedNodes.forEach(node => {
-      if (!node.x || !node.y) return
-      
-      ctx.fillStyle = node.color || currentTheme.nodeColors[node.type]
-      ctx.beginPath()
-      ctx.arc(node.x, node.y, 2, 0, Math.PI * 2)
-      ctx.fill()
-    })
-
-    ctx.restore()
-
-    // Draw viewport indicator
-    const viewportX = miniMapX + miniMapSize / 2 - (viewport.x * scale)
-    const viewportY = miniMapY + miniMapSize / 2 - (viewport.y * scale)
-    const viewportWidth = dimensions.width / viewport.zoom * scale
-    const viewportHeight = dimensions.height / viewport.zoom * scale
-
-    ctx.strokeStyle = currentTheme.selectionColor
-    ctx.lineWidth = 2
-    ctx.strokeRect(viewportX - viewportWidth / 2, viewportY - viewportHeight / 2, viewportWidth, viewportHeight)
-  }, [dimensions, currentTheme, processedNodes, viewport])
-
-  const drawPerformanceMonitor = useCallback((ctx: CanvasRenderingContext2D) => {
-    const monitorX = 20
-    const monitorY = 20
-    const monitorWidth = 200
-    const monitorHeight = 120
-
-    // Background
-    ctx.fillStyle = currentTheme.background
-    ctx.globalAlpha = 0.9
-    ctx.fillRect(monitorX, monitorY, monitorWidth, monitorHeight)
-    
-    ctx.strokeStyle = currentTheme.textColor
-    ctx.lineWidth = 1
-    ctx.strokeRect(monitorX, monitorY, monitorWidth, monitorHeight)
-    ctx.globalAlpha = 1
-
-    // Text
-    ctx.fillStyle = currentTheme.textColor
-    ctx.font = '12px monospace'
-    ctx.textAlign = 'left'
-
-    const metrics = performanceMetrics.current
-    const lines = [
-      `FPS: ${metrics.fps}`,
-      `Render: ${metrics.renderTime.toFixed(1)}ms`,
-      `Nodes: ${metrics.nodeCount}`,
-      `Visible: ${metrics.visibleNodeCount}`,
-      `Connections: ${metrics.connectionCount}`,
-      `Zoom: ${(viewport.zoom * 100).toFixed(0)}%`
-    ]
-
-    lines.forEach((line, index) => {
-      ctx.fillText(line, monitorX + 10, monitorY + 20 + index * 15)
-    })
-  }, [currentTheme, viewport.zoom])
-
-  const drawLoadingIndicator = useCallback((ctx: CanvasRenderingContext2D) => {
-    const centerX = dimensions.width / 2
-    const centerY = dimensions.height / 2
-    const radius = 30
-    
-    ctx.strokeStyle = currentTheme.selectionColor
-    ctx.lineWidth = 4
-    ctx.lineCap = 'round'
-    
-    const angle = (Date.now() / 10) % 360
-    ctx.beginPath()
-    ctx.arc(centerX, centerY, radius, 0, (angle * Math.PI) / 180)
-    ctx.stroke()
-    
-    // Loading text
-    ctx.fillStyle = currentTheme.textColor
-    ctx.font = '16px system-ui'
-    ctx.textAlign = 'center'
-    ctx.fillText('Computing Layout...', centerX, centerY + radius + 30)
-  }, [dimensions, currentTheme])
-
-  // Node legend component
-  const NodeLegend = useCallback(() => (
-    <div className="absolute bottom-4 right-20 z-20">
-      <Card className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm shadow-xl">
-        <CardContent className="p-3">
-          <div className="flex items-center gap-2 mb-3">
-            <Network className="h-4 w-4 text-blue-500" />
-            <span className="text-sm font-semibold">Node Types</span>
-          </div>
-          <div className="space-y-2">
-            <div className="flex items-center gap-3 text-xs">
-              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: currentTheme.nodeColors.database }}></div>
-              <Database className="h-3 w-3" style={{ color: currentTheme.nodeColors.database }} />
-              <span className="font-medium">Database</span>
-            </div>
-            <div className="flex items-center gap-3 text-xs">
-              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: currentTheme.nodeColors.schema }}></div>
-              <Folder className="h-3 w-3" style={{ color: currentTheme.nodeColors.schema }} />
-              <span className="font-medium">Schema</span>
-            </div>
-            <div className="flex items-center gap-3 text-xs">
-              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: currentTheme.nodeColors.table }}></div>
-              <Table className="h-3 w-3" style={{ color: currentTheme.nodeColors.table }} />
-              <span className="font-medium">Table</span>
-            </div>
-            <div className="flex items-center gap-3 text-xs">
-              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: currentTheme.nodeColors.view }}></div>
-              <FileText className="h-3 w-3" style={{ color: currentTheme.nodeColors.view }} />
-              <span className="font-medium">View</span>
-            </div>
-            <div className="flex items-center gap-3 text-xs">
-              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: currentTheme.nodeColors.column }}></div>
-              <Columns className="h-3 w-3" style={{ color: currentTheme.nodeColors.column }} />
-              <span className="font-medium">Column</span>
-            </div>
-            {performance.enableClustering && (
-              <div className="flex items-center gap-3 text-xs">
-                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: currentTheme.nodeColors.cluster }}></div>
-                <Layers className="h-3 w-3" style={{ color: currentTheme.nodeColors.cluster }} />
-                <span className="font-medium">Cluster</span>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  ), [currentTheme, performance.enableClustering])
-
-  // Render loop
-  useEffect(() => {
-    let animationId: number
-    
-    const render = () => {
-      renderGraph()
-      animationId = requestAnimationFrame(render)
-    }
-    
-    render()
-    
-    return () => {
-      if (animationId) {
-        cancelAnimationFrame(animationId)
-      }
-    }
-  }, [renderGraph])
-
   // Interaction handlers
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (!enablePan && !enableSelection && !enableDrag) return
@@ -2361,9 +1773,6 @@ export const AdvancedGraphView = forwardRef<any, AdvancedGraphViewProps>(({
         </div>
       )}
 
-      {/* Node Legend */}
-      <NodeLegend />
-
       {/* Main Canvas */}
       <div
         ref={containerRef}
@@ -2388,3 +1797,782 @@ export const AdvancedGraphView = forwardRef<any, AdvancedGraphViewProps>(({
 
 // Default export for easier importing
 export default AdvancedGraphView
+  const [connectionOpacity, setConnectionOpacity] = useState(0.6)
+  const [showLabels, setShowLabels] = useState(true)
+  const [filterType, setFilterType] = useState<string>('all')
+  const [sortBy, setSortBy] = useState<'name' | 'type' | 'importance'>('importance')
+  
+  // Performance optimization
+  const [visibleNodes, setVisibleNodes] = useState<GraphNode[]>([])
+  const [connections, setConnections] = useState<GraphConnection[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [nodePositions, setNodePositions] = useState<Record<string, { x: number, y: number }>>({})
+  
+  // Performance constants
+  const LARGE_GRAPH_THRESHOLD = 500
+  const MAX_NODES = 1000
+  const MAX_CONNECTIONS = 2000
+  const VIEWPORT_PADDING = 100
+
+  // Initialize Web Worker
+  useEffect(() => {
+    try {
+      workerRef.current = createLayoutWorker()
+    } catch (error) {
+      console.warn('Web Worker not supported, falling back to main thread')
+    }
+    
+    return () => {
+      if (workerRef.current) {
+        workerRef.current.terminate()
+      }
+    }
+  }, [])
+
+  // Update dimensions on resize
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout
+    const updateDimensions = () => {
+      clearTimeout(timeoutId)
+      timeoutId = setTimeout(() => {
+        if (containerRef.current) {
+          setDimensions({
+            width: containerRef.current.offsetWidth,
+            height: containerRef.current.offsetHeight
+          })
+        }
+      }, 100)
+    }
+
+    updateDimensions()
+    window.addEventListener('resize', updateDimensions)
+    return () => {
+      window.removeEventListener('resize', updateDimensions)
+      clearTimeout(timeoutId)
+    }
+  }, [])
+
+  // Flatten hierarchical nodes
+  const flattenNodes = useCallback((nodeList: GraphNode[], level = 0): GraphNode[] => {
+    const result: GraphNode[] = []
+    
+    const flatten = (nodes: GraphNode[], currentLevel = 0) => {
+      nodes.forEach(node => {
+        result.push({ 
+          ...node, 
+          level: currentLevel,
+          depth: currentLevel,
+          importance: calculateNodeImportance(node)
+        })
+        
+        if (node.children && node.children.length > 0) {
+          flatten(node.children, currentLevel + 1)
+        }
+      })
+    }
+    
+    flatten(nodeList, level)
+    return result
+  }, [])
+
+  // Calculate node importance
+  const calculateNodeImportance = useCallback((node: GraphNode): number => {
+    let importance = 0
+    
+    switch (node.type) {
+      case 'database': importance = 100; break
+      case 'schema': importance = 80; break
+      case 'table': importance = 60; break
+      case 'view': importance = 50; break
+      case 'column': importance = 30; break
+      default: importance = 10
+    }
+    
+    if (node.metadata?.rowCount) {
+      importance += Math.min(20, Math.log10(node.metadata.rowCount + 1))
+    }
+    
+    return importance
+  }, [])
+
+  // Process nodes with filtering and sorting
+  const processedNodes = useMemo(() => {
+    const flattened = flattenNodes(nodes)
+    let filtered = flattened
+    
+    // Filter by type
+    if (filterType !== 'all') {
+      filtered = filtered.filter(node => node.type === filterType)
+    }
+    
+    // Sort nodes
+    filtered = [...filtered].sort((a, b) => {
+      switch (sortBy) {
+        case 'name': return a.name.localeCompare(b.name)
+        case 'type': return a.type.localeCompare(b.type)
+        case 'importance': return (b.importance || 0) - (a.importance || 0)
+        default: return 0
+      }
+    })
+    
+    // Cap nodes for performance
+    if (filtered.length > MAX_NODES) {
+      filtered = filtered.slice(0, MAX_NODES)
+    }
+    
+    return filtered
+  }, [nodes, filterType, sortBy, flattenNodes])
+
+  // Generate connections
+  const generateConnections = useCallback((nodes: GraphNode[]): GraphConnection[] => {
+    const conns: GraphConnection[] = []
+    const nodeMap = new Map(nodes.map(node => [node.id, node]))
+    
+    for (let i = 0; i < nodes.length && conns.length < MAX_CONNECTIONS; i++) {
+      const node = nodes[i]
+      
+      if (node.level > 0) {
+        // Find parent nodes
+        const potentialParents: GraphNode[] = []
+        
+        if (node.parentId && nodeMap.has(node.parentId)) {
+          potentialParents.push(nodeMap.get(node.parentId)!)
+        } else {
+          const parent = nodes.find(n => n.level === node.level - 1)
+          if (parent) potentialParents.push(parent)
+        }
+        
+        if (potentialParents.length > 0) {
+          const parent = potentialParents[0]
+          conns.push({
+            from: parent.id,
+            to: node.id,
+            type: 'parent',
+            strength: 1
+          })
+        }
+      }
+    }
+    
+    return conns
+  }, [])
+
+  // Request layout from worker
+  const requestLayoutFromWorker = useCallback((baseNodes: GraphNode[], mode: string): Promise<Record<string, {x:number,y:number}>> => {
+    return new Promise((resolve) => {
+      if (!workerRef.current || !dimensions.width || !dimensions.height) {
+        // Fallback to simple radial layout
+        const centerX = dimensions.width / 2
+        const centerY = dimensions.height / 2
+        const radius = Math.min(dimensions.width, dimensions.height) * 0.4
+        const positions: Record<string, {x:number,y:number}> = {}
+        const levelGroups = new Map<number, GraphNode[]>()
+        
+        baseNodes.forEach(n => {
+          const lvl = n.level || 0
+          if (!levelGroups.has(lvl)) levelGroups.set(lvl, [])
+          levelGroups.get(lvl)!.push(n)
+        })
+        
+        baseNodes.forEach((node) => {
+          let x = centerX, y = centerY
+          const lvl = node.level || 0
+          const siblings = levelGroups.get(lvl) || []
+          const idx = Math.max(0, siblings.findIndex(s => s.id === node.id))
+          const angle = (idx * 2 * Math.PI) / Math.max(1, siblings.length)
+          const r = lvl === 0 ? 0 : radius * (0.15 + lvl * 0.15)
+          x = centerX + Math.cos(angle) * r
+          y = centerY + Math.sin(angle) * r
+          positions[node.id] = { x, y }
+        })
+        
+        resolve(positions)
+        return
+      }
+      
+      const requestId = ++requestIdRef.current
+      const payload = {
+        nodes: baseNodes.map(n => ({ 
+          id: n.id, 
+          level: n.level, 
+          type: n.type, 
+          parentId: n.parentId, 
+          importance: n.importance 
+        })),
+        viewMode: mode,
+        width: dimensions.width,
+        height: dimensions.height,
+        requestId
+      }
+      
+      const handleMessage = (e: MessageEvent) => {
+        if (e.data.requestId === requestId) {
+          resolve(e.data.positions)
+          workerRef.current?.removeEventListener('message', handleMessage)
+        }
+      }
+      
+      workerRef.current.addEventListener('message', handleMessage)
+      workerRef.current.postMessage(payload)
+    })
+  }, [dimensions])
+
+  // Calculate layout and connections
+  useEffect(() => {
+    if (processedNodes.length === 0) return
+    
+    setIsLoading(true)
+    
+    const updateLayout = async () => {
+      try {
+        const positions = await requestLayoutFromWorker(processedNodes, viewMode)
+        const layoutNodes = processedNodes.map(n => ({ 
+          ...n, 
+          x: positions[n.id]?.x, 
+          y: positions[n.id]?.y 
+        }))
+        const nodeConnections = generateConnections(layoutNodes)
+        
+        setVisibleNodes(layoutNodes)
+        setConnections(nodeConnections)
+        setNodePositions(positions)
+        setIsLoading(false)
+      } catch (error) {
+        console.error('Layout computation failed:', error)
+        setIsLoading(false)
+      }
+    }
+    
+    if (processedNodes.length > LARGE_GRAPH_THRESHOLD && 'requestIdleCallback' in window) {
+      ;(window as any).requestIdleCallback(() => {
+        animationFrameRef.current = requestAnimationFrame(updateLayout)
+      }, { timeout: 100 })
+    } else {
+      animationFrameRef.current = requestAnimationFrame(updateLayout)
+    }
+    
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current)
+      }
+    }
+  }, [processedNodes, viewMode, requestLayoutFromWorker, generateConnections])
+
+  // Canvas rendering with viewport culling
+  useEffect(() => {
+    const canvas = canvasRef.current
+    const ctx = canvas?.getContext('2d')
+    if (!canvas || !ctx || !dimensions.width || !dimensions.height) return
+    
+    // Set up canvas for high DPI
+    const dpr = window.devicePixelRatio || 1
+    canvas.width = Math.floor(dimensions.width * dpr)
+    canvas.height = Math.floor(dimensions.height * dpr)
+    canvas.style.width = `${dimensions.width}px`
+    canvas.style.height = `${dimensions.height}px`
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+    
+    // Clear canvas
+    ctx.clearRect(0, 0, dimensions.width, dimensions.height)
+    
+    // Viewport bounds for culling
+    const viewportLeft = -pan.x / zoom - VIEWPORT_PADDING
+    const viewportRight = (-pan.x + dimensions.width) / zoom + VIEWPORT_PADDING
+    const viewportTop = -pan.y / zoom - VIEWPORT_PADDING
+    const viewportBottom = (-pan.y + dimensions.height) / zoom + VIEWPORT_PADDING
+    
+    ctx.save()
+    ctx.translate(pan.x, pan.y)
+    ctx.scale(zoom, zoom)
+    
+    // Draw connections (culled)
+    if (showConnections) {
+      ctx.strokeStyle = `rgba(148, 163, 184, ${connectionOpacity})`
+      ctx.lineWidth = Math.max(0.5, 1.5 / zoom)
+      
+      for (let i = 0; i < connections.length; i++) {
+        const conn = connections[i]
+        const from = visibleNodes.find(n => n.id === conn.from)
+        const to = visibleNodes.find(n => n.id === conn.to)
+        
+        if (!from || !to || !from.x || !from.y || !to.x || !to.y) continue
+        
+        // Cull connections outside viewport
+        if (from.x < viewportLeft || from.x > viewportRight || 
+            from.y < viewportTop || from.y > viewportBottom ||
+            to.x < viewportLeft || to.x > viewportRight || 
+            to.y < viewportTop || to.y > viewportBottom) continue
+        
+        ctx.beginPath()
+        ctx.moveTo(from.x, from.y)
+        ctx.lineTo(to.x, to.y)
+        ctx.stroke()
+      }
+    }
+    
+    // Draw nodes (culled and LOD)
+    const nodeSizeMultiplier = Math.max(0.5, Math.min(2, nodeSize))
+    
+    for (let i = 0; i < visibleNodes.length; i++) {
+      const node = visibleNodes[i]
+      if (!node.x || !node.y) continue
+      
+      // Cull nodes outside viewport
+      if (node.x < viewportLeft || node.x > viewportRight || 
+          node.y < viewportTop || node.y > viewportBottom) continue
+      
+      // LOD: smaller nodes at low zoom
+      const baseSize = 12
+      const size = Math.max(4, Math.min(24, baseSize * nodeSizeMultiplier / Math.max(0.3, zoom)))
+      
+      // Color by type
+      let fill = '#64748b' // slate-500
+      if (node.type === 'database') fill = '#3b82f6' // blue-500
+      else if (node.type === 'schema') fill = '#f59e0b' // amber-500
+      else if (node.type === 'table') fill = '#10b981' // emerald-500
+      else if (node.type === 'view') fill = '#8b5cf6' // violet-500
+      else if (node.type === 'column') fill = '#6b7280' // gray-500
+      
+      if (node.isSelected) fill = '#f59e0b' // amber-500
+      if (hoveredNode === node.id) fill = '#6366f1' // indigo-500
+      
+      ctx.fillStyle = fill
+      ctx.beginPath()
+      ctx.arc(node.x, node.y, size / 2, 0, Math.PI * 2)
+      ctx.fill()
+      
+      // Draw selection ring
+      if (node.isSelected) {
+        ctx.strokeStyle = '#f59e0b'
+        ctx.lineWidth = 2
+        ctx.beginPath()
+        ctx.arc(node.x, node.y, size / 2 + 2, 0, Math.PI * 2)
+        ctx.stroke()
+      }
+      
+      // Draw labels (LOD: only at high zoom)
+      if (showLabels && zoom >= 0.8) {
+        ctx.fillStyle = '#111827'
+        ctx.font = `${Math.max(10, 12 / zoom)}px system-ui, -apple-system, Segoe UI, Roboto, Ubuntu`
+        const text = node.name.length > 15 ? node.name.slice(0, 14) + '…' : node.name
+        ctx.fillText(text, node.x + size * 0.7, node.y + 4)
+      }
+    }
+    
+    ctx.restore()
+  }, [visibleNodes, connections, zoom, pan, showLabels, showConnections, connectionOpacity, nodeSize, dimensions, hoveredNode])
+
+  // Mouse interaction handlers
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    if (e.button === 0) {
+      setIsDragging(true)
+      setDragStart({ x: e.clientX - pan.x, y: e.clientY - pan.y })
+    }
+  }, [pan])
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (isDragging) {
+      setPan({
+        x: e.clientX - dragStart.x,
+        y: e.clientY - dragStart.y
+      })
+    } else {
+      // Hit testing for hover
+      const canvas = canvasRef.current
+      if (!canvas) return
+      
+      const rect = canvas.getBoundingClientRect()
+      const x = (e.clientX - rect.left - pan.x) / zoom
+      const y = (e.clientY - rect.top - pan.y) / zoom
+      
+      let foundNode: GraphNode | null = null
+      for (let i = 0; i < visibleNodes.length; i++) {
+        const node = visibleNodes[i]
+        if (!node.x || !node.y) continue
+        
+        const distance = Math.sqrt((x - node.x) ** 2 + (y - node.y) ** 2)
+        const currentNodeSize = Math.max(4, Math.min(24, 12 * nodeSize / Math.max(0.3, zoom)))
+        
+        if (distance <= currentNodeSize / 2) {
+          foundNode = node
+          break
+        }
+      }
+      
+      setHoveredNode(foundNode?.id || null)
+    }
+  }, [isDragging, dragStart, pan, zoom, visibleNodes, nodeSize])
+
+  const handleMouseUp = useCallback(() => {
+    setIsDragging(false)
+  }, [])
+
+  const handleWheel = useCallback((e: React.WheelEvent) => {
+    e.preventDefault()
+    const delta = e.deltaY > 0 ? 0.9 : 1.1
+    setZoom(prev => Math.max(0.1, Math.min(5, prev * delta)))
+  }, [])
+
+  const handleCanvasClick = useCallback((e: React.MouseEvent) => {
+    if (isDragging) return
+    
+    const canvas = canvasRef.current
+    if (!canvas) return
+    
+    const rect = canvas.getBoundingClientRect()
+    const x = (e.clientX - rect.left - pan.x) / zoom
+    const y = (e.clientY - rect.top - pan.y) / zoom
+    
+    // Hit testing
+    for (let i = 0; i < visibleNodes.length; i++) {
+      const node = visibleNodes[i]
+      if (!node.x || !node.y) continue
+      
+      const distance = Math.sqrt((x - node.x) ** 2 + (y - node.y) ** 2)
+      const currentNodeSize = Math.max(4, Math.min(24, 12 * nodeSize / Math.max(0.3, zoom)))
+      
+      if (distance <= currentNodeSize / 2) {
+        onSelect(node.id, !node.isSelected)
+        return
+      }
+    }
+  }, [isDragging, pan, zoom, visibleNodes, nodeSize, onSelect])
+
+  const handleCanvasDoubleClick = useCallback((e: React.MouseEvent) => {
+    if (isDragging) return
+    
+    const canvas = canvasRef.current
+    if (!canvas) return
+    
+    const rect = canvas.getBoundingClientRect()
+    const x = (e.clientX - rect.left - pan.x) / zoom
+    const y = (e.clientY - rect.top - pan.y) / zoom
+    
+    // Hit testing
+    for (let i = 0; i < visibleNodes.length; i++) {
+      const node = visibleNodes[i]
+      if (!node.x || !node.y) continue
+      
+      const distance = Math.sqrt((x - node.x) ** 2 + (y - node.y) ** 2)
+      const currentNodeSize = Math.max(4, Math.min(24, 12 * nodeSize / Math.max(0.3, zoom)))
+      
+      if (distance <= currentNodeSize / 2) {
+        if (node.hasChildren) {
+          onToggle(node.id)
+        } else {
+          onPreview(node)
+        }
+        return
+      }
+    }
+  }, [isDragging, pan, zoom, visibleNodes, nodeSize, onToggle, onPreview])
+
+  const resetView = useCallback(() => {
+    setZoom(1)
+    setPan({ x: 0, y: 0 })
+  }, [])
+
+  const fitToView = useCallback(() => {
+    if (visibleNodes.length === 0) return
+    
+    const bounds = visibleNodes.reduce((acc, node) => {
+      if (!node.x || !node.y) return acc
+      return {
+        minX: Math.min(acc.minX, node.x),
+        maxX: Math.max(acc.maxX, node.x),
+        minY: Math.min(acc.minY, node.y),
+        maxY: Math.max(acc.maxY, node.y)
+      }
+    }, { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity })
+    
+    const width = bounds.maxX - bounds.minX
+    const height = bounds.maxY - bounds.minY
+    const centerX = (bounds.minX + bounds.maxX) / 2
+    const centerY = (bounds.minY + bounds.maxY) / 2
+    
+    const scale = Math.min(dimensions.width / width, dimensions.height / height) * 0.8
+    const newZoom = Math.max(0.1, Math.min(5, scale))
+    
+    setZoom(newZoom)
+    setPan({
+      x: dimensions.width / 2 - centerX * newZoom,
+      y: dimensions.height / 2 - centerY * newZoom
+    })
+  }, [visibleNodes, dimensions])
+
+  // Auto-expand nodes with children but no data
+  const attemptedAutoExpandRef = useRef(false)
+  useEffect(() => {
+    if (attemptedAutoExpandRef.current) return
+    if (!nodes || nodes.length === 0) return
+    
+    const rootsWithNoChildren = nodes.filter(n => n.hasChildren && (!n.children || n.children.length === 0))
+    if (rootsWithNoChildren.length > 0) {
+      attemptedAutoExpandRef.current = true
+      rootsWithNoChildren.slice(0, 8).forEach(r => {
+        try { onToggle(r.id) } catch { /* noop */ }
+      })
+    }
+  }, [nodes, onToggle])
+
+  // Control panel
+  const renderControlPanel = () => (
+    <div className="absolute top-4 left-4 right-4 z-30 flex items-center justify-between">
+      <div className="flex items-center gap-3">
+        <Badge variant="outline" className="bg-white/90 backdrop-blur-sm shadow-lg">
+          <Network className="h-3 w-3 mr-1" />
+          {viewMode.charAt(0).toUpperCase() + viewMode.slice(1)} View
+        </Badge>
+        <Badge variant="outline" className="bg-white/90 backdrop-blur-sm shadow-lg">
+          {visibleNodes.length} Nodes
+        </Badge>
+        {isLoading && (
+          <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200">
+            <Activity className="h-3 w-3 mr-1 animate-pulse" />
+            Processing
+          </Badge>
+        )}
+      </div>
+      
+      <div className="flex items-center gap-2">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={resetView}
+                className="bg-white/90 backdrop-blur-sm shadow-lg"
+              >
+                <RotateCcw className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Reset View</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={fitToView}
+                className="bg-white/90 backdrop-blur-sm shadow-lg"
+              >
+                <Maximize2 className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Fit to View</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        
+        <div className="flex items-center gap-2 bg-white/90 backdrop-blur-sm rounded-lg px-3 py-1 shadow-lg">
+          <ZoomOut 
+            className="h-4 w-4 cursor-pointer hover:text-blue-600" 
+            onClick={() => setZoom(prev => Math.max(0.1, prev * 0.9))}
+          />
+          <span className="text-xs font-medium min-w-[3rem] text-center">
+            {Math.round(zoom * 100)}%
+          </span>
+          <ZoomIn 
+            className="h-4 w-4 cursor-pointer hover:text-blue-600" 
+            onClick={() => setZoom(prev => Math.min(5, prev * 1.1))}
+          />
+        </div>
+        
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setShowControls(!showControls)}
+          className="bg-white/90 backdrop-blur-sm shadow-lg"
+        >
+          <Settings className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  )
+
+  return (
+    <div className="relative w-full h-full bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-blue-950 dark:to-indigo-950 rounded-lg overflow-hidden">
+      {/* Control Panel */}
+      {renderControlPanel()}
+      
+      {/* Settings Panel */}
+      {showControls && (
+        <div className="absolute top-16 right-4 z-30 w-80 bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm rounded-lg shadow-xl border p-4">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-semibold text-sm">Graph Settings</h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowControls(false)}
+                className="h-6 w-6 p-0"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            
+            <div className="space-y-3">
+              <div>
+                <Label className="text-xs font-medium">Node Size</Label>
+                <Slider
+                  value={[nodeSize]}
+                  onValueChange={([value]) => setNodeSize(value)}
+                  min={0.5}
+                  max={2}
+                  step={0.1}
+                  className="mt-2"
+                />
+              </div>
+              
+              <div>
+                <Label className="text-xs font-medium">Connection Opacity</Label>
+                <Slider
+                  value={[connectionOpacity]}
+                  onValueChange={([value]) => setConnectionOpacity(value)}
+                  min={0.1}
+                  max={1}
+                  step={0.1}
+                  className="mt-2"
+                />
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <Label className="text-xs font-medium">Show Labels</Label>
+                <Switch
+                  checked={showLabels}
+                  onCheckedChange={setShowLabels}
+                />
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <Label className="text-xs font-medium">Show Connections</Label>
+                <Switch
+                  checked={showConnections}
+                  onCheckedChange={(checked) => {
+                    console.log('Toggle connections:', checked)
+                  }}
+                />
+              </div>
+            </div>
+            
+            <div className="pt-2 border-t">
+              <div className="space-y-2">
+                <Label className="text-xs font-medium">Filter by Type</Label>
+                <select
+                  value={filterType}
+                  onChange={(e) => setFilterType(e.target.value)}
+                  className="w-full text-xs border rounded px-2 py-1"
+                >
+                  <option value="all">All Types</option>
+                  <option value="database">Database</option>
+                  <option value="schema">Schema</option>
+                  <option value="table">Table</option>
+                  <option value="view">View</option>
+                  <option value="column">Column</option>
+                </select>
+              </div>
+              
+              <div className="space-y-2 mt-3">
+                <Label className="text-xs font-medium">Sort by</Label>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as any)}
+                  className="w-full text-xs border rounded px-2 py-1"
+                >
+                  <option value="importance">Importance</option>
+                  <option value="name">Name</option>
+                  <option value="type">Type</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Canvas Graph Renderer */}
+      <ScrollArea className="w-full h-full">
+        <div
+          ref={containerRef}
+          className="relative w-full h-full cursor-grab active:cursor-grabbing"
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+          onWheel={handleWheel}
+          style={{ height: `${height}px`, minHeight: `${height}px` }}
+        >
+          <canvas 
+            ref={canvasRef} 
+            className="absolute inset-0"
+            onClick={handleCanvasClick}
+            onDoubleClick={handleCanvasDoubleClick}
+          />
+
+          {/* Center indicator for centralized view */}
+          {viewMode === 'centralized' && (
+            <div
+              className="absolute w-3 h-3 bg-blue-500 rounded-full shadow-lg animate-pulse"
+              style={{
+                left: dimensions.width / 2 + pan.x,
+                top: dimensions.height / 2 + pan.y,
+                transform: 'translate(-50%, -50%)'
+              }}
+            />
+          )}
+        </div>
+      </ScrollArea>
+
+      {/* Legend */}
+      <div className="absolute bottom-4 left-4 z-20">
+        <div className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm rounded-xl p-4 shadow-xl border">
+          <div className="flex items-center gap-2 mb-3">
+            <Network className="h-4 w-4 text-blue-500" />
+            <span className="text-sm font-semibold">Node Types</span>
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-center gap-3 text-xs">
+              <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+              <Database className="h-3 w-3 text-blue-500" />
+              <span className="font-medium">Database</span>
+            </div>
+            <div className="flex items-center gap-3 text-xs">
+              <div className="w-3 h-3 rounded-full bg-amber-500"></div>
+              <Folder className="h-3 w-3 text-amber-500" />
+              <span className="font-medium">Schema</span>
+            </div>
+            <div className="flex items-center gap-3 text-xs">
+              <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
+              <Table className="h-3 w-3 text-emerald-500" />
+              <span className="font-medium">Table</span>
+            </div>
+            <div className="flex items-center gap-3 text-xs">
+              <div className="w-3 h-3 rounded-full bg-violet-500"></div>
+              <FileText className="h-3 w-3 text-violet-500" />
+              <span className="font-medium">View</span>
+            </div>
+            <div className="flex items-center gap-3 text-xs">
+              <div className="w-3 h-3 rounded-full bg-gray-500"></div>
+              <Columns className="h-3 w-3 text-gray-500" />
+              <span className="font-medium">Column</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Performance Indicator */}
+      {isLoading && (
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-40">
+          <div className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm rounded-lg p-4 shadow-xl border">
+            <div className="flex items-center gap-3">
+              <Activity className="h-5 w-5 text-blue-500 animate-pulse" />
+              <span className="text-sm font-medium">Processing Graph Layout...</span>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
