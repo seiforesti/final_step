@@ -22,7 +22,7 @@ import OptimizedTreeNode from "../shared/components/optimized-tree-node"
 import { VirtualizedTree } from "../shared/utils/virtualized-tree"
 import { DatabaseChargingAnimation } from "../shared/components/database-charging-animation"
 import { EnhancedTreeView } from "../shared/components/enhanced-tree-view"
-
+import { AdvancedGraphView } from "../shared/components/Entreprise-graph-view"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -139,6 +139,7 @@ export function SchemaDiscovery({
 
   // Use shared progress tracking
   const progressTracker = useSchemaDiscoveryProgress('enterprise')
+
 
   // Performance optimization for large datasets
   const {
@@ -1653,6 +1654,7 @@ export function SchemaDiscovery({
             </Button>
           )}
           
+          
           <Button variant="outline" onClick={onClose}>
             <X className="h-4 w-4 mr-2" />
             Close
@@ -1857,6 +1859,7 @@ export function SchemaDiscovery({
               />
             )}
           </div>
+
 
           {/* Selection Actions */}
           {getSelectedCount() > 0 && (
@@ -2313,3 +2316,4 @@ export function SchemaDiscovery({
     </div>
   )
 }
+

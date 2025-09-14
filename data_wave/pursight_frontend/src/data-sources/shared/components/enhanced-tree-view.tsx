@@ -8,14 +8,14 @@ import {
   Database, Table, Columns, FileText, Folder, FolderOpen, 
   ChevronRight, ChevronDown, Eye, Search, Zap, Star, Shield,
   Network, List, TreePine, Grid3X3, Layers, Target, Activity, Brain,
-  Maximize2, Minimize2, RotateCcw
+  Maximize2, Minimize2, RotateCcw, GitBranch
 } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { AdvancedGraphView } from "./advanced-graph-view"
+import { AdvancedGraphView } from "./Entreprise-graph-view"
 import { VirtualizedTree } from "../utils/virtualized-tree"
 import OptimizedTreeNode from "./optimized-tree-node"
 
@@ -603,7 +603,7 @@ export function EnhancedTreeView({
             onSelect={onSelect}
             onPreview={onPreview}
             height={height - 100}
-            viewMode={graphViewMode}
+            layoutAlgorithm={graphViewMode === 'centralized' ? 'force-directed' : 'hierarchical'}
             showConnections={showConnections}
           />
         )}

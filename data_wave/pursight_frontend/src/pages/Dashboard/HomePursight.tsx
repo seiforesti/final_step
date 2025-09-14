@@ -38,7 +38,7 @@ type FeatureItem = {
   bgColor: string;
 };
 
-export default function HomePursight() {
+export default function   HomePursight() {
   // State to track whether there are recent items
   const hasRecentItems = false; // Will be replaced with backend data
   // État pour gérer l'ouverture/fermeture de la modale
