@@ -390,7 +390,9 @@ class GraphLayoutEngine {
     const centerY = this.height / 2
     const centerZ = this.space3D.centerZ
     
-    // Group nodes by type and level for proper hierarchy
+    console.log('🎯 SCHEMA-GRAPH SYNC: Initializing schema-aware positioning')
+    
+    // Group nodes by type for proper schema hierarchy
     const nodesByType = {
       database: this.nodes.filter(n => n.type === 'database'),
       schema: this.nodes.filter(n => n.type === 'schema'),
@@ -399,67 +401,90 @@ class GraphLayoutEngine {
       column: this.nodes.filter(n => n.type === 'column')
     }
     
+    console.log('📊 Schema Items Distribution:', {
+      databases: nodesByType.database.length,
+      schemas: nodesByType.schema.length,
+      tables: nodesByType.table.length,
+      views: nodesByType.view.length,
+      columns: nodesByType.column.length
+    })
+    
+    // CRITICAL: Position each schema item based on its hierarchy
     this.nodes.forEach((node, index) => {
       if (node.fx === undefined && node.fy === undefined) {
-        // Calculate schema-aware initial position
-        const level = node.level || 0
         const type = node.type
+        const level = node.level || 0
         const importance = node.metadata?.importance || 50
         
-        // Level-based radius for hierarchy
-        const levelRadius = 40 + (level * 60)
-        const levelAngle = (index * 2 * Math.PI) / Math.max(1, this.nodes.filter(n => n.level === level).length)
-        
-        // Type-specific positioning for PROPER SCHEMA SYNCHRONIZATION
+        // Calculate schema-specific position
         let baseX = centerX
         let baseY = centerY
         let baseZ = centerZ
         
         switch (type) {
           case 'database':
-            // Databases at center - CRITICAL for schema sync
-            baseX = centerX + (Math.random() - 0.5) * 30
-            baseY = centerY + (Math.random() - 0.5) * 30
+            // Databases at center - STABLE and VISIBLE
+            baseX = centerX + (Math.random() - 0.5) * 20
+            baseY = centerY + (Math.random() - 0.5) * 20
             baseZ = centerZ
+            console.log(`🗄️ Database ${node.name} positioned at center`)
             break
+            
           case 'schema':
             // Schemas around databases - MAINTAIN CONNECTION
-            baseX = centerX + Math.cos(levelAngle) * levelRadius
-            baseY = centerY + Math.sin(levelAngle) * levelRadius
-            baseZ = centerZ + (Math.random() - 0.5) * 20
+            const schemaIndex = nodesByType.schema.indexOf(node)
+            const schemaRadius = 100 + (level * 30)
+            const schemaAngle = (schemaIndex * 2 * Math.PI) / Math.max(1, nodesByType.schema.length)
+            baseX = centerX + Math.cos(schemaAngle) * schemaRadius
+            baseY = centerY + Math.sin(schemaAngle) * schemaRadius
+            baseZ = centerZ + (Math.random() - 0.5) * 15
+            console.log(`📁 Schema ${node.name} positioned around database`)
             break
+            
           case 'table':
             // Tables around their schemas - KEEP SCHEMA ITEMS TOGETHER
-            baseX = centerX + Math.cos(levelAngle) * levelRadius + (Math.random() - 0.5) * 50
-            baseY = centerY + Math.sin(levelAngle) * levelRadius + (Math.random() - 0.5) * 50
-            baseZ = centerZ + (Math.random() - 0.5) * 30
-            break
-          case 'view':
-            // Views near tables - MAINTAIN RELATIONSHIPS
-            baseX = centerX + Math.cos(levelAngle) * levelRadius + (Math.random() - 0.5) * 40
-            baseY = centerY + Math.sin(levelAngle) * levelRadius + (Math.random() - 0.5) * 40
+            const tableIndex = nodesByType.table.indexOf(node)
+            const tableRadius = 150 + (level * 40)
+            const tableAngle = (tableIndex * 2 * Math.PI) / Math.max(1, nodesByType.table.length)
+            baseX = centerX + Math.cos(tableAngle) * tableRadius + (Math.random() - 0.5) * 40
+            baseY = centerY + Math.sin(tableAngle) * tableRadius + (Math.random() - 0.5) * 40
             baseZ = centerZ + (Math.random() - 0.5) * 25
+            console.log(`📋 Table ${node.name} positioned around schema`)
             break
+            
+          case 'view':
+            // Views near related tables - MAINTAIN RELATIONSHIPS
+            const viewIndex = nodesByType.view.indexOf(node)
+            const viewRadius = 130 + (level * 35)
+            const viewAngle = (viewIndex * 2 * Math.PI) / Math.max(1, nodesByType.view.length)
+            baseX = centerX + Math.cos(viewAngle) * viewRadius + (Math.random() - 0.5) * 35
+            baseY = centerY + Math.sin(viewAngle) * viewRadius + (Math.random() - 0.5) * 35
+            baseZ = centerZ + (Math.random() - 0.5) * 20
+            console.log(`👁️ View ${node.name} positioned near tables`)
+            break
+            
           case 'column':
             // Columns within their tables - PRECISE POSITIONING
-            baseX = centerX + Math.cos(levelAngle) * levelRadius + (Math.random() - 0.5) * 30
-            baseY = centerY + Math.sin(levelAngle) * levelRadius + (Math.random() - 0.5) * 30
-            baseZ = centerZ + (Math.random() - 0.5) * 15
+            const columnIndex = nodesByType.column.indexOf(node)
+            const columnRadius = 80 + (level * 25)
+            const columnAngle = (columnIndex * 2 * Math.PI) / Math.max(1, nodesByType.column.length)
+            baseX = centerX + Math.cos(columnAngle) * columnRadius + (Math.random() - 0.5) * 25
+            baseY = centerY + Math.sin(columnAngle) * columnRadius + (Math.random() - 0.5) * 25
+            baseZ = centerZ + (Math.random() - 0.5) * 10
+            console.log(`📊 Column ${node.name} positioned within table`)
             break
-          default:
-            baseX = centerX + (Math.random() - 0.5) * this.width * 0.6
-            baseY = centerY + (Math.random() - 0.5) * this.height * 0.6
-            baseZ = centerZ + (Math.random() - 0.5) * 50
         }
         
         node.x = baseX
         node.y = baseY
         node.z = baseZ
-        node.vx = (Math.random() - 0.5) * 0.3
-        node.vy = (Math.random() - 0.5) * 0.3
-        node.vz = (Math.random() - 0.5) * 0.2
+        node.vx = (Math.random() - 0.5) * 0.2
+        node.vy = (Math.random() - 0.5) * 0.2
+        node.vz = (Math.random() - 0.5) * 0.1
       }
     })
+    
+    console.log('✅ SCHEMA-GRAPH SYNC: Schema-aware positioning completed')
   }
   
   private initializeHierarchical() {
@@ -1812,14 +1837,22 @@ export function AdvancedGraphView({
   const [sortBy, setSortBy] = useState<'name' | 'type' | 'importance'>('importance')
   const [searchTerm, setSearchTerm] = useState('')
   
-  // Additional state for advanced features
-  const [enablePhysicsState, setEnablePhysicsState] = useState(enablePhysics)
-  const [enableAnimationState, setEnableAnimationState] = useState(enableAnimation)
-  const [enableClusteringState, setEnableClusteringState] = useState(enableClustering)
+  // Schema synchronization state
+  const [schemaSyncStatus, setSchemaSyncStatus] = useState({
+    isSynchronized: false,
+    totalItems: 0,
+    connectedItems: 0,
+    syncPercentage: 0
+  })
   const [autoLayoutState, setAutoLayoutState] = useState(autoLayout)
   const [showMinimapState, setShowMinimapState] = useState(showMinimap)
   const [showLabelsState, setShowLabelsState] = useState(showLabels)
   const [showConnectionsState, setShowConnectionsState] = useState(showConnections)
+  
+  // Additional state for advanced features
+  const [enablePhysicsState, setEnablePhysicsState] = useState(enablePhysics)
+  const [enableAnimationState, setEnableAnimationState] = useState(enableAnimation)
+  const [enableClusteringState, setEnableClusteringState] = useState(enableClustering)
   
   // Advanced control state
   const [simulationSpeed, setSimulationSpeed] = useState(0.3) // Reduced default
@@ -2027,140 +2060,156 @@ export function AdvancedGraphView({
     autoAnalyze: true
   })
 
-  // Generate connections with COMPLETE schema synchronization - ALL items must be connected
+  // CRITICAL: Generate connections that map EXACTLY to discovered schema items
   const generateConnections = useCallback((nodes: GraphNode[]): GraphConnection[] => {
     const conns: GraphConnection[] = []
     const nodeMap = new Map(nodes.map(node => [node.id, node]))
     
-    console.log('🔗 GENERATING COMPLETE CONNECTIONS for', nodes.length, 'schema items')
+    console.log('🔍 SCHEMA-GRAPH SYNC: Generating connections for', nodes.length, 'schema items')
     
-    // CRITICAL: Generate connections for ALL schema items to ensure 100% synchronization
-    nodes.forEach(node => {
-      const nodeType = node.type
-      const nodeLevel = node.level || 0
-      
-      console.log(`🔗 Processing ${nodeType} node: ${node.name} (level ${nodeLevel})`)
-      
-      // 1. PARENT-CHILD CONNECTIONS (CRITICAL for schema hierarchy)
-      if (node.parentId && nodeMap.has(node.parentId)) {
-        const parentNode = nodeMap.get(node.parentId)!
-        const connectionType = getConnectionType(nodeType, parentNode.type)
-        
-        console.log(`  → Connecting to parent: ${parentNode.name} (${parentNode.type})`)
-        
-        conns.push({
-          id: `${node.parentId}-${node.id}`,
-          from: node.parentId,
-          to: node.id,
-          type: connectionType,
-          strength: getConnectionStrength(nodeType, parentNode.type),
-          fromX: parentNode.x,
-          fromY: parentNode.y,
-          toX: node.x,
-          toY: node.y
-        })
-      }
-      
-      // 2. CHILD CONNECTIONS (CRITICAL for complete schema mapping)
-      if (node.childIds && node.childIds.length > 0) {
-        node.childIds.forEach(childId => {
-          if (nodeMap.has(childId)) {
-            const childNode = nodeMap.get(childId)!
-            const connectionType = getConnectionType(childNode.type, nodeType)
-            
-            console.log(`  → Connecting to child: ${childNode.name} (${childNode.type})`)
-            
-            conns.push({
-              id: `${node.id}-${childId}`,
-              from: node.id,
-              to: childId,
-              type: connectionType,
-              strength: getConnectionStrength(childNode.type, nodeType),
-              fromX: node.x,
-              fromY: node.y,
-              toX: childNode.x,
-              toY: childNode.y
-            })
-          }
-        })
-      }
-      
-      // 3. SCHEMA-LEVEL CONNECTIONS (CRITICAL for complete graph construction)
-      // Connect all nodes at the same level within the same schema
-      if (nodeLevel > 0) {
-        const sameLevelNodes = nodes.filter(n => 
-          n.level === nodeLevel && 
-          n.id !== node.id &&
-          n.parentId === node.parentId // Same parent = same schema
-        )
-        
-        sameLevelNodes.forEach(siblingNode => {
-          console.log(`  → Connecting to sibling: ${siblingNode.name} (same level ${nodeLevel})`)
-          
+    // CRITICAL: Build schema hierarchy from discovered items
+    const schemaHierarchy = buildSchemaHierarchy(nodes)
+    console.log('📊 Schema Hierarchy:', schemaHierarchy)
+    
+    // 1. DATABASE → SCHEMA connections (CRITICAL for schema sync)
+    schemaHierarchy.databases.forEach(database => {
+      schemaHierarchy.schemas.forEach(schema => {
+        if (schema.parentId === database.id || schema.level === 1) {
           conns.push({
-            id: `${node.id}-${siblingNode.id}`,
-            from: node.id,
-            to: siblingNode.id,
-            type: 'reference' as const,
-            strength: 0.4,
-            fromX: node.x,
-            fromY: node.y,
-            toX: siblingNode.x,
-            toY: siblingNode.y
-          })
-        })
-      }
-      
-      // 4. CROSS-SCHEMA CONNECTIONS (for complete graph model)
-      if (nodeType === 'table' || nodeType === 'view') {
-        // Find related tables/views across schemas
-        const relatedNodes = nodes.filter(n => 
-          (n.type === 'table' || n.type === 'view') && 
-          n.id !== node.id &&
-          Math.abs((n.metadata?.importance || 0) - (node.metadata?.importance || 0)) < 30
-        )
-        
-        relatedNodes.slice(0, 3).forEach(relatedNode => {
-          console.log(`  → Connecting to related: ${relatedNode.name} (cross-schema)`)
-          
-          conns.push({
-            id: `${node.id}-${relatedNode.id}`,
-            from: node.id,
-            to: relatedNode.id,
-            type: 'reference' as const,
-            strength: 0.2,
-            fromX: node.x,
-            fromY: node.y,
-            toX: relatedNode.x,
-            toY: relatedNode.y
-          })
-        })
-      }
-      
-      // 5. DATABASE-SCHEMA CONNECTIONS (CRITICAL for root level)
-      if (nodeType === 'database') {
-        const schemaNodes = nodes.filter(n => n.type === 'schema' && n.parentId === node.id)
-        schemaNodes.forEach(schemaNode => {
-          console.log(`  → Connecting database to schema: ${schemaNode.name}`)
-          
-          conns.push({
-            id: `${node.id}-${schemaNode.id}`,
-            from: node.id,
-            to: schemaNode.id,
-            type: 'parent',
+            id: `db-${database.id}-schema-${schema.id}`,
+            from: database.id,
+            to: schema.id,
+            type: 'parent' as const,
             strength: 1.0,
-            fromX: node.x,
-            fromY: node.y,
-            toX: schemaNode.x,
-            toY: schemaNode.y
+            fromX: database.x,
+            fromY: database.y,
+            toX: schema.x,
+            toY: schema.y
           })
-        })
-      }
+        }
+      })
     })
     
-    console.log(`🔗 Generated ${conns.length} connections for complete schema synchronization`)
+    // 2. SCHEMA → TABLE connections (CRITICAL for schema sync)
+    schemaHierarchy.schemas.forEach(schema => {
+      schemaHierarchy.tables.forEach(table => {
+        if (table.parentId === schema.id || table.level === schema.level + 1) {
+          conns.push({
+            id: `schema-${schema.id}-table-${table.id}`,
+            from: schema.id,
+            to: table.id,
+            type: 'parent' as const,
+            strength: 0.8,
+            fromX: schema.x,
+            fromY: schema.y,
+            toX: table.x,
+            toY: table.y
+          })
+        }
+      })
+    })
+    
+    // 3. SCHEMA → VIEW connections (CRITICAL for schema sync)
+    schemaHierarchy.schemas.forEach(schema => {
+      schemaHierarchy.views.forEach(view => {
+        if (view.parentId === schema.id || view.level === schema.level + 1) {
+          conns.push({
+            id: `schema-${schema.id}-view-${view.id}`,
+            from: schema.id,
+            to: view.id,
+            type: 'parent' as const,
+            strength: 0.7,
+            fromX: schema.x,
+            fromY: schema.y,
+            toX: view.x,
+            toY: view.y
+          })
+        }
+      })
+    })
+    
+    // 4. TABLE → COLUMN connections (CRITICAL for schema sync)
+    schemaHierarchy.tables.forEach(table => {
+      schemaHierarchy.columns.forEach(column => {
+        if (column.parentId === table.id || column.level === table.level + 1) {
+          conns.push({
+            id: `table-${table.id}-column-${column.id}`,
+            from: table.id,
+            to: column.id,
+            type: 'parent' as const,
+            strength: 0.6,
+            fromX: table.x,
+            fromY: table.y,
+            toX: column.x,
+            toY: column.y
+          })
+        }
+      })
+    })
+    
+    // 5. Cross-schema relationships (for better graph structure)
+    schemaHierarchy.tables.forEach(table => {
+      // Find related tables in same schema
+      const relatedTables = schemaHierarchy.tables.filter(t => 
+        t.id !== table.id && 
+        t.level === table.level &&
+        Math.abs((t.metadata?.importance || 0) - (table.metadata?.importance || 0)) < 30
+      )
+      
+      relatedTables.slice(0, 2).forEach(relatedTable => {
+        conns.push({
+          id: `table-${table.id}-ref-${relatedTable.id}`,
+          from: table.id,
+          to: relatedTable.id,
+          type: 'reference' as const,
+          strength: 0.3,
+          fromX: table.x,
+          fromY: table.y,
+          toX: relatedTable.x,
+          toY: relatedTable.y
+        })
+      })
+    })
+    
+    console.log('🔗 Generated', conns.length, 'schema-synchronized connections')
+    
+    // CRITICAL: Calculate schema synchronization status
+    const totalItems = nodes.length
+    const connectedItems = new Set([...conns.map(c => c.from), ...conns.map(c => c.to)]).size
+    const syncPercentage = totalItems > 0 ? Math.round((connectedItems / totalItems) * 100) : 0
+    
+    setSchemaSyncStatus({
+      isSynchronized: syncPercentage > 80,
+      totalItems,
+      connectedItems,
+      syncPercentage
+    })
+    
+    console.log(`📊 SCHEMA SYNC STATUS: ${syncPercentage}% (${connectedItems}/${totalItems} items connected)`)
+    
     return conns
   }, [])
+  
+  // CRITICAL: Build schema hierarchy from discovered items
+  const buildSchemaHierarchy = (nodes: GraphNode[]) => {
+    const hierarchy = {
+      databases: nodes.filter(n => n.type === 'database'),
+      schemas: nodes.filter(n => n.type === 'schema'),
+      tables: nodes.filter(n => n.type === 'table'),
+      views: nodes.filter(n => n.type === 'view'),
+      columns: nodes.filter(n => n.type === 'column')
+    }
+    
+    console.log('📋 Schema Hierarchy Built:', {
+      databases: hierarchy.databases.length,
+      schemas: hierarchy.schemas.length,
+      tables: hierarchy.tables.length,
+      views: hierarchy.views.length,
+      columns: hierarchy.columns.length
+    })
+    
+    return hierarchy
+  }
   
   // Helper functions for schema-aware connections
   const getConnectionType = (childType: string, parentType: string): 'parent' | 'child' | 'reference' | 'dependency' | 'foreign_key' | 'index' => {
@@ -2513,6 +2562,18 @@ export function AdvancedGraphView({
         </Badge>
         <Badge variant="outline" className="bg-white/90 backdrop-blur-sm shadow-lg">
           {connections.length} Connections
+        </Badge>
+        {/* CRITICAL: Schema Synchronization Status */}
+        <Badge 
+          variant="outline" 
+          className={`${
+            schemaSyncStatus.isSynchronized 
+              ? 'bg-green-50 text-green-600 border-green-200' 
+              : 'bg-red-50 text-red-600 border-red-200'
+          }`}
+        >
+          <Brain className="h-3 w-3 mr-1" />
+          Schema Sync: {schemaSyncStatus.syncPercentage}%
         </Badge>
         {isLoading && (
           <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200">
