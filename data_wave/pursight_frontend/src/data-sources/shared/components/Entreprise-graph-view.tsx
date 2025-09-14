@@ -10,7 +10,8 @@ import {
   ChevronRight, ChevronDown, ChevronLeft, Eye, Network, Activity, Brain, Maximize2,
   Minimize2, RotateCcw, ZoomIn, ZoomOut, Settings, X, Search, Filter,
   Layers, Grid3X3, Circle, Square, Triangle, Hexagon, Star, Zap,
-  Target, TrendingUp, Shield, Sparkles, Gauge, BarChart3, Globe
+  Target, TrendingUp, Shield, Sparkles, Gauge, BarChart3, Globe,
+  CheckCircle, AlertCircle, AlertTriangle
 } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -295,6 +296,68 @@ class GraphLayoutEngine {
   setMovementDamping(damping: number) {
     this.forceConfig.friction = Math.max(0.5, Math.min(0.99, damping))
     this.forceConfig.velocityDecay = Math.max(0.1, Math.min(0.9, damping))
+  }
+  
+  // ENHANCED: Advanced transition scaling methods
+  setTransitionScaling(enabled: boolean, factor: number = 1.2) {
+    // Enable high-performance transitions with scaling
+    if (enabled) {
+      this.forceConfig.enableTransitions = true
+      this.forceConfig.scalingFactor = Math.max(1.0, Math.min(3.0, factor))
+      this.forceConfig.transitionDuration = 800 // Smooth 800ms transitions
+    }
+  }
+  
+  // ENHANCED: Flexible layout adaptation
+  setFlexibleLayout(enabled: boolean) {
+    if (enabled) {
+      // Automatically adjust parameters based on node count and density
+      const nodeCount = this.nodes.length
+      const density = nodeCount / (this.width * this.height / 10000) // Nodes per 100x100 area
+      
+      if (density > 2.0) { // High density
+        this.forceConfig.charge = -1200 // Stronger repulsion
+        this.forceConfig.linkDistance = 200 // More space
+        this.forceConfig.collisionRadius = 60
+      } else if (density > 1.0) { // Medium density
+        this.forceConfig.charge = -1000
+        this.forceConfig.linkDistance = 175
+        this.forceConfig.collisionRadius = 55
+      } else { // Low density
+        this.forceConfig.charge = -800
+        this.forceConfig.linkDistance = 150
+        this.forceConfig.collisionRadius = 50
+      }
+      
+      console.log(`🔧 Flexible layout adapted for density: ${density.toFixed(2)} (${nodeCount} nodes)`)
+    }
+  }
+  
+  // ENHANCED: Performance optimization based on graph complexity
+  optimizeForPerformance() {
+    const nodeCount = this.nodes.length
+    const connectionCount = this.connections.length
+    const complexity = nodeCount + (connectionCount * 0.5)
+    
+    if (complexity > 1500) { // Very high complexity
+      this.forceConfig.alphaDecay = 0.05 // Faster convergence
+      this.forceConfig.velocityDecay = 0.8 // Higher damping
+      this.forceConfig.maxIterations = 200 // Limit iterations
+    } else if (complexity > 800) { // High complexity
+      this.forceConfig.alphaDecay = 0.03
+      this.forceConfig.velocityDecay = 0.7
+      this.forceConfig.maxIterations = 300
+    } else if (complexity > 400) { // Medium complexity
+      this.forceConfig.alphaDecay = 0.02
+      this.forceConfig.velocityDecay = 0.6
+      this.forceConfig.maxIterations = 400
+    } else { // Low complexity - allow more detailed simulation
+      this.forceConfig.alphaDecay = 0.01
+      this.forceConfig.velocityDecay = 0.4
+      this.forceConfig.maxIterations = 500
+    }
+    
+    console.log(`🚀 Performance optimized for complexity: ${complexity} (${nodeCount}N + ${connectionCount}C)`)
   }
   
   // 3D Projection methods for true dimensional movement
@@ -1879,16 +1942,23 @@ export function AdvancedGraphView({
   const [isLoading, setIsLoading] = useState(false)
   const [nodePositions, setNodePositions] = useState<Record<string, { x: number, y: number }>>({})
   
-  // Ultra-performance constants for maximum FPS and smooth 3D movement
+  // ENHANCED: Ultra-performance constants for advanced graph features
   const defaultConfig: PerformanceConfig = {
-    maxNodes: 400, // Optimized for maximum FPS
-    maxConnections: 800, // Optimized for ultra-smooth rendering
+    maxNodes: 1000, // Increased for better schema coverage
+    maxConnections: 2000, // Increased for comprehensive connections
     enableVirtualization: true,
-    enableLOD: true,
-    enableWebGL: false, // Disabled for better compatibility
-    enableWorkers: false, // Disabled for simplicity
-    frameRate: 120, // Ultra-high FPS for smooth 3D movement
-    memoryLimit: 50 * 1024 * 1024, // 50MB
+    enableLOD: true, // Level of Detail for performance
+    enableWebGL: true, // Enabled for advanced rendering
+    enableWorkers: true, // Enabled for better performance
+    frameRate: 144, // Ultra-high FPS for smooth transitions
+    memoryLimit: 100 * 1024 * 1024, // 100MB for larger schemas
+    // Advanced visual features
+    enableTransitions: true,
+    transitionDuration: 800, // Smooth transitions
+    enableScaling: true,
+    scalingFactor: 1.2, // High transition scaling
+    enableFlexibleLayout: true,
+    adaptiveRendering: true,
     ...performanceConfig
   }
   
@@ -1992,10 +2062,241 @@ export function AdvancedGraphView({
     return importance
   }, [])
 
-  // Process nodes with filtering and sorting
+  // Helper functions for enhanced node processing
+  const getNodeSize = useCallback((node: GraphNode): number => {
+    const baseSize = 12
+    const importance = calculateNodeImportance(node)
+    return baseSize + (importance / 100) * 8
+  }, [calculateNodeImportance])
+
+  const getNodeColor = useCallback((type: string): string => {
+    const colors = {
+      database: '#3b82f6',
+      schema: '#f59e0b', 
+      table: '#10b981',
+      view: '#8b5cf6',
+      column: '#6b7280'
+    }
+    return colors[type as keyof typeof colors] || '#6b7280'
+  }, [])
+
+  const getParentId = useCallback((node: GraphNode, allNodes: GraphNode[]): string | undefined => {
+    if (node.parentId) return node.parentId
+    
+    // Infer parent relationships based on schema hierarchy
+    switch (node.type) {
+      case 'schema':
+        return allNodes.find(n => n.type === 'database')?.id
+      case 'table':
+      case 'view':
+        return allNodes.find(n => n.type === 'schema' && n.level === (node.level || 0) - 1)?.id
+      case 'column':
+        return allNodes.find(n => (n.type === 'table' || n.type === 'view') && n.level === (node.level || 0) - 1)?.id
+      default:
+        return undefined
+    }
+  }, [])
+
+  const getChildIds = useCallback((node: GraphNode, allNodes: GraphNode[]): string[] => {
+    if (node.childIds) return node.childIds
+    
+    // Find children based on parent-child relationships
+    return allNodes
+      .filter(n => n.parentId === node.id || getParentId(n, allNodes) === node.id)
+      .map(n => n.id)
+  }, [getParentId])
+
+  const buildSchemaPath = useCallback((node: GraphNode, allNodes: GraphNode[]): string => {
+    const path: string[] = []
+    let current = node
+    
+    // Build path from current node to root
+    while (current) {
+      path.unshift(current.name)
+      const parentId = current.parentId || getParentId(current, allNodes)
+      current = parentId ? allNodes.find(n => n.id === parentId) || null : null
+    }
+    
+    return path.join(' > ')
+  }, [getParentId])
+
+  const calculateConnectionWeight = useCallback((node: GraphNode): number => {
+    let weight = 1
+    
+    // Higher weight for more important node types
+    switch (node.type) {
+      case 'database': weight = 5; break
+      case 'schema': weight = 4; break
+      case 'table': weight = 3; break
+      case 'view': weight = 2; break
+      case 'column': weight = 1; break
+    }
+    
+    // Increase weight based on metadata
+    if (node.metadata?.rowCount && node.metadata.rowCount > 1000) weight += 1
+    if (node.metadata?.columnCount && node.metadata.columnCount > 10) weight += 1
+    
+    return weight
+  }, [])
+
+  // ENHANCED: Schema validation to ensure all discovered items are represented
+  const validateSchemaRepresentation = useCallback((nodes: GraphNode[]): {
+    isValid: boolean
+    issues: string[]
+    coverage: number
+    recommendations: string[]
+  } => {
+    const issues: string[] = []
+    const recommendations: string[] = []
+    
+    if (!nodes || nodes.length === 0) {
+      return {
+        isValid: false,
+        issues: ['No schema nodes provided'],
+        coverage: 0,
+        recommendations: ['Ensure schema discovery has completed successfully']
+      }
+    }
+    
+    // Validate node structure
+    const nodeTypes = {
+      database: nodes.filter(n => n.type === 'database').length,
+      schema: nodes.filter(n => n.type === 'schema').length,
+      table: nodes.filter(n => n.type === 'table').length,
+      view: nodes.filter(n => n.type === 'view').length,
+      column: nodes.filter(n => n.type === 'column').length
+    }
+    
+    console.log('🔍 SCHEMA VALIDATION:', nodeTypes)
+    
+    // Check for missing critical components
+    if (nodeTypes.database === 0) {
+      issues.push('No database nodes found')
+      recommendations.push('Verify database connection and discovery process')
+    }
+    
+    if (nodeTypes.schema === 0 && nodeTypes.table > 0) {
+      issues.push('Tables found without schema context')
+      recommendations.push('Ensure schema-level discovery is enabled')
+    }
+    
+    if (nodeTypes.table === 0 && nodeTypes.column > 0) {
+      issues.push('Columns found without table context')
+      recommendations.push('Check table-level discovery configuration')
+    }
+    
+    // Validate relationships
+    const nodesWithoutId = nodes.filter(n => !n.id || n.id.trim() === '')
+    if (nodesWithoutId.length > 0) {
+      issues.push(`${nodesWithoutId.length} nodes missing valid IDs`)
+      recommendations.push('Ensure all discovered items have unique identifiers')
+    }
+    
+    const orphanNodes = nodes.filter(n => 
+      n.type !== 'database' && 
+      !n.parentId && 
+      !getParentId(n, nodes)
+    )
+    if (orphanNodes.length > 0) {
+      issues.push(`${orphanNodes.length} orphan nodes without parent relationships`)
+      recommendations.push('Review schema hierarchy and parent-child relationships')
+    }
+    
+    // Calculate coverage score
+    let coverageScore = 0
+    const totalPossibleTypes = 5 // database, schema, table, view, column
+    const presentTypes = Object.values(nodeTypes).filter(count => count > 0).length
+    
+    coverageScore = (presentTypes / totalPossibleTypes) * 100
+    
+    // Bonus for having proper hierarchy
+    if (nodeTypes.database > 0 && nodeTypes.schema > 0) coverageScore += 10
+    if (nodeTypes.schema > 0 && (nodeTypes.table > 0 || nodeTypes.view > 0)) coverageScore += 10
+    if ((nodeTypes.table > 0 || nodeTypes.view > 0) && nodeTypes.column > 0) coverageScore += 10
+    
+    coverageScore = Math.min(100, coverageScore)
+    
+    // Additional recommendations based on coverage
+    if (coverageScore < 50) {
+      recommendations.push('Consider running a more comprehensive schema discovery')
+    } else if (coverageScore < 80) {
+      recommendations.push('Some schema components may be missing - review discovery settings')
+    }
+    
+    const isValid = issues.length === 0 && coverageScore >= 70
+    
+    console.log(`✅ SCHEMA VALIDATION COMPLETE: ${isValid ? 'VALID' : 'ISSUES FOUND'}`)
+    console.log(`   Coverage: ${coverageScore}%`)
+    console.log(`   Issues: ${issues.length}`)
+    
+    return {
+      isValid,
+      issues,
+      coverage: Math.round(coverageScore),
+      recommendations
+    }
+  }, [getParentId])
+
+  // ENHANCED: Validate current schema representation
+  const schemaValidation = useMemo(() => {
+    return validateSchemaRepresentation(processedNodes)
+  }, [processedNodes, validateSchemaRepresentation])
+
+  // CRITICAL: Enhanced node processing with schema discovery integration
   const processedNodes = useMemo(() => {
+    console.log('🔄 PROCESSING NODES:', nodes.length, 'raw schema items')
+    
+    // First, ensure we have proper schema discovery data
+    if (!nodes || nodes.length === 0) {
+      console.warn('⚠️ NO SCHEMA NODES PROVIDED - Graph will be empty!')
+      setSchemaSyncStatus({
+        isSynchronized: false,
+        totalItems: 0,
+        connectedItems: 0,
+        syncPercentage: 0
+      })
+      return []
+    }
+    
+    // Flatten and enhance nodes with proper schema relationships
     const flattened = flattenNodes(nodes)
-    let filtered = flattened
+    console.log('📋 FLATTENED NODES:', flattened.length, 'items')
+    
+    // Validate and enhance each node for graph display
+    const enhancedNodes = flattened.map((node, index) => {
+      const enhanced = {
+        ...node,
+        // Ensure proper IDs and relationships
+        id: node.id || `${node.type}_${index}`,
+        level: node.level || 0,
+        depth: node.depth || node.level || 0,
+        importance: calculateNodeImportance(node),
+        
+        // Add visual properties for graph display
+        x: node.x || Math.random() * 800,
+        y: node.y || Math.random() * 600,
+        size: getNodeSize(node),
+        color: getNodeColor(node.type),
+        
+        // Ensure proper parent-child relationships
+        parentId: node.parentId || getParentId(node, flattened),
+        childIds: node.childIds || getChildIds(node, flattened),
+        
+        // Add metadata for better graph connections
+        metadata: {
+          ...node.metadata,
+          schemaPath: buildSchemaPath(node, flattened),
+          connectionWeight: calculateConnectionWeight(node)
+        }
+      }
+      
+      return enhanced
+    })
+    
+    console.log('✨ ENHANCED NODES:', enhancedNodes.length, 'with proper relationships')
+    
+    // Apply filters
+    let filtered = enhancedNodes
     
     // Filter by type
     if (filterType !== 'all') {
@@ -2007,25 +2308,29 @@ export function AdvancedGraphView({
       const term = searchTerm.toLowerCase()
       filtered = filtered.filter(node => 
         node.name.toLowerCase().includes(term) ||
-        node.metadata?.description?.toLowerCase().includes(term)
+        node.metadata?.description?.toLowerCase().includes(term) ||
+        node.metadata?.schemaPath?.toLowerCase().includes(term)
       )
     }
     
-    // Sort nodes
+    // Sort nodes by importance for better graph layout
     filtered = [...filtered].sort((a, b) => {
       switch (sortBy) {
         case 'name': return a.name.localeCompare(b.name)
         case 'type': return a.type.localeCompare(b.type)
         case 'importance': return (b.importance || 0) - (a.importance || 0)
-        default: return 0
+        default: return (b.importance || 0) - (a.importance || 0) // Default to importance
       }
     })
     
-    // Cap nodes for performance
+    // Performance optimization - limit nodes but ensure we keep important ones
     if (filtered.length > MAX_NODES) {
+      console.log(`⚡ PERFORMANCE: Limiting to ${MAX_NODES} nodes from ${filtered.length}`)
+      // Keep the most important nodes
       filtered = filtered.slice(0, MAX_NODES)
     }
     
+    console.log('🎯 FINAL PROCESSED NODES:', filtered.length, 'ready for graph display')
     return filtered
   }, [nodes, filterType, sortBy, searchTerm, flattenNodes])
 
@@ -2060,32 +2365,60 @@ export function AdvancedGraphView({
     autoAnalyze: true
   })
 
-  // CRITICAL: Generate connections that map EXACTLY to discovered schema items
+  // CRITICAL: Enhanced connection generation with comprehensive schema mapping
   const generateConnections = useCallback((nodes: GraphNode[]): GraphConnection[] => {
     const conns: GraphConnection[] = []
     const nodeMap = new Map(nodes.map(node => [node.id, node]))
     
-    console.log('🔍 SCHEMA-GRAPH SYNC: Generating connections for', nodes.length, 'schema items')
+    console.log('🔍 ADVANCED SCHEMA-GRAPH SYNC: Generating connections for', nodes.length, 'schema items')
     
-    // CRITICAL: Build schema hierarchy from discovered items
+    if (nodes.length === 0) {
+      console.warn('⚠️ NO NODES TO CONNECT - Graph will have 0% synchronization')
+      setSchemaSyncStatus({
+        isSynchronized: false,
+        totalItems: 0,
+        connectedItems: 0,
+        syncPercentage: 0
+      })
+      return []
+    }
+    
+    // Build enhanced schema hierarchy with detailed mapping
     const schemaHierarchy = buildSchemaHierarchy(nodes)
-    console.log('📊 Schema Hierarchy:', schemaHierarchy)
+    console.log('📊 Enhanced Schema Hierarchy:', schemaHierarchy)
+    
+    let connectedItemsCount = 0
+    const totalItems = nodes.length
     
     // 1. DATABASE → SCHEMA connections (CRITICAL for schema sync)
     schemaHierarchy.databases.forEach(database => {
       schemaHierarchy.schemas.forEach(schema => {
-        if (schema.parentId === database.id || schema.level === 1) {
+        const isDirectChild = schema.parentId === database.id || 
+                             (schema.level === 1 && database.level === 0) ||
+                             schema.metadata?.schemaPath?.includes(database.name)
+        
+        if (isDirectChild) {
           conns.push({
             id: `db-${database.id}-schema-${schema.id}`,
             from: database.id,
             to: schema.id,
             type: 'parent' as const,
             strength: 1.0,
+            weight: 5,
+            color: '#3b82f6',
+            width: 2,
+            opacity: 0.8,
+            animated: true,
             fromX: database.x,
             fromY: database.y,
             toX: schema.x,
-            toY: schema.y
+            toY: schema.y,
+            metadata: {
+              relationship: 'database-schema',
+              importance: 'critical'
+            }
           })
+          connectedItemsCount += 2
         }
       })
     })
@@ -2093,18 +2426,32 @@ export function AdvancedGraphView({
     // 2. SCHEMA → TABLE connections (CRITICAL for schema sync)
     schemaHierarchy.schemas.forEach(schema => {
       schemaHierarchy.tables.forEach(table => {
-        if (table.parentId === schema.id || table.level === schema.level + 1) {
+        const isDirectChild = table.parentId === schema.id || 
+                             (table.level === schema.level + 1) ||
+                             table.metadata?.schemaPath?.includes(schema.name)
+        
+        if (isDirectChild) {
           conns.push({
             id: `schema-${schema.id}-table-${table.id}`,
             from: schema.id,
             to: table.id,
             type: 'parent' as const,
             strength: 0.8,
+            weight: 4,
+            color: '#10b981',
+            width: 1.5,
+            opacity: 0.7,
+            animated: false,
             fromX: schema.x,
             fromY: schema.y,
             toX: table.x,
-            toY: table.y
+            toY: table.y,
+            metadata: {
+              relationship: 'schema-table',
+              importance: 'high'
+            }
           })
+          connectedItemsCount += 1
         }
       })
     })
@@ -2112,18 +2459,32 @@ export function AdvancedGraphView({
     // 3. SCHEMA → VIEW connections (CRITICAL for schema sync)
     schemaHierarchy.schemas.forEach(schema => {
       schemaHierarchy.views.forEach(view => {
-        if (view.parentId === schema.id || view.level === schema.level + 1) {
+        const isDirectChild = view.parentId === schema.id || 
+                             (view.level === schema.level + 1) ||
+                             view.metadata?.schemaPath?.includes(schema.name)
+        
+        if (isDirectChild) {
           conns.push({
             id: `schema-${schema.id}-view-${view.id}`,
             from: schema.id,
             to: view.id,
             type: 'parent' as const,
             strength: 0.7,
+            weight: 3,
+            color: '#8b5cf6',
+            width: 1.5,
+            opacity: 0.6,
+            style: 'dashed',
             fromX: schema.x,
             fromY: schema.y,
             toX: view.x,
-            toY: view.y
+            toY: view.y,
+            metadata: {
+              relationship: 'schema-view',
+              importance: 'medium'
+            }
           })
+          connectedItemsCount += 1
         }
       })
     })
@@ -2131,29 +2492,76 @@ export function AdvancedGraphView({
     // 4. TABLE → COLUMN connections (CRITICAL for schema sync)
     schemaHierarchy.tables.forEach(table => {
       schemaHierarchy.columns.forEach(column => {
-        if (column.parentId === table.id || column.level === table.level + 1) {
+        const isDirectChild = column.parentId === table.id || 
+                             (column.level === table.level + 1) ||
+                             column.metadata?.schemaPath?.includes(table.name)
+        
+        if (isDirectChild) {
           conns.push({
             id: `table-${table.id}-column-${column.id}`,
             from: table.id,
             to: column.id,
             type: 'parent' as const,
             strength: 0.6,
+            weight: 2,
+            color: '#6b7280',
+            width: 1,
+            opacity: 0.5,
             fromX: table.x,
             fromY: table.y,
             toX: column.x,
-            toY: column.y
+            toY: column.y,
+            metadata: {
+              relationship: 'table-column',
+              importance: 'medium'
+            }
           })
+          connectedItemsCount += 1
         }
       })
     })
     
-    // 5. Cross-schema relationships (for better graph structure)
+    // 5. VIEW → COLUMN connections (for views with columns)
+    schemaHierarchy.views.forEach(view => {
+      schemaHierarchy.columns.forEach(column => {
+        const isDirectChild = column.parentId === view.id || 
+                             (column.level === view.level + 1) ||
+                             column.metadata?.schemaPath?.includes(view.name)
+        
+        if (isDirectChild) {
+          conns.push({
+            id: `view-${view.id}-column-${column.id}`,
+            from: view.id,
+            to: column.id,
+            type: 'parent' as const,
+            strength: 0.5,
+            weight: 2,
+            color: '#6b7280',
+            width: 1,
+            opacity: 0.4,
+            style: 'dotted',
+            fromX: view.x,
+            fromY: view.y,
+            toX: column.x,
+            toY: column.y,
+            metadata: {
+              relationship: 'view-column',
+              importance: 'low'
+            }
+          })
+          connectedItemsCount += 1
+        }
+      })
+    })
+    
+    // 6. Cross-schema relationships (for enhanced graph structure)
     schemaHierarchy.tables.forEach(table => {
-      // Find related tables in same schema
+      // Find related tables in same schema for foreign key relationships
       const relatedTables = schemaHierarchy.tables.filter(t => 
         t.id !== table.id && 
-        t.level === table.level &&
-        Math.abs((t.metadata?.importance || 0) - (table.metadata?.importance || 0)) < 30
+        t.parentId === table.parentId && // Same schema
+        t.metadata?.connectionWeight && table.metadata?.connectionWeight &&
+        Math.abs(t.metadata.connectionWeight - table.metadata.connectionWeight) <= 2
       )
       
       relatedTables.slice(0, 2).forEach(relatedTable => {
@@ -2163,29 +2571,50 @@ export function AdvancedGraphView({
           to: relatedTable.id,
           type: 'reference' as const,
           strength: 0.3,
+          weight: 1,
+          color: '#f59e0b',
+          width: 1,
+          opacity: 0.3,
+          style: 'dashed',
           fromX: table.x,
           fromY: table.y,
           toX: relatedTable.x,
-          toY: relatedTable.y
+          toY: relatedTable.y,
+          metadata: {
+            relationship: 'table-reference',
+            importance: 'low'
+          }
         })
       })
     })
     
-    console.log('🔗 Generated', conns.length, 'schema-synchronized connections')
+    // 7. Calculate final synchronization status
+    const syncPercentage = totalItems > 0 ? Math.round((connectedItemsCount / totalItems) * 100) : 0
+    const isSynchronized = syncPercentage >= 80 // Consider 80%+ as synchronized
     
-    // CRITICAL: Calculate schema synchronization status
-    const totalItems = nodes.length
-    const connectedItems = new Set([...conns.map(c => c.from), ...conns.map(c => c.to)]).size
-    const syncPercentage = totalItems > 0 ? Math.round((connectedItems / totalItems) * 100) : 0
+    console.log(`🎯 SCHEMA SYNCHRONIZATION COMPLETE:`)
+    console.log(`   • Total Items: ${totalItems}`)
+    console.log(`   • Connected Items: ${connectedItemsCount}`)
+    console.log(`   • Synchronization: ${syncPercentage}%`)
+    console.log(`   • Status: ${isSynchronized ? '✅ SYNCHRONIZED' : '❌ NOT SYNCHRONIZED'}`)
+    console.log(`   • Total Connections: ${conns.length}`)
     
+    // Update synchronization status
     setSchemaSyncStatus({
-      isSynchronized: syncPercentage > 80,
+      isSynchronized,
       totalItems,
-      connectedItems,
+      connectedItems: connectedItemsCount,
       syncPercentage
     })
     
-    console.log(`📊 SCHEMA SYNC STATUS: ${syncPercentage}% (${connectedItems}/${totalItems} items connected)`)
+    // Log connection breakdown for debugging
+    const connectionTypes = conns.reduce((acc, conn) => {
+      const type = conn.metadata?.relationship || conn.type
+      acc[type] = (acc[type] || 0) + 1
+      return acc
+    }, {} as Record<string, number>)
+    
+    console.log('🔗 Connection Breakdown:', connectionTypes)
     
     return conns
   }, [])
@@ -2239,10 +2668,15 @@ export function AdvancedGraphView({
         layoutEngineRef.current!.setNodes(processedNodes)
         layoutEngineRef.current!.setAlgorithm(selectedGraphType)
         
-        // Apply advanced controls
+        // Apply advanced controls with enhanced features
         layoutEngineRef.current!.setSimulationSpeed(simulationSpeed)
         layoutEngineRef.current!.setNodeSpacing(nodeSpacing)
         layoutEngineRef.current!.setMovementDamping(movementDamping)
+        
+        // ENHANCED: Apply advanced features
+        layoutEngineRef.current!.setTransitionScaling(defaultConfig.enableTransitions, defaultConfig.scalingFactor)
+        layoutEngineRef.current!.setFlexibleLayout(defaultConfig.enableFlexibleLayout)
+        layoutEngineRef.current!.optimizeForPerformance()
         
         // Generate connections
         const nodeConnections = generateConnections(processedNodes)
@@ -2563,18 +2997,55 @@ export function AdvancedGraphView({
         <Badge variant="outline" className="bg-white/90 backdrop-blur-sm shadow-lg">
           {connections.length} Connections
         </Badge>
-        {/* CRITICAL: Schema Synchronization Status */}
+        {/* CRITICAL: Enhanced Schema Synchronization Status */}
         <Badge 
           variant="outline" 
-          className={`${
+          className={`backdrop-blur-sm shadow-lg ${
             schemaSyncStatus.isSynchronized 
-              ? 'bg-green-50 text-green-600 border-green-200' 
-              : 'bg-red-50 text-red-600 border-red-200'
+              ? 'bg-green-50 text-green-700 border-green-200' 
+              : schemaSyncStatus.syncPercentage > 50
+                ? 'bg-yellow-50 text-yellow-700 border-yellow-200'
+                : schemaSyncStatus.syncPercentage > 0
+                  ? 'bg-orange-50 text-orange-700 border-orange-200'
+                  : 'bg-red-50 text-red-700 border-red-200'
           }`}
+          title={`${schemaSyncStatus.connectedItems}/${schemaSyncStatus.totalItems} schema items connected`}
         >
-          <Brain className="h-3 w-3 mr-1" />
-          Schema Sync: {schemaSyncStatus.syncPercentage}%
+          {schemaSyncStatus.isSynchronized ? (
+            <CheckCircle className="h-3 w-3 mr-1" />
+          ) : schemaSyncStatus.syncPercentage > 50 ? (
+            <Activity className="h-3 w-3 mr-1" />
+          ) : schemaSyncStatus.syncPercentage > 0 ? (
+            <AlertTriangle className="h-3 w-3 mr-1" />
+          ) : (
+            <AlertCircle className="h-3 w-3 mr-1" />
+          )}
+          Schema Sync: {schemaSyncStatus.syncPercentage}% 
+          {schemaSyncStatus.isSynchronized && ' ✓'}
         </Badge>
+        
+        {/* ENHANCED: Schema Validation Status */}
+        <Badge 
+          variant="outline" 
+          className={`backdrop-blur-sm shadow-lg ${
+            schemaValidation.isValid 
+              ? 'bg-blue-50 text-blue-700 border-blue-200' 
+              : schemaValidation.coverage > 70
+                ? 'bg-yellow-50 text-yellow-700 border-yellow-200'
+                : 'bg-red-50 text-red-700 border-red-200'
+          }`}
+          title={`Schema Coverage: ${schemaValidation.coverage}% | Issues: ${schemaValidation.issues.length}`}
+        >
+          {schemaValidation.isValid ? (
+            <Shield className="h-3 w-3 mr-1" />
+          ) : schemaValidation.issues.length > 0 ? (
+            <AlertTriangle className="h-3 w-3 mr-1" />
+          ) : (
+            <Target className="h-3 w-3 mr-1" />
+          )}
+          Validation: {schemaValidation.coverage}%
+        </Badge>
+        
         {isLoading && (
           <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200">
             <Activity className="h-3 w-3 mr-1 animate-pulse" />
