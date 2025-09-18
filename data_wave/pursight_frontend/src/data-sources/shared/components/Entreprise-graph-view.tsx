@@ -24,7 +24,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useSchemaAnalysis } from '../hooks/use-schema-analysis'
 import { SchemaAnalysisPanel } from './schema-analysis-panel'
-import { SchemaLineChart } from './schema-line-chart'
+import { SchemaLineChart, type SchemaLineChartRef } from './schema-line-chart'
+import { AdvancedReportGenerator } from './advanced-report-generator'
+import { PDFReportGenerator } from '../utils/pdf-report-generator'
 import type { GraphNode as AnalysisGraphNode } from '../utils/schema-analysis-utils'
 
 // Enhanced Graph Node Interface with Advanced Properties
@@ -1332,6 +1334,7 @@ class GraphRenderer {
   private targetFPS: number = 120 // Ultra-high FPS for smooth 3D movement
   private frameTime: number = 1000 / this.targetFPS
   private frameSkip: number = 0
+  private patternHighlightColor: string = '#3b82f6' // Add pattern highlight color property
   private maxFrameSkip: number = 0 // No frame skipping for ultra-smooth movement
   private renderCount: number = 0
   private lastFPSUpdate: number = 0
@@ -1417,8 +1420,12 @@ class GraphRenderer {
     hoveredNode?: string | null
     selectedNodes?: Set<string>
     highlightedNodes?: Set<string>
+    patternHighlightColor?: string
   }) {
     const now = performance.now()
+    
+    // Set pattern highlight color
+    this.patternHighlightColor = options.patternHighlightColor || '#3b82f6'
     
     // Ultra-optimized frame skipping for maximum FPS
     if (now - this.lastRenderTime < this.frameTime) {
@@ -1772,9 +1779,8 @@ class GraphRenderer {
   }
   
   private getPatternHighlightColor(nodeId: string): string | null {
-    // This would be passed from the parent component
-    // For now, return a default highlight color
-    return '#3b82f6'
+    // Use the pattern highlight color passed from the parent component
+    return this.patternHighlightColor || '#3b82f6'
   }
   
   destroy() {
@@ -1837,6 +1843,9 @@ export function AdvancedGraphView({
   const [sortBy, setSortBy] = useState<'name' | 'type' | 'importance'>('importance')
   const [searchTerm, setSearchTerm] = useState('')
   
+  // CRITICAL: Pattern-based node highlighting system
+  const [patternHighlightColor, setPatternHighlightColor] = useState<string>('#3b82f6')
+  
   // Schema synchronization state
   const [schemaSyncStatus, setSchemaSyncStatus] = useState({
     isSynchronized: false,
@@ -1844,6 +1853,13 @@ export function AdvancedGraphView({
     connectedItems: 0,
     syncPercentage: 0
   })
+  
+  // Advanced report generation state
+  const [showReportGenerator, setShowReportGenerator] = useState(false)
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false)
+  const graphRef = useRef<HTMLDivElement>(null)
+  const chartRef = useRef<HTMLDivElement>(null)
+  const chartComponentRef = useRef<SchemaLineChartRef>(null)
   const [autoLayoutState, setAutoLayoutState] = useState(autoLayout)
   const [showMinimapState, setShowMinimapState] = useState(showMinimap)
   const [showLabelsState, setShowLabelsState] = useState(showLabels)
@@ -2059,6 +2075,135 @@ export function AdvancedGraphView({
     nodes: analysisNodes,
     autoAnalyze: true
   })
+
+  // CRITICAL: Enhanced pattern selection with node highlighting
+  const enhancedSelectPattern = useCallback((patternId: string | null) => {
+    // Call the original selectPattern function
+    selectPattern(patternId)
+    
+    if (patternId) {
+      // Get pattern color for highlighting
+      const pattern = patterns.find(p => p.id === patternId)
+      if (pattern) {
+        setPatternHighlightColor(pattern.color)
+        console.log(`🎯 PATTERN HIGHLIGHT: Selected pattern ${patternId} with color ${pattern.color}`)
+      }
+    } else {
+      // Clear highlighting when pattern is deselected
+      setPatternHighlightColor('#3b82f6')
+      console.log('🎯 PATTERN HIGHLIGHT: Cleared pattern highlighting')
+    }
+  }, [selectPattern, patterns])
+
+  // CRITICAL: Enhanced highlighted nodes with pattern highlighting
+  const enhancedHighlightedNodes = useMemo(() => {
+    return new Set([
+      ...highlightedNodes,
+      ...(selectedPattern ? 
+        analysis.find(a => a.patternId === selectedPattern)?.nodeIds || [] 
+        : [])
+    ])
+  }, [highlightedNodes, selectedPattern, analysis])
+
+  // CRITICAL: Advanced report generation function
+  const handleGenerateAdvancedReport = useCallback(async (reportConfig: any) => {
+    setIsGeneratingReport(true)
+    
+    try {
+      console.log('🎯 GENERATING ADVANCED REPORT WITH CONFIG:', reportConfig)
+      
+      const pdfGenerator = new PDFReportGenerator()
+      
+      // Filter data based on selected patterns
+      const selectedPatterns = reportConfig.selectedPatterns.length > 0 
+        ? patterns.filter(p => reportConfig.selectedPatterns.includes(p.id))
+        : patterns
+      
+      const selectedAnalysis = reportConfig.selectedPatterns.length > 0
+        ? analysis.filter(a => reportConfig.selectedPatterns.includes(a.patternId))
+        : analysis
+      
+      const selectedNodes = reportConfig.selectedPatterns.length > 0
+        ? analysisNodes.filter(n => 
+            selectedAnalysis.some(a => a.nodeIds.includes(n.id))
+          )
+        : analysisNodes
+      
+      const selectedLineChartData = reportConfig.selectedPatterns.length > 0
+        ? lineChartData.filter(d => reportConfig.selectedPatterns.includes(d.patternId))
+        : lineChartData
+      
+      console.log('🎯 FILTERED DATA FOR REPORT:')
+      console.log('- Selected Patterns:', selectedPatterns.map(p => p.name))
+      console.log('- Selected Analysis:', selectedAnalysis.length)
+      console.log('- Selected Nodes:', selectedNodes.length)
+      console.log('- Selected Line Chart Data:', selectedLineChartData.length)
+      
+      // Get graph and chart elements for screenshots
+      let graphElement: HTMLElement | undefined
+      let chartElement: HTMLElement | undefined
+      
+      // Try multiple selectors to find canvas elements
+      if (containerRef.current) {
+        graphElement = containerRef.current.querySelector('canvas') || undefined
+        if (!graphElement) {
+          // Try to find any canvas in the container
+          const canvases = containerRef.current.querySelectorAll('canvas')
+          if (canvases.length > 0) {
+            graphElement = canvases[0] as HTMLElement
+          }
+        }
+      }
+      
+      // Try to get chart canvas from the component ref first
+      if (chartComponentRef.current) {
+        const chartCanvas = chartComponentRef.current.getCanvas()
+        if (chartCanvas) {
+          chartElement = chartCanvas
+        }
+      }
+      
+      // Fallback: try to find canvas in the chart container
+      if (!chartElement && chartRef.current) {
+        chartElement = chartRef.current.querySelector('canvas') || undefined
+        if (!chartElement) {
+          // Try to find any canvas in the chart container and nested components
+          const canvases = chartRef.current.querySelectorAll('canvas')
+          if (canvases.length > 0) {
+            chartElement = canvases[0] as HTMLElement
+          }
+        }
+      }
+      
+      console.log('🎯 SCREENSHOT ELEMENTS:')
+      console.log('- Container Ref:', containerRef.current)
+      console.log('- Chart Ref:', chartRef.current)
+      console.log('- Graph Element:', graphElement)
+      console.log('- Chart Element:', chartElement)
+      console.log('- Graph Element Tag:', graphElement?.tagName)
+      console.log('- Chart Element Tag:', chartElement?.tagName)
+      console.log('- Graph Canvas Size:', graphElement ? `${(graphElement as HTMLCanvasElement).width}x${(graphElement as HTMLCanvasElement).height}` : 'N/A')
+      console.log('- Chart Canvas Size:', chartElement ? `${(chartElement as HTMLCanvasElement).width}x${(chartElement as HTMLCanvasElement).height}` : 'N/A')
+      
+      await pdfGenerator.generateReport(
+        reportConfig,
+        selectedPatterns,
+        selectedAnalysis,
+        selectedNodes,
+        selectedLineChartData,
+        graphElement,
+        chartElement
+      )
+      
+      console.log('✅ Advanced PDF report generated successfully')
+      
+    } catch (error) {
+      console.error('❌ Report generation failed:', error)
+      alert(`Report generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    } finally {
+      setIsGeneratingReport(false)
+    }
+  }, [patterns, analysis, analysisNodes, lineChartData])
 
   // CRITICAL: Generate connections that map EXACTLY to discovered schema items
   const generateConnections = useCallback((nodes: GraphNode[]): GraphConnection[] => {
@@ -2302,7 +2447,8 @@ export function AdvancedGraphView({
         connectionOpacity: performanceMode ? 0.5 : connectionOpacity,
         hoveredNode,
         selectedNodes: new Set(processedNodes.filter(n => n.isSelected).map(n => n.id)),
-        highlightedNodes: highlightedNodes
+        highlightedNodes: enhancedHighlightedNodes,
+        patternHighlightColor: patternHighlightColor
       })
       
       // Continue animation for floating effect
@@ -3274,11 +3420,14 @@ export function AdvancedGraphView({
                     analysis={analysis}
                     lineChartData={lineChartData}
                     selectedPattern={selectedPattern}
-                    highlightedNodes={highlightedNodes}
+                    highlightedNodes={enhancedHighlightedNodes}
                     nodes={analysisNodes}
-                    onPatternSelect={selectPattern}
+                    onPatternSelect={enhancedSelectPattern}
                     onClose={() => setShowAnalysisPanel(false)}
-                    onGenerateReport={generateReport}
+                    onGenerateReport={() => {
+                      console.log('🎯 REPORT BUTTON CLICKED: Opening report generator')
+                      setShowReportGenerator(true)
+                    }}
                     onToggleChart={() => setShowLineChart(!showLineChart)}
                     showChart={showLineChart}
                     className="h-full"
@@ -3304,12 +3453,13 @@ export function AdvancedGraphView({
                     </div>
                     
                     {/* Chart Panel Content */}
-                    <div className="flex-1 p-4">
+                    <div ref={chartRef} className="flex-1 p-4">
                       <SchemaLineChart
+                        ref={chartComponentRef}
                         data={lineChartData}
                         patterns={patterns}
                         selectedPattern={selectedPattern}
-                        onPatternSelect={selectPattern}
+                        onPatternSelect={enhancedSelectPattern}
                         onClose={() => setShowLineChart(false)}
                       />
                     </div>
@@ -3323,6 +3473,18 @@ export function AdvancedGraphView({
       
       {/* Performance Indicator */}
       {renderPerformanceIndicator()}
+      
+      {/* Advanced Report Generator */}
+      <AdvancedReportGenerator
+        isOpen={showReportGenerator}
+        onClose={() => setShowReportGenerator(false)}
+        patterns={patterns}
+        analysis={analysis}
+        lineChartData={lineChartData}
+        nodes={analysisNodes}
+        selectedPattern={selectedPattern}
+        onGenerateReport={handleGenerateAdvancedReport}
+      />
     </div>
   )
 }

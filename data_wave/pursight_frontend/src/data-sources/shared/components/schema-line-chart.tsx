@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useRef, useEffect, useCallback, useState } from 'react'
+import React, { useRef, useEffect, useCallback, useState, forwardRef, useImperativeHandle } from 'react'
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
@@ -25,17 +25,27 @@ interface SchemaLineChartProps {
   className?: string
 }
 
-export function SchemaLineChart({
+export interface SchemaLineChartRef {
+  getCanvas: () => HTMLCanvasElement | null
+}
+
+export const SchemaLineChart = forwardRef<SchemaLineChartRef, SchemaLineChartProps>(({
   data,
   patterns,
   selectedPattern,
   onPatternSelect,
   onClose,
   className = ""
-}: SchemaLineChartProps) {
+}, ref) => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [hoveredPattern, setHoveredPattern] = useState<string | null>(null)
   const [isAnimating, setIsAnimating] = useState(false)
+  const [chartRange, setChartRange] = useState({ min: 0, max: 100 })
+
+  // Expose canvas ref for screenshot capture
+  useImperativeHandle(ref, () => ({
+    getCanvas: () => canvasRef.current
+  }), [])
 
   // Render line chart on canvas
   const renderChart = useCallback(() => {
@@ -88,14 +98,31 @@ export function SchemaLineChart({
       ctx.stroke()
     }
 
-    // Draw Y-axis labels
+    // CRITICAL: Calculate dynamic data range for proper scaling
+    const allValues = data.flatMap(patternData => patternData.dataPoints.map(point => point.value))
+    const minValue = Math.min(...allValues)
+    const maxValue = Math.max(...allValues)
+    const valueRange = maxValue - minValue
+    const paddingRange = valueRange * 0.1 // Add 10% padding above and below
+    
+    // Use dynamic range instead of fixed 0-100
+    const chartMinValue = Math.max(0, minValue - paddingRange)
+    const chartMaxValue = maxValue + paddingRange
+    const dynamicRange = chartMaxValue - chartMinValue
+    
+    console.log('📊 CHART SCALING:', { minValue, maxValue, chartMinValue, chartMaxValue, dynamicRange })
+    
+    // Update chart range state for display
+    setChartRange({ min: chartMinValue, max: chartMaxValue })
+
+    // Draw Y-axis labels with dynamic scaling
     ctx.fillStyle = '#94a3b8'
     ctx.font = '10px system-ui, -apple-system, Segoe UI, Roboto, Ubuntu'
     ctx.textAlign = 'right'
     for (let i = 0; i <= 5; i++) {
-      const value = 100 - (i * 20)
+      const value = chartMaxValue - (dynamicRange / 5) * i
       const y = padding + (chartHeight / 5) * i + 3
-      ctx.fillText(value.toString(), padding - 5, y)
+      ctx.fillText(value.toFixed(1), padding - 5, y)
     }
 
     // Draw X-axis labels (dates)
@@ -110,23 +137,38 @@ export function SchemaLineChart({
       }
     })
 
-    // Draw lines for each pattern
+    // CRITICAL: Draw lines for each pattern with enhanced visibility
     data.forEach((patternData, index) => {
       const isSelected = selectedPattern === patternData.patternId
       const isHovered = hoveredPattern === patternData.patternId
-      const opacity = selectedPattern ? (isSelected ? 1 : 0.3) : (isHovered ? 0.8 : 0.6)
+      const opacity = selectedPattern ? (isSelected ? 1 : 0.3) : (isHovered ? 0.9 : 0.8) // Increased base opacity
       
-      // Set line style
+      // CRITICAL: Enhanced line visibility - ensure all lines are clearly visible
       ctx.strokeStyle = patternData.color
-      ctx.lineWidth = isSelected ? 4 : isHovered ? 3 : 2
+      ctx.lineWidth = isSelected ? 6 : isHovered ? 4 : 3 // Increased base line width
       ctx.globalAlpha = opacity
       ctx.setLineDash([])
       
-      // Draw line
+      // CRITICAL: Add glow effect for better visibility
+      if (isSelected || isHovered) {
+        ctx.shadowColor = patternData.color
+        ctx.shadowBlur = 8
+      } else {
+        // Add subtle glow for all lines to make them more visible
+        ctx.shadowColor = patternData.color
+        ctx.shadowBlur = 2
+      }
+      
+      // Draw line with enhanced visibility using dynamic scaling
       ctx.beginPath()
       patternData.dataPoints.forEach((point, pointIndex) => {
         const x = padding + (chartWidth / (patternData.dataPoints.length - 1)) * pointIndex
-        const y = padding + chartHeight - (point.value / 100) * chartHeight
+        // CRITICAL: Use dynamic scaling instead of fixed 0-100 range
+        const normalizedValue = (point.value - chartMinValue) / dynamicRange
+        // CRITICAL: Ensure minimum visibility for very low values
+        const minVisibleHeight = chartHeight * 0.05 // 5% of chart height minimum
+        const adjustedValue = Math.max(normalizedValue, minVisibleHeight / chartHeight)
+        const y = padding + chartHeight - (adjustedValue * chartHeight)
         
         if (pointIndex === 0) {
           ctx.moveTo(x, y)
@@ -136,16 +178,31 @@ export function SchemaLineChart({
       })
       ctx.stroke()
       
-      // Draw data points
+      // Reset shadow
+      ctx.shadowBlur = 0
+      
+      // CRITICAL: Enhanced data points with better visibility using dynamic scaling
       ctx.fillStyle = patternData.color
       patternData.dataPoints.forEach((point, pointIndex) => {
         const x = padding + (chartWidth / (patternData.dataPoints.length - 1)) * pointIndex
-        const y = padding + chartHeight - (point.value / 100) * chartHeight
+        // CRITICAL: Use dynamic scaling for data points too
+        const normalizedValue = (point.value - chartMinValue) / dynamicRange
+        // CRITICAL: Ensure minimum visibility for data points too
+        const minVisibleHeight = chartHeight * 0.05 // 5% of chart height minimum
+        const adjustedValue = Math.max(normalizedValue, minVisibleHeight / chartHeight)
+        const y = padding + chartHeight - (adjustedValue * chartHeight)
         
         ctx.beginPath()
-        const radius = isSelected ? 6 : isHovered ? 5 : 3
+        const radius = isSelected ? 8 : isHovered ? 6 : 4 // Increased base radius
         ctx.arc(x, y, radius, 0, Math.PI * 2)
         ctx.fill()
+        
+        // Add white center for better contrast
+        ctx.fillStyle = '#ffffff'
+        ctx.beginPath()
+        ctx.arc(x, y, radius * 0.4, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.fillStyle = patternData.color
       })
     })
 
@@ -311,6 +368,9 @@ export function SchemaLineChart({
           {/* Chart Title */}
           <div className="absolute top-2 left-2 text-xs text-slate-400">
             Criticality Score Over Time
+            <div className="text-xs text-slate-500 mt-1">
+              Range: {chartRange.min.toFixed(1)} - {chartRange.max.toFixed(1)}
+            </div>
           </div>
         </div>
       </div>
@@ -421,4 +481,6 @@ export function SchemaLineChart({
       </div>
     </div>
   )
-}
+})
+
+SchemaLineChart.displayName = 'SchemaLineChart'

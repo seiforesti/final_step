@@ -36,7 +36,7 @@ interface SchemaAnalysisPanelProps {
   nodes: GraphNode[]
   onPatternSelect: (patternId: string | null) => void
   onClose: () => void
-  onGenerateReport: (selectedPatterns?: string[]) => void
+  onGenerateReport: () => void
   onToggleChart?: () => void
   showChart?: boolean
   className?: string
@@ -374,7 +374,7 @@ export function SchemaAnalysisPanel({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => onGenerateReport(selectedPattern ? [selectedPattern] : undefined)}
+              onClick={onGenerateReport}
               className="text-xs"
             >
               <FileText className="h-3 w-3 mr-1" />
