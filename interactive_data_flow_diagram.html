@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PurSight - Interactive Data Flow Diagram</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            background: linear-gradient(45deg, #64b5f6, #42a5f5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .control-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #42a5f5, #1e88e5);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(66, 165, 245, 0.3);
+        }
+        
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(66, 165, 245, 0.4);
+        }
+        
+        .control-btn.active {
+            background: linear-gradient(135deg, #4caf50, #388e3c);
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+        
+        #diagram {
+            width: 100%;
+            height: 800px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+        }
+        
+        .node {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .node:hover {
+            transform: scale(1.1);
+        }
+        
+        .node rect {
+            rx: 8;
+            ry: 8;
+            stroke-width: 2;
+            filter: url(#glow);
+        }
+        
+        .node text {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-weight: 500;
+            text-anchor: middle;
+            dominant-baseline: middle;
+        }
+        
+        .link {
+            stroke-width: 3;
+            opacity: 0.7;
+            transition: all 0.3s ease;
+        }
+        
+        .link:hover {
+            stroke-width: 5;
+            opacity: 1;
+        }
+        
+        .link.animated {
+            stroke-dasharray: 10, 5;
+            animation: dash 2s linear infinite;
+        }
+        
+        @keyframes dash {
+            to {
+                stroke-dashoffset: -15;
+            }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                opacity: 0.5;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.05);
+            }
+            100% {
+                opacity: 0.5;
+                transform: scale(1);
+            }
+        }
+        
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            pointer-events: none;
+            z-index: 1000;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            max-width: 300px;
+        }
+        
+        .legend {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        .legend h3 {
+            margin: 0 0 15px 0;
+            color: #64b5f6;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+            font-size: 14px;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #64b5f6;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌊 Interactive Data Flow Diagram</h1>
+        <p style="text-align: center; margin-bottom: 30px; opacity: 0.9;">
+            Explore the real-time data flow through the PurSight Data Governance platform
+        </p>
+        
+        <div class="controls">
+            <button class="control-btn active" onclick="showAllFlows()">Show All Flows</button>
+            <button class="control-btn" onclick="showIngestionFlow()">Ingestion Flow</button>
+            <button class="control-btn" onclick="showProcessingFlow()">Processing Flow</button>
+            <button class="control-btn" onclick="showGovernanceFlow()">Governance Flow</button>
+            <button class="control-btn" onclick="showAnalyticsFlow()">Analytics Flow</button>
+            <button class="control-btn" onclick="toggleAnimation()">Toggle Animation</button>
+        </div>
+        
+        <div style="position: relative;">
+            <svg id="diagram"></svg>
+            
+            <div class="legend">
+                <h3>Component Types</h3>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #42a5f5;"></div>
+                    <span>Data Sources</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #66bb6a;"></div>
+                    <span>Processing</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #ff7043;"></div>
+                    <span>Governance</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #ab47bc;"></div>
+                    <span>Storage</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #26c6da;"></div>
+                    <span>Analytics</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #ffa726;"></div>
+                    <span>User Interface</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value">15</div>
+                <div class="stat-label">Data Sources</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">8</div>
+                <div class="stat-label">Processing Steps</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">12</div>
+                <div class="stat-label">Governance Checks</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">6</div>
+                <div class="stat-label">Storage Systems</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">10</div>
+                <div class="stat-label">Analytics Models</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">7</div>
+                <div class="stat-label">User Interfaces</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Data for the diagram
+        const nodes = [
+            // Data Sources
+            { id: 'databases', name: 'Databases', type: 'source', x: 50, y: 100, color: '#42a5f5' },
+            { id: 'files', name: 'File Systems', type: 'source', x: 50, y: 180, color: '#42a5f5' },
+            { id: 'apis', name: 'APIs', type: 'source', x: 50, y: 260, color: '#42a5f5' },
+            { id: 'streams', name: 'Data Streams', type: 'source', x: 50, y: 340, color: '#42a5f5' },
+            { id: 'cloud', name: 'Cloud Storage', type: 'source', x: 50, y: 420, color: '#42a5f5' },
+            
+            // Ingestion Layer
+            { id: 'connectors', name: 'Data Connectors', type: 'ingestion', x: 250, y: 150, color: '#66bb6a' },
+            { id: 'schedulers', name: 'Schedulers', type: 'ingestion', x: 250, y: 250, color: '#66bb6a' },
+            { id: 'monitors', name: 'Health Monitors', type: 'ingestion', x: 250, y: 350, color: '#66bb6a' },
+            
+            // Processing Pipeline
+            { id: 'scanner', name: 'Schema Scanner', type: 'processing', x: 450, y: 100, color: '#66bb6a' },
+            { id: 'profiler', name: 'Data Profiler', type: 'processing', x: 450, y: 200, color: '#66bb6a' },
+            { id: 'classifier', name: 'ML Classifier', type: 'processing', x: 450, y: 300, color: '#66bb6a' },
+            { id: 'lineage', name: 'Lineage Tracker', type: 'processing', x: 450, y: 400, color: '#66bb6a' },
+            
+            // Governance Engine
+            { id: 'policy', name: 'Policy Engine', type: 'governance', x: 650, y: 150, color: '#ff7043' },
+            { id: 'compliance', name: 'Compliance Checker', type: 'governance', x: 650, y: 250, color: '#ff7043' },
+            { id: 'quality', name: 'Quality Gates', type: 'governance', x: 650, y: 350, color: '#ff7043' },
+            
+            // Storage & Indexing
+            { id: 'catalog', name: 'Data Catalog', type: 'storage', x: 850, y: 100, color: '#ab47bc' },
+            { id: 'search', name: 'Search Index', type: 'storage', x: 850, y: 200, color: '#ab47bc' },
+            { id: 'metadata', name: 'Metadata Store', type: 'storage', x: 850, y: 300, color: '#ab47bc' },
+            { id: 'audit', name: 'Audit Log', type: 'storage', x: 850, y: 400, color: '#ab47bc' },
+            
+            // Analytics & ML
+            { id: 'ml', name: 'ML Models', type: 'analytics', x: 1050, y: 150, color: '#26c6da' },
+            { id: 'recommendations', name: 'Recommendations', type: 'analytics', x: 1050, y: 250, color: '#26c6da' },
+            { id: 'insights', name: 'Insights Engine', type: 'analytics', x: 1050, y: 350, color: '#26c6da' },
+            
+            // User Interface
+            { id: 'dashboard', name: 'Dashboard', type: 'ui', x: 1250, y: 100, color: '#ffa726' },
+            { id: 'explorer', name: 'Data Explorer', type: 'ui', x: 1250, y: 200, color: '#ffa726' },
+            { id: 'governance_ui', name: 'Governance UI', type: 'ui', x: 1250, y: 300, color: '#ffa726' },
+            { id: 'reports', name: 'Reports', type: 'ui', x: 1250, y: 400, color: '#ffa726' }
+        ];
+        
+        const links = [
+            // Source to Ingestion
+            { source: 'databases', target: 'connectors', type: 'data' },
+            { source: 'files', target: 'connectors', type: 'data' },
+            { source: 'apis', target: 'connectors', type: 'data' },
+            { source: 'streams', target: 'connectors', type: 'data' },
+            { source: 'cloud', target: 'connectors', type: 'data' },
+            
+            // Ingestion to Processing
+            { source: 'connectors', target: 'scanner', type: 'data' },
+            { source: 'schedulers', target: 'scanner', type: 'control' },
+            { source: 'monitors', target: 'scanner', type: 'control' },
+            
+            // Processing Pipeline
+            { source: 'scanner', target: 'profiler', type: 'data' },
+            { source: 'profiler', target: 'classifier', type: 'data' },
+            { source: 'classifier', target: 'lineage', type: 'data' },
+            
+            // Processing to Governance
+            { source: 'lineage', target: 'policy', type: 'data' },
+            { source: 'policy', target: 'compliance', type: 'data' },
+            { source: 'compliance', target: 'quality', type: 'data' },
+            
+            // Governance to Storage
+            { source: 'quality', target: 'catalog', type: 'data' },
+            { source: 'quality', target: 'search', type: 'data' },
+            { source: 'quality', target: 'metadata', type: 'data' },
+            { source: 'quality', target: 'audit', type: 'data' },
+            
+            // Storage to Analytics
+            { source: 'catalog', target: 'ml', type: 'data' },
+            { source: 'search', target: 'ml', type: 'data' },
+            { source: 'metadata', target: 'ml', type: 'data' },
+            
+            // Analytics Processing
+            { source: 'ml', target: 'recommendations', type: 'data' },
+            { source: 'ml', target: 'insights', type: 'data' },
+            
+            // Analytics to UI
+            { source: 'catalog', target: 'dashboard', type: 'data' },
+            { source: 'search', target: 'explorer', type: 'data' },
+            { source: 'metadata', target: 'governance_ui', type: 'data' },
+            { source: 'audit', target: 'reports', type: 'data' },
+            { source: 'recommendations', target: 'dashboard', type: 'data' },
+            { source: 'insights', target: 'dashboard', type: 'data' }
+        ];
+        
+        // SVG setup
+        const svg = d3.select("#diagram");
+        const width = 1400;
+        const height = 500;
+        svg.attr("width", width).attr("height", height);
+        
+        // Add definitions for effects
+        const defs = svg.append("defs");
+        
+        // Glow effect
+        const glow = defs.append("filter")
+            .attr("id", "glow")
+            .attr("x", "-50%")
+            .attr("y", "-50%")
+            .attr("width", "200%")
+            .attr("height", "200%");
+        
+        glow.append("feGaussianBlur")
+            .attr("stdDeviation", "3")
+            .attr("result", "coloredBlur");
+        
+        const feMerge = glow.append("feMerge");
+        feMerge.append("feMergeNode").attr("in", "coloredBlur");
+        feMerge.append("feMergeNode").attr("in", "SourceGraphic");
+        
+        // Arrow marker
+        defs.append("marker")
+            .attr("id", "arrowhead")
+            .attr("viewBox", "-0 -5 10 10")
+            .attr("refX", 8)
+            .attr("refY", 0)
+            .attr("orient", "auto")
+            .attr("markerWidth", 8)
+            .attr("markerHeight", 8)
+            .attr("xoverflow", "visible")
+            .append("path")
+            .attr("d", "M 0,-5 L 10 ,0 L 0,5")
+            .attr("fill", "#999")
+            .style("stroke", "none");
+        
+        // Create tooltip
+        const tooltip = d3.select("body").append("div")
+            .attr("class", "tooltip")
+            .style("opacity", 0);
+        
+        // Draw links
+        const linkGroup = svg.append("g").attr("class", "links");
+        const nodeGroup = svg.append("g").attr("class", "nodes");
+        
+        function drawDiagram() {
+            // Clear existing elements
+            linkGroup.selectAll("*").remove();
+            nodeGroup.selectAll("*").remove();
+            
+            // Draw links
+            const linkElements = linkGroup.selectAll("line")
+                .data(links)
+                .enter()
+                .append("line")
+                .attr("class", "link animated")
+                .attr("x1", d => nodes.find(n => n.id === d.source).x + 60)
+                .attr("y1", d => nodes.find(n => n.id === d.source).y + 15)
+                .attr("x2", d => nodes.find(n => n.id === d.target).x)
+                .attr("y2", d => nodes.find(n => n.id === d.target).y + 15)
+                .attr("stroke", d => d.type === 'control' ? '#ffa726' : '#64b5f6')
+                .attr("marker-end", "url(#arrowhead)");
+            
+            // Draw nodes
+            const nodeElements = nodeGroup.selectAll("g")
+                .data(nodes)
+                .enter()
+                .append("g")
+                .attr("class", "node")
+                .attr("transform", d => `translate(${d.x}, ${d.y})`);
+            
+            nodeElements.append("rect")
+                .attr("width", 120)
+                .attr("height", 30)
+                .attr("fill", d => d.color)
+                .attr("stroke", d => d3.color(d.color).darker(0.5));
+            
+            nodeElements.append("text")
+                .attr("x", 60)
+                .attr("y", 15)
+                .attr("fill", "white")
+                .attr("font-size", "12px")
+                .text(d => d.name);
+            
+            // Add hover effects
+            nodeElements
+                .on("mouseover", function(event, d) {
+                    d3.select(this).classed("pulse", true);
+                    
+                    tooltip.transition()
+                        .duration(200)
+                        .style("opacity", .9);
+                    
+                    tooltip.html(`
+                        <strong>${d.name}</strong><br/>
+                        Type: ${d.type}<br/>
+                        Status: Active<br/>
+                        Last Updated: ${new Date().toLocaleTimeString()}
+                    `)
+                        .style("left", (event.pageX + 10) + "px")
+                        .style("top", (event.pageY - 28) + "px");
+                })
+                .on("mouseout", function(d) {
+                    d3.select(this).classed("pulse", false);
+                    
+                    tooltip.transition()
+                        .duration(500)
+                        .style("opacity", 0);
+                })
+                .on("click", function(event, d) {
+                    highlightPath(d.id);
+                });
+        }
+        
+        function highlightPath(nodeId) {
+            // Reset all elements
+            nodeGroup.selectAll("g").style("opacity", 0.3);
+            linkGroup.selectAll("line").style("opacity", 0.1);
+            
+            // Highlight selected node
+            nodeGroup.selectAll("g")
+                .filter(d => d.id === nodeId)
+                .style("opacity", 1);
+            
+            // Find and highlight connected paths
+            const connectedNodes = new Set([nodeId]);
+            const connectedLinks = links.filter(link => 
+                link.source === nodeId || link.target === nodeId
+            );
+            
+            connectedLinks.forEach(link => {
+                connectedNodes.add(link.source);
+                connectedNodes.add(link.target);
+            });
+            
+            // Highlight connected nodes
+            nodeGroup.selectAll("g")
+                .filter(d => connectedNodes.has(d.id))
+                .style("opacity", 1);
+            
+            // Highlight connected links
+            linkGroup.selectAll("line")
+                .filter(d => connectedNodes.has(d.source) && connectedNodes.has(d.target))
+                .style("opacity", 1);
+            
+            // Reset after 3 seconds
+            setTimeout(() => {
+                nodeGroup.selectAll("g").style("opacity", 1);
+                linkGroup.selectAll("line").style("opacity", 0.7);
+            }, 3000);
+        }
+        
+        // Control functions
+        let animationEnabled = true;
+        
+        function showAllFlows() {
+            document.querySelectorAll('.control-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            nodeGroup.selectAll("g").style("opacity", 1);
+            linkGroup.selectAll("line").style("opacity", 0.7);
+        }
+        
+        function showIngestionFlow() {
+            document.querySelectorAll('.control-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            const ingestionTypes = ['source', 'ingestion'];
+            nodeGroup.selectAll("g").style("opacity", d => 
+                ingestionTypes.includes(d.type) ? 1 : 0.2
+            );
+            
+            linkGroup.selectAll("line").style("opacity", d => {
+                const sourceNode = nodes.find(n => n.id === d.source);
+                const targetNode = nodes.find(n => n.id === d.target);
+                return (ingestionTypes.includes(sourceNode.type) && 
+                        ingestionTypes.includes(targetNode.type)) ? 1 : 0.1;
+            });
+        }
+        
+        function showProcessingFlow() {
+            document.querySelectorAll('.control-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            const processingTypes = ['ingestion', 'processing'];
+            nodeGroup.selectAll("g").style("opacity", d => 
+                processingTypes.includes(d.type) ? 1 : 0.2
+            );
+            
+            linkGroup.selectAll("line").style("opacity", d => {
+                const sourceNode = nodes.find(n => n.id === d.source);
+                const targetNode = nodes.find(n => n.id === d.target);
+                return (processingTypes.includes(sourceNode.type) && 
+                        processingTypes.includes(targetNode.type)) ? 1 : 0.1;
+            });
+        }
+        
+        function showGovernanceFlow() {
+            document.querySelectorAll('.control-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            const governanceTypes = ['processing', 'governance', 'storage'];
+            nodeGroup.selectAll("g").style("opacity", d => 
+                governanceTypes.includes(d.type) ? 1 : 0.2
+            );
+            
+            linkGroup.selectAll("line").style("opacity", d => {
+                const sourceNode = nodes.find(n => n.id === d.source);
+                const targetNode = nodes.find(n => n.id === d.target);
+                return (governanceTypes.includes(sourceNode.type) && 
+                        governanceTypes.includes(targetNode.type)) ? 1 : 0.1;
+            });
+        }
+        
+        function showAnalyticsFlow() {
+            document.querySelectorAll('.control-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            const analyticsTypes = ['storage', 'analytics', 'ui'];
+            nodeGroup.selectAll("g").style("opacity", d => 
+                analyticsTypes.includes(d.type) ? 1 : 0.2
+            );
+            
+            linkGroup.selectAll("line").style("opacity", d => {
+                const sourceNode = nodes.find(n => n.id === d.source);
+                const targetNode = nodes.find(n => n.id === d.target);
+                return (analyticsTypes.includes(sourceNode.type) && 
+                        analyticsTypes.includes(targetNode.type)) ? 1 : 0.1;
+            });
+        }
+        
+        function toggleAnimation() {
+            animationEnabled = !animationEnabled;
+            linkGroup.selectAll("line")
+                .classed("animated", animationEnabled);
+            
+            event.target.textContent = animationEnabled ? "Disable Animation" : "Enable Animation";
+        }
+        
+        // Initialize diagram
+        drawDiagram();
+        
+        // Auto-update stats
+        setInterval(() => {
+            document.querySelectorAll('.stat-value').forEach(stat => {
+                const currentValue = parseInt(stat.textContent);
+                const variation = Math.floor(Math.random() * 3) - 1; // -1, 0, or 1
+                const newValue = Math.max(0, currentValue + variation);
+                stat.textContent = newValue;
+            });
+        }, 5000);
+    </script>
+</body>
+</html>

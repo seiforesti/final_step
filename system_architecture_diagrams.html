@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PurSight Data Governance - System Architecture Diagrams</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2d3748;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #718096;
+            font-size: 1.2rem;
+            margin-bottom: 40px;
+        }
+        
+        .diagram-section {
+            margin: 60px 0;
+            padding: 30px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+        
+        .diagram-title {
+            font-size: 1.8rem;
+            color: #2d3748;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .diagram-description {
+            color: #4a5568;
+            margin-bottom: 25px;
+            line-height: 1.6;
+            font-size: 1.1rem;
+        }
+        
+        .mermaid {
+            background: #fafafa;
+            border-radius: 10px;
+            padding: 20px;
+            border: 2px solid #e2e8f0;
+            margin: 20px 0;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .feature-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .feature-card h3 {
+            margin: 0 0 10px 0;
+            font-size: 1.3rem;
+        }
+        
+        .feature-card p {
+            margin: 0;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+        
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .tech-item {
+            background: #edf2f7;
+            color: #2d3748;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        
+        .tech-item:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        
+        .animated-connection {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+        
+        .performance-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .metric {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
+        }
+        
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .metric-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏗️ PurSight Data Governance</h1>
+        <p class="subtitle">Advanced System Architecture & Connection Flow Diagrams</p>
+        
+        <!-- High-Level System Architecture -->
+        <div class="diagram-section">
+            <h2 class="diagram-title">🌟 High-Level System Architecture</h2>
+            <p class="diagram-description">
+                Complete overview of the PurSight Data Governance platform showing all major components, 
+                their interactions, and data flow patterns. This architecture supports enterprise-scale 
+                data governance with advanced security, monitoring, and integration capabilities.
+            </p>
+            <div class="mermaid">
+                graph TB
+                    subgraph "Frontend Layer"
+                        UI[🎨 React Frontend<br/>TypeScript + Vite]
+                        PWA[📱 Progressive Web App]
+                        Mobile[📲 Mobile Interface]
+                    end
+                    
+                    subgraph "API Gateway"
+                        Gateway[🚪 API Gateway<br/>Rate Limiting + Auth]
+                        LB[⚖️ Load Balancer]
+                    end
+                    
+                    subgraph "Backend Services"
+                        Auth[🔐 Auth Service<br/>JWT + OAuth2]
+                        Catalog[📚 Catalog Service<br/>Data Discovery]
+                        Governance[🛡️ Governance Service<br/>Policy Engine]
+                        Analytics[📊 Analytics Service<br/>ML + Insights]
+                        Workflow[🔄 Workflow Engine<br/>Approval Process]
+                        Integration[🔗 Integration Service<br/>External APIs]
+                    end
+                    
+                    subgraph "Message Queue"
+                        Redis[🔴 Redis<br/>Cache + Queue]
+                        Kafka[⚡ Apache Kafka<br/>Event Streaming]
+                    end
+                    
+                    subgraph "Data Layer"
+                        PostgreSQL[🐘 PostgreSQL<br/>Primary Database]
+                        Elasticsearch[🔍 Elasticsearch<br/>Search + Analytics]
+                        MinIO[💾 MinIO<br/>Object Storage]
+                    end
+                    
+                    subgraph "External Systems"
+                        Azure[☁️ Azure Purview]
+                        Databricks[🧮 Databricks]
+                        Snowflake[❄️ Snowflake]
+                        AWS[🟡 AWS Services]
+                    end
+                    
+                    subgraph "Monitoring"
+                        Prometheus[📈 Prometheus<br/>Metrics]
+                        Grafana[📊 Grafana<br/>Dashboards]
+                        ELK[📋 ELK Stack<br/>Logging]
+                    end
+                    
+                    UI --> Gateway
+                    PWA --> Gateway
+                    Mobile --> Gateway
+                    
+                    Gateway --> LB
+                    LB --> Auth
+                    LB --> Catalog
+                    LB --> Governance
+                    LB --> Analytics
+                    LB --> Workflow
+                    LB --> Integration
+                    
+                    Auth -.-> Redis
+                    Catalog --> PostgreSQL
+                    Catalog --> Elasticsearch
+                    Governance --> PostgreSQL
+                    Analytics --> Elasticsearch
+                    Workflow --> Redis
+                    
+                    Integration --> Azure
+                    Integration --> Databricks
+                    Integration --> Snowflake
+                    Integration --> AWS
+                    
+                    Catalog --> Kafka
+                    Governance --> Kafka
+                    Analytics --> Kafka
+                    
+                    Kafka --> MinIO
+                    
+                    Auth --> Prometheus
+                    Catalog --> Prometheus
+                    Governance --> Prometheus
+                    Analytics --> Prometheus
+                    
+                    Prometheus --> Grafana
+                    
+                    classDef frontend fill:#e1f5fe,stroke:#0277bd,stroke-width:3px
+                    classDef backend fill:#f3e5f5,stroke:#7b1fa2,stroke-width:3px
+                    classDef data fill:#e8f5e8,stroke:#2e7d32,stroke-width:3px
+                    classDef external fill:#fff3e0,stroke:#f57c00,stroke-width:3px
+                    classDef monitoring fill:#fce4ec,stroke:#c2185b,stroke-width:3px
+                    
+                    class UI,PWA,Mobile frontend
+                    class Auth,Catalog,Governance,Analytics,Workflow,Integration backend
+                    class PostgreSQL,Elasticsearch,MinIO,Redis,Kafka data
+                    class Azure,Databricks,Snowflake,AWS external
+                    class Prometheus,Grafana,ELK monitoring
+            </div>
+        </div>
+        
+        <!-- Data Flow Architecture -->
+        <div class="diagram-section">
+            <h2 class="diagram-title">🔄 Data Flow & Processing Architecture</h2>
+            <p class="diagram-description">
+                Detailed view of how data flows through the system, from ingestion to processing, 
+                governance, and consumption. Shows real-time and batch processing patterns with 
+                quality checks and lineage tracking.
+            </p>
+            <div class="mermaid">
+                flowchart LR
+                    subgraph "Data Sources"
+                        DB[(🗄️ Databases)]
+                        Files[📁 File Systems]
+                        APIs[🔌 APIs]
+                        Streams[🌊 Data Streams]
+                    end
+                    
+                    subgraph "Ingestion Layer"
+                        Connectors[🔗 Data Connectors]
+                        Schedulers[⏰ Schedulers]
+                        Monitors[👁️ Health Monitors]
+                    end
+                    
+                    subgraph "Processing Pipeline"
+                        Scanner[🔍 Schema Scanner]
+                        Profiler[📊 Data Profiler]
+                        Classifier[🏷️ ML Classifier]
+                        Lineage[📈 Lineage Tracker]
+                    end
+                    
+                    subgraph "Governance Engine"
+                        PolicyEngine[📋 Policy Engine]
+                        ComplianceChecker[✅ Compliance Checker]
+                        QualityGates[🚪 Quality Gates]
+                        AccessControl[🔐 Access Control]
+                    end
+                    
+                    subgraph "Storage & Indexing"
+                        Catalog[(📚 Data Catalog)]
+                        SearchIndex[🔍 Search Index]
+                        MetadataStore[(🗃️ Metadata Store)]
+                        AuditLog[(📋 Audit Log)]
+                    end
+                    
+                    subgraph "Analytics & ML"
+                        MLModels[🤖 ML Models]
+                        Recommendations[💡 Recommendations]
+                        Insights[📊 Insights Engine]
+                        Predictions[🔮 Predictions]
+                    end
+                    
+                    subgraph "User Interface"
+                        Dashboard[📊 Dashboard]
+                        DataExplorer[🔍 Data Explorer]
+                        Governance[🛡️ Governance UI]
+                        Reports[📈 Reports]
+                    end
+                    
+                    DB --> Connectors
+                    Files --> Connectors
+                    APIs --> Connectors
+                    Streams --> Connectors
+                    
+                    Connectors --> Scanner
+                    Schedulers --> Scanner
+                    Monitors --> Scanner
+                    
+                    Scanner --> Profiler
+                    Profiler --> Classifier
+                    Classifier --> Lineage
+                    
+                    Lineage --> PolicyEngine
+                    PolicyEngine --> ComplianceChecker
+                    ComplianceChecker --> QualityGates
+                    QualityGates --> AccessControl
+                    
+                    AccessControl --> Catalog
+                    AccessControl --> SearchIndex
+                    AccessControl --> MetadataStore
+                    AccessControl --> AuditLog
+                    
+                    Catalog --> MLModels
+                    SearchIndex --> MLModels
+                    MetadataStore --> MLModels
+                    
+                    MLModels --> Recommendations
+                    MLModels --> Insights
+                    MLModels --> Predictions
+                    
+                    Catalog --> Dashboard
+                    SearchIndex --> DataExplorer
+                    MetadataStore --> Governance
+                    AuditLog --> Reports
+                    
+                    Recommendations --> Dashboard
+                    Insights --> Dashboard
+                    Predictions --> Dashboard
+                    
+                    classDef source fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+                    classDef ingestion fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+                    classDef processing fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
+                    classDef governance fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+                    classDef storage fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+                    classDef ml fill:#f1f8e9,stroke:#689f38,stroke-width:2px
+                    classDef ui fill:#e0f2f1,stroke:#00796b,stroke-width:2px
+                    
+                    class DB,Files,APIs,Streams source
+                    class Connectors,Schedulers,Monitors ingestion
+                    class Scanner,Profiler,Classifier,Lineage processing
+                    class PolicyEngine,ComplianceChecker,QualityGates,AccessControl governance
+                    class Catalog,SearchIndex,MetadataStore,AuditLog storage
+                    class MLModels,Recommendations,Insights,Predictions ml
+                    class Dashboard,DataExplorer,Governance,Reports ui
+            </div>
+        </div>
+        
+        <!-- Microservices Architecture -->
+        <div class="diagram-section">
+            <h2 class="diagram-title">🏗️ Microservices Architecture</h2>
+            <p class="diagram-description">
+                Detailed microservices breakdown showing service boundaries, communication patterns, 
+                and deployment architecture. Each service is independently scalable and maintainable.
+            </p>
+            <div class="mermaid">
+                graph TB
+                    subgraph "Client Layer"
+                        WebApp[🌐 Web Application]
+                        MobileApp[📱 Mobile App]
+                        API_Client[🔌 API Clients]
+                    end
+                    
+                    subgraph "Edge Layer"
+                        CDN[🌍 CDN]
+                        WAF[🛡️ Web Application Firewall]
+                        LB[⚖️ Load Balancer]
+                    end
+                    
+                    subgraph "API Gateway Layer"
+                        Gateway[🚪 API Gateway]
+                        RateLimit[⏱️ Rate Limiter]
+                        AuthProxy[🔐 Auth Proxy]
+                    end
+                    
+                    subgraph "Core Services"
+                        UserService[👤 User Service]
+                        AuthService[🔐 Auth Service]
+                        CatalogService[📚 Catalog Service]
+                        GovernanceService[🛡️ Governance Service]
+                        AnalyticsService[📊 Analytics Service]
+                        WorkflowService[🔄 Workflow Service]
+                        NotificationService[🔔 Notification Service]
+                        IntegrationService[🔗 Integration Service]
+                    end
+                    
+                    subgraph "Data Services"
+                        MetadataService[🗃️ Metadata Service]
+                        SearchService[🔍 Search Service]
+                        LineageService[📈 Lineage Service]
+                        QualityService[✅ Quality Service]
+                        ClassificationService[🏷️ Classification Service]
+                    end
+                    
+                    subgraph "Infrastructure Services"
+                        ConfigService[⚙️ Config Service]
+                        LoggingService[📋 Logging Service]
+                        MonitoringService[📊 Monitoring Service]
+                        SecretService[🔒 Secret Service]
+                    end
+                    
+                    subgraph "Message Bus"
+                        EventBus[⚡ Event Bus]
+                        MessageQueue[📬 Message Queue]
+                    end
+                    
+                    subgraph "Data Stores"
+                        UserDB[(👤 User DB)]
+                        CatalogDB[(📚 Catalog DB)]
+                        GovernanceDB[(🛡️ Governance DB)]
+                        AnalyticsDB[(📊 Analytics DB)]
+                        SearchIndex[(🔍 Search Index)]
+                        Cache[(🔴 Redis Cache)]
+                    end
+                    
+                    WebApp --> CDN
+                    MobileApp --> CDN
+                    API_Client --> CDN
+                    
+                    CDN --> WAF
+                    WAF --> LB
+                    LB --> Gateway
+                    
+                    Gateway --> RateLimit
+                    RateLimit --> AuthProxy
+                    
+                    AuthProxy --> UserService
+                    AuthProxy --> AuthService
+                    AuthProxy --> CatalogService
+                    AuthProxy --> GovernanceService
+                    AuthProxy --> AnalyticsService
+                    AuthProxy --> WorkflowService
+                    AuthProxy --> NotificationService
+                    AuthProxy --> IntegrationService
+                    
+                    CatalogService --> MetadataService
+                    CatalogService --> SearchService
+                    CatalogService --> LineageService
+                    
+                    GovernanceService --> QualityService
+                    GovernanceService --> ClassificationService
+                    
+                    UserService --> UserDB
+                    CatalogService --> CatalogDB
+                    GovernanceService --> GovernanceDB
+                    AnalyticsService --> AnalyticsDB
+                    SearchService --> SearchIndex
+                    
+                    UserService -.-> Cache
+                    CatalogService -.-> Cache
+                    GovernanceService -.-> Cache
+                    AnalyticsService -.-> Cache
+                    
+                    CatalogService --> EventBus
+                    GovernanceService --> EventBus
+                    AnalyticsService --> EventBus
+                    WorkflowService --> EventBus
+                    NotificationService --> EventBus
+                    
+                    EventBus --> MessageQueue
+                    
+                    ConfigService -.-> UserService
+                    ConfigService -.-> CatalogService
+                    ConfigService -.-> GovernanceService
+                    ConfigService -.-> AnalyticsService
+                    
+                    LoggingService -.-> UserService
+                    LoggingService -.-> CatalogService
+                    LoggingService -.-> GovernanceService
+                    LoggingService -.-> AnalyticsService
+                    
+                    MonitoringService -.-> UserService
+                    MonitoringService -.-> CatalogService
+                    MonitoringService -.-> GovernanceService
+                    MonitoringService -.-> AnalyticsService
+                    
+                    classDef client fill:#e1f5fe,stroke:#0277bd,stroke-width:3px
+                    classDef edge fill:#f3e5f5,stroke:#7b1fa2,stroke-width:3px
+                    classDef gateway fill:#e8f5e8,stroke:#2e7d32,stroke-width:3px
+                    classDef core fill:#fff3e0,stroke:#f57c00,stroke-width:3px
+                    classDef data fill:#fce4ec,stroke:#c2185b,stroke-width:3px
+                    classDef infra fill:#f1f8e9,stroke:#689f38,stroke-width:3px
+                    classDef storage fill:#e0f2f1,stroke:#00796b,stroke-width:3px
+                    
+                    class WebApp,MobileApp,API_Client client
+                    class CDN,WAF,LB edge
+                    class Gateway,RateLimit,AuthProxy gateway
+                    class UserService,AuthService,CatalogService,GovernanceService,AnalyticsService,WorkflowService,NotificationService,IntegrationService core
+                    class MetadataService,SearchService,LineageService,QualityService,ClassificationService data
+                    class ConfigService,LoggingService,MonitoringService,SecretService infra
+                    class UserDB,CatalogDB,GovernanceDB,AnalyticsDB,SearchIndex,Cache,EventBus,MessageQueue storage
+            </div>
+        </div>
+        
+        <!-- Security Architecture -->
+        <div class="diagram-section">
+            <h2 class="diagram-title">🔒 Security Architecture</h2>
+            <p class="diagram-description">
+                Comprehensive security model showing authentication, authorization, data protection, 
+                and audit mechanisms. Implements zero-trust architecture with multiple security layers.
+            </p>
+            <div class="mermaid">
+                graph TD
+                    subgraph "Client Security"
+                        ClientAuth[🔐 Client Authentication]
+                        HTTPS[🔒 HTTPS/TLS]
+                        CSP[🛡️ Content Security Policy]
+                        CSRF[🛡️ CSRF Protection]
+                    end
+                    
+                    subgraph "Network Security"
+                        Firewall[🔥 Firewall]
+                        DDoS[🛡️ DDoS Protection]
+                        VPN[🌐 VPN Gateway]
+                        NetworkSeg[🔒 Network Segmentation]
+                    end
+                    
+                    subgraph "Authentication Layer"
+                        OAuth2[🔑 OAuth2/OIDC]
+                        JWT[🎫 JWT Tokens]
+                        MFA[📱 Multi-Factor Auth]
+                        SSO[🔗 Single Sign-On]
+                    end
+                    
+                    subgraph "Authorization Layer"
+                        RBAC[👥 Role-Based Access]
+                        ABAC[📋 Attribute-Based Access]
+                        PolicyEngine[📜 Policy Engine]
+                        PermissionMatrix[📊 Permission Matrix]
+                    end
+                    
+                    subgraph "Data Protection"
+                        Encryption[🔐 Data Encryption]
+                        KeyManagement[🗝️ Key Management]
+                        DataMasking[🎭 Data Masking]
+                        TokenVault[🏦 Token Vault]
+                    end
+                    
+                    subgraph "Monitoring & Audit"
+                        AuditLog[📋 Audit Logging]
+                        SIEM[👁️ SIEM Integration]
+                        ThreatDetection[⚠️ Threat Detection]
+                        ComplianceMonitor[✅ Compliance Monitor]
+                    end
+                    
+                    subgraph "Infrastructure Security"
+                        ContainerSec[📦 Container Security]
+                        SecretsManagement[🔒 Secrets Management]
+                        VulnScanning[🔍 Vulnerability Scanning]
+                        SecurityBaseline[📏 Security Baseline]
+                    end
+                    
+                    ClientAuth --> OAuth2
+                    HTTPS --> OAuth2
+                    CSP --> OAuth2
+                    CSRF --> OAuth2
+                    
+                    Firewall --> OAuth2
+                    DDoS --> OAuth2
+                    VPN --> OAuth2
+                    NetworkSeg --> OAuth2
+                    
+                    OAuth2 --> JWT
+                    JWT --> MFA
+                    MFA --> SSO
+                    
+                    SSO --> RBAC
+                    RBAC --> ABAC
+                    ABAC --> PolicyEngine
+                    PolicyEngine --> PermissionMatrix
+                    
+                    PermissionMatrix --> Encryption
+                    Encryption --> KeyManagement
+                    KeyManagement --> DataMasking
+                    DataMasking --> TokenVault
+                    
+                    TokenVault --> AuditLog
+                    AuditLog --> SIEM
+                    SIEM --> ThreatDetection
+                    ThreatDetection --> ComplianceMonitor
+                    
+                    ComplianceMonitor --> ContainerSec
+                    ContainerSec --> SecretsManagement
+                    SecretsManagement --> VulnScanning
+                    VulnScanning --> SecurityBaseline
+                    
+                    classDef client fill:#ffebee,stroke:#d32f2f,stroke-width:3px
+                    classDef network fill:#e8eaf6,stroke:#3f51b5,stroke-width:3px
+                    classDef auth fill:#e0f2f1,stroke:#4caf50,stroke-width:3px
+                    classDef authz fill:#fff3e0,stroke:#ff9800,stroke-width:3px
+                    classDef data fill:#f3e5f5,stroke:#9c27b0,stroke-width:3px
+                    classDef monitor fill:#e1f5fe,stroke:#03a9f4,stroke-width:3px
+                    classDef infra fill:#f1f8e9,stroke:#8bc34a,stroke-width:3px
+                    
+                    class ClientAuth,HTTPS,CSP,CSRF client
+                    class Firewall,DDoS,VPN,NetworkSeg network
+                    class OAuth2,JWT,MFA,SSO auth
+                    class RBAC,ABAC,PolicyEngine,PermissionMatrix authz
+                    class Encryption,KeyManagement,DataMasking,TokenVault data
+                    class AuditLog,SIEM,ThreatDetection,ComplianceMonitor monitor
+                    class ContainerSec,SecretsManagement,VulnScanning,SecurityBaseline infra
+            </div>
+        </div>
+        
+        <!-- Key Features -->
+        <div class="features-grid">
+            <div class="feature-card">
+                <h3>🚀 High Performance</h3>
+                <p>Optimized for enterprise scale with advanced caching, connection pooling, and async processing</p>
+            </div>
+            <div class="feature-card">
+                <h3>🔒 Enterprise Security</h3>
+                <p>Zero-trust architecture with multi-layer security, encryption, and comprehensive audit trails</p>
+            </div>
+            <div class="feature-card">
+                <h3>🔄 Real-time Processing</h3>
+                <p>Event-driven architecture with WebSocket connections and streaming data processing</p>
+            </div>
+            <div class="feature-card">
+                <h3>📊 Advanced Analytics</h3>
+                <p>ML-powered insights, predictive analytics, and intelligent recommendations</p>
+            </div>
+            <div class="feature-card">
+                <h3>🌐 Cloud-Native</h3>
+                <p>Kubernetes-ready with auto-scaling, service mesh, and multi-cloud support</p>
+            </div>
+            <div class="feature-card">
+                <h3>🔗 Extensive Integrations</h3>
+                <p>Pre-built connectors for major data platforms, cloud services, and enterprise systems</p>
+            </div>
+        </div>
+        
+        <!-- Technology Stack -->
+        <div class="diagram-section">
+            <h2 class="diagram-title">🛠️ Technology Stack</h2>
+            <div class="tech-stack">
+                <span class="tech-item">React 18</span>
+                <span class="tech-item">TypeScript</span>
+                <span class="tech-item">FastAPI</span>
+                <span class="tech-item">PostgreSQL</span>
+                <span class="tech-item">Redis</span>
+                <span class="tech-item">Elasticsearch</span>
+                <span class="tech-item">Apache Kafka</span>
+                <span class="tech-item">Docker</span>
+                <span class="tech-item">Kubernetes</span>
+                <span class="tech-item">Prometheus</span>
+                <span class="tech-item">Grafana</span>
+                <span class="tech-item">JWT</span>
+                <span class="tech-item">OAuth2</span>
+                <span class="tech-item">WebSocket</span>
+                <span class="tech-item">GraphQL</span>
+                <span class="tech-item">MinIO</span>
+                <span class="tech-item">Nginx</span>
+                <span class="tech-item">Traefik</span>
+            </div>
+        </div>
+        
+        <!-- Performance Metrics -->
+        <div class="performance-metrics">
+            <div class="metric">
+                <div class="metric-value">99.9%</div>
+                <div class="metric-label">Uptime SLA</div>
+            </div>
+            <div class="metric">
+                <div class="metric-value">&lt;100ms</div>
+                <div class="metric-label">API Response Time</div>
+            </div>
+            <div class="metric">
+                <div class="metric-value">1M+</div>
+                <div class="metric-label">Assets Supported</div>
+            </div>
+            <div class="metric">
+                <div class="metric-value">10K+</div>
+                <div class="metric-label">Concurrent Users</div>
+            </div>
+            <div class="metric">
+                <div class="metric-value">100TB+</div>
+                <div class="metric-label">Data Processing</div>
+            </div>
+            <div class="metric">
+                <div class="metric-value">24/7</div>
+                <div class="metric-label">Monitoring</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Initialize Mermaid with configuration
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            themeVariables: {
+                primaryColor: '#667eea',
+                primaryTextColor: '#2d3748',
+                primaryBorderColor: '#4c51bf',
+                lineColor: '#a0aec0',
+                secondaryColor: '#764ba2',
+                tertiaryColor: '#f7fafc',
+                background: '#ffffff',
+                mainBkg: '#ffffff',
+                secondBkg: '#f7fafc',
+                tertiaryBkg: '#edf2f7'
+            },
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis'
+            },
+            sequence: {
+                diagramMarginX: 50,
+                diagramMarginY: 10,
+                actorMargin: 50,
+                width: 150,
+                height: 65,
+                boxMargin: 10,
+                boxTextMargin: 5,
+                noteMargin: 10,
+                messageMargin: 35
+            }
+        });
+        
+        // Add animation effects
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add intersection observer for animations
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            // Observe all diagram sections
+            document.querySelectorAll('.diagram-section').forEach(section => {
+                section.style.opacity = '0';
+                section.style.transform = 'translateY(30px)';
+                section.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(section);
+            });
+            
+            // Add hover effects to tech items
+            document.querySelectorAll('.tech-item').forEach(item => {
+                item.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-3px) scale(1.05)';
+                });
+                
+                item.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0) scale(1)';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
