@@ -1381,7 +1381,13 @@ export function SchemaDiscovery({
   }
 
   return (
-    <div className="h-full flex flex-col relative">
+    <div 
+      className="h-full flex flex-col relative overflow-hidden"
+      style={{
+        background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 25%, #0f0f0f 50%, #1a1a1a 75%, #0a0a0a 100%)',
+        minHeight: '100vh'
+      }}
+    >
       {/* Database Charging Animation Overlay - Only show when enterprise discovery is actively running */}
       <DatabaseChargingAnimation 
         progress={discoveryProgress}
@@ -1392,48 +1398,116 @@ export function SchemaDiscovery({
       
       {/* Refresh Spinner - Only for component view changes */}
       {isRefreshing && (
-        <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-40 flex items-center justify-center">
-          <div className="flex flex-col items-center gap-3">
-            <RefreshCw className="h-8 w-8 animate-spin text-blue-500" />
-            <p className="text-sm text-muted-foreground">Refreshing discovery status...</p>
+        <div 
+          className="absolute inset-0 z-40 flex items-center justify-center"
+          style={{
+            background: 'linear-gradient(135deg, rgba(0,0,0,0.9) 0%, rgba(20,20,20,0.8) 50%, rgba(0,0,0,0.9) 100%)',
+            backdropFilter: 'blur(15px) saturate(150%)',
+            WebkitBackdropFilter: 'blur(15px) saturate(150%)'
+          }}
+        >
+          <div className="flex flex-col items-center gap-4 p-8 rounded-2xl border border-white/10 bg-black/50 backdrop-blur-sm">
+            <div className="relative">
+              <RefreshCw 
+                className="h-10 w-10 animate-spin text-white" 
+                style={{
+                  filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.5))'
+                }}
+              />
+              <div className="absolute inset-0 h-10 w-10 border-2 border-white/20 rounded-full animate-ping" />
+            </div>
+            <p 
+              className="text-base text-white font-mono"
+              style={{
+                textShadow: '0 0 8px rgba(255,255,255,0.3)',
+                letterSpacing: '0.5px'
+              }}
+            >
+              ► REFRESHING DISCOVERY STATUS...
+            </p>
           </div>
         </div>
       )}
       
-      {/* Enhanced Header */}
-      <div className="flex items-center justify-between p-4 border-b bg-background">
+      {/* Enhanced Header with Cursor Style */}
+      <div 
+        className="flex items-center justify-between p-6 border-b border-white/10"
+        style={{
+          background: 'linear-gradient(135deg, rgba(0,0,0,0.95) 0%, rgba(20,20,20,0.9) 50%, rgba(0,0,0,0.95) 100%)',
+          backdropFilter: 'blur(20px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+          boxShadow: '0 1px 0 rgba(255,255,255,0.1), inset 0 1px 0 rgba(255,255,255,0.05)'
+        }}
+      >
         <div className="flex-1">
-          <h2 className="text-xl font-bold flex items-center gap-2">
-            <Brain className="h-6 w-6" />
-            Intelligent Schema Discovery
+          <h2 
+            className="text-2xl font-bold flex items-center gap-3 text-white mb-2"
+            style={{
+              background: 'linear-gradient(135deg, #ffffff, #e5e5e5)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              textShadow: '0 0 20px rgba(255,255,255,0.3)',
+              fontFamily: 'monospace',
+              letterSpacing: '0.5px'
+            }}
+          >
+            <Brain 
+              className="h-7 w-7 text-white" 
+              style={{ 
+                filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.6))' 
+              }} 
+            />
+            ► QUANTUM SCHEMA DISCOVERY MATRIX
           </h2>
-          <p className="text-sm text-muted-foreground">
-            AI-powered exploration and analysis of {dataSourceName}
+          <p 
+            className="text-base text-gray-300 font-mono"
+            style={{
+              textShadow: '0 0 8px rgba(255,255,255,0.2)',
+              letterSpacing: '0.3px'
+            }}
+          >
+            ► Neural AI-powered exploration and analysis of {dataSourceName}
           </p>
           
-          {/* Clean Status Indicators */}
-          <div className="mt-2 flex items-center gap-4">
+          {/* Enhanced Status Indicators with Cursor Style */}
+          <div className="mt-4 flex items-center gap-6">
             {/* Connection Status */}
-            <div className="flex items-center gap-2 text-xs">
-              <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-yellow-500'}`} />
-              <span className={isConnected ? 'text-green-600' : 'text-yellow-600'}>
-                {isConnected ? 'Connected' : 'Offline'}
+            <div className="flex items-center gap-2 px-3 py-1 rounded-lg bg-black/50 border border-white/10">
+              <div className={`w-3 h-3 rounded-full ${isConnected ? 'bg-green-400 shadow-lg shadow-green-400/50' : 'bg-yellow-400 shadow-lg shadow-yellow-400/50'}`} 
+                   style={{ 
+                     boxShadow: isConnected ? '0 0 10px rgba(34, 197, 94, 0.5)' : '0 0 10px rgba(251, 191, 36, 0.5)' 
+                   }} />
+              <span 
+                className={`${isConnected ? 'text-green-300' : 'text-yellow-300'} text-sm font-mono`}
+                style={{ textShadow: '0 0 5px rgba(255,255,255,0.2)' }}
+              >
+                {isConnected ? '● NEURAL LINK ACTIVE' : '● OFFLINE MODE'}
               </span>
             </div>
             
             {/* Discovery Status - Only show when not actively discovering */}
             {!isLoading && !isStarted && (
-              <div className="flex items-center gap-2 text-xs">
-                <div className="w-2 h-2 rounded-full bg-gray-400" />
-                <span className="text-gray-600">Ready</span>
+              <div className="flex items-center gap-2 px-3 py-1 rounded-lg bg-black/50 border border-white/10">
+                <div className="w-3 h-3 rounded-full bg-gray-400 shadow-lg shadow-gray-400/50" />
+                <span 
+                  className="text-gray-300 text-sm font-mono"
+                  style={{ textShadow: '0 0 5px rgba(255,255,255,0.2)' }}
+                >
+                  ● MATRIX READY
+                </span>
               </div>
             )}
             
             {/* Discovery Status - Show when discovery is running but not loading (initial state) */}
             {isStarted && !isLoading && discoveryProgress === 0 && (
-              <div className="flex items-center gap-2 text-xs">
-                <div className="w-2 h-2 rounded-full bg-purple-500 animate-pulse" />
-                <span className="text-purple-600">Starting Discovery...</span>
+              <div className="flex items-center gap-2 px-3 py-1 rounded-lg bg-black/50 border border-white/10">
+                <div className="w-3 h-3 rounded-full bg-purple-400 animate-pulse shadow-lg shadow-purple-400/50" />
+                <span 
+                  className="text-purple-300 text-sm font-mono"
+                  style={{ textShadow: '0 0 5px rgba(255,255,255,0.2)' }}
+                >
+                  ● INITIALIZING DISCOVERY...
+                </span>
               </div>
             )}
           </div>
@@ -1509,13 +1583,31 @@ export function SchemaDiscovery({
             </div>
           )}
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           {/* AI Analysis Toggle */}
           {!isLoading && schemaStats && (
-            <div className="flex items-center gap-2 px-3 py-2 bg-white/50 dark:bg-gray-800/50 rounded-lg border">
-              <Brain className="h-4 w-4 text-purple-500" />
-              <Label className="text-xs font-medium">AI Analysis</Label>
-              <Switch checked={true} />
+            <div 
+              className="flex items-center gap-3 px-4 py-2 rounded-lg border border-white/20"
+              style={{
+                background: 'linear-gradient(135deg, rgba(0,0,0,0.8), rgba(30,30,30,0.8))',
+                backdropFilter: 'blur(10px)',
+                boxShadow: '0 0 15px rgba(255,255,255,0.1)'
+              }}
+            >
+              <Brain 
+                className="h-5 w-5 text-white animate-pulse" 
+                style={{ filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))' }}
+              />
+              <Label 
+                className="text-sm font-mono text-white"
+                style={{ textShadow: '0 0 5px rgba(255,255,255,0.3)' }}
+              >
+                AI NEURAL ANALYSIS
+              </Label>
+              <Switch 
+                checked={true} 
+                className="data-[state=checked]:bg-white data-[state=unchecked]:bg-gray-600"
+              />
             </div>
           )}
           
@@ -1527,6 +1619,13 @@ export function SchemaDiscovery({
                   <Button 
                     variant="outline" 
                     size="sm"
+                    className="border-white/20 bg-black/50 text-white hover:bg-black/70 hover:border-white/30 font-mono"
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(0,0,0,0.8), rgba(30,30,30,0.8))',
+                      backdropFilter: 'blur(10px)',
+                      boxShadow: '0 0 15px rgba(255,255,255,0.1)',
+                      textShadow: '0 0 5px rgba(255,255,255,0.3)'
+                    }}
                     onClick={async () => {
                       try {
                         setDiscoveryStatus("🤖 Generating AI recommendations...")
@@ -1591,12 +1690,12 @@ export function SchemaDiscovery({
                       }
                     }}
                   >
-                    <Brain className="h-4 w-4 mr-2" />
-                    AI Recommendations
+                    <Brain className="h-4 w-4 mr-2" style={{ filter: 'drop-shadow(0 0 5px rgba(255,255,255,0.5))' }} />
+                    ► AI NEURAL RECOMMENDATIONS
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>
-                  <p>Get AI-powered recommendations for critical items to catalog</p>
+                <TooltipContent className="bg-black/90 border-white/20 text-white">
+                  <p className="font-mono">Get AI-powered neural recommendations for critical discovery items</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -1607,13 +1706,23 @@ export function SchemaDiscovery({
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="outline" size="sm">
-                    <Sparkles className="h-4 w-4 mr-2" />
-                    Insights
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="border-white/20 bg-black/50 text-white hover:bg-black/70 hover:border-white/30 font-mono"
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(0,0,0,0.8), rgba(30,30,30,0.8))',
+                      backdropFilter: 'blur(10px)',
+                      boxShadow: '0 0 15px rgba(255,255,255,0.1)',
+                      textShadow: '0 0 5px rgba(255,255,255,0.3)'
+                    }}
+                  >
+                    <Sparkles className="h-4 w-4 mr-2" style={{ filter: 'drop-shadow(0 0 5px rgba(255,255,255,0.5))' }} />
+                    ► QUANTUM INSIGHTS
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>
-                  <p>View AI-generated insights about your schema</p>
+                <TooltipContent className="bg-black/90 border-white/20 text-white">
+                  <p className="font-mono">View AI-generated quantum insights about your schema matrix</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -1628,15 +1737,31 @@ export function SchemaDiscovery({
                 discoverSchema()
               }}
               disabled={isLoading} 
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg"
+              className="font-mono text-lg px-6 py-3 text-black font-bold shadow-2xl hover:shadow-white/20 transition-all duration-300"
+              style={{
+                background: 'linear-gradient(135deg, #ffffff 0%, #e5e5e5 50%, #ffffff 100%)',
+                border: '2px solid rgba(255,255,255,0.3)',
+                boxShadow: '0 0 25px rgba(255,255,255,0.3), inset 0 1px 0 rgba(255,255,255,0.8)',
+                textShadow: '0 0 10px rgba(0,0,0,0.5)',
+                letterSpacing: '0.5px'
+              }}
             >
-              <Brain className="h-4 w-4 mr-2" />
-              Start Enterprise Discovery
+              <Brain className="h-5 w-5 mr-3 text-black" />
+              ► INITIATE QUANTUM DISCOVERY
             </Button>
           ) : isLoading ? (
-            <Button variant="destructive" onClick={stopDiscovery} className="shadow-lg">
-              <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-              Stop Enterprise Discovery
+            <Button 
+              onClick={stopDiscovery} 
+              className="font-mono text-lg px-6 py-3 text-white font-bold shadow-2xl bg-red-900/80 hover:bg-red-800/80 border-2 border-red-500/50 transition-all duration-300"
+              style={{
+                background: 'linear-gradient(135deg, rgba(185, 28, 28, 0.9), rgba(127, 29, 29, 0.9))',
+                boxShadow: '0 0 25px rgba(239, 68, 68, 0.3)',
+                textShadow: '0 0 10px rgba(255,255,255,0.3)',
+                letterSpacing: '0.5px'
+              }}
+            >
+              <RefreshCw className="h-5 w-5 mr-3 animate-spin" />
+              ► TERMINATE DISCOVERY MATRIX
             </Button>
           ) : (
             <Button 
@@ -1646,18 +1771,30 @@ export function SchemaDiscovery({
                 discoverSchema()
               }} 
               disabled={isLoading} 
-              variant="outline" 
-              className="border-blue-200 hover:bg-blue-50"
+              className="font-mono text-lg px-6 py-3 text-white font-bold shadow-2xl hover:shadow-white/20 transition-all duration-300 border-2 border-white/30"
+              style={{
+                background: 'linear-gradient(135deg, rgba(0,0,0,0.9), rgba(40,40,40,0.9))',
+                boxShadow: '0 0 25px rgba(255,255,255,0.2)',
+                textShadow: '0 0 10px rgba(255,255,255,0.3)',
+                letterSpacing: '0.5px'
+              }}
             >
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Re-analyze with Enterprise AI
+              <RefreshCw className="h-5 w-5 mr-3" />
+              ► REANALYZE NEURAL MATRIX
             </Button>
           )}
           
-          
-          <Button variant="outline" onClick={onClose}>
+          <Button 
+            variant="outline" 
+            onClick={onClose}
+            className="font-mono px-4 py-2 text-white border-white/30 bg-black/50 hover:bg-black/70 hover:border-white/50"
+            style={{
+              textShadow: '0 0 5px rgba(255,255,255,0.3)',
+              boxShadow: '0 0 10px rgba(255,255,255,0.1)'
+            }}
+          >
             <X className="h-4 w-4 mr-2" />
-            Close
+            ► EXIT
           </Button>
         </div>
       </div>
@@ -1684,28 +1821,94 @@ export function SchemaDiscovery({
         </div>
       )}
 
-      {/* Main Content */}
+      {/* Main Content with Scrollable Container */}
       {!isLoading && !error && (
-        <div className="flex-1 flex flex-col">
-          {/* Summary Stats */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {/* Enhanced Summary Stats */}
           {schemaStats && (
-            <div className="p-4 border-b">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="text-center">
-                  <div className="text-2xl font-bold">{schemaStats.total_databases}</div>
-                  <div className="text-xs text-muted-foreground">Databases</div>
+            <div 
+              className="p-6 border-b border-white/10"
+              style={{
+                background: 'linear-gradient(135deg, rgba(0,0,0,0.9) 0%, rgba(25,25,25,0.9) 50%, rgba(0,0,0,0.9) 100%)',
+                backdropFilter: 'blur(10px)'
+              }}
+            >
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div className="text-center p-4 rounded-lg bg-black/50 border border-white/10">
+                  <div 
+                    className="text-3xl font-bold text-white mb-2 font-mono"
+                    style={{ 
+                      textShadow: '0 0 15px rgba(255,255,255,0.5)',
+                      background: 'linear-gradient(135deg, #ffffff, #e5e5e5)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent'
+                    }}
+                  >
+                    {schemaStats.total_databases}
+                  </div>
+                  <div 
+                    className="text-sm text-gray-300 font-mono"
+                    style={{ textShadow: '0 0 5px rgba(255,255,255,0.2)' }}
+                  >
+                    ► DATABASES
+                  </div>
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold">{schemaStats.total_schemas}</div>
-                  <div className="text-xs text-muted-foreground">Schemas</div>
+                <div className="text-center p-4 rounded-lg bg-black/50 border border-white/10">
+                  <div 
+                    className="text-3xl font-bold text-white mb-2 font-mono"
+                    style={{ 
+                      textShadow: '0 0 15px rgba(255,255,255,0.5)',
+                      background: 'linear-gradient(135deg, #ffffff, #e5e5e5)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent'
+                    }}
+                  >
+                    {schemaStats.total_schemas}
+                  </div>
+                  <div 
+                    className="text-sm text-gray-300 font-mono"
+                    style={{ textShadow: '0 0 5px rgba(255,255,255,0.2)' }}
+                  >
+                    ► SCHEMAS
+                  </div>
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold">{schemaStats.total_tables}</div>
-                  <div className="text-xs text-muted-foreground">Tables</div>
+                <div className="text-center p-4 rounded-lg bg-black/50 border border-white/10">
+                  <div 
+                    className="text-3xl font-bold text-white mb-2 font-mono"
+                    style={{ 
+                      textShadow: '0 0 15px rgba(255,255,255,0.5)',
+                      background: 'linear-gradient(135deg, #ffffff, #e5e5e5)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent'
+                    }}
+                  >
+                    {schemaStats.total_tables}
+                  </div>
+                  <div 
+                    className="text-sm text-gray-300 font-mono"
+                    style={{ textShadow: '0 0 5px rgba(255,255,255,0.2)' }}
+                  >
+                    ► TABLES
+                  </div>
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold">{schemaStats.total_columns}</div>
-                  <div className="text-xs text-muted-foreground">Columns</div>
+                <div className="text-center p-4 rounded-lg bg-black/50 border border-white/10">
+                  <div 
+                    className="text-3xl font-bold text-white mb-2 font-mono"
+                    style={{ 
+                      textShadow: '0 0 15px rgba(255,255,255,0.5)',
+                      background: 'linear-gradient(135deg, #ffffff, #e5e5e5)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent'
+                    }}
+                  >
+                    {schemaStats.total_columns}
+                  </div>
+                  <div 
+                    className="text-sm text-gray-300 font-mono"
+                    style={{ textShadow: '0 0 5px rgba(255,255,255,0.2)' }}
+                  >
+                    ► COLUMNS
+                  </div>
                 </div>
               </div>
             </div>
@@ -1809,75 +2012,185 @@ export function SchemaDiscovery({
             )}
           </div>
 
-          {/* Enhanced Schema Tree with Multiple View Modes */}
-          <div className="flex-1 overflow-hidden">
+          {/* Enhanced Schema Tree with Scrollable Container */}
+          <div 
+            className="flex-1 overflow-hidden"
+            style={{
+              background: 'linear-gradient(135deg, rgba(0,0,0,0.95) 0%, rgba(15,15,15,0.95) 50%, rgba(0,0,0,0.95) 100%)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              borderRadius: '8px',
+              margin: '8px',
+              backdropFilter: 'blur(10px)'
+            }}
+          >
             {schemaTree.length === 0 ? (
               <div className="h-full flex items-center justify-center">
-                <div className="text-center py-12 text-muted-foreground">
-                  <Database className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p className="text-lg font-medium mb-2">No Schema Data</p>
-                  <p className="text-sm">Start enterprise discovery to explore your data source</p>
+                <div className="text-center py-16 px-8">
+                  <div className="relative mb-8">
+                    <Database 
+                      className="h-16 w-16 mx-auto text-white opacity-50" 
+                      style={{ filter: 'drop-shadow(0 0 20px rgba(255,255,255,0.3))' }}
+                    />
+                    <div className="absolute inset-0 h-16 w-16 mx-auto border-2 border-white/20 rounded-full animate-ping" />
+                  </div>
+                  <p 
+                    className="text-2xl font-bold text-white mb-4 font-mono"
+                    style={{
+                      background: 'linear-gradient(135deg, #ffffff, #e5e5e5)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      textShadow: '0 0 20px rgba(255,255,255,0.3)'
+                    }}
+                  >
+                    ► NO SCHEMA DATA MATRIX
+                  </p>
+                  <p 
+                    className="text-lg text-gray-300 font-mono"
+                    style={{ textShadow: '0 0 10px rgba(255,255,255,0.2)' }}
+                  >
+                    ► Initiate quantum discovery to explore neural data patterns
+                  </p>
                 </div>
               </div>
             ) : (
-              <EnhancedTreeView
-                nodes={(() => {
-                  const convertToEnhancedTree = (nodes: SchemaNode[], level = 0): any[] => {
-                    return nodes.map(node => ({
-                      id: node.id,
-                      name: node.name,
-                      type: node.type,
-                      level,
-                      hasChildren: Boolean(node.children && node.children.length > 0),
-                      isExpanded: expandedNodes.has(node.id),
-                      isSelected: selectedNodes.has(node.id),
-                      isVisible: true,
-                      metadata: node.metadata,
-                      children: node.children ? convertToEnhancedTree(node.children, level + 1) : undefined
-                    }))
+              <div className="h-full overflow-hidden relative">
+                {/* Custom Scrollable Container */}
+                <ScrollArea 
+                  className="h-full w-full"
+                  style={{
+                    '--scrollbar-size': '8px',
+                    '--scrollbar-track': 'rgba(255,255,255,0.05)',
+                    '--scrollbar-thumb': 'rgba(255,255,255,0.2)',
+                    '--scrollbar-thumb-hover': 'rgba(255,255,255,0.3)'
+                  } as any}
+                >
+                  <div className="p-4">
+                    <EnhancedTreeView
+                      nodes={(() => {
+                        const convertToEnhancedTree = (nodes: SchemaNode[], level = 0): any[] => {
+                          return nodes.map(node => ({
+                            id: node.id,
+                            name: node.name,
+                            type: node.type,
+                            level,
+                            hasChildren: Boolean(node.children && node.children.length > 0),
+                            isExpanded: expandedNodes.has(node.id),
+                            isSelected: selectedNodes.has(node.id),
+                            isVisible: true,
+                            metadata: node.metadata,
+                            children: node.children ? convertToEnhancedTree(node.children, level + 1) : undefined
+                          }))
+                        }
+                        
+                        // Debug logging for graph data
+                        console.log('🔍 Schema Discovery Data Debug:', {
+                          schemaTreeLength: schemaTree.length,
+                          schemaTree: schemaTree,
+                          pathIndexKeys: Object.keys(pathIndex),
+                          expandedNodesSize: expandedNodes.size,
+                          selectedNodesSize: selectedNodes.size
+                        })
+                        
+                        // Use schemaTree for graph view to ensure all data is available
+                        // Use filteredTree for other views to respect search/filter
+                        return convertToEnhancedTree(schemaTree)
+                      })()}
+                      onToggle={handleNodeToggle}
+                      onSelect={handleNodeSelect}
+                      onPreview={handlePreviewTable}
+                      height={600}
+                      showViewModeToggle={true}
+                      defaultViewMode="tree"
+                    />
+                  </div>
+                </ScrollArea>
+                
+                {/* Scrollbar Styling */}
+                <style jsx>{`
+                  .scroll-area-viewport {
+                    scrollbar-width: thin;
+                    scrollbar-color: rgba(255,255,255,0.2) rgba(255,255,255,0.05);
                   }
                   
-                  // Debug logging for graph data
-                  console.log('🔍 Schema Discovery Data Debug:', {
-                    schemaTreeLength: schemaTree.length,
-                    schemaTree: schemaTree,
-                    pathIndexKeys: Object.keys(pathIndex),
-                    expandedNodesSize: expandedNodes.size,
-                    selectedNodesSize: selectedNodes.size
-                  })
+                  .scroll-area-viewport::-webkit-scrollbar {
+                    width: 8px;
+                    height: 8px;
+                  }
                   
-                  // Use schemaTree for graph view to ensure all data is available
-                  // Use filteredTree for other views to respect search/filter
-                  return convertToEnhancedTree(schemaTree)
-                })()}
-                onToggle={handleNodeToggle}
-                onSelect={handleNodeSelect}
-                onPreview={handlePreviewTable}
-                height={600}
-                showViewModeToggle={true}
-                defaultViewMode="tree"
-              />
+                  .scroll-area-viewport::-webkit-scrollbar-track {
+                    background: rgba(255,255,255,0.05);
+                    border-radius: 4px;
+                  }
+                  
+                  .scroll-area-viewport::-webkit-scrollbar-thumb {
+                    background: rgba(255,255,255,0.2);
+                    border-radius: 4px;
+                    border: 1px solid rgba(255,255,255,0.1);
+                  }
+                  
+                  .scroll-area-viewport::-webkit-scrollbar-thumb:hover {
+                    background: rgba(255,255,255,0.3);
+                  }
+                  
+                  .scroll-area-viewport::-webkit-scrollbar-corner {
+                    background: rgba(255,255,255,0.05);
+                  }
+                `}</style>
+              </div>
             )}
           </div>
 
 
-          {/* Selection Actions */}
+          {/* Enhanced Selection Actions */}
           {getSelectedCount() > 0 && (
-            <div className="p-4 border-t bg-muted/30">
+            <div 
+              className="p-6 border-t border-white/10"
+              style={{
+                background: 'linear-gradient(135deg, rgba(0,0,0,0.95) 0%, rgba(20,20,20,0.9) 50%, rgba(0,0,0,0.95) 100%)',
+                backdropFilter: 'blur(15px)',
+                boxShadow: '0 -1px 0 rgba(255,255,255,0.1)'
+              }}
+            >
               <div className="flex items-center justify-between">
-                <span className="text-sm">
-                  {getSelectedCount()} items selected
-                </span>
-                <div className="flex gap-2">
+                <div className="flex items-center gap-4">
+                  <span 
+                    className="text-lg font-mono text-white"
+                    style={{
+                      textShadow: '0 0 10px rgba(255,255,255,0.3)',
+                      background: 'linear-gradient(135deg, #ffffff, #e5e5e5)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent'
+                    }}
+                  >
+                    ► {getSelectedCount()} NEURAL ITEMS SELECTED
+                  </span>
+                  <div className="px-3 py-1 rounded-lg bg-white/10 border border-white/20">
+                    <span className="text-white text-sm font-mono">MATRIX READY</span>
+                  </div>
+                </div>
+                <div className="flex gap-3">
                   <Button 
                     variant="outline" 
                     size="sm"
                     onClick={() => setSelectedNodes(new Set())}
+                    className="font-mono border-white/30 bg-black/50 text-white hover:bg-black/70 hover:border-white/50"
+                    style={{
+                      textShadow: '0 0 5px rgba(255,255,255,0.3)',
+                      boxShadow: '0 0 10px rgba(255,255,255,0.1)'
+                    }}
                   >
-                    Clear Selection
+                    ► CLEAR MATRIX
                   </Button>
                   <Button 
                     size="sm"
+                    className="font-mono text-lg px-6 py-3 text-black font-bold shadow-2xl hover:shadow-white/20 transition-all duration-300"
+                    style={{
+                      background: 'linear-gradient(135deg, #ffffff 0%, #e5e5e5 50%, #ffffff 100%)',
+                      border: '2px solid rgba(255,255,255,0.3)',
+                      boxShadow: '0 0 25px rgba(255,255,255,0.3), inset 0 1px 0 rgba(255,255,255,0.8)',
+                      textShadow: '0 0 10px rgba(0,0,0,0.5)',
+                      letterSpacing: '0.5px'
+                    }}
                     onClick={async () => {
                       console.log('🧩 Catalog Selected Items clicked')
                       const selections: any[] = []
@@ -1978,7 +2291,7 @@ export function SchemaDiscovery({
                       onSelectionChange(selections)
                     }}
                   >
-                    Catalog Selected Items
+                    ► CATALOG NEURAL MATRIX
                   </Button>
                 </div>
               </div>
