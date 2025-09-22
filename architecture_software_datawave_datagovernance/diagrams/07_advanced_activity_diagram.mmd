@@ -1,0 +1,321 @@
+flowchart TD
+    %% ========================================================================
+    %% DATAWAVE DATA GOVERNANCE SYSTEM - ADVANCED ACTIVITY DIAGRAM
+    %% ========================================================================
+    
+    %% Start Node
+    START([🚀 Start DataWave<br/>Data Governance Process])
+    
+    %% Data Discovery & Onboarding Process
+    subgraph DATA_DISCOVERY["📊 DATA DISCOVERY & ONBOARDING PROCESS"]
+        direction TB
+        
+        IDENTIFY_SOURCES["🔍 Identify Data Sources<br/>├─ Automated Discovery<br/>├─ Manual Registration<br/>├─ Integration APIs<br/>└─ External Catalogs"]
+        
+        VALIDATE_CONNECTIONS["✅ Validate Connections<br/>├─ Connection Testing<br/>├─ Credential Verification<br/>├─ Permission Checking<br/>└─ Network Accessibility"]
+        
+        EXTRACT_METADATA["📝 Extract Metadata<br/>├─ Schema Discovery<br/>├─ Data Sampling<br/>├─ Statistical Analysis<br/>└─ Structure Mapping"]
+        
+        REGISTER_SOURCE["📋 Register Data Source<br/>├─ Catalog Entry Creation<br/>├─ Metadata Storage<br/>├─ Monitoring Setup<br/>└─ Access Configuration"]
+        
+        DECISION_VALID{"❓ Source Valid?"}
+        
+        IDENTIFY_SOURCES --> VALIDATE_CONNECTIONS
+        VALIDATE_CONNECTIONS --> DECISION_VALID
+        DECISION_VALID -->|Yes| EXTRACT_METADATA
+        DECISION_VALID -->|No| HANDLE_ERRORS["❌ Handle Connection Errors<br/>├─ Error Logging<br/>├─ Retry Logic<br/>├─ Admin Notification<br/>└─ Troubleshooting Guide"]
+        HANDLE_ERRORS --> IDENTIFY_SOURCES
+        EXTRACT_METADATA --> REGISTER_SOURCE
+    end
+    
+    %% AI-Powered Data Classification Process
+    subgraph DATA_CLASSIFICATION["🤖 AI-POWERED DATA CLASSIFICATION PROCESS"]
+        direction TB
+        
+        TRIGGER_CLASSIFICATION["🎯 Trigger Classification<br/>├─ New Data Detected<br/>├─ Scheduled Scan<br/>├─ Manual Request<br/>└─ Policy Update"]
+        
+        PREPARE_DATA["📦 Prepare Data for Analysis<br/>├─ Data Sampling<br/>├─ Format Normalization<br/>├─ Quality Preprocessing<br/>└─ Context Enrichment"]
+        
+        AI_ANALYSIS["🧠 AI Pattern Analysis<br/>├─ Machine Learning Models<br/>├─ Natural Language Processing<br/>├─ Pattern Recognition<br/>└─ Confidence Scoring"]
+        
+        PARALLEL_CLASSIFICATION{{"⚡ Parallel Classification"}}
+        
+        SENSITIVITY_DETECTION["🔒 Sensitivity Detection<br/>├─ PII Identification<br/>├─ Financial Data<br/>├─ Healthcare Records<br/>└─ Regulatory Data"]
+        
+        BUSINESS_CLASSIFICATION["💼 Business Classification<br/>├─ Domain Categorization<br/>├─ Business Context<br/>├─ Usage Patterns<br/>└─ Value Assessment"]
+        
+        TECHNICAL_CLASSIFICATION["⚙️ Technical Classification<br/>├─ Data Type Analysis<br/>├─ Quality Assessment<br/>├─ Format Detection<br/>└─ Structure Analysis"]
+        
+        MERGE_RESULTS["🔄 Merge Classification Results<br/>├─ Confidence Aggregation<br/>├─ Conflict Resolution<br/>├─ Rule Application<br/>└─ Final Scoring"]
+        
+        DECISION_CONFIDENCE{"❓ Confidence > Threshold?"}
+        
+        AUTO_APPLY["✅ Auto-Apply Classification<br/>├─ Label Assignment<br/>├─ Policy Application<br/>├─ Access Control Update<br/>└─ Notification"]
+        
+        MANUAL_REVIEW["👥 Manual Review Required<br/>├─ Expert Assignment<br/>├─ Review Queue<br/>├─ Evidence Presentation<br/>└─ Decision Support"]
+        
+        TRIGGER_CLASSIFICATION --> PREPARE_DATA
+        PREPARE_DATA --> AI_ANALYSIS
+        AI_ANALYSIS --> PARALLEL_CLASSIFICATION
+        PARALLEL_CLASSIFICATION --> SENSITIVITY_DETECTION
+        PARALLEL_CLASSIFICATION --> BUSINESS_CLASSIFICATION
+        PARALLEL_CLASSIFICATION --> TECHNICAL_CLASSIFICATION
+        SENSITIVITY_DETECTION --> MERGE_RESULTS
+        BUSINESS_CLASSIFICATION --> MERGE_RESULTS
+        TECHNICAL_CLASSIFICATION --> MERGE_RESULTS
+        MERGE_RESULTS --> DECISION_CONFIDENCE
+        DECISION_CONFIDENCE -->|High Confidence| AUTO_APPLY
+        DECISION_CONFIDENCE -->|Low Confidence| MANUAL_REVIEW
+        MANUAL_REVIEW --> AUTO_APPLY
+    end
+    
+    %% Compliance Monitoring & Enforcement Process
+    subgraph COMPLIANCE_MONITORING["⚖️ COMPLIANCE MONITORING & ENFORCEMENT PROCESS"]
+        direction TB
+        
+        LOAD_POLICIES["📜 Load Compliance Policies<br/>├─ Regulatory Requirements<br/>├─ Industry Standards<br/>├─ Corporate Policies<br/>└─ Custom Rules"]
+        
+        CONTINUOUS_MONITORING["👁️ Continuous Monitoring<br/>├─ Real-time Scanning<br/>├─ Policy Evaluation<br/>├─ Risk Assessment<br/>└─ Anomaly Detection"]
+        
+        DECISION_VIOLATION{"❓ Violation Detected?"}
+        
+        ASSESS_SEVERITY["⚠️ Assess Violation Severity<br/>├─ Impact Analysis<br/>├─ Risk Scoring<br/>├─ Regulatory Impact<br/>└─ Business Impact"]
+        
+        DECISION_CRITICAL{"❓ Critical Violation?"}
+        
+        IMMEDIATE_ACTION["🚨 Immediate Action<br/>├─ Access Restriction<br/>├─ Data Quarantine<br/>├─ Emergency Notification<br/>└─ Incident Creation"]
+        
+        STANDARD_WORKFLOW["📋 Standard Workflow<br/>├─ Violation Logging<br/>├─ Owner Notification<br/>├─ Remediation Planning<br/>└─ Timeline Assignment"]
+        
+        REMEDIATION_TRACKING["📊 Track Remediation<br/>├─ Progress Monitoring<br/>├─ Deadline Tracking<br/>├─ Escalation Rules<br/>└─ Completion Verification"]
+        
+        AUDIT_REPORTING["📈 Generate Audit Reports<br/>├─ Compliance Dashboards<br/>├─ Executive Summaries<br/>├─ Regulatory Reports<br/>└─ Trend Analysis"]
+        
+        LOAD_POLICIES --> CONTINUOUS_MONITORING
+        CONTINUOUS_MONITORING --> DECISION_VIOLATION
+        DECISION_VIOLATION -->|Yes| ASSESS_SEVERITY
+        DECISION_VIOLATION -->|No| CONTINUOUS_MONITORING
+        ASSESS_SEVERITY --> DECISION_CRITICAL
+        DECISION_CRITICAL -->|Yes| IMMEDIATE_ACTION
+        DECISION_CRITICAL -->|No| STANDARD_WORKFLOW
+        IMMEDIATE_ACTION --> REMEDIATION_TRACKING
+        STANDARD_WORKFLOW --> REMEDIATION_TRACKING
+        REMEDIATION_TRACKING --> AUDIT_REPORTING
+        AUDIT_REPORTING --> CONTINUOUS_MONITORING
+    end
+    
+    %% Racine Workflow Orchestration Process
+    subgraph RACINE_ORCHESTRATION["👑 RACINE WORKFLOW ORCHESTRATION PROCESS"]
+        direction TB
+        
+        WORKFLOW_DESIGN["🎨 Workflow Design<br/>├─ Visual Designer<br/>├─ Template Library<br/>├─ Custom Logic<br/>└─ Dependency Mapping"]
+        
+        VALIDATE_WORKFLOW["✅ Validate Workflow<br/>├─ Syntax Checking<br/>├─ Dependency Validation<br/>├─ Resource Verification<br/>└─ Security Review"]
+        
+        DECISION_VALID_WF{"❓ Workflow Valid?"}
+        
+        DEPLOY_WORKFLOW["🚀 Deploy Workflow<br/>├─ Environment Setup<br/>├─ Resource Allocation<br/>├─ Monitoring Configuration<br/>└─ Trigger Setup"]
+        
+        WORKFLOW_EXECUTION["⚙️ Execute Workflow<br/>├─ Task Scheduling<br/>├─ Parallel Execution<br/>├─ Progress Tracking<br/>└─ Error Handling"]
+        
+        PARALLEL_TASKS{{"⚡ Parallel Task Execution"}}
+        
+        DATA_PROCESSING["📊 Data Processing Tasks<br/>├─ ETL Operations<br/>├─ Data Transformation<br/>├─ Quality Checks<br/>└─ Validation"]
+        
+        AI_TASKS["🧠 AI/ML Tasks<br/>├─ Model Training<br/>├─ Inference<br/>├─ Pattern Analysis<br/>└─ Recommendation Generation"]
+        
+        COMPLIANCE_TASKS["⚖️ Compliance Tasks<br/>├─ Policy Validation<br/>├─ Audit Checks<br/>├─ Risk Assessment<br/>└─ Reporting"]
+        
+        SYNC_POINT["🔄 Synchronization Point<br/>├─ Task Completion Check<br/>├─ Result Aggregation<br/>├─ Error Consolidation<br/>└─ Next Phase Preparation"]
+        
+        DECISION_SUCCESS{"❓ All Tasks Successful?"}
+        
+        WORKFLOW_COMPLETION["✅ Workflow Completion<br/>├─ Results Compilation<br/>├─ Notification Sending<br/>├─ Cleanup Operations<br/>└─ Metrics Recording"]
+        
+        ERROR_HANDLING["❌ Error Handling<br/>├─ Rollback Operations<br/>├─ Error Analysis<br/>├─ Recovery Procedures<br/>└─ Incident Logging"]
+        
+        WORKFLOW_DESIGN --> VALIDATE_WORKFLOW
+        VALIDATE_WORKFLOW --> DECISION_VALID_WF
+        DECISION_VALID_WF -->|Yes| DEPLOY_WORKFLOW
+        DECISION_VALID_WF -->|No| WORKFLOW_DESIGN
+        DEPLOY_WORKFLOW --> WORKFLOW_EXECUTION
+        WORKFLOW_EXECUTION --> PARALLEL_TASKS
+        PARALLEL_TASKS --> DATA_PROCESSING
+        PARALLEL_TASKS --> AI_TASKS
+        PARALLEL_TASKS --> COMPLIANCE_TASKS
+        DATA_PROCESSING --> SYNC_POINT
+        AI_TASKS --> SYNC_POINT
+        COMPLIANCE_TASKS --> SYNC_POINT
+        SYNC_POINT --> DECISION_SUCCESS
+        DECISION_SUCCESS -->|Yes| WORKFLOW_COMPLETION
+        DECISION_SUCCESS -->|No| ERROR_HANDLING
+        ERROR_HANDLING --> WORKFLOW_EXECUTION
+    end
+    
+    %% Real-time Collaboration Process
+    subgraph COLLABORATION_PROCESS["👥 REAL-TIME COLLABORATION PROCESS"]
+        direction TB
+        
+        CREATE_SESSION["🏢 Create Collaboration Session<br/>├─ Workspace Selection<br/>├─ Participant Invitation<br/>├─ Permission Setup<br/>└─ Resource Allocation"]
+        
+        JOIN_PARTICIPANTS["👤 Participants Join<br/>├─ Authentication<br/>├─ Permission Validation<br/>├─ Session Initialization<br/>└─ Real-time Connection"]
+        
+        COLLABORATIVE_ACTIVITIES{{"⚡ Collaborative Activities"}}
+        
+        DOCUMENT_SHARING["📄 Document Sharing<br/>├─ Real-time Editing<br/>├─ Version Control<br/>├─ Change Tracking<br/>└─ Conflict Resolution"]
+        
+        DATA_EXPLORATION["🔍 Data Exploration<br/>├─ Shared Queries<br/>├─ Visualization Sharing<br/>├─ Insight Discussion<br/>└─ Annotation"]
+        
+        POLICY_REVIEW["📋 Policy Review<br/>├─ Collaborative Editing<br/>├─ Comment System<br/>├─ Approval Workflow<br/>└─ Version Management"]
+        
+        REAL_TIME_CHAT["💬 Real-time Communication<br/>├─ Text Chat<br/>├─ Voice Notes<br/>├─ Screen Sharing<br/>└─ Context Awareness"]
+        
+        AI_ASSISTANCE_COLLAB["🧠 AI-Assisted Collaboration<br/>├─ Smart Suggestions<br/>├─ Context Analysis<br/>├─ Conflict Resolution<br/>└─ Meeting Summaries"]
+        
+        SESSION_SUMMARY["📊 Session Summary<br/>├─ Activity Summary<br/>├─ Decision Log<br/>├─ Action Items<br/>└─ Outcome Documentation"]
+        
+        CREATE_SESSION --> JOIN_PARTICIPANTS
+        JOIN_PARTICIPANTS --> COLLABORATIVE_ACTIVITIES
+        COLLABORATIVE_ACTIVITIES --> DOCUMENT_SHARING
+        COLLABORATIVE_ACTIVITIES --> DATA_EXPLORATION
+        COLLABORATIVE_ACTIVITIES --> POLICY_REVIEW
+        COLLABORATIVE_ACTIVITIES --> REAL_TIME_CHAT
+        COLLABORATIVE_ACTIVITIES --> AI_ASSISTANCE_COLLAB
+        DOCUMENT_SHARING --> SESSION_SUMMARY
+        DATA_EXPLORATION --> SESSION_SUMMARY
+        POLICY_REVIEW --> SESSION_SUMMARY
+        REAL_TIME_CHAT --> SESSION_SUMMARY
+        AI_ASSISTANCE_COLLAB --> SESSION_SUMMARY
+    end
+    
+    %% Data Quality & Remediation Process
+    subgraph QUALITY_REMEDIATION["✅ DATA QUALITY & REMEDIATION PROCESS"]
+        direction TB
+        
+        QUALITY_ASSESSMENT["📊 Quality Assessment<br/>├─ Data Profiling<br/>├─ Statistical Analysis<br/>├─ Rule Validation<br/>└─ Anomaly Detection"]
+        
+        QUALITY_SCORING["🎯 Quality Scoring<br/>├─ Completeness Score<br/>├─ Accuracy Score<br/>├─ Consistency Score<br/>└─ Overall Quality Index"]
+        
+        DECISION_QUALITY{"❓ Quality Acceptable?"}
+        
+        IDENTIFY_ISSUES["🔍 Identify Quality Issues<br/>├─ Missing Values<br/>├─ Data Inconsistencies<br/>├─ Format Violations<br/>└─ Business Rule Violations"]
+        
+        PRIORITIZE_ISSUES["📋 Prioritize Issues<br/>├─ Impact Assessment<br/>├─ Business Priority<br/>├─ Resource Requirements<br/>└─ Timeline Constraints"]
+        
+        REMEDIATION_STRATEGY{{"⚡ Remediation Strategy"}}
+        
+        AUTOMATED_FIXES["🤖 Automated Fixes<br/>├─ Data Cleansing Rules<br/>├─ Format Standardization<br/>├─ Default Value Assignment<br/>└─ Duplicate Removal"]
+        
+        MANUAL_CORRECTION["👥 Manual Correction<br/>├─ Expert Review<br/>├─ Data Entry<br/>├─ Business Validation<br/>└─ Quality Assurance"]
+        
+        SOURCE_CORRECTION["🔧 Source System Correction<br/>├─ Root Cause Analysis<br/>├─ Process Improvement<br/>├─ System Updates<br/>└─ Preventive Measures"]
+        
+        VALIDATE_FIXES["✅ Validate Corrections<br/>├─ Quality Re-assessment<br/>├─ Business Validation<br/>├─ Impact Analysis<br/>└─ Approval Process"]
+        
+        QUALITY_MONITORING["👁️ Ongoing Quality Monitoring<br/>├─ Continuous Monitoring<br/>├─ Trend Analysis<br/>├─ Alert Management<br/>└─ Performance Tracking"]
+        
+        QUALITY_ASSESSMENT --> QUALITY_SCORING
+        QUALITY_SCORING --> DECISION_QUALITY
+        DECISION_QUALITY -->|No| IDENTIFY_ISSUES
+        DECISION_QUALITY -->|Yes| QUALITY_MONITORING
+        IDENTIFY_ISSUES --> PRIORITIZE_ISSUES
+        PRIORITIZE_ISSUES --> REMEDIATION_STRATEGY
+        REMEDIATION_STRATEGY --> AUTOMATED_FIXES
+        REMEDIATION_STRATEGY --> MANUAL_CORRECTION
+        REMEDIATION_STRATEGY --> SOURCE_CORRECTION
+        AUTOMATED_FIXES --> VALIDATE_FIXES
+        MANUAL_CORRECTION --> VALIDATE_FIXES
+        SOURCE_CORRECTION --> VALIDATE_FIXES
+        VALIDATE_FIXES --> QUALITY_ASSESSMENT
+        QUALITY_MONITORING --> QUALITY_ASSESSMENT
+    end
+    
+    %% Security & Access Control Process
+    subgraph SECURITY_ACCESS["🔐 SECURITY & ACCESS CONTROL PROCESS"]
+        direction TB
+        
+        USER_AUTHENTICATION["🔑 User Authentication<br/>├─ Credential Validation<br/>├─ Multi-Factor Authentication<br/>├─ Single Sign-On<br/>└─ Session Management"]
+        
+        ROLE_AUTHORIZATION["🗝️ Role-based Authorization<br/>├─ Role Assignment<br/>├─ Permission Evaluation<br/>├─ Context Analysis<br/>└─ Access Decision"]
+        
+        DECISION_ACCESS{"❓ Access Granted?"}
+        
+        RESOURCE_ACCESS["✅ Grant Resource Access<br/>├─ Permission Application<br/>├─ Activity Logging<br/>├─ Session Tracking<br/>└─ Audit Trail"]
+        
+        ACCESS_DENIED["❌ Access Denied<br/>├─ Denial Logging<br/>├─ User Notification<br/>├─ Security Alert<br/>└─ Incident Recording"]
+        
+        CONTINUOUS_MONITORING_SEC["👁️ Continuous Security Monitoring<br/>├─ Behavior Analysis<br/>├─ Anomaly Detection<br/>├─ Threat Assessment<br/>└─ Risk Evaluation"]
+        
+        SECURITY_INCIDENT{"❓ Security Incident?"}
+        
+        INCIDENT_RESPONSE["🚨 Incident Response<br/>├─ Immediate Containment<br/>├─ Investigation<br/>├─ Evidence Collection<br/>└─ Recovery Procedures"]
+        
+        SECURITY_REPORTING["📊 Security Reporting<br/>├─ Access Reports<br/>├─ Security Metrics<br/>├─ Compliance Reports<br/>└─ Risk Assessment"]
+        
+        USER_AUTHENTICATION --> ROLE_AUTHORIZATION
+        ROLE_AUTHORIZATION --> DECISION_ACCESS
+        DECISION_ACCESS -->|Yes| RESOURCE_ACCESS
+        DECISION_ACCESS -->|No| ACCESS_DENIED
+        RESOURCE_ACCESS --> CONTINUOUS_MONITORING_SEC
+        ACCESS_DENIED --> CONTINUOUS_MONITORING_SEC
+        CONTINUOUS_MONITORING_SEC --> SECURITY_INCIDENT
+        SECURITY_INCIDENT -->|Yes| INCIDENT_RESPONSE
+        SECURITY_INCIDENT -->|No| SECURITY_REPORTING
+        INCIDENT_RESPONSE --> SECURITY_REPORTING
+        SECURITY_REPORTING --> CONTINUOUS_MONITORING_SEC
+    end
+    
+    %% End Node
+    END([🏁 End DataWave<br/>Data Governance Process])
+    
+    %% Main Process Flow
+    START --> DATA_DISCOVERY
+    DATA_DISCOVERY --> DATA_CLASSIFICATION
+    DATA_CLASSIFICATION --> COMPLIANCE_MONITORING
+    COMPLIANCE_MONITORING --> RACINE_ORCHESTRATION
+    RACINE_ORCHESTRATION --> COLLABORATION_PROCESS
+    COLLABORATION_PROCESS --> QUALITY_REMEDIATION
+    QUALITY_REMEDIATION --> SECURITY_ACCESS
+    SECURITY_ACCESS --> END
+    
+    %% Parallel Process Connections
+    DATA_DISCOVERY -.->|"Concurrent"| SECURITY_ACCESS
+    DATA_CLASSIFICATION -.->|"Triggers"| COMPLIANCE_MONITORING
+    RACINE_ORCHESTRATION -.->|"Orchestrates"| QUALITY_REMEDIATION
+    COLLABORATION_PROCESS -.->|"Supports"| DATA_CLASSIFICATION
+    
+    %% Feedback Loops
+    COMPLIANCE_MONITORING -.->|"Policy Updates"| DATA_CLASSIFICATION
+    QUALITY_REMEDIATION -.->|"Quality Insights"| DATA_DISCOVERY
+    SECURITY_ACCESS -.->|"Access Patterns"| COMPLIANCE_MONITORING
+    
+    %% ========================================================================
+    %% STYLING & VISUAL ENHANCEMENTS
+    %% ========================================================================
+    
+    classDef startEndClass fill:#e8f5e8,stroke:#2e7d32,stroke-width:4px,color:#000
+    classDef discoveryClass fill:#e0f2f1,stroke:#00695c,stroke-width:3px,color:#000
+    classDef classificationClass fill:#fff8e1,stroke:#ff8f00,stroke-width:3px,color:#000
+    classDef complianceClass fill:#fce4ec,stroke:#ad1457,stroke-width:3px,color:#000
+    classDef racineClass fill:#fff3e0,stroke:#e65100,stroke-width:4px,color:#000
+    classDef collaborationClass fill:#f3e5f5,stroke:#7b1fa2,stroke-width:3px,color:#000
+    classDef qualityClass fill:#e8eaf6,stroke:#3f51b5,stroke-width:3px,color:#000
+    classDef securityClass fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#000
+    classDef decisionClass fill:#fff9c4,stroke:#f57f17,stroke-width:3px,color:#000
+    classDef parallelClass fill:#e1f5fe,stroke:#0277bd,stroke-width:3px,color:#000
+    classDef errorClass fill:#ffcdd2,stroke:#d32f2f,stroke-width:3px,color:#000
+    classDef actionClass fill:#c8e6c9,stroke:#388e3c,stroke-width:3px,color:#000
+    
+    %% Apply styles
+    class START,END startEndClass
+    class IDENTIFY_SOURCES,VALIDATE_CONNECTIONS,EXTRACT_METADATA,REGISTER_SOURCE discoveryClass
+    class TRIGGER_CLASSIFICATION,PREPARE_DATA,AI_ANALYSIS,SENSITIVITY_DETECTION,BUSINESS_CLASSIFICATION,TECHNICAL_CLASSIFICATION,MERGE_RESULTS classificationClass
+    class LOAD_POLICIES,CONTINUOUS_MONITORING,ASSESS_SEVERITY,REMEDIATION_TRACKING,AUDIT_REPORTING complianceClass
+    class WORKFLOW_DESIGN,VALIDATE_WORKFLOW,DEPLOY_WORKFLOW,WORKFLOW_EXECUTION,WORKFLOW_COMPLETION racineClass
+    class CREATE_SESSION,JOIN_PARTICIPANTS,DOCUMENT_SHARING,DATA_EXPLORATION,POLICY_REVIEW,REAL_TIME_CHAT,AI_ASSISTANCE_COLLAB,SESSION_SUMMARY collaborationClass
+    class QUALITY_ASSESSMENT,QUALITY_SCORING,IDENTIFY_ISSUES,PRIORITIZE_ISSUES,VALIDATE_FIXES,QUALITY_MONITORING qualityClass
+    class USER_AUTHENTICATION,ROLE_AUTHORIZATION,RESOURCE_ACCESS,CONTINUOUS_MONITORING_SEC,INCIDENT_RESPONSE,SECURITY_REPORTING securityClass
+    class DECISION_VALID,DECISION_CONFIDENCE,DECISION_VIOLATION,DECISION_CRITICAL,DECISION_VALID_WF,DECISION_SUCCESS,DECISION_QUALITY,DECISION_ACCESS,SECURITY_INCIDENT decisionClass
+    class PARALLEL_CLASSIFICATION,PARALLEL_TASKS,COLLABORATIVE_ACTIVITIES,REMEDIATION_STRATEGY parallelClass
+    class HANDLE_ERRORS,ERROR_HANDLING,ACCESS_DENIED errorClass
+    class AUTO_APPLY,MANUAL_REVIEW,IMMEDIATE_ACTION,STANDARD_WORKFLOW,AUTOMATED_FIXES,MANUAL_CORRECTION,SOURCE_CORRECTION actionClass

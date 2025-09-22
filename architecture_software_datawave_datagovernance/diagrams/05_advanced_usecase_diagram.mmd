@@ -1,0 +1,299 @@
+graph TB
+    %% ========================================================================
+    %% DATAWAVE DATA GOVERNANCE SYSTEM - ADVANCED USE CASE DIAGRAM
+    %% ========================================================================
+    
+    %% External Actors
+    subgraph ACTORS["👥 SYSTEM ACTORS & STAKEHOLDERS"]
+        direction TB
+        
+        %% Primary Business Users
+        subgraph PRIMARY_USERS["Primary Business Users"]
+            DATA_STEWARD["👨‍💼 Data Steward<br/>├─ Data Quality Management<br/>├─ Metadata Governance<br/>├─ Data Classification<br/>├─ Compliance Monitoring<br/>└─ Data Lineage Oversight"]
+            
+            DATA_ENGINEER["👨‍💻 Data Engineer<br/>├─ Pipeline Development<br/>├─ Data Integration<br/>├─ Performance Optimization<br/>├─ Technical Implementation<br/>└─ System Maintenance"]
+            
+            COMPLIANCE_OFFICER["👩‍⚖️ Compliance Officer<br/>├─ Regulatory Compliance<br/>├─ Risk Assessment<br/>├─ Audit Management<br/>├─ Policy Enforcement<br/>└─ Violation Investigation"]
+            
+            BUSINESS_ANALYST["👩‍📊 Business Analyst<br/>├─ Data Discovery<br/>├─ Business Intelligence<br/>├─ Report Generation<br/>├─ Data Insights<br/>└─ Requirements Analysis"]
+        end
+        
+        %% Administrative Users
+        subgraph ADMIN_USERS["Administrative Users"]
+            SYSTEM_ADMIN["👨‍🔧 System Administrator<br/>├─ System Configuration<br/>├─ User Management<br/>├─ Security Administration<br/>├─ Performance Monitoring<br/>└─ Infrastructure Management"]
+            
+            DATA_ARCHITECT["👩‍🏗️ Data Architect<br/>├─ Data Model Design<br/>├─ Architecture Planning<br/>├─ Integration Strategy<br/>├─ Governance Framework<br/>└─ Technical Standards"]
+            
+            SECURITY_ADMIN["🔐 Security Administrator<br/>├─ Access Control Management<br/>├─ Security Policy Definition<br/>├─ Threat Monitoring<br/>├─ Incident Response<br/>└─ Audit Trail Management"]
+        end
+        
+        %% Executive Users
+        subgraph EXECUTIVE_USERS["Executive Users"]
+            CDO["👔 Chief Data Officer<br/>├─ Strategic Data Governance<br/>├─ Executive Reporting<br/>├─ ROI Analysis<br/>├─ Data Strategy<br/>└─ Organizational Alignment"]
+            
+            CTO["👔 Chief Technology Officer<br/>├─ Technology Strategy<br/>├─ Infrastructure Planning<br/>├─ Innovation Leadership<br/>├─ Technical Governance<br/>└─ Digital Transformation"]
+        end
+        
+        %% External Systems
+        subgraph EXTERNAL_SYSTEMS["External System Actors"]
+            AZURE_SERVICES["☁️ Azure Services<br/>├─ Azure Purview<br/>├─ Azure Databricks<br/>├─ Azure Synapse<br/>├─ Cognitive Services<br/>└─ Azure Monitor"]
+            
+            THIRD_PARTY_SYSTEMS["🌐 Third-party Systems<br/>├─ Legacy Database Systems<br/>├─ External APIs<br/>├─ Partner Data Sources<br/>├─ Regulatory Systems<br/>└─ Cloud Data Platforms"]
+            
+            AI_SYSTEMS["🤖 AI/ML Systems<br/>├─ Machine Learning Models<br/>├─ Natural Language Processing<br/>├─ Pattern Recognition<br/>├─ Anomaly Detection<br/>└─ Recommendation Engines"]
+        end
+    end
+    
+    %% Core Use Cases
+    subgraph CORE_SYSTEM["🏛️ DATAWAVE DATA GOVERNANCE SYSTEM"]
+        direction TB
+        
+        %% Data Discovery & Cataloging Use Cases
+        subgraph DATA_DISCOVERY["📚 DATA DISCOVERY & CATALOGING"]
+            direction TB
+            UC_DISCOVER_DATA["🔍 Discover Data Sources<br/>├─ Automated Schema Discovery<br/>├─ Connection Testing<br/>├─ Metadata Extraction<br/>├─ Health Assessment<br/>└─ Performance Profiling"]
+            
+            UC_CATALOG_ASSETS["📖 Catalog Data Assets<br/>├─ Asset Registration<br/>├─ Metadata Management<br/>├─ Relationship Mapping<br/>├─ Lineage Tracking<br/>└─ Search Indexing"]
+            
+            UC_BROWSE_CATALOG["🔎 Browse Data Catalog<br/>├─ Advanced Search<br/>├─ Filter & Sort<br/>├─ Asset Details View<br/>├─ Related Assets<br/>└─ Usage Analytics"]
+            
+            UC_MANAGE_LINEAGE["🔗 Manage Data Lineage<br/>├─ Lineage Visualization<br/>├─ Impact Analysis<br/>├─ Dependency Tracking<br/>├─ Change Propagation<br/>└─ Lineage Validation"]
+            
+            UC_SEMANTIC_SEARCH["🧠 Semantic Search<br/>├─ Natural Language Queries<br/>├─ AI-Powered Suggestions<br/>├─ Context-Aware Results<br/>├─ Smart Recommendations<br/>└─ Federated Search"]
+        end
+        
+        %% Data Classification & Labeling Use Cases
+        subgraph DATA_CLASSIFICATION["🏷️ DATA CLASSIFICATION & LABELING"]
+            direction TB
+            UC_AUTO_CLASSIFY["🤖 Automated Classification<br/>├─ AI-Powered Analysis<br/>├─ Pattern Recognition<br/>├─ Sensitivity Detection<br/>├─ Confidence Scoring<br/>└─ Batch Processing"]
+            
+            UC_MANUAL_CLASSIFY["✋ Manual Classification<br/>├─ Expert Review<br/>├─ Custom Labeling<br/>├─ Override Automation<br/>├─ Quality Assurance<br/>└─ Approval Workflows"]
+            
+            UC_MANAGE_LABELS["🏷️ Manage Classification Labels<br/>├─ Label Hierarchy<br/>├─ Custom Categories<br/>├─ Label Relationships<br/>├─ Versioning<br/>└─ Standardization"]
+            
+            UC_SENSITIVITY_ANALYSIS["🔍 Sensitivity Analysis<br/>├─ PII Detection<br/>├─ Regulatory Classification<br/>├─ Risk Assessment<br/>├─ Privacy Impact<br/>└─ Compliance Mapping"]
+            
+            UC_CLASSIFICATION_RULES["📋 Classification Rules<br/>├─ Rule Definition<br/>├─ Pattern Matching<br/>├─ Business Logic<br/>├─ Validation Logic<br/>└─ Exception Handling"]
+        end
+        
+        %% Compliance & Governance Use Cases
+        subgraph COMPLIANCE_GOVERNANCE["⚖️ COMPLIANCE & GOVERNANCE"]
+            direction TB
+            UC_POLICY_MANAGEMENT["📜 Policy Management<br/>├─ Policy Definition<br/>├─ Rule Configuration<br/>├─ Enforcement Rules<br/>├─ Exception Management<br/>└─ Policy Versioning"]
+            
+            UC_COMPLIANCE_MONITORING["📊 Compliance Monitoring<br/>├─ Real-time Monitoring<br/>├─ Violation Detection<br/>├─ Risk Assessment<br/>├─ Compliance Scoring<br/>└─ Trend Analysis"]
+            
+            UC_AUDIT_MANAGEMENT["🔍 Audit Management<br/>├─ Audit Trail Generation<br/>├─ Evidence Collection<br/>├─ Audit Report Creation<br/>├─ Compliance Certification<br/>└─ Regulatory Submission"]
+            
+            UC_RISK_ASSESSMENT["⚠️ Risk Assessment<br/>├─ Risk Identification<br/>├─ Impact Analysis<br/>├─ Probability Scoring<br/>├─ Mitigation Planning<br/>└─ Risk Monitoring"]
+            
+            UC_VIOLATION_MANAGEMENT["🚨 Violation Management<br/>├─ Violation Detection<br/>├─ Incident Investigation<br/>├─ Root Cause Analysis<br/>├─ Remediation Planning<br/>└─ Follow-up Tracking"]
+        end
+        
+        %% Data Quality & Scanning Use Cases
+        subgraph DATA_QUALITY["✅ DATA QUALITY & SCANNING"]
+            direction TB
+            UC_DATA_PROFILING["📈 Data Profiling<br/>├─ Statistical Analysis<br/>├─ Data Distribution<br/>├─ Quality Metrics<br/>├─ Anomaly Detection<br/>└─ Trend Analysis"]
+            
+            UC_QUALITY_RULES["📏 Quality Rules Management<br/>├─ Rule Definition<br/>├─ Quality Thresholds<br/>├─ Validation Logic<br/>├─ Business Rules<br/>└─ Custom Validators"]
+            
+            UC_SCAN_EXECUTION["🔍 Scan Execution<br/>├─ Scheduled Scans<br/>├─ On-demand Scans<br/>├─ Incremental Scans<br/>├─ Full Scans<br/>└─ Parallel Processing"]
+            
+            UC_QUALITY_MONITORING["📊 Quality Monitoring<br/>├─ Real-time Monitoring<br/>├─ Quality Dashboards<br/>├─ Alert Management<br/>├─ Trend Tracking<br/>└─ SLA Monitoring"]
+            
+            UC_REMEDIATION["🔧 Data Remediation<br/>├─ Issue Identification<br/>├─ Remediation Planning<br/>├─ Automated Fixes<br/>├─ Manual Corrections<br/>└─ Validation Testing"]
+        end
+        
+        %% Racine Advanced Features Use Cases
+        subgraph RACINE_FEATURES["👑 RACINE ADVANCED FEATURES"]
+            direction TB
+            UC_WORKSPACE_MGMT["🏢 Workspace Management<br/>├─ Multi-tenant Workspaces<br/>├─ Resource Allocation<br/>├─ Access Control<br/>├─ Environment Isolation<br/>└─ Usage Analytics"]
+            
+            UC_WORKFLOW_ORCHESTRATION["⚙️ Workflow Orchestration<br/>├─ Workflow Design<br/>├─ Task Scheduling<br/>├─ Dependency Management<br/>├─ Execution Monitoring<br/>└─ Error Handling"]
+            
+            UC_PIPELINE_OPTIMIZATION["🚀 Pipeline Optimization<br/>├─ Performance Analysis<br/>├─ Resource Optimization<br/>├─ Cost Analysis<br/>├─ Bottleneck Detection<br/>└─ AI-driven Improvements"]
+            
+            UC_AI_ASSISTANCE["🧠 AI Assistance<br/>├─ Intelligent Recommendations<br/>├─ Natural Language Queries<br/>├─ Automated Insights<br/>├─ Pattern Recognition<br/>└─ Decision Support"]
+            
+            UC_COLLABORATION["👥 Real-time Collaboration<br/>├─ Team Workspaces<br/>├─ Document Sharing<br/>├─ Real-time Chat<br/>├─ Version Control<br/>└─ Review Workflows"]
+            
+            UC_DASHBOARD_ANALYTICS["📈 Advanced Analytics<br/>├─ Custom Dashboards<br/>├─ Executive Reports<br/>├─ KPI Monitoring<br/>├─ Predictive Analytics<br/>└─ Data Visualization"]
+        end
+        
+        %% Security & Access Control Use Cases
+        subgraph SECURITY_ACCESS["🔐 SECURITY & ACCESS CONTROL"]
+            direction TB
+            UC_USER_MANAGEMENT["👤 User Management<br/>├─ User Registration<br/>├─ Profile Management<br/>├─ Authentication<br/>├─ Session Management<br/>└─ Account Security"]
+            
+            UC_ROLE_MANAGEMENT["🗝️ Role & Permission Management<br/>├─ Role Definition<br/>├─ Permission Assignment<br/>├─ Hierarchical Roles<br/>├─ Dynamic Authorization<br/>└─ Access Reviews"]
+            
+            UC_ACCESS_CONTROL["🛡️ Access Control<br/>├─ Resource Protection<br/>├─ Fine-grained Permissions<br/>├─ Context-based Access<br/>├─ Temporary Access<br/>└─ Emergency Access"]
+            
+            UC_SECURITY_MONITORING["👁️ Security Monitoring<br/>├─ Access Logging<br/>├─ Suspicious Activity Detection<br/>├─ Security Alerts<br/>├─ Threat Analysis<br/>└─ Incident Response"]
+            
+            UC_AUDIT_TRAIL["📋 Audit Trail Management<br/>├─ Activity Logging<br/>├─ Change Tracking<br/>├─ Access History<br/>├─ Compliance Reporting<br/>└─ Forensic Analysis"]
+        end
+        
+        %% System Administration Use Cases
+        subgraph SYSTEM_ADMIN["🔧 SYSTEM ADMINISTRATION"]
+            direction TB
+            UC_SYSTEM_CONFIG["⚙️ System Configuration<br/>├─ Environment Setup<br/>├─ Feature Configuration<br/>├─ Integration Settings<br/>├─ Performance Tuning<br/>└─ Backup Configuration"]
+            
+            UC_MONITORING["📊 System Monitoring<br/>├─ Performance Monitoring<br/>├─ Resource Utilization<br/>├─ Health Checks<br/>├─ Alert Management<br/>└─ Capacity Planning"]
+            
+            UC_BACKUP_RECOVERY["💾 Backup & Recovery<br/>├─ Data Backup<br/>├─ System Backup<br/>├─ Disaster Recovery<br/>├─ Point-in-time Recovery<br/>└─ Recovery Testing"]
+            
+            UC_INTEGRATION_MGMT["🔌 Integration Management<br/>├─ External System Integration<br/>├─ API Management<br/>├─ Data Synchronization<br/>├─ Connection Monitoring<br/>└─ Error Handling"]
+            
+            UC_MAINTENANCE["🛠️ System Maintenance<br/>├─ Software Updates<br/>├─ Database Maintenance<br/>├─ Performance Optimization<br/>├─ Cleanup Operations<br/>└─ Health Assessments"]
+        end
+    end
+    
+    %% ========================================================================
+    %% USE CASE RELATIONSHIPS & INTERACTIONS
+    %% ========================================================================
+    
+    %% Data Steward Interactions
+    DATA_STEWARD --> UC_DISCOVER_DATA
+    DATA_STEWARD --> UC_CATALOG_ASSETS
+    DATA_STEWARD --> UC_BROWSE_CATALOG
+    DATA_STEWARD --> UC_MANAGE_LINEAGE
+    DATA_STEWARD --> UC_MANUAL_CLASSIFY
+    DATA_STEWARD --> UC_MANAGE_LABELS
+    DATA_STEWARD --> UC_DATA_PROFILING
+    DATA_STEsteward --> UC_QUALITY_RULES
+    DATA_STEWARD --> UC_REMEDIATION
+    DATA_STEWARD --> UC_WORKSPACE_MGMT
+    DATA_STEWARD --> UC_COLLABORATION
+    
+    %% Data Engineer Interactions
+    DATA_ENGINEER --> UC_DISCOVER_DATA
+    DATA_ENGINEER --> UC_SCAN_EXECUTION
+    DATA_ENGINEER --> UC_WORKFLOW_ORCHESTRATION
+    DATA_ENGINEER --> UC_PIPELINE_OPTIMIZATION
+    DATA_ENGINEER --> UC_INTEGRATION_MGMT
+    DATA_ENGINEER --> UC_QUALITY_MONITORING
+    DATA_ENGINEER --> UC_REMEDIATION
+    DATA_ENGINEER --> UC_AI_ASSISTANCE
+    DATA_ENGINEER --> UC_COLLABORATION
+    
+    %% Compliance Officer Interactions
+    COMPLIANCE_OFFICER --> UC_POLICY_MANAGEMENT
+    COMPLIANCE_OFFICER --> UC_COMPLIANCE_MONITORING
+    COMPLIANCE_OFFICER --> UC_AUDIT_MANAGEMENT
+    COMPLIANCE_OFFICER --> UC_RISK_ASSESSMENT
+    COMPLIANCE_OFFICER --> UC_VIOLATION_MANAGEMENT
+    COMPLIANCE_OFFICER --> UC_SENSITIVITY_ANALYSIS
+    COMPLIANCE_OFFICER --> UC_BROWSE_CATALOG
+    COMPLIANCE_OFFICER --> UC_DASHBOARD_ANALYTICS
+    
+    %% Business Analyst Interactions
+    BUSINESS_ANALYST --> UC_BROWSE_CATALOG
+    BUSINESS_ANALYST --> UC_SEMANTIC_SEARCH
+    BUSINESS_ANALYST --> UC_MANAGE_LINEAGE
+    BUSINESS_ANALYST --> UC_DASHBOARD_ANALYTICS
+    BUSINESS_ANALYST --> UC_DATA_PROFILING
+    BUSINESS_ANALYST --> UC_AI_ASSISTANCE
+    BUSINESS_ANALYST --> UC_COLLABORATION
+    
+    %% System Administrator Interactions
+    SYSTEM_ADMIN --> UC_SYSTEM_CONFIG
+    SYSTEM_ADMIN --> UC_MONITORING
+    SYSTEM_ADMIN --> UC_BACKUP_RECOVERY
+    SYSTEM_ADMIN --> UC_INTEGRATION_MGMT
+    SYSTEM_ADMIN --> UC_MAINTENANCE
+    SYSTEM_ADMIN --> UC_USER_MANAGEMENT
+    SYSTEM_ADMIN --> UC_SECURITY_MONITORING
+    
+    %% Data Architect Interactions
+    DATA_ARCHITECT --> UC_CATALOG_ASSETS
+    DATA_ARCHITECT --> UC_MANAGE_LINEAGE
+    DATA_ARCHITECT --> UC_WORKSPACE_MGMT
+    DATA_ARCHITECT --> UC_WORKFLOW_ORCHESTRATION
+    DATA_ARCHITECT --> UC_INTEGRATION_MGMT
+    DATA_ARCHITECT --> UC_SYSTEM_CONFIG
+    DATA_ARCHITECT --> UC_DASHBOARD_ANALYTICS
+    
+    %% Security Administrator Interactions
+    SECURITY_ADMIN --> UC_USER_MANAGEMENT
+    SECURITY_ADMIN --> UC_ROLE_MANAGEMENT
+    SECURITY_ADMIN --> UC_ACCESS_CONTROL
+    SECURITY_ADMIN --> UC_SECURITY_MONITORING
+    SECURITY_ADMIN --> UC_AUDIT_TRAIL
+    SECURITY_ADMIN --> UC_POLICY_MANAGEMENT
+    
+    %% Executive Interactions
+    CDO --> UC_DASHBOARD_ANALYTICS
+    CDO --> UC_COMPLIANCE_MONITORING
+    CDO --> UC_RISK_ASSESSMENT
+    CDO --> UC_AUDIT_MANAGEMENT
+    CDO --> UC_AI_ASSISTANCE
+    
+    CTO --> UC_MONITORING
+    CTO --> UC_PIPELINE_OPTIMIZATION
+    CTO --> UC_SYSTEM_CONFIG
+    CTO --> UC_DASHBOARD_ANALYTICS
+    CTO --> UC_AI_ASSISTANCE
+    
+    %% External System Interactions
+    AZURE_SERVICES -.->|"Data Integration"| UC_DISCOVER_DATA
+    AZURE_SERVICES -.->|"AI Services"| UC_AUTO_CLASSIFY
+    AZURE_SERVICES -.->|"Analytics"| UC_DASHBOARD_ANALYTICS
+    
+    THIRD_PARTY_SYSTEMS -.->|"Data Sources"| UC_DISCOVER_DATA
+    THIRD_PARTY_SYSTEMS -.->|"Integration"| UC_INTEGRATION_MGMT
+    THIRD_PARTY_SYSTEMS -.->|"Compliance Data"| UC_COMPLIANCE_MONITORING
+    
+    AI_SYSTEMS -.->|"ML Models"| UC_AUTO_CLASSIFY
+    AI_SYSTEMS -.->|"Recommendations"| UC_AI_ASSISTANCE
+    AI_SYSTEMS -.->|"Pattern Recognition"| UC_DATA_PROFILING
+    AI_SYSTEMS -.->|"Anomaly Detection"| UC_QUALITY_MONITORING
+    
+    %% Use Case Dependencies (includes)
+    UC_BROWSE_CATALOG -.->|"includes"| UC_SEMANTIC_SEARCH
+    UC_AUTO_CLASSIFY -.->|"includes"| UC_SENSITIVITY_ANALYSIS
+    UC_COMPLIANCE_MONITORING -.->|"includes"| UC_RISK_ASSESSMENT
+    UC_SCAN_EXECUTION -.->|"includes"| UC_DATA_PROFILING
+    UC_WORKFLOW_ORCHESTRATION -.->|"includes"| UC_PIPELINE_OPTIMIZATION
+    UC_DASHBOARD_ANALYTICS -.->|"includes"| UC_AI_ASSISTANCE
+    UC_VIOLATION_MANAGEMENT -.->|"includes"| UC_AUDIT_TRAIL
+    UC_WORKSPACE_MGMT -.->|"includes"| UC_ACCESS_CONTROL
+    
+    %% Use Case Extensions (extends)
+    UC_MANUAL_CLASSIFY -.->|"extends"| UC_AUTO_CLASSIFY
+    UC_REMEDIATION -.->|"extends"| UC_QUALITY_MONITORING
+    UC_VIOLATION_MANAGEMENT -.->|"extends"| UC_COMPLIANCE_MONITORING
+    UC_COLLABORATION -.->|"extends"| UC_WORKSPACE_MGMT
+    UC_AI_ASSISTANCE -.->|"extends"| UC_SEMANTIC_SEARCH
+    
+    %% ========================================================================
+    %% STYLING & VISUAL ENHANCEMENTS
+    %% ========================================================================
+    
+    classDef actorClass fill:#e3f2fd,stroke:#1976d2,stroke-width:3px,color:#000
+    classDef primaryUserClass fill:#e8f5e8,stroke:#2e7d32,stroke-width:3px,color:#000
+    classDef adminUserClass fill:#fff3e0,stroke:#f57c00,stroke-width:3px,color:#000
+    classDef executiveClass fill:#fce4ec,stroke:#c2185b,stroke-width:3px,color:#000
+    classDef externalClass fill:#f3e5f5,stroke:#7b1fa2,stroke-width:3px,color:#000
+    classDef discoveryClass fill:#e0f2f1,stroke:#00695c,stroke-width:3px,color:#000
+    classDef classificationClass fill:#fff8e1,stroke:#ff8f00,stroke-width:3px,color:#000
+    classDef complianceClass fill:#fce4ec,stroke:#ad1457,stroke-width:3px,color:#000
+    classDef qualityClass fill:#e8eaf6,stroke:#3f51b5,stroke-width:3px,color:#000
+    classDef racineClass fill:#fff3e0,stroke:#e65100,stroke-width:4px,color:#000
+    classDef securityClass fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#000
+    classDef adminClass fill:#f1f8e9,stroke:#558b2f,stroke-width:3px,color:#000
+    
+    %% Apply styles to actors
+    class DATA_STEWARD,DATA_ENGINEER,COMPLIANCE_OFFICER,BUSINESS_ANALYST primaryUserClass
+    class SYSTEM_ADMIN,DATA_ARCHITECT,SECURITY_ADMIN adminUserClass
+    class CDO,CTO executiveClass
+    class AZURE_SERVICES,THIRD_PARTY_SYSTEMS,AI_SYSTEMS externalClass
+    
+    %% Apply styles to use case groups
+    class UC_DISCOVER_DATA,UC_CATALOG_ASSETS,UC_BROWSE_CATALOG,UC_MANAGE_LINEAGE,UC_SEMANTIC_SEARCH discoveryClass
+    class UC_AUTO_CLASSIFY,UC_MANUAL_CLASSIFY,UC_MANAGE_LABELS,UC_SENSITIVITY_ANALYSIS,UC_CLASSIFICATION_RULES classificationClass
+    class UC_POLICY_MANAGEMENT,UC_COMPLIANCE_MONITORING,UC_AUDIT_MANAGEMENT,UC_RISK_ASSESSMENT,UC_VIOLATION_MANAGEMENT complianceClass
+    class UC_DATA_PROFILING,UC_QUALITY_RULES,UC_SCAN_EXECUTION,UC_QUALITY_MONITORING,UC_REMEDIATION qualityClass
+    class UC_WORKSPACE_MGMT,UC_WORKFLOW_ORCHESTRATION,UC_PIPELINE_OPTIMIZATION,UC_AI_ASSISTANCE,UC_COLLABORATION,UC_DASHBOARD_ANALYTICS racineClass
+    class UC_USER_MANAGEMENT,UC_ROLE_MANAGEMENT,UC_ACCESS_CONTROL,UC_SECURITY_MONITORING,UC_AUDIT_TRAIL securityClass
+    class UC_SYSTEM_CONFIG,UC_MONITORING,UC_BACKUP_RECOVERY,UC_INTEGRATION_MGMT,UC_MAINTENANCE adminClass

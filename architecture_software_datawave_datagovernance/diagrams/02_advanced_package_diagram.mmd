@@ -1,0 +1,323 @@
+graph TB
+    %% ========================================================================
+    %% DATAWAVE DATA GOVERNANCE SYSTEM - ADVANCED PACKAGE ARCHITECTURE
+    %% ========================================================================
+    
+    %% Root Application Package
+    subgraph ROOT["🏛️ DATAWAVE ROOT APPLICATION"]
+        direction TB
+        
+        %% Backend Package Structure
+        subgraph BACKEND["🔧 BACKEND MICROSERVICES ARCHITECTURE"]
+            direction TB
+            
+            %% Models Package - Data Layer
+            subgraph MODELS_PKG["📊 MODELS PACKAGE - DATA ENTITIES"]
+                direction TB
+                subgraph CORE_MODELS["Core Entity Models"]
+                    AUTH_MODELS["🔐 auth_models.py<br/>├─ User Entity<br/>├─ Role Entity<br/>├─ Permission Entity<br/>├─ Session Entity<br/>├─ Group Entity<br/>└─ UserRole Relations"]
+                    
+                    SCAN_MODELS["🔍 scan_models.py<br/>├─ DataSource Entity<br/>├─ Scan Entity<br/>├─ ScanResult Entity<br/>├─ ScanMetrics Entity<br/>└─ ScanHistory Entity"]
+                    
+                    COMPLIANCE_MODELS["⚖️ compliance_models.py<br/>├─ ComplianceRule Entity<br/>├─ ComplianceValidation Entity<br/>├─ ComplianceReport Entity<br/>├─ AuditLog Entity<br/>└─ PolicyTemplate Entity"]
+                    
+                    CLASSIFICATION_MODELS["🏷️ classification_models.py<br/>├─ ClassificationRule Entity<br/>├─ DataClassification Entity<br/>├─ ClassificationResult Entity<br/>├─ SensitivityLabel Entity<br/>└─ ClassificationTemplate Entity"]
+                    
+                    CATALOG_MODELS["📚 catalog_models.py<br/>├─ CatalogItem Entity<br/>├─ AssetMetadata Entity<br/>├─ DataLineage Entity<br/>├─ AssetRelationship Entity<br/>└─ SearchIndex Entity"]
+                end
+                
+                subgraph RACINE_MODELS_PKG["🎯 Racine Models Package"]
+                    RACINE_ORCHESTRATION["🎭 racine_orchestration_models.py<br/>├─ OrchestrationMaster Entity<br/>├─ ServiceRegistry Entity<br/>├─ WorkflowDefinition Entity<br/>├─ ExecutionContext Entity<br/>└─ ResourceAllocation Entity"]
+                    
+                    RACINE_WORKSPACE["🏢 racine_workspace_models.py<br/>├─ Workspace Entity<br/>├─ WorkspaceUser Entity<br/>├─ WorkspaceResource Entity<br/>├─ AccessPolicy Entity<br/>└─ WorkspaceMetrics Entity"]
+                    
+                    RACINE_WORKFLOW["⚙️ racine_workflow_models.py<br/>├─ WorkflowTemplate Entity<br/>├─ WorkflowExecution Entity<br/>├─ TaskDefinition Entity<br/>├─ TaskExecution Entity<br/>└─ WorkflowSchedule Entity"]
+                    
+                    RACINE_PIPELINE["🚀 racine_pipeline_models.py<br/>├─ Pipeline Entity<br/>├─ PipelineStage Entity<br/>├─ PipelineExecution Entity<br/>├─ OptimizationResult Entity<br/>└─ PerformanceMetrics Entity"]
+                    
+                    RACINE_AI["🧠 racine_ai_models.py<br/>├─ AIConversation Entity<br/>├─ AIRecommendation Entity<br/>├─ MLModel Entity<br/>├─ TrainingData Entity<br/>└─ ModelMetrics Entity"]
+                    
+                    RACINE_COLLABORATION["👥 racine_collaboration_models.py<br/>├─ CollaborationSession Entity<br/>├─ SharedDocument Entity<br/>├─ ChatMessage Entity<br/>├─ ActivityFeed Entity<br/>└─ NotificationQueue Entity"]
+                end
+                
+                subgraph EXTENDED_MODELS["Extended Domain Models"]
+                    WORKFLOW_MODELS["🔄 workflow_models.py<br/>├─ WorkflowJob Entity<br/>├─ JobSchedule Entity<br/>├─ ExecutionLog Entity<br/>├─ TaskDependency Entity<br/>└─ ResourceQuota Entity"]
+                    
+                    ANALYTICS_MODELS["📈 analytics_models.py<br/>├─ MetricDefinition Entity<br/>├─ MetricValue Entity<br/>├─ Dashboard Entity<br/>├─ Visualization Entity<br/>└─ AlertRule Entity"]
+                    
+                    INTEGRATION_MODELS["🔌 integration_models.py<br/>├─ ExternalSystem Entity<br/>├─ APIConnection Entity<br/>├─ DataSync Entity<br/>├─ ConnectionPool Entity<br/>└─ SyncHistory Entity"]
+                end
+            end
+            
+            %% Services Package - Business Logic Layer
+            subgraph SERVICES_PKG["🏗️ SERVICES PACKAGE - BUSINESS LOGIC"]
+                direction TB
+                subgraph CORE_SERVICES["Core Business Services"]
+                    AUTH_SERVICE["🔒 auth_service.py<br/>├─ UserAuthenticationService<br/>├─ SessionManagementService<br/>├─ PasswordPolicyService<br/>├─ MFAService<br/>└─ SSOIntegrationService"]
+                    
+                    RBAC_SERVICE["🗝️ rbac_service.py<br/>├─ RoleManagementService<br/>├─ PermissionService<br/>├─ AccessControlService<br/>├─ PolicyEvaluationService<br/>└─ AuditTrailService"]
+                    
+                    DATA_SOURCE_SERVICE["💾 data_source_service.py<br/>├─ ConnectionManagementService<br/>├─ SchemaDiscoveryService<br/>├─ HealthMonitoringService<br/>├─ MetadataExtractionService<br/>└─ PerformanceOptimizationService"]
+                    
+                    SCAN_SERVICE["🔍 scan_service.py<br/>├─ DataScanningService<br/>├─ SchemaAnalysisService<br/>├─ DataProfilingService<br/>├─ QualityAssessmentService<br/>└─ AnomalyDetectionService"]
+                    
+                    CLASSIFICATION_SERVICE["🔖 classification_service.py<br/>├─ AIClassificationService<br/>├─ PatternMatchingService<br/>├─ SensitivityDetectionService<br/>├─ AutoTaggingService<br/>└─ CustomRuleService"]
+                    
+                    COMPLIANCE_SERVICE["📊 compliance_service.py<br/>├─ RegulatoryValidationService<br/>├─ PolicyEnforcementService<br/>├─ RiskAssessmentService<br/>├─ AuditReportingService<br/>└─ ViolationDetectionService"]
+                    
+                    CATALOG_SERVICE["📖 catalog_service.py<br/>├─ MetadataManagementService<br/>├─ LineageTrackingService<br/>├─ AssetDiscoveryService<br/>├─ RelationshipMappingService<br/>└─ SearchBrowseService"]
+                end
+                
+                subgraph RACINE_SERVICES_PKG["🎯 Racine Services Package"]
+                    RACINE_ORCHESTRATION_SVC["🎭 racine_orchestration_service.py<br/>├─ MasterOrchestrationService<br/>├─ ServiceCoordinationService<br/>├─ WorkflowManagementService<br/>├─ ResourceAllocationService<br/>└─ EventDistributionService"]
+                    
+                    RACINE_WORKSPACE_SVC["🏢 racine_workspace_service.py<br/>├─ WorkspaceManagementService<br/>├─ MultiTenantIsolationService<br/>├─ ResourceProvisioningService<br/>├─ AccessControlIntegrationService<br/>└─ EnvironmentManagementService"]
+                    
+                    RACINE_WORKFLOW_SVC["⚙️ racine_workflow_service.py<br/>├─ WorkflowEngineService<br/>├─ DAGExecutionService<br/>├─ TaskSchedulingService<br/>├─ DependencyManagementService<br/>└─ ErrorRecoveryService"]
+                    
+                    RACINE_PIPELINE_SVC["🚀 racine_pipeline_service.py<br/>├─ PipelineOptimizerService<br/>├─ PerformanceAnalysisService<br/>├─ ResourceOptimizationService<br/>├─ CostAnalysisService<br/>└─ BottleneckDetectionService"]
+                    
+                    RACINE_AI_SVC["🧠 racine_ai_service.py<br/>├─ AIAssistantService<br/>├─ NLPService<br/>├─ RecommendationEngineService<br/>├─ PatternRecognitionService<br/>└─ AutomatedInsightsService"]
+                    
+                    RACINE_COLLABORATION_SVC["👥 racine_collaboration_service.py<br/>├─ CollaborationHubService<br/>├─ DocumentSharingService<br/>├─ TeamCommunicationService<br/>├─ VersionControlService<br/>└─ ReviewWorkflowService"]
+                end
+                
+                subgraph ADVANCED_SERVICES["Advanced Services"]
+                    AI_ML_SERVICE["🤖 ai_ml_service.py<br/>├─ MachineLearningService<br/>├─ ModelTrainingService<br/>├─ PredictionService<br/>├─ ModelVersioningService<br/>└─ MLOpsService"]
+                    
+                    ANALYTICS_SERVICE["📈 analytics_service.py<br/>├─ RealTimeAnalyticsService<br/>├─ CustomVisualizationService<br/>├─ KPIMonitoringService<br/>├─ AlertManagementService<br/>└─ ExecutiveReportingService"]
+                    
+                    INTEGRATION_SERVICE["🔌 integration_service.py<br/>├─ ExternalSystemIntegrationService<br/>├─ APIManagementService<br/>├─ DataSynchronizationService<br/>├─ ProtocolTranslationService<br/>└─ ConnectionPoolingService"]
+                end
+            end
+            
+            %% API Package - Presentation Layer
+            subgraph API_PKG["🚪 API PACKAGE - PRESENTATION LAYER"]
+                direction TB
+                subgraph ROUTES_PKG["API Routes"]
+                    CORE_ROUTES["🛣️ Core API Routes<br/>├─ auth_routes.py<br/>├─ scan_routes.py<br/>├─ compliance_routes.py<br/>├─ classification_routes.py<br/>├─ catalog_routes.py<br/>└─ rbac_routes.py"]
+                    
+                    RACINE_ROUTES_PKG["🎯 Racine Routes Package"]
+                    RACINE_ORCHESTRATION_ROUTES["🎭 racine_orchestration_routes.py<br/>├─ Orchestration API Endpoints<br/>├─ Service Management<br/>├─ Workflow Control<br/>├─ Resource Management<br/>└─ Event Streaming"]
+                    
+                    RACINE_WORKSPACE_ROUTES["🏢 racine_workspace_routes.py<br/>├─ Workspace API Endpoints<br/>├─ Multi-tenant Operations<br/>├─ Resource Provisioning<br/>├─ Access Management<br/>└─ Environment Control"]
+                    
+                    ENTERPRISE_ROUTES["🏢 enterprise_routes.py<br/>├─ Enterprise Analytics<br/>├─ Advanced Reporting<br/>├─ Integration Management<br/>├─ System Administration<br/>└─ Performance Monitoring"]
+                end
+                
+                subgraph MIDDLEWARE_PKG["Middleware Components"]
+                    SECURITY_MIDDLEWARE["🛡️ Security Middleware<br/>├─ Authentication Middleware<br/>├─ Authorization Middleware<br/>├─ CORS Handler<br/>├─ Rate Limiter<br/>└─ Request Validator"]
+                    
+                    API_MIDDLEWARE["⚡ API Middleware<br/>├─ Request/Response Transformer<br/>├─ Error Handler<br/>├─ Logging Middleware<br/>├─ Metrics Collector<br/>└─ Circuit Breaker"]
+                end
+            end
+            
+            %% Core Infrastructure Package
+            subgraph CORE_PKG["⚙️ CORE PACKAGE - INFRASTRUCTURE"]
+                direction TB
+                CONFIG_MODULE["🔧 config.py<br/>├─ Environment Configuration<br/>├─ Database Settings<br/>├─ Security Configuration<br/>├─ Feature Flags<br/>└─ External Service Config"]
+                
+                DATABASE_MODULE["💾 database.py<br/>├─ Database Connection<br/>├─ Connection Pooling<br/>├─ Migration Management<br/>├─ Health Monitoring<br/>└─ Performance Optimization"]
+                
+                SECURITY_MODULE["🔒 security.py<br/>├─ Cryptographic Utilities<br/>├─ Token Management<br/>├─ Password Hashing<br/>├─ Encryption/Decryption<br/>└─ Security Headers"]
+                
+                LOGGING_MODULE["📝 logging.py<br/>├─ Structured Logging<br/>├─ Log Formatting<br/>├─ Log Routing<br/>├─ Performance Logging<br/>└─ Audit Logging"]
+            end
+            
+            %% Utils Package
+            subgraph UTILS_PKG["🛠️ UTILS PACKAGE - UTILITIES"]
+                direction TB
+                VALIDATORS["✅ validators.py<br/>├─ Input Validation<br/>├─ Data Sanitization<br/>├─ Schema Validation<br/>├─ Business Rule Validation<br/>└─ Security Validation"]
+                
+                SERIALIZERS["🔄 serializers.py<br/>├─ Data Transformation<br/>├─ JSON Serialization<br/>├─ XML Processing<br/>├─ Format Conversion<br/>└─ Data Mapping"]
+                
+                HELPERS["🔧 helpers.py<br/>├─ Common Utilities<br/>├─ Date/Time Helpers<br/>├─ String Manipulation<br/>├─ File Operations<br/>└─ Calculation Helpers"]
+            end
+        end
+        
+        %% Frontend Package Structure
+        subgraph FRONTEND["🖥️ FRONTEND SINGLE PAGE APPLICATION"]
+            direction TB
+            
+            %% Components Package
+            subgraph COMPONENTS_PKG["🧩 COMPONENTS PACKAGE"]
+                direction TB
+                subgraph CORE_COMPONENTS["Core UI Components"]
+                    RBAC_COMPONENTS["🔐 Advanced_RBAC_Components<br/>├─ UserManagement.tsx<br/>├─ RoleEditor.tsx<br/>├─ PermissionMatrix.tsx<br/>├─ AccessControl.tsx<br/>└─ AuditViewer.tsx"]
+                    
+                    CATALOG_COMPONENTS["📚 Advanced_Catalog_Components<br/>├─ AssetBrowser.tsx<br/>├─ LineageViewer.tsx<br/>├─ MetadataEditor.tsx<br/>├─ SearchInterface.tsx<br/>└─ RelationshipMapper.tsx"]
+                    
+                    SCAN_COMPONENTS["🔍 Advanced_Scan_Components<br/>├─ ScanRuleDesigner.tsx<br/>├─ DataSourceConnector.tsx<br/>├─ ScanResultViewer.tsx<br/>├─ QualityDashboard.tsx<br/>└─ AnomalyDetector.tsx"]
+                    
+                    CLASSIFICATION_COMPONENTS["🏷️ Classification_Components<br/>├─ ClassificationRuleEditor.tsx<br/>├─ SensitivityLabeler.tsx<br/>├─ PatternMatcher.tsx<br/>├─ AutoTaggingConfig.tsx<br/>└─ ClassificationViewer.tsx"]
+                    
+                    COMPLIANCE_COMPONENTS["⚖️ Compliance_Components<br/>├─ ComplianceRuleEditor.tsx<br/>├─ PolicyManager.tsx<br/>├─ RiskAssessment.tsx<br/>├─ AuditReporter.tsx<br/>└─ ViolationTracker.tsx"]
+                end
+                
+                subgraph RACINE_COMPONENTS["🎯 Racine UI Components"]
+                    RACINE_ORCHESTRATION_UI["🎭 racine_orchestration<br/>├─ OrchestrationDashboard.tsx<br/>├─ ServiceMonitor.tsx<br/>├─ WorkflowVisualizer.tsx<br/>├─ ResourceManager.tsx<br/>└─ EventViewer.tsx"]
+                    
+                    RACINE_WORKSPACE_UI["🏢 racine_workspace<br/>├─ WorkspaceManager.tsx<br/>├─ MultiTenantDashboard.tsx<br/>├─ ResourceProvisioner.tsx<br/>├─ AccessController.tsx<br/>└─ EnvironmentConfig.tsx"]
+                    
+                    RACINE_COLLABORATION_UI["👥 racine_collaboration<br/>├─ CollaborationHub.tsx<br/>├─ DocumentSharing.tsx<br/>├─ TeamChat.tsx<br/>├─ VersionControl.tsx<br/>└─ ReviewWorkflow.tsx"]
+                    
+                    RACINE_AI_UI["🧠 racine_ai_assistant<br/>├─ AIAssistant.tsx<br/>├─ RecommendationEngine.tsx<br/>├─ InsightsViewer.tsx<br/>├─ PatternAnalyzer.tsx<br/>└─ AutomationConfig.tsx"]
+                end
+                
+                subgraph SHARED_COMPONENTS["Shared UI Components"]
+                    LAYOUT_COMPONENTS["🏗️ layout<br/>├─ Header.tsx<br/>├─ Sidebar.tsx<br/>├─ Navigation.tsx<br/>├─ Footer.tsx<br/>└─ MainLayout.tsx"]
+                    
+                    COMMON_COMPONENTS["🔧 common<br/>├─ DataTable.tsx<br/>├─ FormBuilder.tsx<br/>├─ ChartComponents.tsx<br/>├─ ModalDialogs.tsx<br/>└─ LoadingSpinner.tsx"]
+                end
+            end
+            
+            %% Services Package
+            subgraph FRONTEND_SERVICES_PKG["🔗 SERVICES PACKAGE"]
+                direction TB
+                API_SERVICES["🌐 API Services<br/>├─ api.service.ts<br/>├─ auth.service.ts<br/>├─ websocket.service.ts<br/>├─ upload.service.ts<br/>└─ cache.service.ts"]
+                
+                RACINE_API_SERVICES["🎯 Racine API Services<br/>├─ orchestration.service.ts<br/>├─ workspace.service.ts<br/>├─ workflow.service.ts<br/>├─ pipeline.service.ts<br/>├─ ai.service.ts<br/>└─ collaboration.service.ts"]
+                
+                STATE_SERVICES["📊 State Management<br/>├─ store.ts<br/>├─ reducers<br/>├─ actions<br/>├─ selectors<br/>└─ middleware"]
+            end
+            
+            %% Types Package
+            subgraph TYPES_PKG["📋 TYPES PACKAGE"]
+                direction TB
+                CORE_TYPES["🔧 Core Types<br/>├─ api.types.ts<br/>├─ auth.types.ts<br/>├─ common.types.ts<br/>├─ form.types.ts<br/>└─ table.types.ts"]
+                
+                RACINE_TYPES["🎯 Racine Types<br/>├─ orchestration.types.ts<br/>├─ workspace.types.ts<br/>├─ workflow.types.ts<br/>├─ pipeline.types.ts<br/>├─ ai.types.ts<br/>└─ collaboration.types.ts"]
+            end
+            
+            %% Utils Package
+            subgraph FRONTEND_UTILS_PKG["🛠️ UTILS PACKAGE"]
+                direction TB
+                FRONTEND_UTILS["🔧 Frontend Utilities<br/>├─ formatters.ts<br/>├─ validators.ts<br/>├─ helpers.ts<br/>├─ constants.ts<br/>└─ hooks.ts"]
+            end
+        end
+    end
+    
+    %% ========================================================================
+    %% PACKAGE DEPENDENCIES & RELATIONSHIPS
+    %% ========================================================================
+    
+    %% Services depend on Models
+    AUTH_SERVICE -.->|"imports"| AUTH_MODELS
+    RBAC_SERVICE -.->|"imports"| AUTH_MODELS
+    DATA_SOURCE_SERVICE -.->|"imports"| SCAN_MODELS
+    SCAN_SERVICE -.->|"imports"| SCAN_MODELS
+    CLASSIFICATION_SERVICE -.->|"imports"| CLASSIFICATION_MODELS
+    COMPLIANCE_SERVICE -.->|"imports"| COMPLIANCE_MODELS
+    CATALOG_SERVICE -.->|"imports"| CATALOG_MODELS
+    
+    %% Racine Services depend on Racine Models
+    RACINE_ORCHESTRATION_SVC -.->|"imports"| RACINE_ORCHESTRATION
+    RACINE_WORKSPACE_SVC -.->|"imports"| RACINE_WORKSPACE
+    RACINE_WORKFLOW_SVC -.->|"imports"| RACINE_WORKFLOW
+    RACINE_PIPELINE_SVC -.->|"imports"| RACINE_PIPELINE
+    RACINE_AI_SVC -.->|"imports"| RACINE_AI
+    RACINE_COLLABORATION_SVC -.->|"imports"| RACINE_COLLABORATION
+    
+    %% Advanced Services depend on Multiple Models
+    AI_ML_SERVICE -.->|"imports"| RACINE_AI
+    AI_ML_SERVICE -.->|"imports"| ANALYTICS_MODELS
+    ANALYTICS_SERVICE -.->|"imports"| ANALYTICS_MODELS
+    INTEGRATION_SERVICE -.->|"imports"| INTEGRATION_MODELS
+    
+    %% API Routes depend on Services
+    CORE_ROUTES -.->|"imports"| AUTH_SERVICE
+    CORE_ROUTES -.->|"imports"| RBAC_SERVICE
+    CORE_ROUTES -.->|"imports"| DATA_SOURCE_SERVICE
+    CORE_ROUTES -.->|"imports"| SCAN_SERVICE
+    CORE_ROUTES -.->|"imports"| CLASSIFICATION_SERVICE
+    CORE_ROUTES -.->|"imports"| COMPLIANCE_SERVICE
+    CORE_ROUTES -.->|"imports"| CATALOG_SERVICE
+    
+    %% Racine Routes depend on Racine Services
+    RACINE_ORCHESTRATION_ROUTES -.->|"imports"| RACINE_ORCHESTRATION_SVC
+    RACINE_WORKSPACE_ROUTES -.->|"imports"| RACINE_WORKSPACE_SVC
+    ENTERPRISE_ROUTES -.->|"imports"| ANALYTICS_SERVICE
+    ENTERPRISE_ROUTES -.->|"imports"| INTEGRATION_SERVICE
+    
+    %% Middleware depends on Services
+    SECURITY_MIDDLEWARE -.->|"imports"| AUTH_SERVICE
+    SECURITY_MIDDLEWARE -.->|"imports"| RBAC_SERVICE
+    API_MIDDLEWARE -.->|"imports"| LOGGING_MODULE
+    
+    %% Core Infrastructure Dependencies
+    AUTH_SERVICE -.->|"imports"| DATABASE_MODULE
+    AUTH_SERVICE -.->|"imports"| SECURITY_MODULE
+    RBAC_SERVICE -.->|"imports"| DATABASE_MODULE
+    DATA_SOURCE_SERVICE -.->|"imports"| DATABASE_MODULE
+    SCAN_SERVICE -.->|"imports"| DATABASE_MODULE
+    CLASSIFICATION_SERVICE -.->|"imports"| DATABASE_MODULE
+    COMPLIANCE_SERVICE -.->|"imports"| DATABASE_MODULE
+    CATALOG_SERVICE -.->|"imports"| DATABASE_MODULE
+    
+    %% All Racine Services depend on Core
+    RACINE_ORCHESTRATION_SVC -.->|"imports"| DATABASE_MODULE
+    RACINE_WORKSPACE_SVC -.->|"imports"| DATABASE_MODULE
+    RACINE_WORKFLOW_SVC -.->|"imports"| DATABASE_MODULE
+    RACINE_PIPELINE_SVC -.->|"imports"| DATABASE_MODULE
+    RACINE_AI_SVC -.->|"imports"| DATABASE_MODULE
+    RACINE_COLLABORATION_SVC -.->|"imports"| DATABASE_MODULE
+    
+    %% Utils Dependencies
+    AUTH_SERVICE -.->|"imports"| VALIDATORS
+    COMPLIANCE_SERVICE -.->|"imports"| VALIDATORS
+    CLASSIFICATION_SERVICE -.->|"imports"| VALIDATORS
+    CATALOG_SERVICE -.->|"imports"| SERIALIZERS
+    SCAN_SERVICE -.->|"imports"| HELPERS
+    
+    %% Frontend Dependencies
+    RBAC_COMPONENTS -.->|"imports"| RACINE_API_SERVICES
+    CATALOG_COMPONENTS -.->|"imports"| API_SERVICES
+    SCAN_COMPONENTS -.->|"imports"| API_SERVICES
+    CLASSIFICATION_COMPONENTS -.->|"imports"| API_SERVICES
+    COMPLIANCE_COMPONENTS -.->|"imports"| API_SERVICES
+    
+    %% Racine UI Components Dependencies
+    RACINE_ORCHESTRATION_UI -.->|"imports"| RACINE_API_SERVICES
+    RACINE_WORKSPACE_UI -.->|"imports"| RACINE_API_SERVICES
+    RACINE_COLLABORATION_UI -.->|"imports"| RACINE_API_SERVICES
+    RACINE_AI_UI -.->|"imports"| RACINE_API_SERVICES
+    
+    %% Frontend Services Dependencies
+    API_SERVICES -.->|"calls"| CORE_ROUTES
+    RACINE_API_SERVICES -.->|"calls"| RACINE_ORCHESTRATION_ROUTES
+    RACINE_API_SERVICES -.->|"calls"| RACINE_WORKSPACE_ROUTES
+    RACINE_API_SERVICES -.->|"calls"| ENTERPRISE_ROUTES
+    
+    %% Frontend Types Dependencies
+    RBAC_COMPONENTS -.->|"imports"| CORE_TYPES
+    RBAC_COMPONENTS -.->|"imports"| RACINE_TYPES
+    CATALOG_COMPONENTS -.->|"imports"| CORE_TYPES
+    SCAN_COMPONENTS -.->|"imports"| CORE_TYPES
+    
+    %% Frontend Utils Dependencies
+    RBAC_COMPONENTS -.->|"imports"| FRONTEND_UTILS
+    CATALOG_COMPONENTS -.->|"imports"| FRONTEND_UTILS
+    API_SERVICES -.->|"imports"| FRONTEND_UTILS
+    
+    %% ========================================================================
+    %% STYLING & VISUAL ENHANCEMENTS
+    %% ========================================================================
+    
+    classDef modelsClass fill:#e3f2fd,stroke:#0d47a1,stroke-width:3px,color:#000
+    classDef servicesClass fill:#e8f5e8,stroke:#1b5e20,stroke-width:3px,color:#000
+    classDef apiClass fill:#fce4ec,stroke:#880e4f,stroke-width:3px,color:#000
+    classDef coreClass fill:#f1f8e9,stroke:#33691e,stroke-width:3px,color:#000
+    classDef utilsClass fill:#fff8e1,stroke:#e65100,stroke-width:3px,color:#000
+    classDef frontendClass fill:#f3e5f5,stroke:#4a148c,stroke-width:3px,color:#000
+    classDef racineClass fill:#fff3e0,stroke:#bf360c,stroke-width:4px,color:#000
+    
+    %% Apply styles to packages
+    class AUTH_MODELS,SCAN_MODELS,COMPLIANCE_MODELS,CLASSIFICATION_MODELS,CATALOG_MODELS,WORKFLOW_MODELS,ANALYTICS_MODELS,INTEGRATION_MODELS modelsClass
+    class RACINE_ORCHESTRATION,RACINE_WORKSPACE,RACINE_WORKFLOW,RACINE_PIPELINE,RACINE_AI,RACINE_COLLABORATION racineClass
+    class AUTH_SERVICE,RBAC_SERVICE,DATA_SOURCE_SERVICE,SCAN_SERVICE,CLASSIFICATION_SERVICE,COMPLIANCE_SERVICE,CATALOG_SERVICE,AI_ML_SERVICE,ANALYTICS_SERVICE,INTEGRATION_SERVICE servicesClass
+    class RACINE_ORCHESTRATION_SVC,RACINE_WORKSPACE_SVC,RACINE_WORKFLOW_SVC,RACINE_PIPELINE_SVC,RACINE_AI_SVC,RACINE_COLLABORATION_SVC racineClass
+    class CORE_ROUTES,RACINE_ORCHESTRATION_ROUTES,RACINE_WORKSPACE_ROUTES,ENTERPRISE_ROUTES,SECURITY_MIDDLEWARE,API_MIDDLEWARE apiClass
+    class CONFIG_MODULE,DATABASE_MODULE,SECURITY_MODULE,LOGGING_MODULE coreClass
+    class VALIDATORS,SERIALIZERS,HELPERS utilsClass
+    class RBAC_COMPONENTS,CATALOG_COMPONENTS,SCAN_COMPONENTS,CLASSIFICATION_COMPONENTS,COMPLIANCE_COMPONENTS,LAYOUT_COMPONENTS,COMMON_COMPONENTS,API_SERVICES,STATE_SERVICES,CORE_TYPES,FRONTEND_UTILS frontendClass
+    class RACINE_ORCHESTRATION_UI,RACINE_WORKSPACE_UI,RACINE_COLLABORATION_UI,RACINE_AI_UI,RACINE_API_SERVICES,RACINE_TYPES racineClass
