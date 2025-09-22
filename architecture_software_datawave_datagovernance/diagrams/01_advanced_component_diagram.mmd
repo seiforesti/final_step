@@ -1,0 +1,259 @@
+graph TB
+    %% ========================================================================
+    %% DATAWAVE DATA GOVERNANCE SYSTEM - ADVANCED COMPONENT ARCHITECTURE
+    %% ========================================================================
+    
+    %% Frontend Layer Components
+    subgraph FRONTEND["🖥️ FRONTEND PRESENTATION LAYER"]
+        direction TB
+        subgraph REACT_APPS["React Applications"]
+            REACT_UI["🔷 React UI Components<br/>├─ Advanced RBAC System<br/>├─ Data Catalog Browser<br/>├─ Scan Rule Designer<br/>├─ Compliance Dashboard<br/>└─ Classification Manager"]
+            WEBSOCKET_CLIENT["🌐 WebSocket Client<br/>├─ Real-time Notifications<br/>├─ Collaboration Events<br/>├─ Live Dashboard Updates<br/>└─ Activity Streaming"]
+        end
+        
+        subgraph FRONTEND_SERVICES["Frontend Service Layer"]
+            API_CLIENT["🔗 API Client Services<br/>├─ HTTP Interceptors<br/>├─ Error Handling<br/>├─ Request/Response Transformation<br/>└─ Authentication Headers"]
+            STATE_MANAGER["📊 State Management<br/>├─ Redux Store<br/>├─ Context Providers<br/>├─ Local Storage<br/>└─ Session Management"]
+        end
+    end
+    
+    %% API Gateway Layer
+    subgraph GATEWAY["🚪 API GATEWAY ORCHESTRATION LAYER"]
+        direction TB
+        subgraph GATEWAY_CORE["Gateway Core"]
+            FASTAPI_GATEWAY["⚡ FastAPI Gateway<br/>├─ Request Routing<br/>├─ Load Balancing<br/>├─ Circuit Breaker<br/>└─ API Versioning"]
+            MIDDLEWARE_STACK["🛡️ Middleware Stack<br/>├─ Authentication Middleware<br/>├─ CORS Handler<br/>├─ Rate Limiter<br/>├─ Request Validator<br/>└─ Response Transformer"]
+        end
+    end
+    
+    %% Racine Main Manager Layer (Master Orchestrator)
+    subgraph RACINE["👑 RACINE MAIN MANAGER - MASTER ORCHESTRATION LAYER"]
+        direction TB
+        subgraph ORCHESTRATION_CORE["Orchestration Core"]
+            MASTER_ORCHESTRATOR["🎯 Master Orchestrator<br/>├─ Cross-Service Coordination<br/>├─ Workflow Orchestration<br/>├─ Resource Management<br/>├─ Event Distribution<br/>└─ Service Discovery"]
+        end
+        
+        subgraph RACINE_SERVICES["Advanced Management Services"]
+            WORKSPACE_MANAGER["🏢 Workspace Manager<br/>├─ Multi-Tenant Isolation<br/>├─ Resource Allocation<br/>├─ Access Control Integration<br/>└─ Environment Management"]
+            
+            WORKFLOW_ENGINE["⚙️ Workflow Engine<br/>├─ Databricks-style Workflows<br/>├─ DAG Execution<br/>├─ Task Scheduling<br/>├─ Dependency Management<br/>└─ Error Recovery"]
+            
+            PIPELINE_OPTIMIZER["🚀 Pipeline Optimizer<br/>├─ AI-Driven Optimization<br/>├─ Performance Analysis<br/>├─ Resource Optimization<br/>├─ Cost Analysis<br/>└─ Bottleneck Detection"]
+            
+            AI_ASSISTANT["🧠 AI Assistant<br/>├─ Context-Aware Intelligence<br/>├─ Natural Language Processing<br/>├─ Recommendation Engine<br/>├─ Pattern Recognition<br/>└─ Automated Insights"]
+            
+            COLLABORATION_HUB["👥 Collaboration Hub<br/>├─ Real-time Collaboration<br/>├─ Document Sharing<br/>├─ Team Communication<br/>├─ Version Control<br/>└─ Review Workflows"]
+            
+            DASHBOARD_ENGINE["📈 Dashboard Engine<br/>├─ Real-time Analytics<br/>├─ Custom Visualizations<br/>├─ KPI Monitoring<br/>├─ Alert Management<br/>└─ Executive Reporting"]
+            
+            ACTIVITY_TRACKER["📋 Activity Tracker<br/>├─ Comprehensive Audit Trail<br/>├─ User Behavior Analytics<br/>├─ System Performance Metrics<br/>├─ Compliance Monitoring<br/>└─ Change Detection"]
+            
+            INTEGRATION_MANAGER["🔌 Integration Manager<br/>├─ External System Integration<br/>├─ API Management<br/>├─ Data Synchronization<br/>├─ Protocol Translation<br/>└─ Connection Pooling"]
+        end
+    end
+    
+    %% Core Business Services Layer
+    subgraph CORE_SERVICES["🏗️ CORE BUSINESS SERVICES LAYER"]
+        direction TB
+        subgraph GROUP1["🔐 Group 1: RBAC Authority"]
+            AUTH_SERVICE["🔒 Authentication Service<br/>├─ User Management<br/>├─ Session Handling<br/>├─ MFA Support<br/>├─ SSO Integration<br/>└─ Password Policies"]
+            
+            RBAC_SERVICE["🗝️ RBAC Service<br/>├─ Role-Based Access Control<br/>├─ Permission Management<br/>├─ Policy Enforcement<br/>├─ Hierarchical Roles<br/>└─ Dynamic Authorization"]
+        end
+        
+        subgraph GROUP2["🗄️ Group 2: Data Discovery"]
+            DATA_SOURCE_SERVICE["💾 Data Source Service<br/>├─ Connection Management<br/>├─ Schema Discovery<br/>├─ Metadata Extraction<br/>├─ Health Monitoring<br/>└─ Performance Optimization"]
+            
+            SCAN_SERVICE["🔍 Scan Service<br/>├─ Intelligent Data Scanning<br/>├─ Schema Analysis<br/>├─ Data Profiling<br/>├─ Quality Assessment<br/>└─ Anomaly Detection"]
+        end
+        
+        subgraph GROUP3["⚡ Group 3: Intelligence Engine"]
+            SCAN_RULE_SERVICE["📋 Scan Rule Sets Service<br/>├─ Rule Definition & Management<br/>├─ Template Library<br/>├─ Version Control<br/>├─ Execution History<br/>└─ Performance Analytics"]
+        end
+        
+        subgraph GROUP4["🏷️ Group 4: Classification Engine"]
+            CLASSIFICATION_SERVICE["🔖 Classification Service<br/>├─ AI-Powered Classification<br/>├─ Pattern Matching<br/>├─ Sensitivity Detection<br/>├─ Auto-Tagging<br/>└─ Custom Rules"]
+        end
+        
+        subgraph GROUP5["⚖️ Group 5: Governance Engine"]
+            COMPLIANCE_SERVICE["📊 Compliance Service<br/>├─ Regulatory Validation<br/>├─ Policy Enforcement<br/>├─ Risk Assessment<br/>├─ Audit Reporting<br/>└─ Violation Detection"]
+        end
+        
+        subgraph GROUP6["📚 Group 6: Knowledge Management"]
+            CATALOG_SERVICE["📖 Catalog Service<br/>├─ Metadata Management<br/>├─ Data Lineage Tracking<br/>├─ Asset Discovery<br/>├─ Relationship Mapping<br/>└─ Search & Browse"]
+        end
+        
+        subgraph GROUP7["🔄 Group 7: Orchestration Engine"]
+            WORKFLOW_ORCHESTRATION["🎭 Workflow Orchestration<br/>├─ Job Scheduling<br/>├─ Task Execution<br/>├─ Workflow Templates<br/>├─ Execution Monitoring<br/>└─ Resource Allocation"]
+        end
+    end
+    
+    %% Data Access & Infrastructure Layer
+    subgraph DATA_LAYER["💾 DATA ACCESS & INFRASTRUCTURE LAYER"]
+        direction TB
+        subgraph ORM_LAYER["Object-Relational Mapping"]
+            SQLMODEL_ORM["🔗 SQLModel ORM<br/>├─ Entity Mapping<br/>├─ Query Builder<br/>├─ Transaction Management<br/>├─ Connection Pooling<br/>└─ Migration Support"]
+        end
+        
+        subgraph CACHE_LAYER["Caching Layer"]
+            REDIS_MANAGER["⚡ Redis Cache Manager<br/>├─ Session Storage<br/>├─ Query Result Caching<br/>├─ Real-time Data<br/>├─ Pub/Sub Messaging<br/>└─ Distributed Locking"]
+        end
+        
+        subgraph CONNECTION_MANAGEMENT["Connection Management"]
+            CONN_POOL["🏊 Connection Pool Manager<br/>├─ Database Connection Pooling<br/>├─ Health Monitoring<br/>├─ Load Balancing<br/>├─ Failover Support<br/>└─ Performance Optimization"]
+        end
+    end
+    
+    %% Storage Layer
+    subgraph STORAGE["🗃️ PERSISTENT STORAGE LAYER"]
+        direction TB
+        subgraph PRIMARY_DB["Primary Database"]
+            POSTGRES_PRIMARY["🐘 PostgreSQL Primary<br/>├─ ACID Transactions<br/>├─ Advanced Indexing<br/>├─ Full-text Search<br/>├─ JSON Support<br/>└─ Partitioning"]
+        end
+        
+        subgraph READ_REPLICAS["Read Replicas"]
+            POSTGRES_REPLICA1["🐘 PostgreSQL Replica 1<br/>├─ Read-only Operations<br/>├─ Load Distribution<br/>├─ Async Replication<br/>└─ Backup Source"]
+            POSTGRES_REPLICA2["🐘 PostgreSQL Replica 2<br/>├─ Read-only Operations<br/>├─ Geographic Distribution<br/>├─ Disaster Recovery<br/>└─ Analytics Workload"]
+        end
+        
+        subgraph CACHE_STORAGE["Cache Storage"]
+            REDIS_MASTER["🔴 Redis Master<br/>├─ Write Operations<br/>├─ Session Management<br/>├─ Real-time Data<br/>└─ Message Queuing"]
+            REDIS_SLAVE["🔴 Redis Slave<br/>├─ Read Operations<br/>├─ Backup & Recovery<br/>├─ Load Distribution<br/>└─ High Availability"]
+        end
+        
+        subgraph FILE_STORAGE["File Storage"]
+            BLOB_STORAGE["☁️ Azure Blob Storage<br/>├─ Document Storage<br/>├─ Backup Files<br/>├─ Log Archives<br/>├─ Media Assets<br/>└─ Data Exports"]
+            FILE_SYSTEM["📁 Local File System<br/>├─ Temporary Files<br/>├─ Processing Cache<br/>├─ Configuration Files<br/>└─ Log Files"]
+        end
+    end
+    
+    %% External Systems Layer
+    subgraph EXTERNAL["🌐 EXTERNAL SYSTEMS INTEGRATION"]
+        direction TB
+        subgraph AZURE_SERVICES["Azure Services"]
+            AZURE_AD["🔑 Azure Active Directory<br/>├─ Enterprise Authentication<br/>├─ Single Sign-On<br/>├─ Multi-Factor Auth<br/>├─ Identity Governance<br/>└─ Conditional Access"]
+            
+            AZURE_PURVIEW["🔍 Azure Purview<br/>├─ Data Governance<br/>├─ Data Discovery<br/>├─ Compliance Monitoring<br/>├─ Data Classification<br/>└─ Lineage Tracking"]
+            
+            AZURE_DATABRICKS["⚡ Azure Databricks<br/>├─ Big Data Analytics<br/>├─ Machine Learning<br/>├─ Spark Processing<br/>├─ Collaborative Notebooks<br/>└─ MLOps Pipeline"]
+            
+            COGNITIVE_SERVICES["🧠 Azure Cognitive Services<br/>├─ Text Analytics<br/>├─ Language Understanding<br/>├─ Computer Vision<br/>├─ Speech Services<br/>└─ Decision APIs"]
+        end
+        
+        subgraph MONITORING["Monitoring & Observability"]
+            AZURE_MONITOR["📊 Azure Monitor<br/>├─ Infrastructure Monitoring<br/>├─ Application Performance<br/>├─ Log Analytics<br/>├─ Alert Management<br/>└─ Custom Dashboards"]
+        end
+    end
+    
+    %% ========================================================================
+    %% COMPONENT CONNECTIONS & DATA FLOW
+    %% ========================================================================
+    
+    %% Frontend to Gateway
+    REACT_UI -.->|"HTTP/HTTPS"| FASTAPI_GATEWAY
+    WEBSOCKET_CLIENT -.->|"WebSocket"| FASTAPI_GATEWAY
+    API_CLIENT -.->|"REST APIs"| FASTAPI_GATEWAY
+    STATE_MANAGER -.->|"State Sync"| API_CLIENT
+    
+    %% Gateway to Middleware
+    FASTAPI_GATEWAY --> MIDDLEWARE_STACK
+    
+    %% Gateway to Racine Master
+    MIDDLEWARE_STACK --> MASTER_ORCHESTRATOR
+    
+    %% Racine Internal Orchestration
+    MASTER_ORCHESTRATOR --> WORKSPACE_MANAGER
+    MASTER_ORCHESTRATOR --> WORKFLOW_ENGINE
+    MASTER_ORCHESTRATOR --> PIPELINE_OPTIMIZER
+    MASTER_ORCHESTRATOR --> AI_ASSISTANT
+    MASTER_ORCHESTRATOR --> COLLABORATION_HUB
+    MASTER_ORCHESTRATOR --> DASHBOARD_ENGINE
+    MASTER_ORCHESTRATOR --> ACTIVITY_TRACKER
+    MASTER_ORCHESTRATOR --> INTEGRATION_MANAGER
+    
+    %% Workspace Manager to Core Services
+    WORKSPACE_MANAGER --> AUTH_SERVICE
+    WORKSPACE_MANAGER --> RBAC_SERVICE
+    WORKSPACE_MANAGER --> DATA_SOURCE_SERVICE
+    WORKSPACE_MANAGER --> SCAN_SERVICE
+    WORKSPACE_MANAGER --> SCAN_RULE_SERVICE
+    WORKSPACE_MANAGER --> CLASSIFICATION_SERVICE
+    WORKSPACE_MANAGER --> COMPLIANCE_SERVICE
+    WORKSPACE_MANAGER --> CATALOG_SERVICE
+    WORKSPACE_MANAGER --> WORKFLOW_ORCHESTRATION
+    
+    %% AI Assistant Integration
+    AI_ASSISTANT -.->|"ML Models"| CLASSIFICATION_SERVICE
+    AI_ASSISTANT -.->|"Optimization"| PIPELINE_OPTIMIZER
+    AI_ASSISTANT -.->|"Insights"| DASHBOARD_ENGINE
+    AI_ASSISTANT -.->|"Recommendations"| CATALOG_SERVICE
+    
+    %% Collaboration Hub Connections
+    COLLABORATION_HUB -.->|"Real-time"| WEBSOCKET_CLIENT
+    COLLABORATION_HUB --> ACTIVITY_TRACKER
+    
+    %% Core Services to Data Layer
+    AUTH_SERVICE --> SQLMODEL_ORM
+    RBAC_SERVICE --> SQLMODEL_ORM
+    DATA_SOURCE_SERVICE --> SQLMODEL_ORM
+    SCAN_SERVICE --> SQLMODEL_ORM
+    SCAN_RULE_SERVICE --> SQLMODEL_ORM
+    CLASSIFICATION_SERVICE --> SQLMODEL_ORM
+    COMPLIANCE_SERVICE --> SQLMODEL_ORM
+    CATALOG_SERVICE --> SQLMODEL_ORM
+    WORKFLOW_ORCHESTRATION --> SQLMODEL_ORM
+    
+    %% Caching Connections
+    AUTH_SERVICE -.->|"Sessions"| REDIS_MANAGER
+    COLLABORATION_HUB -.->|"Real-time"| REDIS_MANAGER
+    DASHBOARD_ENGINE -.->|"Metrics"| REDIS_MANAGER
+    
+    %% ORM to Connection Pool
+    SQLMODEL_ORM --> CONN_POOL
+    
+    %% Connection Pool to Databases
+    CONN_POOL --> POSTGRES_PRIMARY
+    CONN_POOL -.->|"Read"| POSTGRES_REPLICA1
+    CONN_POOL -.->|"Read"| POSTGRES_REPLICA2
+    
+    %% Redis Connections
+    REDIS_MANAGER --> REDIS_MASTER
+    REDIS_MASTER --> REDIS_SLAVE
+    
+    %% File Storage Connections
+    SCAN_SERVICE -.->|"Data Files"| BLOB_STORAGE
+    CATALOG_SERVICE -.->|"Metadata"| BLOB_STORAGE
+    DATA_SOURCE_SERVICE -.->|"Configs"| FILE_SYSTEM
+    ACTIVITY_TRACKER -.->|"Logs"| FILE_SYSTEM
+    
+    %% External System Integrations
+    INTEGRATION_MANAGER --> AZURE_AD
+    INTEGRATION_MANAGER --> AZURE_PURVIEW
+    INTEGRATION_MANAGER --> AZURE_DATABRICKS
+    AI_ASSISTANT --> COGNITIVE_SERVICES
+    
+    %% Monitoring Connections
+    MASTER_ORCHESTRATOR -.->|"Metrics"| AZURE_MONITOR
+    WORKFLOW_ENGINE -.->|"Performance"| AZURE_MONITOR
+    POSTGRES_PRIMARY -.->|"DB Metrics"| AZURE_MONITOR
+    
+    %% ========================================================================
+    %% STYLING & VISUAL ENHANCEMENTS
+    %% ========================================================================
+    
+    classDef frontendClass fill:#e1f5fe,stroke:#01579b,stroke-width:3px,color:#000
+    classDef gatewayClass fill:#f3e5f5,stroke:#4a148c,stroke-width:3px,color:#000
+    classDef racineClass fill:#fff3e0,stroke:#e65100,stroke-width:4px,color:#000
+    classDef coreServiceClass fill:#e8f5e8,stroke:#1b5e20,stroke-width:3px,color:#000
+    classDef dataClass fill:#fce4ec,stroke:#880e4f,stroke-width:3px,color:#000
+    classDef storageClass fill:#f1f8e9,stroke:#33691e,stroke-width:3px,color:#000
+    classDef externalClass fill:#fff8e1,stroke:#ff6f00,stroke-width:3px,color:#000
+    
+    %% Apply styles to components
+    class REACT_UI,WEBSOCKET_CLIENT,API_CLIENT,STATE_MANAGER frontendClass
+    class FASTAPI_GATEWAY,MIDDLEWARE_STACK gatewayClass
+    class MASTER_ORCHESTRATOR,WORKSPACE_MANAGER,WORKFLOW_ENGINE,PIPELINE_OPTIMIZER,AI_ASSISTANT,COLLABORATION_HUB,DASHBOARD_ENGINE,ACTIVITY_TRACKER,INTEGRATION_MANAGER racineClass
+    class AUTH_SERVICE,RBAC_SERVICE,DATA_SOURCE_SERVICE,SCAN_SERVICE,SCAN_RULE_SERVICE,CLASSIFICATION_SERVICE,COMPLIANCE_SERVICE,CATALOG_SERVICE,WORKFLOW_ORCHESTRATION coreServiceClass
+    class SQLMODEL_ORM,REDIS_MANAGER,CONN_POOL dataClass
+    class POSTGRES_PRIMARY,POSTGRES_REPLICA1,POSTGRES_REPLICA2,REDIS_MASTER,REDIS_SLAVE,BLOB_STORAGE,FILE_SYSTEM storageClass
+    class AZURE_AD,AZURE_PURVIEW,AZURE_DATABRICKS,COGNITIVE_SERVICES,AZURE_MONITOR externalClass

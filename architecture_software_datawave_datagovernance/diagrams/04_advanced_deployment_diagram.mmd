@@ -1,0 +1,318 @@
+graph TB
+    %% ========================================================================
+    %% DATAWAVE DATA GOVERNANCE SYSTEM - ADVANCED DEPLOYMENT ARCHITECTURE
+    %% ========================================================================
+    
+    %% Internet & External Access
+    subgraph INTERNET["🌐 INTERNET & EXTERNAL ACCESS"]
+        direction TB
+        USERS["👥 End Users<br/>├─ Data Stewards<br/>├─ Data Engineers<br/>├─ Compliance Officers<br/>├─ Business Analysts<br/>└─ System Administrators"]
+        EXTERNAL_SYSTEMS["🔗 External Systems<br/>├─ Third-party APIs<br/>├─ Partner Systems<br/>├─ Legacy Applications<br/>├─ Data Providers<br/>└─ Regulatory Systems"]
+    end
+    
+    %% Azure Cloud Environment
+    subgraph AZURE_CLOUD["☁️ MICROSOFT AZURE CLOUD ENVIRONMENT"]
+        direction TB
+        
+        %% Traffic Management & Security Layer
+        subgraph TRAFFIC_MGT["🛡️ TRAFFIC MANAGEMENT & SECURITY LAYER"]
+            direction TB
+            subgraph CDN_LAYER["Content Delivery Network"]
+                AZURE_CDN["🌍 Azure CDN<br/>├─ Global Edge Locations<br/>├─ Static Asset Caching<br/>├─ SSL/TLS Termination<br/>├─ DDoS Protection<br/>└─ Geographic Load Balancing<br/><br/>📊 Performance:<br/>├─ 99.99% Availability<br/>├─ <100ms Latency<br/>└─ 10Gbps Bandwidth"]
+            end
+            
+            subgraph WAF_LAYER["Web Application Firewall"]
+                APP_GATEWAY["🔐 Azure Application Gateway<br/>├─ Web Application Firewall (WAF)<br/>├─ SSL Certificate Management<br/>├─ URL-based Routing<br/>├─ Session Affinity<br/>├─ Auto-scaling (2-10 instances)<br/>└─ Health Probes<br/><br/>🔧 Configuration:<br/>├─ Standard_v2 SKU<br/>├─ OWASP Core Rule Set<br/>└─ Custom Security Rules"]
+            end
+            
+            subgraph LOAD_BALANCER["Load Balancing"]
+                AZURE_LB["⚖️ Azure Load Balancer<br/>├─ Layer 4 Load Balancing<br/>├─ High Availability Ports<br/>├─ Outbound NAT Rules<br/>├─ Health Monitoring<br/>└─ Cross-region Failover<br/><br/>📈 Specifications:<br/>├─ Standard SKU<br/>├─ Zone Redundant<br/>└─ 99.99% SLA"]
+            end
+        end
+        
+        %% Container Orchestration Platform
+        subgraph AKS_CLUSTER["🚢 AZURE KUBERNETES SERVICE (AKS) CLUSTER"]
+            direction TB
+            
+            %% Cluster Configuration
+            subgraph CLUSTER_CONFIG["Cluster Configuration"]
+                AKS_CONTROL["🎛️ AKS Control Plane<br/>├─ Kubernetes v1.28<br/>├─ 3 Master Nodes (Managed)<br/>├─ RBAC Enabled<br/>├─ Network Policy: Calico<br/>├─ Auto-scaling: Enabled<br/>└─ Monitoring: Container Insights<br/><br/>🔧 Features:<br/>├─ Azure AD Integration<br/>├─ Pod Identity<br/>└─ Secret Store CSI Driver"]
+            end
+            
+            %% Node Pools
+            subgraph NODE_POOLS["Node Pool Architecture"]
+                SYSTEM_POOL["🖥️ System Node Pool<br/>├─ VM Size: Standard_D4s_v3<br/>├─ Node Count: 3-5 (Auto-scale)<br/>├─ OS Disk: 128GB Premium SSD<br/>├─ Taint: CriticalAddonsOnly<br/>└─ Purpose: System Components<br/><br/>💾 Resources per Node:<br/>├─ 4 vCPUs<br/>├─ 16GB RAM<br/>└─ 100Gbps Network"]
+                
+                APPLICATION_POOL["🚀 Application Node Pool<br/>├─ VM Size: Standard_D8s_v3<br/>├─ Node Count: 5-15 (Auto-scale)<br/>├─ OS Disk: 256GB Premium SSD<br/>├─ Purpose: Application Workloads<br/>└─ Spot Instances: 30% for dev<br/><br/>💾 Resources per Node:<br/>├─ 8 vCPUs<br/>├─ 32GB RAM<br/>└─ 100Gbps Network"]
+                
+                AI_POOL["🧠 AI/ML Node Pool<br/>├─ VM Size: Standard_NC6s_v3<br/>├─ Node Count: 2-8 (Auto-scale)<br/>├─ GPU: NVIDIA V100<br/>├─ Purpose: AI/ML Workloads<br/>└─ Preemptible: Cost Optimization<br/><br/>🔥 Specialized Resources:<br/>├─ 6 vCPUs + GPU<br/>├─ 112GB RAM<br/>└─ NVMe SSD Cache"]
+            end
+            
+            %% Ingress Layer
+            subgraph INGRESS_LAYER["🚪 INGRESS LAYER"]
+                NGINX_INGRESS["🌐 NGINX Ingress Controller<br/>├─ Replicas: 3 (HA Configuration)<br/>├─ SSL/TLS Termination<br/>├─ Rate Limiting: 1000 req/min<br/>├─ Request Routing<br/>├─ WebSocket Support<br/>└─ Sticky Sessions<br/><br/>📊 Resource Allocation:<br/>├─ CPU: 500m per replica<br/>├─ Memory: 512Mi per replica<br/>└─ Network: Dedicated Load Balancer"]
+            end
+            
+            %% Frontend Tier
+            subgraph FRONTEND_TIER["🖥️ FRONTEND PRESENTATION TIER"]
+                direction TB
+                REACT_PODS["⚛️ React Application Pods<br/>├─ Replicas: 6 (2 per AZ)<br/>├─ Container: nginx:alpine<br/>├─ Static Assets: Optimized<br/>├─ PWA: Enabled<br/>├─ Service Worker: Caching<br/>└─ Auto-scaling: HPA Enabled<br/><br/>📊 Resource Allocation:<br/>├─ CPU Request: 100m<br/>├─ CPU Limit: 200m<br/>├─ Memory Request: 128Mi<br/>├─ Memory Limit: 256Mi<br/>└─ Storage: 1Gi EmptyDir"]
+                
+                WEBSOCKET_PODS["🔌 WebSocket Service Pods<br/>├─ Replicas: 4<br/>├─ Real-time Communication<br/>├─ Connection Pooling<br/>├─ Message Broadcasting<br/>├─ Session Persistence<br/>└─ Auto-scaling: Custom Metrics<br/><br/>📊 Resource Allocation:<br/>├─ CPU Request: 200m<br/>├─ CPU Limit: 500m<br/>├─ Memory Request: 256Mi<br/>├─ Memory Limit: 512Mi<br/>└─ Connections: 10k per pod"]
+            end
+            
+            %% API Gateway Tier
+            subgraph API_GATEWAY_TIER["🚪 API GATEWAY TIER"]
+                FASTAPI_PODS["⚡ FastAPI Gateway Pods<br/>├─ Replicas: 6 (2 per AZ)<br/>├─ Request Routing & Load Balancing<br/>├─ Authentication Middleware<br/>├─ Rate Limiting: Redis-based<br/>├─ Circuit Breaker: Hystrix<br/>├─ API Versioning<br/>└─ Request/Response Transformation<br/><br/>📊 Resource Allocation:<br/>├─ CPU Request: 500m<br/>├─ CPU Limit: 1000m<br/>├─ Memory Request: 1Gi<br/>├─ Memory Limit: 2Gi<br/>└─ Throughput: 5k req/sec"]
+            end
+            
+            %% Racine Main Manager Tier
+            subgraph RACINE_TIER["👑 RACINE MAIN MANAGER TIER"]
+                direction TB
+                ORCHESTRATION_PODS["🎯 Master Orchestration Pods<br/>├─ Replicas: 4 (Leader Election)<br/>├─ Cross-Service Coordination<br/>├─ Workflow Management<br/>├─ Resource Allocation<br/>├─ Event Distribution<br/>├─ Service Discovery<br/>└─ Health Monitoring<br/><br/>📊 Resource Allocation:<br/>├─ CPU Request: 1000m<br/>├─ CPU Limit: 2000m<br/>├─ Memory Request: 2Gi<br/>├─ Memory Limit: 4Gi<br/>└─ Storage: 10Gi Persistent"]
+                
+                WORKSPACE_PODS["🏢 Workspace Manager Pods<br/>├─ Replicas: 4<br/>├─ Multi-Tenant Isolation<br/>├─ Resource Provisioning<br/>├─ Access Control Integration<br/>├─ Environment Management<br/>├─ Quota Management<br/>└─ Workspace Analytics<br/><br/>📊 Resource Allocation:<br/>├─ CPU Request: 500m<br/>├─ CPU Limit: 1000m<br/>├─ Memory Request: 1Gi<br/>├─ Memory Limit: 2Gi<br/>└─ Storage: 5Gi Persistent"]
+                
+                WORKFLOW_PODS["⚙️ Workflow Engine Pods<br/>├─ Replicas: 6<br/>├─ DAG Execution Engine<br/>├─ Task Scheduling<br/>├─ Dependency Management<br/>├─ Error Recovery<br/>├─ Parallel Processing<br/>└─ Workflow Templates<br/><br/>📊 Resource Allocation:<br/>├─ CPU Request: 1000m<br/>├─ CPU Limit: 2000m<br/>├─ Memory Request: 2Gi<br/>├─ Memory Limit: 4Gi<br/>└─ Storage: 20Gi Persistent"]
+                
+                PIPELINE_PODS["🚀 Pipeline Optimizer Pods<br/>├─ Replicas: 4<br/>├─ AI-Driven Optimization<br/>├─ Performance Analysis<br/>├─ Cost Optimization<br/>├─ Bottleneck Detection<br/>├─ Resource Scaling<br/>└─ Predictive Analytics<br/><br/>📊 Resource Allocation:<br/>├─ CPU Request: 1500m<br/>├─ CPU Limit: 3000m<br/>├─ Memory Request: 4Gi<br/>├─ Memory Limit: 8Gi<br/>└─ GPU: Optional V100"]
+                
+                AI_ASSISTANT_PODS["🧠 AI Assistant Pods<br/>├─ Replicas: 4<br/>├─ Natural Language Processing<br/>├─ Recommendation Engine<br/>├─ Pattern Recognition<br/>├─ Automated Insights<br/>├─ Context Analysis<br/>├─ ML Model Serving<br/>└─ Knowledge Graph<br/><br/>📊 Resource Allocation:<br/>├─ CPU Request: 2000m<br/>├─ CPU Limit: 4000m<br/>├─ Memory Request: 8Gi<br/>├─ Memory Limit: 16Gi<br/>└─ GPU: NVIDIA V100"]
+                
+                COLLABORATION_PODS["👥 Collaboration Hub Pods<br/>├─ Replicas: 4<br/>├─ Real-time Collaboration<br/>├─ Document Sharing<br/>├─ Team Communication<br/>├─ Version Control<br/>├─ Review Workflows<br/>├─ Activity Feeds<br/>└─ Notification System<br/><br/>📊 Resource Allocation:<br/>├─ CPU Request: 500m<br/>├─ CPU Limit: 1000m<br/>├─ Memory Request: 1Gi<br/>├─ Memory Limit: 2Gi<br/>└─ WebSocket Connections"]
+                
+                DASHBOARD_PODS["📈 Dashboard Engine Pods<br/>├─ Replicas: 4<br/>├─ Real-time Analytics<br/>├─ Custom Visualizations<br/>├─ KPI Monitoring<br/>├─ Executive Reporting<br/>├─ Alert Management<br/>├─ Data Aggregation<br/>└─ Export Services<br/><br/>📊 Resource Allocation:<br/>├─ CPU Request: 500m<br/>├─ CPU Limit: 1000m<br/>├─ Memory Request: 1Gi<br/>├─ Memory Limit: 2Gi<br/>└─ Cache: Redis Integration"]
+                
+                ACTIVITY_PODS["📋 Activity Tracker Pods<br/>├─ Replicas: 3<br/>├─ Comprehensive Audit Trail<br/>├─ User Behavior Analytics<br/>├─ System Performance Metrics<br/>├─ Compliance Monitoring<br/>├─ Change Detection<br/>├─ Event Streaming<br/>└─ Log Aggregation<br/><br/>📊 Resource Allocation:<br/>├─ CPU Request: 300m<br/>├─ CPU Limit: 500m<br/>├─ Memory Request: 512Mi<br/>├─ Memory Limit: 1Gi<br/>└─ Storage: 50Gi Logs"]
+                
+                INTEGRATION_PODS["🔌 Integration Manager Pods<br/>├─ Replicas: 4<br/>├─ External System Integration<br/>├─ API Management<br/>├─ Data Synchronization<br/>├─ Protocol Translation<br/>├─ Connection Pooling<br/>├─ Message Queuing<br/>└─ ETL Processing<br/><br/>📊 Resource Allocation:<br/>├─ CPU Request: 500m<br/>├─ CPU Limit: 1000m<br/>├─ Memory Request: 1Gi<br/>├─ Memory Limit: 2Gi<br/>└─ Network: High Bandwidth"]
+            end
+            
+            %% Core Business Services Tier
+            subgraph CORE_SERVICES_TIER["🏗️ CORE BUSINESS SERVICES TIER"]
+                direction TB
+                AUTH_PODS["🔒 Authentication Service Pods<br/>├─ Replicas: 6<br/>├─ User Management<br/>├─ Session Handling<br/>├─ MFA Support<br/>├─ SSO Integration<br/>├─ Password Policies<br/>├─ Token Management<br/>└─ Security Auditing<br/><br/>📊 Resource Allocation:<br/>├─ CPU Request: 300m<br/>├─ CPU Limit: 500m<br/>├─ Memory Request: 512Mi<br/>├─ Memory Limit: 1Gi<br/>└─ Cache: Redis Sessions"]
+                
+                RBAC_PODS["🗝️ RBAC Service Pods<br/>├─ Replicas: 4<br/>├─ Role-Based Access Control<br/>├─ Permission Management<br/>├─ Policy Enforcement<br/>├─ Hierarchical Roles<br/>├─ Dynamic Authorization<br/>├─ Audit Trail<br/>└─ Policy Engine<br/><br/>📊 Resource Allocation:<br/>├─ CPU Request: 300m<br/>├─ CPU Limit: 500m<br/>├─ Memory Request: 512Mi<br/>├─ Memory Limit: 1Gi<br/>└─ Policy Cache: Redis"]
+                
+                DATA_SOURCE_PODS["💾 Data Source Service Pods<br/>├─ Replicas: 4<br/>├─ Connection Management<br/>├─ Schema Discovery<br/>├─ Health Monitoring<br/>├─ Performance Optimization<br/>├─ Metadata Extraction<br/>├─ Connection Pooling<br/>└─ Driver Management<br/><br/>📊 Resource Allocation:<br/>├─ CPU Request: 500m<br/>├─ CPU Limit: 1000m<br/>├─ Memory Request: 1Gi<br/>├─ Memory Limit: 2Gi<br/>└─ Connections: 1k per pod"]
+                
+                SCAN_PODS["🔍 Scan Service Pods<br/>├─ Replicas: 6<br/>├─ Data Scanning Engine<br/>├─ Schema Analysis<br/>├─ Data Profiling<br/>├─ Quality Assessment<br/>├─ Anomaly Detection<br/>├─ Parallel Processing<br/>└─ Result Aggregation<br/><br/>📊 Resource Allocation:<br/>├─ CPU Request: 1000m<br/>├─ CPU Limit: 2000m<br/>├─ Memory Request: 2Gi<br/>├─ Memory Limit: 4Gi<br/>└─ Storage: Temporary Data"]
+                
+                CLASSIFICATION_PODS["🔖 Classification Service Pods<br/>├─ Replicas: 4<br/>├─ AI-Powered Classification<br/>├─ Pattern Matching<br/>├─ Sensitivity Detection<br/>├─ Auto-Tagging<br/>├─ Custom Rules<br/>├─ ML Model Inference<br/>└─ Confidence Scoring<br/><br/>📊 Resource Allocation:<br/>├─ CPU Request: 1000m<br/>├─ CPU Limit: 2000m<br/>├─ Memory Request: 2Gi<br/>├─ Memory Limit: 4Gi<br/>└─ ML Models: Cached"]
+                
+                COMPLIANCE_PODS["📊 Compliance Service Pods<br/>├─ Replicas: 4<br/>├─ Regulatory Validation<br/>├─ Policy Enforcement<br/>├─ Risk Assessment<br/>├─ Audit Reporting<br/>├─ Violation Detection<br/>├─ Compliance Scoring<br/>└─ Regulatory Updates<br/><br/>📊 Resource Allocation:<br/>├─ CPU Request: 500m<br/>├─ CPU Limit: 1000m<br/>├─ Memory Request: 1Gi<br/>├─ Memory Limit: 2Gi<br/>└─ Rules Engine: Cached"]
+                
+                CATALOG_PODS["📖 Catalog Service Pods<br/>├─ Replicas: 4<br/>├─ Metadata Management<br/>├─ Data Lineage Tracking<br/>├─ Asset Discovery<br/>├─ Relationship Mapping<br/>├─ Search & Browse<br/>├─ Index Management<br/>└─ Graph Processing<br/><br/>📊 Resource Allocation:<br/>├─ CPU Request: 500m<br/>├─ CPU Limit: 1000m<br/>├─ Memory Request: 1Gi<br/>├─ Memory Limit: 2Gi<br/>└─ Search Index: Elasticsearch"]
+            end
+            
+            %% Data & Cache Layer
+            subgraph DATA_CACHE_LAYER["💾 DATA & CACHE LAYER"]
+                direction TB
+                POSTGRES_PRIMARY["🐘 PostgreSQL Primary<br/>├─ Version: 15.3<br/>├─ High Availability: Enabled<br/>├─ Backup: Automated Daily<br/>├─ Point-in-time Recovery<br/>├─ Connection Pooling: PgBouncer<br/>├─ Monitoring: pg_stat_statements<br/>└─ Encryption: TLS + at-rest<br/><br/>📊 Resource Allocation:<br/>├─ CPU Request: 4000m<br/>├─ Memory Request: 16Gi<br/>├─ Storage: 2TB Premium SSD<br/>└─ IOPS: 20,000"]
+                
+                POSTGRES_REPLICAS["🐘 PostgreSQL Read Replicas<br/>├─ Replicas: 3 (Multi-AZ)<br/>├─ Streaming Replication<br/>├─ Load Balancing: Read Queries<br/>├─ Failover: Automatic<br/>├─ Lag Monitoring: <1sec<br/>├─ Analytics Workloads<br/>└─ Disaster Recovery<br/><br/>📊 Resource Allocation:<br/>├─ CPU Request: 2000m<br/>├─ Memory Request: 8Gi<br/>├─ Storage: 2TB Premium SSD<br/>└─ Cross-region: Available"]
+                
+                REDIS_CLUSTER["🔴 Redis Cluster<br/>├─ Topology: 6 nodes (3 masters)<br/>├─ High Availability: Sentinel<br/>├─ Persistence: RDB + AOF<br/>├─ Memory Policy: allkeys-lru<br/>├─ Clustering: Enabled<br/>├─ SSL/TLS: Enabled<br/>└─ Monitoring: Redis Insights<br/><br/>📊 Resource Allocation:<br/>├─ CPU Request: 1000m per node<br/>├─ Memory Request: 4Gi per node<br/>├─ Storage: 100Gi Premium SSD<br/>└─ Network: 10Gbps"]
+            end
+            
+            %% Storage Layer
+            subgraph STORAGE_LAYER["🗄️ PERSISTENT STORAGE LAYER"]
+                direction TB
+                PVC_POSTGRES["💽 PostgreSQL PVCs<br/>├─ Storage Class: Premium SSD<br/>├─ Size: 2TB per instance<br/>├─ Replication: 3x<br/>├─ Backup: Automated<br/>├─ Encryption: AES-256<br/>├─ Snapshot: Daily<br/>└─ Performance: 20k IOPS"]
+                
+                PVC_REDIS["💽 Redis PVCs<br/>├─ Storage Class: Premium SSD<br/>├─ Size: 100Gi per node<br/>├─ Replication: 3x<br/>├─ Persistence: RDB + AOF<br/>├─ Encryption: AES-256<br/>└─ Performance: 5k IOPS"]
+                
+                PVC_LOGS["📝 Logging PVCs<br/>├─ Storage Class: Standard SSD<br/>├─ Size: 500Gi<br/>├─ Retention: 90 days<br/>├─ Compression: Enabled<br/>├─ Rotation: Daily<br/>└─ Archive: Cold Storage"]
+                
+                PVC_TEMP["🔄 Temporary PVCs<br/>├─ Storage Class: Premium SSD<br/>├─ Size: 1TB<br/>├─ Purpose: Processing Cache<br/>├─ Lifecycle: Ephemeral<br/>├─ Performance: High IOPS<br/>└─ Auto-cleanup: Enabled"]
+            end
+        end
+        
+        %% Managed Azure Services
+        subgraph AZURE_MANAGED["🔧 AZURE MANAGED SERVICES"]
+            direction TB
+            
+            subgraph DATABASE_SERVICES["Database Services"]
+                AZURE_POSTGRES["🐘 Azure Database for PostgreSQL<br/>├─ Service Tier: Flexible Server<br/>├─ Compute: General Purpose<br/>├─ vCores: 8 (Burstable to 32)<br/>├─ Memory: 32GB<br/>├─ Storage: 2TB (Auto-grow)<br/>├─ Backup Retention: 35 days<br/>├─ High Availability: Zone Redundant<br/>├─ SSL: Required<br/>└─ Point-in-time Recovery: Enabled<br/><br/>🔧 Features:<br/>├─ Read Replicas: 5 max<br/>├─ Connection Pooling: PgBouncer<br/>├─ Query Performance Insights<br/>├─ Intelligent Performance<br/>└─ Advanced Threat Protection"]
+                
+                AZURE_REDIS["🔴 Azure Cache for Redis<br/>├─ Service Tier: Premium P3<br/>├─ Memory: 26GB<br/>├─ Clustering: Enabled (10 shards)<br/>├─ Persistence: RDB + AOF<br/>├─ Geo-replication: Available<br/>├─ SSL: Required<br/>├─ VNet Integration: Enabled<br/>└─ Zone Redundancy: Enabled<br/><br/>🔧 Features:<br/>├─ Redis Modules: RedisSearch<br/>├─ Import/Export: Supported<br/>├─ Scheduled Patching<br/>├─ Advanced Monitoring<br/>└─ Private Endpoint"]
+            end
+            
+            subgraph STORAGE_SERVICES["Storage Services"]
+                BLOB_STORAGE["☁️ Azure Blob Storage<br/>├─ Account Type: StorageV2<br/>├─ Performance: Standard<br/>├─ Replication: GRS (Geo-redundant)<br/>├─ Access Tiers: Hot/Cool/Archive<br/>├─ Capacity: 100TB<br/>├─ Encryption: Customer-managed keys<br/>├─ Lifecycle Management: Enabled<br/>├─ Soft Delete: 30 days<br/>└─ Versioning: Enabled<br/><br/>🔧 Features:<br/>├─ Private Endpoints<br/>├─ Immutable Blobs<br/>├─ Change Feed<br/>├─ Point-in-time Restore<br/>└─ Advanced Threat Protection"]
+                
+                FILE_STORAGE["📁 Azure Files<br/>├─ Service Tier: Premium<br/>├─ Protocol: SMB 3.0 + NFS 4.1<br/>├─ Capacity: 10TB<br/>├─ Performance: 10k IOPS<br/>├─ Throughput: 1GB/s<br/>├─ Backup: Azure Backup<br/>├─ Encryption: AES-256<br/>├─ Access Control: RBAC + ACLs<br/>└─ Sync: Azure File Sync<br/><br/>🔧 Features:<br/>├─ Private Endpoints<br/>├─ Snapshot: Manual + Automated<br/>├─ Soft Delete: 14 days<br/>├─ Large File Shares<br/>└─ Multi-region Access"]
+            end
+            
+            subgraph CONTAINER_SERVICES["Container Services"]
+                ACR["🐳 Azure Container Registry<br/>├─ Service Tier: Premium<br/>├─ Geo-replication: 3 regions<br/>├─ Webhook: Enabled<br/>├─ Content Trust: Enabled<br/>├─ Vulnerability Scanning: Enabled<br/>├─ Helm Chart Support<br/>├─ OCI Artifact Support<br/>├─ Private Endpoints<br/>└─ Customer-managed Keys<br/><br/>🔧 Features:<br/>├─ Image Quarantine<br/>├─ Retention Policies<br/>├─ Build Tasks (ACR Tasks)<br/>├─ Multi-architecture Images<br/>└─ Token Authentication"]
+            end
+            
+            subgraph SECURITY_SERVICES["Security Services"]
+                KEY_VAULT["🔐 Azure Key Vault<br/>├─ Service Tier: Premium<br/>├─ HSM: Dedicated HSM Pool<br/>├─ Secrets: 10k limit<br/>├─ Certificates: Auto-renewal<br/>├─ Keys: RSA 4096 + ECC<br/>├─ Access Policies: RBAC<br/>├─ Soft Delete: 90 days<br/>├─ Purge Protection: Enabled<br/>└─ Private Endpoints<br/><br/>🔧 Features:<br/>├─ Certificate Transparency<br/>├─ Backup & Restore<br/>├─ Key Rotation Automation<br/>├─ Multi-region Replication<br/>└─ Compliance: FIPS 140-2"]
+                
+                AZURE_AD["🔑 Azure Active Directory<br/>├─ Edition: Premium P2<br/>├─ Users: 10k+ Enterprise Users<br/>├─ Groups: Dynamic + Security<br/>├─ Conditional Access: Enabled<br/>├─ MFA: Enforced<br/>├─ Identity Protection: Enabled<br/>├─ Privileged Identity Management<br/>├─ Access Reviews: Quarterly<br/>└─ B2B/B2C: Supported<br/><br/>🔧 Features:<br/>├─ Single Sign-On (SSO)<br/>├─ SAML/OAuth/OpenID<br/>├─ Application Proxy<br/>├─ Device Management<br/>└─ Risk-based Policies"]
+            end
+            
+            subgraph MONITORING_SERVICES["Monitoring & Observability"]
+                AZURE_MONITOR["📊 Azure Monitor<br/>├─ Metrics: Custom + Platform<br/>├─ Logs: 2TB/month retention<br/>├─ Alerts: 1000+ rules<br/>├─ Dashboards: Executive + Technical<br/>├─ Workbooks: Interactive Analysis<br/>├─ Action Groups: Multi-channel<br/>├─ Service Map: Dependency Mapping<br/>├─ Network Performance Monitor<br/>└─ Application Change Analysis<br/><br/>🔧 Features:<br/>├─ Cross-resource Queries<br/>├─ Scheduled Query Rules<br/>├─ Metric Alerts<br/>├─ Log Analytics Workspace<br/>└─ Data Export"]
+                
+                APP_INSIGHTS["🔍 Application Insights<br/>├─ Sampling: Adaptive<br/>├─ Telemetry: Distributed Tracing<br/>├─ Performance: APM<br/>├─ Availability: Multi-step Tests<br/>├─ User Analytics: Behavior Flow<br/>├─ Live Metrics: Real-time<br/>├─ Profiler: CPU + Memory<br/>├─ Snapshot Debugger<br/>└─ Smart Detection: AI-powered<br/><br/>🔧 Features:<br/>├─ Custom Events & Metrics<br/>├─ Dependency Tracking<br/>├─ Exception Tracking<br/>├─ Performance Counters<br/>└─ Continuous Export"]
+                
+                LOG_ANALYTICS["📝 Log Analytics Workspace<br/>├─ Data Retention: 2 years<br/>├─ Daily Ingestion: 100GB<br/>├─ Query Language: KQL<br/>├─ Saved Queries: 500+<br/>├─ Functions: Custom<br/>├─ Alerts: Log-based<br/>├─ Data Export: Continuous<br/>├─ API Access: REST<br/>└─ Cross-workspace Queries<br/><br/>🔧 Features:<br/>├─ Machine Learning: Anomaly Detection<br/>├─ Workbooks: Interactive<br/>├─ Data Connectors: 200+<br/>├─ SIEM Integration<br/>└─ Compliance Reporting"]
+            end
+        end
+        
+        %% External Integration Services
+        subgraph EXTERNAL_INTEGRATIONS["🔗 EXTERNAL INTEGRATION SERVICES"]
+            direction TB
+            
+            subgraph AZURE_DATA_SERVICES["Azure Data Platform Services"]
+                AZURE_PURVIEW["🔍 Azure Purview<br/>├─ Data Map: Automated Discovery<br/>├─ Data Catalog: Business Glossary<br/>├─ Data Insights: Usage Analytics<br/>├─ Lineage: End-to-end Tracking<br/>├─ Classification: Automated<br/>├─ Sensitivity Labels: Microsoft 365<br/>├─ Data Estate Insights<br/>├─ Compliance Dashboard<br/>└─ API Integration<br/><br/>🔧 Integration Features:<br/>├─ REST API: Full Coverage<br/>├─ Event Grid: Change Notifications<br/>├─ PowerBI: Native Integration<br/>├─ Synapse: Data Lineage<br/>└─ Data Factory: Automated Scanning"]
+                
+                AZURE_DATABRICKS["⚡ Azure Databricks<br/>├─ Runtime: 11.3 LTS ML<br/>├─ Cluster: Multi-node Auto-scaling<br/>├─ Notebooks: Collaborative<br/>├─ Jobs: Scheduled + Event-driven<br/>├─ MLflow: Model Management<br/>├─ Delta Lake: ACID Transactions<br/>├─ Unity Catalog: Data Governance<br/>├─ Security: Private Link<br/>└─ Monitoring: Ganglia + Spark UI<br/><br/>🔧 Compute Configuration:<br/>├─ Driver: Standard_D4s_v3<br/>├─ Workers: 2-20 Standard_D4s_v3<br/>├─ Auto-scaling: Enabled<br/>├─ Spot Instances: 50% workers<br/>└─ Photon: Enabled"]
+                
+                AZURE_SYNAPSE["🏢 Azure Synapse Analytics<br/>├─ SQL Pool: DW500c<br/>├─ Spark Pool: 3-10 nodes<br/>├─ Data Integration: 50+ connectors<br/>├─ Pipelines: 100+ active<br/>├─ Monitoring: Built-in<br/>├─ Security: Column-level<br/>├─ Workspaces: Development + Production<br/>├─ Git Integration: Azure DevOps<br/>└─ Power BI: Native Integration<br/><br/>🔧 Performance Features:<br/>├─ Materialized Views<br/>├─ Result Set Caching<br/>├─ Columnstore Indexes<br/>├─ Workload Management<br/>└─ Query Performance Insights"]
+                
+                COGNITIVE_SERVICES["🧠 Azure Cognitive Services<br/>├─ Text Analytics: Sentiment + Entities<br/>├─ Language Understanding (LUIS)<br/>├─ Computer Vision: OCR + Analysis<br/>├─ Speech Services: STT + TTS<br/>├─ Translator: 100+ languages<br/>├─ Form Recognizer: Document AI<br/>├─ Custom Vision: ML Models<br/>├─ Content Moderator: Safety<br/>└─ Anomaly Detector: Time Series<br/><br/>🔧 API Configuration:<br/>├─ Endpoint: Multi-region<br/>├─ Keys: Managed Identity<br/>├─ Rate Limits: Enterprise Tier<br/>├─ Custom Models: Domain-specific<br/>└─ Compliance: SOC 2 + HIPAA"]
+            end
+            
+            subgraph THIRD_PARTY_SERVICES["Third-party Services"]
+                SPARK_EXTERNAL["⚡ External Apache Spark<br/>├─ Version: 3.3.x<br/>├─ Deployment: On-premises/Cloud<br/>├─ Integration: REST API<br/>├─ Data Sources: HDFS + S3<br/>├─ Processing: Batch + Streaming<br/>├─ Monitoring: Spark History Server<br/>├─ Security: Kerberos + TLS<br/>└─ Resource Management: YARN"]
+                
+                EXTERNAL_APIS["🌐 External APIs<br/>├─ Regulatory APIs: SEC + GDPR<br/>├─ Data Provider APIs: Thomson Reuters<br/>├─ Classification APIs: Custom ML<br/>├─ Compliance APIs: Regulatory Tech<br/>├─ Integration: REST + GraphQL<br/>├─ Authentication: OAuth 2.0<br/>├─ Rate Limiting: Implemented<br/>└─ Monitoring: Health Checks"]
+            end
+        end
+    end
+    
+    %% ========================================================================
+    %% NETWORK CONNECTIONS & DATA FLOW
+    %% ========================================================================
+    
+    %% External User Access
+    USERS -.->|"HTTPS/WSS"| AZURE_CDN
+    EXTERNAL_SYSTEMS -.->|"API Calls"| APP_GATEWAY
+    
+    %% Traffic Flow Through Azure
+    AZURE_CDN --> APP_GATEWAY
+    APP_GATEWAY --> AZURE_LB
+    AZURE_LB --> NGINX_INGRESS
+    
+    %% Ingress to Frontend
+    NGINX_INGRESS --> REACT_PODS
+    NGINX_INGRESS --> WEBSOCKET_PODS
+    NGINX_INGRESS --> FASTAPI_PODS
+    
+    %% API Gateway to Racine
+    FASTAPI_PODS --> ORCHESTRATION_PODS
+    
+    %% Racine Internal Orchestration
+    ORCHESTRATION_PODS --> WORKSPACE_PODS
+    ORCHESTRATION_PODS --> WORKFLOW_PODS
+    ORCHESTRATION_PODS --> PIPELINE_PODS
+    ORCHESTRATION_PODS --> AI_ASSISTANT_PODS
+    ORCHESTRATION_PODS --> COLLABORATION_PODS
+    ORCHESTRATION_PODS --> DASHBOARD_PODS
+    ORCHESTRATION_PODS --> ACTIVITY_PODS
+    ORCHESTRATION_PODS --> INTEGRATION_PODS
+    
+    %% Workspace to Core Services
+    WORKSPACE_PODS --> AUTH_PODS
+    WORKSPACE_PODS --> RBAC_PODS
+    WORKSPACE_PODS --> DATA_SOURCE_PODS
+    WORKSPACE_PODS --> SCAN_PODS
+    WORKSPACE_PODS --> CLASSIFICATION_PODS
+    WORKSPACE_PODS --> COMPLIANCE_PODS
+    WORKSPACE_PODS --> CATALOG_PODS
+    
+    %% Core Services to Database
+    AUTH_PODS --> POSTGRES_PRIMARY
+    RBAC_PODS --> POSTGRES_PRIMARY
+    DATA_SOURCE_PODS --> POSTGRES_PRIMARY
+    SCAN_PODS --> POSTGRES_PRIMARY
+    CLASSIFICATION_PODS --> POSTGRES_PRIMARY
+    COMPLIANCE_PODS --> POSTGRES_PRIMARY
+    CATALOG_PODS --> POSTGRES_PRIMARY
+    
+    %% Racine Services to Database
+    ORCHESTRATION_PODS --> POSTGRES_PRIMARY
+    WORKSPACE_PODS --> POSTGRES_PRIMARY
+    WORKFLOW_PODS --> POSTGRES_PRIMARY
+    PIPELINE_PODS --> POSTGRES_PRIMARY
+    AI_ASSISTANT_PODS --> POSTGRES_PRIMARY
+    COLLABORATION_PODS --> POSTGRES_PRIMARY
+    DASHBOARD_PODS --> POSTGRES_PRIMARY
+    ACTIVITY_PODS --> POSTGRES_PRIMARY
+    INTEGRATION_PODS --> POSTGRES_PRIMARY
+    
+    %% Database Replication
+    POSTGRES_PRIMARY --> POSTGRES_REPLICAS
+    
+    %% Cache Connections
+    AUTH_PODS -.->|"Sessions"| REDIS_CLUSTER
+    COLLABORATION_PODS -.->|"Real-time"| REDIS_CLUSTER
+    DASHBOARD_PODS -.->|"Metrics"| REDIS_CLUSTER
+    FASTAPI_PODS -.->|"Rate Limiting"| REDIS_CLUSTER
+    
+    %% Storage Connections
+    POSTGRES_PRIMARY --> PVC_POSTGRES
+    POSTGRES_REPLICAS --> PVC_POSTGRES
+    REDIS_CLUSTER --> PVC_REDIS
+    ACTIVITY_PODS --> PVC_LOGS
+    SCAN_PODS --> PVC_TEMP
+    
+    %% Managed Service Connections
+    SCAN_PODS -.->|"Data Files"| BLOB_STORAGE
+    CATALOG_PODS -.->|"Metadata"| BLOB_STORAGE
+    DATA_SOURCE_PODS -.->|"Configs"| FILE_STORAGE
+    
+    %% Security Connections
+    AUTH_PODS -.->|"Secrets"| KEY_VAULT
+    INTEGRATION_PODS -.->|"API Keys"| KEY_VAULT
+    FASTAPI_PODS -.->|"Certificates"| KEY_VAULT
+    
+    %% External Integration Connections
+    INTEGRATION_PODS --> AZURE_AD
+    INTEGRATION_PODS --> AZURE_PURVIEW
+    INTEGRATION_PODS --> AZURE_DATABRICKS
+    INTEGRATION_PODS --> AZURE_SYNAPSE
+    AI_ASSISTANT_PODS --> COGNITIVE_SERVICES
+    PIPELINE_PODS --> SPARK_EXTERNAL
+    COMPLIANCE_PODS --> EXTERNAL_APIS
+    
+    %% Monitoring Connections
+    ORCHESTRATION_PODS -.->|"Metrics"| AZURE_MONITOR
+    WORKFLOW_PODS -.->|"Performance"| APP_INSIGHTS
+    POSTGRES_PRIMARY -.->|"DB Metrics"| LOG_ANALYTICS
+    REDIS_CLUSTER -.->|"Cache Metrics"| LOG_ANALYTICS
+    
+    %% Container Registry
+    AKS_CLUSTER -.->|"Image Pull"| ACR
+    
+    %% ========================================================================
+    %% STYLING & VISUAL ENHANCEMENTS
+    %% ========================================================================
+    
+    classDef internetClass fill:#e8eaf6,stroke:#3f51b5,stroke-width:3px,color:#000
+    classDef trafficClass fill:#e0f2f1,stroke:#00695c,stroke-width:3px,color:#000
+    classDef aksClass fill:#fff3e0,stroke:#e65100,stroke-width:4px,color:#000
+    classDef frontendClass fill:#f3e5f5,stroke:#4a148c,stroke-width:3px,color:#000
+    classDef racineClass fill:#fff8e1,stroke:#ff6f00,stroke-width:4px,color:#000
+    classDef coreClass fill:#e8f5e8,stroke:#1b5e20,stroke-width:3px,color:#000
+    classDef dataClass fill:#fce4ec,stroke:#880e4f,stroke-width:3px,color:#000
+    classDef storageClass fill:#f1f8e9,stroke:#33691e,stroke-width:3px,color:#000
+    classDef managedClass fill:#e1f5fe,stroke:#01579b,stroke-width:3px,color:#000
+    classDef externalClass fill:#fff9c4,stroke:#f57f17,stroke-width:3px,color:#000
+    
+    %% Apply styles
+    class USERS,EXTERNAL_SYSTEMS internetClass
+    class AZURE_CDN,APP_GATEWAY,AZURE_LB trafficClass
+    class AKS_CONTROL,SYSTEM_POOL,APPLICATION_POOL,AI_POOL,NGINX_INGRESS aksClass
+    class REACT_PODS,WEBSOCKET_PODS,FASTAPI_PODS frontendClass
+    class ORCHESTRATION_PODS,WORKSPACE_PODS,WORKFLOW_PODS,PIPELINE_PODS,AI_ASSISTANT_PODS,COLLABORATION_PODS,DASHBOARD_PODS,ACTIVITY_PODS,INTEGRATION_PODS racineClass
+    class AUTH_PODS,RBAC_PODS,DATA_SOURCE_PODS,SCAN_PODS,CLASSIFICATION_PODS,COMPLIANCE_PODS,CATALOG_PODS coreClass
+    class POSTGRES_PRIMARY,POSTGRES_REPLICAS,REDIS_CLUSTER dataClass
+    class PVC_POSTGRES,PVC_REDIS,PVC_LOGS,PVC_TEMP storageClass
+    class AZURE_POSTGRES,AZURE_REDIS,BLOB_STORAGE,FILE_STORAGE,ACR,KEY_VAULT,AZURE_AD,AZURE_MONITOR,APP_INSIGHTS,LOG_ANALYTICS managedClass
+    class AZURE_PURVIEW,AZURE_DATABRICKS,AZURE_SYNAPSE,COGNITIVE_SERVICES,SPARK_EXTERNAL,EXTERNAL_APIS externalClass

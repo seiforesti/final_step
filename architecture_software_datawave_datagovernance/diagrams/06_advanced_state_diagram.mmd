@@ -1,0 +1,594 @@
+stateDiagram-v2
+    %% ========================================================================
+    %% DATAWAVE DATA GOVERNANCE SYSTEM - ADVANCED STATE DIAGRAM
+    %% ========================================================================
+    
+    %% Data Source Lifecycle States
+    state "📊 DATA SOURCE LIFECYCLE" as DATA_SOURCE_LIFECYCLE {
+        [*] --> DS_DISCOVERED : Discovery Initiated
+        
+        DS_DISCOVERED : 🔍 Discovered
+        DS_DISCOVERED : ├─ Connection Detected
+        DS_DISCOVERED : ├─ Basic Metadata Extracted
+        DS_DISCOVERED : ├─ Schema Information Available
+        DS_DISCOVERED : └─ Pending Validation
+        
+        DS_DISCOVERED --> DS_VALIDATING : Validate Connection
+        DS_DISCOVERED --> DS_FAILED : Discovery Failed
+        
+        DS_VALIDATING : ⚡ Validating
+        DS_VALIDATING : ├─ Connection Testing
+        DS_VALIDATING : ├─ Credential Verification
+        DS_VALIDATING : ├─ Permission Checking
+        DS_VALIDATING : └─ Health Assessment
+        
+        DS_VALIDATING --> DS_VALIDATED : Validation Successful
+        DS_VALIDATING --> DS_FAILED : Validation Failed
+        DS_VALIDATING --> DS_DISCOVERED : Retry Required
+        
+        DS_VALIDATED : ✅ Validated
+        DS_VALIDATED : ├─ Connection Verified
+        DS_VALIDATED : ├─ Permissions Confirmed
+        DS_VALIDATED : ├─ Health Status Good
+        DS_VALIDATED : └─ Ready for Registration
+        
+        DS_VALIDATED --> DS_REGISTERING : Register Source
+        
+        DS_REGISTERING : 📝 Registering
+        DS_REGISTERING : ├─ Creating Catalog Entry
+        DS_REGISTERING : ├─ Setting Up Monitoring
+        DS_REGISTERING : ├─ Configuring Scanning
+        DS_REGISTERING : └─ Establishing Lineage
+        
+        DS_REGISTERING --> DS_ACTIVE : Registration Complete
+        DS_REGISTERING --> DS_FAILED : Registration Failed
+        
+        DS_ACTIVE : 🟢 Active
+        DS_ACTIVE : ├─ Fully Operational
+        DS_ACTIVE : ├─ Monitoring Enabled
+        DS_ACTIVE : ├─ Scanning Scheduled
+        DS_ACTIVE : └─ Available for Use
+        
+        DS_ACTIVE --> DS_SCANNING : Scan Triggered
+        DS_ACTIVE --> DS_MAINTENANCE : Maintenance Required
+        DS_ACTIVE --> DS_DEPRECATED : Mark Deprecated
+        DS_ACTIVE --> DS_INACTIVE : Deactivate
+        
+        DS_SCANNING : 🔍 Scanning
+        DS_SCANNING : ├─ Data Profiling Active
+        DS_SCANNING : ├─ Quality Assessment Running
+        DS_SCANNING : ├─ Classification in Progress
+        DS_SCANNING : └─ Compliance Checking
+        
+        DS_SCANNING --> DS_ACTIVE : Scan Complete
+        DS_SCANNING --> DS_FAILED : Scan Failed
+        
+        DS_MAINTENANCE : 🔧 Under Maintenance
+        DS_MAINTENANCE : ├─ Scheduled Maintenance
+        DS_MAINTENANCE : ├─ Configuration Updates
+        DS_MAINTENANCE : ├─ Performance Tuning
+        DS_MAINTENANCE : └─ Temporary Unavailable
+        
+        DS_MAINTENANCE --> DS_ACTIVE : Maintenance Complete
+        DS_MAINTENANCE --> DS_FAILED : Maintenance Failed
+        
+        DS_DEPRECATED : ⚠️ Deprecated
+        DS_DEPRECATED : ├─ Marked for Retirement
+        DS_DEPRECATED : ├─ Migration Recommended
+        DS_DEPRECATED : ├─ Limited Functionality
+        DS_DEPRECATED : └─ End-of-Life Scheduled
+        
+        DS_DEPRECATED --> DS_RETIRED : Retire Source
+        DS_DEPRECATED --> DS_ACTIVE : Reactivate
+        
+        DS_INACTIVE : ⏸️ Inactive
+        DS_INACTIVE : ├─ Temporarily Disabled
+        DS_INACTIVE : ├─ Access Suspended
+        DS_INACTIVE : ├─ Configuration Issues
+        DS_INACTIVE : └─ Awaiting Resolution
+        
+        DS_INACTIVE --> DS_ACTIVE : Reactivate
+        DS_INACTIVE --> DS_RETIRED : Permanently Retire
+        
+        DS_FAILED : ❌ Failed
+        DS_FAILED : ├─ Connection Issues
+        DS_FAILED : ├─ Authentication Problems
+        DS_FAILED : ├─ Configuration Errors
+        DS_FAILED : └─ System Failures
+        
+        DS_FAILED --> DS_DISCOVERED : Retry Discovery
+        DS_FAILED --> DS_RETIRED : Abandon Source
+        
+        DS_RETIRED : 🏁 Retired
+        DS_RETIRED : ├─ Permanently Decommissioned
+        DS_RETIRED : ├─ Historical Data Archived
+        DS_RETIRED : ├─ Metadata Preserved
+        DS_RETIRED : └─ Audit Trail Maintained
+        
+        DS_RETIRED --> [*]
+    }
+    
+    %% Data Scanning Workflow States
+    state "🔍 DATA SCANNING WORKFLOW" as SCAN_WORKFLOW {
+        [*] --> SCAN_QUEUED : Scan Requested
+        
+        SCAN_QUEUED : 📋 Queued
+        SCAN_QUEUED : ├─ Scan Request Received
+        SCAN_QUEUED : ├─ Resource Allocation Pending
+        SCAN_QUEUED : ├─ Priority Assignment
+        SCAN_QUEUED : └─ Waiting for Execution
+        
+        SCAN_QUEUED --> SCAN_INITIALIZING : Resources Available
+        SCAN_QUEUED --> SCAN_CANCELLED : Scan Cancelled
+        
+        SCAN_INITIALIZING : ⚙️ Initializing
+        SCAN_INITIALIZING : ├─ Connection Establishment
+        SCAN_INITIALIZING : ├─ Resource Allocation
+        SCAN_INITIALIZING : ├─ Configuration Loading
+        SCAN_INITIALIZING : └─ Environment Setup
+        
+        SCAN_INITIALIZING --> SCAN_RUNNING : Initialization Complete
+        SCAN_INITIALIZING --> SCAN_FAILED : Initialization Failed
+        
+        SCAN_RUNNING : 🏃 Running
+        SCAN_RUNNING : ├─ Data Extraction Active
+        SCAN_RUNNING : ├─ Schema Analysis Running
+        SCAN_RUNNING : ├─ Quality Profiling
+        SCAN_RUNNING : └─ Progress Monitoring
+        
+        SCAN_RUNNING --> SCAN_CLASSIFYING : Data Extracted
+        SCAN_RUNNING --> SCAN_PAUSED : Pause Requested
+        SCAN_RUNNING --> SCAN_FAILED : Execution Error
+        SCAN_RUNNING --> SCAN_CANCELLED : Cancellation Requested
+        
+        SCAN_PAUSED : ⏸️ Paused
+        SCAN_PAUSED : ├─ Execution Suspended
+        SCAN_PAUSED : ├─ State Preserved
+        SCAN_PAUSED : ├─ Resources Held
+        SCAN_PAUSED : └─ Awaiting Resume
+        
+        SCAN_PAUSED --> SCAN_RUNNING : Resume Scan
+        SCAN_PAUSED --> SCAN_CANCELLED : Cancel Scan
+        
+        SCAN_CLASSIFYING : 🏷️ Classifying
+        SCAN_CLASSIFYING : ├─ AI Classification Active
+        SCAN_CLASSIFYING : ├─ Pattern Matching
+        SCAN_CLASSIFYING : ├─ Sensitivity Analysis
+        SCAN_CLASSIFYING : └─ Confidence Scoring
+        
+        SCAN_CLASSIFYING --> SCAN_VALIDATING : Classification Complete
+        SCAN_CLASSIFYING --> SCAN_FAILED : Classification Error
+        
+        SCAN_VALIDATING : ✅ Validating
+        SCAN_VALIDATING : ├─ Quality Validation
+        SCAN_VALIDATING : ├─ Compliance Checking
+        SCAN_VALIDATING : ├─ Business Rule Validation
+        SCAN_VALIDATING : └─ Anomaly Detection
+        
+        SCAN_VALIDATING --> SCAN_CATALOGING : Validation Passed
+        SCAN_VALIDATING --> SCAN_FAILED : Validation Failed
+        
+        SCAN_CATALOGING : 📚 Cataloging
+        SCAN_CATALOGING : ├─ Metadata Enrichment
+        SCAN_CATALOGING : ├─ Lineage Update
+        SCAN_CATALOGING : ├─ Relationship Mapping
+        SCAN_CATALOGING : └─ Index Updates
+        
+        SCAN_CATALOGING --> SCAN_COMPLETED : Cataloging Complete
+        SCAN_CATALOGING --> SCAN_FAILED : Cataloging Error
+        
+        SCAN_COMPLETED : ✅ Completed
+        SCAN_COMPLETED : ├─ All Tasks Finished
+        SCAN_COMPLETED : ├─ Results Available
+        SCAN_COMPLETED : ├─ Reports Generated
+        SCAN_COMPLETED : └─ Notifications Sent
+        
+        SCAN_COMPLETED --> [*]
+        
+        SCAN_FAILED : ❌ Failed
+        SCAN_FAILED : ├─ Error Occurred
+        SCAN_FAILED : ├─ Failure Analysis
+        SCAN_FAILED : ├─ Rollback Performed
+        SCAN_FAILED : └─ Error Logged
+        
+        SCAN_FAILED --> SCAN_QUEUED : Retry Scan
+        SCAN_FAILED --> [*] : Abandon Scan
+        
+        SCAN_CANCELLED : 🚫 Cancelled
+        SCAN_CANCELLED : ├─ User Cancellation
+        SCAN_CANCELLED : ├─ System Cancellation
+        SCAN_CANCELLED : ├─ Resource Cleanup
+        SCAN_CANCELLED : └─ State Reset
+        
+        SCAN_CANCELLED --> [*]
+    }
+    
+    %% Compliance Monitoring States
+    state "⚖️ COMPLIANCE MONITORING" as COMPLIANCE_MONITORING {
+        [*] --> COMPLIANCE_IDLE : System Ready
+        
+        COMPLIANCE_IDLE : 😴 Idle
+        COMPLIANCE_IDLE : ├─ Monitoring Inactive
+        COMPLIANCE_IDLE : ├─ Rules Configured
+        COMPLIANCE_IDLE : ├─ Awaiting Trigger
+        COMPLIANCE_IDLE : └─ Resources Available
+        
+        COMPLIANCE_IDLE --> COMPLIANCE_MONITORING_ACTIVE : Monitoring Enabled
+        
+        COMPLIANCE_MONITORING_ACTIVE : 👁️ Active Monitoring
+        COMPLIANCE_MONITORING_ACTIVE : ├─ Real-time Monitoring
+        COMPLIANCE_MONITORING_ACTIVE : ├─ Rule Evaluation
+        COMPLIANCE_MONITORING_ACTIVE : ├─ Violation Detection
+        COMPLIANCE_MONITORING_ACTIVE : └─ Risk Assessment
+        
+        COMPLIANCE_MONITORING_ACTIVE --> COMPLIANCE_VIOLATION_DETECTED : Violation Found
+        COMPLIANCE_MONITORING_ACTIVE --> COMPLIANCE_AUDIT_TRIGGERED : Audit Requested
+        COMPLIANCE_MONITORING_ACTIVE --> COMPLIANCE_IDLE : Monitoring Disabled
+        
+        COMPLIANCE_VIOLATION_DETECTED : 🚨 Violation Detected
+        COMPLIANCE_VIOLATION_DETECTED : ├─ Violation Identified
+        COMPLIANCE_VIOLATION_DETECTED : ├─ Severity Assessment
+        COMPLIANCE_VIOLATION_DETECTED : ├─ Impact Analysis
+        COMPLIANCE_VIOLATION_DETECTED : └─ Stakeholder Notification
+        
+        COMPLIANCE_VIOLATION_DETECTED --> COMPLIANCE_INVESTIGATION : Start Investigation
+        COMPLIANCE_VIOLATION_DETECTED --> COMPLIANCE_MONITORING_ACTIVE : False Positive
+        
+        COMPLIANCE_INVESTIGATION : 🔍 Under Investigation
+        COMPLIANCE_INVESTIGATION : ├─ Root Cause Analysis
+        COMPLIANCE_INVESTIGATION : ├─ Evidence Collection
+        COMPLIANCE_INVESTIGATION : ├─ Stakeholder Interviews
+        COMPLIANCE_INVESTIGATION : └─ Documentation Review
+        
+        COMPLIANCE_INVESTIGATION --> COMPLIANCE_REMEDIATION : Investigation Complete
+        COMPLIANCE_INVESTIGATION --> COMPLIANCE_MONITORING_ACTIVE : No Action Required
+        
+        COMPLIANCE_REMEDIATION : 🔧 Remediation
+        COMPLIANCE_REMEDIATION : ├─ Corrective Actions
+        COMPLIANCE_REMEDIATION : ├─ Process Improvements
+        COMPLIANCE_REMEDIATION : ├─ Control Implementation
+        COMPLIANCE_REMEDIATION : └─ Validation Testing
+        
+        COMPLIANCE_REMEDIATION --> COMPLIANCE_MONITORING_ACTIVE : Remediation Complete
+        COMPLIANCE_REMEDIATION --> COMPLIANCE_ESCALATION : Escalation Required
+        
+        COMPLIANCE_ESCALATION : ⬆️ Escalated
+        COMPLIANCE_ESCALATION : ├─ Senior Management Involved
+        COMPLIANCE_ESCALATION : ├─ External Consultation
+        COMPLIANCE_ESCALATION : ├─ Regulatory Notification
+        COMPLIANCE_ESCALATION : └─ Emergency Procedures
+        
+        COMPLIANCE_ESCALATION --> COMPLIANCE_REMEDIATION : Resolution Path Found
+        COMPLIANCE_ESCALATION --> COMPLIANCE_MONITORING_ACTIVE : Issue Resolved
+        
+        COMPLIANCE_AUDIT_TRIGGERED : 📋 Audit In Progress
+        COMPLIANCE_AUDIT_TRIGGERED : ├─ Audit Scope Defined
+        COMPLIANCE_AUDIT_TRIGGERED : ├─ Evidence Collection
+        COMPLIANCE_AUDIT_TRIGGERED : ├─ Compliance Testing
+        COMPLIANCE_AUDIT_TRIGGERED : └─ Report Generation
+        
+        COMPLIANCE_AUDIT_TRIGGERED --> COMPLIANCE_MONITORING_ACTIVE : Audit Complete
+    }
+    
+    %% Racine Workflow Orchestration States
+    state "👑 RACINE WORKFLOW ORCHESTRATION" as RACINE_WORKFLOW {
+        [*] --> WF_DESIGN : Workflow Creation
+        
+        WF_DESIGN : 🎨 Design Phase
+        WF_DESIGN : ├─ Workflow Definition
+        WF_DESIGN : ├─ Task Configuration
+        WF_DESIGN : ├─ Dependency Mapping
+        WF_DESIGN : └─ Resource Planning
+        
+        WF_DESIGN --> WF_VALIDATION : Design Complete
+        
+        WF_VALIDATION : ✅ Validation
+        WF_VALIDATION : ├─ Syntax Validation
+        WF_VALIDATION : ├─ Dependency Check
+        WF_VALIDATION : ├─ Resource Validation
+        WF_VALIDATION : └─ Security Review
+        
+        WF_VALIDATION --> WF_APPROVED : Validation Passed
+        WF_VALIDATION --> WF_DESIGN : Validation Failed
+        
+        WF_APPROVED : 👍 Approved
+        WF_APPROVED : ├─ Ready for Deployment
+        WF_APPROVED : ├─ Approval Recorded
+        WF_APPROVED : ├─ Version Control
+        WF_APPROVED : └─ Deployment Pending
+        
+        WF_APPROVED --> WF_DEPLOYING : Deploy Workflow
+        
+        WF_DEPLOYING : 🚀 Deploying
+        WF_DEPLOYING : ├─ Environment Setup
+        WF_DEPLOYING : ├─ Resource Allocation
+        WF_DEPLOYING : ├─ Configuration Deployment
+        WF_DEPLOYING : └─ Health Checks
+        
+        WF_DEPLOYING --> WF_ACTIVE : Deployment Successful
+        WF_DEPLOYING --> WF_FAILED : Deployment Failed
+        
+        WF_ACTIVE : 🟢 Active
+        WF_ACTIVE : ├─ Ready for Execution
+        WF_ACTIVE : ├─ Monitoring Enabled
+        WF_ACTIVE : ├─ Trigger Conditions Set
+        WF_ACTIVE : └─ Resources Allocated
+        
+        WF_ACTIVE --> WF_EXECUTING : Workflow Triggered
+        WF_ACTIVE --> WF_PAUSED : Pause Workflow
+        WF_ACTIVE --> WF_MAINTENANCE : Maintenance Mode
+        WF_ACTIVE --> WF_DEPRECATED : Mark Deprecated
+        
+        WF_EXECUTING : 🏃 Executing
+        WF_EXECUTING : ├─ Task Execution
+        WF_EXECUTING : ├─ Progress Monitoring
+        WF_EXECUTING : ├─ Dependency Resolution
+        WF_EXECUTING : └─ Error Handling
+        
+        state WF_EXECUTING {
+            [*] --> TASK_PENDING : Task Queued
+            
+            TASK_PENDING : ⏳ Pending
+            TASK_PENDING --> TASK_RUNNING : Dependencies Met
+            TASK_PENDING --> TASK_SKIPPED : Skip Condition
+            
+            TASK_RUNNING : ▶️ Running
+            TASK_RUNNING --> TASK_COMPLETED : Success
+            TASK_RUNNING --> TASK_FAILED : Error
+            TASK_RUNNING --> TASK_RETRYING : Retry Required
+            
+            TASK_RETRYING : 🔄 Retrying
+            TASK_RETRYING --> TASK_RUNNING : Retry Attempt
+            TASK_RETRYING --> TASK_FAILED : Max Retries
+            
+            TASK_COMPLETED : ✅ Completed
+            TASK_SKIPPED : ⏭️ Skipped
+            TASK_FAILED : ❌ Failed
+            
+            TASK_COMPLETED --> [*]
+            TASK_SKIPPED --> [*]
+            TASK_FAILED --> [*]
+        }
+        
+        WF_EXECUTING --> WF_COMPLETED : All Tasks Complete
+        WF_EXECUTING --> WF_FAILED : Critical Failure
+        WF_EXECUTING --> WF_PAUSED : Pause Requested
+        
+        WF_PAUSED : ⏸️ Paused
+        WF_PAUSED : ├─ Execution Suspended
+        WF_PAUSED : ├─ State Preserved
+        WF_PAUSED : ├─ Resources Maintained
+        WF_PAUSED : └─ Manual Intervention
+        
+        WF_PAUSED --> WF_EXECUTING : Resume Execution
+        WF_PAUSED --> WF_CANCELLED : Cancel Workflow
+        
+        WF_COMPLETED : ✅ Completed
+        WF_COMPLETED : ├─ All Tasks Successful
+        WF_COMPLETED : ├─ Results Available
+        WF_COMPLETED : ├─ Cleanup Performed
+        WF_COMPLETED : └─ Notifications Sent
+        
+        WF_COMPLETED --> WF_ACTIVE : Ready for Next Run
+        
+        WF_FAILED : ❌ Failed
+        WF_FAILED : ├─ Critical Error Occurred
+        WF_FAILED : ├─ Rollback Performed
+        WF_FAILED : ├─ Error Analysis
+        WF_FAILED : └─ Incident Created
+        
+        WF_FAILED --> WF_ACTIVE : Error Resolved
+        WF_FAILED --> WF_MAINTENANCE : Requires Maintenance
+        
+        WF_CANCELLED : 🚫 Cancelled
+        WF_CANCELLED : ├─ User Cancellation
+        WF_CANCELLED : ├─ System Cancellation
+        WF_CANCELLED : ├─ Resource Cleanup
+        WF_CANCELLED : └─ State Reset
+        
+        WF_CANCELLED --> WF_ACTIVE : Reset Complete
+        
+        WF_MAINTENANCE : 🔧 Maintenance
+        WF_MAINTENANCE : ├─ Configuration Updates
+        WF_MAINTENANCE : ├─ Performance Tuning
+        WF_MAINTENANCE : ├─ Bug Fixes
+        WF_MAINTENANCE : └─ Temporary Unavailable
+        
+        WF_MAINTENANCE --> WF_ACTIVE : Maintenance Complete
+        WF_MAINTENANCE --> WF_DEPRECATED : End of Life
+        
+        WF_DEPRECATED : ⚠️ Deprecated
+        WF_DEPRECATED : ├─ Marked for Retirement
+        WF_DEPRECATED : ├─ Migration Available
+        WF_DEPRECATED : ├─ Limited Support
+        WF_DEPRECATED : └─ Scheduled Decommission
+        
+        WF_DEPRECATED --> WF_RETIRED : Retire Workflow
+        WF_DEPRECATED --> WF_ACTIVE : Reactivate
+        
+        WF_RETIRED : 🏁 Retired
+        WF_RETIRED : ├─ Permanently Decommissioned
+        WF_RETIRED : ├─ Historical Data Preserved
+        WF_RETIRED : ├─ Documentation Archived
+        WF_RETIRED : └─ Audit Trail Maintained
+        
+        WF_RETIRED --> [*]
+    }
+    
+    %% AI Assistant Interaction States
+    state "🧠 AI ASSISTANT INTERACTION" as AI_INTERACTION {
+        [*] --> AI_IDLE : Assistant Ready
+        
+        AI_IDLE : 😴 Idle
+        AI_IDLE : ├─ Models Loaded
+        AI_IDLE : ├─ Context Ready
+        AI_IDLE : ├─ Awaiting Input
+        AI_IDLE : └─ Resources Available
+        
+        AI_IDLE --> AI_PROCESSING : Query Received
+        AI_IDLE --> AI_LEARNING : Training Triggered
+        
+        AI_PROCESSING : 🤔 Processing
+        AI_PROCESSING : ├─ Query Analysis
+        AI_PROCESSING : ├─ Context Retrieval
+        AI_PROCESSING : ├─ Model Inference
+        AI_PROCESSING : └─ Response Generation
+        
+        AI_PROCESSING --> AI_RESPONDING : Processing Complete
+        AI_PROCESSING --> AI_ESCALATION : Complex Query
+        AI_PROCESSING --> AI_ERROR : Processing Error
+        
+        AI_RESPONDING : 💬 Responding
+        AI_RESPONDING : ├─ Response Formatting
+        AI_RESPONDING : ├─ Confidence Scoring
+        AI_RESPONDING : ├─ Recommendation Generation
+        AI_RESPONDING : └─ Follow-up Suggestions
+        
+        AI_RESPONDING --> AI_FEEDBACK : Response Delivered
+        
+        AI_FEEDBACK : 📝 Feedback Collection
+        AI_FEEDBACK : ├─ User Feedback
+        AI_FEEDBACK : ├─ Interaction Rating
+        AI_FEEDBACK : ├─ Outcome Tracking
+        AI_FEEDBACK : └─ Learning Data
+        
+        AI_FEEDBACK --> AI_IDLE : Feedback Complete
+        AI_FEEDBACK --> AI_LEARNING : Learning Required
+        
+        AI_LEARNING : 📚 Learning
+        AI_LEARNING : ├─ Data Processing
+        AI_LEARNING : ├─ Model Updates
+        AI_LEARNING : ├─ Pattern Recognition
+        AI_LEARNING : └─ Knowledge Expansion
+        
+        AI_LEARNING --> AI_IDLE : Learning Complete
+        AI_LEARNING --> AI_ERROR : Learning Error
+        
+        AI_ESCALATION : ⬆️ Escalation
+        AI_ESCALATION : ├─ Human Expert Required
+        AI_ESCALATION : ├─ Complex Analysis
+        AI_ESCALATION : ├─ Domain Expertise
+        AI_ESCALATION : └─ Manual Intervention
+        
+        AI_ESCALATION --> AI_IDLE : Expert Response
+        
+        AI_ERROR : ❌ Error State
+        AI_ERROR : ├─ Processing Error
+        AI_ERROR : ├─ Model Failure
+        AI_ERROR : ├─ Resource Unavailable
+        AI_ERROR : └─ Recovery Needed
+        
+        AI_ERROR --> AI_IDLE : Error Resolved
+        AI_ERROR --> AI_MAINTENANCE : Maintenance Required
+        
+        AI_MAINTENANCE : 🔧 Maintenance
+        AI_MAINTENANCE : ├─ Model Updates
+        AI_MAINTENANCE : ├─ System Optimization
+        AI_MAINTENANCE : ├─ Bug Fixes
+        AI_MAINTENANCE : └─ Performance Tuning
+        
+        AI_MAINTENANCE --> AI_IDLE : Maintenance Complete
+    }
+    
+    %% User Session States
+    state "👤 USER SESSION MANAGEMENT" as USER_SESSION {
+        [*] --> SESSION_UNAUTHENTICATED : User Access
+        
+        SESSION_UNAUTHENTICATED : 🔒 Unauthenticated
+        SESSION_UNAUTHENTICATED : ├─ No Valid Session
+        SESSION_UNAUTHENTICATED : ├─ Anonymous Access
+        SESSION_UNAUTHENTICATED : ├─ Limited Functionality
+        SESSION_UNAUTHENTICATED : └─ Login Required
+        
+        SESSION_UNAUTHENTICATED --> SESSION_AUTHENTICATING : Login Attempt
+        
+        SESSION_AUTHENTICATING : 🔐 Authenticating
+        SESSION_AUTHENTICATING : ├─ Credential Validation
+        SESSION_AUTHENTICATING : ├─ MFA Verification
+        SESSION_AUTHENTICATING : ├─ Security Checks
+        SESSION_AUTHENTICATING : └─ Session Creation
+        
+        SESSION_AUTHENTICATING --> SESSION_ACTIVE : Authentication Success
+        SESSION_AUTHENTICATING --> SESSION_FAILED : Authentication Failed
+        SESSION_AUTHENTICATING --> SESSION_MFA_REQUIRED : MFA Required
+        
+        SESSION_MFA_REQUIRED : 🔢 MFA Required
+        SESSION_MFA_REQUIRED : ├─ Second Factor Needed
+        SESSION_MFA_REQUIRED : ├─ Token Verification
+        SESSION_MFA_REQUIRED : ├─ Biometric Check
+        SESSION_MFA_REQUIRED : └─ Security Challenge
+        
+        SESSION_MFA_REQUIRED --> SESSION_ACTIVE : MFA Success
+        SESSION_MFA_REQUIRED --> SESSION_FAILED : MFA Failed
+        
+        SESSION_ACTIVE : ✅ Active Session
+        SESSION_ACTIVE : ├─ User Authenticated
+        SESSION_ACTIVE : ├─ Permissions Loaded
+        SESSION_ACTIVE : ├─ Session Monitoring
+        SESSION_ACTIVE : └─ Full Access Available
+        
+        SESSION_ACTIVE --> SESSION_IDLE : User Inactive
+        SESSION_ACTIVE --> SESSION_EXPIRED : Session Timeout
+        SESSION_ACTIVE --> SESSION_TERMINATED : Logout/Termination
+        SESSION_ACTIVE --> SESSION_SUSPENDED : Security Violation
+        
+        SESSION_IDLE : 😴 Idle Session
+        SESSION_IDLE : ├─ User Inactive
+        SESSION_IDLE : ├─ Session Preserved
+        SESSION_IDLE : ├─ Timeout Warning
+        SESSION_IDLE : └─ Limited Activity
+        
+        SESSION_IDLE --> SESSION_ACTIVE : User Activity
+        SESSION_IDLE --> SESSION_EXPIRED : Idle Timeout
+        
+        SESSION_EXPIRED : ⏰ Expired
+        SESSION_EXPIRED : ├─ Session Timeout
+        SESSION_EXPIRED : ├─ Re-authentication Required
+        SESSION_EXPIRED : ├─ Data Preserved
+        SESSION_EXPIRED : └─ Security Logout
+        
+        SESSION_EXPIRED --> SESSION_UNAUTHENTICATED : Session Cleared
+        SESSION_EXPIRED --> SESSION_AUTHENTICATING : Re-authentication
+        
+        SESSION_SUSPENDED : ⚠️ Suspended
+        SESSION_SUSPENDED : ├─ Security Violation
+        SESSION_SUSPENDED : ├─ Admin Action
+        SESSION_SUSPENDED : ├─ Policy Violation
+        SESSION_SUSPENDED : └─ Investigation Required
+        
+        SESSION_SUSPENDED --> SESSION_TERMINATED : Permanent Suspension
+        SESSION_SUSPENDED --> SESSION_ACTIVE : Suspension Lifted
+        
+        SESSION_TERMINATED : 🚪 Terminated
+        SESSION_TERMINATED : ├─ User Logout
+        SESSION_TERMINATED : ├─ Admin Termination
+        SESSION_TERMINATED : ├─ Security Logout
+        SESSION_TERMINATED : └─ Session Cleanup
+        
+        SESSION_TERMINATED --> SESSION_UNAUTHENTICATED : Cleanup Complete
+        
+        SESSION_FAILED : ❌ Authentication Failed
+        SESSION_FAILED : ├─ Invalid Credentials
+        SESSION_FAILED : ├─ Account Locked
+        SESSION_FAILED : ├─ Security Violation
+        SESSION_FAILED : └─ Access Denied
+        
+        SESSION_FAILED --> SESSION_UNAUTHENTICATED : Retry Allowed
+        SESSION_FAILED --> SESSION_BLOCKED : Account Blocked
+        
+        SESSION_BLOCKED : 🚫 Blocked
+        SESSION_BLOCKED : ├─ Account Locked
+        SESSION_BLOCKED : ├─ Security Incident
+        SESSION_BLOCKED : ├─ Admin Intervention
+        SESSION_BLOCKED : └─ Access Prohibited
+        
+        SESSION_BLOCKED --> SESSION_UNAUTHENTICATED : Block Removed
+    }
+    
+    %% State Transitions and Triggers
+    note right of DATA_SOURCE_LIFECYCLE : Automated discovery and lifecycle management
+    note right of SCAN_WORKFLOW : Intelligent scanning with AI classification
+    note right of COMPLIANCE_MONITORING : Continuous compliance monitoring and alerting
+    note right of RACINE_WORKFLOW : Advanced workflow orchestration with error handling
+    note right of AI_INTERACTION : Context-aware AI assistance with learning capabilities
+    note right of USER_SESSION : Secure session management with MFA support
