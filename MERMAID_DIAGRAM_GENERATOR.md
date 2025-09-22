@@ -1,0 +1,213 @@
+# 🎨 MERMAID DIAGRAM GENERATION GUIDE
+
+## **METHOD 1: Online Mermaid Editor (Easiest)**
+
+1. **Go to Mermaid Live Editor**: https://mermaid.live/
+2. **Copy the Mermaid code** from the architecture document
+3. **Paste it** into the editor
+4. **Export** as PNG, SVG, or PDF
+
+### **Step-by-Step:**
+```bash
+# 1. Open browser and navigate to:
+https://mermaid.live/
+
+# 2. Copy this main diagram code:
+```
+
+```mermaid
+graph TB
+    subgraph "🎯 RACINE MAIN MANAGER - MASTER ORCHESTRATOR"
+        ROM[RacineOrchestrationMaster]
+        RWS[RacineWorkspace] 
+        RJW[RacineJobWorkflow]
+        RPL[RacinePipeline]
+        RAI[RacineAIConversation]
+        RAC[RacineActivity]
+        RDB[RacineDashboard]
+        RCB[RacineCollaboration]
+        RIG[RacineIntegration]
+    end
+
+    subgraph "🔐 GROUP 1: RBAC SYSTEM - CENTRAL AUTHORITY"
+        USER[User] 
+        ORG[Organization]
+        ROLE[Role]
+        PERM[Permission]
+        SESS[Session]
+        GRP[Group]
+    end
+
+    subgraph "🗄️ GROUP 2: DATA SOURCES - DATA DISCOVERY ENGINE"
+        DS[DataSource]
+        SCAN[Scan]
+        SR[ScanResult]
+        DST[DataSourceTemplate]
+        DSM[DataSourceMetrics]
+    end
+
+    subgraph "⚡ GROUP 3: SCAN RULE SETS - INTELLIGENCE ENGINE"
+        ISR[IntelligentScanRule]
+        ESRS[EnhancedScanRuleSet]
+        REH[RuleExecutionHistory]
+        SRT[ScanRuleTemplate]
+        RVM[RuleVersionManagement]
+    end
+
+    subgraph "🏷️ GROUP 4: CLASSIFICATIONS - DATA CLASSIFICATION"
+        CR[ClassificationRule]
+        DC[DataClassification]
+        CRS[ClassificationRuleSet]
+        CT[ClassificationTemplate]
+        CM[ClassificationMetrics]
+    end
+
+    subgraph "⚖️ GROUP 5: COMPLIANCE RULES - GOVERNANCE ENGINE"
+        COMP[ComplianceRule]
+        CV[ComplianceValidation]
+        CAL[ComplianceAuditLog]
+        CRP[ComplianceReport]
+        CEM[ComplianceExtendedMetrics]
+    end
+
+    subgraph "📚 GROUP 6: ADVANCED CATALOG - KNOWLEDGE MANAGEMENT"
+        CI[CatalogItem]
+        IDA[IntelligentDataAsset]
+        EDL[EnterpriseDataLineage]
+        CII[CatalogIntelligence]
+        AR[AssetRecommendation]
+    end
+
+    subgraph "🔄 GROUP 7: SCAN LOGIC - ORCHESTRATION ENGINE"
+        SOJ[ScanOrchestrationJob]
+        SW[ScanWorkflow]
+        SWT[ScanWorkflowTemplate]
+        WE[WorkflowExecution]
+        TE[TaskExecution]
+    end
+
+    %% MASTER ORCHESTRATION CONNECTIONS
+    ROM -.-> USER
+    ROM -.-> DS
+    ROM -.-> ISR
+    ROM -.-> CR
+    ROM -.-> COMP
+    ROM -.-> CI
+    ROM -.-> SOJ
+
+    %% CENTRAL AUTHORITY CONNECTIONS (RBAC)
+    USER --> ORG
+    USER --> ROLE
+    ROLE --> PERM
+    USER --> SESS
+    USER --> GRP
+
+    %% CROSS-GROUP STRATEGIC CONNECTIONS (NO LOOPS)
+    ORG -.-> DS
+    ORG -.-> CI
+    ORG -.-> COMP
+    
+    DS --> SCAN
+    SCAN --> SR
+    DS -.-> ISR
+    
+    ISR --> ESRS
+    ISR --> REH
+    
+    CR --> DC
+    DC -.-> CI
+    
+    COMP --> CV
+    COMP --> CAL
+    
+    CI --> IDA
+    IDA --> EDL
+    
+    SOJ --> SW
+    SW --> WE
+
+    %% RACINE WORKSPACE CONNECTIONS
+    RWS -.-> USER
+    RWS -.-> DS
+    RWS -.-> CI
+    
+    %% RACINE AI INTEGRATION
+    RAI -.-> ISR
+    RAI -.-> IDA
+    RAI -.-> AR
+    
+    %% RACINE PIPELINE ORCHESTRATION
+    RPL -.-> SOJ
+    RPL -.-> SW
+    RPL -.-> WE
+
+    classDef masterOrchestrator fill:#ff6b6b,stroke:#333,stroke-width:3px,color:#fff
+    classDef centralAuthority fill:#4ecdc4,stroke:#333,stroke-width:2px,color:#fff
+    classDef dataDiscovery fill:#45b7d1,stroke:#333,stroke-width:2px,color:#fff
+    classDef intelligenceEngine fill:#96ceb4,stroke:#333,stroke-width:2px,color:#fff
+    classDef classification fill:#feca57,stroke:#333,stroke-width:2px,color:#fff
+    classDef governance fill:#ff9ff3,stroke:#333,stroke-width:2px,color:#fff
+    classDef knowledgeMgmt fill:#54a0ff,stroke:#333,stroke-width:2px,color:#fff
+    classDef orchestrationEngine fill:#5f27cd,stroke:#333,stroke-width:2px,color:#fff
+
+    class ROM,RWS,RJW,RPL,RAI,RAC,RDB,RCB,RIG masterOrchestrator
+    class USER,ORG,ROLE,PERM,SESS,GRP centralAuthority
+    class DS,SCAN,SR,DST,DSM dataDiscovery
+    class ISR,ESRS,REH,SRT,RVM intelligenceEngine
+    class CR,DC,CRS,CT,CM classification
+    class COMP,CV,CAL,CRP,CEM governance
+    class CI,IDA,EDL,CII,AR knowledgeMgmt
+    class SOJ,SW,SWT,WE,TE orchestrationEngine
+```
+
+## **METHOD 2: VS Code Extension (For Developers)**
+
+1. **Install Mermaid Preview Extension** in VS Code
+2. **Create a `.md` file** with the mermaid code
+3. **Use Ctrl+Shift+V** to preview
+4. **Export** the preview as image
+
+### **Installation:**
+```bash
+# In VS Code Extensions:
+# Search for: "Mermaid Preview"
+# Install by: bierner.markdown-mermaid
+```
+
+## **METHOD 3: Command Line Tools**
+
+### **Install Mermaid CLI:**
+```bash
+npm install -g @mermaid-js/mermaid-cli
+```
+
+### **Generate Diagram:**
+```bash
+# Create the diagram file
+mmdc -i diagram.mmd -o enterprise_class_diagram.png -t dark -b transparent
+```
+
+## **METHOD 4: GitHub/GitLab (Automatic)**
+
+1. **Create a `.md` file** in your repository
+2. **Add the mermaid code** with triple backticks
+3. **GitHub/GitLab will render** it automatically
+
+## **METHOD 5: PlantUML (Alternative)**
+
+If you prefer PlantUML, I can convert the diagram to PlantUML syntax.
+
+## **METHOD 6: Draw.io Integration**
+
+1. **Go to**: https://app.diagrams.net/
+2. **Use Mermaid plugin** or manually recreate
+3. **Export** in various formats
+
+---
+
+## **🎯 RECOMMENDED WORKFLOW:**
+
+1. **Start with Mermaid Live Editor** (fastest)
+2. **Export as SVG** (best quality)
+3. **Use in presentations** or documentation
+4. **Save source code** for future updates
