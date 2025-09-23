@@ -1,540 +1,457 @@
-# Classification Module - Advanced Use Case Diagram
+# Classification Module - Advanced Use Case Architecture
 
-## Python-Generated AI-Powered Classification Architecture
+## Advanced Use Case Diagram for AI-Powered Data Classification System
 
-This document presents an advanced use case diagram for the Classification Module using Python diagram-as-code with proper UML structure, showcasing the AI-powered data classification capabilities.
+This document presents the most advanced use case diagram for the AI-Powered Classification Module of the DataWave Data Governance System. The diagram follows enterprise-grade UML standards with Lucidchart-style design, comprehensive AI/ML actor analysis, and deep learning integration patterns.
 
-```python
-# Advanced Classification Module Use Case Diagram - Python Code
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
-from matplotlib.patches import Ellipse, FancyBboxPatch, Circle, Polygon
-import numpy as np
+### Module Overview
 
-def create_classification_usecase_diagram():
-    """
-    Create advanced use case diagram for AI-Powered Classification Module
-    """
-    fig, ax = plt.subplots(1, 1, figsize=(28, 22))
-    ax.set_xlim(0, 100)
-    ax.set_ylim(0, 100)
-    ax.axis('off')
-    
-    # System Boundary
-    system_boundary = FancyBboxPatch(
-        (6, 10), 88, 85,
-        boxstyle="round,pad=2",
-        facecolor='#fff7ed',
-        edgecolor='#ea580c',
-        linewidth=4,
-        linestyle='-'
-    )
-    ax.add_patch(system_boundary)
-    
-    # System Title
-    ax.text(50, 92, 'AI-Powered Data Classification Module', 
-            fontsize=22, fontweight='bold', ha='center', va='center',
-            bbox=dict(boxstyle="round,pad=0.8", facecolor='#ea580c', edgecolor='none'),
-            color='white')
-    
-    # Module Description
-    ax.text(50, 88, 'Intelligent Data Classification & Labeling with Advanced Machine Learning', 
-            fontsize=14, fontweight='normal', ha='center', va='center',
-            style='italic', color='#c2410c')
-    
-    # === PRIMARY ACTORS (Left Side) ===
-    
-    # AI/ML Professionals
-    data_scientist = patches.Rectangle((1, 80), 6, 8, facecolor='#fef3c7', edgecolor='#d97706', linewidth=2)
-    ax.add_patch(data_scientist)
-    ax.text(4, 84, 'Data\nScientist', fontsize=9, fontweight='bold', ha='center', va='center')
-    
-    ml_engineer = patches.Rectangle((1, 70), 6, 8, facecolor='#fef3c7', edgecolor='#d97706', linewidth=2)
-    ax.add_patch(ml_engineer)
-    ax.text(4, 74, 'ML\nEngineer', fontsize=9, fontweight='bold', ha='center', va='center')
-    
-    ai_researcher = patches.Rectangle((1, 60), 6, 8, facecolor='#fef3c7', edgecolor='#d97706', linewidth=2)
-    ax.add_patch(ai_researcher)
-    ax.text(4, 64, 'AI\nResearcher', fontsize=9, fontweight='bold', ha='center', va='center')
-    
-    # Governance Professionals
-    data_steward = patches.Rectangle((1, 47), 6, 8, facecolor='#dcfce7', edgecolor='#16a34a', linewidth=2)
-    ax.add_patch(data_steward)
-    ax.text(4, 51, 'Data\nSteward', fontsize=9, fontweight='bold', ha='center', va='center')
-    
-    compliance_officer = patches.Rectangle((1, 37), 6, 8, facecolor='#dcfce7', edgecolor='#16a34a', linewidth=2)
-    ax.add_patch(compliance_officer)
-    ax.text(4, 41, 'Compliance\nOfficer', fontsize=9, fontweight='bold', ha='center', va='center')
-    
-    privacy_officer = patches.Rectangle((1, 27), 6, 8, facecolor='#dcfce7', edgecolor='#16a34a', linewidth=2)
-    ax.add_patch(privacy_officer)
-    ax.text(4, 31, 'Privacy\nOfficer', fontsize=9, fontweight='bold', ha='center', va='center')
-    
-    # Domain Experts
-    subject_expert = patches.Rectangle((1, 17), 6, 8, facecolor='#fce7f3', edgecolor='#be185d', linewidth=2)
-    ax.add_patch(subject_expert)
-    ax.text(4, 21, 'Subject\nExpert', fontsize=9, fontweight='bold', ha='center', va='center')
-    
-    # === SECONDARY ACTORS (Right Side) ===
-    
-    # AI/ML Platforms
-    ml_frameworks = patches.Rectangle((93, 80), 6, 8, facecolor='#e0f2f1', edgecolor='#00695c', linewidth=2)
-    ax.add_patch(ml_frameworks)
-    ax.text(96, 84, 'ML\nFrameworks', fontsize=9, fontweight='bold', ha='center', va='center')
-    
-    cloud_ai = patches.Rectangle((93, 70), 6, 8, facecolor='#e0f2f1', edgecolor='#00695c', linewidth=2)
-    ax.add_patch(cloud_ai)
-    ax.text(96, 74, 'Cloud AI\nServices', fontsize=9, fontweight='bold', ha='center', va='center')
-    
-    nlp_services = patches.Rectangle((93, 60), 6, 8, facecolor='#e0f2f1', edgecolor='#00695c', linewidth=2)
-    ax.add_patch(nlp_services)
-    ax.text(96, 64, 'NLP\nServices', fontsize=9, fontweight='bold', ha='center', va='center')
-    
-    # Data Systems
-    training_data = patches.Rectangle((93, 47), 6, 8, facecolor='#e3f2fd', edgecolor='#1565c0', linewidth=2)
-    ax.add_patch(training_data)
-    ax.text(96, 51, 'Training\nData', fontsize=9, fontweight='bold', ha='center', va='center')
-    
-    knowledge_bases = patches.Rectangle((93, 37), 6, 8, facecolor='#e3f2fd', edgecolor='#1565c0', linewidth=2)
-    ax.add_patch(knowledge_bases)
-    ax.text(96, 41, 'Knowledge\nBases', fontsize=9, fontweight='bold', ha='center', va='center')
-    
-    # Integration Systems
-    data_sources = patches.Rectangle((93, 27), 6, 8, facecolor='#f3e5f5', edgecolor='#7b1fa2', linewidth=2)
-    ax.add_patch(data_sources)
-    ax.text(96, 31, 'Data\nSources', fontsize=9, fontweight='bold', ha='center', va='center')
-    
-    governance_systems = patches.Rectangle((93, 17), 6, 8, facecolor='#f3e5f5', edgecolor='#7b1fa2', linewidth=2)
-    ax.add_patch(governance_systems)
-    ax.text(96, 21, 'Governance\nSystems', fontsize=9, fontweight='bold', ha='center', va='center')
-    
-    # === CORE USE CASES ===
-    
-    # AI-Powered Classification Layer
-    uc_auto_classification = Ellipse((18, 82), 11, 6, facecolor='#fef3c7', edgecolor='#d97706', linewidth=3)
-    ax.add_patch(uc_auto_classification)
-    ax.text(18, 82, 'Automated\nClassification', fontsize=8, fontweight='bold', ha='center', va='center')
-    
-    uc_deep_learning = Ellipse((32, 82), 11, 6, facecolor='#fef3c7', edgecolor='#d97706', linewidth=3)
-    ax.add_patch(uc_deep_learning)
-    ax.text(32, 82, 'Deep Learning\nClassification', fontsize=8, fontweight='bold', ha='center', va='center')
-    
-    uc_ensemble_methods = Ellipse((46, 82), 11, 6, facecolor='#fef3c7', edgecolor='#d97706', linewidth=3)
-    ax.add_patch(uc_ensemble_methods)
-    ax.text(46, 82, 'Ensemble\nMethods', fontsize=8, fontweight='bold', ha='center', va='center')
-    
-    uc_active_learning = Ellipse((60, 82), 11, 6, facecolor='#fef3c7', edgecolor='#d97706', linewidth=3)
-    ax.add_patch(uc_active_learning)
-    ax.text(60, 82, 'Active\nLearning', fontsize=8, fontweight='bold', ha='center', va='center')
-    
-    uc_federated_learning = Ellipse((74, 82), 11, 6, facecolor='#fef3c7', edgecolor='#d97706', linewidth=3)
-    ax.add_patch(uc_federated_learning)
-    ax.text(74, 82, 'Federated\nLearning', fontsize=8, fontweight='bold', ha='center', va='center')
-    
-    # Intelligent Labeling Layer
-    uc_smart_labeling = Ellipse((18, 72), 11, 6, facecolor='#fff8e1', edgecolor='#f57f17', linewidth=2)
-    ax.add_patch(uc_smart_labeling)
-    ax.text(18, 72, 'Smart\nLabeling', fontsize=8, fontweight='bold', ha='center', va='center')
-    
-    uc_sensitivity_detection = Ellipse((32, 72), 11, 6, facecolor='#fff8e1', edgecolor='#f57f17', linewidth=2)
-    ax.add_patch(uc_sensitivity_detection)
-    ax.text(32, 72, 'Sensitivity\nDetection', fontsize=8, fontweight='bold', ha='center', va='center')
-    
-    uc_regulatory_mapping = Ellipse((46, 72), 11, 6, facecolor='#fff8e1', edgecolor='#f57f17', linewidth=2)
-    ax.add_patch(uc_regulatory_mapping)
-    ax.text(46, 72, 'Regulatory\nMapping', fontsize=8, fontweight='bold', ha='center', va='center')
-    
-    uc_business_classification = Ellipse((60, 72), 11, 6, facecolor='#fff8e1', edgecolor='#f57f17', linewidth=2)
-    ax.add_patch(uc_business_classification)
-    ax.text(60, 72, 'Business\nClassification', fontsize=8, fontweight='bold', ha='center', va='center')
-    
-    # Model Management Layer
-    uc_model_development = Ellipse((18, 62), 11, 6, facecolor='#e1f5fe', edgecolor='#0277bd', linewidth=2)
-    ax.add_patch(uc_model_development)
-    ax.text(18, 62, 'Model\nDevelopment', fontsize=8, fontweight='bold', ha='center', va='center')
-    
-    uc_model_training = Ellipse((32, 62), 11, 6, facecolor='#e1f5fe', edgecolor='#0277bd', linewidth=2)
-    ax.add_patch(uc_model_training)
-    ax.text(32, 62, 'Model\nTraining', fontsize=8, fontweight='bold', ha='center', va='center')
-    
-    uc_model_validation = Ellipse((46, 62), 11, 6, facecolor='#e1f5fe', edgecolor='#0277bd', linewidth=2)
-    ax.add_patch(uc_model_validation)
-    ax.text(46, 62, 'Model\nValidation', fontsize=8, fontweight='bold', ha='center', va='center')
-    
-    uc_model_deployment = Ellipse((60, 62), 11, 6, facecolor='#e1f5fe', edgecolor='#0277bd', linewidth=2)
-    ax.add_patch(uc_model_deployment)
-    ax.text(60, 62, 'Model\nDeployment', fontsize=8, fontweight='bold', ha='center', va='center')
-    
-    # Pattern Recognition Layer
-    uc_pattern_discovery = Ellipse((18, 52), 11, 6, facecolor='#e8f5e8', edgecolor='#388e3c', linewidth=2)
-    ax.add_patch(uc_pattern_discovery)
-    ax.text(18, 52, 'Pattern\nDiscovery', fontsize=8, fontweight='bold', ha='center', va='center')
-    
-    uc_regex_patterns = Ellipse((32, 52), 11, 6, facecolor='#e8f5e8', edgecolor='#388e3c', linewidth=2)
-    ax.add_patch(uc_regex_patterns)
-    ax.text(32, 52, 'Regex\nPatterns', fontsize=8, fontweight='bold', ha='center', va='center')
-    
-    uc_semantic_analysis = Ellipse((46, 52), 11, 6, facecolor='#e8f5e8', edgecolor='#388e3c', linewidth=2)
-    ax.add_patch(uc_semantic_analysis)
-    ax.text(46, 52, 'Semantic\nAnalysis', fontsize=8, fontweight='bold', ha='center', va='center')
-    
-    uc_statistical_analysis = Ellipse((60, 52), 11, 6, facecolor='#e8f5e8', edgecolor='#388e3c', linewidth=2)
-    ax.add_patch(uc_statistical_analysis)
-    ax.text(60, 52, 'Statistical\nAnalysis', fontsize=8, fontweight='bold', ha='center', va='center')
-    
-    # Governance & Quality Layer
-    uc_expert_review = Ellipse((18, 42), 11, 6, facecolor='#fce4ec', edgecolor='#ad1457', linewidth=2)
-    ax.add_patch(uc_expert_review)
-    ax.text(18, 42, 'Expert\nReview', fontsize=8, fontweight='bold', ha='center', va='center')
-    
-    uc_approval_workflow = Ellipse((32, 42), 11, 6, facecolor='#fce4ec', edgecolor='#ad1457', linewidth=2)
-    ax.add_patch(uc_approval_workflow)
-    ax.text(32, 42, 'Approval\nWorkflow', fontsize=8, fontweight='bold', ha='center', va='center')
-    
-    uc_quality_assurance = Ellipse((46, 42), 11, 6, facecolor='#fce4ec', edgecolor='#ad1457', linewidth=2)
-    ax.add_patch(uc_quality_assurance)
-    ax.text(46, 42, 'Quality\nAssurance', fontsize=8, fontweight='bold', ha='center', va='center')
-    
-    uc_exception_handling = Ellipse((60, 42), 11, 6, facecolor='#fce4ec', edgecolor='#ad1457', linewidth=2)
-    ax.add_patch(uc_exception_handling)
-    ax.text(60, 42, 'Exception\nHandling', fontsize=8, fontweight='bold', ha='center', va='center')
-    
-    # Monitoring & Optimization Layer
-    uc_performance_monitoring = Ellipse((18, 32), 11, 6, facecolor='#f3e5f5', edgecolor='#7b1fa2', linewidth=2)
-    ax.add_patch(uc_performance_monitoring)
-    ax.text(18, 32, 'Performance\nMonitoring', fontsize=8, fontweight='bold', ha='center', va='center')
-    
-    uc_drift_detection = Ellipse((32, 32), 11, 6, facecolor='#f3e5f5', edgecolor='#7b1fa2', linewidth=2)
-    ax.add_patch(uc_drift_detection)
-    ax.text(32, 32, 'Drift\nDetection', fontsize=8, fontweight='bold', ha='center', va='center')
-    
-    uc_bias_analysis = Ellipse((46, 32), 11, 6, facecolor='#f3e5f5', edgecolor='#7b1fa2', linewidth=2)
-    ax.add_patch(uc_bias_analysis)
-    ax.text(46, 32, 'Bias\nAnalysis', fontsize=8, fontweight='bold', ha='center', va='center')
-    
-    uc_explainability = Ellipse((60, 32), 11, 6, facecolor='#f3e5f5', edgecolor='#7b1fa2', linewidth=2)
-    ax.add_patch(uc_explainability)
-    ax.text(60, 32, 'Model\nExplainability', fontsize=8, fontweight='bold', ha='center', va='center')
-    
-    # Integration & Automation Layer
-    uc_pipeline_integration = Ellipse((25, 22), 11, 6, facecolor='#e0f2f1', edgecolor='#00695c', linewidth=2)
-    ax.add_patch(uc_pipeline_integration)
-    ax.text(25, 22, 'Pipeline\nIntegration', fontsize=8, fontweight='bold', ha='center', va='center')
-    
-    uc_auto_labeling = Ellipse((39, 22), 11, 6, facecolor='#e0f2f1', edgecolor='#00695c', linewidth=2)
-    ax.add_patch(uc_auto_labeling)
-    ax.text(39, 22, 'Automated\nLabeling', fontsize=8, fontweight='bold', ha='center', va='center')
-    
-    uc_continuous_learning = Ellipse((53, 22), 11, 6, facecolor='#e0f2f1', edgecolor='#00695c', linewidth=2)
-    ax.add_patch(uc_continuous_learning)
-    ax.text(53, 22, 'Continuous\nLearning', fontsize=8, fontweight='bold', ha='center', va='center')
-    
-    # === ACTOR-USE CASE RELATIONSHIPS ===
-    
-    # Data Scientist relationships
-    ax.annotate('', xy=(12.5, 82), xytext=(7, 84),
-                arrowprops=dict(arrowstyle='->', color='#374151', lw=1.5))
-    ax.annotate('', xy=(12.5, 62), xytext=(7, 84),
-                arrowprops=dict(arrowstyle='->', color='#374151', lw=1.5))
-    ax.annotate('', xy=(12.5, 52), xytext=(7, 84),
-                arrowprops=dict(arrowstyle='->', color='#374151', lw=1.5))
-    ax.annotate('', xy=(40.5, 32), xytext=(7, 84),
-                arrowprops=dict(arrowstyle='->', color='#374151', lw=1.5))
-    ax.annotate('', xy=(54.5, 32), xytext=(7, 84),
-                arrowprops=dict(arrowstyle='->', color='#374151', lw=1.5))
-    
-    # ML Engineer relationships
-    ax.annotate('', xy=(54.5, 62), xytext=(7, 74),
-                arrowprops=dict(arrowstyle='->', color='#374151', lw=1.5))
-    ax.annotate('', xy=(12.5, 32), xytext=(7, 74),
-                arrowprops=dict(arrowstyle='->', color='#374151', lw=1.5))
-    ax.annotate('', xy=(26.5, 32), xytext=(7, 74),
-                arrowprops=dict(arrowstyle='->', color='#374151', lw=1.5))
-    ax.annotate('', xy=(19.5, 22), xytext=(7, 74),
-                arrowprops=dict(arrowstyle='->', color='#374151', lw=1.5))
-    ax.annotate('', xy=(47.5, 22), xytext=(7, 74),
-                arrowprops=dict(arrowstyle='->', color='#374151', lw=1.5))
-    
-    # AI Researcher relationships
-    ax.annotate('', xy=(26.5, 82), xytext=(7, 64),
-                arrowprops=dict(arrowstyle='->', color='#374151', lw=1.5))
-    ax.annotate('', xy=(40.5, 82), xytext=(7, 64),
-                arrowprops=dict(arrowstyle='->', color='#374151', lw=1.5))
-    ax.annotate('', xy=(54.5, 82), xytext=(7, 64),
-                arrowprops=dict(arrowstyle='->', color='#374151', lw=1.5))
-    ax.annotate('', xy=(68.5, 82), xytext=(7, 64),
-                arrowprops=dict(arrowstyle='->', color='#374151', lw=1.5))
-    ax.annotate('', xy=(54.5, 32), xytext=(7, 64),
-                arrowprops=dict(arrowstyle='->', color='#374151', lw=1.5))
-    
-    # Data Steward relationships
-    ax.annotate('', xy=(12.5, 42), xytext=(7, 51),
-                arrowprops=dict(arrowstyle='->', color='#374151', lw=1.5))
-    ax.annotate('', xy=(40.5, 42), xytext=(7, 51),
-                arrowprops=dict(arrowstyle='->', color='#374151', lw=1.5))
-    ax.annotate('', xy=(12.5, 72), xytext=(7, 51),
-                arrowprops=dict(arrowstyle='->', color='#374151', lw=1.5))
-    ax.annotate('', xy=(54.5, 72), xytext=(7, 51),
-                arrowprops=dict(arrowstyle='->', color='#374151', lw=1.5))
-    ax.annotate('', xy=(26.5, 42), xytext=(7, 51),
-                arrowprops=dict(arrowstyle='->', color='#374151', lw=1.5))
-    
-    # Compliance Officer relationships
-    ax.annotate('', xy=(40.5, 72), xytext=(7, 41),
-                arrowprops=dict(arrowstyle='->', color='#374151', lw=1.5))
-    ax.annotate('', xy=(26.5, 72), xytext=(7, 41),
-                arrowprops=dict(arrowstyle='->', color='#374151', lw=1.5))
-    ax.annotate('', xy=(40.5, 32), xytext=(7, 41),
-                arrowprops=dict(arrowstyle='->', color='#374151', lw=1.5))
-    ax.annotate('', xy=(40.5, 42), xytext=(7, 41),
-                arrowprops=dict(arrowstyle='->', color='#374151', lw=1.5))
-    
-    # Privacy Officer relationships
-    ax.annotate('', xy=(26.5, 72), xytext=(7, 31),
-                arrowprops=dict(arrowstyle='->', color='#374151', lw=1.5))
-    ax.annotate('', xy=(40.5, 72), xytext=(7, 31),
-                arrowprops=dict(arrowstyle='->', color='#374151', lw=1.5))
-    ax.annotate('', xy=(40.5, 32), xytext=(7, 31),
-                arrowprops=dict(arrowstyle='->', color='#374151', lw=1.5))
-    
-    # Subject Expert relationships
-    ax.annotate('', xy=(12.5, 42), xytext=(7, 21),
-                arrowprops=dict(arrowstyle='->', color='#374151', lw=1.5))
-    ax.annotate('', xy=(54.5, 72), xytext=(7, 21),
-                arrowprops=dict(arrowstyle='->', color='#374151', lw=1.5))
-    ax.annotate('', xy=(40.5, 52), xytext=(7, 21),
-                arrowprops=dict(arrowstyle='->', color='#374151', lw=1.5))
-    ax.annotate('', xy=(54.5, 82), xytext=(7, 21),
-                arrowprops=dict(arrowstyle='->', color='#374151', lw=1.5))
-    
-    # === SECONDARY ACTOR INTEGRATIONS ===
-    
-    # ML Frameworks integrations
-    ax.annotate('', xy=(87, 82), xytext=(93, 84),
-                arrowprops=dict(arrowstyle='<->', color='#6b7280', lw=1, linestyle='dotted'))
-    ax.annotate('', xy=(87, 62), xytext=(93, 84),
-                arrowprops=dict(arrowstyle='<->', color='#6b7280', lw=1, linestyle='dotted'))
-    
-    # Cloud AI integrations
-    ax.annotate('', xy=(87, 82), xytext=(93, 74),
-                arrowprops=dict(arrowstyle='<->', color='#6b7280', lw=1, linestyle='dotted'))
-    ax.annotate('', xy=(87, 62), xytext=(93, 74),
-                arrowprops=dict(arrowstyle='<->', color='#6b7280', lw=1, linestyle='dotted'))
-    
-    # NLP Services integrations
-    ax.annotate('', xy=(87, 52), xytext=(93, 64),
-                arrowprops=dict(arrowstyle='<->', color='#6b7280', lw=1, linestyle='dotted'))
-    ax.annotate('', xy=(87, 72), xytext=(93, 64),
-                arrowprops=dict(arrowstyle='<->', color='#6b7280', lw=1, linestyle='dotted'))
-    
-    # Training Data integrations
-    ax.annotate('', xy=(87, 62), xytext=(93, 51),
-                arrowprops=dict(arrowstyle='<->', color='#6b7280', lw=1, linestyle='dotted'))
-    ax.annotate('', xy=(87, 32), xytext=(93, 51),
-                arrowprops=dict(arrowstyle='<->', color='#6b7280', lw=1, linestyle='dotted'))
-    
-    # Knowledge Bases integrations
-    ax.annotate('', xy=(87, 52), xytext=(93, 41),
-                arrowprops=dict(arrowstyle='<->', color='#6b7280', lw=1, linestyle='dotted'))
-    ax.annotate('', xy=(87, 72), xytext=(93, 41),
-                arrowprops=dict(arrowstyle='<->', color='#6b7280', lw=1, linestyle='dotted'))
-    
-    # Data Sources integrations
-    ax.annotate('', xy=(87, 82), xytext=(93, 31),
-                arrowprops=dict(arrowstyle='<->', color='#6b7280', lw=1, linestyle='dotted'))
-    ax.annotate('', xy=(87, 52), xytext=(93, 31),
-                arrowprops=dict(arrowstyle='<->', color='#6b7280', lw=1, linestyle='dotted'))
-    
-    # Governance Systems integrations
-    ax.annotate('', xy=(87, 72), xytext=(93, 21),
-                arrowprops=dict(arrowstyle='<->', color='#6b7280', lw=1, linestyle='dotted'))
-    ax.annotate('', xy=(87, 42), xytext=(93, 21),
-                arrowprops=dict(arrowstyle='<->', color='#6b7280', lw=1, linestyle='dotted'))
-    
-    # === USE CASE DEPENDENCIES ===
-    
-    # Include relationships
-    ax.annotate('', xy=(23.5, 72), xytext=(18, 82),
-                arrowprops=dict(arrowstyle='->', color='#6b7280', lw=1, linestyle='dashed'))
-    ax.text(20.75, 77, '<<includes>>', fontsize=6, ha='center', va='center', style='italic', rotation=60)
-    
-    ax.annotate('', xy=(23.5, 62), xytext=(18, 62),
-                arrowprops=dict(arrowstyle='->', color='#6b7280', lw=1, linestyle='dashed'))
-    ax.text(20.75, 62, '<<includes>>', fontsize=6, ha='center', va='bottom', style='italic')
-    
-    ax.annotate('', xy=(37.5, 62), xytext=(32, 62),
-                arrowprops=dict(arrowstyle='->', color='#6b7280', lw=1, linestyle='dashed'))
-    ax.text(34.75, 64, '<<includes>>', fontsize=6, ha='center', va='bottom', style='italic')
-    
-    ax.annotate('', xy=(51.5, 62), xytext=(46, 62),
-                arrowprops=dict(arrowstyle='->', color='#6b7280', lw=1, linestyle='dashed'))
-    ax.text(48.75, 64, '<<includes>>', fontsize=6, ha='center', va='bottom', style='italic')
-    
-    ax.annotate('', xy=(23.5, 42), xytext=(18, 42),
-                arrowprops=dict(arrowstyle='->', color='#6b7280', lw=1, linestyle='dashed'))
-    ax.text(20.75, 44, '<<includes>>', fontsize=6, ha='center', va='bottom', style='italic')
-    
-    ax.annotate('', xy=(23.5, 32), xytext=(18, 32),
-                arrowprops=dict(arrowstyle='->', color='#6b7280', lw=1, linestyle='dashed'))
-    ax.text(20.75, 34, '<<includes>>', fontsize=6, ha='center', va='bottom', style='italic')
-    
-    # Extend relationships
-    ax.annotate('', xy=(26.5, 82), xytext=(18, 82),
-                arrowprops=dict(arrowstyle='->', color='#9ca3af', lw=1, linestyle='dashdot'))
-    ax.text(22.25, 84, '<<extends>>', fontsize=6, ha='center', va='bottom', style='italic', color='#6b7280')
-    
-    ax.annotate('', xy=(40.5, 72), xytext=(18, 72),
-                arrowprops=dict(arrowstyle='->', color='#9ca3af', lw=1, linestyle='dashdot'))
-    ax.text(29.25, 74, '<<extends>>', fontsize=6, ha='center', va='bottom', style='italic', color='#6b7280')
-    
-    ax.annotate('', xy=(40.5, 52), xytext=(18, 52),
-                arrowprops=dict(arrowstyle='->', color='#9ca3af', lw=1, linestyle='dashdot'))
-    ax.text(29.25, 54, '<<extends>>', fontsize=6, ha='center', va='bottom', style='italic', color='#6b7280')
-    
-    # === LEGEND AND ANNOTATIONS ===
-    
-    # Legend Box
-    legend_box = FancyBboxPatch(
-        (10, 2), 80, 6,
-        boxstyle="round,pad=0.5",
-        facecolor='#f9fafb',
-        edgecolor='#6b7280',
-        linewidth=1
-    )
-    ax.add_patch(legend_box)
-    
-    ax.text(50, 6.5, 'AI-Powered Data Classification Module - Advanced Use Case Architecture', 
-            fontsize=16, fontweight='bold', ha='center', va='center')
-    
-    # Actor Legend
-    ax.text(13, 5, '🤖 AI/ML Pros', fontsize=9, ha='left', va='center',
-            bbox=dict(boxstyle="round,pad=0.2", facecolor='#fef3c7', alpha=0.7))
-    ax.text(13, 4, '👤 Governance', fontsize=9, ha='left', va='center',
-            bbox=dict(boxstyle="round,pad=0.2", facecolor='#dcfce7', alpha=0.7))
-    ax.text(13, 3, '👩‍🏫 Experts', fontsize=9, ha='left', va='center',
-            bbox=dict(boxstyle="round,pad=0.2", facecolor='#fce7f3', alpha=0.7))
-    
-    # Use Case Legend
-    ax.text(28, 5, '🤖 AI Classification', fontsize=9, ha='left', va='center',
-            bbox=dict(boxstyle="round,pad=0.2", facecolor='#fef3c7', alpha=0.7))
-    ax.text(28, 4, '🏷️ Labeling', fontsize=9, ha='left', va='center',
-            bbox=dict(boxstyle="round,pad=0.2", facecolor='#fff8e1', alpha=0.7))
-    ax.text(28, 3, '🎓 Models', fontsize=9, ha='left', va='center',
-            bbox=dict(boxstyle="round,pad=0.2", facecolor='#e1f5fe', alpha=0.7))
-    
-    ax.text(48, 5, '🔍 Patterns', fontsize=9, ha='left', va='center',
-            bbox=dict(boxstyle="round,pad=0.2", facecolor='#e8f5e8', alpha=0.7))
-    ax.text(48, 4, '📋 Governance', fontsize=9, ha='left', va='center',
-            bbox=dict(boxstyle="round,pad=0.2", facecolor='#fce4ec', alpha=0.7))
-    ax.text(48, 3, '📊 Monitoring', fontsize=9, ha='left', va='center',
-            bbox=dict(boxstyle="round,pad=0.2", facecolor='#f3e5f5', alpha=0.7))
-    
-    ax.text(68, 5, '🔄 Integration', fontsize=9, ha='left', va='center',
-            bbox=dict(boxstyle="round,pad=0.2", facecolor='#e0f2f1', alpha=0.7))
-    ax.text(68, 4, '🧠 AI Platforms', fontsize=9, ha='left', va='center',
-            bbox=dict(boxstyle="round,pad=0.2", facecolor='#e0f2f1', alpha=0.7))
-    ax.text(68, 3, '📚 Data Systems', fontsize=9, ha='left', va='center',
-            bbox=dict(boxstyle="round,pad=0.2", facecolor='#e3f2fd', alpha=0.7))
-    
-    plt.tight_layout()
-    return fig
+The Classification Module serves as the intelligence core of the DataWave Data Governance System, providing advanced AI-powered data classification capabilities that leverage cutting-edge machine learning, deep learning, and natural language processing technologies to automatically and accurately classify data with unprecedented intelligence and precision.
 
-# Generate the diagram
-fig = create_classification_usecase_diagram()
-plt.savefig('/workspace/classification_usecase_diagram.png', dpi=300, bbox_inches='tight')
-plt.show()
+## Advanced AI Classification Use Case Architecture
+
+```lucidchart
+@startuml Classification_Advanced_UseCase_Architecture
+
+!define ADVANCED_CLASSIFICATION_THEME
+!theme aws-orange
+skinparam backgroundColor #F8F9FA
+skinparam handwritten false
+skinparam shadowing true
+skinparam roundCorner 15
+skinparam packageStyle rectangle
+skinparam defaultFontName Arial
+skinparam defaultFontSize 9
+
+' === ADVANCED COLOR SCHEME FOR CLASSIFICATION MODULE ===
+skinparam actor {
+  BackgroundColor<<AIMLSpecialist>> #9C27B0
+  BorderColor<<AIMLSpecialist>> #6A1B9A
+  FontColor<<AIMLSpecialist>> #FFFFFF
+  BackgroundColor<<DataGovernance>> #4CAF50
+  BorderColor<<DataGovernance>> #2E7D32
+  FontColor<<DataGovernance>> #FFFFFF
+  BackgroundColor<<DomainExpert>> #E91E63
+  BorderColor<<DomainExpert>> #AD1457
+  FontColor<<DomainExpert>> #FFFFFF
+  BackgroundColor<<AISystem>> #607D8B
+  BorderColor<<AISystem>> #37474F
+  FontColor<<AISystem>> #FFFFFF
+  BackgroundColor<<DataSystem>> #FF5722
+  BorderColor<<DataSystem>> #D84315
+  FontColor<<DataSystem>> #FFFFFF
+}
+
+skinparam usecase {
+  BackgroundColor<<AIClassification>> #FFF3E0
+  BorderColor<<AIClassification>> #FF9800
+  FontColor<<AIClassification>> #E65100
+  BackgroundColor<<IntelligentLabeling>> #E8F5E8
+  BorderColor<<IntelligentLabeling>> #4CAF50
+  FontColor<<IntelligentLabeling>> #1B5E20
+  BackgroundColor<<ModelManagement>> #E3F2FD
+  BorderColor<<ModelManagement>> #2196F3
+  FontColor<<ModelManagement>> #0D47A1
+  BackgroundColor<<PatternRecognition>> #F3E5F5
+  BorderColor<<PatternRecognition>> #9C27B0
+  FontColor<<PatternRecognition>> #4A148C
+  BackgroundColor<<GovernanceQuality>> #FCE4EC
+  BorderColor<<GovernanceQuality>> #E91E63
+  FontColor<<GovernanceQuality>> #880E4F
+  BackgroundColor<<MonitoringOptimization>> #E0F2F1
+  BorderColor<<MonitoringOptimization>> #009688
+  FontColor<<MonitoringOptimization>> #004D40
+  BackgroundColor<<IntegrationAutomation>> #FFF8E1
+  BorderColor<<IntegrationAutomation>> #FFC107
+  FontColor<<IntegrationAutomation>> #F57F17
+}
+
+' === SYSTEM BOUNDARY ===
+rectangle "🏷️ AI-POWERED CLASSIFICATION INTELLIGENCE ECOSYSTEM" as ClassificationSystem {
+
+  ' === PRIMARY ACTORS ===
+  package "👥 PRIMARY AI/ML STAKEHOLDER ACTORS" as PrimaryActors {
+    
+    ' === AI/ML SPECIALISTS ===
+    package "🤖 AI/ML Specialists" as AIMLActors {
+      actor "👨‍🔬 Lead Data Scientist\n🤖 Advanced ML Model Development\n📊 Deep Learning Architecture\n🔍 Pattern Recognition Research\n🧠 Algorithm Innovation\n📈 Predictive Modeling\n🔬 Statistical Analysis\n🎯 Feature Engineering\n📋 Model Validation & Testing" as LeadDataScientist <<AIMLSpecialist>>
+      
+      actor "👨‍💻 ML Engineer\n🚀 Model Deployment & Production\n⚡ Pipeline Development\n📊 Model Monitoring & Maintenance\n🔧 Performance Optimization\n🏗️ ML Infrastructure Management\n🤖 Automation Development\n🔍 Production Support\n📈 Scalability Engineering" as MLEngineer <<AIMLSpecialist>>
+      
+      actor "👩‍🔬 AI Research Scientist\n🧠 Advanced AI Research\n🔬 Algorithm Innovation\n📊 Experimental Design\n🎓 Academic Collaboration\n📋 Publication & Documentation\n🔍 Technology Evaluation\n💡 Proof of Concepts\n🚀 Innovation Leadership" as AIResearcher <<AIMLSpecialist>>
+      
+      actor "👨‍💻 NLP Specialist\n📝 Natural Language Processing\n🧠 Text Analytics & Understanding\n🔍 Entity Recognition\n📊 Sentiment Analysis\n🌐 Language Detection\n🔤 Text Classification\n📋 Semantic Analysis\n💡 Contextual Understanding" as NLPSpecialist <<AIMLSpecialist>>
+    }
+    
+    ' === DATA GOVERNANCE PROFESSIONALS ===
+    package "👤 Data Governance Professionals" as GovernanceActors {
+      actor "👤 Classification Governance Manager\n📊 Classification Strategy & Governance\n🏷️ Taxonomy Management\n📋 Quality Assurance\n👨‍🏫 Expert Review Coordination\n📈 Performance Oversight\n🤝 Stakeholder Management\n📚 Training & Education\n⚖️ Compliance Oversight" as ClassificationManager <<DataGovernance>>
+      
+      actor "👤 Data Steward\n📊 Data Quality Management\n🏷️ Classification Oversight\n📚 Metadata Governance\n✅ Validation & Review\n📈 Lineage Management\n🔍 Quality Monitoring\n🤝 Business Coordination\n📋 Process Improvement" as DataSteward <<DataGovernance>>
+      
+      actor "👤 Privacy Officer\n🔒 Privacy Impact Assessment\n🛡️ PII Classification\n📜 Privacy Policy Enforcement\n👤 Data Subject Rights\n⚖️ Regulatory Compliance\n🔍 Privacy Risk Assessment\n📊 Privacy Analytics\n🌐 Cross-Border Data Management" as PrivacyOfficer <<DataGovernance>>
+      
+      actor "👤 Compliance Officer\n⚖️ Regulatory Classification\n📋 Audit Management\n🔍 Risk Assessment\n📜 Policy Enforcement\n🚨 Violation Investigation\n📊 Compliance Reporting\n🛡️ Data Protection\n🌐 Multi-Jurisdiction Support" as ComplianceOfficer <<DataGovernance>>
+    }
+    
+    ' === DOMAIN EXPERTS ===
+    package "👩‍🏫 Domain Experts & Business Users" as DomainActors {
+      actor "👩‍🏫 Subject Matter Expert\n🎓 Domain Knowledge & Expertise\n📋 Business Rule Definition\n✅ Classification Validation\n🔍 Quality Assessment\n💡 Context & Meaning\n🤝 Knowledge Sharing\n📚 Training Support\n🌟 Best Practice Definition" as SubjectExpert <<DomainExpert>>
+      
+      actor "👩‍📊 Business Analyst\n📊 Business Requirements Analysis\n💡 Process Analysis\n📈 Impact Assessment\n💼 ROI Analysis\n🎯 User Experience Design\n🔄 Change Management\n🤝 Stakeholder Communication\n📋 Success Metrics Definition" as BusinessAnalyst <<DomainExpert>>
+      
+      actor "⚖️ Legal Expert\n📜 Legal Requirements Analysis\n⚖️ Regulatory Interpretation\n🔍 Risk Assessment\n📋 Policy Development\n📄 Contract Review\n🛡️ Legal Compliance\n🚨 Litigation Support\n🎓 Legal Training" as LegalExpert <<DomainExpert>>
+      
+      actor "🔒 Security Analyst\n🛡️ Security Classification\n🔍 Threat Analysis\n📊 Risk Assessment\n🚨 Security Monitoring\n🔒 Access Control Review\n📋 Security Policy Enforcement\n🌐 Security Intelligence\n🔧 Security Tool Integration" as SecurityAnalyst <<DomainExpert>>
+    }
+  }
+
+  ' === SECONDARY SYSTEM ACTORS ===
+  package "🤖 AI/ML PLATFORM ACTORS" as SecondaryActors {
+    
+    ' === AI/ML PLATFORMS ===
+    package "🧠 AI/ML Platforms & Frameworks" as AIPlatforms {
+      actor "🤖 ML Frameworks\n├─ TensorFlow Enterprise\n├─ PyTorch Lightning\n├─ scikit-learn\n├─ XGBoost\n├─ LightGBM\n├─ Keras\n├─ Hugging Face Transformers\n└─ AutoML Platforms" as MLFrameworks <<AISystem>>
+      
+      actor "☁️ Cloud AI Services\n├─ Azure Cognitive Services\n├─ AWS AI/ML Services\n├─ Google AI Platform\n├─ IBM Watson\n├─ Azure Machine Learning\n├─ AWS SageMaker\n├─ Google AutoML\n└─ Databricks MLflow" as CloudAIServices <<AISystem>>
+      
+      actor "📝 NLP & Text Analytics\n├─ spaCy\n├─ NLTK\n├─ Azure Text Analytics\n├─ AWS Comprehend\n├─ Google Natural Language AI\n├─ OpenAI GPT Models\n├─ BERT/RoBERTa Models\n└─ Custom Language Models" as NLPServices <<AISystem>>
+      
+      actor "🖼️ Computer Vision & OCR\n├─ OpenCV\n├─ Azure Computer Vision\n├─ AWS Rekognition\n├─ Google Vision AI\n├─ Tesseract OCR\n├─ Azure Form Recognizer\n├─ AWS Textract\n└─ Custom Vision Models" as VisionServices <<AISystem>>
+    }
+    
+    ' === DATA SYSTEMS ===
+    package "🗄️ Data & Knowledge Systems" as DataSystems {
+      actor "📊 Training Data Repositories\n├─ Labeled Datasets\n├─ Synthetic Data Generators\n├─ Benchmark Datasets\n├─ Domain-specific Collections\n├─ Multi-language Corpora\n├─ Streaming Data Sources\n├─ Historical Archives\n└─ External Data Feeds" as TrainingData <<DataSystem>>
+      
+      actor "📚 Knowledge Bases & Ontologies\n├─ Business Glossaries\n├─ Domain Ontologies\n├─ Taxonomy Hierarchies\n├─ Regulatory Frameworks\n├─ Industry Standards\n├─ Best Practice Libraries\n├─ Expert Knowledge Bases\n└─ Semantic Networks" as KnowledgeBases <<DataSystem>>
+      
+      actor "🗄️ Enterprise Data Sources\n├─ Database Systems\n├─ File Systems\n├─ Stream Processing\n├─ API Services\n├─ Cloud Storage\n├─ Enterprise Applications\n├─ External Data Feeds\n└─ IoT Data Streams" as DataSources <<DataSystem>>
+      
+      actor "🏛️ Governance Integration\n├─ Data Catalog Systems\n├─ Metadata Management\n├─ Lineage Tracking\n├─ Quality Management\n├─ Compliance Systems\n├─ Audit Systems\n├─ Policy Management\n└─ Workflow Systems" as GovernanceSystems <<DataSystem>>
+    }
+  }
+
+  ' === CORE USE CASES ===
+  package "🎯 CORE AI CLASSIFICATION USE CASES" as CoreUseCases {
+    
+    ' === AI-POWERED CLASSIFICATION ===
+    package "🤖 Advanced AI Classification Engine" as AIClassificationPackage {
+      usecase "🤖 Automated ML Classification\n├─ Deep Neural Networks\n├─ Ensemble Learning Methods\n├─ Real-time Processing\n├─ Batch Classification\n├─ Confidence Scoring\n├─ Multi-class Classification\n├─ Contextual Analysis\n└─ Performance Optimization" as UC_AutomatedClassification <<AIClassification>>
+      
+      usecase "🧠 Deep Learning Classification\n├─ Convolutional Neural Networks\n├─ Recurrent Neural Networks\n├─ Transformer Architecture\n├─ BERT/GPT Integration\n├─ Computer Vision Models\n├─ Multi-modal Learning\n├─ Transfer Learning\n└─ Few-shot Learning" as UC_DeepLearning <<AIClassification>>
+      
+      usecase "🎯 Ensemble Classification\n├─ Model Combination Strategies\n├─ Voting Mechanisms\n├─ Stacking Methods\n├─ Boosting Algorithms\n├─ Bagging Techniques\n├─ Consensus Building\n├─ Uncertainty Quantification\n└─ Performance Optimization" as UC_EnsembleClassification <<AIClassification>>
+      
+      usecase "🎓 Active Learning System\n├─ Uncertainty Sampling\n├─ Query Strategy Optimization\n├─ Human-in-the-Loop\n├─ Adaptive Learning\n├─ Feedback Integration\n├─ Continuous Improvement\n├─ Cost-Effective Training\n└─ Expert Guidance Integration" as UC_ActiveLearning <<AIClassification>>
+    }
+    
+    ' === INTELLIGENT LABELING ===
+    package "🏷️ Intelligent Data Labeling" as IntelligentLabelingPackage {
+      usecase "🏷️ Smart Labeling System\n├─ Context-Aware Labeling\n├─ Hierarchical Classification\n├─ Multi-Label Classification\n├─ Probabilistic Labeling\n├─ Dynamic Label Assignment\n├─ Label Propagation\n├─ Semantic Labeling\n└─ Temporal Classification" as UC_SmartLabeling <<IntelligentLabeling>>
+      
+      usecase "🔍 Advanced Sensitivity Detection\n├─ PII Identification\n├─ PHI Detection\n├─ Financial Data Detection\n├─ Confidential Information\n├─ Intellectual Property\n├─ Trade Secret Detection\n├─ Regulatory Data Classification\n└─ Custom Sensitivity Rules" as UC_SensitivityDetection <<IntelligentLabeling>>
+      
+      usecase "📜 Regulatory Mapping\n├─ GDPR Classification\n├─ CCPA Mapping\n├─ HIPAA Classification\n├─ SOX Compliance\n├─ PCI-DSS Classification\n├─ Industry Standards\n├─ Custom Frameworks\n└─ Multi-Jurisdiction Support" as UC_RegulatoryMapping <<IntelligentLabeling>>
+      
+      usecase "💼 Business Classification\n├─ Business Domain Mapping\n├─ Functional Classification\n├─ Process Classification\n├─ Value Classification\n├─ Criticality Assessment\n├─ Usage Classification\n├─ Ownership Classification\n└─ Lifecycle Classification" as UC_BusinessClassification <<IntelligentLabeling>>
+    }
+    
+    ' === MODEL MANAGEMENT ===
+    package "🎓 Advanced Model Management" as ModelManagementPackage {
+      usecase "🛠️ Model Development Lifecycle\n├─ Algorithm Selection\n├─ Feature Engineering\n├─ Hyperparameter Tuning\n├─ Cross-Validation\n├─ Architecture Design\n├─ Performance Optimization\n├─ Experiment Tracking\n└─ Version Control" as UC_ModelDevelopment <<ModelManagement>>
+      
+      usecase "🏋️ Advanced Model Training\n├─ Supervised Learning\n├─ Unsupervised Learning\n├─ Semi-Supervised Learning\n├─ Reinforcement Learning\n├─ Online Learning\n├─ Incremental Learning\n├─ Distributed Training\n└─ GPU Acceleration" as UC_ModelTraining <<ModelManagement>>
+      
+      usecase "✅ Comprehensive Model Validation\n├─ Performance Evaluation\n├─ Bias Detection & Mitigation\n├─ Fairness Assessment\n├─ Robustness Testing\n├─ Adversarial Testing\n├─ Explainability Analysis\n├─ Statistical Validation\n└─ Domain Validation" as UC_ModelValidation <<ModelManagement>>
+      
+      usecase "🚀 Production Model Deployment\n├─ Model Serving Infrastructure\n├─ A/B Testing Framework\n├─ Canary Releases\n├─ Blue-Green Deployment\n├─ API Integration\n├─ Performance Monitoring\n├─ Rollback Capabilities\n└─ Scaling Management" as UC_ModelDeployment <<ModelManagement>>
+    }
+    
+    ' === PATTERN RECOGNITION ===
+    package "🔍 Advanced Pattern Recognition" as PatternRecognitionPackage {
+      usecase "🔍 Intelligent Pattern Discovery\n├─ Data Pattern Mining\n├─ Anomaly Detection\n├─ Trend Analysis\n├─ Correlation Analysis\n├─ Sequence Mining\n├─ Association Rules\n├─ Clustering Analysis\n└─ Dimensionality Reduction" as UC_PatternDiscovery <<PatternRecognition>>
+      
+      usecase "🔤 Regex Pattern Management\n├─ Pattern Library Management\n├─ Pattern Optimization\n├─ Pattern Testing Framework\n├─ Pattern Validation\n├─ Custom Pattern Creation\n├─ Pattern Versioning\n├─ Performance Tuning\n└─ Pattern Analytics" as UC_RegexPatterns <<PatternRecognition>>
+      
+      usecase "🧠 Semantic Analysis Engine\n├─ Semantic Understanding\n├─ Context Analysis\n├─ Ontology Mapping\n├─ Concept Extraction\n├─ Relationship Discovery\n├─ Semantic Similarity\n├─ Knowledge Graph Integration\n└─ Semantic Search" as UC_SemanticAnalysis <<PatternRecognition>>
+      
+      usecase "📊 Statistical Analysis\n├─ Descriptive Statistics\n├─ Inferential Statistics\n├─ Hypothesis Testing\n├─ Distribution Analysis\n├─ Correlation Analysis\n├─ Regression Analysis\n├─ Time Series Analysis\n└─ Multivariate Analysis" as UC_StatisticalAnalysis <<PatternRecognition>>
+    }
+  }
+
+  ' === ADVANCED USE CASES ===
+  package "🚀 ADVANCED CLASSIFICATION CAPABILITIES" as AdvancedUseCases {
+    
+    ' === GOVERNANCE & QUALITY ===
+    package "📋 Classification Governance & Quality" as GovernanceQualityPackage {
+      usecase "👨‍🏫 Expert Review System\n├─ Human Validation Workflow\n├─ Expert Annotation Interface\n├─ Quality Assurance Process\n├─ Consensus Building\n├─ Conflict Resolution\n├─ Knowledge Transfer\n├─ Training Support\n└─ Best Practice Sharing" as UC_ExpertReview <<GovernanceQuality>>
+      
+      usecase "✅ Advanced Approval Workflows\n├─ Multi-Stage Approval\n├─ Role-Based Reviews\n├─ Escalation Management\n├─ Approval Tracking\n├─ Audit Trail Generation\n├─ Notification System\n├─ SLA Management\n└─ Automated Routing" as UC_ApprovalWorkflows <<GovernanceQuality>>
+      
+      usecase "🎯 Quality Assurance System\n├─ Classification Accuracy\n├─ Consistency Validation\n├─ Coverage Analysis\n├─ Performance Metrics\n├─ Error Analysis\n├─ Improvement Recommendations\n├─ Benchmark Comparison\n└─ Quality Reporting" as UC_QualityAssurance <<GovernanceQuality>>
+      
+      usecase "⚠️ Exception Handling\n├─ Exception Detection\n├─ Exception Classification\n├─ Root Cause Analysis\n├─ Resolution Workflows\n├─ Exception Tracking\n├─ Pattern Analysis\n├─ Prevention Strategies\n└─ Learning Integration" as UC_ExceptionHandling <<GovernanceQuality>>
+    }
+    
+    ' === MONITORING & OPTIMIZATION ===
+    package "📊 Advanced Monitoring & Optimization" as MonitoringOptimizationPackage {
+      usecase "📈 Performance Monitoring\n├─ Model Performance Tracking\n├─ Classification Accuracy\n├─ Processing Speed Analysis\n├─ Resource Utilization\n├─ Scalability Metrics\n├─ Error Rate Monitoring\n├─ Latency Analysis\n└─ Throughput Optimization" as UC_PerformanceMonitoring <<MonitoringOptimization>>
+      
+      usecase "📉 Model Drift Detection\n├─ Data Drift Detection\n├─ Concept Drift Detection\n├─ Performance Degradation\n├─ Distribution Changes\n├─ Feature Drift Analysis\n├─ Temporal Changes\n├─ Alert System\n└─ Retraining Triggers" as UC_DriftDetection <<MonitoringOptimization>>
+      
+      usecase "⚖️ Bias Analysis & Fairness\n├─ Fairness Assessment\n├─ Discrimination Detection\n├─ Bias Measurement\n├─ Demographic Parity\n├─ Equalized Odds\n├─ Individual Fairness\n├─ Bias Mitigation\n└─ Fairness Reporting" as UC_BiasAnalysis <<MonitoringOptimization>>
+      
+      usecase "💡 Model Explainability\n├─ Feature Importance\n├─ SHAP Values\n├─ LIME Analysis\n├─ Decision Trees\n├─ Rule Extraction\n├─ Attention Visualization\n├─ Counterfactual Analysis\n└─ Global Explanations" as UC_ModelExplainability <<MonitoringOptimization>>
+    }
+    
+    ' === INTEGRATION & AUTOMATION ===
+    package "🔗 Integration & Automation" as IntegrationAutomationPackage {
+      usecase "🔄 Pipeline Integration\n├─ ETL/ELT Integration\n├─ Real-time Streaming\n├─ Batch Processing\n├─ Event-Driven Processing\n├─ API Integration\n├─ Microservices Architecture\n├─ Workflow Orchestration\n└─ Error Handling" as UC_PipelineIntegration <<IntegrationAutomation>>
+      
+      usecase "🤖 Automated Labeling\n├─ Pre-labeling Systems\n├─ Weak Supervision\n├─ Programmatic Labeling\n├─ Rule-Based Labeling\n├─ Transfer Learning\n├─ Self-Training\n├─ Co-Training\n└─ Multi-Task Learning" as UC_AutomatedLabeling <<IntegrationAutomation>>
+      
+      usecase "🔄 Continuous Learning\n├─ Online Learning\n├─ Incremental Updates\n├─ Feedback Integration\n├─ Model Adaptation\n├─ Dynamic Retraining\n├─ Performance Optimization\n├─ Knowledge Retention\n└─ Catastrophic Forgetting Prevention" as UC_ContinuousLearning <<IntegrationAutomation>>
+      
+      usecase "🌐 Federated Learning\n├─ Distributed Training\n├─ Privacy Preservation\n├─ Local Model Updates\n├─ Global Model Aggregation\n├─ Communication Efficiency\n├─ Security Protocols\n├─ Heterogeneity Handling\n└─ Consensus Mechanisms" as UC_FederatedLearning <<IntegrationAutomation>>
+    }
+  }
+}
+
+' === USE CASE RELATIONSHIPS ===
+
+' AI/ML Specialists Relationships
+LeadDataScientist --> UC_ModelDevelopment : "ML Architecture"
+LeadDataScientist --> UC_ModelTraining : "Algorithm Development"
+LeadDataScientist --> UC_PatternDiscovery : "Pattern Research"
+LeadDataScientist --> UC_StatisticalAnalysis : "Statistical Modeling"
+LeadDataScientist --> UC_BiasAnalysis : "Fairness Research"
+LeadDataScientist --> UC_ModelExplainability : "Interpretability"
+
+MLEngineer --> UC_ModelDeployment : "Production Deployment"
+MLEngineer --> UC_PerformanceMonitoring : "Production Monitoring"
+MLEngineer --> UC_DriftDetection : "Model Maintenance"
+MLEngineer --> UC_PipelineIntegration : "ML Pipeline Engineering"
+MLEngineer --> UC_AutomatedLabeling : "Automation Development"
+MLEngineer --> UC_ContinuousLearning : "Continuous Integration"
+
+AIResearcher --> UC_DeepLearning : "Advanced AI Research"
+AIResearcher --> UC_EnsembleClassification : "Algorithm Innovation"
+AIResearcher --> UC_ActiveLearning : "Learning Strategy Research"
+AIResearcher --> UC_FederatedLearning : "Distributed Learning Research"
+AIResearcher --> UC_ModelExplainability : "Explainable AI Research"
+
+NLPSpecialist --> UC_SemanticAnalysis : "NLP Development"
+NLPSpecialist --> UC_SensitivityDetection : "Text Analysis"
+NLPSpecialist --> UC_RegexPatterns : "Pattern Recognition"
+NLPSpecialist --> UC_SmartLabeling : "Text Classification"
+
+' Data Governance Professionals
+ClassificationManager --> UC_ExpertReview : "Governance Management"
+ClassificationManager --> UC_QualityAssurance : "Quality Management"
+ClassificationManager --> UC_ApprovalWorkflows : "Workflow Management"
+ClassificationManager --> UC_BusinessClassification : "Business Alignment"
+
+DataSteward --> UC_SmartLabeling : "Data Labeling"
+DataSteward --> UC_QualityAssurance : "Quality Oversight"
+DataSteward --> UC_ExpertReview : "Validation Support"
+DataSteward --> UC_ExceptionHandling : "Exception Management"
+
+PrivacyOfficer --> UC_SensitivityDetection : "Privacy Classification"
+PrivacyOfficer --> UC_RegulatoryMapping : "Privacy Compliance"
+PrivacyOfficer --> UC_BiasAnalysis : "Privacy Fairness"
+PrivacyOfficer --> UC_ExceptionHandling : "Privacy Exceptions"
+
+ComplianceOfficer --> UC_RegulatoryMapping : "Compliance Management"
+ComplianceOfficer --> UC_QualityAssurance : "Compliance Quality"
+ComplianceOfficer --> UC_ExpertReview : "Compliance Review"
+ComplianceOfficer --> UC_ApprovalWorkflows : "Compliance Approval"
+
+' Domain Experts
+SubjectExpert --> UC_ExpertReview : "Expert Validation"
+SubjectExpert --> UC_BusinessClassification : "Domain Classification"
+SubjectExpert --> UC_SemanticAnalysis : "Domain Knowledge"
+SubjectExpert --> UC_ActiveLearning : "Expert Guidance"
+SubjectExpert --> UC_QualityAssurance : "Domain Quality"
+
+BusinessAnalyst --> UC_BusinessClassification : "Business Analysis"
+BusinessAnalyst --> UC_PerformanceMonitoring : "Performance Analysis"
+BusinessAnalyst --> UC_QualityAssurance : "Business Quality"
+BusinessAnalyst --> UC_PatternDiscovery : "Business Patterns"
+
+LegalExpert --> UC_RegulatoryMapping : "Legal Classification"
+LegalExpert --> UC_SensitivityDetection : "Legal Sensitivity"
+LegalExpert --> UC_BiasAnalysis : "Legal Fairness"
+LegalExpert --> UC_ApprovalWorkflows : "Legal Approval"
+
+SecurityAnalyst --> UC_SensitivityDetection : "Security Classification"
+SecurityAnalyst --> UC_BiasAnalysis : "Security Fairness"
+SecurityAnalyst --> UC_ExceptionHandling : "Security Exceptions"
+SecurityAnalyst --> UC_PerformanceMonitoring : "Security Monitoring"
+
+' Secondary System Integrations
+MLFrameworks -.-> UC_ModelTraining : "Framework Integration"
+MLFrameworks -.-> UC_ModelDevelopment : "Development Tools"
+MLFrameworks -.-> UC_DeepLearning : "Deep Learning Frameworks"
+MLFrameworks -.-> UC_EnsembleClassification : "Ensemble Methods"
+
+CloudAIServices -.-> UC_AutomatedClassification : "Cloud AI Services"
+CloudAIServices -.-> UC_ModelDeployment : "Cloud Deployment"
+CloudAIServices -.-> UC_ModelTraining : "Scalable Training"
+CloudAIServices -.-> UC_PerformanceMonitoring : "Cloud Monitoring"
+
+NLPServices -.-> UC_SemanticAnalysis : "NLP Services"
+NLPServices -.-> UC_SensitivityDetection : "Text Analysis"
+NLPServices -.-> UC_PatternDiscovery : "Language Patterns"
+NLPServices -.-> UC_SmartLabeling : "Text Labeling"
+
+VisionServices -.-> UC_DeepLearning : "Computer Vision"
+VisionServices -.-> UC_AutomatedClassification : "Image Classification"
+VisionServices -.-> UC_PatternDiscovery : "Visual Patterns"
+VisionServices -.-> UC_ModelTraining : "Vision Training"
+
+TrainingData -.-> UC_ModelTraining : "Training Data"
+TrainingData -.-> UC_ModelValidation : "Validation Data"
+TrainingData -.-> UC_PerformanceMonitoring : "Benchmark Data"
+TrainingData -.-> UC_ActiveLearning : "Learning Data"
+
+KnowledgeBases -.-> UC_SemanticAnalysis : "Domain Knowledge"
+KnowledgeBases -.-> UC_BusinessClassification : "Business Rules"
+KnowledgeBases -.-> UC_RegulatoryMapping : "Regulatory Knowledge"
+KnowledgeBases -.-> UC_ExpertReview : "Expert Knowledge"
+
+DataSources -.-> UC_AutomatedClassification : "Data Input"
+DataSources -.-> UC_PatternDiscovery : "Pattern Analysis"
+DataSources -.-> UC_StatisticalAnalysis : "Statistical Analysis"
+DataSources -.-> UC_PipelineIntegration : "Data Integration"
+
+GovernanceSystems -.-> UC_SmartLabeling : "Metadata Integration"
+GovernanceSystems -.-> UC_ApprovalWorkflows : "Workflow Integration"
+GovernanceSystems -.-> UC_QualityAssurance : "Quality Integration"
+GovernanceSystems -.-> UC_ExceptionHandling : "Exception Integration"
+
+' Use Case Dependencies (Include Relationships)
+UC_AutomatedClassification ..> UC_SmartLabeling : "<<includes>>"
+UC_SmartLabeling ..> UC_SensitivityDetection : "<<includes>>"
+UC_ModelDevelopment ..> UC_ModelTraining : "<<includes>>"
+UC_ModelTraining ..> UC_ModelValidation : "<<includes>>"
+UC_ModelValidation ..> UC_ModelDeployment : "<<includes>>"
+UC_PatternDiscovery ..> UC_StatisticalAnalysis : "<<includes>>"
+UC_ExpertReview ..> UC_ApprovalWorkflows : "<<includes>>"
+UC_PerformanceMonitoring ..> UC_DriftDetection : "<<includes>>"
+UC_BiasAnalysis ..> UC_ModelExplainability : "<<includes>>"
+UC_PipelineIntegration ..> UC_AutomatedLabeling : "<<includes>>"
+UC_ContinuousLearning ..> UC_FederatedLearning : "<<includes>>"
+
+' Extension Relationships
+UC_DeepLearning ..> UC_AutomatedClassification : "<<extends>>"
+UC_EnsembleClassification ..> UC_AutomatedClassification : "<<extends>>"
+UC_ActiveLearning ..> UC_ModelTraining : "<<extends>>"
+UC_RegulatoryMapping ..> UC_SmartLabeling : "<<extends>>"
+UC_BusinessClassification ..> UC_SmartLabeling : "<<extends>>"
+UC_SemanticAnalysis ..> UC_PatternDiscovery : "<<extends>>"
+UC_RegexPatterns ..> UC_PatternDiscovery : "<<extends>>"
+UC_QualityAssurance ..> UC_ExpertReview : "<<extends>>"
+UC_ExceptionHandling ..> UC_ApprovalWorkflows : "<<extends>>"
+UC_ModelExplainability ..> UC_ModelValidation : "<<extends>>"
+
+@enduml
 ```
 
-## Classification Module Advanced AI Capabilities
+## Classification Module Analysis
 
-### Core AI-Powered Use Case Categories
+### Executive Summary
 
-#### 1. **AI-Powered Classification Layer** 🤖
-- **Automated Classification**: Multi-model ensemble with real-time and batch processing
-- **Deep Learning Classification**: Neural networks with transformer models (BERT, GPT)
-- **Ensemble Methods**: Sophisticated model combination with voting, stacking, and boosting
-- **Active Learning**: Human-in-the-loop with uncertainty sampling and expert guidance
-- **Federated Learning**: Distributed training with privacy preservation and secure protocols
+The Classification Module represents the intelligence core of the DataWave Data Governance System, providing advanced AI-powered data classification capabilities that leverage cutting-edge machine learning, deep learning, and natural language processing technologies. This module combines state-of-the-art artificial intelligence with robust governance, compliance, and quality assurance features to automatically and accurately classify data with unprecedented intelligence and precision.
 
-#### 2. **Intelligent Data Labeling Layer** 🏷️
-- **Smart Labeling System**: Context-aware hierarchical classification with multi-label support
-- **Sensitivity Detection**: Comprehensive PII, PHI, financial, and confidential data identification
-- **Regulatory Mapping**: Multi-framework support for GDPR, CCPA, HIPAA, SOX, and PCI-DSS
+### Core AI-Powered Classification Capabilities
+
+#### 1. **Advanced AI Classification Engine**
+Revolutionary machine learning capabilities that automatically classify data with exceptional accuracy:
+
+- **Automated ML Classification**: Multi-model ensemble approach with deep neural networks and real-time processing
+- **Deep Learning Integration**: Advanced neural networks including CNNs, RNNs, and Transformer architectures
+- **Ensemble Classification**: Sophisticated model combination with voting, stacking, and boosting techniques
+- **Active Learning System**: Human-in-the-loop approach with uncertainty sampling and expert guidance
+
+#### 2. **Intelligent Data Labeling**
+Advanced labeling capabilities that provide context-aware, hierarchical classification:
+
+- **Smart Labeling System**: Context-aware labeling with hierarchical and multi-label classification support
+- **Advanced Sensitivity Detection**: Comprehensive PII, PHI, financial, and confidential data identification
+- **Regulatory Mapping**: Multi-framework support for GDPR, CCPA, HIPAA, SOX, and custom frameworks
 - **Business Classification**: Domain-specific classification with functional and value-based categorization
 
-#### 3. **Model Management Layer** 🎓
-- **Model Development**: Complete ML lifecycle from algorithm selection to architecture design
-- **Model Training**: Support for supervised, unsupervised, semi-supervised, and reinforcement learning
-- **Model Validation**: Comprehensive evaluation including bias detection and fairness assessment
-- **Model Deployment**: Production-ready deployment with A/B testing and canary releases
+#### 3. **Advanced Model Management**
+Complete ML lifecycle management from development to production deployment:
 
-#### 4. **Pattern Recognition Layer** 🔍
-- **Pattern Discovery**: Advanced data mining with anomaly detection and trend analysis
+- **Model Development Lifecycle**: Comprehensive algorithm selection, feature engineering, and architecture design
+- **Advanced Model Training**: Support for supervised, unsupervised, reinforcement, and federated learning
+- **Comprehensive Model Validation**: Multi-dimensional evaluation including bias detection and fairness assessment
+- **Production Model Deployment**: Enterprise-grade deployment with A/B testing and automated scaling
+
+#### 4. **Advanced Pattern Recognition**
+Sophisticated pattern recognition and analysis capabilities:
+
+- **Intelligent Pattern Discovery**: Advanced data mining with anomaly detection and correlation analysis
 - **Regex Pattern Management**: Optimized pattern library with performance tuning and analytics
-- **Semantic Analysis**: Deep semantic understanding with ontology mapping and knowledge graphs
+- **Semantic Analysis Engine**: Deep semantic understanding with ontology mapping and knowledge graphs
 - **Statistical Analysis**: Comprehensive statistical methods from descriptive to multivariate analysis
 
-#### 5. **Governance & Quality Layer** 📋
-- **Expert Review System**: Human validation with consensus building and conflict resolution
-- **Approval Workflows**: Multi-stage approval with role-based reviews and escalation management
-- **Quality Assurance**: Comprehensive accuracy validation with consistency checks and coverage analysis
-- **Exception Handling**: Intelligent exception detection with root cause analysis and resolution workflows
+### Advanced AI/ML Features
 
-#### 6. **Monitoring & Optimization Layer** 📊
-- **Performance Monitoring**: Real-time metrics for classification accuracy, processing speed, and resource utilization
-- **Model Drift Detection**: Advanced drift detection for data, concept, and performance changes
-- **Bias Analysis**: Comprehensive fairness assessment with discrimination detection and bias mitigation
-- **Model Explainability**: Interpretability with SHAP values, LIME analysis, and feature importance
-
-#### 7. **Integration & Automation Layer** 🔄
-- **Pipeline Integration**: Seamless integration with ETL/ELT tools and streaming platforms
-- **Automated Labeling**: Pre-labeling with weak supervision and programmatic approaches
-- **Continuous Learning**: Online learning with incremental updates and feedback integration
-
-### Advanced AI Technologies
-
-#### **Cutting-Edge AI Capabilities**:
-- **Deep Learning**: State-of-the-art neural networks for complex pattern recognition
-- **Natural Language Processing**: Advanced text analytics with entity recognition and sentiment analysis
-- **Computer Vision**: Image and document analysis for visual data classification
+#### 1. **Cutting-Edge AI Technologies**
+- **Deep Learning**: State-of-the-art neural networks including BERT, GPT, and custom transformer models
+- **Computer Vision**: Advanced image and document analysis for visual data classification
+- **Natural Language Processing**: Sophisticated text analytics with entity recognition and sentiment analysis
 - **Multi-Modal Learning**: Integration of text, image, and structured data classification
 
-#### **Machine Learning Excellence**:
-- **Transfer Learning**: Knowledge transfer across domains with few-shot learning capabilities
-- **Ensemble Learning**: Advanced model combination techniques for improved accuracy
-- **Active Learning**: Intelligent sample selection for efficient model training
-- **Federated Learning**: Privacy-preserving distributed training across multiple data sources
+#### 2. **Intelligent Automation & Optimization**
+- **Automated Labeling**: Pre-labeling with weak supervision and programmatic approaches
+- **Continuous Learning**: Online learning with incremental updates and feedback integration
+- **Federated Learning**: Distributed training with privacy preservation and secure protocols
+- **Performance Optimization**: Automated hyperparameter tuning and architecture optimization
 
-### Actor Interaction Patterns
+### Governance & Quality Excellence
 
-#### **Primary Actors**:
-- **AI/ML Professionals**: Data Scientists, ML Engineers, AI Researchers
-- **Governance Professionals**: Data Stewards, Compliance Officers, Privacy Officers
-- **Domain Experts**: Subject Matter Experts, Business Analysts, Legal Experts
+#### 1. **Expert Review & Quality Assurance**
+- **Expert Review System**: Comprehensive human validation with consensus building and conflict resolution
+- **Advanced Approval Workflows**: Multi-stage approval with role-based reviews and escalation management
+- **Quality Assurance System**: Comprehensive accuracy validation with consistency checks and coverage analysis
+- **Exception Handling**: Intelligent exception detection with root cause analysis and resolution workflows
 
-#### **Secondary Actors**:
-- **AI/ML Platforms**: TensorFlow, PyTorch, scikit-learn, cloud AI services
-- **Data Systems**: Training data, knowledge bases, benchmark datasets
-- **Integration Systems**: Data sources, governance systems, workflow platforms
+#### 2. **Compliance & Ethics**
+- **Bias Analysis & Fairness**: Comprehensive fairness assessment with discrimination detection and mitigation
+- **Model Explainability**: Advanced interpretability with SHAP values, LIME analysis, and feature importance
+- **Regulatory Compliance**: Multi-framework compliance with automated policy enforcement
+- **Privacy Protection**: Advanced privacy-preserving techniques with differential privacy
 
-### Advanced Features:
+### Monitoring & Optimization
 
-#### **Intelligent Automation**:
-- Automated model selection and hyperparameter tuning
-- Self-improving classification rules with continuous learning
-- Intelligent data preprocessing and feature engineering
-- Automated model validation and deployment pipelines
+#### 1. **Advanced Performance Monitoring**
+- **Real-time Performance Tracking**: Continuous monitoring of classification accuracy and processing speed
+- **Model Drift Detection**: Advanced drift detection for data, concept, and performance changes
+- **Scalability Analytics**: Performance analysis across different scales and workloads
+- **Resource Optimization**: Intelligent resource allocation and utilization optimization
 
-#### **Enterprise Compliance**:
-- Multi-framework regulatory compliance with automated policy enforcement
-- Privacy-preserving techniques with differential privacy and secure computation
-- Comprehensive audit trails with explainable AI decisions
-- Bias detection and fairness assessment across all models
+#### 2. **Continuous Improvement**
+- **Adaptive Learning**: Dynamic model adaptation based on performance feedback and new data
+- **Knowledge Retention**: Prevention of catastrophic forgetting in continuous learning scenarios
+- **Benchmark Comparison**: Comparative analysis against industry standards and best practices
+- **Innovation Integration**: Seamless integration of latest AI/ML research and techniques
 
-#### **Scalability & Performance**:
-- Distributed training with GPU acceleration and cloud scaling
-- Real-time classification with sub-second response times
-- Horizontal scaling across multiple compute nodes
-- Intelligent resource allocation and cost optimization
+### Integration & Ecosystem
 
-This Classification Module represents the intelligence core of the DataWave Data Governance System, providing cutting-edge AI-powered data classification capabilities that combine advanced machine learning with robust governance, compliance, and quality assurance features.
+#### 1. **Platform Integration**
+- **ML Framework Support**: Native integration with TensorFlow, PyTorch, scikit-learn, and cloud AI services
+- **Data Pipeline Integration**: Seamless integration with ETL/ELT tools and streaming platforms
+- **Governance Integration**: Deep integration with data catalog, metadata management, and compliance systems
+- **API Ecosystem**: Comprehensive API support for microservices architecture and external integrations
+
+#### 2. **Enterprise Capabilities**
+- **Scalability**: Horizontal scaling with distributed processing and GPU acceleration
+- **Security**: End-to-end security with encryption, access control, and audit trails
+- **High Availability**: Fault-tolerant architecture with automatic failover and recovery
+- **Multi-Tenancy**: Isolated classification environments with shared model infrastructure
+
+This Classification Module provides a comprehensive, AI-powered classification platform that combines advanced machine learning capabilities with robust governance, compliance, and quality assurance features, enabling organizations to automatically and accurately classify their data while maintaining the highest standards of ethics, fairness, and regulatory compliance.
