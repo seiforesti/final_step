@@ -606,67 +606,67 @@ classDiagram
     %% ===== RELATIONSHIPS =====
     
     %% RBAC Core Relationships
-    User ||--o{ UserRole : "has roles"
-    User ||--o{ UserGroup : "belongs to groups"
-    User ||--o{ Session : "has sessions"
-    User ||--o{ APIKey : "owns API keys"
-    User }o--|| Organization : "belongs to organization"
+    User --> UserRole : "has roles"
+    User --> UserGroup : "belongs to groups"
+    User --> Session : "has sessions"
+    User --> APIKey : "owns API keys"
+    User --> Organization : "belongs to organization"
     
-    Role ||--o{ RolePermission : "has permissions"
-    Role ||--o{ UserRole : "assigned to users"
-    Role ||--o{ GroupRole : "assigned to groups"
+    Role --> RolePermission : "has permissions"
+    Role --> UserRole : "assigned to users"
+    Role --> GroupRole : "assigned to groups"
     
-    Permission ||--o{ RolePermission : "granted to roles"
+    Permission --> RolePermission : "granted to roles"
     
-    Group ||--o{ UserGroup : "contains users"
-    Group ||--o{ GroupRole : "has roles"
+    Group --> UserGroup : "contains users"
+    Group --> GroupRole : "has roles"
     
     %% Data Source Security
-    DataSource ||--o{ DataSourcePermission : "access permissions"
-    DataSource ||--o{ AccessLog : "access logs"
-    DataSourcePermission }o--|| User : "granted to user"
-    AccessLog }o--|| User : "logged for user"
+    DataSource --> DataSourcePermission : "access permissions"
+    DataSource --> AccessLog : "access logs"
+    DataSourcePermission --> User : "granted to user"
+    AccessLog --> User : "logged for user"
     
     %% Classification Security
-    ClassificationRule ||--o{ ClassificationAccessControl : "access controls"
-    ClassificationAccessControl }o--|| User : "controls user access"
+    ClassificationRule --> ClassificationAccessControl : "access controls"
+    ClassificationAccessControl --> User : "controls user access"
     
     %% Compliance Security
-    ComplianceRequirement ||--o{ ComplianceAccessControl : "access controls"
-    ComplianceAccessControl }o--|| User : "controls user access"
+    ComplianceRequirement --> ComplianceAccessControl : "access controls"
+    ComplianceAccessControl --> User : "controls user access"
     
     %% Scan Logic Security
-    ScanOrchestrationJob ||--o{ ScanAccessControl : "access controls"
-    ScanAccessControl }o--|| User : "controls user access"
+    ScanOrchestrationJob --> ScanAccessControl : "access controls"
+    ScanAccessControl --> User : "controls user access"
     
     %% Scan Rule Sets Security
-    IntelligentScanRule ||--o{ RuleAccessControl : "access controls"
-    RuleAccessControl }o--|| User : "controls user access"
+    IntelligentScanRule --> RuleAccessControl : "access controls"
+    RuleAccessControl --> User : "controls user access"
     
     %% Catalog Security
-    CatalogItem ||--o{ CatalogAccessControl : "access controls"
-    CatalogAccessControl }o--|| User : "controls user access"
+    CatalogItem --> CatalogAccessControl : "access controls"
+    CatalogAccessControl --> User : "controls user access"
     
     %% Racine Orchestrator Security
-    RacineOrchestrationMaster ||--o{ OrchestrationAccessControl : "access controls"
-    RacineOrchestrationMaster }o--|| User : "created by user"
-    RacineOrchestrationMaster }o--|| User : "modified by user"
-    OrchestrationAccessControl }o--|| User : "controls user access"
+    RacineOrchestrationMaster --> OrchestrationAccessControl : "access controls"
+    RacineOrchestrationMaster --> User : "created by user"
+    RacineOrchestrationMaster --> User : "modified by user"
+    OrchestrationAccessControl --> User : "controls user access"
     
     %% Advanced Security Features
-    User ||--o{ SecurityIncident : "involved in incidents"
-    User ||--o{ AuditLog : "generates audit logs"
-    SecurityPolicy ||--o{ User : "applies to users"
-    SecurityPolicy ||--o{ Role : "applies to roles"
-    SecurityMetrics }o--|| Organization : "organization metrics"
+    User --> SecurityIncident : "involved in incidents"
+    User --> AuditLog : "generates audit logs"
+    SecurityPolicy --> User : "applies to users"
+    SecurityPolicy --> Role : "applies to roles"
+    SecurityMetrics --> Organization : "organization metrics"
     
     %% Organization Security
-    Organization ||--o{ User : "has users"
-    Organization ||--o{ Role : "defines roles"
-    Organization ||--o{ Group : "has groups"
-    Organization ||--o{ SecurityPolicy : "enforces policies"
-    Organization ||--o{ SecurityIncident : "manages incidents"
-    Organization ||--o{ AuditLog : "generates audit logs"
+    Organization --> User : "has users"
+    Organization --> Role : "defines roles"
+    Organization --> Group : "has groups"
+    Organization --> SecurityPolicy : "enforces policies"
+    Organization --> SecurityIncident : "manages incidents"
+    Organization --> AuditLog : "generates audit logs"
 
     %% Styling
     classDef centralClass fill:#fff8e1,stroke:#f57f17,stroke-width:4px
@@ -680,15 +680,35 @@ classDiagram
     classDef securityClass fill:#f9fbe7,stroke:#827717,stroke-width:2px
     classDef orgClass fill:#f1f8e9,stroke:#33691e,stroke-width:2px
 
-    class User,Role,Permission,UserRole,RolePermission,Group,UserGroup,GroupRole,Session,APIKey centralClass
-    class DataSource,DataSourcePermission,AccessLog dataSourceClass
-    class ClassificationRule,ClassificationAccessControl classificationClass
-    class ComplianceRequirement,ComplianceAccessControl complianceClass
-    class ScanOrchestrationJob,ScanAccessControl scanLogicClass
-    class IntelligentScanRule,RuleAccessControl ruleSetClass
-    class CatalogItem,CatalogAccessControl catalogClass
-    class RacineOrchestrationMaster,OrchestrationAccessControl racineClass
-    class SecurityPolicy,SecurityIncident,AuditLog,SecurityMetrics securityClass
+    class User centralClass
+    class Role centralClass
+    class Permission centralClass
+    class UserRole centralClass
+    class RolePermission centralClass
+    class Group centralClass
+    class UserGroup centralClass
+    class GroupRole centralClass
+    class Session centralClass
+    class APIKey centralClass
+    class DataSource dataSourceClass
+    class DataSourcePermission dataSourceClass
+    class AccessLog dataSourceClass
+    class ClassificationRule classificationClass
+    class ClassificationAccessControl classificationClass
+    class ComplianceRequirement complianceClass
+    class ComplianceAccessControl complianceClass
+    class ScanOrchestrationJob scanLogicClass
+    class ScanAccessControl scanLogicClass
+    class IntelligentScanRule ruleSetClass
+    class RuleAccessControl ruleSetClass
+    class CatalogItem catalogClass
+    class CatalogAccessControl catalogClass
+    class RacineOrchestrationMaster racineClass
+    class OrchestrationAccessControl racineClass
+    class SecurityPolicy securityClass
+    class SecurityIncident securityClass
+    class AuditLog securityClass
+    class SecurityMetrics securityClass
     class Organization orgClass
 ```
 
