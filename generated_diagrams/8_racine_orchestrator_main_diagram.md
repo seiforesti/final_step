@@ -542,69 +542,69 @@ classDiagram
     %% ===== RELATIONSHIPS =====
     
     %% Racine Orchestrator as Main Manager - Core Relationships
-    RacineOrchestrationMaster ||--o{ RacineWorkflowExecution : "executes workflows"
-    RacineOrchestrationMaster ||--o{ RacineSystemHealth : "monitors system health"
-    RacineOrchestrationMaster ||--o{ RacineCrossGroupIntegration : "manages integrations"
-    RacineOrchestrationMaster ||--o{ RacinePerformanceMetrics : "collects metrics"
-    RacineOrchestrationMaster ||--o{ RacineErrorLog : "logs errors"
-    RacineOrchestrationMaster }o--|| User : "created by user"
-    RacineOrchestrationMaster }o--|| User : "modified by user"
-    RacineOrchestrationMaster }o--|| Organization : "organization orchestrator"
+    RacineOrchestrationMaster --> RacineWorkflowExecution : "executes workflows"
+    RacineOrchestrationMaster --> RacineSystemHealth : "monitors system health"
+    RacineOrchestrationMaster --> RacineCrossGroupIntegration : "manages integrations"
+    RacineOrchestrationMaster --> RacinePerformanceMetrics : "collects metrics"
+    RacineOrchestrationMaster --> RacineErrorLog : "logs errors"
+    RacineOrchestrationMaster --> User : "created by user"
+    RacineOrchestrationMaster --> User : "modified by user"
+    RacineOrchestrationMaster --> Organization : "organization orchestrator"
     
     %% Module 1: Data Source Orchestration
-    RacineOrchestrationMaster ||--o{ DataSource : "orchestrates data sources"
-    DataSource }o--|| RacineOrchestrationMaster : "managed by racine"
+    RacineOrchestrationMaster --> DataSource : "orchestrates data sources"
+    DataSource --> RacineOrchestrationMaster : "managed by racine"
     
     %% Module 2: Classification Orchestration
-    RacineOrchestrationMaster ||--o{ ClassificationRule : "orchestrates classification rules"
-    ClassificationRule }o--|| RacineOrchestrationMaster : "managed by racine"
-    ClassificationResult ||--o{ RacineWorkflowExecution : "contributes to workflows"
+    RacineOrchestrationMaster --> ClassificationRule : "orchestrates classification rules"
+    ClassificationRule --> RacineOrchestrationMaster : "managed by racine"
+    ClassificationResult --> RacineWorkflowExecution : "contributes to workflows"
     
     %% Module 3: Compliance Orchestration
-    RacineOrchestrationMaster ||--o{ ComplianceRequirement : "orchestrates compliance"
-    ComplianceValidation ||--o{ RacineWorkflowExecution : "validates in workflows"
+    RacineOrchestrationMaster --> ComplianceRequirement : "orchestrates compliance"
+    ComplianceValidation --> RacineWorkflowExecution : "validates in workflows"
     
     %% Module 4: Scan Logic Orchestration
-    RacineOrchestrationMaster ||--o{ ScanOrchestrationJob : "manages scan jobs"
-    ScanOrchestrationJob }o--|| RacineOrchestrationMaster : "coordinated by racine"
-    ScanResult ||--o{ RacineWorkflowExecution : "feeds workflow results"
+    RacineOrchestrationMaster --> ScanOrchestrationJob : "manages scan jobs"
+    ScanOrchestrationJob --> RacineOrchestrationMaster : "coordinated by racine"
+    ScanResult --> RacineWorkflowExecution : "feeds workflow results"
     
     %% Module 5: Scan Rule Sets Orchestration
-    RacineOrchestrationMaster ||--o{ IntelligentScanRule : "orchestrates intelligent rules"
-    IntelligentScanRule }o--|| RacineOrchestrationMaster : "managed by racine"
-    EnhancedScanRuleSet ||--o{ RacineWorkflowExecution : "executes in workflows"
+    RacineOrchestrationMaster --> IntelligentScanRule : "orchestrates intelligent rules"
+    IntelligentScanRule --> RacineOrchestrationMaster : "managed by racine"
+    EnhancedScanRuleSet --> RacineWorkflowExecution : "executes in workflows"
     
     %% Module 6: Catalog Orchestration
-    RacineOrchestrationMaster ||--o{ IntelligentDataAsset : "orchestrates intelligent assets"
-    IntelligentDataAsset }o--|| RacineOrchestrationMaster : "managed by racine"
-    CatalogItem ||--o{ RacineWorkflowExecution : "enriches workflows"
+    RacineOrchestrationMaster --> IntelligentDataAsset : "orchestrates intelligent assets"
+    IntelligentDataAsset --> RacineOrchestrationMaster : "managed by racine"
+    CatalogItem --> RacineWorkflowExecution : "enriches workflows"
     
     %% Module 7: RBAC Orchestration
-    User ||--o{ RacineOrchestrationMaster : "creates orchestrators"
-    Role ||--o{ Permission : "has permissions"
-    Permission ||--o{ RacineOrchestrationMaster : "controls access"
+    User --> RacineOrchestrationMaster : "creates orchestrators"
+    Role --> Permission : "has permissions"
+    Permission --> RacineOrchestrationMaster : "controls access"
     
     %% Cross-Group Integration Relationships
-    RacineCrossGroupIntegration }o--|| RacineOrchestrationMaster : "managed by orchestrator"
-    RacineCrossGroupIntegration }o--|| User : "created by user"
+    RacineCrossGroupIntegration --> RacineOrchestrationMaster : "managed by orchestrator"
+    RacineCrossGroupIntegration --> User : "created by user"
     
     %% Workflow Execution Relationships
-    RacineWorkflowExecution }o--|| RacineOrchestrationMaster : "executed by orchestrator"
-    RacineWorkflowExecution }o--|| User : "triggered by user"
+    RacineWorkflowExecution --> RacineOrchestrationMaster : "executed by orchestrator"
+    RacineWorkflowExecution --> User : "triggered by user"
     
     %% System Health Relationships
-    RacineSystemHealth }o--|| RacineOrchestrationMaster : "monitors orchestrator"
+    RacineSystemHealth --> RacineOrchestrationMaster : "monitors orchestrator"
     
     %% Performance and Error Tracking
-    RacinePerformanceMetrics }o--|| RacineOrchestrationMaster : "measures orchestrator"
-    RacineErrorLog }o--|| RacineOrchestrationMaster : "logs orchestrator errors"
+    RacinePerformanceMetrics --> RacineOrchestrationMaster : "measures orchestrator"
+    RacineErrorLog --> RacineOrchestrationMaster : "logs orchestrator errors"
     
     %% Organization Management
-    Organization ||--o{ RacineOrchestrationMaster : "owns orchestrators"
-    Organization ||--o{ User : "has users"
-    Organization ||--o{ DataSource : "owns data sources"
-    Organization ||--o{ ComplianceRequirement : "defines requirements"
-    Organization ||--o{ CatalogItem : "owns catalog items"
+    Organization --> RacineOrchestrationMaster : "owns orchestrators"
+    Organization --> User : "has users"
+    Organization --> DataSource : "owns data sources"
+    Organization --> ComplianceRequirement : "defines requirements"
+    Organization --> CatalogItem : "owns catalog items"
 
     %% Styling
     classDef racineClass fill:#ffebee,stroke:#c62828,stroke-width:4px
@@ -618,15 +618,26 @@ classDiagram
     classDef supportClass fill:#f9fbe7,stroke:#827717,stroke-width:2px
     classDef orgClass fill:#f1f8e9,stroke:#33691e,stroke-width:2px
 
-    class RacineOrchestrationMaster,RacineWorkflowExecution,RacineSystemHealth,RacineCrossGroupIntegration racineClass
+    class RacineOrchestrationMaster racineClass
+    class RacineWorkflowExecution racineClass
+    class RacineSystemHealth racineClass
+    class RacineCrossGroupIntegration racineClass
     class DataSource dataSourceClass
-    class ClassificationRule,ClassificationResult classificationClass
-    class ComplianceRequirement,ComplianceValidation complianceClass
-    class ScanOrchestrationJob,ScanResult scanLogicClass
-    class IntelligentScanRule,EnhancedScanRuleSet ruleSetClass
-    class IntelligentDataAsset,CatalogItem catalogClass
-    class User,Role,Permission rbacClass
-    class RacinePerformanceMetrics,RacineErrorLog supportClass
+    class ClassificationRule classificationClass
+    class ClassificationResult classificationClass
+    class ComplianceRequirement complianceClass
+    class ComplianceValidation complianceClass
+    class ScanOrchestrationJob scanLogicClass
+    class ScanResult scanLogicClass
+    class IntelligentScanRule ruleSetClass
+    class EnhancedScanRuleSet ruleSetClass
+    class IntelligentDataAsset catalogClass
+    class CatalogItem catalogClass
+    class User rbacClass
+    class Role rbacClass
+    class Permission rbacClass
+    class RacinePerformanceMetrics supportClass
+    class RacineErrorLog supportClass
     class Organization orgClass
 ```
 

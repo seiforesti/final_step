@@ -724,75 +724,75 @@ classDiagram
     %% ===== RELATIONSHIPS =====
     
     %% Scan Orchestration Job as Central Hub
-    ScanOrchestrationJob ||--o{ Scan : "orchestrates scans"
-    ScanOrchestrationJob ||--o{ ScanWorkflowExecution : "executes workflows"
-    ScanOrchestrationJob ||--o{ ScanResourceAllocation : "allocates resources"
-    ScanOrchestrationJob ||--o{ ScanPerformanceMetrics : "collects metrics"
-    ScanOrchestrationJob ||--o{ ScanExecutionLog : "generates logs"
-    ScanOrchestrationJob }o--|| EnhancedScanRuleSet : "uses enhanced rule set"
-    ScanOrchestrationJob }o--|| RacineOrchestrationMaster : "managed by racine"
-    ScanOrchestrationJob }o--|| Organization : "organization orchestration"
+    ScanOrchestrationJob --> Scan : "orchestrates scans"
+    ScanOrchestrationJob --> ScanWorkflowExecution : "executes workflows"
+    ScanOrchestrationJob --> ScanResourceAllocation : "allocates resources"
+    ScanOrchestrationJob --> ScanPerformanceMetrics : "collects metrics"
+    ScanOrchestrationJob --> ScanExecutionLog : "generates logs"
+    ScanOrchestrationJob --> EnhancedScanRuleSet : "uses enhanced rule set"
+    ScanOrchestrationJob --> RacineOrchestrationMaster : "managed by racine"
+    ScanOrchestrationJob --> Organization : "organization orchestration"
     
     %% Scan Execution Relationships
-    Scan ||--o{ ScanResult : "produces results"
-    Scan }o--|| DataSource : "scans data source"
-    Scan }o--|| ScanRuleSet : "uses rule set"
-    ScanResult ||--o{ ScanClassificationIntegration : "classification integration"
-    ScanResult ||--o{ ScanComplianceIntegration : "compliance integration"
-    ScanResult ||--o{ ScanCatalogEnrichment : "catalog enrichment"
+    Scan --> ScanResult : "produces results"
+    Scan --> DataSource : "scans data source"
+    Scan --> ScanRuleSet : "uses rule set"
+    ScanResult --> ScanClassificationIntegration : "classification integration"
+    ScanResult --> ScanComplianceIntegration : "compliance integration"
+    ScanResult --> ScanCatalogEnrichment : "catalog enrichment"
     
     %% Workflow Execution Relationships
-    ScanWorkflowExecution }o--|| ScanOrchestrationJob : "part of orchestration"
-    ScanWorkflowExecution }o--|| ScanWorkflowExecution : "parent-child steps"
+    ScanWorkflowExecution --> ScanOrchestrationJob : "part of orchestration"
+    ScanWorkflowExecution --> ScanWorkflowExecution : "parent-child steps"
     
     %% Resource Allocation Relationships
-    ScanResourceAllocation }o--|| ScanOrchestrationJob : "allocates for orchestration"
+    ScanResourceAllocation --> ScanOrchestrationJob : "allocates for orchestration"
     
     %% Data Source Integration
-    DataSource ||--o{ Scan : "subject to scans"
-    DataSource ||--o{ DiscoveryHistory : "discovery history"
-    DataSource ||--o{ ScanRuleSet : "has rule sets"
+    DataSource --> Scan : "subject to scans"
+    DataSource --> DiscoveryHistory : "discovery history"
+    DataSource --> ScanRuleSet : "has rule sets"
     
     %% Scan Rule Sets Integration
-    ScanRuleSet ||--o{ Scan : "governs scans"
-    ScanRuleSet ||--o{ EnhancedScanRuleSet : "enhanced by"
-    EnhancedScanRuleSet ||--o{ IntelligentScanRule : "contains intelligent rules"
-    IntelligentScanRule }o--|| RacineOrchestrationMaster : "orchestrated by racine"
+    ScanRuleSet --> Scan : "governs scans"
+    ScanRuleSet --> EnhancedScanRuleSet : "enhanced by"
+    EnhancedScanRuleSet --> IntelligentScanRule : "contains intelligent rules"
+    IntelligentScanRule --> RacineOrchestrationMaster : "orchestrated by racine"
     
     %% Classification Integration
-    ClassificationResult }o--|| ScanResult : "classifies scan results"
-    ScanClassificationIntegration }o--|| ScanResult : "integrates with scan"
-    ScanClassificationIntegration }o--|| ClassificationResult : "links classification"
+    ClassificationResult --> ScanResult : "classifies scan results"
+    ScanClassificationIntegration --> ScanResult : "integrates with scan"
+    ScanClassificationIntegration --> ClassificationResult : "links classification"
     
     %% Compliance Integration
-    ComplianceValidation }o--|| DataSource : "validates data source"
-    ScanComplianceIntegration }o--|| ScanResult : "validates scan result"
-    ScanComplianceIntegration }o--|| ComplianceValidation : "uses validation"
+    ComplianceValidation --> DataSource : "validates data source"
+    ScanComplianceIntegration --> ScanResult : "validates scan result"
+    ScanComplianceIntegration --> ComplianceValidation : "uses validation"
     
     %% Catalog Integration
-    CatalogItem }o--|| DataSource : "catalogs data from"
-    ScanCatalogEnrichment }o--|| ScanResult : "enriches from scan"
-    ScanCatalogEnrichment }o--|| CatalogItem : "enriches catalog item"
+    CatalogItem --> DataSource : "catalogs data from"
+    ScanCatalogEnrichment --> ScanResult : "enriches from scan"
+    ScanCatalogEnrichment --> CatalogItem : "enriches catalog item"
     
     %% RBAC Integration
-    User ||--o{ ScanOrchestrationJob : "creates scan jobs"
-    User ||--o{ Scan : "initiates scans"
-    Role ||--o{ Permission : "has permissions"
-    Permission ||--o{ ScanOrchestrationJob : "controls access"
+    User --> ScanOrchestrationJob : "creates scan jobs"
+    User --> Scan : "initiates scans"
+    Role --> Permission : "has permissions"
+    Permission --> ScanOrchestrationJob : "controls access"
     
     %% Racine Orchestrator Integration
-    RacineOrchestrationMaster ||--o{ ScanOrchestrationJob : "orchestrates scan jobs"
-    RacineOrchestrationMaster ||--o{ DataSource : "manages data sources"
-    RacineOrchestrationMaster }o--|| User : "created by user"
+    RacineOrchestrationMaster --> ScanOrchestrationJob : "orchestrates scan jobs"
+    RacineOrchestrationMaster --> DataSource : "manages data sources"
+    RacineOrchestrationMaster --> User : "created by user"
     
     %% Performance and Monitoring
-    ScanPerformanceMetrics }o--|| ScanOrchestrationJob : "measures orchestration performance"
-    ScanExecutionLog }o--|| ScanOrchestrationJob : "logs orchestration execution"
+    ScanPerformanceMetrics --> ScanOrchestrationJob : "measures orchestration performance"
+    ScanExecutionLog --> ScanOrchestrationJob : "logs orchestration execution"
     
     %% Organization Relationships
-    Organization ||--o{ ScanOrchestrationJob : "owns orchestration jobs"
-    Organization ||--o{ User : "has users"
-    Organization ||--o{ DataSource : "owns data sources"
+    Organization --> ScanOrchestrationJob : "owns orchestration jobs"
+    Organization --> User : "has users"
+    Organization --> DataSource : "owns data sources"
 
     %% Styling
     classDef centralClass fill:#f3e5f5,stroke:#4a148c,stroke-width:4px
@@ -806,15 +806,28 @@ classDiagram
     classDef performanceClass fill:#f9fbe7,stroke:#827717,stroke-width:2px
     classDef orgClass fill:#f1f8e9,stroke:#33691e,stroke-width:2px
 
-    class ScanOrchestrationJob,Scan,ScanResult,ScanWorkflowExecution,ScanResourceAllocation centralClass
-    class DataSource,DiscoveryHistory dataSourceClass
-    class ScanRuleSet,EnhancedScanRuleSet,IntelligentScanRule ruleSetClass
-    class ClassificationResult,ScanClassificationIntegration classificationClass
-    class ComplianceValidation,ScanComplianceIntegration complianceClass
-    class CatalogItem,ScanCatalogEnrichment catalogClass
-    class User,Role,Permission rbacClass
+    class ScanOrchestrationJob centralClass
+    class Scan centralClass
+    class ScanResult centralClass
+    class ScanWorkflowExecution centralClass
+    class ScanResourceAllocation centralClass
+    class DataSource dataSourceClass
+    class DiscoveryHistory dataSourceClass
+    class ScanRuleSet ruleSetClass
+    class EnhancedScanRuleSet ruleSetClass
+    class IntelligentScanRule ruleSetClass
+    class ClassificationResult classificationClass
+    class ScanClassificationIntegration classificationClass
+    class ComplianceValidation complianceClass
+    class ScanComplianceIntegration complianceClass
+    class CatalogItem catalogClass
+    class ScanCatalogEnrichment catalogClass
+    class User rbacClass
+    class Role rbacClass
+    class Permission rbacClass
     class RacineOrchestrationMaster racineClass
-    class ScanPerformanceMetrics,ScanExecutionLog performanceClass
+    class ScanPerformanceMetrics performanceClass
+    class ScanExecutionLog performanceClass
     class Organization orgClass
 ```
 

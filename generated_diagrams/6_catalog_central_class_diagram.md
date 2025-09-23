@@ -679,87 +679,87 @@ classDiagram
     %% ===== RELATIONSHIPS =====
     
     %% Catalog Item as Central Hub
-    CatalogItem ||--o{ CatalogItemTag : "has tags"
-    CatalogItem ||--o{ DataLineage : "source/target lineage"
-    CatalogItem ||--o{ CatalogUsageLog : "usage logs"
-    CatalogItem ||--o{ CatalogQualityRule : "quality rules"
-    CatalogItem ||--o{ IntelligentDataAsset : "enhanced by intelligent asset"
-    CatalogItem ||--o{ CatalogItemClassification : "classification enrichment"
-    CatalogItem ||--o{ ComplianceCatalogEnrichment : "compliance enrichment"
-    CatalogItem ||--o{ ScanCatalogEnrichment : "scan enrichment"
-    CatalogItem ||--o{ CatalogRuleMapping : "rule mappings"
-    CatalogItem ||--o{ CatalogAccessControl : "access controls"
-    CatalogItem ||--o{ CatalogIntelligence : "AI insights"
-    CatalogItem ||--o{ AssetRecommendation : "recommendations"
-    CatalogItem ||--o{ CatalogCollaboration : "collaborations"
-    CatalogItem }o--|| DataSource : "cataloged from data source"
-    CatalogItem }o--|| Organization : "organization catalog"
-    CatalogItem }o--|| CatalogItem : "parent-child hierarchy"
+    CatalogItem --> CatalogItemTag : "has tags"
+    CatalogItem --> DataLineage : "source/target lineage"
+    CatalogItem --> CatalogUsageLog : "usage logs"
+    CatalogItem --> CatalogQualityRule : "quality rules"
+    CatalogItem --> IntelligentDataAsset : "enhanced by intelligent asset"
+    CatalogItem --> CatalogItemClassification : "classification enrichment"
+    CatalogItem --> ComplianceCatalogEnrichment : "compliance enrichment"
+    CatalogItem --> ScanCatalogEnrichment : "scan enrichment"
+    CatalogItem --> CatalogRuleMapping : "rule mappings"
+    CatalogItem --> CatalogAccessControl : "access controls"
+    CatalogItem --> CatalogIntelligence : "AI insights"
+    CatalogItem --> AssetRecommendation : "recommendations"
+    CatalogItem --> CatalogCollaboration : "collaborations"
+    CatalogItem --> DataSource : "cataloged from data source"
+    CatalogItem --> Organization : "organization catalog"
+    CatalogItem --> CatalogItem : "parent-child hierarchy"
     
     %% Intelligent Data Asset Relationships
-    IntelligentDataAsset }o--|| CatalogItem : "enhances catalog item"
-    IntelligentDataAsset }o--|| DataSource : "intelligent asset from data source"
-    IntelligentDataAsset }o--|| RacineOrchestrationMaster : "orchestrated by racine"
-    IntelligentDataAsset ||--o{ EnterpriseDataLineage : "enhanced lineage"
+    IntelligentDataAsset --> CatalogItem : "enhances catalog item"
+    IntelligentDataAsset --> DataSource : "intelligent asset from data source"
+    IntelligentDataAsset --> RacineOrchestrationMaster : "orchestrated by racine"
+    IntelligentDataAsset --> EnterpriseDataLineage : "enhanced lineage"
     
     %% Enterprise Data Lineage Relationships
-    EnterpriseDataLineage }o--|| IntelligentDataAsset : "source asset"
-    EnterpriseDataLineage }o--|| IntelligentDataAsset : "target asset"
+    EnterpriseDataLineage --> IntelligentDataAsset : "source asset"
+    EnterpriseDataLineage --> IntelligentDataAsset : "target asset"
     
     %% Data Lineage Relationships
-    DataLineage }o--|| CatalogItem : "source item"
-    DataLineage }o--|| CatalogItem : "target item"
+    DataLineage --> CatalogItem : "source item"
+    DataLineage --> CatalogItem : "target item"
     
     %% Tag Relationships
-    CatalogTag ||--o{ CatalogItemTag : "tag associations"
-    CatalogItemTag }o--|| CatalogItem : "tagged item"
-    CatalogItemTag }o--|| CatalogTag : "tag reference"
+    CatalogTag --> CatalogItemTag : "tag associations"
+    CatalogItemTag --> CatalogItem : "tagged item"
+    CatalogItemTag --> CatalogTag : "tag reference"
     
     %% Data Source Integration
-    DataSource ||--o{ CatalogItem : "catalog items"
-    DataSource ||--o{ DataSourceCatalogMapping : "catalog mappings"
-    DataSourceCatalogMapping }o--|| CatalogItem : "mapped catalog item"
+    DataSource --> CatalogItem : "catalog items"
+    DataSource --> DataSourceCatalogMapping : "catalog mappings"
+    DataSourceCatalogMapping --> CatalogItem : "mapped catalog item"
     
     %% Classification Integration
-    ClassificationResult ||--o{ CatalogItemClassification : "classification links"
-    CatalogItemClassification }o--|| CatalogItem : "classified catalog item"
-    CatalogItemClassification }o--|| ClassificationResult : "classification result"
+    ClassificationResult --> CatalogItemClassification : "classification links"
+    CatalogItemClassification --> CatalogItem : "classified catalog item"
+    CatalogItemClassification --> ClassificationResult : "classification result"
     
     %% Compliance Integration
-    ComplianceRequirement ||--o{ ComplianceCatalogEnrichment : "compliance enrichment"
-    ComplianceCatalogEnrichment }o--|| CatalogItem : "enriched catalog item"
+    ComplianceRequirement --> ComplianceCatalogEnrichment : "compliance enrichment"
+    ComplianceCatalogEnrichment --> CatalogItem : "enriched catalog item"
     
     %% Scan Logic Integration
-    ScanResult ||--o{ ScanCatalogEnrichment : "scan enrichment"
-    ScanCatalogEnrichment }o--|| CatalogItem : "enriched from scan"
+    ScanResult --> ScanCatalogEnrichment : "scan enrichment"
+    ScanCatalogEnrichment --> CatalogItem : "enriched from scan"
     
     %% Scan Rule Sets Integration
-    IntelligentScanRule ||--o{ CatalogRuleMapping : "rule mappings"
-    CatalogRuleMapping }o--|| CatalogItem : "mapped catalog item"
+    IntelligentScanRule --> CatalogRuleMapping : "rule mappings"
+    CatalogRuleMapping --> CatalogItem : "mapped catalog item"
     
     %% RBAC Integration
-    User ||--o{ CatalogAccessControl : "catalog access"
-    User ||--o{ CatalogUsageLog : "catalog usage"
-    User ||--o{ CatalogCollaboration : "collaborations"
-    Role ||--o{ Permission : "has permissions"
-    Permission ||--o{ CatalogItem : "controls access"
-    CatalogAccessControl }o--|| CatalogItem : "controls access to"
+    User --> CatalogAccessControl : "catalog access"
+    User --> CatalogUsageLog : "catalog usage"
+    User --> CatalogCollaboration : "collaborations"
+    Role --> Permission : "has permissions"
+    Permission --> CatalogItem : "controls access"
+    CatalogAccessControl --> CatalogItem : "controls access to"
     
     %% Racine Orchestrator Integration
-    RacineOrchestrationMaster ||--o{ IntelligentDataAsset : "orchestrates intelligent assets"
-    RacineOrchestrationMaster }o--|| User : "created by user"
+    RacineOrchestrationMaster --> IntelligentDataAsset : "orchestrates intelligent assets"
+    RacineOrchestrationMaster --> User : "created by user"
     
     %% Advanced Features
-    CatalogIntelligence }o--|| CatalogItem : "provides insights for"
-    AssetRecommendation }o--|| IntelligentDataAsset : "source asset"
-    AssetRecommendation }o--|| IntelligentDataAsset : "recommended asset"
-    CatalogSearch ||--o{ CatalogItem : "searches catalog items"
-    CatalogCollaboration }o--|| CatalogItem : "collaborates on"
+    CatalogIntelligence --> CatalogItem : "provides insights for"
+    AssetRecommendation --> IntelligentDataAsset : "source asset"
+    AssetRecommendation --> IntelligentDataAsset : "recommended asset"
+    CatalogSearch --> CatalogItem : "searches catalog items"
+    CatalogCollaboration --> CatalogItem : "collaborates on"
     
     %% Organization Relationships
-    Organization ||--o{ CatalogItem : "owns catalog items"
-    Organization ||--o{ User : "has users"
-    Organization ||--o{ DataSource : "owns data sources"
+    Organization --> CatalogItem : "owns catalog items"
+    Organization --> User : "has users"
+    Organization --> DataSource : "owns data sources"
 
     %% Styling
     classDef centralClass fill:#e0f2f1,stroke:#004d40,stroke-width:4px
@@ -773,15 +773,33 @@ classDiagram
     classDef advancedClass fill:#f9fbe7,stroke:#827717,stroke-width:2px
     classDef orgClass fill:#f1f8e9,stroke:#33691e,stroke-width:2px
 
-    class CatalogItem,IntelligentDataAsset,EnterpriseDataLineage,CatalogTag,CatalogItemTag,DataLineage,CatalogUsageLog,CatalogQualityRule centralClass
-    class DataSource,DataSourceCatalogMapping dataSourceClass
-    class ClassificationResult,CatalogItemClassification classificationClass
-    class ComplianceRequirement,ComplianceCatalogEnrichment complianceClass
-    class ScanResult,ScanCatalogEnrichment scanLogicClass
-    class IntelligentScanRule,CatalogRuleMapping ruleSetClass
-    class User,Role,Permission,CatalogAccessControl rbacClass
+    class CatalogItem centralClass
+    class IntelligentDataAsset centralClass
+    class EnterpriseDataLineage centralClass
+    class CatalogTag centralClass
+    class CatalogItemTag centralClass
+    class DataLineage centralClass
+    class CatalogUsageLog centralClass
+    class CatalogQualityRule centralClass
+    class DataSource dataSourceClass
+    class DataSourceCatalogMapping dataSourceClass
+    class ClassificationResult classificationClass
+    class CatalogItemClassification classificationClass
+    class ComplianceRequirement complianceClass
+    class ComplianceCatalogEnrichment complianceClass
+    class ScanResult scanLogicClass
+    class ScanCatalogEnrichment scanLogicClass
+    class IntelligentScanRule ruleSetClass
+    class CatalogRuleMapping ruleSetClass
+    class User rbacClass
+    class Role rbacClass
+    class Permission rbacClass
+    class CatalogAccessControl rbacClass
     class RacineOrchestrationMaster racineClass
-    class CatalogIntelligence,AssetRecommendation,CatalogSearch,CatalogCollaboration advancedClass
+    class CatalogIntelligence advancedClass
+    class AssetRecommendation advancedClass
+    class CatalogSearch advancedClass
+    class CatalogCollaboration advancedClass
     class Organization orgClass
 ```
 

@@ -385,60 +385,60 @@ classDiagram
     %% ===== RELATIONSHIPS =====
     
     %% DataSource as Central Hub - Primary Relationships
-    DataSource ||--o{ Scan : "manages scans"
-    DataSource ||--o{ ScanRuleSet : "defines scan rules"
-    DataSource ||--o{ ScanResult : "produces scan results"
-    DataSource ||--o{ CatalogItem : "catalogs assets"
-    DataSource ||--o{ ClassificationResult : "classifies data"
-    DataSource ||--o{ ComplianceRequirement : "enforces compliance"
-    DataSource ||--o{ DataSourcePermission : "controls access"
-    DataSource ||--o{ AccessLog : "logs access attempts"
+    DataSource --> Scan : "manages scans"
+    DataSource --> ScanRuleSet : "defines scan rules"
+    DataSource --> ScanResult : "produces scan results"
+    DataSource --> CatalogItem : "catalogs assets"
+    DataSource --> ClassificationResult : "classifies data"
+    DataSource --> ComplianceRequirement : "enforces compliance"
+    DataSource --> DataSourcePermission : "controls access"
+    DataSource --> AccessLog : "logs access attempts"
     
     %% Scan Logic Relationships
-    Scan ||--o{ ScanResult : "generates results"
-    Scan }o--|| ScanRuleSet : "uses rule set"
-    ScanOrchestrationJob ||--o{ Scan : "orchestrates scans"
-    ScanOrchestrationJob }o--|| RacineOrchestrationMaster : "managed by racine"
+    Scan --> ScanResult : "generates results"
+    Scan --> ScanRuleSet : "uses rule set"
+    ScanOrchestrationJob --> Scan : "orchestrates scans"
+    ScanOrchestrationJob --> RacineOrchestrationMaster : "managed by racine"
     
     %% Scan Rule Sets Relationships
-    IntelligentScanRule }o--|| RacineOrchestrationMaster : "orchestrated by racine"
-    ScanRuleSet ||--o{ IntelligentScanRule : "contains intelligent rules"
+    IntelligentScanRule --> RacineOrchestrationMaster : "orchestrated by racine"
+    ScanRuleSet --> IntelligentScanRule : "contains intelligent rules"
     
     %% Classification Relationships
-    ClassificationRule }o--|| RacineOrchestrationMaster : "orchestrated by racine"
-    ClassificationRule ||--o{ ClassificationResult : "produces classifications"
-    ClassificationResult }o--|| DataSource : "classifies data from"
-    ClassificationResult }o--|| ScanResult : "classifies scan results"
+    ClassificationRule --> RacineOrchestrationMaster : "orchestrated by racine"
+    ClassificationRule --> ClassificationResult : "produces classifications"
+    ClassificationResult --> DataSource : "classifies data from"
+    ClassificationResult --> ScanResult : "classifies scan results"
     
     %% Compliance Relationships
-    ComplianceRequirement }o--|| Organization : "organization requirements"
-    ComplianceValidation }o--|| ComplianceRequirement : "validates requirement"
-    ComplianceValidation }o--|| DataSource : "validates data source"
+    ComplianceRequirement --> Organization : "organization requirements"
+    ComplianceValidation --> ComplianceRequirement : "validates requirement"
+    ComplianceValidation --> DataSource : "validates data source"
     
     %% Catalog Relationships
-    CatalogItem }o--|| DataSource : "catalogs data from"
-    CatalogItem }o--|| Organization : "organization catalog"
-    DataLineage }o--|| CatalogItem : "traces lineage"
+    CatalogItem --> DataSource : "catalogs data from"
+    CatalogItem --> Organization : "organization catalog"
+    DataLineage --> CatalogItem : "traces lineage"
     
     %% RBAC Relationships
-    DataSourcePermission }o--|| DataSource : "permissions for"
-    DataSourcePermission }o--|| User : "granted to user"
-    AccessLog }o--|| DataSource : "logs access to"
-    AccessLog }o--|| User : "logs user access"
-    User }o--|| Organization : "belongs to"
+    DataSourcePermission --> DataSource : "permissions for"
+    DataSourcePermission --> User : "granted to user"
+    AccessLog --> DataSource : "logs access to"
+    AccessLog --> User : "logs user access"
+    User --> Organization : "belongs to"
     
     %% Racine Orchestrator Relationships (Central Management)
-    RacineOrchestrationMaster ||--o{ DataSource : "orchestrates data sources"
-    RacineOrchestrationMaster ||--o{ IntelligentScanRule : "manages scan rules"
-    RacineOrchestrationMaster ||--o{ ClassificationRule : "manages classifications"
-    RacineOrchestrationMaster ||--o{ ScanOrchestrationJob : "orchestrates scan jobs"
-    RacineOrchestrationMaster }o--|| User : "created by user"
+    RacineOrchestrationMaster --> DataSource : "orchestrates data sources"
+    RacineOrchestrationMaster --> IntelligentScanRule : "manages scan rules"
+    RacineOrchestrationMaster --> ClassificationRule : "manages classifications"
+    RacineOrchestrationMaster --> ScanOrchestrationJob : "orchestrates scan jobs"
+    RacineOrchestrationMaster --> User : "created by user"
     
     %% Organization Relationships (Multi-tenant)
-    Organization ||--o{ DataSource : "owns data sources"
-    Organization ||--o{ User : "has users"
-    Organization ||--o{ CatalogItem : "owns catalog items"
-    Organization ||--o{ ComplianceRequirement : "has compliance requirements"
+    Organization --> DataSource : "owns data sources"
+    Organization --> User : "has users"
+    Organization --> CatalogItem : "owns catalog items"
+    Organization --> ComplianceRequirement : "has compliance requirements"
 
     %% Styling
     classDef centralClass fill:#e1f5fe,stroke:#01579b,stroke-width:4px
@@ -452,12 +452,20 @@ classDiagram
     classDef orgClass fill:#f1f8e9,stroke:#33691e,stroke-width:2px
 
     class DataSource centralClass
-    class Scan,ScanResult,ScanOrchestrationJob scanLogicClass
-    class ScanRuleSet,IntelligentScanRule ruleSetClass
-    class ClassificationRule,ClassificationResult classificationClass
-    class ComplianceRequirement,ComplianceValidation complianceClass
-    class CatalogItem,DataLineage catalogClass
-    class DataSourcePermission,AccessLog,User rbacClass
+    class Scan scanLogicClass
+    class ScanResult scanLogicClass
+    class ScanOrchestrationJob scanLogicClass
+    class ScanRuleSet ruleSetClass
+    class IntelligentScanRule ruleSetClass
+    class ClassificationRule classificationClass
+    class ClassificationResult classificationClass
+    class ComplianceRequirement complianceClass
+    class ComplianceValidation complianceClass
+    class CatalogItem catalogClass
+    class DataLineage catalogClass
+    class DataSourcePermission rbacClass
+    class AccessLog rbacClass
+    class User rbacClass
     class RacineOrchestrationMaster racineClass
     class Organization orgClass
 ```

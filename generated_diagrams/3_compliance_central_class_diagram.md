@@ -558,72 +558,72 @@ classDiagram
     %% ===== RELATIONSHIPS =====
     
     %% Compliance Framework as Central Hub
-    ComplianceFramework ||--o{ ComplianceRequirement : "defines requirements"
-    ComplianceFramework ||--o{ ComplianceAssessment : "governs assessments"
-    ComplianceFramework ||--o{ ComplianceRule : "contains rules"
-    ComplianceFramework ||--o{ ComplianceMetrics : "measures performance"
+    ComplianceFramework --> ComplianceRequirement : "defines requirements"
+    ComplianceFramework --> ComplianceAssessment : "governs assessments"
+    ComplianceFramework --> ComplianceRule : "contains rules"
+    ComplianceFramework --> ComplianceMetrics : "measures performance"
     
     %% Compliance Requirement Relationships
-    ComplianceRequirement ||--o{ ComplianceAssessment : "assessed by"
-    ComplianceRequirement ||--o{ ComplianceGap : "identifies gaps"
-    ComplianceRequirement ||--o{ ComplianceValidation : "validates against"
-    ComplianceRequirement ||--o{ ComplianceEvidence : "supported by evidence"
-    ComplianceRequirement }o--|| Organization : "organization requirement"
-    ComplianceRequirement }o--|| DataSource : "applies to data source"
+    ComplianceRequirement --> ComplianceAssessment : "assessed by"
+    ComplianceRequirement --> ComplianceGap : "identifies gaps"
+    ComplianceRequirement --> ComplianceValidation : "validates against"
+    ComplianceRequirement --> ComplianceEvidence : "supported by evidence"
+    ComplianceRequirement --> Organization : "organization requirement"
+    ComplianceRequirement --> DataSource : "applies to data source"
     
     %% Compliance Assessment Relationships
-    ComplianceAssessment }o--|| DataSource : "assesses data source"
-    ComplianceAssessment ||--o{ ComplianceGap : "identifies gaps"
-    ComplianceAssessment ||--o{ ComplianceReport : "generates reports"
+    ComplianceAssessment --> DataSource : "assesses data source"
+    ComplianceAssessment --> ComplianceGap : "identifies gaps"
+    ComplianceAssessment --> ComplianceReport : "generates reports"
     
     %% Compliance Validation Relationships
-    ComplianceValidation }o--|| ComplianceRequirement : "validates requirement"
-    ComplianceValidation }o--|| DataSource : "validates data source"
-    ComplianceValidation ||--o{ ComplianceAuditTrail : "creates audit records"
+    ComplianceValidation --> ComplianceRequirement : "validates requirement"
+    ComplianceValidation --> DataSource : "validates data source"
+    ComplianceValidation --> ComplianceAuditTrail : "creates audit records"
     
     %% Data Source Integration
-    DataSource ||--o{ ComplianceRequirement : "subject to requirements"
-    DataSource ||--o{ ComplianceRule : "governed by rules"
-    DataSource ||--o{ ComplianceValidation : "validated for compliance"
+    DataSource --> ComplianceRequirement : "subject to requirements"
+    DataSource --> ComplianceRule : "governed by rules"
+    DataSource --> ComplianceValidation : "validated for compliance"
     
     %% Classification Integration
-    ClassificationResult ||--o{ ComplianceClassificationMapping : "compliance mapping"
-    ComplianceClassificationMapping }o--|| ComplianceRequirement : "maps to requirement"
+    ClassificationResult --> ComplianceClassificationMapping : "compliance mapping"
+    ComplianceClassificationMapping --> ComplianceRequirement : "maps to requirement"
     
     %% Scan Logic Integration
-    ScanResult ||--o{ ComplianceScanIntegration : "compliance assessment"
-    ComplianceScanIntegration }o--|| ComplianceRule : "evaluated by rule"
+    ScanResult --> ComplianceScanIntegration : "compliance assessment"
+    ComplianceScanIntegration --> ComplianceRule : "evaluated by rule"
     
     %% Catalog Integration
-    CatalogItem ||--o{ ComplianceCatalogEnrichment : "compliance enrichment"
-    ComplianceCatalogEnrichment }o--|| ComplianceRequirement : "enriched with requirement"
+    CatalogItem --> ComplianceCatalogEnrichment : "compliance enrichment"
+    ComplianceCatalogEnrichment --> ComplianceRequirement : "enriched with requirement"
     
     %% Scan Rule Sets Integration
-    IntelligentScanRule ||--o{ ComplianceRuleIntegration : "compliance integration"
-    ComplianceRuleIntegration }o--|| ComplianceRequirement : "integrates with requirement"
+    IntelligentScanRule --> ComplianceRuleIntegration : "compliance integration"
+    ComplianceRuleIntegration --> ComplianceRequirement : "integrates with requirement"
     
     %% RBAC Integration
-    User ||--o{ ComplianceAccessControl : "compliance access"
-    User ||--o{ ComplianceAuditTrail : "performs actions"
-    Role ||--o{ ComplianceAccessControl : "role-based access"
-    ComplianceAccessControl }o--|| ComplianceRequirement : "controls access to"
+    User --> ComplianceAccessControl : "compliance access"
+    User --> ComplianceAuditTrail : "performs actions"
+    Role --> ComplianceAccessControl : "role-based access"
+    ComplianceAccessControl --> ComplianceRequirement : "controls access to"
     
     %% Racine Orchestrator Integration
-    RacineOrchestrationMaster ||--o{ ComplianceRequirement : "orchestrates compliance"
-    RacineOrchestrationMaster ||--o{ ComplianceAssessment : "coordinates assessments"
-    RacineOrchestrationMaster }o--|| User : "created by user"
+    RacineOrchestrationMaster --> ComplianceRequirement : "orchestrates compliance"
+    RacineOrchestrationMaster --> ComplianceAssessment : "coordinates assessments"
+    RacineOrchestrationMaster --> User : "created by user"
     
     %% Audit and Reporting
-    ComplianceAuditTrail }o--|| User : "performed by user"
-    ComplianceReport }o--|| Organization : "organization report"
-    ComplianceReport }o--|| ComplianceFramework : "framework report"
-    ComplianceMetrics }o--|| Organization : "organization metrics"
+    ComplianceAuditTrail --> User : "performed by user"
+    ComplianceReport --> Organization : "organization report"
+    ComplianceReport --> ComplianceFramework : "framework report"
+    ComplianceMetrics --> Organization : "organization metrics"
     
     %% Organization Relationships
-    Organization ||--o{ ComplianceRequirement : "defines requirements"
-    Organization ||--o{ ComplianceReport : "generates reports"
-    Organization ||--o{ User : "has users"
-    Organization ||--o{ DataSource : "owns data sources"
+    Organization --> ComplianceRequirement : "defines requirements"
+    Organization --> ComplianceReport : "generates reports"
+    Organization --> User : "has users"
+    Organization --> DataSource : "owns data sources"
 
     %% Styling
     classDef centralClass fill:#fce4ec,stroke:#880e4f,stroke-width:4px
@@ -637,15 +637,29 @@ classDiagram
     classDef auditClass fill:#f9fbe7,stroke:#827717,stroke-width:2px
     classDef orgClass fill:#f1f8e9,stroke:#33691e,stroke-width:2px
 
-    class ComplianceFramework,ComplianceRequirement,ComplianceAssessment,ComplianceGap,ComplianceValidation,ComplianceEvidence,ComplianceRule centralClass
+    class ComplianceFramework centralClass
+    class ComplianceRequirement centralClass
+    class ComplianceAssessment centralClass
+    class ComplianceGap centralClass
+    class ComplianceValidation centralClass
+    class ComplianceEvidence centralClass
+    class ComplianceRule centralClass
     class DataSource dataSourceClass
-    class ClassificationResult,ComplianceClassificationMapping classificationClass
-    class ScanResult,ComplianceScanIntegration scanLogicClass
-    class CatalogItem,ComplianceCatalogEnrichment catalogClass
-    class IntelligentScanRule,ComplianceRuleIntegration ruleSetClass
-    class User,Role,ComplianceAccessControl rbacClass
+    class ClassificationResult classificationClass
+    class ComplianceClassificationMapping classificationClass
+    class ScanResult scanLogicClass
+    class ComplianceScanIntegration scanLogicClass
+    class CatalogItem catalogClass
+    class ComplianceCatalogEnrichment catalogClass
+    class IntelligentScanRule ruleSetClass
+    class ComplianceRuleIntegration ruleSetClass
+    class User rbacClass
+    class Role rbacClass
+    class ComplianceAccessControl rbacClass
     class RacineOrchestrationMaster racineClass
-    class ComplianceAuditTrail,ComplianceReport,ComplianceMetrics auditClass
+    class ComplianceAuditTrail auditClass
+    class ComplianceReport auditClass
+    class ComplianceMetrics auditClass
     class Organization orgClass
 ```
 
