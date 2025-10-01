@@ -1,0 +1,100 @@
+\chapter*{Introduction générale}
+\addcontentsline{toc}{chapter}{Introduction générale}
+\markboth{Introduction générale}{}
+
+%========================================
+% INTRODUCTION GÉNÉRALE - DATAWAVE
+% Plateforme de Gouvernance des Données
+%========================================
+
+\section*{Contexte et Problématique}
+
+Dans l'ère du Big Data et de la transformation numérique, les entreprises modernes font face à des défis croissants en matière de gouvernance des données. La prolifération des sources de données hétérogènes, la complexité des environnements multi-cloud, et les exigences réglementaires strictes (GDPR, HIPAA, SOX, PCI-DSS) imposent aux organisations de repenser leurs stratégies de gestion et de gouvernance des données.
+
+Les solutions existantes sur le marché, telles que Microsoft Azure Purview et Databricks Unity Catalog, présentent des limitations significatives. Azure Purview souffre de quotas restrictifs (100 millions d'assets maximum, 10 scans concurrents), d'un support limité de bases de données (3-5 types seulement), et d'une absence de support VNet direct. Databricks Unity Catalog, quant à lui, se concentre principalement sur le traitement des données (lakehouse) plutôt que sur une gouvernance complète, avec une intégration complexe et des coûts imprévisibles basés sur le compute.
+
+Face à ces lacunes, le besoin d'une plateforme de gouvernance des données universelle, performante, et économiquement viable devient évident. Les entreprises recherchent une solution capable de :
+\begin{itemize}
+    \item Supporter une large gamme de types de bases de données (relationnelles, NoSQL, cloud warehouses, storage)
+    \item Offrir une classification automatique intelligente basée sur l'IA/ML
+    \item Garantir la conformité réglementaire automatisée multi-frameworks
+    \item Fournir une traçabilité complète des données (data lineage)
+    \item Assurer des performances exceptionnelles avec une scalabilité horizontale illimitée
+    \item Réduire significativement les coûts opérationnels
+\end{itemize}
+
+\section*{Objectifs du Projet}
+
+Ce projet de fin d'études vise à concevoir et développer \textbf{DataWave}, une plateforme révolutionnaire de gouvernance des données d'entreprise qui répond aux limitations des solutions existantes. Les objectifs principaux sont :
+
+\textbf{Objectif 1 : Architecture Edge Computing Innovante}
+\begin{itemize}
+    \item Implémenter une architecture de traitement distribué au plus près des sources de données
+    \item Réduire la latence à des niveaux sub-second
+    \item Optimiser l'utilisation de la bande passante réseau
+    \item Permettre une scalabilité horizontale illimitée
+\end{itemize}
+
+\textbf{Objectif 2 : Support Universel de Bases de Données}
+\begin{itemize}
+    \item Développer des connecteurs spécialisés pour 15+ types de bases de données
+    \item Supporter les environnements on-premises, cloud, et hybrides
+    \item Intégrer avec AWS, Azure, et GCP de manière transparente
+    \item Implémenter 10+ méthodes d'authentification avancées
+\end{itemize}
+
+\textbf{Objectif 3 : Intelligence Artificielle et Machine Learning}
+\begin{itemize}
+    \item Intégrer des modèles de classification automatique intelligente
+    \item Utiliser le NLP pour la recherche sémantique et l'enrichissement de métadonnées
+    \item Implémenter l'apprentissage continu pour améliorer la précision
+    \item Atteindre une précision de classification supérieure à 95\%
+\end{itemize}
+
+\textbf{Objectif 4 : Conformité Réglementaire Automatisée}
+\begin{itemize}
+    \item Supporter 6 frameworks majeurs (SOC2, GDPR, HIPAA, PCI-DSS, SOX, CCPA)
+    \item Automatiser l'évaluation de conformité
+    \item Fournir des workflows de remédiation intelligents
+    \item Générer des rapports d'audit complets
+\end{itemize}
+
+\textbf{Objectif 5 : Performance et Scalabilité}
+\begin{itemize}
+    \item Atteindre une latence API inférieure à 100ms
+    \item Supporter plus de 1000 requêtes par seconde
+    \item Garantir une disponibilité de 99.99\%
+    \item Gérer 100+ sources de données simultanément
+\end{itemize}
+
+\section*{Méthodologie et Approche}
+
+Pour atteindre ces objectifs ambitieux, nous avons adopté une méthodologie rigoureuse basée sur :
+
+\textbf{Architecture Microservices} : Nous avons conçu DataWave selon une architecture microservices modulaire comprenant 7 modules de gouvernance intégrés, permettant une scalabilité indépendante et une maintenance facilitée.
+
+\textbf{Développement Agile} : Le projet a été développé en sprints itératifs, permettant des ajustements continus basés sur les retours et les tests.
+
+\textbf{Stack Technologique Moderne} :
+\begin{itemize}
+    \item Backend : FastAPI (Python 3.11+), PostgreSQL avec PgBouncer, Redis, Kafka
+    \item Frontend : React 18, Next.js, TypeScript, TailwindCSS
+    \item IA/ML : Scikit-learn, Transformers (Hugging Face), SpaCy, PyTorch
+    \item DevOps : Docker, Kubernetes, GitHub Actions, Prometheus, Grafana
+\end{itemize}
+
+\textbf{Tests Rigoureux} : Nous avons mis en place une stratégie de tests complète incluant tests unitaires, tests d'intégration, tests de performance (load testing, stress testing), et tests de sécurité.
+
+\section*{Organisation du Rapport}
+
+Ce rapport est organisé en quatre chapitres qui présentent de manière structurée l'ensemble du travail réalisé :
+
+\textbf{Chapitre 1 : Contexte Général et État de l'Art} présente l'organisme d'accueil, analyse la problématique de la gouvernance des données dans les entreprises modernes, étudie les solutions existantes (Azure Purview, Databricks Unity Catalog, Collibra, Alation), et positionne DataWave comme une innovation majeure dans ce domaine.
+
+\textbf{Chapitre 2 : Analyse et Conception du Système} détaille l'analyse des besoins fonctionnels et non-fonctionnels, présente l'architecture globale de la plateforme avec ses 7 modules de gouvernance, décrit l'architecture backend (59 modèles, 143 services, 80+ routes API) et frontend (447 composants Racine Manager, 7 SPAs modulaires), et expose la modélisation des données.
+
+\textbf{Chapitre 3 : Réalisation et Implémentation} décrit en détail l'implémentation de chaque module : Data Source Management (connectivité universelle 15+ BD), Data Catalog (catalogage et lineage), Classification System (classification intelligente), Scan Rule Sets (gestion des règles), Scan Logic (orchestration), Compliance System (conformité multi-frameworks), et RBAC (sécurité et contrôle d'accès). Chaque section présente l'architecture technique, les fonctionnalités clés, et les interfaces développées.
+
+\textbf{Chapitre 4 : Tests, Déploiement et Résultats} présente la stratégie de tests mise en œuvre (tests unitaires, d'intégration, de performance, de sécurité), l'infrastructure de déploiement (Docker, Kubernetes, CI/CD), les résultats obtenus (performance, scalabilité, classification, conformité), et une analyse comparative détaillée avec les solutions existantes démontrant les avantages de DataWave (60-80\% de réduction de coûts, support universel de BD, performance supérieure).
+
+Ce travail démontre comment DataWave révolutionne la gouvernance des données d'entreprise en combinant une architecture edge computing innovante, une intelligence artificielle intégrée, et une approche modulaire extensible, tout en surpassant significativement les solutions existantes sur le marché.

@@ -10,6 +10,8 @@ import { ChevronRight, Home, Shield, Users, Database, Activity, Eye, Lock, Unloc
 import { cn } from '@/lib copie/utils';
 import { useCurrentUser } from '../../hooks/useCurrentUser';
 import { usePermissionCheck } from '../../hooks/usePermissionCheck';
+import { User as UserIcon } from 'lucide-react';
+import { UserCheck as UserCheckIcon } from 'lucide-react';
 
 // Breadcrumb configuration interfaces
 export interface BreadcrumbConfig {
@@ -144,7 +146,7 @@ const pathToBreadcrumbMap: Record<string, PathSegment> = {
   '/rbac/users/[id]': {
     path: '/rbac/users/[id]',
     label: 'User Details',
-    icon: <User className="w-4 h-4" />,
+    icon: <UserIcon className="w-4 h-4" />,
     permission: 'users:read',
     isDynamic: true
   },
@@ -201,7 +203,7 @@ const pathToBreadcrumbMap: Record<string, PathSegment> = {
   '/rbac/access-requests': {
     path: '/rbac/access-requests',
     label: 'Access Requests',
-    icon: <UserCheck className="w-4 h-4" />,
+    icon: <UserCheckIcon className="w-4 h-4" />,
     permission: 'access_requests:read'
   },
   '/rbac/settings': {

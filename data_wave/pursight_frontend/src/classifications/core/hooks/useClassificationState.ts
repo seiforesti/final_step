@@ -10,6 +10,15 @@ import { subscribeWithSelector } from 'zustand/middleware'
 import { immer } from 'zustand/middleware/immer'
 import { persist, createJSONStorage } from 'zustand/middleware'
 
+// Import the API clients for backend integration
+import { 
+  ClassificationFrameworkApi, 
+  ClassificationRulesApi, 
+  BulkOperationsApi, 
+  ClassificationResultsApi, 
+  AuditTrailApi 
+} from '../api/classificationApi'
+
 import {
   ClassificationFramework,
   ClassificationRule,

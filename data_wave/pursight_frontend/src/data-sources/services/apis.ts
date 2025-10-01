@@ -614,20 +614,99 @@ export const useConnectionPoolStatsQuery = (dataSourceId: number, options = {}) 
 // SCAN OPERATIONS
 // ============================================================================
 
-// Scan Results - Using scan schedules as placeholder
-const getScanResults = async (dataSourceId: number, limit: number = 10): Promise<any> => {
-  const { data } = await api.get(`/scan/schedules?data_source_id=${dataSourceId}&limit=${limit}`);
-  return data;
+// Scan Results - Get scans for data source and their results
+const getDataSourceScans = async (dataSourceId: number, options: { timeRange?: string } = {}): Promise<any[]> => {
+  try {
+    // First get scans for the data source
+    const { data: scans } = await api.get(`/scan/scans?data_source_id=${dataSourceId}`);
+    return scans || [];
+  } catch (error: any) {
+    console.error(`Error fetching scans for data source ${dataSourceId}:`, error);
+    return [];
+  }
 };
 
-export const useScanResultsQuery = (dataSourceId: number, limit: number = 10, options = {}) => {
+const getScanResults = async (scanId: number): Promise<any[]> => {
+  try {
+    const { data } = await api.get(`/scan/scans/${scanId}/results`);
+    return data || [];
+  } catch (error: any) {
+    console.error(`Error fetching scan results for scan ${scanId}:`, error);
+    return [];
+  }
+};
+
+const getScanSummary = async (scanId: number): Promise<any> => {
+  try {
+    const { data } = await api.get(`/scan/scans/${scanId}/summary`);
+    return data || {};
+  } catch (error: any) {
+    console.error(`Error fetching scan summary for scan ${scanId}:`, error);
+    return {};
+  }
+};
+
+export const useDataSourceScansQuery = (dataSourceId: number, options = {}) => {
   return useQuery({
-    queryKey: ['scan-results', dataSourceId, limit],
-    queryFn: () => getScanResults(dataSourceId, limit),
+    queryKey: ['data-source-scans', dataSourceId],
+    queryFn: () => getDataSourceScans(dataSourceId, options),
     enabled: !!dataSourceId,
     ...options,
   })
 }
+
+export const useScanResultsQuery = (dataSourceId: number, options: { timeRange?: string } = {}) => {
+  return useQuery({
+    queryKey: ['scan-results', dataSourceId, options.timeRange],
+    queryFn: async () => {
+      if (!dataSourceId) return [];
+      
+      // Get all scans for the data source
+      const scans = await getDataSourceScans(dataSourceId, options);
+      
+      // Get results for each scan
+      const scanResultsPromises = scans.map(async (scan: any) => {
+        const [results, summary] = await Promise.all([
+          getScanResults(scan.id),
+          getScanSummary(scan.id)
+        ]);
+        
+        return {
+          ...scan,
+          results: results || [],
+          summary: summary || {},
+          total_entities: summary.total_entities || 0,
+          entities_discovered: summary.entities_discovered || 0,
+          issues_count: summary.issues_count || 0,
+          completion_rate: summary.completion_rate || 0,
+          quality_score: summary.quality_score || 0,
+          compliance_score: summary.compliance_score || 0
+        };
+      });
+      
+      return await Promise.all(scanResultsPromises);
+    },
+    enabled: !!dataSourceId,
+    ...options,
+  })
+}
+
+// Start scan mutation
+export const useStartScanMutation = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ dataSourceId, scanName }: { dataSourceId: number; scanName?: string }) => {
+      const { data } = await api.post(`/scan/data-sources/${dataSourceId}/scan`, { scan_name: scanName });
+      return data;
+    },
+    onSuccess: (data, variables) => {
+      // Invalidate scan results to refresh the data
+      queryClient.invalidateQueries({ queryKey: ['scan-results', variables.dataSourceId] });
+      queryClient.invalidateQueries({ queryKey: ['data-source-scans', variables.dataSourceId] });
+    },
+  });
+};
 
 // ============================================================================
 // QUALITY METRICS OPERATIONS

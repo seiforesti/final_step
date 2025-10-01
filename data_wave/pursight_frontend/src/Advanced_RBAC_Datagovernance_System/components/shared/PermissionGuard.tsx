@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback, useRef, createContext, useContext } from 'react';
-import { Shield, Lock, Unlock, Eye, EyeOff, AlertTriangle, Info, CheckCircle2, XCircle, Key, Users, User, Settings, Database, FileText, Folder, Globe, MapPin, Building, Smartphone, Monitor, Server, Network, Wifi, Clock, Calendar, Target, Flag, Tag, Star, Bookmark, Bell, Mail, Activity, BarChart3, PieChart, TrendingUp, TrendingDown, Brain, Zap, Lightbulb, HelpCircle, ExternalLink, Link, Copy, Edit, Trash2, Save, Upload, Download, Share, RefreshCw, MoreHorizontal, Plus, Minus, X, Check, ChevronDown, ChevronUp, ChevronRight, ChevronLeft } from 'lucide-react';
+import { Shield, Lock, Unlock, Eye, EyeOff, AlertTriangle, Info, CheckCircle2, XCircle, Key, Users, User as UserIcon, Settings, Database, FileText, Folder, Globe, MapPin, Building, Smartphone, Monitor, Server, Network, Wifi, Clock, Calendar, Target, Flag, Tag, Star, Bookmark, Bell, Mail, Activity, BarChart3, PieChart, TrendingUp, TrendingDown, Brain, Zap, Lightbulb, HelpCircle, ExternalLink, Link, Copy, Edit, Trash2, Save, Upload, Download, Share, RefreshCw, MoreHorizontal, Plus, Minus, X, Check, ChevronDown, ChevronUp, ChevronRight, ChevronLeft } from 'lucide-react';
 import { cn } from '@/lib copie/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';

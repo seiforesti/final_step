@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DataWave Models Viewer</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    html, body { height: 100%; margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
+    .layout { display: grid; grid-template-columns: 320px 1fr; height: 100%; }
+    .sidebar { border-right: 1px solid #e5e7eb; padding: 12px; overflow: auto; }
+    .main { display: flex; flex-direction: column; height: 100%; }
+    .controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 12px; border-bottom: 1px solid #e5e7eb; }
+    .controls > * { min-width: 0; }
+    .panel { padding: 8px 12px; }
+    .list { display: grid; gap: 4px; }
+    .badge { display: inline-block; padding: 2px 6px; border-radius: 6px; background: #eef2ff; color: #4338ca; font-size: 12px; }
+    .row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 8px; border-radius: 6px; }
+    .row:hover { background: #f8fafc; }
+    .row input { margin-right: 6px; }
+    .mermaid-wrap { flex: 1; overflow: auto; padding: 12px; background: #fff; }
+    .footer { padding: 8px 12px; border-top: 1px solid #e5e7eb; font-size: 12px; color: #64748b; }
+    .muted { color: #64748b; font-size: 12px; }
+    .spacer { height: 8px; }
+    .divider { height: 1px; background: #e5e7eb; margin: 8px 0; }
+    .btn { cursor: pointer; border: 1px solid #cbd5e1; background: #fff; border-radius: 6px; padding: 6px 10px; }
+    .btn.primary { background: #111827; color: #fff; border-color: #111827; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .checkboxes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+    code { background: #f1f5f9; padding: 2px 4px; border-radius: 4px; }
+  </style>
+  <script>
+    mermaid.initialize({ startOnLoad: false, securityLevel: 'loose', theme: 'default' });
+  </script>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <h3>Models</h3>
+      <input id="search" type="search" placeholder="Search classes/modules..." style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px;" />
+      <div class="spacer"></div>
+      <div class="checkboxes">
+        <label><input type="checkbox" id="onlyIntraModule" /> Intra-module only</label>
+        <label><input type="checkbox" id="includeNeighbors" checked /> Include neighbors</label>
+        <label><input type="checkbox" id="oneToMany" checked /> one_to_many</label>
+        <label><input type="checkbox" id="manyToMany" checked /> many_to_many</label>
+        <label><input type="checkbox" id="oneToOne" checked /> one_to_one</label>
+      </div>
+      <div class="divider"></div>
+      <div class="grid-2">
+        <button class="btn" id="clearSelection">Clear</button>
+        <button class="btn" id="selectAll">Select All</button>
+      </div>
+      <div class="spacer"></div>
+      <div id="classList" class="list" aria-live="polite"></div>
+    </aside>
+    <main class="main">
+      <div class="controls">
+        <div>
+          <div class="muted">Selected classes</div>
+          <div id="selectedCount" class="badge">0</div>
+        </div>
+        <div>
+          <button class="btn primary" id="renderBtn">Render diagram</button>
+        </div>
+        <div style="text-align:right">
+          <button class="btn" id="downloadBtn">Download SVG</button>
+        </div>
+      </div>
+      <div id="diagram" class="mermaid-wrap">
+        <div class="muted">Choose classes and click "Render diagram".</div>
+      </div>
+      <div class="footer">
+        Powered by Mermaid. Data source: <code>architecture/generated_class_diagrams/models_graph.json</code>
+        <span style="margin-left:12px"></span>
+        <label class="btn">
+          Load JSON
+          <input id="fileInput" type="file" accept="application/json" style="display:none" />
+        </label>
+        <span style="margin-left:8px"></span>
+        <button class="btn" id="togglePaste">Paste JSON</button>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const state = { data: null, selected: new Set(), filterText: '' };
+
+    const el = (id) => document.getElementById(id);
+    const classListEl = el('classList');
+    const selectedCountEl = el('selectedCount');
+
+    function safeId(name) { return name.replace(/[^A-Za-z0-9_]/g, '_'); }
+
+    function multiplicityFor(kind) {
+      switch (kind) {
+        case 'one_to_one': return ['"1"', '"1"'];
+        case 'one_to_many': return ['"1"', '"0..*"'];
+        case 'many_to_many': return ['"0..*"', '"0..*"'];
+        case 'o2o': return ['"1"', '"1"'];
+        case 'o2m': return ['"1"', '"0..*"'];
+        case 'm2m': return ['"0..*"', '"0..*"'];
+        default: return ['', ''];
+      }
+    }
+
+    function buildMermaid(selectedNames, options) {
+      const { onlyIntraModule, includeNeighbors, kinds } = options;
+      const classesByName = new Map(state.data.classes.map(c => [c.name, c]));
+
+      // Expand with neighbors if requested
+      let workingSet = new Set(selectedNames);
+      if (includeNeighbors) {
+        for (const r of state.data.relations) {
+          if (!kinds.has(r.kind)) continue;
+          if (workingSet.has(r.source) || workingSet.has(r.target)) {
+            workingSet.add(r.source); workingSet.add(r.target);
+          }
+        }
+      }
+
+      // Optional intra-module filter
+      if (onlyIntraModule && workingSet.size > 0) {
+        const first = classesByName.get([...workingSet][0]);
+        const mod = first ? first.module : null;
+        if (mod) {
+          workingSet = new Set([...workingSet].filter(n => classesByName.get(n)?.module === mod));
+        }
+      }
+
+      const nodes = [...workingSet].filter(n => classesByName.has(n));
+      const nodeDecls = nodes.map(n => {
+        const c = classesByName.get(n);
+        const title = `${c.name}\\n<${c.module}>`;
+        return `${safeId(c.name)}[\"${title}\"]`;
+      });
+
+      const edges = [];
+      const nodeSet = new Set(nodes);
+      for (const r of state.data.relations) {
+        if (!kinds.has(r.kind)) continue;
+        if (!nodeSet.has(r.source) || !nodeSet.has(r.target)) continue;
+        const [left, right] = multiplicityFor(r.kind);
+        const a = safeId(r.source), b = safeId(r.target);
+        edges.push(`${left} ${a} --> ${right} ${b}`);
+      }
+
+      const lines = [
+        'flowchart TB',
+        '%% Autogenerated from models_graph.json',
+        ...nodeDecls,
+        ...edges,
+      ];
+      return lines.join('\n');
+    }
+
+    function renderDiagram() {
+      const onlyIntraModule = el('onlyIntraModule').checked;
+      const includeNeighbors = el('includeNeighbors').checked;
+      const kinds = new Set([
+        el('oneToMany').checked ? 'one_to_many' : null,
+        el('manyToMany').checked ? 'many_to_many' : null,
+        el('oneToOne').checked ? 'one_to_one' : null,
+      ].filter(Boolean));
+
+      const code = buildMermaid([...state.selected], { onlyIntraModule, includeNeighbors, kinds });
+      const container = el('diagram');
+      container.innerHTML = '<div class="muted">Rendering...</div>';
+      mermaid.render('m1', code).then(({ svg }) => {
+        container.innerHTML = svg;
+      }).catch(err => {
+        container.innerHTML = `<pre style="color:#b91c1c">${String(err)}</pre><pre>${code.replace(/</g,'&lt;')}</pre>`;
+      });
+    }
+
+    function refreshList() {
+      const q = state.filterText.toLowerCase();
+      const items = state.data.classes
+        .filter(c => c.name.toLowerCase().includes(q) || c.module.toLowerCase().includes(q))
+        .sort((a,b) => a.module.localeCompare(b.module) || a.name.localeCompare(b.name));
+
+      classListEl.innerHTML = '';
+      let lastModule = null;
+      for (const c of items) {
+        if (c.module !== lastModule) {
+          lastModule = c.module;
+          const h = document.createElement('div');
+          h.className = 'muted';
+          h.textContent = c.module;
+          classListEl.appendChild(h);
+        }
+        const row = document.createElement('label');
+        row.className = 'row';
+        const left = document.createElement('div');
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.checked = state.selected.has(c.name);
+        cb.addEventListener('change', () => {
+          if (cb.checked) state.selected.add(c.name); else state.selected.delete(c.name);
+          selectedCountEl.textContent = String(state.selected.size);
+        });
+        left.appendChild(cb);
+        const span = document.createElement('span');
+        span.textContent = c.name;
+        left.appendChild(span);
+        const right = document.createElement('span');
+        right.className = 'badge'; right.textContent = c.module.split('.').slice(-1)[0];
+        row.appendChild(left); row.appendChild(right);
+        classListEl.appendChild(row);
+      }
+      selectedCountEl.textContent = String(state.selected.size);
+    }
+
+    function normalizeData(d) {
+      const out = { ...d };
+      const cls = d && d.classes;
+      const rel = d && d.relations;
+      // accept alternative top-level keys
+      const altClasses = cls || d?.nodes || d?.entities;
+      const altRelations = rel || d?.edges || d?.links;
+
+      if (altClasses && !Array.isArray(altClasses) && typeof altClasses === 'object') {
+        out.classes = Object.entries(altClasses).map(([k, v], i) => ({
+          name: v.name || v.class_name || v.id || k || `Class_${i}`,
+          module: v.module || v.module_name || v.pkg || v.package || v.namespace || 'unknown',
+          ...v,
+        }));
+      }
+      if (!out.classes) out.classes = Array.isArray(altClasses) ? altClasses.map((v, i) => ({
+        name: v.name || v.class_name || v.id || `Class_${i}`,
+        module: v.module || v.module_name || v.pkg || v.package || v.namespace || 'unknown',
+        ...v,
+      })) : [];
+
+      if (altRelations && !Array.isArray(altRelations) && typeof altRelations === 'object') {
+        out.relations = Object.values(altRelations);
+      }
+      if (!out.relations) out.relations = Array.isArray(altRelations) ? altRelations : [];
+
+      // normalize relation field names and kinds
+      out.relations = out.relations.map((r) => {
+        const source = r.source || r.from || r.a || r.left || r.src || r.start;
+        const target = r.target || r.to || r.b || r.right || r.dst || r.end;
+        let kind = r.kind || r.type || r.relation || 'unknown';
+        const k = String(kind).toLowerCase();
+        if (k === 'm2m' || k === 'many_to_many' || k === 'many-to-many') kind = 'many_to_many';
+        else if (k === 'o2m' || k === 'one_to_many' || k === 'one-to-many') kind = 'one_to_many';
+        else if (k === 'o2o' || k === 'one_to_one' || k === 'one-to-one') kind = 'one_to_one';
+        else if (k.includes('fk') || k.includes('foreign')) kind = 'one_to_many';
+        return { source, target, kind };
+      }).filter(r => r.source && r.target);
+
+      // ensure names are strings
+      out.classes = out.classes.map((c, i) => ({
+        ...c,
+        name: String(c.name || `Class_${i}`),
+        module: String(c.module || 'unknown'),
+      }));
+      return out;
+    }
+
+    async function tryFetch(url) {
+      const resp = await fetch(url, { cache: 'no-store' });
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const json = await resp.json();
+      return normalizeData(json);
+    }
+
+    async function load() {
+      // Try relative, then absolute-from-project-root
+      const candidates = [
+        'models_graph.json',
+        '/architecture/generated_class_diagrams/models_graph.json'
+      ];
+      for (const url of candidates) {
+        try {
+          state.data = await tryFetch(url);
+          refreshList();
+          return;
+        } catch {}
+      }
+      classListEl.innerHTML = `<div style='color:#b91c1c'>Failed to load models_graph.json: TypeError: Failed to fetch. Use the Load JSON button or start a local server in this folder.</div>`;
+    }
+
+    function loadFromFile(file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          state.data = normalizeData(JSON.parse(reader.result));
+          refreshList();
+        } catch (e) {
+          classListEl.innerHTML = `<div style='color:#b91c1c'>Invalid JSON file: ${String(e)}</div>`;
+        }
+      };
+      reader.readAsText(file, 'utf-8');
+    }
+
+    function downloadSVG() {
+      const svg = el('diagram').querySelector('svg');
+      if (!svg) return;
+      const blob = new Blob([svg.outerHTML], { type: 'image/svg+xml' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'diagram.svg'; a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function mountPasteArea() {
+      if (document.getElementById('pasteArea')) return;
+      const wrap = document.createElement('div');
+      wrap.id = 'pasteArea';
+      wrap.className = 'panel';
+      wrap.innerHTML = `
+        <div class="divider"></div>
+        <div class="muted">Paste models_graph.json below, then click Load.</div>
+        <textarea id="pasteInput" style="width:100%; height:160px; border:1px solid #cbd5e1; border-radius:6px; padding:8px; font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;"></textarea>
+        <div class="spacer"></div>
+        <button class="btn primary" id="pasteLoad">Load</button>
+      `;
+      document.querySelector('.sidebar').appendChild(wrap);
+      document.getElementById('pasteLoad').addEventListener('click', () => {
+        const txt = document.getElementById('pasteInput').value;
+        try {
+          state.data = normalizeData(JSON.parse(txt));
+          refreshList();
+        } catch (e) {
+          classListEl.innerHTML = `<div style='color:#b91c1c'>Invalid JSON: ${String(e)}</div>`;
+        }
+      });
+    }
+
+    // Wire up events
+    el('search').addEventListener('input', (e) => { state.filterText = e.target.value || ''; refreshList(); });
+    el('renderBtn').addEventListener('click', renderDiagram);
+    el('downloadBtn').addEventListener('click', downloadSVG);
+    el('fileInput').addEventListener('change', (e) => { const f = e.target.files?.[0]; if (f) loadFromFile(f); });
+    el('togglePaste').addEventListener('click', mountPasteArea);
+    el('clearSelection').addEventListener('click', () => { state.selected.clear(); refreshList(); });
+    el('selectAll').addEventListener('click', () => { state.selected = new Set(state.data.classes.map(c => c.name)); refreshList(); });
+
+    load();
+  </script>
+</body>
+</html>
+
+

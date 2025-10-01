@@ -1,0 +1,722 @@
+@startuml DataWave_Data_Model_Overview
+!theme aws-orange
+
+title DataWave Data Layer Architecture - Model Overview
+
+skinparam backgroundColor #f8f9fa
+skinparam defaultFontName "Segoe UI"
+skinparam roundcorner 10
+skinparam shadowing true
+
+' Define colors for different model domains
+skinparam package {
+    BackgroundColor<<catalog>> #e8f5e8
+    BorderColor<<catalog>> #4caf50
+    BackgroundColor<<scan>> #e3f2fd
+    BorderColor<<scan>> #2196f3
+    BackgroundColor<<ai>> #fff3e0
+    BorderColor<<ai>> #ff9800
+    BackgroundColor<<compliance>> #f3e5f5
+    BorderColor<<compliance>> #9c27b0
+    BackgroundColor<<auth>> #fce4ec
+    BorderColor<<auth>> #e91e63
+    BackgroundColor<<racine>> #e0f2f1
+    BorderColor<<racine>> #009688
+}
+
+' Advanced Catalog Domain Models
+package "Advanced Catalog Domain (57,460 bytes)" <<catalog>> {
+    entity "IntelligentDataAsset" as asset {
+        * id: int <<PK>>
+        --
+        * asset_uuid: str <<UK>>
+        * qualified_name: str <<UK>>
+        * display_name: str
+        description: text
+        --
+        * asset_type: AssetType
+        * asset_status: AssetStatus
+        * asset_criticality: AssetCriticality
+        * data_sensitivity: DataSensitivity
+        --
+        ai_generated_description: text
+        semantic_tags: json[]
+        ai_confidence_score: float
+        semantic_embedding: float[]
+        --
+        quality_score: float
+        completeness: float
+        accuracy: float
+        consistency: float
+        validity: float
+        uniqueness: float
+        --
+        * data_source_id: int <<FK>>
+        racine_orchestrator_id: str <<FK>>
+        * discovered_at: timestamp
+        last_profiled: timestamp
+        last_scanned: timestamp
+    }
+    
+    entity "LineageRelationship" as lineage {
+        * id: int <<PK>>
+        --
+        * upstream_asset_id: int <<FK>>
+        * downstream_asset_id: int <<FK>>
+        * lineage_type: LineageType
+        * lineage_direction: LineageDirection
+        transformation_logic: text
+        confidence_score: float
+        * created_at: timestamp
+    }
+    
+    entity "AssetTag" as tag {
+        * id: int <<PK>>
+        --
+        * asset_id: int <<FK>>
+        * tag_name: str
+        tag_category: str
+        ai_generated: boolean
+        confidence_score: float
+    }
+}
+
+' Scan Logic Domain Models
+package "Scan Logic Domain (172,214 bytes)" <<scan>> {
+    entity "DataSource" as datasource {
+        * id: int <<PK>>
+        --
+        * name: str <<UK>>
+        description: text
+        --
+        * source_type: DataSourceType
+        cloud_provider: CloudProvider
+        * environment: Environment
+        * location: DataSourceLocation
+        --
+        * host: str
+        * port: int
+        database_name: str
+        * username: str
+        * encrypted_password: str
+        --
+        * status: DataSourceStatus
+        last_connection_test: timestamp
+        connection_test_result: text
+        --
+        * scan_frequency: ScanFrequency
+        auto_discovery_enabled: boolean
+        * data_classification: DataClassification
+        * criticality: Criticality
+    }
+    
+    entity "EnhancedScanRuleSet" as scanrule {
+        * id: int <<PK>>
+        --
+        * rule_set_name: str <<UK>>
+        description: text
+        * rule_type: RuleType
+        * status: RuleStatus
+        --
+        pattern_definition: json
+        ai_enhanced_patterns: json
+        confidence_threshold: float
+        --
+        * data_source_id: int <<FK>>
+        * created_by: int <<FK>>
+        * created_at: timestamp
+        last_modified: timestamp
+    }
+    
+    entity "ScanExecution" as scanexec {
+        * id: int <<PK>>
+        --
+        * scan_uuid: str <<UK>>
+        * data_source_id: int <<FK>>
+        * rule_set_id: int <<FK>>
+        --
+        * status: ScanStatus
+        * started_at: timestamp
+        completed_at: timestamp
+        duration_seconds: int
+        --
+        records_scanned: bigint
+        matches_found: int
+        errors_count: int
+        --
+        execution_metadata: json
+        performance_metrics: json
+    }
+}
+
+' AI/ML Intelligence Domain Models
+package "AI/ML Intelligence Domain (68,084 bytes)" <<ai>> {
+    entity "AIModelConfiguration" as aimodel {
+        * id: int <<PK>>
+        --
+        * model_name: str <<UK>>
+        * model_type: AIModelType
+        * provider_type: AIProviderType
+        --
+        model_version: str
+        configuration: json
+        performance_metrics: json
+        --
+        * is_active: boolean
+        * created_at: timestamp
+        last_updated: timestamp
+    }
+    
+    entity "MLPrediction" as mlpred {
+        * id: int <<PK>>
+        --
+        * prediction_uuid: str <<UK>>
+        * model_id: int <<FK>>
+        * asset_id: int <<FK>>
+        --
+        input_features: json
+        prediction_result: json
+        confidence_score: float
+        --
+        * task_type: AITaskType
+        * created_at: timestamp
+        processing_time_ms: int
+    }
+    
+    entity "AITaskExecution" as aitask {
+        * id: int <<PK>>
+        --
+        * execution_uuid: str <<UK>>
+        * model_id: int <<FK>>
+        * task_type: AITaskType
+        --
+        input_data: json
+        output_data: json
+        * status: ExecutionStatus
+        --
+        * started_at: timestamp
+        completed_at: timestamp
+        error_message: text
+    }
+}
+
+' Compliance Domain Models
+package "Compliance Domain (48,632 bytes)" <<compliance>> {
+    entity "ComplianceRequirement" as compliance {
+        * id: int <<PK>>
+        --
+        * data_source_id: int <<FK>>
+        organization_id: int <<FK>>
+        --
+        * framework: ComplianceFramework
+        * requirement_id: str
+        * title: str
+        * description: text
+        * category: str
+        --
+        * status: ComplianceStatus
+        compliance_percentage: float
+        --
+        last_assessed: timestamp
+        next_assessment: timestamp
+        assessor: str
+        assessment_notes: text
+        --
+        evidence_files: json[]
+        documentation_links: json[]
+        --
+        * risk_level: str
+        impact_description: text
+        remediation_plan: text
+        remediation_deadline: timestamp
+        remediation_owner: str
+    }
+    
+    entity "ComplianceAssessment" as assessment {
+        * id: int <<PK>>
+        --
+        * data_source_id: int <<FK>>
+        * framework: ComplianceFramework
+        * assessment_type: str
+        * title: str
+        description: text
+        --
+        * status: AssessmentStatus
+        * started_at: timestamp
+        completed_at: timestamp
+        --
+        findings: json
+        recommendations: json
+        overall_score: float
+    }
+}
+
+' Authentication & Authorization Domain Models
+package "Authentication Domain (15,328 bytes)" <<auth>> {
+    entity "User" as user {
+        * id: int <<PK>>
+        --
+        * email: str <<UK>>
+        hashed_password: str
+        * is_active: boolean
+        is_verified: boolean
+        --
+        * mfa_enabled: boolean
+        mfa_secret: str
+        * role: str
+        --
+        first_name: str
+        last_name: str
+        display_name: str
+        profile_picture_url: str
+        department: str
+        region: str
+        --
+        oauth_provider: str
+        oauth_id: str
+        last_login: timestamp
+        timezone: str
+        --
+        organization_id: int <<FK>>
+        * created_at: timestamp
+    }
+    
+    entity "Role" as role {
+        * id: int <<PK>>
+        --
+        * name: str <<UK>>
+        description: text
+        * is_active: boolean
+        --
+        permissions: json[]
+        * created_at: timestamp
+    }
+    
+    entity "UserRole" as userrole {
+        * id: int <<PK>>
+        --
+        * user_id: int <<FK>>
+        * role_id: int <<FK>>
+        assigned_at: timestamp
+        assigned_by: int <<FK>>
+    }
+}
+
+' Racine Orchestration Domain Models
+package "Racine Orchestration Domain (270,449 bytes)" <<racine>> {
+    entity "RacineOrchestrationMaster" as racine {
+        * id: str <<PK>>
+        --
+        * orchestration_name: str
+        description: text
+        * orchestration_type: str
+        * status: str
+        --
+        configuration: json
+        workflow_definition: json
+        execution_history: json
+        --
+        * organization_id: int <<FK>>
+        * created_by: int <<FK>>
+        last_modified_by: int <<FK>>
+        --
+        * created_at: timestamp
+        last_modified_at: timestamp
+        last_executed_at: timestamp
+    }
+    
+    entity "RacineWorkspace" as workspace {
+        * id: int <<PK>>
+        --
+        * workspace_name: str <<UK>>
+        description: text
+        * workspace_type: str
+        --
+        configuration: json
+        metadata: json
+        --
+        * owner_id: int <<FK>>
+        organization_id: int <<FK>>
+        * created_at: timestamp
+    }
+    
+    entity "RacineCollaborationSession" as collab {
+        * id: int <<PK>>
+        --
+        * session_uuid: str <<UK>>
+        * workspace_id: int <<FK>>
+        --
+        * session_name: str
+        * status: str
+        --
+        participants: json[]
+        session_data: json
+        --
+        * started_at: timestamp
+        ended_at: timestamp
+    }
+}
+
+' Relationships between domains
+asset ||--o{ lineage : "upstream/downstream"
+asset ||--o{ tag : "tagged with"
+asset }o--|| datasource : "belongs to"
+asset }o--o| racine : "orchestrated by"
+
+datasource ||--o{ scanrule : "has rules"
+datasource ||--o{ scanexec : "scanned by"
+datasource ||--o{ compliance : "complies with"
+
+scanrule ||--o{ scanexec : "executed in"
+
+aimodel ||--o{ mlpred : "generates"
+aimodel ||--o{ aitask : "executes"
+asset ||--o{ mlpred : "predicted for"
+
+user ||--o{ userrole : "has roles"
+role ||--o{ userrole : "assigned to"
+user ||--o{ racine : "creates/modifies"
+user ||--o{ workspace : "owns"
+
+workspace ||--o{ collab : "hosts sessions"
+racine ||--o{ asset : "manages"
+
+note top of asset : "Core catalog model with\nAI-enhanced metadata\nand quality metrics"
+note top of datasource : "Enterprise data source\nwith comprehensive\nconnection management"
+note top of aimodel : "Advanced AI model\nconfiguration supporting\n20+ model types"
+note top of compliance : "Multi-framework\ncompliance tracking\nwith evidence management"
+note top of racine : "Central orchestration\nwith workflow automation\nand collaboration"
+
+@enduml
+
+@startuml DataWave_Database_Schema_Relationships
+!theme aws-orange
+
+title DataWave Database Schema - Entity Relationships & Constraints
+
+skinparam backgroundColor #f8f9fa
+skinparam defaultFontName "Segoe UI"
+skinparam roundcorner 8
+skinparam shadowing true
+
+' Core entities with detailed relationships
+entity "organizations" as org {
+    * id: int <<PK>>
+    --
+    * name: str <<UK>>
+    description: text
+    * created_at: timestamp
+}
+
+entity "users" as user {
+    * id: int <<PK>>
+    --
+    * email: str <<UK>>
+    hashed_password: str
+    * is_active: boolean
+    --
+    organization_id: int <<FK>>
+    * created_at: timestamp
+}
+
+entity "datasource" as ds {
+    * id: int <<PK>>
+    --
+    * name: str <<UK>>
+    * source_type: enum
+    * host: str
+    * port: int
+    * encrypted_password: str
+    --
+    organization_id: int <<FK>>
+    created_by: int <<FK>>
+}
+
+entity "intelligent_data_assets" as asset {
+    * id: int <<PK>>
+    --
+    * asset_uuid: str <<UK>>
+    * qualified_name: str <<UK>>
+    * display_name: str
+    --
+    * asset_type: enum
+    * asset_status: enum
+    quality_score: float
+    --
+    * data_source_id: int <<FK>>
+    organization_id: int <<FK>>
+    * discovered_at: timestamp
+}
+
+entity "lineage_relationships" as lineage {
+    * id: int <<PK>>
+    --
+    * upstream_asset_id: int <<FK>>
+    * downstream_asset_id: int <<FK>>
+    * lineage_type: enum
+    confidence_score: float
+}
+
+entity "scan_executions" as scan {
+    * id: int <<PK>>
+    --
+    * scan_uuid: str <<UK>>
+    * data_source_id: int <<FK>>
+    * status: enum
+    * started_at: timestamp
+    records_scanned: bigint
+}
+
+entity "compliance_requirements" as comp {
+    * id: int <<PK>>
+    --
+    * data_source_id: int <<FK>>
+    * framework: enum
+    * requirement_id: str
+    * status: enum
+    compliance_percentage: float
+}
+
+entity "audit_logs" as audit {
+    * id: int <<PK>>
+    --
+    * event_timestamp: timestamp
+    * event_type: str
+    * table_name: str
+    * record_id: str
+    --
+    user_id: int <<FK>>
+    old_values: jsonb
+    new_values: jsonb
+}
+
+' Relationships with cardinality
+org ||--o{ user : "employs"
+org ||--o{ ds : "owns"
+org ||--o{ asset : "manages"
+
+user ||--o{ ds : "creates"
+user ||--o{ audit : "performs actions"
+
+ds ||--o{ asset : "contains"
+ds ||--o{ scan : "scanned by"
+ds ||--o{ comp : "subject to"
+
+asset ||--o{ lineage : "upstream"
+asset ||--o{ lineage : "downstream"
+
+' Constraints and indexes
+note right of asset : "Constraints:\n• quality_score: 0.0-1.0\n• asset_status: enum values\n\nIndexes:\n• (asset_type, quality_score)\n• (organization_id, status)\n• GIN(semantic_tags)"
+
+note right of ds : "Constraints:\n• port: 1-65535\n• source_type: enum values\n\nSecurity:\n• encrypted_password\n• connection pooling"
+
+note right of audit : "Partitioning:\n• Monthly partitions\n• Retention: 7 years\n\nIndexes:\n• (event_timestamp)\n• (user_id, event_type)\n• GIN(old_values, new_values)"
+
+note right of lineage : "Self-referencing:\n• upstream_asset_id → asset.id\n• downstream_asset_id → asset.id\n\nGraph traversal optimized"
+
+@enduml
+
+@startuml DataWave_JSON_Schema_Design
+!theme aws-orange
+
+title DataWave JSON Schema Design & JSONB Usage
+
+skinparam backgroundColor #f8f9fa
+skinparam defaultFontName "Segoe UI"
+skinparam roundcorner 8
+skinparam shadowing true
+
+' JSON column usage examples
+package "JSON/JSONB Column Usage" {
+    
+    class "IntelligentDataAsset" as asset {
+        --JSON Columns--
+        + columns_info: json[]
+        + schema_definition: jsonb
+        + semantic_tags: json[]
+        + semantic_embedding: float[]
+        + constraints: json[]
+        + indexes: json[]
+        + partitioning_info: jsonb
+        --Methods--
+        + extract_column_metadata()
+        + update_semantic_tags()
+        + calculate_quality_metrics()
+    }
+    
+    class "ScanExecution" as scan {
+        --JSON Columns--
+        + execution_metadata: jsonb
+        + performance_metrics: jsonb
+        + error_details: json[]
+        + scan_results: jsonb
+        --Methods--
+        + get_performance_summary()
+        + extract_error_patterns()
+        + analyze_scan_coverage()
+    }
+    
+    class "AIModelConfiguration" as ai {
+        --JSON Columns--
+        + configuration: jsonb
+        + performance_metrics: jsonb
+        + hyperparameters: json
+        + training_data: jsonb
+        --Methods--
+        + optimize_parameters()
+        + track_performance()
+        + validate_config()
+    }
+    
+    class "AuditLog" as audit {
+        --JSONB Columns--
+        + old_values: jsonb
+        + new_values: jsonb
+        + context_data: jsonb
+        + metadata: jsonb
+        --Methods--
+        + compare_changes()
+        + extract_field_changes()
+        + generate_audit_report()
+    }
+}
+
+' JSON query examples
+note right of asset : "JSON Queries:\n\n-- Extract schema type\nSELECT schema_definition->>'type'\nFROM intelligent_data_assets;\n\n-- Query by semantic tags\nSELECT * FROM intelligent_data_assets\nWHERE semantic_tags @> '[\"PII\"]';\n\n-- GIN Index for performance\nCREATE INDEX idx_semantic_tags\nON intelligent_data_assets\nUSING GIN (semantic_tags);"
+
+note right of scan : "Performance Metrics:\n\n-- Extract scan duration\nSELECT \n  scan_uuid,\n  performance_metrics->>'duration_ms'\nFROM scan_executions;\n\n-- Query by error type\nSELECT * FROM scan_executions\nWHERE execution_metadata @>\n  '{\"error_type\": \"timeout\"}';"
+
+note right of ai : "Model Configuration:\n\n-- Extract hyperparameters\nSELECT \n  model_name,\n  configuration->'hyperparameters'\nFROM ai_model_configuration;\n\n-- Query by model type\nSELECT * FROM ai_model_configuration\nWHERE configuration @>\n  '{\"type\": \"transformer\"}';"
+
+note right of audit : "Audit Trail Queries:\n\n-- Find field changes\nSELECT \n  event_timestamp,\n  jsonb_object_keys(\n    new_values - old_values\n  ) as changed_fields\nFROM audit_logs;\n\n-- Query specific changes\nSELECT * FROM audit_logs\nWHERE old_values->>'status' != \n      new_values->>'status';"
+
+' JSON schema examples
+package "JSON Schema Examples" {
+    
+    note as schema_def : "Schema Definition Example:\n{\n  \"type\": \"table\",\n  \"columns\": [\n    {\n      \"name\": \"customer_id\",\n      \"type\": \"integer\",\n      \"nullable\": false,\n      \"primary_key\": true\n    },\n    {\n      \"name\": \"email\",\n      \"type\": \"varchar\",\n      \"length\": 255,\n      \"nullable\": false,\n      \"constraints\": [\"unique\"]\n    }\n  ],\n  \"indexes\": [\n    {\n      \"name\": \"idx_email\",\n      \"columns\": [\"email\"],\n      \"type\": \"btree\"\n    }\n  ]\n}"
+    
+    note as perf_metrics : "Performance Metrics Example:\n{\n  \"scan_duration_ms\": 45230,\n  \"records_processed\": 1250000,\n  \"throughput_rps\": 27650,\n  \"memory_usage_mb\": 512,\n  \"cpu_utilization_pct\": 78.5,\n  \"errors\": {\n    \"connection_timeouts\": 2,\n    \"parsing_errors\": 0,\n    \"validation_failures\": 15\n  },\n  \"quality_metrics\": {\n    \"completeness\": 0.987,\n    \"accuracy\": 0.945,\n    \"consistency\": 0.923\n  }\n}"
+    
+    note as ai_config : "AI Model Configuration:\n{\n  \"model_type\": \"transformer\",\n  \"architecture\": \"bert-base\",\n  \"hyperparameters\": {\n    \"learning_rate\": 2e-5,\n    \"batch_size\": 32,\n    \"max_length\": 512,\n    \"num_epochs\": 3\n  },\n  \"training_config\": {\n    \"optimizer\": \"AdamW\",\n    \"scheduler\": \"linear\",\n    \"warmup_steps\": 1000\n  },\n  \"performance\": {\n    \"accuracy\": 0.942,\n    \"f1_score\": 0.938,\n    \"precision\": 0.951,\n    \"recall\": 0.925\n  }\n}"
+}
+
+@enduml
+
+@startuml DataWave_Indexing_Strategy
+!theme aws-orange
+
+title DataWave Advanced Indexing & Performance Strategy
+
+skinparam backgroundColor #f8f9fa
+skinparam defaultFontName "Segoe UI"
+skinparam roundcorner 8
+skinparam shadowing true
+
+' Indexing strategy overview
+package "Primary Index Types" {
+    
+    class "B-Tree Indexes" as btree {
+        --Standard Indexes--
+        + Primary Keys (id)
+        + Unique Constraints (email, uuid)
+        + Foreign Keys (user_id, org_id)
+        + Timestamp Columns (created_at)
+        --Composite Indexes--
+        + (organization_id, status)
+        + (asset_type, quality_score)
+        + (event_timestamp, user_id)
+    }
+    
+    class "GIN Indexes" as gin {
+        --JSON/JSONB Columns--
+        + semantic_tags (json[])
+        + schema_definition (jsonb)
+        + configuration (jsonb)
+        + audit_details (jsonb)
+        --Full-Text Search--
+        + tsvector columns
+        + Multi-language support
+    }
+    
+    class "Partial Indexes" as partial {
+        --Filtered Indexes--
+        + Active records only
+        + Non-null values
+        + Specific status values
+        + Recent data (last 30 days)
+        --Benefits--
+        + Smaller index size
+        + Faster maintenance
+        + Better performance
+    }
+    
+    class "Expression Indexes" as expr {
+        --Computed Indexes--
+        + LOWER(email)
+        + EXTRACT(month FROM created_at)
+        + jsonb_array_length(tags)
+        + COALESCE(display_name, name)
+        --Use Cases--
+        + Case-insensitive search
+        + Date-based queries
+        + Computed aggregations
+    }
+}
+
+' Index examples with SQL
+note right of btree : "B-Tree Index Examples:\n\n-- Composite index for catalog\nCREATE INDEX idx_catalog_composite\nON intelligent_data_assets\n(asset_type, quality_score DESC,\n discovered_at DESC);\n\n-- Foreign key performance\nCREATE INDEX idx_asset_datasource\nON intelligent_data_assets\n(data_source_id)\nWHERE asset_status = 'active';"
+
+note right of gin : "GIN Index Examples:\n\n-- JSON array search\nCREATE INDEX idx_semantic_tags\nON intelligent_data_assets\nUSING GIN (semantic_tags);\n\n-- JSONB containment\nCREATE INDEX idx_schema_definition\nON intelligent_data_assets\nUSING GIN (schema_definition);\n\n-- Full-text search\nCREATE INDEX idx_description_fts\nON intelligent_data_assets\nUSING GIN (to_tsvector('english', description));"
+
+note right of partial : "Partial Index Examples:\n\n-- Active assets only\nCREATE INDEX idx_active_assets\nON intelligent_data_assets (asset_uuid)\nWHERE asset_status = 'active';\n\n-- Recent audit logs\nCREATE INDEX idx_recent_audits\nON audit_logs (event_timestamp)\nWHERE event_timestamp > \n  CURRENT_DATE - INTERVAL '30 days';\n\n-- Non-null quality scores\nCREATE INDEX idx_quality_scores\nON intelligent_data_assets (quality_score)\nWHERE quality_score IS NOT NULL;"
+
+note right of expr : "Expression Index Examples:\n\n-- Case-insensitive email\nCREATE INDEX idx_email_lower\nON users (LOWER(email));\n\n-- Monthly partitioning helper\nCREATE INDEX idx_created_month\nON audit_logs \n(EXTRACT(month FROM event_timestamp));\n\n-- JSON array length\nCREATE INDEX idx_tags_count\nON intelligent_data_assets\n(jsonb_array_length(semantic_tags));"
+
+' Performance optimization strategies
+package "Performance Optimization" {
+    
+    class "Query Optimization" as query_opt {
+        --Strategies--
+        + Index-only scans
+        + Covering indexes
+        + Index intersection
+        + Bitmap heap scans
+        --Monitoring--
+        + pg_stat_user_indexes
+        + Query execution plans
+        + Index usage statistics
+    }
+    
+    class "Maintenance" as maintenance {
+        --Regular Tasks--
+        + VACUUM and ANALYZE
+        + Index rebuilding
+        + Statistics updates
+        + Bloat monitoring
+        --Automation--
+        + pg_cron scheduling
+        + Automated maintenance
+        + Performance alerts
+    }
+    
+    class "Partitioning" as partitioning {
+        --Partition Types--
+        + Range (timestamp)
+        + Hash (organization_id)
+        + List (asset_type)
+        --Benefits--
+        + Parallel processing
+        + Faster queries
+        + Easier maintenance
+        + Better performance
+    }
+}
+
+' Performance metrics
+note bottom of query_opt : "Query Performance Targets:\n• Sub-10ms for primary key lookups\n• <100ms for complex catalog queries\n• <500ms for analytical queries\n• 95th percentile response times"
+
+note bottom of maintenance : "Maintenance Schedule:\n• Daily: VACUUM and ANALYZE\n• Weekly: Index usage review\n• Monthly: Performance tuning\n• Quarterly: Capacity planning"
+
+note bottom of partitioning : "Partitioning Strategy:\n• audit_logs: Monthly partitions\n• scan_executions: Daily partitions\n• Users: Hash by organization\n• Assets: Range by created_at"
+
+@enduml

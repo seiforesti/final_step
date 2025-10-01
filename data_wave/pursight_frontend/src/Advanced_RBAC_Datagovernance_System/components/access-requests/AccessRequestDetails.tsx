@@ -5,7 +5,7 @@ import {
   ArrowLeft,
   Calendar,
   Clock,
-  User,
+  User as UserIcon,
   FileText,
   MessageCircle,
   History,
@@ -931,7 +931,7 @@ export const AccessRequestDetails: React.FC<AccessRequestDetailsProps> = ({
           
           <div className="flex items-center space-x-4 text-sm text-muted-foreground">
             <div className="flex items-center space-x-1">
-              <User className="h-4 w-4" />
+              <UserIcon className="h-4 w-4" />
               <span>Created by {request?.user?.email}</span>
             </div>
             <div className="flex items-center space-x-1">

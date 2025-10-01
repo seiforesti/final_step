@@ -4,7 +4,7 @@
 // Enterprise-grade permission management for classification workflows
 // ============================================================================
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, createContext, useContext } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import axios from 'axios'
 
@@ -285,20 +285,24 @@ export function useClassificationsRBAC() {
     error: null
   })
 
-  // Current user query
+  // Development mode check
+  const isDev = import.meta.env.DEV
+
+  // Current user query - disabled in dev mode to avoid API calls
   const { data: currentUser, isLoading: userLoading, error: userError } = useQuery({
     queryKey: ['rbac', 'currentUser'],
     queryFn: rbacApiFunctions.getCurrentUser,
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 2,
-    refetchOnWindowFocus: false
+    refetchOnWindowFocus: false,
+    enabled: !isDev // Disable in development mode
   })
 
-  // User permissions query
+  // User permissions query - disabled in dev mode
   const { data: userPermissions, isLoading: permissionsLoading } = useQuery({
     queryKey: ['rbac', 'permissions', currentUser?.id],
     queryFn: () => currentUser ? rbacApiFunctions.getUserEffectivePermissions(currentUser.id) : Promise.resolve([]),
-    enabled: !!currentUser?.id,
+    enabled: !!currentUser?.id && !isDev, // Disable in development mode
     staleTime: 5 * 60 * 1000
   })
 
@@ -308,28 +312,58 @@ export function useClassificationsRBAC() {
       ...prev,
       currentUser: currentUser || null,
       permissions: userPermissions?.map(p => p.action) || [],
-      loading: userLoading || permissionsLoading,
+      loading: isDev ? false : (userLoading || permissionsLoading), // Never loading in dev mode
       error: userError ? String(userError) : null
     }))
-  }, [currentUser, userPermissions, userLoading, permissionsLoading, userError])
+  }, [currentUser, userPermissions, userLoading, permissionsLoading, userError, isDev])
+
+  // Development bypass - create mock user if no authentication in dev mode
+  const mockUser = useMemo(() => {
+    if (isDev) {
+      return {
+        id: 1,
+        email: 'dev@localhost.com',
+        username: 'Developer',
+        isActive: true,
+        isVerified: true,
+        createdAt: new Date().toISOString(),
+        mfaEnabled: false,
+        role: 'admin',
+        roles: [{
+          id: 1,
+          name: 'admin',
+          description: 'Administrator',
+          permissions: []
+        }],
+        groups: [],
+        sessions: [],
+        department: 'Development',
+        region: 'Local'
+      } as User
+    }
+    return null
+  }, [isDev])
 
   // Permission checking function
   const hasPermission = useCallback((permission: string, options?: PermissionCheckOptions): boolean => {
-    if (!currentUser || rbacState.loading) return false
+    const user = currentUser || mockUser
+    if (!user || (rbacState.loading && !mockUser)) return false
+    
+    const permissions = currentUser ? rbacState.permissions : ['admin.*'] // Grant all permissions in dev mode
     
     // Check if user has the specific permission
-    const hasDirectPermission = rbacState.permissions.includes(permission)
+    const hasDirectPermission = permissions.includes(permission)
     
     // Check admin override
-    const isAdmin = rbacState.permissions.includes('admin.*') || 
-                   currentUser.role === 'admin'
+    const isAdmin = permissions.includes('admin.*') || 
+                   user.role === 'admin'
     
     if (options?.strictMode && !hasDirectPermission) {
       return false
     }
     
     return hasDirectPermission || isAdmin
-  }, [currentUser, rbacState.permissions, rbacState.loading])
+  }, [currentUser, mockUser, rbacState.permissions, rbacState.loading])
 
   // Role checking function
   const hasRole = useCallback((roleName: string): boolean => {
@@ -487,14 +521,18 @@ export function useClassificationsRBAC() {
     }
   }, [queryClient, currentUser?.id])
 
+  const effectiveUser = currentUser || mockUser
+  const effectivePermissions = currentUser ? rbacState.permissions : (isDev ? ['admin.*'] : []) // Grant all permissions in dev mode
+
   return {
     // State
     ...rbacState,
+    currentUser: effectiveUser,
+    permissions: effectivePermissions,
     
     // User data
-    currentUser,
-    isAuthenticated: !!currentUser,
-    isLoading: rbacState.loading,
+    isAuthenticated: !!effectiveUser,
+    isLoading: isDev ? false : rbacState.loading,
     
     // Permission checking
     hasPermission,
@@ -511,13 +549,32 @@ export function useClassificationsRBAC() {
     // Actions
     refreshUser,
     
+    // Components
+    PermissionGuard,
+    
     // API functions (for advanced usage)
     api: rbacApiFunctions
   }
 }
 
 // Context provider for Classifications RBAC data
-import { createContext, useContext } from 'react'
+
+// Permission Guard Component
+interface PermissionGuardProps {
+  permission: string
+  children: React.ReactNode
+  fallback?: React.ReactNode
+}
+
+const PermissionGuard: React.FC<PermissionGuardProps> = ({ permission, children, fallback = null }) => {
+  const rbac = useClassificationsRBACContext()
+  
+  if (rbac.hasPermission(permission)) {
+    return <>{children}</>
+  }
+  
+  return <>{fallback}</>
+}
 
 const ClassificationsRBACContext = createContext<ReturnType<typeof useClassificationsRBAC> | null>(null)
 

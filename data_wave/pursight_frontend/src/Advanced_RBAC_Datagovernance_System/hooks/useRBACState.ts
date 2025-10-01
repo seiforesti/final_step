@@ -1,7 +1,7 @@
 // useRBACState Hook - Global RBAC state management and coordination
 // Provides centralized state management for the entire RBAC system
 
-import { useState, useEffect, useCallback, useMemo, useContext, createContext } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useContext, createContext } from 'react';
 import { useAuth } from './useAuth';
 import { useCurrentUser } from './useCurrentUser';
 import { useUsers } from './useUsers';

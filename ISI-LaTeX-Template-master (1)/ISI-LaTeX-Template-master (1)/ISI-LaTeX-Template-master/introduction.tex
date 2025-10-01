@@ -1,0 +1,139 @@
+\chapter*{Introduction générale}
+\addcontentsline{toc}{chapter}{Introduction générale}
+\markboth{Introduction générale}{}
+
+%========================================
+% INTRODUCTION GÉNÉRALE - DATAWAVE
+% Plateforme de Gouvernance des Données
+%========================================
+
+\section*{Contexte et Problématique}
+
+Dans l'ère du Big Data et de la transformation numérique, les entreprises modernes font face à des défis croissants en matière de gouvernance des données. Avec une croissance annuelle de 40\% du volume de données d'entreprise et l'émergence de réglementations strictes (GDPR, HIPAA, SOX, PCI-DSS, SOC2, CCPA), 85\% des entreprises utilisent désormais des environnements multi-bases de données hétérogènes, créant une complexité sans précédent dans la gestion et la gouvernance des actifs de données.
+
+Les solutions existantes sur le marché, notamment Microsoft Azure Purview et Databricks Unity Catalog, présentent des lacunes critiques qui limitent leur adoption en environnement d'entreprise complexe.
+
+\textbf{Microsoft Azure Purview} souffre de limitations structurelles majeures qui impactent directement son efficacité opérationnelle :
+
+\begin{itemize}
+    \item \textbf{Support de bases de données restreint} : Absence de support natif pour des bases de données critiques telles que MySQL, MongoDB, et PostgreSQL, nécessitant un développement manuel de connecteurs coûteux et chronophage
+    \item \textbf{Traçabilité des données incomplète} : Le data lineage est manuel et incomplet à travers les flux de données complexes, sans mises à jour en temps réel, rendant impossible la traçabilité end-to-end dans les architectures modernes
+    \item \textbf{Contraintes d'intégration API} : Support API limité avec une intégration médiocre aux plateformes non-Microsoft et aux outils tiers, créant des silos technologiques
+    \item \textbf{Classification manuelle inefficace} : Processus de classification entièrement manuel avec une couverture limitée des labels de sensibilité et absence totale d'automatisation par intelligence artificielle, résultant en 70\% de données non classifiées ou mal classifiées
+    \item \textbf{Gestion du glossaire métier défaillante} : Aucune gestion automatisée du glossaire, nécessitant une définition et maintenance manuelles, avec une intégration médiocre aux métadonnées techniques
+    \item \textbf{Goulots d'étranglement de performance} : L'Integration Runtime crée des points de défaillance uniques (single points of failure), limitant drastiquement la flexibilité dans les environnements multi-cloud et hybrides
+\end{itemize}
+
+\textbf{Databricks Unity Catalog}, bien qu'intégré à l'écosystème Databricks, présente des limitations fondamentales pour une gouvernance des données complète :
+
+\begin{itemize}
+    \item \textbf{Focus traitement vs gouvernance} : Optimisé exclusivement pour le traitement de données (data processing) dans un contexte lakehouse, négligeant les aspects critiques de gouvernance d'entreprise
+    \item \textbf{Découverte de données limitée} : Gestion basique des métadonnées sans capacités avancées de traçabilité des lignages (lineage tracking), rendant impossible la compréhension des dépendances de données
+    \item \textbf{Complexité d'intégration prohibitive} : Intégration difficile et coûteuse avec les frameworks de gouvernance existants, nécessitant des développements personnalisés importants
+    \item \textbf{Vendor lock-in sévère} : Dépendance forte à l'écosystème Databricks, limitant la flexibilité architecturale et augmentant les risques stratégiques
+    \item \textbf{Support RDBMS déficient} : Support médiocre des bases de données relationnelles traditionnelles, créant des workflows fragmentés pour 60\% des entreprises qui dépendent de systèmes RDBMS
+\end{itemize}
+
+Ces limitations structurelles se traduisent par des impacts opérationnels mesurables : 60\% des entreprises rencontrent des difficultés majeures dans la gouvernance multi-bases de données, 70\% des données restent non classifiées ou mal classifiées, et 80\% des processus de gouvernance nécessitent une intervention manuelle, générant des coûts opérationnels prohibitifs et des risques de conformité significatifs.
+
+Face à ces lacunes critiques, le besoin d'une plateforme de gouvernance des données universelle, intelligente, et économiquement viable devient impératif. Les entreprises recherchent une solution révolutionnaire capable de :
+
+\begin{itemize}
+    \item \textbf{Connectivité universelle} : Support natif de 15+ types de bases de données (MySQL, PostgreSQL, MongoDB, Oracle, SQL Server, Snowflake, Redshift, BigQuery, S3, Azure Blob, etc.) sans développement manuel
+    
+    \item \textbf{Classification intelligente multi-niveaux} : Système de classification révolutionnaire à 3 tiers combinant approches complémentaires :
+    \begin{itemize}
+        \item Classification basée sur règles (regex, dictionnaires) pour patterns connus - 85-90\% précision
+        \item Machine Learning (Scikit-learn, Random Forest, Gradient Boosting) pour données tabulaires - 90-95\% précision
+        \item IA sémantique (Transformers, BERT, NLP) pour compréhension contextuelle - 95-98\% précision
+        \item Résultat global : 96.9\% de précision vs 82\% Azure Purview, réduisant de 80\% les processus manuels
+    \end{itemize}
+    
+    \item \textbf{Traçabilité complète} : Data lineage au niveau colonne en temps réel à travers tous les systèmes et transformations
+    
+    \item \textbf{Conformité automatisée} : Évaluation automatique multi-frameworks (GDPR, HIPAA, SOX, PCI-DSS, SOC2, CCPA) avec workflows de remédiation intelligents
+    
+    \item \textbf{Performance exceptionnelle} : Latence sub-100ms, throughput > 1000 req/sec, disponibilité 99.99\%, scalabilité horizontale illimitée
+    
+    \item \textbf{Réduction des coûts} : Diminution de 60-80\% des coûts opérationnels par rapport aux solutions existantes
+\end{itemize}
+
+\section*{Objectifs du Projet}
+
+Ce projet de fin d'études vise à concevoir et développer \textbf{DataWave}, une plateforme révolutionnaire de gouvernance des données d'entreprise qui répond aux limitations des solutions existantes. Les objectifs principaux sont :
+
+\textbf{Objectif 1 : Architecture Edge Computing Innovante}
+\begin{itemize}
+    \item Implémenter une architecture de traitement distribué au plus près des sources de données
+    \item Réduire la latence à des niveaux sub-second
+    \item Optimiser l'utilisation de la bande passante réseau
+    \item Permettre une scalabilité horizontale illimitée
+\end{itemize}
+
+\textbf{Objectif 2 : Support Universel de Bases de Données}
+\begin{itemize}
+    \item Développer des connecteurs spécialisés pour 15+ types de bases de données
+    \item Supporter les environnements on-premises, cloud, et hybrides
+    \item Intégrer avec AWS, Azure, et GCP de manière transparente
+    \item Implémenter 10+ méthodes d'authentification avancées
+\end{itemize}
+
+\textbf{Objectif 3 : Système de Classification Intelligente Multi-Niveaux (Module Cœur)}
+\begin{itemize}
+    \item Développer un système de classification révolutionnaire à 3 tiers combinant règles, ML et IA sémantique
+    \item Implémenter des modèles de Machine Learning (Scikit-learn, Random Forest, Gradient Boosting) pour classification tabulaire
+    \item Intégrer des modèles Transformers (BERT, RoBERTa) pour compréhension sémantique et contextuelle
+    \item Utiliser le NLP avancé (SpaCy, Hugging Face) pour recherche sémantique et enrichissement de métadonnées
+    \item Implémenter l'apprentissage continu avec feedback loops pour amélioration constante
+    \item Atteindre une précision globale de 96.9\% (vs 82\% Azure Purview, 78\% Databricks)
+    \item Supporter 20+ catégories de sensibilité (PII, PHI, PCI, GDPR, HIPAA, SOX, etc.)
+    \item Automatiser 80\% des processus de classification manuels
+\end{itemize}
+
+\textbf{Objectif 4 : Conformité Réglementaire Automatisée}
+\begin{itemize}
+    \item Supporter 6 frameworks majeurs (SOC2, GDPR, HIPAA, PCI-DSS, SOX, CCPA)
+    \item Automatiser l'évaluation de conformité
+    \item Fournir des workflows de remédiation intelligents
+    \item Générer des rapports d'audit complets
+\end{itemize}
+
+\textbf{Objectif 5 : Performance et Scalabilité}
+\begin{itemize}
+    \item Atteindre une latence API inférieure à 100ms
+    \item Supporter plus de 1000 requêtes par seconde
+    \item Garantir une disponibilité de 99.99\%
+    \item Gérer 100+ sources de données simultanément
+\end{itemize}
+
+\section*{Méthodologie et Approche}
+
+Pour atteindre ces objectifs ambitieux, nous avons adopté une méthodologie rigoureuse basée sur :
+
+\textbf{Architecture Microservices} : Nous avons conçu DataWave selon une architecture microservices modulaire comprenant 7 modules de gouvernance intégrés, permettant une scalabilité indépendante et une maintenance facilitée.
+
+\textbf{Développement Agile} : Le projet a été développé en sprints itératifs, permettant des ajustements continus basés sur les retours et les tests.
+
+\textbf{Stack Technologique Moderne} :
+\begin{itemize}
+    \item Backend : FastAPI (Python 3.11+), PostgreSQL avec PgBouncer, Redis, Kafka
+    \item Frontend : React 18, Next.js, TypeScript, TailwindCSS
+    \item IA/ML : Scikit-learn, Transformers (Hugging Face), SpaCy, PyTorch
+    \item DevOps : Docker, Kubernetes, GitHub Actions, Prometheus, Grafana
+\end{itemize}
+
+\textbf{Tests Rigoureux} : Nous avons mis en place une stratégie de tests complète incluant tests unitaires, tests d'intégration, tests de performance (load testing, stress testing), et tests de sécurité.
+
+\section*{Organisation du Rapport}
+
+Ce rapport s'articule autour de quatre chapitres présentant l'ensemble du travail réalisé :
+
+\textbf{Chapitre 1 : Contexte Général et État de l'Art} présente l'organisme d'accueil, analyse la problématique de gouvernance des données, étudie de manière critique les solutions existantes (Azure Purview, Databricks Unity Catalog, Collibra, Alation) en révélant leurs limitations structurelles, et positionne DataWave comme innovation disruptive.
+
+\textbf{Chapitre 2 : Analyse et Conception} détaille l'analyse des besoins et présente l'architecture globale : 7 modules de gouvernance intégrés, backend avec 59 modèles et 143 services, frontend avec 447 composants Racine Manager, et modélisation des données.
+
+\textbf{Chapitre 3 : Réalisation et Implémentation} décrit l'implémentation des sept modules : Data Source Management (15+ BD), Data Catalog (lineage colonne), Classification System (96.9\% précision, 3 tiers IA), Scan Rule Sets, Scan Logic, Compliance System (6 frameworks), et RBAC.
+
+\textbf{Chapitre 4 : Tests et Résultats} présente la validation complète : 1419 tests (93\% couverture), infrastructure Docker/Kubernetes, et résultats démontrant la supériorité de DataWave (78ms latence vs 135ms Azure, 96.9\% précision vs 82\% Azure, 60-80\% réduction coûts, ROI 320\%).
+
+Ce travail démontre comment DataWave révolutionne la gouvernance des données par trois innovations majeures : architecture edge computing, classification IA multi-niveaux (80\% réduction processus manuels), et approche modulaire extensible, surpassant significativement les solutions existantes.

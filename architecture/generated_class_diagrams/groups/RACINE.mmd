@@ -1,0 +1,2303 @@
+classDiagram
+  class RacinePipeline {
+    +__tablename__: 
+    +id: 
+    +name: 
+    +description: 
+    +version: 
+    +status: 
+    +pipeline_type: 
+    +configuration: 
+    +data_flow_definition: 
+    +pipeline_metadata: 
+    +pipeline_definition: 
+    +stage_configurations: 
+    +data_flow_mapping: 
+    +dependency_graph: 
+    +involved_groups: 
+    +group_stage_mapping: 
+    +cross_group_data_flow: 
+    +group_specific_configs: 
+    +performance_targets: 
+    +optimization_config: 
+    +resource_allocation: 
+    +scaling_policies: 
+    +ai_optimization_enabled: 
+    +optimization_history: 
+    +performance_baselines: 
+    +optimization_recommendations: 
+    +is_template: 
+    +template_category: 
+    +template_tags: 
+    +parent_template_id: 
+    +previous_version_id: 
+    +next_version_id: 
+    +is_current_version: 
+    +deprecation_date: 
+    +data_lineage_config: 
+    +quality_gates: 
+    +data_governance_rules: 
+    +compliance_requirements: 
+    +monitoring_config: 
+    +alerting_rules: 
+    +notification_settings: 
+    +health_check_config: 
+    +access_level: 
+    +allowed_groups: 
+    +execution_permissions: 
+    +data_access_policies: 
+    +orchestration_master_id: 
+    +created_at: 
+    +updated_at: 
+    +created_by: 
+    +updated_by: 
+    +last_executed_at: 
+    +total_executions: 
+    +creator: 
+    +updater: 
+    +orchestration_master: 
+    +parent_template: 
+    +previous_version: 
+    +next_version: 
+    +executions: 
+    +stages: 
+    +templates: 
+    +optimizations: 
+  }
+  class RacineIntegration {
+    +__tablename__: 
+    +id: 
+    +name: 
+    +description: 
+    +integration_type: 
+    +status: 
+    +source_group: 
+    +target_groups: 
+    +integration_scope: 
+    +configuration: 
+    +endpoint_configuration: 
+    +connection_details: 
+    +authentication_config: 
+    +security_settings: 
+    +data_flow_direction: 
+    +data_mapping: 
+    +transformation_rules: 
+    +validation_rules: 
+    +performance_config: 
+    +reliability_config: 
+    +retry_policy: 
+    +timeout_settings: 
+    +health_check_config: 
+    +monitoring_config: 
+    +alerting_rules: 
+    +sla_requirements: 
+    +event_configuration: 
+    +message_routing: 
+    +event_filtering: 
+    +dead_letter_config: 
+    +version: 
+    +previous_version_id: 
+    +is_current_version: 
+    +deployment_config: 
+    +access_policies: 
+    +governance_rules: 
+    +compliance_requirements: 
+    +audit_settings: 
+    +dependent_integrations: 
+    +dependency_integrations: 
+    +conflict_resolution: 
+    +throughput_target: 
+    +latency_target: 
+    +availability_target: 
+    +error_rate_threshold: 
+    +orchestration_master_id: 
+    +created_at: 
+    +updated_at: 
+    +created_by: 
+    +creator: 
+    +orchestration_master: 
+    +previous_version: 
+    +endpoints: 
+    +data_flows: 
+    +messages: 
+    +health_checks: 
+  }
+  class RacineDashboard {
+    +__tablename__: 
+    +id: 
+    +name: 
+    +description: 
+    +dashboard_type: 
+    +category: 
+    +layout_config: 
+    +theme_config: 
+    +responsive_config: 
+    +interaction_config: 
+    +data_sources: 
+    +refresh_frequency: 
+    +cache_config: 
+    +real_time_config: 
+    +involved_groups: 
+    +cross_group_metrics: 
+    +group_specific_views: 
+    +integration_points: 
+    +predictive_models: 
+    +forecasting_config: 
+    +trend_analysis_config: 
+    +anomaly_detection_config: 
+    +is_public: 
+    +access_level: 
+    +allowed_users: 
+    +allowed_roles: 
+    +personalization_enabled: 
+    +performance_config: 
+    +lazy_loading_config: 
+    +compression_enabled: 
+    +cdn_config: 
+    +alerting_config: 
+    +notification_settings: 
+    +threshold_configs: 
+    +escalation_rules: 
+    +export_config: 
+    +sharing_config: 
+    +embedded_config: 
+    +api_access_config: 
+    +usage_analytics: 
+    +user_interaction_tracking: 
+    +performance_tracking: 
+    +version: 
+    +previous_version_id: 
+    +is_current_version: 
+    +change_log: 
+    +orchestration_master_id: 
+    +created_at: 
+    +updated_at: 
+    +created_by: 
+    +updated_by: 
+    +creator: 
+    +updater: 
+    +orchestration_master: 
+    +previous_version: 
+    +widgets: 
+    +layouts: 
+    +personalizations: 
+    +analytics: 
+  }
+  class RacineActivity {
+    +__tablename__: 
+    +id: 
+    +activity_name: 
+    +activity_type: 
+    +activity_category: 
+    +description: 
+    +status: 
+    +severity: 
+    +priority: 
+    +activity_data: 
+    +input_parameters: 
+    +output_results: 
+    +activity_metadata: 
+    +user_context: 
+    +system_context: 
+    +workspace_context: 
+    +session_context: 
+    +primary_group: 
+    +involved_groups: 
+    +cross_group_correlations: 
+    +group_specific_data: 
+    +source_system: 
+    +source_component: 
+    +api_endpoint: 
+    +http_method: 
+    +request_id: 
+    +trace_id: 
+    +execution_time_ms: 
+    +resource_usage: 
+    +performance_metrics: 
+    +error_details: 
+    +stack_trace: 
+    +debug_information: 
+    +ip_address: 
+    +user_agent: 
+    +geo_location: 
+    +security_context: 
+    +compliance_flags: 
+    +audit_requirements: 
+    +retention_period: 
+    +is_sensitive: 
+    +parent_activity_id: 
+    +correlation_id: 
+    +workflow_execution_id: 
+    +pipeline_execution_id: 
+    +user_id: 
+    +started_at: 
+    +completed_at: 
+    +created_at: 
+    +orchestration_master_id: 
+    +user: 
+    +orchestration_master: 
+    +parent_activity: 
+    +child_activities: 
+    +activity_logs: 
+    +activity_metrics: 
+  }
+  class RacinePipelineTemplate {
+    +__tablename__: 
+    +id: 
+    +template_name: 
+    +template_description: 
+    +template_category: 
+    +template_version: 
+    +complexity_level: 
+    +default_configuration: 
+    +stage_templates: 
+    +template_metadata: 
+    +template_definition: 
+    +parameter_schema: 
+    +default_parameters: 
+    +validation_rules: 
+    +use_cases: 
+    +prerequisites: 
+    +expected_outcomes: 
+    +performance_characteristics: 
+    +supported_groups: 
+    +required_permissions: 
+    +group_specific_customizations: 
+    +data_requirements: 
+    +optimization_template: 
+    +performance_baselines: 
+    +optimization_best_practices: 
+    +usage_count: 
+    +success_rate: 
+    +average_execution_time: 
+    +average_performance_improvement: 
+    +user_ratings: 
+    +is_public: 
+    +is_verified: 
+    +is_ai_optimized: 
+    +deprecation_date: 
+    +replacement_template_id: 
+    +base_pipeline_id: 
+    +created_at: 
+    +updated_at: 
+    +created_by: 
+    +creator: 
+    +base_pipeline: 
+    +replacement_template: 
+    +created_pipelines: 
+  }
+  class RacineCollaborationDocument {
+    +__tablename__: 
+    +id: 
+    +name: 
+    +description: 
+    +document_type: 
+    +file_extension: 
+    +status: 
+    +content: 
+    +content_format: 
+    +file_path: 
+    +file_size: 
+    +version: 
+    +current_version: 
+    +version_history: 
+    +is_current_version: 
+    +parent_version_id: 
+    +real_time_editing_enabled: 
+    +current_editors: 
+    +edit_locks: 
+    +operational_transforms: 
+    +access_level: 
+    +edit_permissions: 
+    +view_permissions: 
+    +download_permissions: 
+    +related_groups: 
+    +group_sections: 
+    +cross_group_references: 
+    +workflow_integration: 
+    +tags: 
+    +categories: 
+    +keywords: 
+    +custom_metadata: 
+    +review_status: 
+    +reviewers: 
+    +approval_workflow: 
+    +review_comments: 
+    +view_count: 
+    +edit_count: 
+    +download_count: 
+    +last_accessed: 
+    +ai_suggestions: 
+    +auto_saved_versions: 
+    +smart_formatting: 
+    +collaboration_id: 
+    +session_id: 
+    +created_at: 
+    +updated_at: 
+    +created_by: 
+    +last_modified_by: 
+    +collaboration: 
+    +creator: 
+    +last_modifier: 
+    +parent_version: 
+    +document_edits: 
+  }
+  class RacineCollaborationMessage {
+    +__tablename__: 
+    +id: 
+    +message_type: 
+    +content: 
+    +formatted_content: 
+    +attachments: 
+    +message_metadata: 
+    +status: 
+    +thread_id: 
+    +parent_message_id: 
+    +subject: 
+    +tags: 
+    +related_groups: 
+    +group_mentions: 
+    +workflow_references: 
+    +resource_references: 
+    +priority: 
+    +is_announcement: 
+    +is_confidential: 
+    +requires_response: 
+    +read_by: 
+    +reactions: 
+    +mentions: 
+    +replies_count: 
+    +ai_generated: 
+    +ai_suggestions: 
+    +auto_translation: 
+    +sentiment_score: 
+    +moderation_status: 
+    +compliance_flags: 
+    +moderation_notes: 
+    +edit_history: 
+    +last_edited_at: 
+    +last_edited_by: 
+    +collaboration_id: 
+    +sender_id: 
+    +sent_at: 
+    +timestamp: 
+    +collaboration: 
+    +sender: 
+    +editor: 
+    +parent_message: 
+    +replies: 
+    +session_id: 
+  }
+  class RacineWorkspace {
+    +__tablename__: 
+    +id: str
+    +name: str
+    +description: Optional[str]
+    +workspace_type: WorkspaceType
+    +status: WorkspaceStatus
+    +access_level: WorkspaceAccessLevel
+    +owner_id: int
+    +is_public: bool
+    +is_template: bool
+    +connected_data_sources: List[str]
+    +linked_scan_rule_sets: List[str]
+    +associated_classifications: List[str]
+    +compliance_policies: List[str]
+    +catalog_items: List[str]
+    +scan_logic_configurations: List[str]
+    +rbac_configurations: List[str]
+    +group_permissions: Dict[str, Dict[str, Any]]
+    +resource_mappings: Dict[str, Dict[str, Any]]
+    +integration_settings: Dict[str, Any]
+    +workspace_settings: Dict[str, Any]
+    +layout_preferences: Dict[str, Any]
+    +theme_settings: Dict[str, Any]
+    +notification_settings: Dict[str, Any]
+    +usage_analytics: Dict[str, Any]
+    +performance_metrics: Dict[str, Any]
+    +collaboration_metrics: Dict[str, Any]
+    +cost_tracking: Dict[str, Any]
+    +security_settings: Dict[str, Any]
+    +audit_settings: Dict[str, Any]
+    +backup_settings: Dict[str, Any]
+    +retention_policy: Dict[str, Any]
+    +template_category: Optional[str]
+    +template_tags: List[str]
+    +template_usage_count: int
+    +template_rating: float
+    +resource_limits: Dict[str, Any]
+    +storage_quota_gb: Optional[float]
+    +member_limit: Optional[int]
+    +tags: List[str]
+    +workspace_metadata: Dict[str, Any]
+    +created_at: datetime
+    +updated_at: datetime
+    +last_accessed: datetime
+    +archived_at: Optional[datetime]
+    +owner: 'User'
+    +members: List['RacineWorkspaceMember']
+    +resources: List['RacineWorkspaceResource']
+    +analytics_records: List['RacineWorkspaceAnalytics']
+    +audit_records: List['RacineWorkspaceAudit']
+    +notifications: List['RacineWorkspaceNotification']
+    +__table_args__: 
+  }
+  class RacineAIConversation {
+    +__tablename__: 
+    +id: 
+    +conversation_title: 
+    +title: 
+    +conversation_type: 
+    +status: 
+    +priority: 
+    +user_context: 
+    +system_context: 
+    +workspace_context: 
+    +group_context: 
+    +context: 
+    +conversation_metadata: 
+    +workspace_id: 
+    +conversation_summary: 
+    +key_topics: 
+    +mentioned_entities: 
+    +cross_group_references: 
+    +is_resolved: 
+    +resolution_type: 
+    +resolution_summary: 
+    +user_satisfaction: 
+    +learning_points: 
+    +improvement_suggestions: 
+    +knowledge_gaps: 
+    +message_count: 
+    +duration_minutes: 
+    +response_time_avg: 
+    +accuracy_score: 
+    +workflows_triggered: 
+    +pipelines_referenced: 
+    +resources_accessed: 
+    +actions_performed: 
+    +user_id: 
+    +started_at: 
+    +last_activity: 
+    +ended_at: 
+    +created_at: 
+    +updated_at: 
+    +user: 
+    +messages: 
+    +recommendations: 
+    +insights: 
+  }
+  class RacineCollaboration {
+    +__tablename__: 
+    +id: 
+    +name: 
+    +description: 
+    +collaboration_type: 
+    +status: 
+    +scope_definition: 
+    +objectives: 
+    +success_criteria: 
+    +deliverables: 
+    +involved_groups: 
+    +group_responsibilities: 
+    +cross_group_workflows: 
+    +coordination_requirements: 
+    +real_time_enabled: 
+    +co_authoring_enabled: 
+    +live_cursors_enabled: 
+    +presence_tracking_enabled: 
+    +communication_channels: 
+    +notification_settings: 
+    +escalation_rules: 
+    +access_level: 
+    +join_policy: 
+    +permissions_config: 
+    +external_participants_allowed: 
+    +shared_documents: 
+    +shared_resources: 
+    +version_control_enabled: 
+    +document_locking_enabled: 
+    +integrated_workflows: 
+    +workflow_permissions: 
+    +workflow_notifications: 
+    +analytics_enabled: 
+    +activity_tracking_enabled: 
+    +performance_metrics: 
+    +engagement_metrics: 
+    +start_date: 
+    +target_end_date: 
+    +actual_end_date: 
+    +milestones: 
+    +expert_consultation_enabled: 
+    +expert_categories: 
+    +consultation_history: 
+    +knowledge_base_integration: 
+    +learning_objectives: 
+    +knowledge_artifacts: 
+    +orchestration_master_id: 
+    +created_at: 
+    +updated_at: 
+    +created_by: 
+    +creator: 
+    +orchestration_master: 
+    +participants: 
+    +sessions: 
+    +messages: 
+    +documents: 
+  }
+  class RacineDashboardAlert {
+    +__tablename__: 
+    +id: 
+    +alert_name: 
+    +alert_type: 
+    +severity: 
+    +status: 
+    +alert_condition: 
+    +threshold_config: 
+    +comparison_config: 
+    +evaluation_window: 
+    +trigger_data: 
+    +trigger_timestamp: 
+    +trigger_value: 
+    +threshold_value: 
+    +notification_channels: 
+    +notification_templates: 
+    +escalation_rules: 
+    +acknowledged_by: 
+    +acknowledged_at: 
+    +resolved_by: 
+    +resolved_at: 
+    +resolution_notes: 
+    +dashboard_id: 
+    +widget_id: 
+    +first_triggered: 
+    +last_triggered: 
+    +trigger_count: 
+    +affected_groups: 
+    +cross_group_implications: 
+    +dashboard: 
+    +widget: 
+    +acknowledger: 
+    +resolver: 
+  }
+  class RacinePipelineMetrics {
+    +__tablename__: 
+    +id: 
+    +metric_type: 
+    +metric_name: 
+    +metric_value: 
+    +metric_unit: 
+    +metric_category: 
+    +pipeline_id: 
+    +execution_id: 
+    +stage_id: 
+    +recorded_at: 
+    +time_window_start: 
+    +time_window_end: 
+    +execution_context: 
+    +baseline_value: 
+    +target_value: 
+    +variance_from_baseline: 
+    +metric_metadata: 
+    +tags: 
+    +pipeline: 
+    +execution: 
+    +stage: 
+  }
+  class RacineDashboardAnalytics {
+    +__tablename__: 
+    +id: 
+    +analytics_type: 
+    +metric_name: 
+    +metric_value: 
+    +metric_unit: 
+    +analytics_data: 
+    +context_data: 
+    +user_segment: 
+    +device_info: 
+    +page_views: 
+    +unique_users: 
+    +session_duration: 
+    +interaction_count: 
+    +load_time_ms: 
+    +render_time_ms: 
+    +data_fetch_time_ms: 
+    +error_count: 
+    +click_through_rate: 
+    +time_spent_seconds: 
+    +bounce_rate: 
+    +conversion_rate: 
+    +group_usage_patterns: 
+    +cross_group_interactions: 
+    +dashboard_id: 
+    +user_id: 
+    +widget_id: 
+    +recorded_at: 
+    +time_window_start: 
+    +time_window_end: 
+    +dashboard: 
+    +user: 
+    +widget: 
+  }
+  class RacineKnowledgeSharing {
+    +__tablename__: 
+    +id: 
+    +title: 
+    +description: 
+    +knowledge_type: 
+    +content_format: 
+    +content: 
+    +structured_content: 
+    +attachments: 
+    +multimedia_content: 
+    +domain_areas: 
+    +applicable_groups: 
+    +use_cases: 
+    +prerequisites: 
+    +source_collaboration: 
+    +contributors: 
+    +expert_validation: 
+    +peer_review: 
+    +quality_score: 
+    +validation_status: 
+    +accuracy_rating: 
+    +completeness_score: 
+    +usage_count: 
+    +success_stories: 
+    +impact_metrics: 
+    +feedback_summary: 
+    +visibility: 
+    +sharing_restrictions: 
+    +access_requirements: 
+    +version: 
+    +update_history: 
+    +related_knowledge: 
+    +superseded_by: 
+    +collaboration_id: 
+    +created_at: 
+    +updated_at: 
+    +created_by: 
+    +collaboration: 
+    +creator: 
+    +superseding_knowledge: 
+  }
+  class RacineActivityStreamEvent {
+    +__tablename__: 
+    +id: 
+    +event_type: 
+    +event_data: 
+    +original_activity_id: 
+    +processing_status: 
+    +processing_attempts: 
+    +last_processing_error: 
+    +processing_time_ms: 
+    +stream_id: 
+    +event_timestamp: 
+    +processed_at: 
+    +stream: 
+    +original_activity: 
+  }
+  class RacineDataFlow {
+    +__tablename__: 
+    +id: 
+    +name: 
+    +description: 
+    +flow_type: 
+    +direction: 
+    +source_group: 
+    +source_system: 
+    +source_endpoint: 
+    +destination_groups: 
+    +destination_systems: 
+    +data_type: 
+    +data_format: 
+    +data_schema: 
+    +data_volume_estimate: 
+    +flow_configuration: 
+    +scheduling_config: 
+    +trigger_conditions: 
+    +processing_rules: 
+    +transformation_pipeline: 
+    +mapping_rules: 
+    +enrichment_rules: 
+    +cleansing_rules: 
+    +quality_rules: 
+    +validation_schema: 
+    +error_handling: 
+    +data_lineage: 
+    +performance_metrics: 
+    +throughput_target: 
+    +latency_target: 
+    +monitoring_config: 
+    +encryption_config: 
+    +access_controls: 
+    +retention_policy: 
+    +compliance_tags: 
+    +status: 
+    +health_status: 
+    +last_execution: 
+    +next_execution: 
+    +execution_count: 
+    +success_count: 
+    +failure_count: 
+    +average_duration: 
+    +integration_id: 
+    +created_at: 
+    +updated_at: 
+    +integration: 
+    +flow_executions: 
+  }
+  class RacineDashboardWidget {
+    +__tablename__: 
+    +id: 
+    +name: 
+    +title: 
+    +description: 
+    +widget_type: 
+    +widget_config: 
+    +data_config: 
+    +visualization_config: 
+    +interaction_config: 
+    +chart_type: 
+    +chart_config: 
+    +axes_config: 
+    +series_config: 
+    +position_x: 
+    +position_y: 
+    +width: 
+    +height: 
+    +z_index: 
+    +data_source: 
+    +primary_query: 
+    +secondary_queries: 
+    +filter_config: 
+    +involved_groups: 
+    +cross_group_joins: 
+    +group_specific_filters: 
+    +is_real_time: 
+    +refresh_interval: 
+    +cache_enabled: 
+    +cache_duration: 
+    +predictive_enabled: 
+    +predictive_config: 
+    +trend_analysis_enabled: 
+    +anomaly_detection_enabled: 
+    +alerts_enabled: 
+    +alert_thresholds: 
+    +alert_config: 
+    +is_personalizable: 
+    +user_customizations_allowed: 
+    +lazy_loading_enabled: 
+    +data_sampling_config: 
+    +compression_config: 
+    +dashboard_id: 
+    +created_at: 
+    +updated_at: 
+    +created_by: 
+    +dashboard: 
+    +creator: 
+    +widget_data: 
+  }
+  class RacineExpertConsultation {
+    +__tablename__: 
+    +id: 
+    +consultation_title: 
+    +description: 
+    +expertise_required: 
+    +urgency: 
+    +problem_statement: 
+    +context_information: 
+    +expected_outcomes: 
+    +time_constraints: 
+    +related_groups: 
+    +group_specific_questions: 
+    +cross_group_implications: 
+    +matched_experts: 
+    +expert_selection_criteria: 
+    +matching_algorithm_used: 
+    +matching_confidence: 
+    +consultation_format: 
+    +scheduled_sessions: 
+    +consultation_materials: 
+    +expert_recommendations: 
+    +expert_assessment: 
+    +follow_up_recommendations: 
+    +knowledge_transfer: 
+    +consultation_rating: 
+    +expert_rating: 
+    +client_satisfaction: 
+    +effectiveness_score: 
+    +status: 
+    +resolution_status: 
+    +completion_date: 
+    +collaboration_id: 
+    +requester_id: 
+    +assigned_expert_id: 
+    +created_at: 
+    +updated_at: 
+    +collaboration: 
+    +requester: 
+    +assigned_expert: 
+  }
+  class RacineCollaborationAnalytics {
+    +__tablename__: 
+    +id: 
+    +analytics_type: 
+    +metric_name: 
+    +metric_value: 
+    +metric_unit: 
+    +analytics_data: 
+    +context_data: 
+    +calculation_method: 
+    +participant_engagement: 
+    +communication_patterns: 
+    +contribution_distribution: 
+    +goal_achievement: 
+    +timeline_adherence: 
+    +quality_metrics: 
+    +innovation_index: 
+    +cross_group_interactions: 
+    +coordination_effectiveness: 
+    +knowledge_transfer_metrics: 
+    +collaboration_id: 
+    +session_id: 
+    +measurement_period_start: 
+    +measurement_period_end: 
+    +recorded_at: 
+    +collaboration: 
+  }
+  class RacineActivityCorrelation {
+    +__tablename__: 
+    +id: 
+    +correlation_type: 
+    +correlation_name: 
+    +description: 
+    +confidence_score: 
+    +correlation_data: 
+    +pattern_definition: 
+    +statistical_measures: 
+    +primary_activity_id: 
+    +related_activity_ids: 
+    +activity_pattern: 
+    +involved_groups: 
+    +cross_group_impact: 
+    +group_interaction_patterns: 
+    +time_window_start: 
+    +time_window_end: 
+    +frequency_pattern: 
+    +seasonal_patterns: 
+    +discovery_method: 
+    +validation_status: 
+    +validation_data: 
+    +business_impact: 
+    +actionable_insights: 
+    +recommended_actions: 
+    +discovered_at: 
+    +last_validated: 
+    +primary_activity: 
+  }
+  class RacineWorkspaceNotification {
+    +__tablename__: 
+    +id: str
+    +workspace_id: str
+    +notification_type: WorkspaceNotificationType
+    +title: str
+    +message: str
+    +recipient_id: Optional[int]
+    +is_broadcast: bool
+    +priority: str
+    +is_read: bool
+    +read_at: Optional[datetime]
+    +is_dismissed: bool
+    +dismissed_at: Optional[datetime]
+    +data: Dict[str, Any]
+    +action_url: Optional[str]
+    +expires_at: Optional[datetime]
+    +created_at: datetime
+    +workspace: 'RacineWorkspace'
+  }
+  class RacineAIInsight {
+    +__tablename__: 
+    +id: 
+    +title: 
+    +insight_title: 
+    +insight_type: 
+    +description: 
+    +significance_level: 
+    +detailed_analysis: 
+    +insight_data: 
+    +key_findings: 
+    +supporting_evidence: 
+    +statistical_data: 
+    +data_sources: 
+    +analysis_methodology: 
+    +ai_models_used: 
+    +confidence_intervals: 
+    +groups_analyzed: 
+    +cross_group_patterns: 
+    +group_specific_insights: 
+    +integration_opportunities: 
+    +predictions: 
+    +trend_analysis: 
+    +forecasts: 
+    +scenario_analysis: 
+    +business_impact: 
+    +technical_implications: 
+    +operational_impact: 
+    +strategic_implications: 
+    +recommended_actions: 
+    +next_steps: 
+    +monitoring_requirements: 
+    +success_metrics: 
+    +validation_status: 
+    +accuracy_score: 
+    +reliability_score: 
+    +peer_review_notes: 
+    +is_public: 
+    +access_level: 
+    +shared_with_groups: 
+    +usage_count: 
+    +generation_context: 
+    +triggering_analysis: 
+    +related_insights: 
+    +conversation_id: 
+    +user_id: 
+    +orchestration_master_id: 
+    +created_at: 
+    +updated_at: 
+    +conversation: 
+    +user: 
+    +orchestration_master: 
+  }
+  class RacineStepExecution {
+    +__tablename__: 
+    +id: 
+    +status: 
+    +started_at: 
+    +completed_at: 
+    +duration_seconds: 
+    +input_data: 
+    +output_data: 
+    +execution_logs: 
+    +error_details: 
+    +resource_usage: 
+    +performance_metrics: 
+    +attempt_number: 
+    +retry_reason: 
+    +recovery_actions: 
+    +job_execution_id: 
+    +workflow_step_id: 
+    +job_execution: 
+    +workflow_step: 
+  }
+  class RacineActivityStream {
+    +__tablename__: 
+    +id: 
+    +stream_name: 
+    +stream_type: 
+    +description: 
+    +filter_criteria: 
+    +aggregation_rules: 
+    +transformation_rules: 
+    +retention_policy: 
+    +target_systems: 
+    +notification_rules: 
+    +alert_thresholds: 
+    +batch_size: 
+    +processing_interval: 
+    +max_lag_tolerance: 
+    +is_active: 
+    +last_processed_at: 
+    +processing_lag_ms: 
+    +error_count: 
+    +total_events_processed: 
+    +events_per_second: 
+    +average_processing_time: 
+    +created_by: 
+    +created_at: 
+    +updated_at: 
+    +creator: 
+    +stream_events: 
+  }
+  class RacineWorkspaceAnalytics {
+    +__tablename__: 
+    +id: str
+    +workspace_id: str
+    +analytics_date: datetime
+    +active_users: int
+    +total_activities: int
+    +resource_access_count: int
+    +collaboration_events: int
+    +average_response_time: float
+    +error_rate: float
+    +uptime_percentage: float
+    +storage_used_gb: float
+    +bandwidth_used_gb: float
+    +compute_hours: float
+    +user_activity_breakdown: Dict[str, Any]
+    +resource_usage_breakdown: Dict[str, Any]
+    +group_activity_breakdown: Dict[str, Any]
+    +workspace: 'RacineWorkspace'
+  }
+  class RacineAIRecommendation {
+    +__tablename__: 
+    +id: 
+    +title: 
+    +recommendation_title: 
+    +recommendation_type: 
+    +description: 
+    +priority: 
+    +detailed_analysis: 
+    +implementation_steps: 
+    +expected_benefits: 
+    +potential_risks: 
+    +resource_requirements: 
+    +confidence_score: 
+    +evidence_data: 
+    +similar_cases: 
+    +success_probability: 
+    +impact_areas: 
+    +performance_impact: 
+    +cost_impact: 
+    +user_impact: 
+    +compliance_impact: 
+    +affected_groups: 
+    +cross_group_benefits: 
+    +integration_requirements: 
+    +coordination_needed: 
+    +status: 
+    +implementation_date: 
+    +implementation_progress: 
+    +implementation_notes: 
+    +actual_results: 
+    +success_rating: 
+    +lessons_learned: 
+    +follow_up_recommendations: 
+    +generation_context: 
+    +source_data: 
+    +recommendation_data: 
+    +triggering_event: 
+    +related_workflows: 
+    +related_pipelines: 
+    +user_feedback: 
+    +user_rating: 
+    +user_notes: 
+    +conversation_id: 
+    +user_id: 
+    +orchestration_master_id: 
+    +created_at: 
+    +updated_at: 
+    +expires_at: 
+    +conversation: 
+    +user: 
+    +orchestration_master: 
+  }
+  class RacineIntegrationHealthCheck {
+    +__tablename__: 
+    +id: 
+    +check_name: 
+    +check_type: 
+    +description: 
+    +check_configuration: 
+    +check_interval_seconds: 
+    +timeout_seconds: 
+    +retry_count: 
+    +status: 
+    +last_check_time: 
+    +last_success_time: 
+    +consecutive_failures: 
+    +response_time_ms: 
+    +availability_percentage: 
+    +error_rate: 
+    +check_results: 
+    +error_details: 
+    +diagnostic_info: 
+    +alert_thresholds: 
+    +notification_config: 
+    +escalation_rules: 
+    +uptime_percentage_24h: 
+    +uptime_percentage_7d: 
+    +uptime_percentage_30d: 
+    +dependent_checks: 
+    +dependency_checks: 
+    +cascade_failures: 
+    +integration_id: 
+    +created_at: 
+    +updated_at: 
+    +integration: 
+  }
+  class RacineCollaborationDocumentEdit {
+    +__tablename__: 
+    +id: 
+    +edit_type: 
+    +operation_data: 
+    +content_delta: 
+    +section_id: 
+    +start_position: 
+    +end_position: 
+    +affected_lines: 
+    +previous_content: 
+    +new_content: 
+    +change_summary: 
+    +edit_session_id: 
+    +collaborative_edit: 
+    +conflict_resolution: 
+    +needs_review: 
+    +reviewed_by: 
+    +reviewed_at: 
+    +review_status: 
+    +document_id: 
+    +editor_id: 
+    +edit_timestamp: 
+    +document: 
+    +editor: 
+    +reviewer: 
+  }
+  class RacineActivityLog {
+    +__tablename__: 
+    +id: 
+    +log_level: 
+    +message: 
+    +log_category: 
+    +log_data: 
+    +context_data: 
+    +stack_trace: 
+    +source_file: 
+    +source_function: 
+    +line_number: 
+    +thread_id: 
+    +process_id: 
+    +timestamp_precise: 
+    +duration_ms: 
+    +memory_usage: 
+    +group_context: 
+    +cross_group_references: 
+    +activity_id: 
+    +sequence_number: 
+    +timestamp: 
+    +activity: 
+  }
+  class RacineJobExecution {
+    +__tablename__: 
+    +id: 
+    +execution_name: 
+    +status: 
+    +trigger_type: 
+    +triggered_by: 
+    +trigger_data: 
+    +execution_context: 
+    +input_parameters: 
+    +started_at: 
+    +completed_at: 
+    +estimated_completion: 
+    +actual_duration: 
+    +estimated_duration: 
+    +total_steps: 
+    +completed_steps: 
+    +failed_steps: 
+    +skipped_steps: 
+    +progress_percentage: 
+    +execution_results: 
+    +output_data: 
+    +generated_artifacts: 
+    +performance_metrics: 
+    +resource_usage: 
+    +bottlenecks_detected: 
+    +optimization_suggestions: 
+    +error_details: 
+    +debug_information: 
+    +retry_attempts: 
+    +recovery_actions: 
+    +group_execution_status: 
+    +cross_group_dependencies_status: 
+    +group_specific_results: 
+    +workflow_id: 
+    +workflow_version: 
+    +workflow: 
+    +trigger_user: 
+    +step_executions: 
+  }
+  class RacineDashboardLayout {
+    +__tablename__: 
+    +id: 
+    +layout_name: 
+    +description: 
+    +layout_type: 
+    +layout_config: 
+    +grid_config: 
+    +responsive_breakpoints: 
+    +device_layouts: 
+    +theme_config: 
+    +css_overrides: 
+    +color_scheme: 
+    +typography_config: 
+    +interaction_config: 
+    +animation_config: 
+    +transition_config: 
+    +lazy_loading_config: 
+    +virtualization_config: 
+    +is_default: 
+    +is_customizable: 
+    +user_customizations: 
+    +dashboard_id: 
+    +created_at: 
+    +updated_at: 
+    +created_by: 
+    +dashboard: 
+    +creator: 
+  }
+  class RacineActivityMetrics {
+    +__tablename__: 
+    +id: 
+    +metric_type: 
+    +metric_name: 
+    +metric_value: 
+    +metric_unit: 
+    +metric_category: 
+    +activity_id: 
+    +measurement_context: 
+    +aggregation_level: 
+    +baseline_value: 
+    +target_value: 
+    +threshold_values: 
+    +variance_from_baseline: 
+    +dimensions: 
+    +tags: 
+    +labels: 
+    +measurement_quality: 
+    +confidence_interval: 
+    +sample_size: 
+    +measurement_timestamp: 
+    +measurement_window_start: 
+    +measurement_window_end: 
+    +metric_metadata: 
+    +collection_method: 
+    +activity: 
+  }
+  class RacineWorkspaceMember {
+    +__tablename__: 
+    +id: str
+    +workspace_id: str
+    +user_id: int
+    +role: WorkspaceMemberRole
+    +permissions: Dict[str, Any]
+    +group_access: Dict[str, Any]
+    +resource_permissions: Dict[str, Any]
+    +status: str
+    +invitation_status: str
+    +invitation_token: Optional[str]
+    +invitation_expires_at: Optional[datetime]
+    +joined_at: datetime
+    +last_active: datetime
+    +activity_count: int
+    +last_login: Optional[datetime]
+    +collaboration_settings: Dict[str, Any]
+    +notification_preferences: Dict[str, Any]
+    +access_restrictions: Dict[str, Any]
+    +ip_restrictions: List[str]
+    +time_restrictions: Dict[str, Any]
+    +invited_by: Optional[int]
+    +invitation_message: Optional[str]
+    +created_at: datetime
+    +updated_at: datetime
+    +workspace: 'RacineWorkspace'
+    +user: 'User'
+    +inviter: Optional['User']
+    +__table_args__: 
+  }
+  class RacineCollaborationParticipant {
+    +__tablename__: 
+    +id: 
+    +role: 
+    +status: 
+    +invitation_status: 
+    +permissions: 
+    +access_level: 
+    +group_access: 
+    +joined_at: 
+    +last_active: 
+    +activity_level: 
+    +contribution_score: 
+    +connection_status: 
+    +expertise_areas: 
+    +specializations: 
+    +preferred_groups: 
+    +notification_preferences: 
+    +communication_preferences: 
+    +availability_schedule: 
+    +contributions: 
+    +feedback_received: 
+    +peer_ratings: 
+    +collaboration_id: 
+    +session_id: 
+    +user_id: 
+    +invited_by: 
+    +collaboration: 
+    +user: 
+    +inviter: 
+  }
+  class RacineIntegrationMessage {
+    +__tablename__: 
+    +id: 
+    +message_id: 
+    +message_type: 
+    +content_type: 
+    +source_group: 
+    +source_endpoint: 
+    +target_group: 
+    +target_endpoint: 
+    +routing_key: 
+    +headers: 
+    +payload: 
+    +message_metadata: 
+    +correlation_id: 
+    +status: 
+    +priority: 
+    +ttl_seconds: 
+    +retry_count: 
+    +created_at: 
+    +sent_at: 
+    +delivered_at: 
+    +expired_at: 
+    +processing_duration_ms: 
+    +response_payload: 
+    +error_details: 
+    +original_payload: 
+    +transformation_applied: 
+    +validation_results: 
+    +quality_score: 
+    +processing_metrics: 
+    +performance_data: 
+    +integration_id: 
+    +integration: 
+  }
+  class RacineAIMessage {
+    +__tablename__: 
+    +id: 
+    +message_type: 
+    +content: 
+    +sender_id: 
+    +sender_type: 
+    +ai_processing_data: 
+    +message_metadata: 
+    +status: 
+    +message_content: 
+    +message_format: 
+    +intent_detected: 
+    +entities_extracted: 
+    +sentiment_score: 
+    +confidence_score: 
+    +complexity_score: 
+    +processing_time_ms: 
+    +ai_model_used: 
+    +processing_pipeline: 
+    +external_apis_called: 
+    +context_used: 
+    +referenced_documents: 
+    +cross_group_data_used: 
+    +workflow_context: 
+    +user_feedback: 
+    +accuracy_rating: 
+    +relevance_score: 
+    +improvement_notes: 
+    +actions_suggested: 
+    +actions_executed: 
+    +follow_up_required: 
+    +follow_up_actions: 
+    +conversation_id: 
+    +message_order: 
+    +timestamp: 
+    +created_at: 
+    +updated_at: 
+    +conversation: 
+  }
+  class RacinePipelineOptimization {
+    +__tablename__: 
+    +id: 
+    +optimization_type: 
+    +optimization_name: 
+    +description: 
+    +status: 
+    +current_metrics: 
+    +target_metrics: 
+    +optimization_recommendations: 
+    +implementation_steps: 
+    +ai_confidence_score: 
+    +ai_analysis_data: 
+    +learning_source: 
+    +similar_optimizations: 
+    +predicted_improvement: 
+    +risk_assessment: 
+    +resource_impact: 
+    +cost_benefit_analysis: 
+    +implementation_status: 
+    +implementation_date: 
+    +implementation_details: 
+    +rollback_plan: 
+    +actual_results: 
+    +performance_improvement: 
+    +cost_impact: 
+    +success_rating: 
+    +pipeline_id: 
+    +stage_id: 
+    +created_at: 
+    +updated_at: 
+    +created_by: 
+    +reviewed_by: 
+    +pipeline: 
+    +stage: 
+    +creator: 
+    +reviewer: 
+  }
+  class RacineDashboardPersonalization {
+    +__tablename__: 
+    +id: 
+    +personalization_name: 
+    +description: 
+    +layout_preferences: 
+    +widget_preferences: 
+    +filter_preferences: 
+    +theme_preferences: 
+    +widget_positions: 
+    +widget_sizes: 
+    +hidden_widgets: 
+    +custom_widgets: 
+    +default_time_range: 
+    +default_filters: 
+    +preferred_metrics: 
+    +custom_calculations: 
+    +notification_preferences: 
+    +alert_preferences: 
+    +access_patterns: 
+    +interaction_preferences: 
+    +dashboard_id: 
+    +user_id: 
+    +is_active: 
+    +last_used: 
+    +created_at: 
+    +updated_at: 
+    +dashboard: 
+    +user: 
+  }
+  class RacineDashboardWidgetData {
+    +__tablename__: 
+    +id: 
+    +data_type: 
+    +data_format: 
+    +data_content: 
+    +data_metadata: 
+    +schema_info: 
+    +data_quality_metrics: 
+    +source_query: 
+    +source_system: 
+    +source_timestamp: 
+    +is_cached: 
+    +cache_key: 
+    +cache_expiry: 
+    +cache_hit_count: 
+    +processing_time_ms: 
+    +transformation_applied: 
+    +aggregation_applied: 
+    +involved_groups: 
+    +group_data_sources: 
+    +cross_group_correlations: 
+    +validation_status: 
+    +validation_errors: 
+    +data_completeness: 
+    +data_accuracy: 
+    +widget_id: 
+    +created_at: 
+    +updated_at: 
+    +widget: 
+  }
+  class RacineIntegrationEndpoint {
+    +__tablename__: 
+    +id: 
+    +name: 
+    +description: 
+    +endpoint_type: 
+    +url: 
+    +http_method: 
+    +headers: 
+    +query_parameters: 
+    +request_schema: 
+    +response_schema: 
+    +authentication_type: 
+    +authentication_config: 
+    +ssl_config: 
+    +rate_limiting: 
+    +source_group: 
+    +target_group: 
+    +routing_rules: 
+    +load_balancing: 
+    +timeout_ms: 
+    +retry_config: 
+    +circuit_breaker_config: 
+    +caching_config: 
+    +request_transformation: 
+    +response_transformation: 
+    +error_transformation: 
+    +logging_config: 
+    +metrics_config: 
+    +tracing_config: 
+    +is_enabled: 
+    +health_status: 
+    +last_health_check: 
+    +error_count: 
+    +request_count: 
+    +success_count: 
+    +error_rate: 
+    +average_latency: 
+    +integration_id: 
+    +created_at: 
+    +updated_at: 
+    +integration: 
+  }
+  class RacineDataFlowExecution {
+    +__tablename__: 
+    +id: 
+    +execution_id: 
+    +status: 
+    +trigger_type: 
+    +started_at: 
+    +completed_at: 
+    +duration_ms: 
+    +triggered_by: 
+    +records_processed: 
+    +records_success: 
+    +records_failed: 
+    +records_skipped: 
+    +data_volume_bytes: 
+    +quality_score: 
+    +validation_errors: 
+    +quality_issues: 
+    +throughput_rate: 
+    +latency_metrics: 
+    +resource_usage: 
+    +bottlenecks: 
+    +error_details: 
+    +debug_information: 
+    +retry_attempts: 
+    +recovery_actions: 
+    +input_sources: 
+    +output_destinations: 
+    +transformation_applied: 
+    +data_lineage_trace: 
+    +data_flow_id: 
+    +data_flow: 
+    +trigger_user: 
+  }
+  class RacinePipelineExecution {
+    +__tablename__: 
+    +id: 
+    +execution_name: 
+    +status: 
+    +trigger_type: 
+    +triggered_by: 
+    +trigger_data: 
+    +execution_context: 
+    +execution_parameters: 
+    +input_parameters: 
+    +input_data_sources: 
+    +started_at: 
+    +completed_at: 
+    +estimated_completion: 
+    +actual_duration: 
+    +estimated_duration: 
+    +total_stages: 
+    +completed_stages: 
+    +failed_stages: 
+    +skipped_stages: 
+    +progress_percentage: 
+    +current_stage_id: 
+    +records_processed: 
+    +records_failed: 
+    +data_quality_score: 
+    +throughput_rate: 
+    +runtime_configuration: 
+    +resource_usage: 
+    +cost_metrics: 
+    +performance_metrics: 
+    +optimization_applied: 
+    +data_lineage: 
+    +error_message: 
+    +error_details: 
+    +debug_information: 
+    +retry_attempts: 
+    +recovery_actions: 
+    +group_execution_status: 
+    +cross_group_data_flow_status: 
+    +group_specific_results: 
+    +quality_check_results: 
+    +compliance_validation_results: 
+    +data_lineage_tracking: 
+    +pipeline_id: 
+    +pipeline_version: 
+    +optimization_recommendations_applied: 
+    +performance_improvement: 
+    +cost_savings: 
+    +pipeline: 
+    +trigger_user: 
+    +current_stage: 
+    +stage_executions: 
+  }
+  class RacinePerformanceMetrics {
+    +__tablename__: 
+    +id: str
+    +orchestration_id: str
+    +metric_name: str
+    +metric_value: float
+    +metric_unit: str
+    +metric_category: str
+    +timestamp: datetime
+    +tags: Dict[str, str]
+    +orchestration_master: 'RacineOrchestrationMaster'
+  }
+  class RacineAIKnowledge {
+    +__tablename__: 
+    +id: 
+    +knowledge_title: 
+    +knowledge_type: 
+    +domain: 
+    +category: 
+    +knowledge_content: 
+    +formal_representation: 
+    +examples: 
+    +related_concepts: 
+    +confidence_level: 
+    +source_reliability: 
+    +last_validated: 
+    +validation_method: 
+    +applicable_contexts: 
+    +usage_examples: 
+    +best_practices: 
+    +common_mistakes: 
+    +applicable_groups: 
+    +group_specific_variations: 
+    +integration_guidelines: 
+    +accuracy_score: 
+    +completeness_score: 
+    +review_status: 
+    +update_frequency: 
+    +usage_count: 
+    +success_rate: 
+    +user_ratings: 
+    +feedback: 
+    +version: 
+    +previous_versions: 
+    +change_history: 
+    +evolution_notes: 
+    +sources: 
+    +references: 
+    +expert_contributors: 
+    +created_by: 
+    +created_at: 
+    +updated_at: 
+    +creator: 
+  }
+  class RacineIntegrationTest {
+    +__tablename__: 
+    +id: 
+    +integration_id: 
+    +test_name: 
+    +test_config: 
+    +last_result: 
+    +last_run_at: 
+    +created_at: 
+  }
+  class RacineWebhookSubscription {
+    +__tablename__: 
+    +id: 
+    +subscriber: 
+    +callback_url: 
+    +secret: 
+    +event_filters: 
+    +status: 
+    +created_at: 
+  }
+  class RacineResourceAllocation {
+    +__tablename__: 
+    +id: str
+    +orchestration_id: str
+    +resource_type: ResourceType
+    +resource_name: str
+    +allocated_amount: float
+    +used_amount: float
+    +utilization_percentage: float
+    +allocation_time: datetime
+    +status: str
+  }
+  class RacineAPIGateway {
+    +__tablename__: 
+    +id: 
+    +name: 
+    +description: 
+    +gateway_type: 
+    +base_url: 
+    +gateway_configuration: 
+    +routing_configuration: 
+    +middleware_config: 
+    +registered_apis: 
+    +api_versions: 
+    +deprecation_policies: 
+    +group_routing_rules: 
+    +cross_group_policies: 
+    +traffic_splitting: 
+    +authentication_providers: 
+    +authorization_policies: 
+    +api_key_management: 
+    +oauth_configuration: 
+    +rate_limiting_config: 
+    +throttling_policies: 
+    +quota_management: 
+    +metrics_config: 
+    +analytics_config: 
+    +audit_logging: 
+    +caching_config: 
+    +compression_config: 
+    +cdn_integration: 
+    +status: 
+    +health_status: 
+    +total_requests: 
+    +successful_requests: 
+    +failed_requests: 
+    +average_response_time: 
+    +created_at: 
+    +updated_at: 
+    +created_by: 
+    +creator: 
+  }
+  class RacineCollaborationComment {
+    +__tablename__: 
+    +id: 
+    +session_id: 
+    +collaboration_id: 
+    +target_type: 
+    +target_id: 
+    +author_id: 
+    +content: 
+    +mentions: 
+    +comment_metadata: 
+    +status: 
+    +created_at: 
+    +updated_at: 
+  }
+  class RacineExternalCollaborator {
+    +__tablename__: 
+    +id: 
+    +collaboration_id: 
+    +external_id: 
+    +identity_provider: 
+    +display_name: 
+    +email: 
+    +role: 
+    +access_scopes: 
+    +invite_status: 
+    +expires_at: 
+    +created_at: 
+  }
+  class RacineWorkspaceSettings {
+    +__tablename__: 
+    +id: str
+    +workspace_id: str
+    +setting_category: str
+    +setting_key: str
+    +setting_value: Dict[str, Any]
+    +setting_type: str
+    +is_user_configurable: bool
+    +created_at: datetime
+    +updated_at: datetime
+  }
+  class RacineIntegrationStatus {
+    +__tablename__: 
+    +id: str
+    +integration_id: str
+    +status_check_time: datetime
+    +status: GroupIntegrationStatus
+    +response_time_ms: float
+    +error_message: Optional[str]
+    +health_score: float
+    +status_metadata: Dict[str, Any]
+  }
+  class RacineActivityAlert {
+    +__tablename__: 
+    +id: 
+    +alert_name: 
+    +alert_type: 
+    +severity: 
+    +status: 
+    +trigger_condition: 
+    +trigger_data: 
+    +related_activities: 
+    +description: 
+    +detailed_message: 
+    +resolution_steps: 
+    +escalation_rules: 
+    +impact_level: 
+    +affected_systems: 
+    +affected_users: 
+    +business_impact: 
+    +acknowledged_by: 
+    +acknowledged_at: 
+    +resolved_by: 
+    +resolved_at: 
+    +resolution_notes: 
+    +affected_groups: 
+    +cross_group_implications: 
+    +coordination_required: 
+    +first_occurrence: 
+    +last_occurrence: 
+    +occurrence_count: 
+    +suppression_rules: 
+    +notifications_sent: 
+    +notification_channels: 
+    +acknowledger: 
+    +resolver: 
+  }
+  class RacineKnowledgeBase {
+    +__tablename__: 
+    +id: 
+    +collaboration_id: 
+    +session_id: 
+    +entry_type: 
+    +title: 
+    +content: 
+    +knowledge_metadata: 
+    +tags: 
+    +status: 
+    +created_by: 
+    +created_at: 
+    +updated_at: 
+  }
+  class RacineCollaborationSpace {
+    +__tablename__: 
+    +id: 
+    +collaboration_id: 
+    +name: 
+    +description: 
+    +space_type: 
+    +visibility: 
+    +participant_ids: 
+    +settings: 
+    +status: 
+    +created_at: 
+    +updated_at: 
+  }
+  class RacineSystemHealth {
+    +__tablename__: 
+    +id: str
+    +orchestration_id: Optional[str]
+    +timestamp: datetime
+    +overall_status: SystemHealthStatus
+    +health_score: float
+    +data_sources_health: Dict[str, Any]
+    +scan_rule_sets_health: Dict[str, Any]
+    +classifications_health: Dict[str, Any]
+    +compliance_rules_health: Dict[str, Any]
+    +advanced_catalog_health: Dict[str, Any]
+    +scan_logic_health: Dict[str, Any]
+    +rbac_system_health: Dict[str, Any]
+    +system_metrics: Dict[str, Any]
+    +performance_metrics: Dict[str, Any]
+    +resource_usage: Dict[str, Any]
+    +active_alerts: List[Dict[str, Any]]
+    +resolved_alerts: List[Dict[str, Any]]
+    +recommendations: List[Dict[str, Any]]
+    +check_duration_ms: float
+    +checks_performed: List[str]
+    +failed_checks: List[str]
+    +health_trend: str
+    +previous_status: Optional[SystemHealthStatus]
+    +status_change_count: int
+    +created_at: datetime
+    +orchestration_master: Optional['RacineOrchestrationMaster']
+    +__table_args__: 
+  }
+  class RacineWorkspaceTemplate {
+    +__tablename__: 
+    +id: str
+    +name: str
+    +description: Optional[str]
+    +category: Optional[str]
+    +template_config: Dict[str, Any]
+    +default_integrations: Dict[str, Any]
+    +default_resources: List[Dict[str, Any]]
+    +default_settings: Dict[str, Any]
+    +is_public: bool
+    +usage_count: int
+    +average_rating: float
+    +total_ratings: int
+    +tags: List[str]
+    +version: str
+    +is_verified: bool
+    +created_by: int
+    +created_at: datetime
+    +updated_at: datetime
+  }
+  class RacineCollaborationNotification {
+    +__tablename__: 
+    +id: 
+    +session_id: 
+    +collaboration_id: 
+    +target_user_id: 
+    +event_type: 
+    +payload: 
+    +delivery_channels: 
+    +delivery_status: 
+    +error_message: 
+    +created_at: 
+    +delivered_at: 
+  }
+  class RacineIntegrationHealth {
+    +__tablename__: 
+    +id: 
+    +integration_id: 
+    +status: 
+    +metrics: 
+    +last_checked: 
+  }
+  class RacineServiceMesh {
+    +__tablename__: 
+    +id: 
+    +name: 
+    +description: 
+    +mesh_type: 
+    +mesh_configuration: 
+    +security_policies: 
+    +traffic_policies: 
+    +observability_config: 
+    +registered_services: 
+    +service_discovery_config: 
+    +load_balancing_config: 
+    +group_connections: 
+    +connection_policies: 
+    +authentication_config: 
+    +authorization_policies: 
+    +routing_rules: 
+    +circuit_breaker_config: 
+    +retry_policies: 
+    +timeout_policies: 
+    +mtls_config: 
+    +certificate_management: 
+    +encryption_policies: 
+    +metrics_collection: 
+    +distributed_tracing: 
+    +logging_config: 
+    +status: 
+    +health_status: 
+    +deployment_status: 
+    +connection_count: 
+    +request_volume: 
+    +average_latency: 
+    +error_rate: 
+    +created_at: 
+    +updated_at: 
+    +created_by: 
+    +creator: 
+  }
+  class RacineServiceRegistry {
+    +__tablename__: 
+    +id: 
+    +service_name: 
+    +group: 
+    +version: 
+    +endpoint_url: 
+    +health_status: 
+    +metadata_json: 
+    +created_at: 
+  }
+  class RacineAILearning {
+    +__tablename__: 
+    +id: 
+    +learning_type: 
+    +learning_source: 
+    +description: 
+    +importance_score: 
+    +learning_data: 
+    +processed_data: 
+    +patterns_identified: 
+    +correlations_found: 
+    +context_data: 
+    +user_context: 
+    +system_context: 
+    +environmental_factors: 
+    +knowledge_gained: 
+    +model_updates: 
+    +behavior_changes: 
+    +performance_impact: 
+    +validation_status: 
+    +quality_score: 
+    +reliability_score: 
+    +validation_notes: 
+    +times_applied: 
+    +success_rate: 
+    +failure_cases: 
+    +improvement_suggestions: 
+    +applicable_groups: 
+    +cross_group_patterns: 
+    +group_specific_adaptations: 
+    +related_conversations: 
+    +related_recommendations: 
+    +related_insights: 
+    +source_user_id: 
+    +created_at: 
+    +last_applied: 
+    +expires_at: 
+    +source_user: 
+  }
+  class RacineDataSync {
+    +__tablename__: 
+    +id: 
+    +source: 
+    +targets: 
+    +sync_schedule: 
+    +last_run: 
+    +next_run: 
+    +sync_config: 
+    +status: 
+  }
+  class RacineExternalIntegration {
+    +__tablename__: 
+    +id: 
+    +provider_name: 
+    +integration_type: 
+    +connection_config: 
+    +auth_config: 
+    +status: 
+    +created_at: 
+  }
+  class RacineAIMetrics {
+    +__tablename__: 
+    +id: 
+    +metric_type: 
+    +metric_name: 
+    +metric_value: 
+    +metric_unit: 
+    +metric_category: 
+    +context_type: 
+    +context_id: 
+    +user_id: 
+    +group_context: 
+    +recorded_at: 
+    +time_window_start: 
+    +time_window_end: 
+    +measurement_context: 
+    +baseline_value: 
+    +target_value: 
+    +variance_from_target: 
+    +metric_metadata: 
+    +tags: 
+    +user: 
+  }
+  class RacineActivityAnalytics {
+    +__tablename__: 
+    +id: 
+    +analytics_type: 
+    +analytics_name: 
+    +description: 
+    +time_period: 
+    +analytics_data: 
+    +key_metrics: 
+    +trends_identified: 
+    +anomalies_detected: 
+    +scope_definition: 
+    +filter_criteria: 
+    +groups_included: 
+    +user_segments: 
+    +statistical_summary: 
+    +distribution_analysis: 
+    +correlation_matrix: 
+    +predictive_models: 
+    +key_insights: 
+    +performance_insights: 
+    +user_behavior_insights: 
+    +recommendations: 
+    +data_quality_score: 
+    +confidence_level: 
+    +sample_size: 
+    +margin_of_error: 
+    +analysis_start_time: 
+    +analysis_end_time: 
+    +computation_time_ms: 
+    +last_updated: 
+    +created_at: 
+  }
+  class RacineCrossGroupIntegration {
+    +__tablename__: 
+    +id: str
+    +orchestration_id: str
+    +integration_name: str
+    +source_group: str
+    +target_group: str
+    +integration_type: str
+    +bidirectional: bool
+    +configuration: Dict[str, Any]
+    +mapping_rules: Dict[str, Any]
+    +transformation_rules: Dict[str, Any]
+    +validation_rules: Dict[str, Any]
+    +status: GroupIntegrationStatus
+    +last_sync: Optional[datetime]
+    +sync_frequency: str
+    +next_sync: Optional[datetime]
+    +total_operations: int
+    +successful_operations: int
+    +failed_operations: int
+    +error_count: int
+    +success_rate: float
+    +average_response_time: float
+    +last_error: Optional[str]
+    +error_history: List[Dict[str, Any]]
+    +recovery_attempts: int
+    +recovery_settings: Dict[str, Any]
+    +data_volume: int
+    +data_flow_metrics: Dict[str, Any]
+    +throughput_metrics: Dict[str, Any]
+    +security_settings: Dict[str, Any]
+    +compliance_requirements: List[str]
+    +audit_trail: List[Dict[str, Any]]
+    +tags: List[str]
+    +integration_metadata: Dict[str, Any]
+    +created_at: datetime
+    +updated_at: datetime
+    +created_by: int
+    +orchestration_master: 'RacineOrchestrationMaster'
+    +creator: 'User'
+    +__table_args__: 
+  }
+  class RacineExpertNetwork {
+    +__tablename__: 
+    +id: 
+    +session_id: 
+    +expert_user_id: 
+    +expertise_areas: 
+    +availability_status: 
+    +consultation_history: 
+    +rating: 
+    +specializations: 
+    +status: 
+    +created_at: 
+  }
+  class RacineEventStream {
+    +__tablename__: 
+    +id: 
+    +stream_name: 
+    +broker_type: 
+    +topic: 
+    +partitions: 
+    +replication_factor: 
+    +retention_policy: 
+    +status: 
+    +created_at: 
+  }
+  class RacineErrorLog {
+    +__tablename__: 
+    +id: str
+    +orchestration_id: str
+    +error_code: str
+    +error_message: str
+    +error_category: str
+    +severity: str
+    +source_group: Optional[str]
+    +stack_trace: Optional[str]
+    +context: Dict[str, Any]
+    +resolved: bool
+    +resolution_notes: Optional[str]
+    +occurred_at: datetime
+    +resolved_at: Optional[datetime]
+    +orchestration_master: 'RacineOrchestrationMaster'
+  }
+  class RacineDashboardTemplate {
+    +__tablename__: 
+    +id: 
+    +template_name: 
+    +description: 
+    +template_category: 
+    +template_type: 
+    +template_definition: 
+    +widget_templates: 
+    +layout_templates: 
+    +default_parameters: 
+    +use_cases: 
+    +prerequisites: 
+    +target_audience: 
+    +complexity_level: 
+    +supported_groups: 
+    +required_permissions: 
+    +group_customizations: 
+    +usage_count: 
+    +success_rate: 
+    +user_ratings: 
+    +user_feedback: 
+    +is_public: 
+    +is_verified: 
+    +version: 
+    +created_at: 
+    +updated_at: 
+    +created_by: 
+    +creator: 
+  }
+  RacinePipeline "1" --> "0..*" RacinePipelineOptimization
+  RacinePipeline "1" --> "0..*" RacinePipelineExecution
+  RacinePipeline "1" --> "0..*" RacinePipelineTemplate
+  RacineDashboard "1" --> "0..*" RacineDashboardAnalytics
+  RacineDashboard "1" --> "0..*" RacineDashboardLayout
+  RacineDashboard "1" --> "0..*" RacineDashboardPersonalization
+  RacineIntegration "1" --> "0..*" RacineIntegrationEndpoint
+  RacineIntegration "1" --> "0..*" RacineIntegrationHealthCheck
+  RacineIntegration "1" --> "0..*" RacineIntegrationMessage
+  RacineIntegration "1" --> "0..*" RacineDataFlow
+  RacineDashboard "1" --> "0..*" RacineDashboardWidget
+  RacineActivity "1" --> "0..*" RacineActivityLog
+  RacineActivity "1" --> "0..*" RacineActivityMetrics
+  RacineAIConversation "1" --> "0..*" RacineAIInsight
+  RacineAIConversation "1" --> "0..*" RacineAIMessage
+  RacineAIConversation "1" --> "0..*" RacineAIRecommendation
+  RacineCollaboration "1" --> "0..*" RacineCollaborationParticipant
+  RacineCollaborationDocument "1" --> "0..*" RacineCollaborationDocumentEdit
+  RacineWorkspace "1" --> "0..*" RacineWorkspaceAnalytics
+  RacineWorkspace "1" --> "0..*" RacineWorkspaceMember
+  RacineWorkspace "1" --> "0..*" RacineWorkspaceNotification
+  RacineCollaboration "1" --> "0..*" RacineCollaborationDocument
+  RacineCollaboration "1" --> "0..*" RacineCollaborationMessage
+  RacineActivityStreamEvent "1" --> "0..*" RacineActivityStream
+  RacineDashboardWidget "1" --> "0..*" RacineDashboardWidgetData
+  RacineDataFlow "1" --> "0..*" RacineDataFlowExecution
+  RacinePipelineMetrics "1" --> "0..*" RacinePipelineExecution
+  RacineDashboardAlert "1" --> "0..*" RacineDashboardWidget
+  RacineActivityStreamEvent "1" --> "0..*" RacineActivity
+  RacineKnowledgeSharing "1" --> "0..*" RacineCollaboration
+  RacineJobExecution "1" --> "0..*" RacineStepExecution
+  RacineActivityCorrelation "1" --> "0..*" RacineActivity
+  RacineCollaborationAnalytics "1" --> "0..*" RacineCollaboration
+  RacineExpertConsultation "1" --> "0..*" RacineCollaboration
+  RacinePipeline ..> RacinePerformanceMetrics
+  RacinePipeline ..> RacineAIKnowledge
+  RacinePipeline ..> RacineIntegrationTest
+  RacinePipeline ..> RacineWebhookSubscription
+  RacinePipeline ..> RacineResourceAllocation
+  RacinePipeline ..> RacineAPIGateway
+  RacinePipeline ..> RacineCollaborationComment
+  RacinePipeline ..> RacineExternalCollaborator
+  RacinePipeline ..> RacineWorkspaceSettings
+  RacinePipeline ..> RacineIntegrationStatus
+  RacinePipeline ..> RacineActivityAlert
+  RacinePipeline ..> RacineKnowledgeBase
+  RacinePipeline ..> RacineCollaborationSpace
+  RacinePipeline ..> RacineSystemHealth
+  RacinePipeline ..> RacineWorkspaceTemplate
+  RacinePipeline ..> RacineCollaborationNotification
+  RacinePipeline ..> RacineIntegrationHealth
+  RacinePipeline ..> RacineServiceMesh
+  RacinePipeline ..> RacineServiceRegistry
+  RacinePipeline ..> RacineAILearning
+  RacinePipeline ..> RacineDataSync
+  RacinePipeline ..> RacineExternalIntegration
+  RacinePipeline ..> RacineAIMetrics
+  RacinePipeline ..> RacineActivityAnalytics
+  RacinePipeline ..> RacineCrossGroupIntegration
+  RacinePipeline ..> RacineExpertNetwork
+  RacinePipeline ..> RacineEventStream
+  RacinePipeline ..> RacineErrorLog
+  RacinePipeline ..> RacineDashboardTemplate
+  classDef domain fill:#F8FAFF,stroke:#111827,color:#111827
+  class RacineAIConversation,RacineAIInsight,RacineAIKnowledge,RacineAILearning,RacineAIMessage,RacineAIMetrics,RacineAIRecommendation,RacineAPIGateway,RacineActivity,RacineActivityAlert,RacineActivityAnalytics,RacineActivityCorrelation,RacineActivityLog,RacineActivityMetrics,RacineActivityStream,RacineActivityStreamEvent,RacineCollaboration,RacineCollaborationAnalytics,RacineCollaborationComment,RacineCollaborationDocument,RacineCollaborationDocumentEdit,RacineCollaborationMessage,RacineCollaborationNotification,RacineCollaborationParticipant,RacineCollaborationSpace,RacineCrossGroupIntegration,RacineDashboard,RacineDashboardAlert,RacineDashboardAnalytics,RacineDashboardLayout,RacineDashboardPersonalization,RacineDashboardTemplate,RacineDashboardWidget,RacineDashboardWidgetData,RacineDataFlow,RacineDataFlowExecution,RacineDataSync,RacineErrorLog,RacineEventStream,RacineExpertConsultation,RacineExpertNetwork,RacineExternalCollaborator,RacineExternalIntegration,RacineIntegration,RacineIntegrationEndpoint,RacineIntegrationHealth,RacineIntegrationHealthCheck,RacineIntegrationMessage,RacineIntegrationStatus,RacineIntegrationTest,RacineJobExecution,RacineKnowledgeBase,RacineKnowledgeSharing,RacinePerformanceMetrics,RacinePipeline,RacinePipelineExecution,RacinePipelineMetrics,RacinePipelineOptimization,RacinePipelineTemplate,RacineResourceAllocation,RacineServiceMesh,RacineServiceRegistry,RacineStepExecution,RacineSystemHealth,RacineWebhookSubscription,RacineWorkspace,RacineWorkspaceAnalytics,RacineWorkspaceMember,RacineWorkspaceNotification,RacineWorkspaceSettings,RacineWorkspaceTemplate domain

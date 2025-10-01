@@ -1,0 +1,71 @@
+classDiagram
+  class DataClassification {
+    +PUBLIC: 
+    +INTERNAL: 
+    +CONFIDENTIAL: 
+    +RESTRICTED: 
+  }
+  class ClassificationRuleType {
+    +REGEX_PATTERN: 
+    +DICTIONARY_LOOKUP: 
+    +COLUMN_NAME_PATTERN: 
+    +TABLE_NAME_PATTERN: 
+    +DATA_TYPE_PATTERN: 
+    +VALUE_RANGE_PATTERN: 
+    +STATISTICAL_PATTERN: 
+    +METADATA_PATTERN: 
+    +COMPOSITE_PATTERN: 
+    +ML_INFERENCE: 
+    +AI_INFERENCE: 
+    +CUSTOM_FUNCTION: 
+  }
+  class ClassificationMethod {
+    +MANUAL: 
+    +AUTOMATED_RULE: 
+    +ML_PREDICTION: 
+    +AI_INFERENCE: 
+    +INHERITED: 
+    +POLICY_DRIVEN: 
+    +EXPERT_REVIEW: 
+  }
+  class ClassificationLevel {
+    +PUBLIC: 
+    +INTERNAL: 
+    +CONFIDENTIAL: 
+    +RESTRICTED: 
+    +CLASSIFIED: 
+  }
+  class ClassificationStatus {
+    +PENDING: 
+    +ACTIVE: 
+    +INACTIVE: 
+    +DEPRECATED: 
+    +FAILED: 
+    +UNDER_REVIEW: 
+    +APPROVED: 
+    +REJECTED: 
+  }
+  class ClassificationConfidenceLevel {
+    +VERY_LOW: 
+    +LOW: 
+    +MEDIUM: 
+    +HIGH: 
+    +VERY_HIGH: 
+    +CERTAIN: 
+  }
+  class ClassificationScope {
+    +GLOBAL: 
+    +DATA_SOURCE: 
+    +SCHEMA: 
+    +TABLE: 
+    +COLUMN: 
+    +CUSTOM: 
+  }
+  DataClassification ..> ClassificationRuleType
+  DataClassification ..> ClassificationMethod
+  DataClassification ..> ClassificationLevel
+  DataClassification ..> ClassificationStatus
+  DataClassification ..> ClassificationConfidenceLevel
+  DataClassification ..> ClassificationScope
+  classDef domain fill:#F8FAFF,stroke:#111827,color:#111827
+  class ClassificationConfidenceLevel,ClassificationLevel,ClassificationMethod,ClassificationRuleType,ClassificationScope,ClassificationStatus,DataClassification domain

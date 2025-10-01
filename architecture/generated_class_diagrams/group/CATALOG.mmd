@@ -1,0 +1,1276 @@
+classDiagram
+  class IntelligentDataAsset {
+    +__tablename__: 
+    +id: Optional[int]
+    +asset_uuid: str
+    +qualified_name: str
+    +display_name: str
+    +description: Optional[str]
+    +asset_type: AssetType
+    +asset_status: AssetStatus
+    +asset_criticality: AssetCriticality
+    +data_sensitivity: DataSensitivity
+    +data_source_id: int
+    +racine_orchestrator_id: Optional[str]
+    +database_name: Optional[str]
+    +schema_name: Optional[str]
+    +table_name: Optional[str]
+    +full_path: str
+    +discovery_method: DiscoveryMethod
+    +discovered_at: datetime
+    +last_profiled: Optional[datetime]
+    +last_scanned: Optional[datetime]
+    +columns_info: List[Dict[str, Any]]
+    +schema_definition: Dict[str, Any]
+    +data_types: List[str]
+    +constraints: List[Dict[str, Any]]
+    +indexes: List[Dict[str, Any]]
+    +partitioning_info: Optional[Dict[str, Any]]
+    +ai_generated_description: Optional[str]
+    +semantic_tags: List[str]
+    +suggested_tags: List[str]
+    +ai_confidence_score: float
+    +semantic_embedding: Optional[List[float]]
+    +quality_score: float
+    +quality_level: DataQuality
+    +completeness: float
+    +accuracy: float
+    +consistency: float
+    +validity: float
+    +uniqueness: float
+    +timeliness: float
+    +record_count: Optional[int]
+    +size_bytes: Optional[int]
+    +null_percentage: float
+    +distinct_values: Optional[int]
+    +data_distribution: Dict[str, Any]
+    +value_patterns: Dict[str, Any]
+    +statistical_summary: Dict[str, Any]
+    +usage_frequency: UsageFrequency
+    +access_count_daily: int
+    +access_count_weekly: int
+    +access_count_monthly: int
+    +unique_users_count: int
+    +last_accessed: Optional[datetime]
+    +peak_usage_time: Optional[datetime]
+    +usage_trends: Dict[str, Any]
+    +business_domain: Optional[str]
+    +business_purpose: Optional[str]
+    +business_rules: List[str]
+    +key_performance_indicators: List[str]
+    +business_value_score: float
+    +owner: Optional[str]
+    +steward: Optional[str]
+    +custodian: Optional[str]
+    +owner_contact: Optional[str]
+    +steward_contact: Optional[str]
+    +owning_team: Optional[str]
+    +responsible_department: Optional[str]
+    +compliance_requirements: List[str]
+    +retention_policy: Optional[Dict[str, Any]]
+    +privacy_impact_level: str
+    +gdpr_applicable: bool
+    +pii_detected: bool
+    +encryption_status: str
+    +compliance_score: float
+    +classification_results: Dict[str, Any]
+    +sensitivity_labels: List[str]
+    +auto_classification_confidence: float
+    +manual_classification_override: bool
+    +query_performance_avg: Optional[float]
+    +storage_cost_monthly: Optional[float]
+    +compute_cost_monthly: Optional[float]
+    +total_cost_monthly: Optional[float]
+    +cost_per_query: Optional[float]
+    +performance_benchmarks: Dict[str, float]
+    +parent_asset_id: Optional[int]
+    +related_assets: List[str]
+    +dependency_count: int
+    +dependent_assets_count: int
+    +version: str
+    +version_history: List[Dict[str, Any]]
+    +last_modified: Optional[datetime]
+    +change_frequency: str
+    +schema_evolution: List[Dict[str, Any]]
+    +monitoring_enabled: bool
+    +alert_thresholds: Dict[str, float]
+    +health_score: float
+    +uptime_percentage: float
+    +availability_sla: Optional[float]
+    +user_tags: List[str]
+    +system_tags: List[str]
+    +custom_properties: Dict[str, Any]
+    +metadata_extensions: Dict[str, Any]
+    +audit_trail: List[Dict[str, Any]]
+    +access_history: List[Dict[str, Any]]
+    +modification_history: List[Dict[str, Any]]
+    +created_at: datetime
+    +updated_at: datetime
+    +created_by: Optional[str]
+    +updated_by: Optional[str]
+    +data_source: Optional['DataSource']
+    +racine_orchestrator: Optional['RacineOrchestrationMaster']
+    +parent_asset: Optional['IntelligentDataAsset']
+    +child_assets: List['IntelligentDataAsset']
+    +lineage_sources: List['EnterpriseDataLineage']
+    +lineage_targets: List['EnterpriseDataLineage']
+    +quality_assessments: List['DataQualityAssessment']
+    +usage_metrics: List['AssetUsageMetrics']
+    +profiling_results: List['DataProfilingResult']
+    +business_glossary_terms: List['BusinessGlossaryAssociation']
+    +__table_args__: 
+  }
+  class DataLineage {
+    +__tablename__: 
+    +id: Optional[int]
+    +source_item_id: int
+    +target_item_id: int
+    +lineage_type: str
+    +transformation_logic: Optional[str]
+    +confidence_score: float
+    +source_item: Optional[CatalogItem]
+    +target_item: Optional[CatalogItem]
+    +created_at: datetime
+    +last_accessed: Optional[datetime]
+    +created_by: Optional[str]
+  }
+  class EnterpriseDataLineage {
+    +__tablename__: 
+    +id: Optional[int]
+    +lineage_id: str
+    +lineage_name: Optional[str]
+    +source_asset_id: int
+    +target_asset_id: int
+    +lineage_type: LineageType
+    +lineage_direction: LineageDirection
+    +confidence_score: float
+    +detection_method: DiscoveryMethod
+    +source_columns: List[str]
+    +target_columns: List[str]
+    +column_mappings: Dict[str, List[str]]
+    +transformation_functions: Dict[str, str]
+    +transformation_logic: Optional[str]
+    +transformation_type: str
+    +business_logic: Optional[str]
+    +calculation_rules: List[Dict[str, Any]]
+    +aggregation_level: Optional[str]
+    +process_name: Optional[str]
+    +process_type: str
+    +process_owner: Optional[str]
+    +process_schedule: Optional[str]
+    +execution_frequency: Optional[str]
+    +data_quality_impact: float
+    +validation_rules: List[Dict[str, Any]]
+    +quality_checks: Dict[str, Any]
+    +error_handling: Dict[str, Any]
+    +processing_time_avg: Optional[float]
+    +data_volume_avg: Optional[int]
+    +success_rate: float
+    +last_execution: Optional[datetime]
+    +next_execution: Optional[datetime]
+    +downstream_impact_score: float
+    +critical_path: bool
+    +business_impact: str
+    +affected_reports: List[str]
+    +affected_users: List[str]
+    +graph_depth: int
+    +path_complexity: float
+    +node_importance: float
+    +centrality_score: float
+    +monitoring_enabled: bool
+    +alert_on_failure: bool
+    +alert_on_delay: bool
+    +sla_threshold_minutes: Optional[int]
+    +escalation_policy: Dict[str, Any]
+    +data_classification_inheritance: bool
+    +privacy_preservation: Dict[str, Any]
+    +compliance_validations: List[str]
+    +audit_requirements: List[str]
+    +technical_metadata: Dict[str, Any]
+    +business_metadata: Dict[str, Any]
+    +operational_metadata: Dict[str, Any]
+    +custom_attributes: Dict[str, Any]
+    +is_active: bool
+    +start_date: Optional[datetime]
+    +end_date: Optional[datetime]
+    +deprecation_reason: Optional[str]
+    +replacement_lineage_id: Optional[str]
+    +discovery_details: Dict[str, Any]
+    +validation_history: List[Dict[str, Any]]
+    +change_history: List[Dict[str, Any]]
+    +created_at: datetime
+    +updated_at: datetime
+    +discovered_at: datetime
+    +last_validated: Optional[datetime]
+    +created_by: Optional[str]
+    +source_asset: Optional[IntelligentDataAsset]
+    +target_asset: Optional[IntelligentDataAsset]
+    +__table_args__: 
+  }
+  class DataLineageEdge {
+    +__tablename__: 
+    +id: Optional[int]
+    +edge_id: str
+    +source_node_id: str
+    +target_node_id: str
+    +lineage_type: LineageType
+    +lineage_direction: LineageDirection
+    +transformation_type: Optional[TransformationType]
+    +confidence_level: LineageConfidence
+    +transformation_logic: Optional[str]
+    +transformation_sql: Optional[str]
+    +transformation_parameters: Optional[Dict[str, Any]]
+    +process_name: Optional[str]
+    +process_type: Optional[str]
+    +process_id: Optional[str]
+    +job_name: Optional[str]
+    +execution_frequency: Optional[str]
+    +last_execution: Optional[datetime]
+    +next_execution: Optional[datetime]
+    +execution_duration_seconds: Optional[int]
+    +success_rate: Optional[float]
+    +average_processing_time: Optional[float]
+    +data_volume_processed: Optional[int]
+    +business_rule: Optional[str]
+    +business_justification: Optional[str]
+    +data_owner: Optional[str]
+    +impact_score: Optional[float]
+    +criticality_level: Optional[ImpactSeverity]
+    +downstream_count: Optional[int]
+    +is_validated: bool
+    +validation_date: Optional[datetime]
+    +validation_notes: Optional[str]
+    +created_at: datetime
+    +updated_at: datetime
+    +created_by: str
+    +discovery_method: Optional[str]
+    +custom_properties: Optional[Dict[str, Any]]
+    +tags: Optional[str]
+    +source_node: Optional[DataLineageNode]
+    +target_node: Optional[DataLineageNode]
+    +__table_args__: 
+  }
+  class DataLineageNode {
+    +__tablename__: 
+    +id: Optional[int]
+    +node_id: str
+    +asset_type: str
+    +asset_name: str
+    +schema_name: Optional[str]
+    +database_name: Optional[str]
+    +data_source_id: Optional[int]
+    +parent_node_id: Optional[str]
+    +root_node_id: Optional[str]
+    +data_type: Optional[str]
+    +is_nullable: Optional[bool]
+    +default_value: Optional[str]
+    +column_position: Optional[int]
+    +classification_id: Optional[int]
+    +classification: Optional[DataClassification]
+    +sensitivity_level: Optional[str]
+    +business_name: Optional[str]
+    +description: Optional[str]
+    +business_glossary_id: Optional[int]
+    +data_steward: Optional[str]
+    +physical_location: Optional[str]
+    +partitioning_info: Optional[Dict[str, Any]]
+    +indexing_info: Optional[Dict[str, Any]]
+    +quality_score: Optional[float]
+    +usage_frequency: Optional[int]
+    +last_accessed: Optional[datetime]
+    +created_at: datetime
+    +updated_at: datetime
+    +created_by: str
+    +custom_properties: Optional[Dict[str, Any]]
+    +tags: Optional[str]
+    +outgoing_edges: List['DataLineageEdge']
+    +incoming_edges: List['DataLineageEdge']
+    +__table_args__: 
+  }
+  class TagStats {
+    +total_tags: int
+    +active_tags: int
+    +system_tags: int
+    +user_tags: int
+    +automated_tags: int
+    +total_assignments: int
+    +most_used_tags: List[Dict[str, Any]]
+    +recent_tags: List[TagResponse]
+    +categories_count: int
+  }
+  class CatalogUsageLog {
+    +__tablename__: 
+    +id: Optional[int]
+    +catalog_item_id: int
+    +user_id: Optional[str]
+    +query_text: Optional[str]
+    +operation_type: str
+    +response_time_ms: Optional[int]
+    +rows_returned: Optional[int]
+    +accessed_at: datetime
+    +catalog_item: Optional[CatalogItem]
+  }
+  class TagCategoryResponse {
+    +id: int
+    +name: str
+    +description: Optional[str]
+    +color: str
+    +parent_id: Optional[int]
+    +sort_order: int
+    +is_active: bool
+    +created_by: str
+    +created_at: datetime
+    +updated_at: datetime
+    +tags: List[TagResponse]
+  }
+  class CatalogQualityRule {
+    +__tablename__: 
+    +id: Optional[int]
+    +catalog_item_id: int
+    +name: str
+    +description: Optional[str]
+    +rule_type: str
+    +rule_expression: str
+    +threshold: float
+    +is_active: bool
+    +last_executed: Optional[datetime]
+    +last_score: Optional[float]
+    +catalog_item: Optional[CatalogItem]
+    +created_at: datetime
+    +updated_at: datetime
+    +created_by: Optional[str]
+  }
+  class RacineStageExecution {
+    +__tablename__: 
+    +id: 
+    +status: 
+    +started_at: 
+    +completed_at: 
+    +duration_seconds: 
+    +stage_input: 
+    +stage_output: 
+    +optimization_applied: 
+    +performance_metrics: 
+    +data_lineage: 
+    +error_message: 
+    +input_data: 
+    +output_data: 
+    +records_processed: 
+    +records_failed: 
+    +data_quality_metrics: 
+    +resource_usage: 
+    +throughput_metrics: 
+    +bottlenecks_detected: 
+    +quality_check_results: 
+    +compliance_validation_results: 
+    +validation_errors: 
+    +execution_logs: 
+    +error_details: 
+    +retry_attempts: 
+    +retry_reason: 
+    +recovery_actions: 
+    +performance_improvement: 
+    +ai_recommendations_generated: 
+    +pipeline_execution_id: 
+    +pipeline_stage_id: 
+    +pipeline_execution: 
+    +pipeline_stage: 
+  }
+  class RacinePipelineStage {
+    +__tablename__: 
+    +id: 
+    +stage_name: 
+    +stage_type: 
+    +stage_order: 
+    +description: 
+    +stage_configuration: 
+    +input_schema: 
+    +output_schema: 
+    +transformation_logic: 
+    +depends_on_stages: 
+    +conditional_logic: 
+    +parallel_group_id: 
+    +branching_conditions: 
+    +target_group: 
+    +target_service: 
+    +target_operation: 
+    +group_specific_config: 
+    +expected_duration: 
+    +resource_requirements: 
+    +scaling_configuration: 
+    +optimization_hints: 
+    +quality_checks: 
+    +validation_rules: 
+    +compliance_checks: 
+    +error_thresholds: 
+    +retry_policy: 
+    +timeout_seconds: 
+    +on_failure_action: 
+    +error_handling_stages: 
+    +ai_optimization_enabled: 
+    +optimization_priorities: 
+    +learning_data: 
+    +pipeline_id: 
+    +created_at: 
+    +updated_at: 
+    +pipeline: 
+    +stage_executions: 
+  }
+  class AssetUsageMetrics {
+    +__tablename__: 
+    +id: Optional[int]
+    +metric_id: str
+    +asset_id: int
+    +metric_date: datetime
+    +period_type: str
+    +period_start: datetime
+    +period_end: datetime
+    +total_accesses: int
+    +unique_users: int
+    +unique_sessions: int
+    +read_operations: int
+    +write_operations: int
+    +query_count: int
+    +avg_response_time: Optional[float]
+    +max_response_time: Optional[float]
+    +min_response_time: Optional[float]
+    +total_processing_time: Optional[float]
+    +throughput_records_per_second: Optional[float]
+    +bytes_read: int
+    +bytes_written: int
+    +records_processed: int
+    +peak_concurrent_users: int
+    +error_count: int
+    +error_rate: float
+    +timeout_count: int
+    +success_rate: float
+    +user_segments: Dict[str, int]
+    +access_patterns: Dict[str, Any]
+    +peak_usage_hours: List[int]
+    +popular_queries: List[Dict[str, Any]]
+    +business_value_generated: Optional[float]
+    +cost_savings: Optional[float]
+    +revenue_impact: Optional[float]
+    +productivity_improvement: Optional[float]
+    +usage_trend: str
+    +growth_rate: Optional[float]
+    +seasonality_pattern: Dict[str, Any]
+    +anomaly_detected: bool
+    +cpu_usage_avg: Optional[float]
+    +memory_usage_avg: Optional[float]
+    +storage_usage_gb: Optional[float]
+    +network_io_mb: Optional[float]
+    +predicted_next_period: Dict[str, Any]
+    +forecast_confidence: float
+    +capacity_recommendations: List[str]
+    +created_at: datetime
+    +calculation_timestamp: datetime
+    +asset: Optional[IntelligentDataAsset]
+    +__table_args__: 
+  }
+  class AssetRecommendation {
+    +__tablename__: 
+    +id: Optional[int]
+    +recommendation_id: str
+    +user_id: str
+    +session_id: Optional[str]
+    +context_asset_id: Optional[str]
+    +recommended_asset_id: str
+    +recommendation_type: RecommendationType
+    +engine_id: str
+    +relevance_score: float
+    +confidence_score: float
+    +business_value_score: float
+    +quality_score: float
+    +final_score: float
+    +rank_position: int
+    +reasoning_factors: Optional[str]
+    +explanation_text: Optional[str]
+    +supporting_evidence: Optional[Dict[str, Any]]
+    +was_presented: bool
+    +presentation_date: Optional[datetime]
+    +was_clicked: bool
+    +click_date: Optional[datetime]
+    +was_used: bool
+    +usage_date: Optional[datetime]
+    +user_rating: Optional[int]
+    +feedback_text: Optional[str]
+    +feedback_date: Optional[datetime]
+    +is_helpful: Optional[bool]
+    +recommendation_context: Optional[Dict[str, Any]]
+    +user_context: Optional[Dict[str, Any]]
+    +created_at: datetime
+    +expires_at: Optional[datetime]
+    +engine: Optional[RecommendationEngine]
+    +__table_args__: 
+  }
+  class CatalogSearchRequest {
+    +query: Optional[str]
+    +type_filter: Optional[CatalogItemType]
+    +classification_filter: Optional[DataClassification]
+    +owner_filter: Optional[str]
+    +tag_filter: Optional[List[str]]
+    +min_quality_score: Optional[float]
+    +limit: int
+    +offset: int
+  }
+  class LineageGraphResponse {
+    +nodes: List[Dict[str, Any]]
+    +edges: List[Dict[str, Any]]
+    +total_nodes: int
+    +total_edges: int
+    +depth_levels: int
+    +has_more: bool
+    +query_metadata: Dict[str, Any]
+  }
+  class CatalogItemResponse {
+    +id: int
+    +name: str
+    +type: CatalogItemType
+    +description: Optional[str]
+    +classification: DataClassification
+    +owner: Optional[str]
+    +quality_score: float
+    +popularity_score: float
+    +row_count: Optional[int]
+    +column_count: Optional[int]
+    +query_count: int
+    +user_count: int
+    +avg_response_time: Optional[float]
+    +data_source_id: int
+    +created_at: datetime
+    +updated_at: datetime
+    +last_accessed: Optional[datetime]
+    +tags: List[str]
+  }
+  class LineageGraph {
+    +graph_id: str
+    +root_asset_id: int
+    +direction: LineageDirection
+    +max_depth: int
+    +nodes: List[Dict[str, Any]]
+    +edges: List[Dict[str, Any]]
+    +graph_metrics: Dict[str, float]
+    +critical_paths: List[List[int]]
+    +bottlenecks: List[int]
+    +impact_analysis: Dict[str, Any]
+    +complexity_score: float
+  }
+  class Tag {
+    +__tablename__: 
+    +id: Optional[int]
+    +name: str
+    +display_name: Optional[str]
+    +description: Optional[str]
+    +color: str
+    +tag_type: TagType
+    +scope: TagScope
+    +category_id: Optional[int]
+    +icon: Optional[str]
+    +tag_metadata: Dict[str, Any]
+    +is_active: bool
+    +usage_count: int
+    +last_used: Optional[datetime]
+    +created_by: str
+    +created_at: datetime
+    +updated_at: datetime
+  }
+  class TagUpdate {
+    +name: Optional[str]
+    +display_name: Optional[str]
+    +description: Optional[str]
+    +color: Optional[str]
+    +tag_type: Optional[TagType]
+    +scope: Optional[TagScope]
+    +category_id: Optional[int]
+    +icon: Optional[str]
+    +tag_metadata: Optional[Dict[str, Any]]
+    +is_active: Optional[bool]
+  }
+  class LineageResponse {
+    +id: int
+    +lineage_id: str
+    +lineage_type: LineageType
+    +confidence_score: float
+    +source_asset_id: int
+    +target_asset_id: int
+    +source_asset_name: Optional[str]
+    +target_asset_name: Optional[str]
+    +transformation_logic: Optional[str]
+    +transformation_type: str
+    +column_mappings: Dict[str, List[str]]
+    +downstream_impact_score: float
+    +critical_path: bool
+    +business_impact: str
+    +is_active: bool
+    +last_validated: Optional[datetime]
+    +created_at: datetime
+  }
+  class CatalogTagResponse {
+    +id: int
+    +name: str
+    +color: Optional[str]
+    +description: Optional[str]
+    +category: Optional[str]
+    +created_at: datetime
+    +created_by: Optional[str]
+    +usage_count: int
+  }
+  class CatalogItemUpdate {
+    +name: Optional[str]
+    +description: Optional[str]
+    +classification: Optional[DataClassification]
+    +owner: Optional[str]
+    +quality_score: Optional[float]
+    +popularity_score: Optional[float]
+  }
+  class DataLineageResponse {
+    +id: int
+    +source_item_id: int
+    +target_item_id: int
+    +lineage_type: str
+    +transformation_logic: Optional[str]
+    +confidence_score: float
+    +created_at: datetime
+    +last_accessed: Optional[datetime]
+    +created_by: Optional[str]
+    +source_item_name: Optional[str]
+    +target_item_name: Optional[str]
+  }
+  class AssetCreateRequest {
+    +qualified_name: str
+    +display_name: str
+    +description: Optional[str]
+    +asset_type: AssetType
+    +asset_criticality: AssetCriticality
+    +data_sensitivity: DataSensitivity
+    +data_source_id: int
+    +racine_orchestrator_id: Optional[str]
+    +database_name: Optional[str]
+    +schema_name: Optional[str]
+    +table_name: Optional[str]
+    +business_domain: Optional[str]
+    +business_purpose: Optional[str]
+    +owner: Optional[str]
+    +steward: Optional[str]
+    +user_tags: Optional[List[str]]
+    +custom_properties: Optional[Dict[str, Any]]
+  }
+  class AssetReview {
+    +__tablename__: 
+    +id: Optional[int]
+    +engine_id: int
+    +asset_id: str
+    +review_type: ReviewType
+    +config: Dict[str, Any]
+    +requester_id: str
+    +requester_name: str
+    +review_items: List[Dict[str, Any]]
+    +criteria: List[Dict[str, Any]]
+    +status: ReviewStatus
+    +progress: Dict[str, Any]
+    +results: List[Dict[str, Any]]
+    +decision: Optional[str]
+    +decision_rationale: Optional[str]
+    +timeline: Dict[str, Any]
+    +due_date: Optional[datetime]
+    +escalation_date: Optional[datetime]
+    +metrics: Dict[str, Any]
+    +created_at: datetime
+    +updated_at: datetime
+    +completed_at: Optional[datetime]
+    +engine: Optional['ReviewWorkflowEngine']
+    +review_assignments: List['ReviewAssignment']
+    +comments: List['ReviewComment']
+  }
+  class BusinessGlossaryResponse {
+    +id: int
+    +term_id: str
+    +term_name: str
+    +display_name: str
+    +short_description: str
+    +category: str
+    +domain: str
+    +synonyms: List[str]
+    +status: str
+    +popularity_score: float
+    +definition_quality_score: float
+    +owner: Optional[str]
+    +expert_validated: bool
+    +usage_frequency: int
+    +association_count: int
+    +created_at: datetime
+    +updated_at: datetime
+  }
+  class CatalogTag {
+    +__tablename__: 
+    +id: Optional[int]
+    +name: str
+    +color: Optional[str]
+    +description: Optional[str]
+    +category: Optional[str]
+    +created_at: datetime
+    +created_by: Optional[str]
+  }
+  class TagAssignRequest {
+    +tag_ids: List[int]
+    +context: Optional[str]
+  }
+  class LineageVisualizationConfig {
+    +__tablename__: 
+    +id: Optional[int]
+    +config_id: str
+    +config_name: str
+    +layout_algorithm: str
+    +max_depth: int
+    +max_nodes: int
+    +show_column_lineage: bool
+    +show_transformation_details: bool
+    +node_styling: Dict[str, Any]
+    +edge_styling: Dict[str, Any]
+    +asset_type_filters: Optional[str]
+    +confidence_threshold: float
+    +exclude_system_processes: bool
+    +enable_clustering: bool
+    +cluster_threshold: int
+    +lazy_loading: bool
+    +created_by: str
+    +is_public: bool
+    +is_default: bool
+    +created_at: datetime
+    +updated_at: datetime
+  }
+  class LineageMetrics {
+    +__tablename__: 
+    +id: Optional[int]
+    +metric_id: str
+    +node_id: Optional[str]
+    +edge_id: Optional[str]
+    +metric_scope: str
+    +metric_name: str
+    +metric_value: float
+    +metric_unit: Optional[str]
+    +metric_category: str
+    +measurement_date: datetime
+    +measurement_period: Optional[str]
+    +previous_value: Optional[float]
+    +baseline_value: Optional[float]
+    +target_value: Optional[float]
+    +is_within_threshold: Optional[bool]
+    +alert_threshold: Optional[float]
+    +custom_properties: Optional[Dict[str, Any]]
+    +__table_args__: 
+  }
+  class CatalogItemTag {
+    +__tablename__: 
+    +catalog_item_id: int
+    +tag_id: int
+    +created_at: datetime
+    +created_by: Optional[str]
+  }
+  class AssetUpdateRequest {
+    +display_name: Optional[str]
+    +description: Optional[str]
+    +asset_criticality: Optional[AssetCriticality]
+    +data_sensitivity: Optional[DataSensitivity]
+    +business_domain: Optional[str]
+    +business_purpose: Optional[str]
+    +owner: Optional[str]
+    +steward: Optional[str]
+    +user_tags: Optional[List[str]]
+    +custom_properties: Optional[Dict[str, Any]]
+  }
+  class AssetUsagePattern {
+    +__tablename__: 
+    +id: Optional[int]
+    +pattern_id: str
+    +asset_id: str
+    +asset_type: str
+    +usage_pattern: UsagePattern
+    +pattern_confidence: AnalysisConfidence
+    +pattern_strength: float
+    +analysis_period_start: datetime
+    +analysis_period_end: datetime
+    +pattern_frequency: Optional[str]
+    +total_accesses: int
+    +unique_users: int
+    +unique_applications: int
+    +peak_usage_time: Optional[str]
+    +average_session_duration: Optional[float]
+    +average_query_time: Optional[float]
+    +data_volume_accessed: Optional[int]
+    +error_rate: Optional[float]
+    +user_segments: Optional[Dict[str, Any]]
+    +access_patterns: Optional[Dict[str, Any]]
+    +collaboration_patterns: Optional[Dict[str, Any]]
+    +business_value_score: Optional[float]
+    +criticality_score: Optional[float]
+    +optimization_opportunities: Optional[str]
+    +predicted_future_usage: Optional[Dict[str, Any]]
+    +trend_direction: Optional[str]
+    +seasonality_factors: Optional[Dict[str, Any]]
+    +analysis_algorithm: str
+    +analysis_version: str
+    +analysis_date: datetime
+    +created_at: datetime
+    +updated_at: datetime
+    +custom_properties: Optional[Dict[str, Any]]
+    +__table_args__: 
+  }
+  class CatalogItemCreate {
+    +name: str
+    +type: CatalogItemType
+    +description: Optional[str]
+    +schema_name: Optional[str]
+    +table_name: Optional[str]
+    +column_name: Optional[str]
+    +classification: DataClassification
+    +owner: Optional[str]
+    +data_source_id: int
+    +parent_id: Optional[int]
+  }
+  class TagCategory {
+    +__tablename__: 
+    +id: Optional[int]
+    +name: str
+    +description: Optional[str]
+    +color: str
+    +parent_id: Optional[int]
+    +sort_order: int
+    +is_active: bool
+    +created_by: str
+    +created_at: datetime
+    +updated_at: datetime
+  }
+  class StageResponse {
+    +stage_id: str
+    +stage_name: str
+    +stage_type: StageType
+    +status: StageStatus
+    +progress_percentage: float
+    +stage_order: int
+    +started_at: Optional[datetime]
+    +completed_at: Optional[datetime]
+  }
+  class TagUsage {
+    +__tablename__: 
+    +id: Optional[int]
+    +tag_id: int
+    +used_by: str
+    +action: str
+    +resource_type: str
+    +resource_id: str
+    +context: Optional[str]
+    +usage_metadata: Dict[str, Any]
+    +created_at: datetime
+  }
+  class BusinessGlossaryTerm {
+    +__tablename__: 
+    +id: Optional[int]
+    +term_id: str
+    +term_name: str
+    +display_name: str
+    +short_description: str
+    +detailed_description: Optional[str]
+    +category: str
+    +subcategory: Optional[str]
+    +domain: str
+    +parent_term_id: Optional[int]
+    +hierarchy_level: int
+    +term_type: str
+    +status: str
+    +maturity_level: str
+    +synonyms: List[str]
+    +acronyms: List[str]
+    +alternative_names: List[str]
+    +semantic_embedding: Optional[List[float]]
+    +semantic_tags: List[str]
+    +business_definition: Optional[str]
+    +technical_definition: Optional[str]
+    +calculation_logic: Optional[str]
+    +business_rules: List[str]
+    +usage_examples: List[str]
+    +related_terms: List[str]
+    +opposite_terms: List[str]
+    +broader_terms: List[str]
+    +narrower_terms: List[str]
+    +see_also: List[str]
+    +associated_data_types: List[str]
+    +common_patterns: List[str]
+    +validation_rules: List[str]
+    +usage_frequency: int
+    +search_frequency: int
+    +association_count: int
+    +popularity_score: float
+    +relevance_score: float
+    +definition_quality_score: float
+    +completeness_score: float
+    +consistency_score: float
+    +expert_validated: bool
+    +community_validated: bool
+    +ai_suggested: bool
+    +ai_confidence_score: float
+    +auto_generated_synonyms: List[str]
+    +ml_topic_classification: List[str]
+    +owner: Optional[str]
+    +steward: Optional[str]
+    +subject_matter_expert: Optional[str]
+    +approver: Optional[str]
+    +approval_date: Optional[datetime]
+    +review_cycle_months: int
+    +next_review_date: Optional[datetime]
+    +version: str
+    +version_history: List[Dict[str, Any]]
+    +change_reason: Optional[str]
+    +deprecation_reason: Optional[str]
+    +replacement_term_id: Optional[str]
+    +external_references: List[Dict[str, str]]
+    +regulatory_references: List[str]
+    +industry_standards: List[str]
+    +documentation_links: List[str]
+    +custom_attributes: Dict[str, Any]
+    +industry_specific_info: Dict[str, Any]
+    +created_at: datetime
+    +updated_at: datetime
+    +last_reviewed: Optional[datetime]
+    +created_by: Optional[str]
+    +updated_by: Optional[str]
+    +parent_term: Optional['BusinessGlossaryTerm']
+    +child_terms: List['BusinessGlossaryTerm']
+    +asset_associations: List['BusinessGlossaryAssociation']
+    +__table_args__: 
+  }
+  class WorkspaceAsset {
+    +__tablename__: 
+    +id: Optional[int]
+    +workspace_id: int
+    +asset_id: str
+    +asset_type: str
+    +asset_name: str
+    +config: Dict[str, Any]
+    +permissions: Dict[str, Any]
+    +added_at: datetime
+    +last_accessed: datetime
+    +workspace: Optional['CollaborationWorkspace']
+  }
+  class StageCreate {
+    +stage_name: str
+    +stage_type: StageType
+    +stage_order: int
+    +depends_on: Optional[List[str]]
+    +parameters: Optional[Dict[str, Any]]
+    +timeout_minutes: int
+    +is_critical: bool
+  }
+  class CatalogWorkspaceMember {
+    +__tablename__: 
+    +id: Optional[int]
+    +workspace_id: int
+    +user_id: str
+    +role: str
+    +permissions: Dict[str, Any]
+    +joined_at: datetime
+    +last_active: datetime
+    +workspace: Optional['CollaborationWorkspace']
+  }
+  class CatalogCollaborationHub {
+    +__tablename__: 
+    +id: Optional[int]
+    +name: str
+    +description: Optional[str]
+    +config: Dict[str, Any]
+    +governance_enabled: bool
+    +auto_approval_rules: Dict[str, Any]
+    +escalation_rules: Dict[str, Any]
+    +analytics_config: Dict[str, Any]
+    +is_active: bool
+    +created_at: datetime
+    +updated_at: datetime
+    +teams: List['CollaborationTeam']
+    +workspaces: List['CollaborationWorkspace']
+    +activities: List['CollaborationActivity']
+  }
+  class LineageImpactAnalysis {
+    +__tablename__: 
+    +id: Optional[int]
+    +analysis_id: str
+    +source_node_id: str
+    +change_type: str
+    +change_description: Optional[str]
+    +total_downstream_assets: int
+    +critical_assets_affected: int
+    +reports_affected: int
+    +dashboards_affected: int
+    +ml_models_affected: int
+    +overall_risk_score: float
+    +business_impact_score: float
+    +technical_complexity_score: float
+    +affected_assets: List[Dict[str, Any]]
+    +critical_path_assets: Optional[str]
+    +recommended_actions: Optional[str]
+    +mitigation_strategies: Optional[Dict[str, Any]]
+    +estimated_effort_hours: Optional[int]
+    +affected_teams: Optional[str]
+    +notification_list: Optional[str]
+    +approvers_required: Optional[str]
+    +analysis_date: datetime
+    +analyst: str
+    +analysis_version: str
+    +confidence_score: float
+    +status: str
+    +approval_date: Optional[datetime]
+    +implementation_date: Optional[datetime]
+    +custom_properties: Optional[Dict[str, Any]]
+    +__table_args__: 
+  }
+  class AssetDiscoveryEvent {
+    +discovery_id: str
+    +asset_uuid: str
+    +discovery_method: DiscoveryMethod
+    +discovery_timestamp: datetime
+    +confidence_score: float
+    +metadata_extracted: Dict[str, Any]
+    +quality_indicators: Dict[str, float]
+    +business_relevance: float
+    +recommendations: List[str]
+  }
+  class CatalogAnalytics {
+    +analytics_id: str
+    +generated_at: datetime
+    +total_assets: int
+    +assets_by_type: Dict[AssetType, int]
+    +coverage_by_source: Dict[int, Dict[str, int]]
+    +quality_distribution: Dict[DataQuality, int]
+    +high_value_assets: int
+    +business_critical_assets: int
+    +total_business_value: float
+    +avg_business_value: float
+    +most_accessed_assets: List[Dict[str, Any]]
+    +usage_trends: Dict[str, List[float]]
+    +user_engagement_metrics: Dict[str, float]
+    +quality_trends: Dict[str, List[float]]
+    +common_issues: List[Dict[str, Any]]
+    +improvement_opportunities: List[str]
+    +pii_asset_count: int
+    +compliance_coverage: Dict[str, int]
+    +risk_assessment: Dict[str, Any]
+  }
+  class AssetSearchRequest {
+    +query: Optional[str]
+    +asset_types: Optional[List[AssetType]]
+    +asset_statuses: Optional[List[AssetStatus]]
+    +criticality_levels: Optional[List[AssetCriticality]]
+    +sensitivity_levels: Optional[List[DataSensitivity]]
+    +business_domains: Optional[List[str]]
+    +data_source_ids: Optional[List[int]]
+    +owners: Optional[List[str]]
+    +stewards: Optional[List[str]]
+    +tags: Optional[List[str]]
+    +min_quality_score: Optional[float]
+    +min_business_value: Optional[float]
+    +has_pii: Optional[bool]
+    +discovered_after: Optional[datetime]
+    +last_accessed_after: Optional[datetime]
+  }
+  class IntelligentAssetResponse {
+    +id: int
+    +asset_uuid: str
+    +qualified_name: str
+    +display_name: str
+    +description: Optional[str]
+    +asset_type: AssetType
+    +asset_status: AssetStatus
+    +asset_criticality: AssetCriticality
+    +data_sensitivity: DataSensitivity
+    +quality_score: float
+    +quality_level: DataQuality
+    +business_value_score: float
+    +health_score: float
+    +discovery_method: DiscoveryMethod
+    +discovered_at: datetime
+    +last_profiled: Optional[datetime]
+    +usage_frequency: UsageFrequency
+    +last_accessed: Optional[datetime]
+    +access_count_daily: int
+    +unique_users_count: int
+    +owner: Optional[str]
+    +steward: Optional[str]
+    +business_domain: Optional[str]
+    +pii_detected: bool
+    +compliance_score: float
+    +compliance_requirements: List[str]
+    +ai_confidence_score: float
+    +semantic_tags: List[str]
+    +created_at: datetime
+    +updated_at: datetime
+  }
+  class TagCreate {
+    +name: str
+    +display_name: Optional[str]
+    +description: Optional[str]
+    +color: str
+    +tag_type: TagType
+    +scope: TagScope
+    +category_id: Optional[int]
+    +icon: Optional[str]
+    +tag_metadata: Dict[str, Any]
+  }
+  class CatalogStats {
+    +total_items: int
+    +items_by_type: Dict[str, int]
+    +items_by_classification: Dict[str, int]
+    +avg_quality_score: float
+    +total_queries: int
+    +unique_users: int
+    +last_updated: Optional[datetime]
+  }
+  class TagRule {
+    +__tablename__: 
+    +id: Optional[int]
+    +tag_id: int
+    +name: str
+    +description: Optional[str]
+    +conditions: Dict[str, Any]
+    +is_active: bool
+    +priority: int
+    +last_executed: Optional[datetime]
+    +execution_count: int
+    +matches_count: int
+    +created_by: str
+    +created_at: datetime
+    +updated_at: datetime
+  }
+  class LineageEdgeCreate {
+    +edge_id: str
+    +source_node_id: str
+    +target_node_id: str
+    +lineage_type: LineageType
+    +transformation_type: Optional[TransformationType]
+    +confidence_level: LineageConfidence
+    +transformation_logic: Optional[str]
+    +process_name: Optional[str]
+    +business_rule: Optional[str]
+    +custom_properties: Optional[Dict[str, Any]]
+  }
+  class LineageNodeCreate {
+    +node_id: str
+    +asset_type: str
+    +asset_name: str
+    +schema_name: Optional[str]
+    +database_name: Optional[str]
+    +data_source_id: Optional[int]
+    +parent_node_id: Optional[str]
+    +classification_id: Optional[int]
+    +business_name: Optional[str]
+    +description: Optional[str]
+    +custom_properties: Optional[Dict[str, Any]]
+    +tags: Optional[List[str]]
+  }
+  class TagResponse {
+    +id: int
+    +name: str
+    +display_name: Optional[str]
+    +description: Optional[str]
+    +color: str
+    +tag_type: TagType
+    +scope: TagScope
+    +category_id: Optional[int]
+    +icon: Optional[str]
+    +tag_metadata: Dict[str, Any]
+    +is_active: bool
+    +usage_count: int
+    +last_used: Optional[datetime]
+    +created_by: str
+    +created_at: datetime
+    +updated_at: datetime
+  }
+  class CatalogItem {
+    +__tablename__: 
+    +id: Optional[int]
+    +name: str
+    +type: CatalogItemType
+    +description: Optional[str]
+    +schema_name: Optional[str]
+    +table_name: Optional[str]
+    +column_name: Optional[str]
+    +classification: DataClassification
+    +owner: Optional[str]
+    +steward: Optional[str]
+    +quality_score: float
+    +popularity_score: float
+    +data_type: Optional[str]
+    +size_bytes: Optional[int]
+    +row_count: Optional[int]
+    +column_count: Optional[int]
+    +null_percentage: Optional[float]
+    +unique_values: Optional[int]
+    +min_value: Optional[str]
+    +max_value: Optional[str]
+    +avg_value: Optional[str]
+    +query_count: int
+    +user_count: int
+    +avg_response_time: Optional[float]
+    +parent_id: Optional[int]
+    +parent: Optional['CatalogItem']
+    +children: List['CatalogItem']
+    +organization_id: Optional[int]
+    +organization: Optional['Organization']
+    +data_source_id: int
+    +data_source: Optional['DataSource']
+    +created_at: datetime
+    +updated_at: datetime
+    +last_accessed: Optional[datetime]
+    +created_by: Optional[str]
+    +updated_by: Optional[str]
+  }
+  IntelligentDataAsset "1" --> "0..*" AssetUsageMetrics
+  IntelligentDataAsset "1" --> "0..*" EnterpriseDataLineage
+  DataLineageEdge "1" --> "0..*" DataLineageNode
+  DataLineage "1" --> "0..*" CatalogItem
+  RacinePipelineStage "1" --> "0..*" RacineStageExecution
+  TagCategoryResponse "1" --> "0..*" TagResponse
+  TagStats "1" --> "0..*" TagResponse
+  CatalogQualityRule "1" --> "0..*" CatalogItem
+  CatalogUsageLog "1" --> "0..*" CatalogItem
+  IntelligentDataAsset ..> AssetRecommendation
+  IntelligentDataAsset ..> CatalogSearchRequest
+  IntelligentDataAsset ..> LineageGraphResponse
+  IntelligentDataAsset ..> CatalogItemResponse
+  IntelligentDataAsset ..> LineageGraph
+  IntelligentDataAsset ..> Tag
+  IntelligentDataAsset ..> TagUpdate
+  IntelligentDataAsset ..> LineageResponse
+  IntelligentDataAsset ..> CatalogTagResponse
+  IntelligentDataAsset ..> CatalogItemUpdate
+  IntelligentDataAsset ..> DataLineageResponse
+  IntelligentDataAsset ..> AssetCreateRequest
+  IntelligentDataAsset ..> AssetReview
+  IntelligentDataAsset ..> BusinessGlossaryResponse
+  IntelligentDataAsset ..> CatalogTag
+  IntelligentDataAsset ..> TagAssignRequest
+  IntelligentDataAsset ..> LineageVisualizationConfig
+  IntelligentDataAsset ..> LineageMetrics
+  IntelligentDataAsset ..> CatalogItemTag
+  IntelligentDataAsset ..> AssetUpdateRequest
+  IntelligentDataAsset ..> AssetUsagePattern
+  IntelligentDataAsset ..> CatalogItemCreate
+  IntelligentDataAsset ..> TagCategory
+  IntelligentDataAsset ..> StageResponse
+  IntelligentDataAsset ..> TagUsage
+  IntelligentDataAsset ..> BusinessGlossaryTerm
+  IntelligentDataAsset ..> WorkspaceAsset
+  IntelligentDataAsset ..> StageCreate
+  IntelligentDataAsset ..> CatalogWorkspaceMember
+  IntelligentDataAsset ..> CatalogCollaborationHub
+  IntelligentDataAsset ..> LineageImpactAnalysis
+  IntelligentDataAsset ..> AssetDiscoveryEvent
+  IntelligentDataAsset ..> CatalogAnalytics
+  IntelligentDataAsset ..> AssetSearchRequest
+  IntelligentDataAsset ..> IntelligentAssetResponse
+  IntelligentDataAsset ..> TagCreate
+  IntelligentDataAsset ..> CatalogStats
+  IntelligentDataAsset ..> TagRule
+  IntelligentDataAsset ..> LineageEdgeCreate
+  IntelligentDataAsset ..> LineageNodeCreate
+  classDef domain fill:#F8FAFF,stroke:#111827,color:#111827
+  class AssetCreateRequest,AssetDiscoveryEvent,AssetRecommendation,AssetReview,AssetSearchRequest,AssetUpdateRequest,AssetUsageMetrics,AssetUsagePattern,BusinessGlossaryResponse,BusinessGlossaryTerm,CatalogAnalytics,CatalogCollaborationHub,CatalogItem,CatalogItemCreate,CatalogItemResponse,CatalogItemTag,CatalogItemUpdate,CatalogQualityRule,CatalogSearchRequest,CatalogStats,CatalogTag,CatalogTagResponse,CatalogUsageLog,CatalogWorkspaceMember,DataLineage,DataLineageEdge,DataLineageNode,DataLineageResponse,EnterpriseDataLineage,IntelligentAssetResponse,IntelligentDataAsset,LineageEdgeCreate,LineageGraph,LineageGraphResponse,LineageImpactAnalysis,LineageMetrics,LineageNodeCreate,LineageResponse,LineageVisualizationConfig,RacinePipelineStage,RacineStageExecution,StageCreate,StageResponse,Tag,TagAssignRequest,TagCategory,TagCategoryResponse,TagCreate,TagResponse,TagRule,TagStats,TagUpdate,TagUsage,WorkspaceAsset domain

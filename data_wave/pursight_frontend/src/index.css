@@ -911,3 +911,401 @@ span.flatpickr-weekday,
   }
 }
 
+/* ========================================
+   🎯 ADVANCED CURSOR SYSTEM - ENTERPRISE GRADE
+   ======================================== */
+
+/* Base cursor reset */
+* {
+  cursor: auto;
+}
+
+/* ========================================
+   🖱️ INTERACTIVE CURSORS
+   ======================================== */
+
+/* Primary Interactive Elements */
+button:not(:disabled),
+[role="button"]:not(:disabled),
+.cursor-pointer,
+a:not([disabled]),
+input[type="submit"]:not(:disabled),
+input[type="button"]:not(:disabled),
+select:not(:disabled) {
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Enhanced Button Hover States */
+button:not(:disabled):hover,
+[role="button"]:not(:disabled):hover,
+.cursor-pointer:hover {
+  cursor: pointer;
+  transform: translateY(-1px);
+}
+
+/* ========================================
+   📝 TEXT & INPUT CURSORS
+   ======================================== */
+
+/* Text Selection Areas */
+input[type="text"]:not(:disabled),
+input[type="email"]:not(:disabled),
+input[type="password"]:not(:disabled),
+input[type="search"]:not(:disabled),
+input[type="url"]:not(:disabled),
+input[type="tel"]:not(:disabled),
+textarea:not(:disabled),
+[contenteditable="true"],
+.cursor-text {
+  cursor: text;
+}
+
+/* Number Inputs */
+input[type="number"]:not(:disabled),
+input[type="range"]:not(:disabled) {
+  cursor: pointer;
+}
+
+/* ========================================
+   🎯 SPECIALIZED CURSORS
+   ======================================== */
+
+/* Drag & Drop */
+.cursor-grab,
+[draggable="true"]:not([draggable="false"]) {
+  cursor: grab;
+}
+
+.cursor-grabbing,
+[draggable="true"]:active {
+  cursor: grabbing;
+}
+
+/* Resize Elements */
+.cursor-resize,
+.resize-handle {
+  cursor: nw-resize;
+}
+
+.cursor-col-resize {
+  cursor: col-resize;
+}
+
+.cursor-row-resize {
+  cursor: row-resize;
+}
+
+/* Help & Info */
+.cursor-help,
+[title]:not([title=""]),
+.tooltip-trigger {
+  cursor: help;
+}
+
+/* Loading States */
+.cursor-wait,
+.loading,
+[aria-busy="true"] {
+  cursor: wait;
+}
+
+.cursor-progress {
+  cursor: progress;
+}
+
+/* ========================================
+   🚫 DISABLED & RESTRICTED CURSORS
+   ======================================== */
+
+/* Disabled Elements */
+:disabled,
+[disabled],
+[aria-disabled="true"],
+.cursor-not-allowed {
+  cursor: not-allowed !important;
+  opacity: 0.6;
+}
+
+/* Read-only Elements */
+[readonly],
+.cursor-default {
+  cursor: default;
+}
+
+/* ========================================
+   🎨 CONTEXT-SPECIFIC CURSORS
+   ======================================== */
+
+/* Navigation Elements */
+.nav-link,
+.breadcrumb-item a,
+.pagination a {
+  cursor: pointer;
+}
+
+/* Form Controls */
+.form-check-input,
+.form-radio-input,
+input[type="checkbox"],
+input[type="radio"] {
+  cursor: pointer;
+}
+
+/* File Upload */
+input[type="file"] {
+  cursor: pointer;
+}
+
+.file-drop-zone {
+  cursor: copy;
+}
+
+/* ========================================
+   📊 DATA VISUALIZATION CURSORS
+   ======================================== */
+
+/* Charts & Graphs */
+.chart-element,
+.graph-node,
+.data-point {
+  cursor: crosshair;
+}
+
+.chart-zoom {
+  cursor: zoom-in;
+}
+
+.chart-pan {
+  cursor: move;
+}
+
+/* ========================================
+   🔧 UTILITY CURSORS
+   ======================================== */
+
+/* Copy Actions */
+.cursor-copy,
+.copy-button {
+  cursor: copy;
+}
+
+/* Move Actions */
+.cursor-move,
+.sortable-item,
+.draggable-handle {
+  cursor: move;
+}
+
+/* Zoom Actions */
+.cursor-zoom-in,
+.zoomable:not(.zoomed) {
+  cursor: zoom-in;
+}
+
+.cursor-zoom-out,
+.zoomable.zoomed {
+  cursor: zoom-out;
+}
+
+/* ========================================
+   🎯 ADVANCED HOVER EFFECTS
+   ======================================== */
+
+/* Magnetic Cursor Effect for Important Buttons */
+.btn-primary,
+.btn-brand,
+.cta-button {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-primary:hover,
+.btn-brand:hover,
+.cta-button:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 10px 25px rgba(70, 95, 255, 0.3);
+}
+
+/* Ripple Effect on Click */
+.ripple-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple-effect::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.ripple-effect:active::before {
+  width: 300px;
+  height: 300px;
+}
+
+/* ========================================
+   🌟 PREMIUM CURSOR ANIMATIONS
+   ======================================== */
+
+/* Smooth Cursor Transitions */
+.smooth-cursor {
+  transition: cursor 0.2s ease-in-out;
+}
+
+/* Pulse Effect for Interactive Elements */
+@keyframes cursor-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.cursor-pulse:hover {
+  animation: cursor-pulse 1s infinite;
+}
+
+/* Glow Effect for Premium Elements */
+.cursor-glow:hover {
+  box-shadow: 
+    0 0 20px rgba(70, 95, 255, 0.4),
+    0 0 40px rgba(70, 95, 255, 0.2),
+    0 0 60px rgba(70, 95, 255, 0.1);
+  transition: box-shadow 0.3s ease-in-out;
+}
+
+/* ========================================
+   📱 RESPONSIVE CURSOR BEHAVIOR
+   ======================================== */
+
+/* Touch Device Optimizations */
+@media (hover: none) and (pointer: coarse) {
+  /* Remove hover effects on touch devices */
+  .cursor-pointer:hover,
+  button:hover,
+  [role="button"]:hover {
+    transform: none;
+  }
+  
+  /* Larger touch targets */
+  button,
+  [role="button"],
+  input[type="submit"],
+  input[type="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Fine Pointer (Mouse) Enhancements */
+@media (hover: hover) and (pointer: fine) {
+  /* Enhanced hover states for precise pointing devices */
+  .hover-lift:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  }
+  
+  .hover-scale:hover {
+    transform: scale(1.05);
+  }
+  
+  .hover-rotate:hover {
+    transform: rotate(5deg);
+  }
+}
+
+/* ========================================
+   🎨 THEME-AWARE CURSORS
+   ======================================== */
+
+/* Light Theme Cursors */
+:root {
+  --cursor-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --cursor-glow: rgba(70, 95, 255, 0.3);
+}
+
+/* Dark Theme Cursors */
+.dark {
+  --cursor-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --cursor-glow: rgba(70, 95, 255, 0.5);
+}
+
+/* ========================================
+   🔥 ENTERPRISE FEATURES
+   ======================================== */
+
+/* Context Menu Cursor */
+.context-menu-trigger {
+  cursor: context-menu;
+}
+
+/* Alias Cursor for Shortcuts */
+.shortcut-link,
+.alias-link {
+  cursor: alias;
+}
+
+/* Cell Cursor for Table Interactions */
+.table-cell-editable {
+  cursor: cell;
+}
+
+/* Vertical Text Cursor */
+.vertical-text {
+  cursor: vertical-text;
+}
+
+/* ========================================
+   🎯 ACCESSIBILITY ENHANCEMENTS
+   ======================================== */
+
+/* Focus Indicators with Cursor Changes */
+.focus-visible:focus-visible {
+  outline: 2px solid var(--color-brand-500);
+  outline-offset: 2px;
+  cursor: pointer;
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  button:hover,
+  [role="button"]:hover {
+    outline: 2px solid currentColor;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .cursor-pulse:hover {
+    animation: none;
+  }
+  
+  .hover-lift:hover,
+  .hover-scale:hover,
+  .hover-rotate:hover {
+    transform: none;
+  }
+}
+
+/* ========================================
+   🚀 PERFORMANCE OPTIMIZATIONS
+   ======================================== */
+
+/* GPU Acceleration for Smooth Cursors */
+.cursor-accelerated {
+  will-change: transform;
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Cursor Preloading */
+.cursor-preload {
+  cursor: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="rgba(70,95,255,0.8)"/></svg>') 12 12, pointer;
+}
+

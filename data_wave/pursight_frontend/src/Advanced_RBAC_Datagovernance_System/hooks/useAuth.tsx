@@ -160,7 +160,87 @@ export function useAuthState(): AuthState & AuthMethods {
           console.warn('Stored session validation failed:', error);
         }
       }
-      
+      // Fallback: attempt to recover token from common locations (aligns with data-sources usage)
+      const recoveredToken = (() => {
+        try {
+          if (typeof window === 'undefined') return null;
+          const fromLocal = localStorage.getItem('auth_token') || localStorage.getItem('authToken');
+          const fromSession = sessionStorage.getItem('auth_token') || sessionStorage.getItem('authToken');
+          const fromCookie = (() => {
+            const value = `; ${document.cookie}`;
+            const pick = (name: string) => {
+              const parts = value.split(`; ${name}=`);
+              if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
+              return null;
+            };
+            return pick('session_token') || pick('auth_token');
+          })();
+          return fromLocal || fromSession || fromCookie || null;
+        } catch {
+          return null;
+        }
+      })();
+
+      if (recoveredToken) {
+        try {
+          const response = await authService.validateSession(recoveredToken);
+          if (response.data.valid) {
+            const recoveredState: Partial<AuthState> = {
+              user: response.data.user,
+              isAuthenticated: true,
+              sessionToken: recoveredToken,
+              lastActivity: new Date(),
+              sessionExpiry: response.data.expiresAt ? new Date(response.data.expiresAt) : null,
+              permissions: response.data.permissions || [],
+              roles: response.data.roles || []
+            };
+            setState(prev => ({
+              ...prev,
+              ...recoveredState,
+              isLoading: false,
+              isInitialized: true
+            }));
+            // Persist in RBAC storage for future reloads
+            saveAuthStateToStorage(recoveredState);
+            return;
+          }
+        } catch (error) {
+          console.warn('Recovered token validation failed:', error);
+          // Secondary fallback: try to fetch current user via proxy with Bearer header
+          try {
+            const resp = await fetch('/proxy/rbac/me', {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${recoveredToken}`
+              }
+            });
+            if (resp.ok) {
+              const user = await resp.json();
+              const fallbackState: Partial<AuthState> = {
+                user,
+                isAuthenticated: true,
+                sessionToken: recoveredToken,
+                lastActivity: new Date(),
+                sessionExpiry: null,
+                permissions: Array.isArray(user?.permissions) ? user.permissions : [],
+                roles: Array.isArray(user?.roles) ? user.roles : []
+              };
+              setState(prev => ({
+                ...prev,
+                ...fallbackState,
+                isLoading: false,
+                isInitialized: true
+              }));
+              saveAuthStateToStorage(fallbackState);
+              return;
+            }
+          } catch (e) {
+            console.warn('Proxy /rbac/me fallback failed:', e);
+          }
+        }
+      }
+
       // Clear invalid state
       clearAuthState();
       setState(prev => ({

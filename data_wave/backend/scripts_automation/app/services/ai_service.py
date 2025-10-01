@@ -160,11 +160,7 @@ class EnterpriseAIService:
     ) -> Tuple[List[AIModelConfiguration], int]:
         """Get AI model configurations with advanced filtering"""
         try:
-            query = select(AIModelConfiguration).options(
-                selectinload(AIModelConfiguration.classification_framework),
-                selectinload(AIModelConfiguration.ai_conversations),
-                selectinload(AIModelConfiguration.ai_experiments)
-            )
+            query = select(AIModelConfiguration)
             
             # Apply filters
             if filters:
@@ -188,7 +184,23 @@ class EnterpriseAIService:
             # Get total count
             count_query = select(func.count(AIModelConfiguration.id))
             if filters:
-                count_query = count_query.where(query.whereclause)
+                # Apply same filters to count query
+                if filters.get("model_type"):
+                    count_query = count_query.where(AIModelConfiguration.model_type == filters["model_type"])
+                if filters.get("provider"):
+                    count_query = count_query.where(AIModelConfiguration.provider == filters["provider"])
+                if filters.get("status"):
+                    count_query = count_query.where(AIModelConfiguration.status == filters["status"])
+                if filters.get("is_active") is not None:
+                    count_query = count_query.where(AIModelConfiguration.is_active == filters["is_active"])
+                if filters.get("search_query"):
+                    search = f"%{filters['search_query']}%"
+                    count_query = count_query.where(
+                        or_(
+                            AIModelConfiguration.name.ilike(search),
+                            AIModelConfiguration.description.ilike(search)
+                        )
+                    )
             
             total_count = await session.scalar(count_query)
             
@@ -198,19 +210,18 @@ class EnterpriseAIService:
                 query = query.offset(offset).limit(pagination.get("size", 10))
             
             # Apply sorting
-            query = query.order_by(desc(AIModelConfiguration.updated_at))
+            query = query.order_by(desc(AIModelConfiguration.id))
             
             result = await session.execute(query)
             configs = result.scalars().all()
             
-            # Enrich with performance metrics
-            for config in configs:
-                config.current_performance = await self._get_ai_performance_summary(session, config.id)
-            
             return configs, total_count
             
         except Exception as e:
+            import traceback
+            error_details = traceback.format_exc()
             logger.error(f"Error getting AI model configurations: {str(e)}")
+            logger.error(f"Full traceback: {error_details}")
             raise
     
     # ============ AI Conversation Management ============
@@ -1663,3 +1674,50 @@ class EnterpriseAIService:
             logger.warning(f"Advanced classification term extraction failed: {e}")
             # Fallback to basic extraction
             return await self._extract_classification_terms(content)
+    
+    async def _get_ai_performance_summary(self, session: AsyncSession, model_id: int) -> Dict[str, Any]:
+        """Get AI model performance summary for display"""
+        try:
+            # Get recent predictions for the model
+            recent_predictions_query = select(AIPrediction).where(
+                AIPrediction.ai_model_id == model_id
+            ).order_by(desc(AIPrediction.id)).limit(100)
+            
+            result = await session.execute(recent_predictions_query)
+            recent_predictions = result.scalars().all()
+            
+            if not recent_predictions:
+                return {
+                    "total_predictions": 0,
+                    "average_confidence": 0.0,
+                    "average_latency_ms": 0.0,
+                    "success_rate": 0.0
+                }
+            
+            # Calculate performance metrics
+            total_predictions = len(recent_predictions)
+            confidence_scores = [pred.confidence_score for pred in recent_predictions if pred.confidence_score is not None]
+            latencies = [pred.processing_time_ms for pred in recent_predictions if pred.processing_time_ms is not None]
+            
+            average_confidence = sum(confidence_scores) / len(confidence_scores) if confidence_scores else 0.0
+            average_latency = sum(latencies) / len(latencies) if latencies else 0.0
+            
+            # Calculate success rate (predictions with confidence > 0.5)
+            successful_predictions = len([pred for pred in recent_predictions if pred.confidence_score and pred.confidence_score > 0.5])
+            success_rate = successful_predictions / total_predictions if total_predictions > 0 else 0.0
+            
+            return {
+                "total_predictions": total_predictions,
+                "average_confidence": round(average_confidence, 3),
+                "average_latency_ms": round(average_latency, 2),
+                "success_rate": round(success_rate, 3)
+            }
+            
+        except Exception as e:
+            logger.warning(f"Error getting AI performance summary for model {model_id}: {str(e)}")
+            return {
+                "total_predictions": 0,
+                "average_confidence": 0.0,
+                "average_latency_ms": 0.0,
+                "success_rate": 0.0
+            }

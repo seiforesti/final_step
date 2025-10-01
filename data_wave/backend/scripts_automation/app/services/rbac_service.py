@@ -175,7 +175,8 @@ class RBACService:
     def _get_user_context(self, user) -> Dict[str, Any]:
         """Get comprehensive user context for ABAC evaluation (synchronous)."""
         try:
-            from ..models.auth_models import UserProfile, Organization
+            from ..models.auth_models import User
+            from ..models.organization_models import Organization
 
             user_context = {
                 'user_id': getattr(user, 'id', None),
@@ -188,7 +189,7 @@ class RBACService:
             }
 
             # Get user profile information
-            profile = self.db.query(UserProfile).filter(UserProfile.user_id == getattr(user, 'id', None)).first()
+            profile = self.db.query(User).filter(User.id == getattr(user, 'id', None)).first()
             if profile:
                 user_context.update({
                     'department': getattr(profile, 'department', None),

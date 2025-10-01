@@ -4,6 +4,8 @@ from datetime import datetime
 from enum import Enum
 import json
 
+from    app.models.scan_models import DataSource
+
 
 class CatalogItemType(str, Enum):
     DATABASE = "database"

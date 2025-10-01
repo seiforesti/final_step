@@ -1,0 +1,25 @@
+classDiagram
+  class BusinessGlossaryAssociation {
+    +__tablename__: 
+    +id: Optional[int]
+    +asset_id: int
+    +term_id: int
+    +association_type: str
+    +association_strength: float
+    +detection_method: str
+    +confidence_score: float
+    +business_context: Optional[str]
+    +validation_status: str
+    +validated_by: Optional[str]
+    +validation_date: Optional[datetime]
+    +usage_frequency: int
+    +quality_score: float
+    +business_value: float
+    +created_at: datetime
+    +created_by: Optional[str]
+    +asset: Optional[IntelligentDataAsset]
+    +term: Optional[BusinessGlossaryTerm]
+    +__table_args__: 
+  }
+  classDef domain fill:#F8FAFF,stroke:#111827,color:#111827
+  class BusinessGlossaryAssociation domain

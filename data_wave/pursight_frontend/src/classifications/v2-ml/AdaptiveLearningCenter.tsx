@@ -741,7 +741,7 @@ const AdaptiveLearningCenter: React.FC<AdaptiveLearningCenterProps> = ({
   // Real-time monitoring setup
   useEffect(() => {
     if (realTimeTracking) {
-      const wsUrl = `${process.env.REACT_APP_WS_URL || 'ws://localhost:8000'}/v2/ml/adaptive-learning/realtime`;
+      const wsUrl = `${import.meta.env.VITE_WS_URL || 'ws://localhost:8000'}/v2/ml/adaptive-learning/realtime`;
       wsRef.current = new WebSocket(wsUrl);
 
       wsRef.current.onmessage = (event) => {

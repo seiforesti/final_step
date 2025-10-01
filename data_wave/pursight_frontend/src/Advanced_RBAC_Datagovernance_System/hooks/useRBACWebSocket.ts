@@ -4,6 +4,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { rbacWebSocketService } from '../services/websocket.service';
 import type { RBACEvent, WebSocketConnectionStatus } from '../types/websocket.types';
+import { useAuth } from './useAuth';
 
 export interface RBACWebSocketState {
   isConnected: boolean;
@@ -59,6 +60,7 @@ const MAX_EVENT_HISTORY = 100;
 const DEFAULT_MAX_RECONNECT_ATTEMPTS = 5;
 
 export function useRBACWebSocket(autoConnect = true, maxReconnectAttempts = DEFAULT_MAX_RECONNECT_ATTEMPTS): UseRBACWebSocketReturn {
+  const { sessionToken } = useAuth();
   const [state, setState] = useState<RBACWebSocketState>({
     isConnected: false,
     connectionStatus: 'disconnected',
@@ -159,7 +161,34 @@ export function useRBACWebSocket(autoConnect = true, maxReconnectAttempts = DEFA
   const connect = useCallback(() => {
     try {
       setState(prev => ({ ...prev, connectionStatus: 'connecting', error: null }));
-      rbacWebSocketService.connect();
+      // Prefer auth provider token; fallback to common storage/cookie keys
+      const token = (() => {
+        if (sessionToken) return sessionToken;
+        try {
+          if (typeof window === 'undefined') return null;
+          const fromLocal = localStorage.getItem('auth_token') || localStorage.getItem('authToken');
+          const fromSession = sessionStorage.getItem('auth_token') || sessionStorage.getItem('authToken');
+          const cookie = (() => {
+            const value = `; ${document.cookie}`;
+            const pick = (name: string) => {
+              const parts = value.split(`; ${name}=`);
+              if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
+              return null;
+            };
+            return pick('session_token') || pick('auth_token');
+          })();
+          return fromLocal || fromSession || cookie || null;
+        } catch {
+          return null;
+        }
+      })();
+
+      if (!token) {
+        setState(prev => ({ ...prev, error: 'Authentication token required for WebSocket connection', connectionStatus: 'error' }));
+        return;
+      }
+
+      rbacWebSocketService.connect(token);
     } catch (error) {
       setState(prev => ({
         ...prev,
@@ -167,7 +196,7 @@ export function useRBACWebSocket(autoConnect = true, maxReconnectAttempts = DEFA
         connectionStatus: 'error'
       }));
     }
-  }, []);
+  }, [sessionToken]);
 
   const disconnect = useCallback(() => {
     try {

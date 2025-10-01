@@ -1,0 +1,162 @@
+================================================================================
+GUIDE D'UTILISATION - TABLEAUX PROFESSIONNELS FLEXIBLES
+================================================================================
+Fichier: tpl/new_commands.tex
+Date: 30/09/2025
+================================================================================
+
+🎯 COMMANDES DISPONIBLES:
+
+1. \tablethreecustom{label}{caption}{contenu}
+   - 3 colonnes: 28% - 28% - 38%
+   - Idéal pour: Défi/Impact/Conséquences
+
+2. \tablethree{label}{caption}{contenu}
+   - 3 colonnes égales: 30% - 30% - 30%
+   - Idéal pour: données équilibrées
+
+3. \tabletwo{label}{caption}{contenu}
+   - 2 colonnes: 48% - 48%
+   - Idéal pour: comparaisons
+
+4. \tablefour{label}{caption}{contenu}
+   - 4 colonnes égales: 22% - 22% - 22% - 22%
+   - Idéal pour: données détaillées
+
+5. \professionaltable{label}{caption}{colonnes}{contenu}
+   - Personnalisable complètement
+   - Pour colonnes custom
+
+================================================================================
+
+📝 COMMANDES AUXILIAIRES:
+
+\tableheader{...} 
+   - Crée l'en-tête avec \midrule
+   - Usage: \tableheader{\textbf{Col1} & \textbf{Col2} & \textbf{Col3}}
+
+\tablerow{...}
+   - Ajoute une ligne avec espacement
+   - Usage: \tablerow{Data1 & Data2 & Data3}
+
+================================================================================
+
+✅ EXEMPLE 1: Tableau 3 colonnes custom (28-28-38)
+
+\tablethreecustom{tab:exemple1}{Mon tableau de défis}{
+\tableheader{\textbf{Défi} & \textbf{Impact} & \textbf{Conséquences}}
+\tablerow{Défi 1 & 60\% & Conséquence détaillée ici}
+\tablerow{Défi 2 & 70\% & Autre conséquence longue}
+Défi 3 & 80\% & Dernière ligne sans espacement \\
+}
+
+RÉSULTAT:
+┌────────────────────────────────────────────────────────────┐
+│ Tableau 1.1 : Mon tableau de défis                         │
+├──────────────────┬──────────────────┬─────────────────────┤
+│ Défi             │ Impact           │ Conséquences        │
+├──────────────────┼──────────────────┼─────────────────────┤
+│ Défi 1           │ 60%              │ Conséquence...      │
+│                  │                  │                     │
+│ Défi 2           │ 70%              │ Autre...            │
+│                  │                  │                     │
+│ Défi 3           │ 80%              │ Dernière ligne      │
+└──────────────────┴──────────────────┴─────────────────────┘
+
+================================================================================
+
+✅ EXEMPLE 2: Tableau 2 colonnes (50-50)
+
+\tabletwo{tab:comparaison}{Comparaison des solutions}{
+\tableheader{\textbf{Solution A} & \textbf{Solution B}}
+\tablerow{Avantage 1 & Avantage 1}
+\tablerow{Avantage 2 & Avantage 2}
+Conclusion & Conclusion \\
+}
+
+================================================================================
+
+✅ EXEMPLE 3: Tableau 4 colonnes
+
+\tablefour{tab:details}{Détails techniques}{
+\tableheader{\textbf{Module} & \textbf{Fonction} & \textbf{Tech} & \textbf{Status}}
+\tablerow{Module 1 & Fonction A & React & OK}
+\tablerow{Module 2 & Fonction B & Python & OK}
+Module 3 & Fonction C & Java & En cours \\
+}
+
+================================================================================
+
+✅ EXEMPLE 4: Tableau personnalisé
+
+\professionaltable{tab:custom}{Tableau custom}{p{0.2\textwidth}p{0.5\textwidth}p{0.2\textwidth}}{
+\tableheader{\textbf{ID} & \textbf{Description Longue} & \textbf{Code}}
+\tablerow{1 & Description très longue qui prend beaucoup de place & ABC}
+\tablerow{2 & Autre description détaillée & DEF}
+3 & Dernière & GHI \\
+}
+
+Colonnes: 20% - 50% - 20% = 90% (10% pour marges)
+
+================================================================================
+
+🎨 AVANTAGES:
+
+✅ Format professionnel booktabs automatique
+✅ Espacement optimal entre lignes
+✅ Pas de lignes verticales (standard académique)
+✅ Colonnes proportionnelles à \textwidth
+✅ Légende et label automatiques
+✅ Taille \small automatique
+✅ Placement [htbp] optimal
+
+================================================================================
+
+⚙️ PERSONNALISATION AVANCÉE:
+
+Pour créer votre propre commande:
+
+\newcommand{\matable}[3]{%
+    \professionaltable{#1}{#2}{p{0.15\textwidth}p{0.60\textwidth}p{0.15\textwidth}}{#3}
+}
+
+Puis utiliser:
+\matable{tab:id}{Titre}{
+\tableheader{\textbf{A} & \textbf{B} & \textbf{C}}
+\tablerow{...}
+}
+
+================================================================================
+
+📋 RÈGLES D'UTILISATION:
+
+1. Toujours utiliser \tableheader pour la première ligne
+2. Utiliser \tablerow pour toutes les lignes SAUF la dernière
+3. La dernière ligne se termine par \\
+4. Total des colonnes ≤ 95% pour éviter débordement
+5. Utiliser \textbf{} pour en-têtes en gras
+
+================================================================================
+
+🔧 DÉPANNAGE:
+
+Problème: Tableau trop large
+Solution: Réduire les pourcentages (ex: 0.25 au lieu de 0.30)
+
+Problème: Texte coupé
+Solution: Augmenter la colonne concernée
+
+Problème: Espacement incorrect
+Solution: Vérifier \tablerow sur toutes lignes sauf dernière
+
+================================================================================
+
+✅ TOUS LES TABLEAUX DU RAPPORT PEUVENT MAINTENANT UTILISER CES COMMANDES!
+
+Avantages:
+- Code plus court et lisible
+- Format uniforme dans tout le rapport
+- Facile à modifier (changer une commande = tous les tableaux changent)
+- Respect automatique des règles pédagogiques
+
+================================================================================

@@ -1,0 +1,432 @@
+@startuml Enterprise_Data_Governance_Class_Diagram
+
+!theme aws-orange
+skinparam backgroundColor #f8f9fa
+skinparam packageStyle rectangle
+skinparam classFontSize 10
+skinparam packageFontSize 12
+skinparam packageFontStyle bold
+
+title "🏗️ ADVANCED ENTERPRISE CLASS DIAGRAM ARCHITECTURE\nPurSight Data Governance Platform - 400+ Models System"
+
+package "🎯 RACINE MAIN MANAGER - MASTER ORCHESTRATOR" as RACINE #ff6b6b {
+    class RacineOrchestrationMaster {
+        +id: int
+        +name: str
+        +orchestration_type: str
+        +status: OrchestrationStatus
+        +priority: OrchestrationPriority
+        +complexity_level: str
+        +resource_requirements: JSON
+        +performance_thresholds: JSON
+        +ai_optimization_enabled: bool
+        +created_by: int
+        +last_modified_by: int
+        +created_at: datetime
+        --
+        +orchestrate_cross_groups()
+        +optimize_performance()
+        +monitor_system_health()
+    }
+    
+    class RacineWorkspace {
+        +id: int
+        +name: str
+        +workspace_type: str
+        +owner_id: int
+        +organization_id: int
+        +configuration: JSON
+        +resource_quotas: JSON
+        +collaboration_settings: JSON
+        +created_at: datetime
+        --
+        +manage_resources()
+        +facilitate_collaboration()
+    }
+    
+    class RacineAIConversation {
+        +id: int
+        +workspace_id: int
+        +user_id: int
+        +conversation_type: str
+        +context_groups: List[str]
+        +ai_model_version: str
+        +conversation_state: JSON
+        +created_at: datetime
+        --
+        +generate_insights()
+        +provide_recommendations()
+    }
+    
+    class RacinePipeline {
+        +id: int
+        +name: str
+        +pipeline_type: str
+        +cross_group_enabled: bool
+        +optimization_strategy: str
+        +resource_allocation: JSON
+        +performance_targets: JSON
+        +created_at: datetime
+        --
+        +execute_cross_group_workflows()
+        +optimize_resource_usage()
+    }
+}
+
+package "🔐 GROUP 1: RBAC SYSTEM - CENTRAL AUTHORITY" as RBAC #4ecdc4 {
+    class Organization {
+        +id: int
+        +name: str
+        +parent_organization_id: int
+        +compliance_framework: str
+        +security_level: str
+        +feature_flags: JSON
+        +created_at: datetime
+        --
+        +manage_hierarchy()
+        +enforce_policies()
+    }
+    
+    class User {
+        +id: int
+        +email: str
+        +organization_id: int
+        +role: str
+        +mfa_enabled: bool
+        +created_at: datetime
+        --
+        +authenticate()
+        +authorize_access()
+    }
+    
+    class Role {
+        +id: int
+        +name: str
+        +description: str
+        --
+        +inherit_permissions()
+        +grant_access()
+    }
+    
+    class Permission {
+        +id: int
+        +action: str
+        +resource: str
+        +conditions: str
+        --
+        +validate_access()
+        +check_conditions()
+    }
+}
+
+package "🗄️ GROUP 2: DATA SOURCES - DATA DISCOVERY ENGINE" as DATASOURCES #45b7d1 {
+    class DataSource {
+        +id: int
+        +name: str
+        +type: DataSourceType
+        +organization_id: int
+        +connection_config: JSON
+        +status: DataSourceStatus
+        +environment: Environment
+        +criticality: Criticality
+        +cloud_provider: CloudProvider
+        +created_at: datetime
+        --
+        +connect()
+        +discover_schema()
+        +monitor_health()
+    }
+    
+    class Scan {
+        +id: int
+        +data_source_id: int
+        +scan_type: str
+        +status: ScanStatus
+        +started_at: datetime
+        +completed_at: datetime
+        +configuration: JSON
+        --
+        +execute_scan()
+        +generate_results()
+    }
+    
+    class ScanResult {
+        +id: int
+        +scan_id: int
+        +table_name: str
+        +schema_name: str
+        +findings: JSON
+        +metrics: JSON
+        +classification_results: JSON
+        --
+        +analyze_findings()
+        +generate_insights()
+    }
+}
+
+package "⚡ GROUP 3: SCAN RULE SETS - INTELLIGENCE ENGINE" as SCANRULES #96ceb4 {
+    class IntelligentScanRule {
+        +id: int
+        +name: str
+        +pattern_type: PatternRecognitionType
+        +rule_pattern: str
+        +complexity_level: RuleComplexityLevel
+        +ai_confidence_score: float
+        +optimization_strategy: RuleOptimizationStrategy
+        +execution_strategy: RuleExecutionStrategy
+        +business_impact: RuleBusinessImpact
+        +performance_metrics: JSON
+        +created_at: datetime
+        --
+        +execute_intelligent_matching()
+        +optimize_performance()
+        +learn_from_feedback()
+    }
+    
+    class EnhancedScanRuleSet {
+        +id: int
+        +name: str
+        +organization_id: int
+        +rule_count: int
+        +execution_mode: str
+        +optimization_level: str
+        +ai_optimization_enabled: bool
+        +performance_threshold: float
+        +created_at: datetime
+        --
+        +orchestrate_rule_execution()
+        +optimize_rule_set()
+    }
+    
+    class RuleExecutionHistory {
+        +id: int
+        +rule_id: int
+        +execution_id: str
+        +data_source_id: int
+        +execution_time_ms: float
+        +accuracy_score: float
+        +optimization_applied: bool
+        +ai_insights: JSON
+        +executed_at: datetime
+        --
+        +track_performance()
+        +generate_insights()
+    }
+}
+
+package "🏷️ GROUP 4: CLASSIFICATIONS - DATA CLASSIFICATION" as CLASSIFICATIONS #feca57 {
+    class ClassificationRule {
+        +id: int
+        +name: str
+        +pattern: str
+        +classification_type: str
+        +confidence_threshold: float
+        +ai_enabled: bool
+        +regex_pattern: str
+        +ml_model_id: str
+        +priority: int
+        +created_at: datetime
+        --
+        +classify_data()
+        +calculate_confidence()
+    }
+    
+    class DataClassification {
+        +id: int
+        +data_source_id: int
+        +table_name: str
+        +column_name: str
+        +classification_type: str
+        +confidence_score: float
+        +rule_id: int
+        +ai_generated: bool
+        +manual_override: bool
+        +created_at: datetime
+        --
+        +apply_classification()
+        +validate_accuracy()
+    }
+}
+
+package "⚖️ GROUP 5: COMPLIANCE RULES - GOVERNANCE ENGINE" as COMPLIANCE #ff9ff3 {
+    class ComplianceRule {
+        +id: int
+        +name: str
+        +framework: ComplianceFramework
+        +rule_type: str
+        +severity: str
+        +automated_check: bool
+        +remediation_guidance: str
+        +business_impact: str
+        +created_at: datetime
+        --
+        +validate_compliance()
+        +generate_remediation_plan()
+    }
+    
+    class ComplianceValidation {
+        +id: int
+        +rule_id: int
+        +data_source_id: int
+        +status: ComplianceStatus
+        +validation_result: JSON
+        +risk_score: float
+        +remediation_required: bool
+        +validated_at: datetime
+        --
+        +execute_validation()
+        +assess_risk()
+    }
+}
+
+package "📚 GROUP 6: ADVANCED CATALOG - KNOWLEDGE MANAGEMENT" as CATALOG #54a0ff {
+    class CatalogItem {
+        +id: int
+        +name: str
+        +type: CatalogItemType
+        +organization_id: int
+        +data_source_id: int
+        +classification: DataClassification
+        +quality_score: float
+        +popularity_score: float
+        +owner: str
+        +steward: str
+        +created_at: datetime
+        --
+        +calculate_quality_score()
+        +track_usage()
+    }
+    
+    class IntelligentDataAsset {
+        +id: int
+        +catalog_item_id: int
+        +ai_generated_description: str
+        +business_context: JSON
+        +usage_patterns: JSON
+        +quality_indicators: JSON
+        +lineage_complexity: int
+        +recommendation_score: float
+        +last_ai_analysis: datetime
+        --
+        +generate_ai_insights()
+        +recommend_usage()
+    }
+    
+    class EnterpriseDataLineage {
+        +id: int
+        +source_asset_id: int
+        +target_asset_id: int
+        +relationship_type: str
+        +transformation_logic: str
+        +impact_analysis: JSON
+        +lineage_depth: int
+        +confidence_score: float
+        +created_at: datetime
+        --
+        +trace_lineage()
+        +analyze_impact()
+    }
+}
+
+package "🔄 GROUP 7: SCAN LOGIC - ORCHESTRATION ENGINE" as SCANLOGIC #5f27cd {
+    class ScanOrchestrationJob {
+        +id: int
+        +name: str
+        +organization_id: int
+        +job_type: str
+        +status: OrchestrationStatus
+        +priority: int
+        +configuration: JSON
+        +resource_requirements: JSON
+        +created_at: datetime
+        --
+        +orchestrate_scan_workflow()
+        +manage_resources()
+    }
+    
+    class ScanWorkflow {
+        +id: int
+        +orchestration_job_id: int
+        +name: str
+        +workflow_type: str
+        +steps_count: int
+        +estimated_duration: int
+        +dependencies: JSON
+        +created_at: datetime
+        --
+        +execute_workflow()
+        +handle_dependencies()
+    }
+    
+    class WorkflowExecution {
+        +id: int
+        +workflow_id: int
+        +execution_id: str
+        +status: str
+        +started_at: datetime
+        +completed_at: datetime
+        +performance_metrics: JSON
+        +error_details: JSON
+        --
+        +track_execution()
+        +handle_errors()
+    }
+}
+
+' MASTER ORCHESTRATION RELATIONSHIPS
+RacineOrchestrationMaster ||..o{ User : "coordinates"
+RacineOrchestrationMaster ||..o{ DataSource : "orchestrates"
+RacineOrchestrationMaster ||..o{ IntelligentScanRule : "manages"
+RacineOrchestrationMaster ||..o{ ComplianceRule : "governs"
+RacineOrchestrationMaster ||..o{ CatalogItem : "catalogs"
+RacineOrchestrationMaster ||..o{ ScanOrchestrationJob : "executes"
+
+RacineOrchestrationMaster ||--o{ RacineWorkspace : "manages"
+RacineWorkspace ||--o{ RacineAIConversation : "hosts"
+RacineWorkspace ||--o{ RacinePipeline : "executes"
+
+' RBAC SYSTEM RELATIONSHIPS
+Organization ||--o{ User : "employs"
+User }o--o{ Role : "assigned"
+Role }o--o{ Permission : "grants"
+
+' DATA SOURCES RELATIONSHIPS
+Organization ||..o{ DataSource : "owns"
+DataSource ||--o{ Scan : "scanned_by"
+Scan ||--o{ ScanResult : "produces"
+
+' SCAN RULE SETS RELATIONSHIPS
+EnhancedScanRuleSet ||--o{ IntelligentScanRule : "contains"
+IntelligentScanRule ||--o{ RuleExecutionHistory : "tracked_by"
+
+' CLASSIFICATIONS RELATIONSHIPS
+ClassificationRule ||--o{ DataClassification : "classifies"
+DataClassification ||..o{ CatalogItem : "enhances"
+
+' COMPLIANCE RELATIONSHIPS
+ComplianceRule ||--o{ ComplianceValidation : "validates"
+
+' CATALOG RELATIONSHIPS
+CatalogItem ||--o{ IntelligentDataAsset : "enhanced_by"
+IntelligentDataAsset ||--o{ EnterpriseDataLineage : "lineage_of"
+
+' SCAN LOGIC RELATIONSHIPS
+ScanOrchestrationJob ||--o{ ScanWorkflow : "orchestrates"
+ScanWorkflow ||--o{ WorkflowExecution : "executed_as"
+
+' CROSS-GROUP STRATEGIC CONNECTIONS (WEAK COUPLING)
+Organization ||..o{ ComplianceRule : "governed_by"
+Organization ||..o{ CatalogItem : "catalogs"
+DataSource ||..o{ IntelligentScanRule : "analyzed_by"
+RacineAIConversation ||..o{ IntelligentDataAsset : "recommends"
+RacinePipeline ||..o{ WorkflowExecution : "orchestrates"
+
+note top of RacineOrchestrationMaster : "Master Orchestrator\n- Coordinates all 7 groups\n- AI-driven optimization\n- Enterprise-scale management"
+
+note top of Organization : "Central Authority\n- Multi-tenant foundation\n- Hierarchical structure\n- Compliance enforcement"
+
+note top of IntelligentScanRule : "Intelligence Engine\n- AI/ML pattern recognition\n- Performance optimization\n- Adaptive execution"
+
+note bottom : "🏆 ENTERPRISE ARCHITECTURE FEATURES:\n• 400+ Models across 7 groups\n• Fort Cohesion & Faible Couplage design\n• No circular dependencies\n• AI-first approach\n• Multi-tenant ready\n• Compliance-driven governance"
+
+@enduml

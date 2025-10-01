@@ -7,30 +7,692 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
 import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Slider } from '@/components/ui/slider';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import {
-  AreaChart, Area, BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
-  ComposedChart, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
-  Legend, ResponsiveContainer, ScatterChart, Scatter, RadarChart, PolarGrid,
-  PolarAngleAxis, PolarRadiusAxis, Radar, Treemap
+  AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
+  XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
+  Legend, ResponsiveContainer
 } from 'recharts';
-import { Workflow, Route, Network, Zap, Brain, Target, Award, Clock, Users, Database, Monitor, Cpu, AlertTriangle, CheckCircle, XCircle, Info, Settings, Search, Filter, Download, Upload, RefreshCw, Play, Pause, Square, MoreVertical, Eye, Edit, Trash2, Plus, Minus, ArrowUp, ArrowDown, ArrowRight, Calendar, Globe, Shield, Lock, Unlock, Star, Heart, Bookmark, Share, MessageSquare, Bell, Mail, Phone, Video, Mic, Camera, Image, File, Folder, Archive, Tag, Flag, Map, Navigation, Compass, Layers, Grid, List, Table, Kanban, Timeline, Chart, Activity, TrendingUp, BarChart3, PieChart as PieChartIcon, LineChart as LineChartIcon } from 'lucide-react';
+import { Workflow, Route, Network, Zap, Brain, Target, Award, Clock, AlertTriangle, CheckCircle, XCircle, Settings, Search, Play, Pause, MoreVertical, Eye, Edit, Plus, Activity, TrendingUp, BarChart3, PieChart as PieChartIcon, RefreshCw } from 'lucide-react';
 
 // Import custom hooks and utilities
 import { useClassificationState } from '../core/hooks/useClassificationState';
-import { useAIIntelligence } from '../core/hooks/useAIIntelligence';
-import { aiApi } from '../core/api/aiApi';
-import { websocketApi } from '../core/api/websocketApi';
 
 // TypeScript Interfaces for Classification Workflow
+
+// Core Workflow Types
+interface WorkflowPerformance {
+  throughput: number;
+  latency: number;
+  successRate: number;
+  errorRate: number;
+  resourceUtilization: number;
+}
+
+interface WorkflowAnalytics {
+  totalExecutions: number;
+  averageDuration: number;
+  successRate: number;
+  failureRate: number;
+  trends: any[];
+}
+
+interface WorkflowMonitoring {
+  isActive: boolean;
+  metrics: any[];
+  alerts: any[];
+  health: 'healthy' | 'warning' | 'critical';
+}
+
+interface WorkflowOptimization {
+  enabled: boolean;
+  strategies: string[];
+  performance: number;
+}
+
+interface WorkflowGovernance {
+  policies: any[];
+  compliance: boolean;
+  auditTrail: any[];
+}
+
+interface WorkflowCompliance {
+  standards: string[];
+  certifications: string[];
+  auditStatus: 'compliant' | 'non-compliant' | 'pending';
+}
+
+interface WorkflowSecurity {
+  encryption: boolean;
+  authentication: boolean;
+  authorization: boolean;
+  auditLogging: boolean;
+}
+
+interface WorkflowCollaboration {
+  enabled: boolean;
+  participants: string[];
+  permissions: any[];
+}
+
+interface WorkflowNotifications {
+  enabled: boolean;
+  channels: string[];
+  events: string[];
+}
+
+interface WorkflowAutomation {
+  enabled: boolean;
+  triggers: any[];
+  actions: any[];
+}
+
+interface WorkflowIntegration {
+  apis: any[];
+  webhooks: any[];
+  connectors: any[];
+}
+
+interface WorkflowCustomization {
+  themes: any[];
+  layouts: any[];
+  preferences: any[];
+}
+
+// Stage Types
+interface StageInput {
+  name: string;
+  type: string;
+  required: boolean;
+  value: any;
+}
+
+interface StageOutput {
+  name: string;
+  type: string;
+  value: any;
+}
+
+interface StageParameters {
+  [key: string]: any;
+}
+
+interface StageValidation {
+  rules: any[];
+  isValid: boolean;
+}
+
+interface StageTransformation {
+  type: string;
+  config: any;
+}
+
+interface StageClassification {
+  algorithm: string;
+  confidence: number;
+  result: any;
+}
+
+interface StageProcessing {
+  type: string;
+  config: any;
+}
+
+interface StageQuality {
+  score: number;
+  metrics: any[];
+}
+
+interface StageMonitoring {
+  enabled: boolean;
+  metrics: any[];
+}
+
+interface StageError {
+  code: string;
+  message: string;
+  timestamp: Date;
+}
+
+interface StageMetrics {
+  duration: number;
+  memory: number;
+  cpu: number;
+}
+
+interface StageLog {
+  level: string;
+  message: string;
+  timestamp: Date;
+}
+
+interface StageArtifact {
+  name: string;
+  type: string;
+  data: any;
+}
+
+interface StageCheckpoint {
+  id: string;
+  timestamp: Date;
+  data: any;
+}
+
+// Execution Types
+interface ExecutionProgress {
+  current: number;
+  total: number;
+  percentage: number;
+  completed: number;
+}
+
+interface ExecutionContext {
+  variables: any;
+  environment: any;
+}
+
+interface ExecutionResults {
+  success: boolean;
+  data: any;
+  errors: any[];
+}
+
+interface ExecutionMetrics {
+  duration: number;
+  memory: number;
+  cpu: number;
+}
+
+interface ExecutionPerformance {
+  throughput: number;
+  latency: number;
+  efficiency: number;
+}
+
+interface ExecutionQuality {
+  score: number;
+  accuracy: number;
+  completeness: number;
+}
+
+interface ExecutionCost {
+  compute: number;
+  storage: number;
+  network: number;
+}
+
+interface ExecutionResources {
+  cpu: number;
+  memory: number;
+  storage: number;
+}
+
+interface ExecutionLog {
+  level: string;
+  message: string;
+  timestamp: Date;
+}
+
+interface ExecutionEvent {
+  type: string;
+  data: any;
+  timestamp: Date;
+}
+
+interface ExecutionError {
+  code: string;
+  message: string;
+  stack: string;
+}
+
+interface ExecutionWarning {
+  code: string;
+  message: string;
+  timestamp: Date;
+}
+
+interface ExecutionNotification {
+  type: string;
+  message: string;
+  timestamp: Date;
+}
+
+interface ExecutionAudit {
+  action: string;
+  user: string;
+  timestamp: Date;
+}
+
+interface ExecutionRetry {
+  count: number;
+  maxRetries: number;
+  nextRetry: Date;
+}
+
+interface ExecutionRecovery {
+  strategy: string;
+  status: string;
+  data: any;
+}
+
+interface ExecutionInput {
+  name: string;
+  type: string;
+  value: any;
+}
+
+interface ExecutionOutput {
+  name: string;
+  type: string;
+  value: any;
+}
+
+// Routing Types
+interface RoutingStrategy {
+  type: string;
+  config: any;
+}
+
+interface RoutingRule {
+  condition: string;
+  action: string;
+}
+
+interface RoutingCondition {
+  field: string;
+  operator: string;
+  value: any;
+}
+
+interface RoutingWeight {
+  factor: number;
+  priority: number;
+}
+
+interface RoutingPriority {
+  level: number;
+  queue: string;
+}
+
+interface RoutingConstraint {
+  type: string;
+  value: any;
+}
+
+interface RoutingOptimization {
+  enabled: boolean;
+  algorithm: string;
+}
+
+interface RoutingLoadBalancing {
+  strategy: string;
+  weights: any;
+}
+
+interface RoutingFailover {
+  enabled: boolean;
+  strategy: string;
+}
+
+interface RoutingCircuitBreaker {
+  enabled: boolean;
+  threshold: number;
+}
+
+interface RoutingAdaptive {
+  enabled: boolean;
+  learning: boolean;
+}
+
+interface RoutingLearning {
+  enabled: boolean;
+  algorithm: string;
+}
+
+interface RoutingAnalytics {
+  enabled: boolean;
+  metrics: any[];
+}
+
+interface RoutingMonitoring {
+  enabled: boolean;
+  alerts: any[];
+}
+
+interface RoutingTesting {
+  enabled: boolean;
+  scenarios: any[];
+}
+
+interface RoutingSimulation {
+  enabled: boolean;
+  models: any[];
+}
+
+// Version Coordination Types
+interface VersionInfo {
+  current: string;
+  available: string[];
+  compatibility: any;
+}
+
+interface VersionCompatibility {
+  matrix: any;
+  conflicts: any[];
+}
+
+interface VersionMigration {
+  from: string;
+  to: string;
+  steps: any[];
+}
+
+interface VersionSynchronization {
+  enabled: boolean;
+  strategy: string;
+}
+
+interface VersionConflict {
+  type: string;
+  resolution: string;
+}
+
+interface ConflictResolution {
+  strategy: string;
+  priority: string;
+}
+
+interface VersionGovernance {
+  policies: any[];
+  compliance: boolean;
+}
+
+interface VersionPolicy {
+  name: string;
+  rules: any[];
+}
+
+interface VersionControl {
+  enabled: boolean;
+  strategy: string;
+}
+
+interface VersionTracking {
+  enabled: boolean;
+  history: any[];
+}
+
+interface VersionAnalytics {
+  enabled: boolean;
+  metrics: any[];
+}
+
+interface VersionMonitoring {
+  enabled: boolean;
+  alerts: any[];
+}
+
+interface VersionAutomation {
+  enabled: boolean;
+  triggers: any[];
+}
+
+interface VersionValidation {
+  enabled: boolean;
+  rules: any[];
+}
+
+interface VersionTesting {
+  enabled: boolean;
+  scenarios: any[];
+}
+
+interface VersionDeployment {
+  strategy: string;
+  rollback: boolean;
+}
+
+interface VersionRollback {
+  enabled: boolean;
+  strategy: string;
+}
+
+// Template Types
+interface TemplateCategory {
+  name: string;
+  description: string;
+}
+
+interface TemplateType {
+  name: string;
+  schema: any;
+}
+
+interface TemplateStage {
+  id: string;
+  type: string;
+  config: any;
+}
+
+interface TemplateParameter {
+  name: string;
+  type: string;
+  required: boolean;
+}
+
+interface TemplateConfiguration {
+  settings: any;
+  defaults: any;
+}
+
+interface TemplateValidation {
+  rules: any[];
+  schema: any;
+}
+
+interface TemplateDocumentation {
+  description: string;
+  examples: any[];
+}
+
+interface TemplateExample {
+  name: string;
+  code: string;
+}
+
+interface TemplateBestPractice {
+  category: string;
+  description: string;
+}
+
+interface TemplateUsage {
+  count: number;
+  rating: number;
+}
+
+interface TemplateRating {
+  score: number;
+  reviews: any[];
+}
+
+interface TemplateFeedback {
+  type: string;
+  message: string;
+  timestamp: Date;
+}
+
+// Metrics Types
+interface MetricTrend {
+  direction: 'up' | 'down' | 'stable';
+  value: number;
+  period: string;
+}
+
+interface MetricBenchmark {
+  target: number;
+  current: number;
+  variance: number;
+}
+
+interface MetricForecast {
+  value: number;
+  confidence: number;
+  period: string;
+}
+
+interface MetricAlert {
+  threshold: number;
+  current: number;
+  status: 'normal' | 'warning' | 'critical';
+}
+
+// Filter and View Types
+interface WorkflowFilter {
+  status?: string[];
+  type?: string[];
+  category?: string[];
+  dateRange?: { start: Date; end: Date };
+  tags?: string[];
+}
+
+type WorkflowViewMode = 'grid' | 'list' | 'timeline';
+type WorkflowSortOrder = 'name' | 'date' | 'status' | 'priority';
+
+// Additional Workflow Types
+interface WorkflowDependency {
+  id: string;
+  type: string;
+  required: boolean;
+}
+
+interface WorkflowTrigger {
+  id: string;
+  type: string;
+  config: any;
+}
+
+interface WorkflowCondition {
+  id: string;
+  expression: string;
+  result: boolean;
+}
+
+interface WorkflowAction {
+  id: string;
+  type: string;
+  config: any;
+}
+
+interface WorkflowRouting {
+  strategy: string;
+  rules: any[];
+}
+
+interface WorkflowScheduling {
+  enabled: boolean;
+  cron: string;
+  timezone: string;
+}
+
+interface WorkflowRetryPolicy {
+  enabled: boolean;
+  maxRetries: number;
+  backoff: string;
+}
+
+interface WorkflowTimeout {
+  enabled: boolean;
+  duration: number;
+}
+
+interface WorkflowResources {
+  cpu: number;
+  memory: number;
+  storage: number;
+}
+
+interface WorkflowConfiguration {
+  settings: any;
+  defaults: any;
+}
+
+interface WorkflowMetadata {
+  version: string;
+  author: string;
+  description: string;
+}
+
+interface WorkflowPermissions {
+  read: string[];
+  write: string[];
+  execute: string[];
+}
+
+interface WorkflowAudit {
+  enabled: boolean;
+  level: string;
+  retention: number;
+}
+
+interface IntelligentRouting {
+  strategy: string;
+  rules: RoutingRule[];
+  optimization: RoutingOptimization;
+}
+
+interface CrossVersionCoordination {
+  enabled: boolean;
+  sync: boolean;
+  conflicts: VersionConflict[];
+}
+
+interface WorkflowTemplate {
+  id: string;
+  name: string;
+  description: string;
+  category: TemplateCategory;
+  version: string;
+  stages: TemplateStage[];
+}
+
+interface WorkflowMetrics {
+  total: number;
+  active: number;
+  completed: number;
+  failed: number;
+  pending: number;
+  success_rate: number;
+  average_duration: number;
+  throughput: number;
+  error_rate: number;
+  performance_score: number;
+  resource_utilization: number;
+  cpu_usage: number;
+  memory_usage: number;
+  network_usage: number;
+  storage_usage: number;
+  quality_score: number;
+  efficiency_score: number;
+  cost_score: number;
+  satisfaction_score: number;
+  trends: MetricTrend[];
+  benchmarks: MetricBenchmark[];
+  forecasts: MetricForecast[];
+  alerts: MetricAlert[];
+}
+
+// Enum Types
+type WorkflowType = 'manual' | 'automated' | 'hybrid' | 'ml' | 'ai';
+type WorkflowCategory = 'classification' | 'validation' | 'approval' | 'processing' | 'analysis';
+type WorkflowStatus = 'draft' | 'active' | 'paused' | 'completed' | 'failed';
+type WorkflowPriority = 'low' | 'medium' | 'high' | 'critical' | 'urgent';
+type StageType = 'input' | 'processing' | 'validation' | 'output';
+type StageStatus = 'pending' | 'running' | 'completed' | 'failed' | 'skipped';
+type ExecutionStatus = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled' | 'queued' | 'timeout';
+type ExecutionPriority = 'low' | 'medium' | 'high' | 'critical' | 'urgent';
+
 interface WorkflowOrchestratorState {
   isLoading: boolean;
   error: string | null;
@@ -216,39 +878,9 @@ interface WorkflowTemplate {
   feedback: TemplateFeedback[];
 }
 
-interface WorkflowMetrics {
-  total: number;
-  active: number;
-  completed: number;
-  failed: number;
-  pending: number;
-  success_rate: number;
-  average_duration: number;
-  throughput: number;
-  error_rate: number;
-  performance_score: number;
-  quality_score: number;
-  efficiency_score: number;
-  cost_score: number;
-  satisfaction_score: number;
-  trends: MetricTrend[];
-  benchmarks: MetricBenchmark[];
-  forecasts: MetricForecast[];
-  alerts: MetricAlert[];
-}
 
 // Additional type definitions
-type WorkflowType = 'manual' | 'ml' | 'ai' | 'hybrid' | 'custom';
-type WorkflowCategory = 'classification' | 'processing' | 'analysis' | 'optimization' | 'governance';
-type WorkflowStatus = 'draft' | 'active' | 'paused' | 'completed' | 'failed' | 'archived';
-type WorkflowPriority = 'low' | 'medium' | 'high' | 'critical' | 'urgent';
-type StageType = 'input' | 'processing' | 'classification' | 'validation' | 'output' | 'notification';
-type StageStatus = 'pending' | 'running' | 'completed' | 'failed' | 'skipped' | 'retrying';
-type ExecutionStatus = 'queued' | 'running' | 'completed' | 'failed' | 'cancelled' | 'timeout';
-type ExecutionPriority = 'low' | 'medium' | 'high' | 'critical' | 'urgent';
 type RoutingAlgorithm = 'round_robin' | 'weighted' | 'least_connections' | 'response_time' | 'adaptive';
-type WorkflowViewMode = 'list' | 'grid' | 'timeline' | 'kanban' | 'graph';
-type WorkflowSortOrder = 'name' | 'created' | 'updated' | 'priority' | 'status' | 'duration';
 
 // Constants
 const WORKFLOW_TYPES = [
@@ -259,14 +891,6 @@ const WORKFLOW_TYPES = [
   { value: 'custom', label: 'Custom Workflow', icon: Edit }
 ] as const;
 
-const STAGE_TYPES = [
-  { value: 'input', label: 'Data Input', icon: Upload },
-  { value: 'processing', label: 'Processing', icon: Cpu },
-  { value: 'classification', label: 'Classification', icon: Tag },
-  { value: 'validation', label: 'Validation', icon: CheckCircle },
-  { value: 'output', label: 'Output', icon: ArrowDownTrayIcon },
-  { value: 'notification', label: 'Notification', icon: Bell }
-] as const;
 
 const ROUTING_ALGORITHMS = [
   { value: 'round_robin', label: 'Round Robin', description: 'Distribute requests evenly' },
@@ -286,6 +910,7 @@ const WORKFLOW_STATUS_COLORS = {
 } as const;
 
 const EXECUTION_STATUS_COLORS = {
+  pending: 'bg-gray-100 text-gray-800',
   queued: 'bg-gray-100 text-gray-800',
   running: 'bg-blue-100 text-blue-800',
   completed: 'bg-green-100 text-green-800',
@@ -300,7 +925,7 @@ const CHART_COLORS = [
 ] as const;
 
 // Mock data generators
-const generateWorkflowMetrics = () => ({
+const generateWorkflowMetrics = (): WorkflowMetrics => ({
   total: 156,
   active: 23,
   completed: 98,
@@ -311,6 +936,11 @@ const generateWorkflowMetrics = () => ({
   throughput: 1.2,
   error_rate: 7.7,
   performance_score: 92.3,
+  resource_utilization: 78.5,
+  cpu_usage: 65.2,
+  memory_usage: 72.8,
+  network_usage: 45.3,
+  storage_usage: 58.9,
   quality_score: 88.9,
   efficiency_score: 91.5,
   cost_score: 85.2,
@@ -352,7 +982,7 @@ const generateRecentExecutions = (): WorkflowExecution[] => [
     status: 'running',
     priority: 'high',
     startTime: new Date(Date.now() - 30 * 60 * 1000),
-    progress: { completed: 65, total: 100, percentage: 65 },
+    progress: { current: 65, completed: 65, total: 100, percentage: 65 },
     currentStage: 'classification',
     completedStages: ['input', 'processing'],
     failedStages: [],
@@ -384,7 +1014,7 @@ const generateRecentExecutions = (): WorkflowExecution[] => [
     startTime: new Date(Date.now() - 2 * 60 * 60 * 1000),
     endTime: new Date(Date.now() - 30 * 60 * 1000),
     duration: 90 * 60 * 1000,
-    progress: { completed: 100, total: 100, percentage: 100 },
+    progress: { current: 100, completed: 100, total: 100, percentage: 100 },
     currentStage: 'output',
     completedStages: ['input', 'processing', 'classification', 'validation', 'output'],
     failedStages: [],
@@ -416,7 +1046,7 @@ const generateRecentExecutions = (): WorkflowExecution[] => [
     startTime: new Date(Date.now() - 4 * 60 * 60 * 1000),
     endTime: new Date(Date.now() - 3.5 * 60 * 60 * 1000),
     duration: 30 * 60 * 1000,
-    progress: { completed: 40, total: 100, percentage: 40 },
+    progress: { current: 40, completed: 40, total: 100, percentage: 40 },
     currentStage: 'processing',
     completedStages: ['input'],
     failedStages: ['processing'],
@@ -536,12 +1166,11 @@ export const ClassificationWorkflow: React.FC = () => {
     selectedExecution: null,
     filterCriteria: {} as WorkflowFilter,
     viewMode: 'list',
-    sortOrder: 'updated'
+    sortOrder: 'name'
   });
 
-  // Custom hooks
-  const { classifications, updateClassification } = useClassificationState();
-  const { aiModels, aiAgents, startIntelligence, stopIntelligence } = useAIIntelligence();
+  // Custom hooks - Mock implementations for now
+  // const { state: classificationState } = useClassificationState();
 
   // Refs for performance optimization
   const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -578,19 +1207,24 @@ export const ClassificationWorkflow: React.FC = () => {
     };
   }, [state.realTimeMode]);
 
-  // WebSocket initialization
+  // WebSocket initialization - Mock implementation
   const initializeWebSocket = useCallback(() => {
     try {
-      websocketRef.current = websocketApi.connect('workflow-orchestrator');
+      // Mock WebSocket connection
+      console.log('WebSocket connected for workflow-orchestrator');
       
-      websocketRef.current.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        handleRealTimeUpdate(data);
-      };
-
-      websocketRef.current.onerror = (error) => {
-        console.error('WebSocket error:', error);
-        setState(prev => ({ ...prev, error: 'Real-time connection failed' }));
+      // Simulate real-time updates
+      const interval = setInterval(() => {
+        const mockData = {
+          type: 'workflow-update',
+          data: { timestamp: new Date().toISOString() }
+        };
+        handleRealTimeUpdate(mockData);
+      }, 30000);
+      
+      return () => {
+        clearInterval(interval);
+        console.log('WebSocket disconnected');
       };
     } catch (error) {
       console.error('Failed to initialize WebSocket:', error);
@@ -602,17 +1236,41 @@ export const ClassificationWorkflow: React.FC = () => {
     setState(prev => ({ ...prev, isLoading: true, error: null }));
     
     try {
-      const [workflowsData, executionsData, metricsData] = await Promise.all([
-        aiApi.getWorkflows(),
-        aiApi.getWorkflowExecutions(),
-        aiApi.getWorkflowMetrics()
+      // Mock API calls for now - will be replaced with real implementation
+      const [workflowsData, executionsData] = await Promise.all([
+        Promise.resolve([]),
+        Promise.resolve([])
       ]);
 
       setState(prev => ({
         ...prev,
         workflows: workflowsData,
         executions: executionsData,
-        metrics: metricsData,
+        metrics: {
+          total: 0,
+          active: 0,
+          completed: 0,
+          failed: 0,
+          pending: 0,
+          success_rate: 0,
+          average_duration: 0,
+          throughput: 0,
+          error_rate: 0,
+          performance_score: 0,
+          resource_utilization: 0,
+          cpu_usage: 0,
+          memory_usage: 0,
+          network_usage: 0,
+          storage_usage: 0,
+          quality_score: 0,
+          efficiency_score: 0,
+          cost_score: 0,
+          satisfaction_score: 0,
+          trends: [],
+          benchmarks: [],
+          forecasts: [],
+          alerts: []
+        },
         isLoading: false
       }));
     } catch (error) {
@@ -637,7 +1295,38 @@ export const ClassificationWorkflow: React.FC = () => {
     setState(prev => ({ ...prev, isLoading: true }));
     
     try {
-      const execution = await aiApi.executeWorkflow(workflowId);
+      // Mock workflow execution
+      const execution: WorkflowExecution = {
+        id: `exec-${Date.now()}`,
+        workflowId,
+        name: `Execution of ${workflowId}`,
+        status: 'running',
+        priority: 'medium',
+        startTime: new Date(),
+        progress: { current: 0, completed: 0, total: 100, percentage: 0 },
+        currentStage: 'input',
+        completedStages: [],
+        failedStages: [],
+        skippedStages: [],
+        context: { variables: {}, environment: {} },
+        inputs: [],
+        outputs: [],
+        results: { success: false, data: null, errors: [] },
+        metrics: { duration: 0, memory: 0, cpu: 0 },
+        performance: { throughput: 0, latency: 0, efficiency: 0 },
+        quality: { score: 0, accuracy: 0, completeness: 0 },
+        cost: { compute: 0, storage: 0, network: 0 },
+        resources: { cpu: 0, memory: 0, storage: 0 },
+        logs: [],
+        events: [],
+        errors: [],
+        warnings: [],
+        notifications: [],
+        audit: { action: 'execute', user: 'system', timestamp: new Date() },
+        retry: { count: 0, maxRetries: 3, nextRetry: new Date() },
+        recovery: { strategy: 'none', status: 'none', data: null }
+      };
+      console.log('Executing workflow:', workflowId);
       setState(prev => ({
         ...prev,
         executions: [execution, ...prev.executions],
@@ -654,7 +1343,8 @@ export const ClassificationWorkflow: React.FC = () => {
 
   const handlePauseWorkflow = useCallback(async (workflowId: string) => {
     try {
-      await aiApi.pauseWorkflow(workflowId);
+      // Mock pause workflow
+      console.log('Pausing workflow:', workflowId);
       setState(prev => ({
         ...prev,
         workflows: prev.workflows.map(wf => 
@@ -671,7 +1361,8 @@ export const ClassificationWorkflow: React.FC = () => {
 
   const handleResumeWorkflow = useCallback(async (workflowId: string) => {
     try {
-      await aiApi.resumeWorkflow(workflowId);
+      // Mock resume workflow
+      console.log('Resuming workflow:', workflowId);
       setState(prev => ({
         ...prev,
         workflows: prev.workflows.map(wf => 
@@ -690,11 +1381,12 @@ export const ClassificationWorkflow: React.FC = () => {
     setState(prev => ({ ...prev, isLoading: true }));
     
     try {
-      const optimizedWorkflow = await aiApi.optimizeWorkflow(workflowId);
+      // Mock workflow optimization
+      console.log('Optimizing workflow:', workflowId);
       setState(prev => ({
         ...prev,
         workflows: prev.workflows.map(wf => 
-          wf.id === workflowId ? optimizedWorkflow : wf
+          wf.id === workflowId ? { ...wf, status: 'active' as WorkflowStatus } : wf
         ),
         isLoading: false
       }));
@@ -1067,7 +1759,7 @@ export const ClassificationWorkflow: React.FC = () => {
           </Select>
         </div>
         <Button variant="outline" onClick={handleRefreshData}>
-          <Refresh className="h-4 w-4 mr-2" />
+          <RefreshCw className="h-4 w-4 mr-2" />
           Refresh
         </Button>
       </div>
@@ -1144,7 +1836,7 @@ export const ClassificationWorkflow: React.FC = () => {
                         )}
                         {execution.status === 'failed' && (
                           <Button variant="ghost" size="sm">
-                            <Refresh className="h-4 w-4" />
+                            <RefreshCw className="h-4 w-4" />
                           </Button>
                         )}
                       </div>
@@ -1416,7 +2108,7 @@ export const ClassificationWorkflow: React.FC = () => {
             onClick={handleRefreshData}
             disabled={state.isLoading}
           >
-            <Refresh className={`h-4 w-4 ${state.isLoading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-4 w-4 ${state.isLoading ? 'animate-spin' : ''}`} />
           </Button>
 
           <Button variant="outline" size="sm">

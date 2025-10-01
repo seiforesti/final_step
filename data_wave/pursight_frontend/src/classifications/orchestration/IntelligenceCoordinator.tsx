@@ -7,28 +7,21 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
 import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Slider } from '@/components/ui/slider';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import {
-  AreaChart, Area, BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
-  ComposedChart, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
-  Legend, ResponsiveContainer, ScatterChart, Scatter, RadarChart, PolarGrid,
-  PolarAngleAxis, PolarRadiusAxis, Radar, Treemap, Sankey
+  PieChart, Pie, Cell,
+  ComposedChart, Bar, Line, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
+  Legend, ResponsiveContainer, RadarChart, PolarGrid,
+  PolarAngleAxis, PolarRadiusAxis, Radar
 } from 'recharts';
-import { Brain, Network, Zap, Target, Award, Clock, Users, Database, Monitor, Cpu, AlertTriangle, CheckCircle, XCircle, Info, Settings, Search, Filter, Download, Upload, RefreshCw, Play, Pause, Square, MoreVertical, Eye, Edit, Trash2, Plus, Minus, ArrowUp, ArrowDown, ArrowRight, Calendar, Globe, Shield, Lock, Unlock, Star, Heart, Bookmark, Share, MessageSquare, Bell, Mail, Phone, Video, Mic, Camera, Image, File, Folder, Archive, Tag, Flag, Map, Navigation, Compass, Route, Layers, Grid, List, Table, Kanban, Timeline, Chart, Activity, TrendingUp, BarChart3, PieChart as PieChartIcon, LineChart as LineChartIcon, GitBranch, Workflow, Bot, Lightbulb } from 'lucide-react';
+import { Brain, Network, Zap, Target, Clock, Users, CheckCircle, XCircle, Info, Settings, Search, Play, Pause, Square, MoreVertical, Eye, Plus, Activity, TrendingUp, BarChart3, PieChart as PieChartIcon, GitBranch, Workflow, Bot, Lightbulb, Grid, Mic, Star, RefreshCw, Tag, MessageSquare } from 'lucide-react';
 
-// Import custom hooks and utilities
-import { useClassificationState } from '../core/hooks/useClassificationState';
-import { useAIIntelligence } from '../core/hooks/useAIIntelligence';
-import { aiApi } from '../core/api/aiApi';
-import { websocketApi } from '../core/api/websocketApi';
+// Import custom hooks and utilities - Mock implementations for now
+// import { useClassificationState } from '../core/hooks/useClassificationState';
+// import { useAIIntelligence } from '../core/hooks/useAIIntelligence';
+// import { aiApi } from '../core/api/aiApi';
+// import { websocketApi } from '../core/api/websocketApi';
 
 // TypeScript Interfaces for Intelligence Coordinator
 interface IntelligenceCoordinatorState {
@@ -60,6 +53,122 @@ interface IntelligenceCoordinatorState {
   sortOrder: IntelligenceSortOrder;
 }
 
+// Additional missing interfaces
+interface IntelligenceMonitoring {
+  enabled: boolean;
+  metrics: MonitoringMetric[];
+  alerts: MonitoringAlert[];
+  dashboards: MonitoringDashboard[];
+  reports: MonitoringReport[];
+  automation: MonitoringAutomation;
+  integration: MonitoringIntegration;
+}
+
+interface IntelligenceAnalytics {
+  enabled: boolean;
+  insights: AnalyticsInsight[];
+  predictions: AnalyticsPrediction[];
+  recommendations: AnalyticsRecommendation[];
+  automation: AnalyticsAutomation;
+  integration: AnalyticsIntegration;
+}
+
+interface IntelligenceGovernance {
+  enabled: boolean;
+  policies: GovernancePolicy[];
+  rules: GovernanceRule[];
+  compliance: GovernanceCompliance;
+  audit: GovernanceAudit;
+  automation: GovernanceAutomation;
+  integration: GovernanceIntegration;
+}
+
+interface IntelligenceSecurity {
+  enabled: boolean;
+  authentication: SecurityAuthentication;
+  authorization: SecurityAuthorization;
+  encryption: SecurityEncryption;
+  monitoring: SecurityMonitoring;
+  compliance: SecurityCompliance;
+  automation: SecurityAutomation;
+  integration: SecurityIntegration;
+}
+
+interface IntelligenceCollaboration {
+  enabled: boolean;
+  teams: CollaborationTeam[];
+  projects: CollaborationProject[];
+  communication: CollaborationCommunication;
+  sharing: CollaborationSharing;
+  automation: CollaborationAutomation;
+  integration: CollaborationIntegration;
+}
+
+interface IntelligenceAutomation {
+  enabled: boolean;
+  workflows: AutomationWorkflow[];
+  triggers: AutomationTrigger[];
+  actions: AutomationAction[];
+  schedules: AutomationSchedule[];
+  monitoring: AutomationMonitoring;
+  integration: AutomationIntegration;
+}
+
+interface IntelligenceIntegration {
+  enabled: boolean;
+  apis: IntegrationAPI[];
+  connectors: IntegrationConnector[];
+  protocols: IntegrationProtocol[];
+  monitoring: IntegrationMonitoring;
+  automation: IntegrationAutomation;
+}
+
+interface IntelligencePerformance {
+  enabled: boolean;
+  metrics: PerformanceMetric[];
+  benchmarks: PerformanceBenchmark[];
+  optimization: PerformanceOptimization;
+  monitoring: PerformanceMonitoring;
+  automation: PerformanceAutomation;
+  integration: PerformanceIntegration;
+}
+
+interface IntelligenceQuality {
+  enabled: boolean;
+  metrics: QualityMetric[];
+  standards: QualityStandard[];
+  testing: QualityTesting;
+  monitoring: QualityMonitoring;
+  automation: QualityAutomation;
+  integration: QualityIntegration;
+}
+
+interface IntelligenceCompliance {
+  enabled: boolean;
+  standards: ComplianceStandard[];
+  regulations: ComplianceRegulation[];
+  audits: ComplianceAudit[];
+  monitoring: ComplianceMonitoring;
+  automation: ComplianceAutomation;
+  integration: ComplianceIntegration;
+}
+
+interface IntelligenceFilter {
+  models: string[];
+  agents: string[];
+  orchestrations: string[];
+  pipelines: string[];
+  status: string[];
+  type: string[];
+  category: string[];
+  tags: string[];
+  dateRange: {
+    start: Date;
+    end: Date;
+  };
+  search: string;
+}
+
 interface IntelligenceModel {
   id: string;
   name: string;
@@ -87,6 +196,99 @@ interface IntelligenceModel {
   updatedBy: string;
   tags: string[];
   labels: { [key: string]: string };
+}
+
+// Model-related interfaces
+interface ModelPerformance {
+  accuracy: number;
+  precision: number;
+  recall: number;
+  f1Score: number;
+  latency: number;
+  throughput: number;
+  memoryUsage: number;
+  cpuUsage: number;
+}
+
+interface ModelCapability {
+  id: string;
+  name: string;
+  description: string;
+  type: string;
+  parameters: { [key: string]: any };
+}
+
+interface ModelDependency {
+  id: string;
+  name: string;
+  version: string;
+  type: string;
+  required: boolean;
+}
+
+interface ModelResources {
+  cpu: number;
+  memory: number;
+  gpu: number;
+  storage: number;
+  network: number;
+}
+
+interface ModelConfiguration {
+  parameters: { [key: string]: any };
+  hyperparameters: { [key: string]: any };
+  environment: { [key: string]: string };
+}
+
+interface ModelTraining {
+  status: string;
+  progress: number;
+  epochs: number;
+  batchSize: number;
+  learningRate: number;
+  loss: number;
+  validationLoss: number;
+}
+
+interface ModelEvaluation {
+  metrics: { [key: string]: number };
+  testResults: { [key: string]: any };
+  validationResults: { [key: string]: any };
+}
+
+interface ModelDeployment {
+  status: string;
+  environment: string;
+  endpoint: string;
+  version: string;
+  replicas: number;
+}
+
+interface ModelMonitoring {
+  enabled: boolean;
+  metrics: string[];
+  alerts: string[];
+  dashboards: string[];
+}
+
+interface ModelOptimization {
+  enabled: boolean;
+  strategies: string[];
+  parameters: { [key: string]: any };
+}
+
+interface ModelLifecycle {
+  stage: string;
+  transitions: string[];
+  approvals: string[];
+}
+
+interface ModelMetadata {
+  description: string;
+  author: string;
+  license: string;
+  documentation: string;
+  examples: string[];
 }
 
 interface IntelligenceAgent {
@@ -119,6 +321,98 @@ interface IntelligenceAgent {
   labels: { [key: string]: string };
 }
 
+// Agent-related interfaces
+interface AgentCapability {
+  id: string;
+  name: string;
+  description: string;
+  type: string;
+  parameters: { [key: string]: any };
+}
+
+interface AgentCoordination {
+  enabled: boolean;
+  protocols: string[];
+  strategies: string[];
+  communication: string[];
+}
+
+interface AgentCommunication {
+  enabled: boolean;
+  protocols: string[];
+  channels: string[];
+  languages: string[];
+}
+
+interface AgentLearning {
+  enabled: boolean;
+  algorithms: string[];
+  data: string[];
+  models: string[];
+}
+
+interface AgentAdaptation {
+  enabled: boolean;
+  strategies: string[];
+  triggers: string[];
+  actions: string[];
+}
+
+interface AgentAutonomy {
+  level: number;
+  decisions: string[];
+  constraints: string[];
+  monitoring: string[];
+}
+
+interface AgentCollaboration {
+  enabled: boolean;
+  teams: string[];
+  projects: string[];
+  protocols: string[];
+}
+
+interface AgentPerformance {
+  efficiency: number;
+  accuracy: number;
+  speed: number;
+  reliability: number;
+}
+
+interface AgentMonitoring {
+  enabled: boolean;
+  metrics: string[];
+  alerts: string[];
+  dashboards: string[];
+}
+
+interface AgentSecurity {
+  enabled: boolean;
+  authentication: string[];
+  authorization: string[];
+  encryption: string[];
+}
+
+interface AgentGovernance {
+  enabled: boolean;
+  policies: string[];
+  rules: string[];
+  compliance: string[];
+}
+
+interface AgentLifecycle {
+  stage: string;
+  transitions: string[];
+  approvals: string[];
+}
+
+interface AgentMetadata {
+  description: string;
+  author: string;
+  version: string;
+  documentation: string;
+}
+
 interface IntelligenceOrchestration {
   id: string;
   name: string;
@@ -146,6 +440,114 @@ interface IntelligenceOrchestration {
   updatedBy: string;
   tags: string[];
   labels: { [key: string]: string };
+}
+
+// Orchestration-related interfaces
+interface OrchestrationModel {
+  id: string;
+  name: string;
+  role: string;
+  priority: number;
+  parameters: { [key: string]: any };
+}
+
+interface OrchestrationAgent {
+  id: string;
+  name: string;
+  role: string;
+  priority: number;
+  capabilities: string[];
+}
+
+interface OrchestrationWorkflow {
+  id: string;
+  name: string;
+  steps: string[];
+  dependencies: string[];
+  conditions: string[];
+}
+
+interface OrchestrationCoordination {
+  enabled: boolean;
+  protocols: string[];
+  strategies: string[];
+  communication: string[];
+}
+
+interface OrchestrationOptimization {
+  enabled: boolean;
+  algorithms: string[];
+  parameters: { [key: string]: any };
+  objectives: string[];
+}
+
+interface OrchestrationMonitoring {
+  enabled: boolean;
+  metrics: string[];
+  alerts: string[];
+  dashboards: string[];
+}
+
+interface OrchestrationGovernance {
+  enabled: boolean;
+  policies: string[];
+  rules: string[];
+  compliance: string[];
+}
+
+interface OrchestrationSecurity {
+  enabled: boolean;
+  authentication: string[];
+  authorization: string[];
+  encryption: string[];
+}
+
+interface OrchestrationPerformance {
+  efficiency: number;
+  throughput: number;
+  latency: number;
+  reliability: number;
+}
+
+interface OrchestrationQuality {
+  accuracy: number;
+  precision: number;
+  recall: number;
+  f1Score: number;
+}
+
+interface OrchestrationCompliance {
+  enabled: boolean;
+  standards: string[];
+  regulations: string[];
+  audits: string[];
+}
+
+interface OrchestrationAutomation {
+  enabled: boolean;
+  workflows: string[];
+  triggers: string[];
+  actions: string[];
+}
+
+interface OrchestrationIntegration {
+  enabled: boolean;
+  apis: string[];
+  connectors: string[];
+  protocols: string[];
+}
+
+interface OrchestrationLifecycle {
+  stage: string;
+  transitions: string[];
+  approvals: string[];
+}
+
+interface OrchestrationMetadata {
+  description: string;
+  author: string;
+  version: string;
+  documentation: string;
 }
 
 interface IntelligencePipeline {
@@ -178,6 +580,123 @@ interface IntelligencePipeline {
   labels: { [key: string]: string };
 }
 
+// Pipeline-related interfaces
+interface PipelineStage {
+  id: string;
+  name: string;
+  type: string;
+  order: number;
+  inputs: string[];
+  outputs: string[];
+  parameters: { [key: string]: any };
+}
+
+interface PipelineModel {
+  id: string;
+  name: string;
+  role: string;
+  stage: string;
+  parameters: { [key: string]: any };
+}
+
+interface PipelineAgent {
+  id: string;
+  name: string;
+  role: string;
+  stage: string;
+  capabilities: string[];
+}
+
+interface PipelineData {
+  sources: string[];
+  formats: string[];
+  schemas: string[];
+  transformations: string[];
+}
+
+interface PipelineProcessing {
+  enabled: boolean;
+  algorithms: string[];
+  parameters: { [key: string]: any };
+  resources: { [key: string]: number };
+}
+
+interface PipelineOptimization {
+  enabled: boolean;
+  strategies: string[];
+  parameters: { [key: string]: any };
+  objectives: string[];
+}
+
+interface PipelineMonitoring {
+  enabled: boolean;
+  metrics: string[];
+  alerts: string[];
+  dashboards: string[];
+}
+
+interface PipelineQuality {
+  accuracy: number;
+  precision: number;
+  recall: number;
+  f1Score: number;
+}
+
+interface PipelinePerformance {
+  efficiency: number;
+  throughput: number;
+  latency: number;
+  reliability: number;
+}
+
+interface PipelineSecurity {
+  enabled: boolean;
+  authentication: string[];
+  authorization: string[];
+  encryption: string[];
+}
+
+interface PipelineGovernance {
+  enabled: boolean;
+  policies: string[];
+  rules: string[];
+  compliance: string[];
+}
+
+interface PipelineCompliance {
+  enabled: boolean;
+  standards: string[];
+  regulations: string[];
+  audits: string[];
+}
+
+interface PipelineAutomation {
+  enabled: boolean;
+  workflows: string[];
+  triggers: string[];
+  actions: string[];
+}
+
+interface PipelineIntegration {
+  enabled: boolean;
+  apis: string[];
+  connectors: string[];
+  protocols: string[];
+}
+
+interface PipelineLifecycle {
+  stage: string;
+  transitions: string[];
+  approvals: string[];
+}
+
+interface PipelineMetadata {
+  description: string;
+  author: string;
+  version: string;
+  documentation: string;
+}
+
 interface CoordinationMatrix {
   models: ModelCoordination[];
   agents: AgentCoordination[];
@@ -194,6 +713,123 @@ interface CoordinationMatrix {
   analytics: CoordinationAnalytics;
   automation: CoordinationAutomation;
   integration: CoordinationIntegration;
+}
+
+// Coordination-related interfaces
+interface ModelCoordination {
+  id: string;
+  name: string;
+  role: string;
+  dependencies: string[];
+  conflicts: string[];
+  optimizations: string[];
+}
+
+interface AgentCoordination {
+  id: string;
+  name: string;
+  role: string;
+  dependencies: string[];
+  conflicts: string[];
+  optimizations: string[];
+}
+
+interface WorkflowCoordination {
+  id: string;
+  name: string;
+  role: string;
+  dependencies: string[];
+  conflicts: string[];
+  optimizations: string[];
+}
+
+interface PipelineCoordination {
+  id: string;
+  name: string;
+  role: string;
+  dependencies: string[];
+  conflicts: string[];
+  optimizations: string[];
+}
+
+interface CoordinationDependency {
+  id: string;
+  source: string;
+  target: string;
+  type: string;
+  strength: number;
+}
+
+interface CoordinationConflict {
+  id: string;
+  type: string;
+  participants: string[];
+  severity: number;
+  resolution: string;
+}
+
+interface ConflictResolution {
+  id: string;
+  conflict: string;
+  strategy: string;
+  result: string;
+  timestamp: Date;
+}
+
+interface CoordinationOptimization {
+  id: string;
+  type: string;
+  parameters: { [key: string]: any };
+  results: { [key: string]: any };
+}
+
+interface CoordinationSynchronization {
+  enabled: boolean;
+  protocols: string[];
+  frequency: number;
+  consistency: string;
+}
+
+interface CoordinationCommunication {
+  enabled: boolean;
+  protocols: string[];
+  channels: string[];
+  languages: string[];
+}
+
+interface CoordinationGovernance {
+  enabled: boolean;
+  policies: string[];
+  rules: string[];
+  compliance: string[];
+}
+
+interface CoordinationMonitoring {
+  enabled: boolean;
+  metrics: string[];
+  alerts: string[];
+  dashboards: string[];
+}
+
+interface CoordinationAnalytics {
+  enabled: boolean;
+  insights: string[];
+  predictions: string[];
+  recommendations: string[];
+}
+
+interface CoordinationAutomation {
+  enabled: boolean;
+  workflows: string[];
+  triggers: string[];
+  actions: string[];
+}
+
+interface CoordinationIntegration {
+  enabled: boolean;
+  apis: string[];
+  connectors: string[];
+  protocols: string[];
 }
 
 interface IntelligenceOptimization {
@@ -213,6 +849,106 @@ interface IntelligenceOptimization {
   integration: OptimizationIntegration;
 }
 
+// Optimization-related interfaces
+interface OptimizationStrategy {
+  id: string;
+  name: string;
+  type: string;
+  parameters: { [key: string]: any };
+  effectiveness: number;
+}
+
+interface OptimizationAlgorithm {
+  id: string;
+  name: string;
+  type: string;
+  parameters: { [key: string]: any };
+  performance: number;
+}
+
+interface OptimizationObjective {
+  id: string;
+  name: string;
+  type: string;
+  weight: number;
+  target: number;
+}
+
+interface OptimizationConstraint {
+  id: string;
+  name: string;
+  type: string;
+  value: number;
+  operator: string;
+}
+
+interface OptimizationParameter {
+  id: string;
+  name: string;
+  type: string;
+  value: any;
+  range: { min: number; max: number };
+}
+
+interface OptimizationResult {
+  id: string;
+  strategy: string;
+  algorithm: string;
+  objective: string;
+  value: number;
+  timestamp: Date;
+}
+
+interface OptimizationRecommendation {
+  id: string;
+  type: string;
+  description: string;
+  priority: number;
+  impact: number;
+}
+
+interface OptimizationAutomation {
+  enabled: boolean;
+  workflows: string[];
+  triggers: string[];
+  actions: string[];
+}
+
+interface OptimizationMonitoring {
+  enabled: boolean;
+  metrics: string[];
+  alerts: string[];
+  dashboards: string[];
+}
+
+interface OptimizationAnalytics {
+  enabled: boolean;
+  insights: string[];
+  predictions: string[];
+  recommendations: string[];
+}
+
+interface OptimizationGovernance {
+  enabled: boolean;
+  policies: string[];
+  rules: string[];
+  compliance: string[];
+}
+
+interface OptimizationCompliance {
+  enabled: boolean;
+  standards: string[];
+  regulations: string[];
+  audits: string[];
+}
+
+interface OptimizationIntegration {
+  enabled: boolean;
+  apis: string[];
+  connectors: string[];
+  protocols: string[];
+}
+
 // Additional type definitions
 type ModelType = 'classification' | 'regression' | 'clustering' | 'nlp' | 'vision' | 'speech' | 'recommendation';
 type ModelCategory = 'supervised' | 'unsupervised' | 'reinforcement' | 'transfer' | 'ensemble' | 'hybrid';
@@ -226,6 +962,452 @@ type PipelineType = 'batch' | 'streaming' | 'real-time' | 'hybrid' | 'distribute
 type PipelineStatus = 'running' | 'stopped' | 'error' | 'maintenance' | 'optimizing' | 'scaling';
 type IntelligenceViewMode = 'overview' | 'detailed' | 'matrix' | 'graph' | 'timeline' | 'metrics';
 type IntelligenceSortOrder = 'name' | 'created' | 'updated' | 'performance' | 'status' | 'priority';
+
+// Additional missing interfaces
+interface MonitoringMetric {
+  id: string;
+  name: string;
+  type: string;
+  value: number;
+  unit: string;
+  timestamp: Date;
+}
+
+interface MonitoringAlert {
+  id: string;
+  name: string;
+  type: string;
+  severity: string;
+  message: string;
+  timestamp: Date;
+}
+
+interface MonitoringDashboard {
+  id: string;
+  name: string;
+  widgets: string[];
+  layout: string;
+}
+
+interface MonitoringReport {
+  id: string;
+  name: string;
+  type: string;
+  data: any;
+  timestamp: Date;
+}
+
+interface MonitoringAutomation {
+  enabled: boolean;
+  workflows: string[];
+  triggers: string[];
+  actions: string[];
+}
+
+interface MonitoringIntegration {
+  enabled: boolean;
+  apis: string[];
+  connectors: string[];
+  protocols: string[];
+}
+
+interface AnalyticsInsight {
+  id: string;
+  name: string;
+  type: string;
+  description: string;
+  confidence: number;
+  timestamp: Date;
+}
+
+interface AnalyticsPrediction {
+  id: string;
+  name: string;
+  type: string;
+  value: number;
+  confidence: number;
+  timestamp: Date;
+}
+
+interface AnalyticsRecommendation {
+  id: string;
+  name: string;
+  type: string;
+  description: string;
+  priority: number;
+  impact: number;
+}
+
+interface AnalyticsAutomation {
+  enabled: boolean;
+  workflows: string[];
+  triggers: string[];
+  actions: string[];
+}
+
+interface AnalyticsIntegration {
+  enabled: boolean;
+  apis: string[];
+  connectors: string[];
+  protocols: string[];
+}
+
+interface GovernancePolicy {
+  id: string;
+  name: string;
+  type: string;
+  description: string;
+  rules: string[];
+}
+
+interface GovernanceRule {
+  id: string;
+  name: string;
+  type: string;
+  description: string;
+  conditions: string[];
+}
+
+interface GovernanceCompliance {
+  enabled: boolean;
+  standards: string[];
+  regulations: string[];
+  audits: string[];
+}
+
+interface GovernanceAudit {
+  id: string;
+  name: string;
+  type: string;
+  results: any;
+  timestamp: Date;
+}
+
+interface GovernanceAutomation {
+  enabled: boolean;
+  workflows: string[];
+  triggers: string[];
+  actions: string[];
+}
+
+interface GovernanceIntegration {
+  enabled: boolean;
+  apis: string[];
+  connectors: string[];
+  protocols: string[];
+}
+
+interface SecurityAuthentication {
+  enabled: boolean;
+  methods: string[];
+  providers: string[];
+  policies: string[];
+}
+
+interface SecurityAuthorization {
+  enabled: boolean;
+  methods: string[];
+  policies: string[];
+  roles: string[];
+}
+
+interface SecurityEncryption {
+  enabled: boolean;
+  algorithms: string[];
+  keys: string[];
+  policies: string[];
+}
+
+interface SecurityMonitoring {
+  enabled: boolean;
+  metrics: string[];
+  alerts: string[];
+  dashboards: string[];
+}
+
+interface SecurityCompliance {
+  enabled: boolean;
+  standards: string[];
+  regulations: string[];
+  audits: string[];
+}
+
+interface SecurityAutomation {
+  enabled: boolean;
+  workflows: string[];
+  triggers: string[];
+  actions: string[];
+}
+
+interface SecurityIntegration {
+  enabled: boolean;
+  apis: string[];
+  connectors: string[];
+  protocols: string[];
+}
+
+interface CollaborationTeam {
+  id: string;
+  name: string;
+  members: string[];
+  projects: string[];
+  permissions: string[];
+}
+
+interface CollaborationProject {
+  id: string;
+  name: string;
+  description: string;
+  team: string;
+  status: string;
+  timeline: { start: Date; end: Date };
+}
+
+interface CollaborationCommunication {
+  enabled: boolean;
+  channels: string[];
+  protocols: string[];
+  languages: string[];
+}
+
+interface CollaborationSharing {
+  enabled: boolean;
+  methods: string[];
+  permissions: string[];
+  policies: string[];
+}
+
+interface CollaborationAutomation {
+  enabled: boolean;
+  workflows: string[];
+  triggers: string[];
+  actions: string[];
+}
+
+interface CollaborationIntegration {
+  enabled: boolean;
+  apis: string[];
+  connectors: string[];
+  protocols: string[];
+}
+
+interface AutomationWorkflow {
+  id: string;
+  name: string;
+  steps: string[];
+  triggers: string[];
+  conditions: string[];
+}
+
+interface AutomationTrigger {
+  id: string;
+  name: string;
+  type: string;
+  conditions: string[];
+  actions: string[];
+}
+
+interface AutomationAction {
+  id: string;
+  name: string;
+  type: string;
+  parameters: { [key: string]: any };
+}
+
+interface AutomationSchedule {
+  id: string;
+  name: string;
+  cron: string;
+  workflow: string;
+  enabled: boolean;
+}
+
+interface AutomationMonitoring {
+  enabled: boolean;
+  metrics: string[];
+  alerts: string[];
+  dashboards: string[];
+}
+
+interface AutomationIntegration {
+  enabled: boolean;
+  apis: string[];
+  connectors: string[];
+  protocols: string[];
+}
+
+interface IntegrationAPI {
+  id: string;
+  name: string;
+  type: string;
+  endpoint: string;
+  authentication: string;
+}
+
+interface IntegrationConnector {
+  id: string;
+  name: string;
+  type: string;
+  configuration: { [key: string]: any };
+}
+
+interface IntegrationProtocol {
+  id: string;
+  name: string;
+  type: string;
+  version: string;
+  features: string[];
+}
+
+interface IntegrationMonitoring {
+  enabled: boolean;
+  metrics: string[];
+  alerts: string[];
+  dashboards: string[];
+}
+
+interface IntegrationAutomation {
+  enabled: boolean;
+  workflows: string[];
+  triggers: string[];
+  actions: string[];
+}
+
+interface PerformanceMetric {
+  id: string;
+  name: string;
+  type: string;
+  value: number;
+  unit: string;
+  timestamp: Date;
+}
+
+interface PerformanceBenchmark {
+  id: string;
+  name: string;
+  type: string;
+  value: number;
+  unit: string;
+  category: string;
+}
+
+interface PerformanceOptimization {
+  enabled: boolean;
+  strategies: string[];
+  parameters: { [key: string]: any };
+  objectives: string[];
+}
+
+interface PerformanceMonitoring {
+  enabled: boolean;
+  metrics: string[];
+  alerts: string[];
+  dashboards: string[];
+}
+
+interface PerformanceAutomation {
+  enabled: boolean;
+  workflows: string[];
+  triggers: string[];
+  actions: string[];
+}
+
+interface PerformanceIntegration {
+  enabled: boolean;
+  apis: string[];
+  connectors: string[];
+  protocols: string[];
+}
+
+interface QualityMetric {
+  id: string;
+  name: string;
+  type: string;
+  value: number;
+  unit: string;
+  threshold: number;
+}
+
+interface QualityStandard {
+  id: string;
+  name: string;
+  type: string;
+  description: string;
+  criteria: string[];
+}
+
+interface QualityTesting {
+  enabled: boolean;
+  methods: string[];
+  tools: string[];
+  coverage: number;
+}
+
+interface QualityMonitoring {
+  enabled: boolean;
+  metrics: string[];
+  alerts: string[];
+  dashboards: string[];
+}
+
+interface QualityAutomation {
+  enabled: boolean;
+  workflows: string[];
+  triggers: string[];
+  actions: string[];
+}
+
+interface QualityIntegration {
+  enabled: boolean;
+  apis: string[];
+  connectors: string[];
+  protocols: string[];
+}
+
+interface ComplianceStandard {
+  id: string;
+  name: string;
+  type: string;
+  description: string;
+  requirements: string[];
+}
+
+interface ComplianceRegulation {
+  id: string;
+  name: string;
+  type: string;
+  description: string;
+  requirements: string[];
+}
+
+interface ComplianceAudit {
+  id: string;
+  name: string;
+  type: string;
+  results: any;
+  timestamp: Date;
+}
+
+interface ComplianceMonitoring {
+  enabled: boolean;
+  metrics: string[];
+  alerts: string[];
+  dashboards: string[];
+}
+
+interface ComplianceAutomation {
+  enabled: boolean;
+  workflows: string[];
+  triggers: string[];
+  actions: string[];
+}
+
+interface ComplianceIntegration {
+  enabled: boolean;
+  apis: string[];
+  connectors: string[];
+  protocols: string[];
+}
 
 // Constants
 const MODEL_TYPES = [
@@ -513,9 +1695,9 @@ export const IntelligenceCoordinator: React.FC = () => {
     sortOrder: 'updated'
   });
 
-  // Custom hooks
-  const { classifications, updateClassification } = useClassificationState();
-  const { aiModels, aiAgents, startIntelligence, stopIntelligence } = useAIIntelligence();
+  // Custom hooks - Mock implementations for now
+  // const { classifications, updateClassification } = useClassificationState();
+  // const { aiModels, aiAgents, startIntelligence, stopIntelligence } = useAIIntelligence();
 
   // Refs for performance optimization
   const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -525,7 +1707,6 @@ export const IntelligenceCoordinator: React.FC = () => {
   const coordinationMetrics = useMemo(() => generateCoordinationMetrics(), []);
   const performanceData = useMemo(() => generatePerformanceData(), []);
   const modelDistribution = useMemo(() => generateModelDistribution(), []);
-  const coordinationFlow = useMemo(() => generateCoordinationFlow(), []);
 
   // Effects
   useEffect(() => {
@@ -557,17 +1738,25 @@ export const IntelligenceCoordinator: React.FC = () => {
   // WebSocket initialization
   const initializeWebSocket = useCallback(() => {
     try {
-      websocketRef.current = websocketApi.connect('intelligence-coordinator');
+      // Mock WebSocket connection for now
+      console.log('Initializing WebSocket connection for intelligence-coordinator');
       
-      websocketRef.current.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        handleRealTimeUpdate(data);
-      };
-
-      websocketRef.current.onerror = (error) => {
-        console.error('WebSocket error:', error);
-        setState(prev => ({ ...prev, error: 'Real-time connection failed' }));
-      };
+      // Simulate WebSocket connection
+      const mockWebSocket = {
+        onmessage: (event: any) => {
+          const data = JSON.parse(event.data);
+          handleRealTimeUpdate(data);
+        },
+        onerror: (error: any) => {
+          console.error('WebSocket error:', error);
+          setState(prev => ({ ...prev, error: 'Real-time connection failed' }));
+        },
+        close: () => {
+          console.log('WebSocket connection closed');
+        }
+      } as WebSocket;
+      
+      websocketRef.current = mockWebSocket;
     } catch (error) {
       console.error('Failed to initialize WebSocket:', error);
     }
@@ -578,10 +1767,11 @@ export const IntelligenceCoordinator: React.FC = () => {
     setState(prev => ({ ...prev, isLoading: true, error: null }));
     
     try {
+      // Mock API calls for now - will be replaced with real implementation
       const [modelsData, agentsData, orchestrationsData] = await Promise.all([
-        aiApi.getIntelligenceModels(),
-        aiApi.getIntelligenceAgents(),
-        aiApi.getOrchestrations()
+        Promise.resolve(generateIntelligenceModels()),
+        Promise.resolve(generateIntelligenceAgents()),
+        Promise.resolve([])
       ]);
 
       setState(prev => ({
@@ -611,7 +1801,10 @@ export const IntelligenceCoordinator: React.FC = () => {
 
   const handleStartModel = useCallback(async (modelId: string) => {
     try {
-      await aiApi.startModel(modelId);
+      // Mock API call for now
+      console.log('Starting model:', modelId);
+      await Promise.resolve();
+      
       setState(prev => ({
         ...prev,
         models: prev.models.map(model => 
@@ -628,7 +1821,10 @@ export const IntelligenceCoordinator: React.FC = () => {
 
   const handleStopModel = useCallback(async (modelId: string) => {
     try {
-      await aiApi.stopModel(modelId);
+      // Mock API call for now
+      console.log('Stopping model:', modelId);
+      await Promise.resolve();
+      
       setState(prev => ({
         ...prev,
         models: prev.models.map(model => 
@@ -647,7 +1843,10 @@ export const IntelligenceCoordinator: React.FC = () => {
     setState(prev => ({ ...prev, isLoading: true }));
     
     try {
-      await aiApi.optimizeCoordination();
+      // Mock API call for now
+      console.log('Optimizing coordination...');
+      await Promise.resolve();
+      
       // Refresh data after optimization
       await handleRefreshData();
     } catch (error) {
@@ -663,7 +1862,37 @@ export const IntelligenceCoordinator: React.FC = () => {
     setState(prev => ({ ...prev, isLoading: true }));
     
     try {
-      const orchestration = await aiApi.createOrchestration({ type });
+      // Mock API call for now
+      console.log('Creating orchestration:', type);
+      const orchestration = {
+        id: `orchestration-${Date.now()}`,
+        name: `${type} Orchestration`,
+        description: `A ${type} orchestration`,
+        type,
+        status: 'planning' as OrchestrationStatus,
+        models: [],
+        agents: [],
+        workflows: [],
+        coordination: {} as OrchestrationCoordination,
+        optimization: {} as OrchestrationOptimization,
+        monitoring: {} as OrchestrationMonitoring,
+        governance: {} as OrchestrationGovernance,
+        security: {} as OrchestrationSecurity,
+        performance: {} as OrchestrationPerformance,
+        quality: {} as OrchestrationQuality,
+        compliance: {} as OrchestrationCompliance,
+        automation: {} as OrchestrationAutomation,
+        integration: {} as OrchestrationIntegration,
+        lifecycle: {} as OrchestrationLifecycle,
+        metadata: {} as OrchestrationMetadata,
+        created: new Date(),
+        updated: new Date(),
+        createdBy: 'admin',
+        updatedBy: 'admin',
+        tags: [type],
+        labels: { type, status: 'planning' }
+      };
+      
       setState(prev => ({
         ...prev,
         orchestrations: [...prev.orchestrations, orchestration],
@@ -1334,7 +2563,7 @@ export const IntelligenceCoordinator: React.FC = () => {
             onClick={handleRefreshData}
             disabled={state.isLoading}
           >
-            <Refresh className={`h-4 w-4 ${state.isLoading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-4 w-4 ${state.isLoading ? 'animate-spin' : ''}`} />
           </Button>
 
           <Button variant="outline" size="sm">

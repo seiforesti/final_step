@@ -1,0 +1,138 @@
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'primaryColor': '#0066cc',
+    'primaryTextColor': '#ffffff',
+    'primaryBorderColor': '#004499',
+    'lineColor': '#0066cc',
+    'secondaryColor': '#3399ff',
+    'tertiaryColor': '#009966',
+    'background': '#f8f9fa',
+    'mainBkg': '#ffffff',
+    'secondBkg': '#f0f8ff',
+    'tertiaryBkg': '#e6f7ff'
+  }
+}}%%
+
+graph TB
+    subgraph "🌐 Frontend Layer"
+        UI[UI<br/>React Frontend<br/>TypeScript + Material-UI]:::frontend
+        WS[WS<br/>WebSocket Client<br/>Real-time Updates]:::frontend
+        API_CLIENT[API<br/>REST + GraphQL<br/>Client Library]:::frontend
+    end
+    
+    subgraph "🚪 API Gateway Layer"
+        GATEWAY[Gateway<br/>FastAPI Gateway<br/>Load Balancer + Auth]:::gateway
+        AUTH[Auth<br/>JWT + OAuth 2.0<br/>Authentication Service]:::auth
+        RBAC[RBAC<br/>Permission Engine<br/>Role-Based Access Control]:::rbac
+        RATE_LIMIT[Rate Limit<br/>Circuit Breaker<br/>Request Throttling]:::rate
+    end
+    
+    subgraph "🏗️ Core Services Layer"
+        DS_SVC[Data Source<br/>Edge Computing<br/>Universal Connectivity]:::datasource
+        CAT_SVC[Catalog<br/>AI-Powered Discovery<br/>Asset Management]:::catalog
+        CLASS_SVC[Classification<br/>ML Classification<br/>Pattern Recognition]:::classification
+        RULE_SVC[Rule Sets<br/>Template Engine<br/>Compliance Rules]:::rules
+        SCAN_SVC[Scan Logic<br/>Workflow Orchestration<br/>Resource Management]:::scan
+        COMP_SVC[Compliance<br/>Policy Engine<br/>Regulatory Compliance]:::compliance
+        RBAC_SVC[RBAC Service<br/>Access Control<br/>Audit Logging]:::rbacservice
+    end
+    
+    subgraph "🤖 AI/ML Layer"
+        AI_SVC[AI Service<br/>Transformers + NLP<br/>Natural Language Processing]:::ai
+        ML_SVC[ML Service<br/>Scikit-learn + PyTorch<br/>Machine Learning]:::ml
+        NLP_SVC[NLP Service<br/>SpaCy + NLTK<br/>Text Processing]:::nlp
+        PRED_SVC[Prediction<br/>Time Series + Forecasting<br/>Predictive Analytics]:::prediction
+    end
+    
+    subgraph "💾 Data Layer"
+        PG[(PostgreSQL<br/>Primary Database<br/>ACID Compliance)]:::postgres
+        REDIS[(Redis<br/>Cache + Session<br/>In-Memory Store)]:::redis
+        MONGO[(MongoDB<br/>Document Store<br/>Flexible Schema)]:::mongodb
+        ES[(Elasticsearch<br/>Search Engine<br/>Full-Text Search)]:::elasticsearch
+    end
+    
+    subgraph "☁️ Infrastructure Layer"
+        DOCKER[Docker<br/>Containerization<br/>Microservices]:::docker
+        K8S[Kubernetes<br/>Orchestration<br/>Auto Scaling]:::kubernetes
+        MONITOR[Monitoring<br/>Prometheus + Grafana<br/>Observability]:::monitoring
+        LOG[Logging<br/>ELK Stack<br/>Centralized Logs]:::logging
+    end
+    
+    %% Frontend to Gateway connections
+    UI -.->|"HTTPS/WebSocket"| GATEWAY
+    WS -.->|"WebSocket"| GATEWAY
+    API_CLIENT -.->|"REST/GraphQL"| GATEWAY
+    
+    %% Gateway internal flow
+    GATEWAY --> AUTH
+    GATEWAY --> RBAC
+    GATEWAY --> RATE_LIMIT
+    
+    %% Authentication flow
+    AUTH --> DS_SVC
+    AUTH --> CAT_SVC
+    AUTH --> CLASS_SVC
+    AUTH --> RULE_SVC
+    AUTH --> SCAN_SVC
+    AUTH --> COMP_SVC
+    AUTH --> RBAC_SVC
+    
+    %% AI/ML integration
+    DS_SVC --> AI_SVC
+    CAT_SVC --> ML_SVC
+    CLASS_SVC --> NLP_SVC
+    SCAN_SVC --> PRED_SVC
+    
+    %% Data layer connections
+    DS_SVC --> PG
+    CAT_SVC --> PG
+    CLASS_SVC --> PG
+    RULE_SVC --> PG
+    SCAN_SVC --> PG
+    COMP_SVC --> PG
+    RBAC_SVC --> PG
+    
+    %% Caching connections
+    DS_SVC --> REDIS
+    CAT_SVC --> REDIS
+    SCAN_SVC --> REDIS
+    
+    %% Document store connections
+    DS_SVC --> MONGO
+    CAT_SVC --> MONGO
+    
+    %% Search connections
+    CAT_SVC --> ES
+    CLASS_SVC --> ES
+    
+    %% Infrastructure connections
+    DOCKER --> K8S
+    MONITOR --> K8S
+    LOG --> K8S
+    
+    %% Styling
+    classDef frontend fill:#e1f5fe,stroke:#01579b,stroke-width:2px,color:#000
+    classDef gateway fill:#f3e5f5,stroke:#4a148c,stroke-width:2px,color:#000
+    classDef auth fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#000
+    classDef rbac fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px,color:#000
+    classDef rate fill:#fce4ec,stroke:#880e4f,stroke-width:2px,color:#000
+    classDef datasource fill:#e0f2f1,stroke:#004d40,stroke-width:2px,color:#000
+    classDef catalog fill:#f1f8e9,stroke:#33691e,stroke-width:2px,color:#000
+    classDef classification fill:#fff8e1,stroke:#f57f17,stroke-width:2px,color:#000
+    classDef rules fill:#e3f2fd,stroke:#0d47a1,stroke-width:2px,color:#000
+    classDef scan fill:#f9fbe7,stroke:#827717,stroke-width:2px,color:#000
+    classDef compliance fill:#fce4ec,stroke:#c2185b,stroke-width:2px,color:#000
+    classDef rbacservice fill:#e8eaf6,stroke:#283593,stroke-width:2px,color:#000
+    classDef ai fill:#f3e5f5,stroke:#4a148c,stroke-width:2px,color:#000
+    classDef ml fill:#e1f5fe,stroke:#01579b,stroke-width:2px,color:#000
+    classDef nlp fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px,color:#000
+    classDef prediction fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#000
+    classDef postgres fill:#336791,stroke:#ffffff,stroke-width:2px,color:#ffffff
+    classDef redis fill:#dc382d,stroke:#ffffff,stroke-width:2px,color:#ffffff
+    classDef mongodb fill:#4db33d,stroke:#ffffff,stroke-width:2px,color:#ffffff
+    classDef elasticsearch fill:#f7df1e,stroke:#000000,stroke-width:2px,color:#000000
+    classDef docker fill:#2496ed,stroke:#ffffff,stroke-width:2px,color:#ffffff
+    classDef kubernetes fill:#326ce5,stroke:#ffffff,stroke-width:2px,color:#ffffff
+    classDef monitoring fill:#e6522c,stroke:#ffffff,stroke-width:2px,color:#ffffff
+    classDef logging fill:#ff6b35,stroke:#ffffff,stroke-width:2px,color:#ffffff

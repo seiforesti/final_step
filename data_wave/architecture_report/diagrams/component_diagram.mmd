@@ -1,0 +1,197 @@
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'primaryColor': '#0066cc',
+    'primaryTextColor': '#ffffff',
+    'primaryBorderColor': '#004499',
+    'lineColor': '#0066cc',
+    'secondaryColor': '#3399ff',
+    'tertiaryColor': '#009966',
+    'background': '#f8f9fa',
+    'mainBkg': '#ffffff',
+    'secondBkg': '#f0f8ff',
+    'tertiaryBkg': '#e6f7ff'
+  }
+}}%%
+
+graph TB
+    subgraph "🌐 Frontend Components"
+        UI[UI Components<br/>React + TypeScript<br/>Material-UI]:::frontend
+        DASHBOARD[Dashboard<br/>Real-time Analytics<br/>Interactive Charts]:::frontend
+        FORMS[Forms<br/>Data Entry<br/>Validation]:::frontend
+        CHARTS[Charts<br/>D3.js + Chart.js<br/>Data Visualization]:::frontend
+    end
+    
+    subgraph "🚪 API Gateway Components"
+        ROUTER[Router<br/>FastAPI Router<br/>Request Routing]:::gateway
+        MIDDLEWARE[Middleware<br/>CORS + Auth<br/>Request Processing]:::gateway
+        VALIDATOR[Validator<br/>Pydantic Models<br/>Data Validation]:::gateway
+        RESPONSE[Response<br/>JSON + Error<br/>Response Handling]:::gateway
+    end
+    
+    subgraph "🏗️ Data Source Management"
+        DS_CONN[Connection Manager<br/>Database Connections<br/>Pool Management]:::datasource
+        DS_DISCOVERY[Schema Discovery<br/>AI-Powered<br/>Metadata Extraction]:::datasource
+        DS_HEALTH[Health Monitor<br/>Connection Status<br/>Performance Metrics]:::datasource
+        DS_EDGE[Edge Computing<br/>Local Processing<br/>Distributed Logic]:::datasource
+    end
+    
+    subgraph "📚 Data Catalog System"
+        CAT_ASSET[Asset Manager<br/>Data Asset Registry<br/>Lifecycle Management]:::catalog
+        CAT_LINEAGE[Lineage Tracker<br/>Data Flow Mapping<br/>Dependency Analysis]:::catalog
+        CAT_SEARCH[Semantic Search<br/>Natural Language<br/>AI-Powered Search]:::catalog
+        CAT_QUALITY[Quality Manager<br/>Data Quality Rules<br/>Assessment Engine]:::catalog
+        CAT_GLOSSARY[Business Glossary<br/>Term Management<br/>Semantic Mapping]:::catalog
+    end
+    
+    subgraph "🏷️ Classification System"
+        CLASS_ML[ML Classifier<br/>Scikit-learn + PyTorch<br/>Automated Classification]:::classification
+        CLASS_PATTERN[Pattern Matcher<br/>Regex + NLP<br/>Pattern Recognition]:::classification
+        CLASS_RULES[Rule Engine<br/>Custom Rules<br/>Business Logic]:::classification
+        CLASS_LEARN[Learning Engine<br/>Continuous Learning<br/>Model Improvement]:::classification
+    end
+    
+    subgraph "📋 Scan Rule Sets"
+        RULE_TEMPLATE[Rule Templates<br/>Pre-built Rules<br/>Compliance Frameworks]:::rules
+        RULE_BUILDER[Rule Builder<br/>Visual Editor<br/>Drag & Drop]:::rules
+        RULE_VERSION[Version Control<br/>Rule History<br/>Change Tracking]:::rules
+        RULE_MARKET[Rule Marketplace<br/>Shared Rules<br/>Community]:::rules
+    end
+    
+    subgraph "🔍 Scan Logic System"
+        SCAN_WORKFLOW[Workflow Engine<br/>Multi-stage Execution<br/>Conditional Logic]:::scan
+        SCAN_ORCH[Orchestrator<br/>Distributed Coordination<br/>Resource Management]:::scan
+        SCAN_RESOURCE[Resource Manager<br/>CPU + Memory<br/>Dynamic Allocation]:::scan
+        SCAN_MONITOR[Monitor<br/>Progress Tracking<br/>Performance Metrics]:::scan
+    end
+    
+    subgraph "⚖️ Compliance System"
+        COMP_FRAMEWORK[Framework Manager<br/>GDPR + HIPAA + SOX<br/>Policy Templates]:::compliance
+        COMP_MONITOR[Compliance Monitor<br/>Real-time Checking<br/>Violation Detection]:::compliance
+        COMP_REPORT[Report Generator<br/>Executive Dashboards<br/>Audit Reports]:::compliance
+        COMP_RISK[Risk Assessor<br/>AI-Powered Risk<br/>Mitigation Strategies]:::compliance
+    end
+    
+    subgraph "👥 RBAC/Access Control"
+        RBAC_USER[User Manager<br/>User Lifecycle<br/>Profile Management]:::rbac
+        RBAC_ROLE[Role Manager<br/>Role Definition<br/>Permission Assignment]:::rbac
+        RBAC_PERM[Permission Manager<br/>Granular Permissions<br/>Resource Scoping]:::rbac
+        RBAC_AUDIT[Audit Logger<br/>Activity Tracking<br/>Compliance Logging]:::rbac
+    end
+    
+    subgraph "🤖 AI/ML Components"
+        AI_TRANSFORMER[Transformer<br/>Hugging Face<br/>NLP Processing]:::ai
+        AI_ML[ML Engine<br/>Scikit-learn<br/>Classification]:::ai
+        AI_NLP[NLP Processor<br/>SpaCy + NLTK<br/>Text Analysis]:::ai
+        AI_PREDICT[Predictor<br/>Time Series<br/>Forecasting]:::ai
+    end
+    
+    subgraph "💾 Data Storage"
+        PG_MAIN[(PostgreSQL<br/>Primary Database<br/>ACID Transactions)]:::postgres
+        REDIS_CACHE[(Redis<br/>Cache + Session<br/>High Performance)]:::redis
+        MONGO_DOC[(MongoDB<br/>Document Store<br/>Flexible Schema)]:::mongodb
+        ES_SEARCH[(Elasticsearch<br/>Search Index<br/>Full-Text Search)]:::elasticsearch
+    end
+    
+    %% Frontend connections
+    UI --> DASHBOARD
+    UI --> FORMS
+    UI --> CHARTS
+    
+    %% API Gateway connections
+    ROUTER --> MIDDLEWARE
+    MIDDLEWARE --> VALIDATOR
+    VALIDATOR --> RESPONSE
+    
+    %% Data Source connections
+    DS_CONN --> DS_DISCOVERY
+    DS_DISCOVERY --> DS_HEALTH
+    DS_HEALTH --> DS_EDGE
+    
+    %% Catalog connections
+    CAT_ASSET --> CAT_LINEAGE
+    CAT_ASSET --> CAT_SEARCH
+    CAT_ASSET --> CAT_QUALITY
+    CAT_ASSET --> CAT_GLOSSARY
+    
+    %% Classification connections
+    CLASS_ML --> CLASS_PATTERN
+    CLASS_PATTERN --> CLASS_RULES
+    CLASS_RULES --> CLASS_LEARN
+    
+    %% Rule Sets connections
+    RULE_TEMPLATE --> RULE_BUILDER
+    RULE_BUILDER --> RULE_VERSION
+    RULE_VERSION --> RULE_MARKET
+    
+    %% Scan Logic connections
+    SCAN_WORKFLOW --> SCAN_ORCH
+    SCAN_ORCH --> SCAN_RESOURCE
+    SCAN_RESOURCE --> SCAN_MONITOR
+    
+    %% Compliance connections
+    COMP_FRAMEWORK --> COMP_MONITOR
+    COMP_MONITOR --> COMP_REPORT
+    COMP_REPORT --> COMP_RISK
+    
+    %% RBAC connections
+    RBAC_USER --> RBAC_ROLE
+    RBAC_ROLE --> RBAC_PERM
+    RBAC_PERM --> RBAC_AUDIT
+    
+    %% AI/ML connections
+    AI_TRANSFORMER --> AI_ML
+    AI_ML --> AI_NLP
+    AI_NLP --> AI_PREDICT
+    
+    %% Cross-module connections
+    DS_EDGE --> CAT_ASSET
+    CAT_ASSET --> CLASS_ML
+    CLASS_ML --> RULE_TEMPLATE
+    RULE_TEMPLATE --> SCAN_WORKFLOW
+    SCAN_WORKFLOW --> COMP_MONITOR
+    COMP_MONITOR --> RBAC_AUDIT
+    
+    %% AI/ML integration
+    DS_DISCOVERY --> AI_TRANSFORMER
+    CAT_SEARCH --> AI_NLP
+    CLASS_ML --> AI_ML
+    SCAN_ORCH --> AI_PREDICT
+    
+    %% Data storage connections
+    DS_CONN --> PG_MAIN
+    CAT_ASSET --> PG_MAIN
+    CLASS_ML --> PG_MAIN
+    RULE_TEMPLATE --> PG_MAIN
+    SCAN_WORKFLOW --> PG_MAIN
+    COMP_FRAMEWORK --> PG_MAIN
+    RBAC_USER --> PG_MAIN
+    
+    %% Caching connections
+    DS_CONN --> REDIS_CACHE
+    CAT_ASSET --> REDIS_CACHE
+    SCAN_WORKFLOW --> REDIS_CACHE
+    
+    %% Document store connections
+    DS_CONN --> MONGO_DOC
+    CAT_ASSET --> MONGO_DOC
+    
+    %% Search connections
+    CAT_SEARCH --> ES_SEARCH
+    CLASS_PATTERN --> ES_SEARCH
+    
+    %% Styling
+    classDef frontend fill:#e1f5fe,stroke:#01579b,stroke-width:2px,color:#000
+    classDef gateway fill:#f3e5f5,stroke:#4a148c,stroke-width:2px,color:#000
+    classDef datasource fill:#e0f2f1,stroke:#004d40,stroke-width:2px,color:#000
+    classDef catalog fill:#f1f8e9,stroke:#33691e,stroke-width:2px,color:#000
+    classDef classification fill:#fff8e1,stroke:#f57f17,stroke-width:2px,color:#000
+    classDef rules fill:#e3f2fd,stroke:#0d47a1,stroke-width:2px,color:#000
+    classDef scan fill:#f9fbe7,stroke:#827717,stroke-width:2px,color:#000
+    classDef compliance fill:#fce4ec,stroke:#c2185b,stroke-width:2px,color:#000
+    classDef rbac fill:#e8eaf6,stroke:#283593,stroke-width:2px,color:#000
+    classDef ai fill:#f3e5f5,stroke:#4a148c,stroke-width:2px,color:#000
+    classDef postgres fill:#336791,stroke:#ffffff,stroke-width:2px,color:#ffffff
+    classDef redis fill:#dc382d,stroke:#ffffff,stroke-width:2px,color:#ffffff
+    classDef mongodb fill:#4db33d,stroke:#ffffff,stroke-width:2px,color:#ffffff
+    classDef elasticsearch fill:#f7df1e,stroke:#000000,stroke-width:2px,color:#000000

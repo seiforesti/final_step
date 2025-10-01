@@ -407,6 +407,94 @@ services:
           memory: 128M
           cpus: '0.1'
 
+  # Kubernetes API Server (Enterprise Orchestration)
+  kubernetes-api:
+    image: k8s.gcr.io/kube-apiserver:v1.28.0
+    container_name: data_governance_k8s_api
+    ports:
+      - "6443:6443"
+    environment:
+      - KUBERNETES_SERVICE_HOST=kubernetes-api
+      - KUBERNETES_SERVICE_PORT=6443
+      - KUBE_API_ARGS=--etcd-servers=http://etcd:2379 --service-cluster-ip-range=10.96.0.0/12 --insecure-bind-address=0.0.0.0 --insecure-port=8080 --enable-admission-plugins=NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,ResourceQuota
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'
+        reservations:
+          memory: 512M
+          cpus: '0.25'
+
+  # Kubernetes Controller Manager
+  kubernetes-controller:
+    image: k8s.gcr.io/kube-controller-manager:v1.28.0
+    container_name: data_governance_k8s_controller
+    environment:
+      - KUBERNETES_SERVICE_HOST=kubernetes-api
+      - KUBERNETES_SERVICE_PORT=6443
+      - KUBE_CONTROLLER_MANAGER_ARGS=--master=http://kubernetes-api:8080 --service-account-private-key-file=/etc/kubernetes/serviceaccount.key
+    restart: unless-stopped
+    depends_on:
+      - kubernetes-api
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.25'
+        reservations:
+          memory: 256M
+          cpus: '0.1'
+
+  # Kubernetes Scheduler
+  kubernetes-scheduler:
+    image: k8s.gcr.io/kube-scheduler:v1.28.0
+    container_name: data_governance_k8s_scheduler
+    environment:
+      - KUBERNETES_SERVICE_HOST=kubernetes-api
+      - KUBERNETES_SERVICE_PORT=6443
+      - KUBE_SCHEDULER_ARGS=--master=http://kubernetes-api:8080
+    restart: unless-stopped
+    depends_on:
+      - kubernetes-api
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.1'
+        reservations:
+          memory: 128M
+          cpus: '0.05'
+
+  # etcd for Kubernetes
+  etcd:
+    image: k8s.gcr.io/etcd:3.5.9-0
+    container_name: data_governance_etcd
+    ports:
+      - "2379:2379"
+    environment:
+      - ETCD_NAME=etcd-server
+      - ETCD_DATA_DIR=/var/lib/etcd
+      - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd:2379
+      - ETCD_LISTEN_PEER_URLS=http://0.0.0.0:2380
+      - ETCD_INITIAL_ADVERTISE_PEER_URLS=http://etcd:2380
+      - ETCD_INITIAL_CLUSTER=etcd-server=http://etcd:2380
+      - ETCD_INITIAL_CLUSTER_TOKEN=etcd-cluster
+      - ETCD_INITIAL_CLUSTER_STATE=new
+    volumes:
+      - etcd_data:/var/lib/etcd
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.25'
+        reservations:
+          memory: 256M
+          cpus: '0.1'
+
 volumes:
   postgres_data:
   redis_data:
@@ -415,6 +503,7 @@ volumes:
   prometheus_data:
   grafana_data:
   pgadmin_data:
+  etcd_data:
 
 networks:
   default:

@@ -1,0 +1,72 @@
+\babel@toc {french}{}\relax 
+\babel@toc {french}{}\relax 
+\addvspace {10\p@ }
+\contentsline {xchapter}{Contexte Général et État de l'Art}{7}{chapter.1}%
+\contentsline {figure}{\numberline {\if@rl \I {1.1}\else \textLR {1.1}\fi }{\ignorespaces Structure organisationnelle de NxC International avec Centre d'Excellence binational}}{9}{figure.caption.10}%
+\contentsline {figure}{\numberline {\if@rl \I {2.1}\else \textLR {1.2}\fi }{\ignorespaces Défis critiques de la gouvernance des données dans l'entreprise moderne}}{10}{figure.caption.11}%
+\contentsline {figure}{\numberline {\if@rl \I {3.1}\else \textLR {1.3}\fi }{\ignorespaces Fragmentation des systèmes et silos de données dans l'entreprise moderne}}{11}{figure.caption.13}%
+\contentsline {figure}{\numberline {\if@rl \I {4.1}\else \textLR {1.4}\fi }{\ignorespaces Frameworks de conformité réglementaire (GDPR, HIPAA, SOX, PCI-DSS)}}{13}{figure.caption.14}%
+\contentsline {figure}{\numberline {\if@rl \I {5.1}\else \textLR {1.5}\fi }{\ignorespaces Architecture de Microsoft Azure Purview}}{15}{figure.caption.16}%
+\contentsline {figure}{\numberline {\if@rl \I {6.1}\else \textLR {1.6}\fi }{\ignorespaces Processus de connexion et extraction via Integration Runtime dans Azure Purview}}{15}{figure.caption.18}%
+\contentsline {figure}{\numberline {\if@rl \I {7.1}\else \textLR {1.7}\fi }{\ignorespaces Limitations architecturales d'Azure Purview}}{16}{figure.caption.19}%
+\contentsline {figure}{\numberline {\if@rl \I {8.1}\else \textLR {1.8}\fi }{\ignorespaces Limitations de Databricks Unity Catalog pour la gouvernance d'entreprise}}{18}{figure.caption.21}%
+\contentsline {figure}{\numberline {\if@rl \I {9.1}\else \textLR {1.9}\fi }{\ignorespaces Support universel des bases de données dans DataWave}}{19}{figure.caption.23}%
+\contentsline {figure}{\numberline {\if@rl \I {10.1}\else \textLR {1.10}\fi }{\ignorespaces Architecture edge computing distribuée vs approche centralisée}}{19}{figure.caption.24}%
+\contentsline {figure}{\numberline {\if@rl \I {11.1}\else \textLR {1.11}\fi }{\ignorespaces Système de classification à trois tiers de DataWave}}{20}{figure.caption.25}%
+\contentsline {figure}{\numberline {\if@rl \I {12.1}\else \textLR {1.12}\fi }{\ignorespaces Architecture des sept modules de gouvernance DataWave}}{20}{figure.caption.26}%
+\contentsline {figure}{\numberline {\if@rl \I {13.1}\else \textLR {1.13}\fi }{\ignorespaces Comparaison des performances DataWave vs concurrents}}{20}{figure.caption.27}%
+\contentsline {figure}{\numberline {\if@rl \I {14.1}\else \textLR {1.14}\fi }{\ignorespaces Positionnement de DataWave face à la concurrence}}{22}{figure.caption.29}%
+\contentsline {figure}{\numberline {\if@rl \I {15.1}\else \textLR {1.15}\fi }{\ignorespaces Avantages compétitifs de DataWave (diagramme radar)}}{22}{figure.caption.30}%
+\addvspace {10\p@ }
+\contentsline {xchapter}{Analyse et Conception du Système}{26}{chapter.2}%
+\contentsline {figure}{\numberline {\if@rl \I {1.2}\else \textLR {2.1}\fi }{\ignorespaces Diagramme des acteurs du système DataWave}}{28}{figure.caption.31}%
+\contentsline {figure}{\numberline {\if@rl \I {2.2}\else \textLR {2.2}\fi }{\ignorespaces Architecture microservices de DataWave avec les 7 modules de gouvernance}}{34}{figure.caption.35}%
+\contentsline {figure}{\numberline {\if@rl \I {3.2}\else \textLR {2.3}\fi }{\ignorespaces Architecture edge computing révolutionnaire de DataWave}}{35}{figure.caption.36}%
+\contentsline {figure}{\numberline {\if@rl \I {4.2}\else \textLR {2.4}\fi }{\ignorespaces Interactions entre les 7 modules de gouvernance de DataWave}}{38}{figure.caption.38}%
+\addvspace {10\p@ }
+\contentsline {xchapter}{Réalisation et Implémentation}{43}{chapter.3}%
+\contentsline {figure}{\numberline {\if@rl \I {1.3}\else \textLR {3.1}\fi }{\ignorespaces Hiérarchie des connecteurs spécialisés avec LocationAwareConnector}}{45}{figure.caption.40}%
+\contentsline {figure}{\numberline {\if@rl \I {2.3}\else \textLR {3.2}\fi }{\ignorespaces Interface de gestion des sources de données avec monitoring en temps réel}}{48}{figure.caption.45}%
+\contentsline {figure}{\numberline {\if@rl \I {3.3}\else \textLR {3.3}\fi }{\ignorespaces Configuration avancée d'une source PostgreSQL avec SSL/TLS}}{49}{figure.caption.46}%
+\contentsline {figure}{\numberline {\if@rl \I {4.3}\else \textLR {3.4}\fi }{\ignorespaces Test de connexion avec métriques de performance et diagnostics}}{50}{figure.caption.47}%
+\contentsline {figure}{\numberline {\if@rl \I {5.3}\else \textLR {3.5}\fi }{\ignorespaces Visualisation interactive du data lineage au niveau colonne}}{52}{figure.caption.49}%
+\contentsline {figure}{\numberline {\if@rl \I {6.3}\else \textLR {3.6}\fi }{\ignorespaces Pipeline de classification multi-niveaux avec scoring de confiance}}{54}{figure.caption.51}%
+\contentsline {figure}{\numberline {\if@rl \I {7.3}\else \textLR {3.7}\fi }{\ignorespaces Arbre hiérarchique de sensibilité avec héritage automatique}}{56}{figure.caption.53}%
+\contentsline {figure}{\numberline {\if@rl \I {8.3}\else \textLR {3.8}\fi }{\ignorespaces Système de scoring de confiance multi-facteurs}}{58}{figure.caption.55}%
+\contentsline {figure}{\numberline {\if@rl \I {9.3}\else \textLR {3.9}\fi }{\ignorespaces Interface de gestion des règles de classification avec bibliothèque}}{59}{figure.caption.56}%
+\contentsline {figure}{\numberline {\if@rl \I {10.3}\else \textLR {3.10}\fi }{\ignorespaces Configuration avancée d'une règle PII avec patterns multiples}}{59}{figure.caption.57}%
+\contentsline {figure}{\numberline {\if@rl \I {11.3}\else \textLR {3.11}\fi }{\ignorespaces Résultats de classification avec scoring de confiance et validation}}{60}{figure.caption.58}%
+\contentsline {figure}{\numberline {\if@rl \I {12.3}\else \textLR {3.12}\fi }{\ignorespaces Diagramme d'états du cycle de vie des règles de scan}}{61}{figure.caption.60}%
+\contentsline {figure}{\numberline {\if@rl \I {13.3}\else \textLR {3.13}\fi }{\ignorespaces Bibliothèque de patterns avec templates pré-construits et partage}}{64}{figure.caption.64}%
+\contentsline {figure}{\numberline {\if@rl \I {14.3}\else \textLR {3.14}\fi }{\ignorespaces Analytics d'utilisation des patterns avec métriques de performance}}{64}{figure.caption.65}%
+\contentsline {figure}{\numberline {\if@rl \I {15.3}\else \textLR {3.15}\fi }{\ignorespaces Interface de création de règle de scan avec assistant guidé}}{65}{figure.caption.66}%
+\contentsline {figure}{\numberline {\if@rl \I {16.3}\else \textLR {3.16}\fi }{\ignorespaces Configuration avancée avec stratégies d'optimisation et d'exécution}}{66}{figure.caption.67}%
+\contentsline {figure}{\numberline {\if@rl \I {17.3}\else \textLR {3.17}\fi }{\ignorespaces Architecture du workflow engine avec orchestration multi-étapes}}{67}{figure.caption.68}%
+\contentsline {figure}{\numberline {\if@rl \I {18.3}\else \textLR {3.18}\fi }{\ignorespaces Architecture d'orchestration distribuée sur edge nodes}}{69}{figure.caption.70}%
+\contentsline {figure}{\numberline {\if@rl \I {19.3}\else \textLR {3.19}\fi }{\ignorespaces Allocation dynamique de ressources avec load balancing intelligent}}{69}{figure.caption.71}%
+\contentsline {figure}{\numberline {\if@rl \I {20.3}\else \textLR {3.20}\fi }{\ignorespaces Dashboard de monitoring en temps réel avec métriques de performance}}{70}{figure.caption.72}%
+\contentsline {figure}{\numberline {\if@rl \I {21.3}\else \textLR {3.21}\fi }{\ignorespaces Visualisation de la progression des scans avec timeline détaillée}}{71}{figure.caption.73}%
+\contentsline {figure}{\numberline {\if@rl \I {22.3}\else \textLR {3.22}\fi }{\ignorespaces Système d'alerting multi-niveaux avec escalation automatique}}{72}{figure.caption.74}%
+\contentsline {figure}{\numberline {\if@rl \I {23.3}\else \textLR {3.23}\fi }{\ignorespaces Architecture du système de conformité multi-frameworks}}{73}{figure.caption.76}%
+\contentsline {figure}{\numberline {\if@rl \I {24.3}\else \textLR {3.24}\fi }{\ignorespaces Processus d'évaluation automatique de conformité}}{76}{figure.caption.79}%
+\contentsline {figure}{\numberline {\if@rl \I {25.3}\else \textLR {3.25}\fi }{\ignorespaces Gestion des issues de conformité avec workflows de remédiation}}{76}{figure.caption.80}%
+\contentsline {figure}{\numberline {\if@rl \I {26.3}\else \textLR {3.26}\fi }{\ignorespaces Dashboard exécutif de conformité multi-frameworks}}{77}{figure.caption.81}%
+\contentsline {figure}{\numberline {\if@rl \I {27.3}\else \textLR {3.27}\fi }{\ignorespaces Rapport d'audit GDPR détaillé avec recommandations}}{78}{figure.caption.82}%
+\contentsline {figure}{\numberline {\if@rl \I {28.3}\else \textLR {3.28}\fi }{\ignorespaces Architecture RBAC avec permissions granulaires}}{79}{figure.caption.84}%
+\addvspace {10\p@ }
+\contentsline {xchapter}{Tests, Déploiement et Résultats}{84}{chapter.4}%
+\contentsline {figure}{\numberline {\if@rl \I {1.4}\else \textLR {4.1}\fi }{\ignorespaces Benchmark de performance : DataWave vs Azure Purview vs Databricks}}{87}{figure.caption.90}%
+\contentsline {figure}{\numberline {\if@rl \I {2.4}\else \textLR {4.2}\fi }{\ignorespaces Architecture de déploiement Kubernetes multi-zones}}{89}{figure.caption.94}%
+\contentsline {figure}{\numberline {\if@rl \I {3.4}\else \textLR {4.3}\fi }{\ignorespaces Dashboard Grafana de monitoring en temps réel}}{91}{figure.caption.96}%
+\contentsline {figure}{\numberline {\if@rl \I {4.4}\else \textLR {4.4}\fi }{\ignorespaces Performance de scanning sur 6 mois (amélioration continue)}}{93}{figure.caption.100}%
+\contentsline {figure}{\numberline {\if@rl \I {5.4}\else \textLR {4.5}\fi }{\ignorespaces Scalabilité horizontale : throughput vs nombre de pods}}{94}{figure.caption.102}%
+\contentsline {figure}{\numberline {\if@rl \I {6.4}\else \textLR {4.6}\fi }{\ignorespaces Évolution de la précision de classification sur 6 mois}}{95}{figure.caption.105}%
+\contentsline {figure}{\numberline {\if@rl \I {7.4}\else \textLR {4.7}\fi }{\ignorespaces Comparaison radar : DataWave vs Azure Purview vs Databricks vs Collibra}}{97}{figure.caption.109}%
+\vspace {3.8mm}
+\contentsline {figure}{Annexe 2.1~~~Logo d'entreprise}{106}{table.5.1}%
+\babel@toc {arabic}{}\relax 
+\babel@toc {french}{}\relax 
+\babel@toc {english}{}\relax 
+\babel@toc {french}{}\relax 
+\babel@toc {arabic}{}\relax 
+\babel@toc {french}{}\relax 

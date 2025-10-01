@@ -1,0 +1,558 @@
+@startuml DataWave_Component_Architecture
+!theme aws-orange
+
+title DataWave Enterprise - Component Architecture
+
+skinparam backgroundColor #f8f9fa
+skinparam defaultFontName "Segoe UI"
+skinparam roundcorner 10
+skinparam shadowing true
+
+' Component styling
+skinparam component {
+    BackgroundColor #e3f2fd
+    BorderColor #1976d2
+    FontSize 12
+    FontStyle bold
+}
+
+' Frontend Components
+package "Frontend Layer" {
+    component [Racine Main Manager] as RMM {
+        - Advanced Navigation
+        - Quick Actions Sidebar
+        - Layout Orchestrator
+        - Tab Manager
+    }
+    
+    component [Advanced Catalog UI] as CatalogUI {
+        - Asset Discovery
+        - Metadata Management
+        - Quality Metrics
+        - Lineage Visualization
+    }
+    
+    component [Scan Management UI] as ScanUI {
+        - Rule Configuration
+        - Execution Monitoring
+        - Performance Analytics
+        - Error Handling
+    }
+    
+    component [Compliance Dashboard] as ComplianceUI {
+        - Framework Tracking
+        - Assessment Reports
+        - Risk Management
+        - Audit Trails
+    }
+    
+    component [AI/ML Interface] as AIUI {
+        - Model Configuration
+        - Prediction Monitoring
+        - Performance Metrics
+        - Training Management
+    }
+}
+
+' API Gateway Layer
+package "API Gateway Layer" {
+    component [Smart Proxy Router] as Proxy {
+        - Route Discovery
+        - Load Balancing
+        - Circuit Breaker
+        - Performance Monitoring
+    }
+    
+    component [Authentication Gateway] as AuthGW {
+        - OAuth Integration
+        - JWT Management
+        - MFA Handling
+        - Session Management
+    }
+    
+    component [Rate Limiter] as RateLimit {
+        - Request Throttling
+        - Quota Management
+        - DDoS Protection
+        - Analytics
+    }
+}
+
+' Service Layer
+package "Service Layer" {
+    component [Catalog Service] as CatalogSvc {
+        - Asset Management
+        - Metadata Processing
+        - Quality Assessment
+        - Lineage Tracking
+    }
+    
+    component [Scan Orchestration] as ScanSvc {
+        - Rule Engine
+        - Execution Scheduler
+        - Performance Monitor
+        - Error Handler
+    }
+    
+    component [AI/ML Service] as AISvc {
+        - Model Management
+        - Prediction Engine
+        - Training Pipeline
+        - Performance Analytics
+    }
+    
+    component [Compliance Service] as CompSvc {
+        - Framework Manager
+        - Assessment Engine
+        - Risk Calculator
+        - Audit Logger
+    }
+    
+    component [Racine Orchestrator] as RacineSvc {
+        - Workflow Engine
+        - Collaboration Manager
+        - Workspace Handler
+        - Integration Hub
+    }
+}
+
+' Data Layer
+package "Data Layer" {
+    component [PostgreSQL Cluster] as PostgreSQL {
+        - Primary Database
+        - Read Replicas
+        - Connection Pooling
+        - Query Optimization
+    }
+    
+    component [Redis Cache] as Redis {
+        - Session Storage
+        - Query Cache
+        - Real-time Data
+        - Pub/Sub Messaging
+    }
+    
+    component [Vector Database] as VectorDB {
+        - Semantic Embeddings
+        - Similarity Search
+        - AI Model Storage
+        - Knowledge Graph
+    }
+}
+
+' External Integrations
+package "External Systems" {
+    component [Cloud Providers] as CloudProviders {
+        - AWS Services
+        - Azure Resources
+        - GCP Integration
+        - Multi-cloud Support
+    }
+    
+    component [Enterprise Systems] as EnterpriseSys {
+        - Active Directory
+        - LDAP Integration
+        - SAML/SSO
+        - Legacy Systems
+    }
+}
+
+' Component Relationships
+RMM --> Proxy : "API Calls"
+CatalogUI --> Proxy : "Catalog Operations"
+ScanUI --> Proxy : "Scan Management"
+ComplianceUI --> Proxy : "Compliance Tracking"
+AIUI --> Proxy : "AI/ML Operations"
+
+Proxy --> AuthGW : "Authentication"
+Proxy --> RateLimit : "Rate Control"
+Proxy --> CatalogSvc : "Route to Services"
+Proxy --> ScanSvc : "Route to Services"
+Proxy --> AISvc : "Route to Services"
+Proxy --> CompSvc : "Route to Services"
+Proxy --> RacineSvc : "Route to Services"
+
+CatalogSvc --> PostgreSQL : "Data Operations"
+ScanSvc --> PostgreSQL : "Execution Data"
+AISvc --> VectorDB : "Model Storage"
+CompSvc --> PostgreSQL : "Compliance Data"
+RacineSvc --> Redis : "Session Management"
+
+CatalogSvc --> Redis : "Caching"
+ScanSvc --> Redis : "Performance Cache"
+AISvc --> Redis : "Model Cache"
+
+RacineSvc --> CloudProviders : "Cloud Integration"
+AuthGW --> EnterpriseSys : "Identity Provider"
+
+note top of Proxy : "Smart routing with\nfailover and monitoring"
+note top of PostgreSQL : "High-availability cluster\nwith read replicas"
+note top of VectorDB : "Specialized storage for\nAI embeddings and models"
+
+@enduml
+
+@startuml DataWave_Package_Dependencies
+!theme aws-orange
+
+title DataWave Enterprise - Package Structure & Dependencies
+
+skinparam backgroundColor #f8f9fa
+skinparam defaultFontName "Segoe UI"
+skinparam roundcorner 8
+skinparam shadowing true
+
+' Package styling
+skinparam package {
+    BackgroundColor #e8f5e8
+    BorderColor #4caf50
+    FontSize 14
+    FontStyle bold
+}
+
+' Frontend Packages
+package "pursight_frontend" {
+    package "src/components" {
+        package "Racine-Main-Manager" {
+            [AdvancedNavigationSidebar]
+            [AdvancedQuickActionsSidebar]
+            [MasterLayoutOrchestrator]
+            [TabManager]
+        }
+        
+        package "Advanced-Catalog" {
+            [AssetDiscovery]
+            [MetadataViewer]
+            [QualityMetrics]
+            [LineageGraph]
+        }
+        
+        package "Advanced-Scan-Logic" {
+            [RuleSetManager]
+            [ExecutionMonitor]
+            [PerformanceAnalytics]
+        }
+        
+        package "Compliance-Rule" {
+            [FrameworkTracker]
+            [AssessmentReports]
+            [RiskDashboard]
+        }
+    }
+    
+    package "src/services" {
+        [ApiClient]
+        [AuthService]
+        [WebSocketManager]
+        [StateManager]
+    }
+}
+
+' Backend Packages
+package "app" {
+    package "models" {
+        package "advanced_catalog_models" {
+            [IntelligentDataAsset]
+            [LineageRelationship]
+            [AssetTag]
+        }
+        
+        package "scan_models" {
+            [DataSource]
+            [ScanRuleSet]
+            [ScanExecution]
+        }
+        
+        package "ai_models" {
+            [AIModelConfiguration]
+            [MLPrediction]
+            [AITaskExecution]
+        }
+        
+        package "compliance_models" {
+            [ComplianceRequirement]
+            [ComplianceAssessment]
+        }
+        
+        package "auth_models" {
+            [User]
+            [Role]
+            [UserRole]
+        }
+        
+        package "racine_models" {
+            [RacineOrchestrationMaster]
+            [RacineWorkspace]
+            [RacineCollaborationSession]
+        }
+    }
+    
+    package "services" {
+        package "advanced_ai" {
+            [ModelManager]
+            [PredictionEngine]
+            [TrainingPipeline]
+        }
+        
+        package "scan_orchestration" {
+            [ScanScheduler]
+            [RuleEngine]
+            [PerformanceMonitor]
+        }
+        
+        package "enterprise_integration" {
+            [CloudConnector]
+            [LegacyAdapter]
+            [DataPipeline]
+        }
+        
+        package "intelligent_discovery" {
+            [AssetDiscoveryEngine]
+            [MetadataExtractor]
+            [QualityAnalyzer]
+        }
+    }
+    
+    package "api/routes" {
+        package "enterprise_apis" {
+            [CatalogAPI]
+            [ScanAPI]
+            [ComplianceAPI]
+        }
+        
+        package "ai_routes" {
+            [ModelAPI]
+            [PredictionAPI]
+            [TrainingAPI]
+        }
+        
+        package "auth_routes" {
+            [AuthenticationAPI]
+            [AuthorizationAPI]
+            [UserManagementAPI]
+        }
+    }
+}
+
+' Core Infrastructure
+package "infrastructure" {
+    package "database" {
+        [ConnectionManager]
+        [MigrationHandler]
+        [QueryOptimizer]
+    }
+    
+    package "cache" {
+        [RedisManager]
+        [CacheStrategy]
+        [SessionHandler]
+    }
+    
+    package "security" {
+        [EncryptionService]
+        [TokenManager]
+        [AuditLogger]
+    }
+}
+
+' Dependencies
+pursight_frontend ..> app : "API Calls"
+[ApiClient] ..> enterprise_apis : "HTTP Requests"
+[AuthService] ..> auth_routes : "Authentication"
+[WebSocketManager] ..> app : "Real-time Updates"
+
+enterprise_apis ..> services : "Business Logic"
+ai_routes ..> advanced_ai : "AI Operations"
+auth_routes ..> auth_models : "User Management"
+
+services ..> models : "Data Access"
+advanced_ai ..> ai_models : "Model Storage"
+scan_orchestration ..> scan_models : "Scan Data"
+intelligent_discovery ..> advanced_catalog_models : "Asset Management"
+
+models ..> infrastructure : "Database Operations"
+services ..> cache : "Performance Optimization"
+api/routes ..> security : "Security Services"
+
+note top of pursight_frontend : "React/TypeScript frontend\nwith 447 components"
+note top of app : "FastAPI backend with\n143 services, 59 models"
+note top of infrastructure : "Shared infrastructure\nservices and utilities"
+
+@enduml
+
+@startuml DataWave_Core_Classes
+!theme aws-orange
+
+title DataWave Enterprise - Core Class Relationships
+
+skinparam backgroundColor #f8f9fa
+skinparam defaultFontName "Segoe UI"
+skinparam roundcorner 8
+skinparam shadowing true
+
+' Class styling
+skinparam class {
+    BackgroundColor #fff3e0
+    BorderColor #f57c00
+    AttributeFontColor #333
+    AttributeFontSize 10
+}
+
+' Core Domain Classes
+class IntelligentDataAsset {
+    -id: int
+    -asset_uuid: str
+    -qualified_name: str
+    -asset_type: AssetType
+    -quality_score: float
+    -semantic_tags: List[str]
+    -ai_confidence_score: float
+    -data_source_id: int
+    +calculate_quality_metrics(): float
+    +update_semantic_tags(tags: List[str]): void
+    +generate_ai_description(): str
+    +get_lineage_relationships(): List[LineageRelationship]
+}
+
+class DataSource {
+    -id: int
+    -name: str
+    -source_type: DataSourceType
+    -host: str
+    -port: int
+    -encrypted_password: str
+    -status: DataSourceStatus
+    +test_connection(): bool
+    +discover_assets(): List[IntelligentDataAsset]
+    +execute_scan(rule_set: ScanRuleSet): ScanExecution
+    +get_compliance_status(): ComplianceStatus
+}
+
+class AIModelConfiguration {
+    -id: int
+    -model_name: str
+    -model_type: AIModelType
+    -configuration: dict
+    -performance_metrics: dict
+    +train_model(data: TrainingData): void
+    +predict(input_data: dict): MLPrediction
+    +evaluate_performance(): dict
+    +optimize_hyperparameters(): void
+}
+
+class ComplianceRequirement {
+    -id: int
+    -framework: ComplianceFramework
+    -requirement_id: str
+    -status: ComplianceStatus
+    -risk_level: str
+    -compliance_percentage: float
+    +assess_compliance(): ComplianceAssessment
+    +generate_report(): ComplianceReport
+    +calculate_risk_score(): float
+    +update_remediation_plan(): void
+}
+
+class User {
+    -id: int
+    -email: str
+    -hashed_password: str
+    -mfa_enabled: bool
+    -role: str
+    -organization_id: int
+    +authenticate(password: str): bool
+    +enable_mfa(): void
+    +get_permissions(): List[Permission]
+    +create_orchestration(): RacineOrchestrationMaster
+}
+
+class RacineOrchestrationMaster {
+    -id: str
+    -orchestration_name: str
+    -workflow_definition: dict
+    -status: str
+    -organization_id: int
+    -created_by: int
+    +execute_workflow(): WorkflowExecution
+    +pause_orchestration(): void
+    +resume_orchestration(): void
+    +get_execution_history(): List[WorkflowExecution]
+}
+
+' Service Classes
+class CatalogService {
+    -asset_repository: AssetRepository
+    -quality_analyzer: QualityAnalyzer
+    -lineage_tracker: LineageTracker
+    +discover_assets(source: DataSource): List[IntelligentDataAsset]
+    +analyze_quality(asset: IntelligentDataAsset): QualityMetrics
+    +track_lineage(asset: IntelligentDataAsset): LineageGraph
+    +generate_metadata(asset: IntelligentDataAsset): dict
+}
+
+class ScanOrchestrationService {
+    -scan_scheduler: ScanScheduler
+    -rule_engine: RuleEngine
+    -performance_monitor: PerformanceMonitor
+    +schedule_scan(source: DataSource, rules: ScanRuleSet): ScanExecution
+    +execute_scan(execution: ScanExecution): ScanResult
+    +monitor_performance(execution: ScanExecution): PerformanceMetrics
+    +handle_errors(execution: ScanExecution): ErrorReport
+}
+
+class AIService {
+    -model_manager: ModelManager
+    -prediction_engine: PredictionEngine
+    -training_pipeline: TrainingPipeline
+    +configure_model(config: AIModelConfiguration): void
+    +generate_predictions(input: dict): MLPrediction
+    +train_model(data: TrainingData): TrainingResult
+    +evaluate_model(model: AIModelConfiguration): EvaluationMetrics
+}
+
+' Repository Classes
+abstract class BaseRepository {
+    #db_session: Session
+    +create(entity: T): T
+    +get_by_id(id: int): T
+    +update(entity: T): T
+    +delete(id: int): bool
+    +get_all(): List[T]
+}
+
+class AssetRepository {
+    +find_by_data_source(source_id: int): List[IntelligentDataAsset]
+    +find_by_quality_score(min_score: float): List[IntelligentDataAsset]
+    +search_by_semantic_tags(tags: List[str]): List[IntelligentDataAsset]
+    +get_lineage_graph(asset_id: int): LineageGraph
+}
+
+class UserRepository {
+    +find_by_email(email: str): User
+    +find_by_organization(org_id: int): List[User]
+    +authenticate_user(email: str, password: str): User
+    +update_last_login(user_id: int): void
+}
+
+' Relationships
+IntelligentDataAsset "1" *-- "many" LineageRelationship : "has lineage"
+DataSource "1" *-- "many" IntelligentDataAsset : "contains"
+DataSource "1" *-- "many" ScanExecution : "scanned by"
+AIModelConfiguration "1" *-- "many" MLPrediction : "generates"
+User "1" *-- "many" RacineOrchestrationMaster : "creates"
+ComplianceRequirement "many" -- "1" DataSource : "applies to"
+
+CatalogService --> IntelligentDataAsset : "manages"
+CatalogService --> AssetRepository : "uses"
+ScanOrchestrationService --> DataSource : "orchestrates"
+ScanOrchestrationService --> ScanExecution : "executes"
+AIService --> AIModelConfiguration : "configures"
+AIService --> MLPrediction : "generates"
+
+AssetRepository --|> BaseRepository : "extends"
+UserRepository --|> BaseRepository : "extends"
+
+note top of IntelligentDataAsset : "Core domain entity with\nAI-enhanced capabilities"
+note top of CatalogService : "Primary service for\nasset management"
+note top of BaseRepository : "Generic repository pattern\nwith common CRUD operations"
+
+@enduml

@@ -688,7 +688,7 @@ export function DataSourceCatalog({
               <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 Enterprise Data Catalog
               </h2>
-              <Badge variant="outline" className="bg-gradient-to-r from-green-50 to-blue-50 border-green-200">
+              <Badge variant="outline" className="bg-gradient-to-r from-green-50 to-blue-50 border-green-200 text-blue-700 dark:text-blue-200">
                 <Sparkles className="h-3 w-3 mr-1" />
                 AI-Powered
               </Badge>
@@ -756,7 +756,7 @@ export function DataSourceCatalog({
             {/* Workflow Actions */}
             <Dialog open={isWorkflowDialogOpen} onOpenChange={setIsWorkflowDialogOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline" className="bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200">
+                <Button variant="outline" className="border-gray-700 bg-gray-900/60 text-gray-100 hover:bg-gray-800/70 dark:border-gray-700 dark:bg-gray-900/60 dark:text-gray-100 dark:hover:bg-gray-800/70">
                   <Workflow className="h-4 w-4 mr-2" />
                   Workflows
                 </Button>
@@ -853,7 +853,7 @@ export function DataSourceCatalog({
             {/* Analytics Dashboard */}
             <Dialog open={isAnalyticsDialogOpen} onOpenChange={setIsAnalyticsDialogOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline" className="bg-gradient-to-r from-green-50 to-teal-50 border-green-200">
+                <Button variant="outline" className="border-gray-700 bg-gray-900/60 text-gray-100 hover:bg-gray-800/70 dark:border-gray-700 dark:bg-gray-900/60 dark:text-gray-100 dark:hover:bg-gray-800/70">
                   <BarChart3 className="h-4 w-4 mr-2" />
                   Analytics
                 </Button>
@@ -1242,7 +1242,7 @@ export function DataSourceCatalog({
             {/* Collaboration */}
             <Dialog open={isCollaborationDialogOpen} onOpenChange={setIsCollaborationDialogOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline" className="bg-gradient-to-r from-orange-50 to-red-50 border-orange-200">
+                <Button variant="outline" className="border-gray-700 bg-gray-900/60 text-gray-100 hover:bg-gray-800/70 dark:border-gray-700 dark:bg-gray-900/60 dark:text-gray-100 dark:hover:bg-gray-800/70">
                   <Users className="h-4 w-4 mr-2" />
                   Collaborate
                 </Button>

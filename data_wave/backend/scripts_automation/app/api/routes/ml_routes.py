@@ -19,7 +19,7 @@ import pandas as pd
 # Import dependencies
 from ...db_session import get_session
 from ...services.ml_service import EnterpriseMLService
-from ...api.security.rbac import get_current_user, require_permission
+from ...api.security.rbac import get_current_user, require_permission, require_permissions
 from ...models.ml_models import (
     MLModelConfiguration, MLTrainingDataset, MLTrainingJob, MLPrediction,
     MLFeedback, MLExperiment, MLExperimentRun, MLFeatureStore,
@@ -579,9 +579,7 @@ async def get_ml_model_configs(
                     "framework": config.framework,
                     "status": config.status,
                     "performance_metrics": config.performance_metrics,
-                    "created_at": config.created_at,
-                    "last_trained": config.last_trained,
-                    "current_performance": getattr(config, 'current_performance', {})
+                    "last_trained": config.last_trained
                 }
                 for config in configs
             ],

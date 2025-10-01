@@ -507,7 +507,7 @@ const TrainingPipelineManager: React.FC<TrainingPipelineManagerProps> = ({
 
   // WebSocket connection for real-time updates
   useEffect(() => {
-    const wsUrl = `${process.env.REACT_APP_WS_URL || 'ws://localhost:8000'}/v2/ml/training/realtime`;
+    const wsUrl = `${import.meta.env.VITE_WS_URL || 'ws://localhost:8000'}/v2/ml/training/realtime`;
     wsRef.current = new WebSocket(wsUrl);
 
     wsRef.current.onmessage = (event) => {

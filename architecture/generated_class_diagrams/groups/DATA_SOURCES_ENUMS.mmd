@@ -1,0 +1,35 @@
+classDiagram
+  class DataSourceLocation {
+    +ON_PREM: 
+    +CLOUD: 
+    +HYBRID: 
+  }
+  class DataSourceType {
+    +MYSQL: 
+    +POSTGRESQL: 
+    +MONGODB: 
+    +SNOWFLAKE: 
+    +S3: 
+    +REDIS: 
+  }
+  class ClassificationSource {
+    +MANUAL: 
+    +AUTOMATED: 
+    +ML_SUGGESTED: 
+    +PATTERN_BASED: 
+    +INHERITED: 
+    +THIRD_PARTY: 
+  }
+  class DataSourceStatus {
+    +ACTIVE: 
+    +INACTIVE: 
+    +ERROR: 
+    +PENDING: 
+    +SYNCING: 
+    +MAINTENANCE: 
+  }
+  DataSourceLocation ..> DataSourceType
+  DataSourceLocation ..> ClassificationSource
+  DataSourceLocation ..> DataSourceStatus
+  classDef domain fill:#F8FAFF,stroke:#111827,color:#111827
+  class ClassificationSource,DataSourceLocation,DataSourceStatus,DataSourceType domain

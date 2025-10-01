@@ -3,7 +3,7 @@
  * Provides tree, graph, and list views for schema discovery
  */
 
-import React, { useState, useMemo, useCallback } from 'react'
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import { 
   Database, Table, Columns, FileText, Folder, FolderOpen, 
   ChevronRight, ChevronDown, Eye, Search, Zap, Star, Shield,
@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { AdvancedGraphView } from "./Entreprise-graph-view"
+import { AdvancedGraphView } from "./Entreprise-graph-view-clean"
 import { VirtualizedTree } from "../utils/virtualized-tree"
 import OptimizedTreeNode from "./optimized-tree-node"
 
@@ -51,6 +51,36 @@ export function EnhancedTreeView({
   showViewModeToggle = true,
   defaultViewMode = 'tree'
 }: EnhancedTreeViewProps) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const headerRef = useRef<HTMLDivElement>(null)
+  const footerRef = useRef<HTMLDivElement>(null)
+  const [containerHeight, setContainerHeight] = useState<number>(height)
+  const [headerHeight, setHeaderHeight] = useState<number>(0)
+  const [footerHeight, setFooterHeight] = useState<number>(0)
+  // Measure container height to fit inside parent tail area
+  useEffect(() => {
+    const measure = () => {
+      const el = containerRef.current
+      if (!el) return
+      const rect = el.getBoundingClientRect()
+      if (rect.height > 0) setContainerHeight(rect.height)
+      if (headerRef.current) setHeaderHeight(headerRef.current.getBoundingClientRect().height || 0)
+      if (footerRef.current) setFooterHeight(footerRef.current.getBoundingClientRect().height || 0)
+    }
+    measure()
+    const ro = new ResizeObserver(measure)
+    if (containerRef.current) ro.observe(containerRef.current)
+    if (headerRef.current) ro.observe(headerRef.current)
+    if (footerRef.current) ro.observe(footerRef.current)
+    window.addEventListener('resize', measure)
+    return () => {
+      window.removeEventListener('resize', measure)
+      ro.disconnect()
+    }
+  }, [])
+
+  const computedHeight = Math.max(240, (height || containerHeight))
+  const contentHeight = Math.max(200, computedHeight - headerHeight - footerHeight)
   const [viewMode, setViewMode] = useState<'tree' | 'graph' | 'list' | 'grid'>(defaultViewMode)
   const [graphViewMode, setGraphViewMode] = useState<'centralized' | 'hierarchical' | 'network'>('centralized')
   const [showConnections, setShowConnections] = useState(true)
@@ -485,10 +515,10 @@ export function EnhancedTreeView({
   }
 
   return (
-    <div className="w-full h-full flex flex-col">
+    <div ref={containerRef} className="relative w-full h-full flex flex-col min-w-0 min-h-0 overflow-hidden">
       {/* Header Controls */}
       {showViewModeToggle && (
-        <div className="flex items-center justify-between p-4 border-b bg-background">
+        <div ref={headerRef} className="flex items-center justify-between p-4 border-b bg-background">
           <div className="flex items-center gap-4">
             {/* View Mode Toggle */}
             <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as any)}>
@@ -573,7 +603,7 @@ export function EnhancedTreeView({
       )}
 
       {/* Content Area */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden min-w-0 min-h-0" style={{ height: contentHeight }}>
         {viewMode === 'tree' && (
           <ScrollArea className="h-full">
             <div className="p-4">
@@ -583,7 +613,7 @@ export function EnhancedTreeView({
                   onToggle={onToggle}
                   onSelect={onSelect}
                   renderNode={renderTreeNode}
-                  height={height - 100}
+                  height={contentHeight - 16}
                   itemHeight={40}
                   overscanCount={10}
                 />
@@ -602,7 +632,7 @@ export function EnhancedTreeView({
             onToggle={onToggle}
             onSelect={onSelect}
             onPreview={onPreview}
-            height={height - 100}
+            height={contentHeight}
             layoutAlgorithm={graphViewMode === 'centralized' ? 'force-directed' : 'hierarchical'}
             showConnections={showConnections}
           />
@@ -626,7 +656,7 @@ export function EnhancedTreeView({
       </div>
 
       {/* Footer Stats */}
-      <div className="p-4 border-t bg-muted/30">
+      <div ref={footerRef} className="p-4 border-t bg-background/60">
         <div className="flex items-center justify-between text-sm text-muted-foreground">
           <div className="flex items-center gap-4">
             <span>Total: {nodes.length}</span>

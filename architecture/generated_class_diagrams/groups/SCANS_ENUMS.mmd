@@ -1,0 +1,149 @@
+classDiagram
+  class WorkflowStepType {
+    +DATA_SOURCE_OPERATION: 
+    +SCAN_RULE_OPERATION: 
+    +CLASSIFICATION_OPERATION: 
+    +COMPLIANCE_OPERATION: 
+    +CATALOG_OPERATION: 
+    +SCAN_LOGIC_OPERATION: 
+    +AI_OPERATION: 
+    +CUSTOM_SCRIPT: 
+    +CONDITIONAL_BRANCH: 
+    +PARALLEL_GROUP: 
+    +NOTIFICATION: 
+    +APPROVAL: 
+  }
+  class ScanOrchestrationStrategy {
+    +SEQUENTIAL: 
+    +PARALLEL: 
+    +ADAPTIVE: 
+    +PRIORITY_BASED: 
+    +RESOURCE_AWARE: 
+    +DEPENDENCY_AWARE: 
+    +LOAD_BALANCED: 
+  }
+  class OrchestrationStatus {
+    +ACTIVE: 
+    +PAUSED: 
+    +COMPLETED: 
+    +FAILED: 
+    +CANCELLED: 
+    +MAINTENANCE: 
+    +INITIALIZING: 
+    +OPTIMIZING: 
+  }
+  class ScanIntelligenceType {
+    +PREDICTIVE_ANALYTICS: 
+    +PERFORMANCE_OPTIMIZATION: 
+    +ANOMALY_DETECTION: 
+    +PATTERN_RECOGNITION: 
+    +RESOURCE_OPTIMIZATION: 
+    +ADAPTIVE_LEARNING: 
+    +BEHAVIORAL_ANALYSIS: 
+    +CROSS_SYSTEM_CORRELATION: 
+  }
+  class ScanFrequency {
+    +HOURLY: 
+    +DAILY: 
+    +WEEKLY: 
+    +MONTHLY: 
+  }
+  class WorkflowPriority {
+    +CRITICAL: 
+    +HIGH: 
+    +NORMAL: 
+    +LOW: 
+    +BACKGROUND: 
+  }
+  class ScanStatus {
+    +PENDING: 
+    +RUNNING: 
+    +COMPLETED: 
+    +FAILED: 
+    +CANCELLED: 
+  }
+  class WorkflowExecutionStatus {
+    +PENDING: 
+    +RUNNING: 
+    +COMPLETED: 
+    +FAILED: 
+    +PAUSED: 
+    +CANCELLED: 
+    +RETRYING: 
+    +TIMEOUT: 
+  }
+  class WorkflowTriggerType {
+    +MANUAL: 
+    +SCHEDULED: 
+    +EVENT_DRIVEN: 
+    +API_TRIGGER: 
+    +WEBHOOK: 
+    +DATA_CHANGE: 
+    +COMPLIANCE_ALERT: 
+  }
+  class WorkflowType {
+    +DATA_PIPELINE: 
+    +ETL: 
+    +ML_PIPELINE: 
+    +APPROVAL: 
+    +NOTIFICATION: 
+    +GOVERNANCE: 
+    +CUSTOM: 
+  }
+  class OrchestrationPriority {
+    +CRITICAL: 
+    +HIGH: 
+    +MEDIUM: 
+    +LOW: 
+    +BACKGROUND: 
+  }
+  class ScanWorkflowStatus {
+    +QUEUED: 
+    +INITIALIZING: 
+    +RUNNING: 
+    +WAITING: 
+    +COMPLETED: 
+    +FAILED: 
+    +SKIPPED: 
+    +RETRYING: 
+  }
+  class WorkflowStatus {
+    +DRAFT: 
+    +ACTIVE: 
+    +COMPLETED: 
+    +CANCELLED: 
+    +ON_HOLD: 
+  }
+  class ScanOrchestrationStatus {
+    +PENDING: 
+    +PLANNING: 
+    +EXECUTING: 
+    +PAUSED: 
+    +COMPLETED: 
+    +FAILED: 
+    +CANCELLED: 
+    +TIMEOUT: 
+  }
+  class ScanPriority {
+    +CRITICAL: 
+    +HIGH: 
+    +NORMAL: 
+    +LOW: 
+    +BACKGROUND: 
+  }
+  WorkflowStepType ..> ScanOrchestrationStrategy
+  WorkflowStepType ..> OrchestrationStatus
+  WorkflowStepType ..> ScanIntelligenceType
+  WorkflowStepType ..> ScanFrequency
+  WorkflowStepType ..> WorkflowPriority
+  WorkflowStepType ..> ScanStatus
+  WorkflowStepType ..> WorkflowExecutionStatus
+  WorkflowStepType ..> WorkflowTriggerType
+  WorkflowStepType ..> WorkflowType
+  WorkflowStepType ..> OrchestrationPriority
+  WorkflowStepType ..> ScanWorkflowStatus
+  WorkflowStepType ..> WorkflowStatus
+  WorkflowStepType ..> ScanOrchestrationStatus
+  WorkflowStepType ..> ScanPriority
+  classDef domain fill:#F8FAFF,stroke:#111827,color:#111827
+  class OrchestrationPriority,OrchestrationStatus,ScanFrequency,ScanIntelligenceType,ScanOrchestrationStatus,ScanOrchestrationStrategy,ScanPriority,ScanStatus,ScanWorkflowStatus,WorkflowExecutionStatus,WorkflowPriority,WorkflowStatus,WorkflowStepType,WorkflowTriggerType,WorkflowType domain

@@ -61,9 +61,9 @@ export const EnterpriseLoadingState: React.FC<LoadingStateProps> = ({
   size = "md",
   variant = "card",
 }) => {
-  const config = loadingConfigs[type]
-  const IconComponent = config.icon
-  const displayMessage = message || config.message
+  const config = loadingConfigs[type] || loadingConfigs.default
+  const IconComponent = config?.icon || Loader2
+  const displayMessage = message || config?.message || "Loading..."
 
   const sizeClasses = {
     sm: "h-4 w-4",
@@ -73,8 +73,8 @@ export const EnterpriseLoadingState: React.FC<LoadingStateProps> = ({
 
   const LoadingContent = () => (
     <div className="flex flex-col items-center justify-center space-y-4">
-      <div className={`p-3 rounded-full ${config.bgColor}`}>
-        <IconComponent className={`${sizeClasses[size]} ${config.color} animate-spin`} />
+      <div className={`p-3 rounded-full ${config?.bgColor || 'bg-primary/10'}`}>
+        <IconComponent className={`${sizeClasses[size]} ${config?.color || 'text-primary'} animate-spin`} />
       </div>
 
       <div className="text-center space-y-2">
@@ -103,7 +103,7 @@ export const EnterpriseLoadingState: React.FC<LoadingStateProps> = ({
   if (variant === "inline") {
     return (
       <div className="flex items-center gap-2 p-2">
-        <IconComponent className={`${sizeClasses.sm} ${config.color} animate-spin`} />
+        <IconComponent className={`${sizeClasses.sm} ${config?.color || 'text-primary'} animate-spin`} />
         <span className="text-sm text-muted-foreground">{displayMessage}</span>
       </div>
     )

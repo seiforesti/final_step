@@ -1,0 +1,84 @@
+classDiagram
+  class ComplianceRuleStatus {
+    +DRAFT: 
+    +ACTIVE: 
+    +INACTIVE: 
+    +DEPRECATED: 
+    +UNDER_REVIEW: 
+  }
+  class ComplianceStatus {
+    +COMPLIANT: 
+    +NON_COMPLIANT: 
+    +PARTIALLY_COMPLIANT: 
+    +UNDER_REVIEW: 
+    +REMEDIATION_REQUIRED: 
+    +EXEMPT: 
+    +NOT_APPLICABLE: 
+  }
+  class MLModelFramework {
+    +SCIKIT_LEARN: 
+    +TENSORFLOW: 
+    +PYTORCH: 
+    +XGBOOST: 
+    +LIGHTGBM: 
+    +CATBOOST: 
+    +KERAS: 
+    +HUGGINGFACE: 
+    +SPACY: 
+    +NLTK: 
+    +CUSTOM: 
+  }
+  class AssessmentStatus {
+    +PENDING: 
+    +IN_PROGRESS: 
+    +COMPLETED: 
+    +FAILED: 
+    +EXPIRED: 
+  }
+  class ComplianceFramework {
+    +GDPR: 
+    +CCPA: 
+    +HIPAA: 
+    +SOX: 
+    +PCI_DSS: 
+    +ISO_27001: 
+    +NIST: 
+    +SOC2: 
+    +CUSTOM: 
+  }
+  class ComplianceRuleScope {
+    +GLOBAL: 
+    +DATA_SOURCE: 
+    +SCHEMA: 
+    +TABLE: 
+    +COLUMN: 
+    +FIELD: 
+  }
+  class ComplianceRuleType {
+    +REGULATORY: 
+    +INTERNAL: 
+    +SECURITY: 
+    +PRIVACY: 
+    +QUALITY: 
+    +ACCESS_CONTROL: 
+    +DATA_RETENTION: 
+    +ENCRYPTION: 
+    +AUDIT: 
+    +MONITORING: 
+    +CUSTOM: 
+  }
+  class ComplianceRuleSeverity {
+    +LOW: 
+    +MEDIUM: 
+    +HIGH: 
+    +CRITICAL: 
+  }
+  ComplianceRuleStatus ..> ComplianceStatus
+  ComplianceRuleStatus ..> MLModelFramework
+  ComplianceRuleStatus ..> AssessmentStatus
+  ComplianceRuleStatus ..> ComplianceFramework
+  ComplianceRuleStatus ..> ComplianceRuleScope
+  ComplianceRuleStatus ..> ComplianceRuleType
+  ComplianceRuleStatus ..> ComplianceRuleSeverity
+  classDef domain fill:#F8FAFF,stroke:#111827,color:#111827
+  class AssessmentStatus,ComplianceFramework,ComplianceRuleScope,ComplianceRuleSeverity,ComplianceRuleStatus,ComplianceRuleType,ComplianceStatus,MLModelFramework domain

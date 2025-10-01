@@ -1,0 +1,66 @@
+\babel@toc {french}{}\relax 
+\babel@toc {french}{}\relax 
+\addvspace {10\p@ }
+\contentsline {xchapter}{Contexte Général et État de l'Art}{7}{chapter.1}%
+\contentsline {table}{\numberline {\if@rl \I {1.1}\else \textLR {1.1}\fi }{\ignorespaces Défis critiques de la gouvernance des données}}{11}{table.caption.12}%
+\contentsline {table}{\numberline {\if@rl \I {2.1}\else \textLR {1.2}\fi }{\ignorespaces Frameworks de conformité réglementaire}}{14}{table.caption.15}%
+\contentsline {table}{\numberline {\if@rl \I {3.1}\else \textLR {1.3}\fi }{\ignorespaces Limitations critiques de Microsoft Azure Purview}}{17}{table.caption.20}%
+\contentsline {table}{\numberline {\if@rl \I {4.1}\else \textLR {1.4}\fi }{\ignorespaces Comparaison des solutions de gouvernance des données}}{18}{table.caption.22}%
+\contentsline {table}{\numberline {\if@rl \I {5.1}\else \textLR {1.5}\fi }{\ignorespaces Synthèse des avantages compétitifs de DataWave}}{21}{table.caption.28}%
+\addvspace {10\p@ }
+\contentsline {xchapter}{Analyse et Conception du Système}{26}{chapter.2}%
+\contentsline {table}{\numberline {\if@rl \I {1.2}\else \textLR {2.1}\fi }{\ignorespaces Matrice acteurs-modules de DataWave}}{28}{table.caption.32}%
+\contentsline {table}{\numberline {\if@rl \I {2.2}\else \textLR {2.2}\fi }{\ignorespaces Besoins fonctionnels par module}}{31}{table.caption.33}%
+\contentsline {table}{\numberline {\if@rl \I {3.2}\else \textLR {2.3}\fi }{\ignorespaces Exigences non-fonctionnelles avec métriques cibles}}{33}{table.caption.34}%
+\contentsline {table}{\numberline {\if@rl \I {4.2}\else \textLR {2.4}\fi }{\ignorespaces Les 7 modules de gouvernance : responsabilités et technologies}}{38}{table.caption.37}%
+\addvspace {10\p@ }
+\contentsline {xchapter}{Réalisation et Implémentation}{43}{chapter.3}%
+\contentsline {table}{\numberline {\if@rl \I {1.3}\else \textLR {3.1}\fi }{\ignorespaces Types de bases de données supportées par DataWave}}{44}{table.caption.39}%
+\contentsline {table}{\numberline {\if@rl \I {2.3}\else \textLR {3.2}\fi }{\ignorespaces Métriques de performance du connection pooling}}{44}{table.caption.41}%
+\contentsline {table}{\numberline {\if@rl \I {3.3}\else \textLR {3.3}\fi }{\ignorespaces Stratégies de découverte de schémas}}{45}{table.caption.42}%
+\contentsline {table}{\numberline {\if@rl \I {4.3}\else \textLR {3.4}\fi }{\ignorespaces Méthodes d'authentification supportées}}{47}{table.caption.43}%
+\contentsline {table}{\numberline {\if@rl \I {5.3}\else \textLR {3.5}\fi }{\ignorespaces Configuration SSL/TLS par type de base de données}}{47}{table.caption.44}%
+\contentsline {table}{\numberline {\if@rl \I {6.3}\else \textLR {3.6}\fi }{\ignorespaces Types de métadonnées capturées et enrichies}}{51}{table.caption.48}%
+\contentsline {table}{\numberline {\if@rl \I {7.3}\else \textLR {3.7}\fi }{\ignorespaces Comparaison des trois approches de classification}}{53}{table.caption.50}%
+\contentsline {table}{\numberline {\if@rl \I {8.3}\else \textLR {3.8}\fi }{\ignorespaces Catégories de sensibilité supportées par DataWave}}{55}{table.caption.52}%
+\contentsline {table}{\numberline {\if@rl \I {9.3}\else \textLR {3.9}\fi }{\ignorespaces Types de patterns supportés par le moteur de classification}}{57}{table.caption.54}%
+\contentsline {table}{\numberline {\if@rl \I {10.3}\else \textLR {3.10}\fi }{\ignorespaces États du cycle de vie des règles de scan}}{60}{table.caption.59}%
+\contentsline {table}{\numberline {\if@rl \I {11.3}\else \textLR {3.11}\fi }{\ignorespaces Stratégies d'optimisation des règles de scan}}{62}{table.caption.61}%
+\contentsline {table}{\numberline {\if@rl \I {12.3}\else \textLR {3.12}\fi }{\ignorespaces Stratégies d'exécution des règles de scan}}{62}{table.caption.62}%
+\contentsline {table}{\numberline {\if@rl \I {13.3}\else \textLR {3.13}\fi }{\ignorespaces Métriques de performance des scans avec optimisations}}{63}{table.caption.63}%
+\contentsline {table}{\numberline {\if@rl \I {14.3}\else \textLR {3.14}\fi }{\ignorespaces Phases du workflow de scanning}}{68}{table.caption.69}%
+\contentsline {table}{\numberline {\if@rl \I {15.3}\else \textLR {3.15}\fi }{\ignorespaces Métriques d'orchestration et de performance}}{73}{table.caption.75}%
+\contentsline {table}{\numberline {\if@rl \I {16.3}\else \textLR {3.16}\fi }{\ignorespaces Frameworks de conformité supportés avec exigences clés}}{74}{table.caption.77}%
+\contentsline {table}{\numberline {\if@rl \I {17.3}\else \textLR {3.17}\fi }{\ignorespaces Scopes d'application des règles de conformité}}{75}{table.caption.78}%
+\contentsline {table}{\numberline {\if@rl \I {18.3}\else \textLR {3.18}\fi }{\ignorespaces Métriques de conformité par framework}}{78}{table.caption.83}%
+\contentsline {table}{\numberline {\if@rl \I {19.3}\else \textLR {3.19}\fi }{\ignorespaces Niveaux de permissions par type de ressource}}{80}{table.caption.85}%
+\contentsline {table}{\numberline {\if@rl \I {20.3}\else \textLR {3.20}\fi }{\ignorespaces Événements audités avec retention policies}}{80}{table.caption.86}%
+\addvspace {10\p@ }
+\contentsline {xchapter}{Tests, Déploiement et Résultats}{84}{chapter.4}%
+\contentsline {table}{\numberline {\if@rl \I {1.4}\else \textLR {4.1}\fi }{\ignorespaces Couverture de tests unitaires par module}}{84}{table.caption.87}%
+\contentsline {table}{\numberline {\if@rl \I {2.4}\else \textLR {4.2}\fi }{\ignorespaces Tests d'intégration API par catégorie}}{85}{table.caption.88}%
+\contentsline {table}{\numberline {\if@rl \I {3.4}\else \textLR {4.3}\fi }{\ignorespaces Résultats des tests de charge}}{86}{table.caption.89}%
+\contentsline {table}{\numberline {\if@rl \I {4.4}\else \textLR {4.4}\fi }{\ignorespaces Benchmark comparatif de performance}}{86}{table.caption.91}%
+\contentsline {table}{\numberline {\if@rl \I {5.4}\else \textLR {4.5}\fi }{\ignorespaces Conformité aux standards de sécurité}}{87}{table.caption.92}%
+\contentsline {table}{\numberline {\if@rl \I {6.4}\else \textLR {4.6}\fi }{\ignorespaces Satisfaction utilisateurs par catégorie}}{88}{table.caption.93}%
+\contentsline {table}{\numberline {\if@rl \I {7.4}\else \textLR {4.7}\fi }{\ignorespaces Configuration des ressources Kubernetes par module}}{89}{table.caption.95}%
+\contentsline {table}{\numberline {\if@rl \I {8.4}\else \textLR {4.8}\fi }{\ignorespaces Métriques de monitoring en production}}{92}{table.caption.97}%
+\contentsline {table}{\numberline {\if@rl \I {9.4}\else \textLR {4.9}\fi }{\ignorespaces Plan de disaster recovery}}{92}{table.caption.98}%
+\contentsline {table}{\numberline {\if@rl \I {10.4}\else \textLR {4.10}\fi }{\ignorespaces Métriques de performance API en production (6 mois)}}{92}{table.caption.99}%
+\contentsline {table}{\numberline {\if@rl \I {11.4}\else \textLR {4.11}\fi }{\ignorespaces Métriques de performance de scanning}}{93}{table.caption.101}%
+\contentsline {table}{\numberline {\if@rl \I {12.4}\else \textLR {4.12}\fi }{\ignorespaces Capacité maximale testée}}{94}{table.caption.103}%
+\contentsline {table}{\numberline {\if@rl \I {13.4}\else \textLR {4.13}\fi }{\ignorespaces Précision de classification par catégorie de sensibilité}}{95}{table.caption.104}%
+\contentsline {table}{\numberline {\if@rl \I {14.4}\else \textLR {4.14}\fi }{\ignorespaces Résultats de conformité par framework (moyenne 3 clients)}}{96}{table.caption.106}%
+\contentsline {table}{\numberline {\if@rl \I {15.4}\else \textLR {4.15}\fi }{\ignorespaces Comparaison détaillée : DataWave vs Microsoft Azure Purview}}{96}{table.caption.107}%
+\contentsline {table}{\numberline {\if@rl \I {16.4}\else \textLR {4.16}\fi }{\ignorespaces Comparaison détaillée : DataWave vs Databricks Unity Catalog}}{96}{table.caption.108}%
+\contentsline {table}{\numberline {\if@rl \I {17.4}\else \textLR {4.17}\fi }{\ignorespaces Comparaison globale des solutions de gouvernance}}{97}{table.caption.110}%
+\contentsline {table}{\numberline {\if@rl \I {18.4}\else \textLR {4.18}\fi }{\ignorespaces Analyse de ROI sur 3 ans (100 sources de données)}}{98}{table.caption.111}%
+\contentsline {table}{\numberline {\if@rl \I {19.4}\else \textLR {4.19}\fi }{\ignorespaces Feedback utilisateurs et améliorations identifiées}}{99}{table.caption.112}%
+\vspace {3.8mm}
+\contentsline {table}{Annexe 1.1~~~Exemple tableau dans l'annexe}{105}{section*.115}%
+\babel@toc {arabic}{}\relax 
+\babel@toc {french}{}\relax 
+\babel@toc {english}{}\relax 
+\babel@toc {french}{}\relax 
+\babel@toc {arabic}{}\relax 
+\babel@toc {french}{}\relax 

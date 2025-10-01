@@ -102,6 +102,10 @@ interface GraphConnection {
 // Layout Algorithm Types
 type LayoutAlgorithm = 
   | 'force-directed'
+  | 'force-3d'
+  | 'force-clustered'
+  | 'force-radial'
+  | 'force-organic'
   | 'hierarchical'
   | 'circular'
   | 'grid'
@@ -111,6 +115,8 @@ type LayoutAlgorithm =
   | 'organic'
   | 'spiral'
   | 'concentric'
+  | 'centralized'
+  | 'network'
 
 // View Mode Types
 type ViewMode = 
@@ -171,6 +177,9 @@ class GraphLayoutEngine {
   private algorithm: LayoutAlgorithm = 'force-directed'
   private isRunning: boolean = false
   private animationId: number | null = null
+  // Adaptive budgeting for stability
+  private nodeBudget: number = 200
+  private connectionBudget: number = 200
   
   // 3D Camera and perspective properties for true dimensional movement
   private camera = {
@@ -356,6 +365,18 @@ class GraphLayoutEngine {
       case 'force-directed':
         this.initializeForceDirected()
         break
+      case 'force-3d':
+        this.initializeForce3D()
+        break
+      case 'force-clustered':
+        this.initializeForceClustered()
+        break
+      case 'force-radial':
+        this.initializeForceRadial()
+        break
+      case 'force-organic':
+        this.initializeForceOrganic()
+        break
       case 'hierarchical':
         this.initializeHierarchical()
         break
@@ -382,6 +403,12 @@ class GraphLayoutEngine {
         break
       case 'concentric':
         this.initializeConcentric()
+        break
+      case 'centralized':
+        this.initializeCentralized()
+        break
+      case 'network':
+        this.initializeNetwork()
         break
     }
   }
@@ -411,7 +438,10 @@ class GraphLayoutEngine {
       columns: nodesByType.column.length
     })
     
-    // CRITICAL: Position each schema item based on its hierarchy
+    // Build quick index for parent relationships
+    const nodeById = new Map(this.nodes.map(n => [n.id, n]))
+
+    // CRITICAL: Position each schema item based on its hierarchy using parent-child relations
     this.nodes.forEach((node, index) => {
       if (node.fx === undefined && node.fy === undefined) {
         const type = node.type
@@ -433,45 +463,57 @@ class GraphLayoutEngine {
             break
             
           case 'schema':
-            // Schemas around databases - MAINTAIN CONNECTION
+            // Position around its parent database if known, else around center
+            const dbParent = node.parentId ? nodeById.get(node.parentId) : undefined
+            const schemaAnchorX = dbParent?.x ?? centerX
+            const schemaAnchorY = dbParent?.y ?? centerY
             const schemaIndex = nodesByType.schema.indexOf(node)
-            const schemaRadius = 100 + (level * 30)
+            const schemaRadius = 120 + (level * 40)
             const schemaAngle = (schemaIndex * 2 * Math.PI) / Math.max(1, nodesByType.schema.length)
-            baseX = centerX + Math.cos(schemaAngle) * schemaRadius
-            baseY = centerY + Math.sin(schemaAngle) * schemaRadius
+            baseX = schemaAnchorX + Math.cos(schemaAngle) * schemaRadius
+            baseY = schemaAnchorY + Math.sin(schemaAngle) * schemaRadius
             baseZ = centerZ + (Math.random() - 0.5) * 15
             console.log(`📁 Schema ${node.name} positioned around database`)
             break
             
           case 'table':
-            // Tables around their schemas - KEEP SCHEMA ITEMS TOGETHER
+            // Place near its parent schema if known, to keep hierarchy tight
+            const schemaParent = node.parentId ? nodeById.get(node.parentId) : undefined
+            const tableAnchorX = schemaParent?.x ?? centerX
+            const tableAnchorY = schemaParent?.y ?? centerY
             const tableIndex = nodesByType.table.indexOf(node)
-            const tableRadius = 150 + (level * 40)
+            const tableRadius = 80 + (level * 30)
             const tableAngle = (tableIndex * 2 * Math.PI) / Math.max(1, nodesByType.table.length)
-            baseX = centerX + Math.cos(tableAngle) * tableRadius + (Math.random() - 0.5) * 40
-            baseY = centerY + Math.sin(tableAngle) * tableRadius + (Math.random() - 0.5) * 40
+            baseX = tableAnchorX + Math.cos(tableAngle) * tableRadius + (Math.random() - 0.5) * 20
+            baseY = tableAnchorY + Math.sin(tableAngle) * tableRadius + (Math.random() - 0.5) * 20
             baseZ = centerZ + (Math.random() - 0.5) * 25
             console.log(`📋 Table ${node.name} positioned around schema`)
             break
             
           case 'view':
-            // Views near related tables - MAINTAIN RELATIONSHIPS
+            // Views near their parent schema (or table if modeled that way)
+            const viewParent = node.parentId ? nodeById.get(node.parentId) : undefined
+            const viewAnchorX = viewParent?.x ?? centerX
+            const viewAnchorY = viewParent?.y ?? centerY
             const viewIndex = nodesByType.view.indexOf(node)
-            const viewRadius = 130 + (level * 35)
+            const viewRadius = 70 + (level * 25)
             const viewAngle = (viewIndex * 2 * Math.PI) / Math.max(1, nodesByType.view.length)
-            baseX = centerX + Math.cos(viewAngle) * viewRadius + (Math.random() - 0.5) * 35
-            baseY = centerY + Math.sin(viewAngle) * viewRadius + (Math.random() - 0.5) * 35
+            baseX = viewAnchorX + Math.cos(viewAngle) * viewRadius + (Math.random() - 0.5) * 16
+            baseY = viewAnchorY + Math.sin(viewAngle) * viewRadius + (Math.random() - 0.5) * 16
             baseZ = centerZ + (Math.random() - 0.5) * 20
             console.log(`👁️ View ${node.name} positioned near tables`)
             break
             
           case 'column':
-            // Columns within their tables - PRECISE POSITIONING
+            // Columns close to their parent table
+            const colParent = node.parentId ? nodeById.get(node.parentId) : undefined
+            const colAnchorX = colParent?.x ?? centerX
+            const colAnchorY = colParent?.y ?? centerY
             const columnIndex = nodesByType.column.indexOf(node)
-            const columnRadius = 80 + (level * 25)
+            const columnRadius = 30 + (level * 15)
             const columnAngle = (columnIndex * 2 * Math.PI) / Math.max(1, nodesByType.column.length)
-            baseX = centerX + Math.cos(columnAngle) * columnRadius + (Math.random() - 0.5) * 25
-            baseY = centerY + Math.sin(columnAngle) * columnRadius + (Math.random() - 0.5) * 25
+            baseX = colAnchorX + Math.cos(columnAngle) * columnRadius + (Math.random() - 0.5) * 10
+            baseY = colAnchorY + Math.sin(columnAngle) * columnRadius + (Math.random() - 0.5) * 10
             baseZ = centerZ + (Math.random() - 0.5) * 10
             console.log(`📊 Column ${node.name} positioned within table`)
             break
@@ -487,6 +529,51 @@ class GraphLayoutEngine {
     })
     
     console.log('✅ SCHEMA-GRAPH SYNC: Schema-aware positioning completed')
+  }
+
+  private initializeForce3D() {
+    // Seed similar to force-directed but with varied Z and slightly wider spacing
+    this.initializeForceDirected()
+    this.nodes.forEach(n => {
+      n.z = (Math.random() - 0.5) * this.space3D.depth * 0.4
+    })
+  }
+
+  private initializeForceClustered() {
+    const clusters = new Map<string, GraphNode[]>()
+    this.nodes.forEach(node => {
+      const key = `${node.type}-${node.level || 0}`
+      const list = clusters.get(key) || []
+      list.push(node)
+      clusters.set(key, list)
+    })
+    const centerX = this.width / 2
+    const centerY = this.height / 2
+    const clusterRadius = Math.min(this.width, this.height) * 0.25
+    let angle = 0
+    clusters.forEach((group) => {
+      const cx = centerX + Math.cos(angle) * clusterRadius
+      const cy = centerY + Math.sin(angle) * clusterRadius
+      group.forEach((node, i) => {
+        const r = 40 + (node.level || 0) * 20
+        const a = (i * 2 * Math.PI) / Math.max(1, group.length)
+        node.x = cx + Math.cos(a) * r
+        node.y = cy + Math.sin(a) * r
+        node.vx = 0
+        node.vy = 0
+      })
+      angle += (2 * Math.PI) / clusters.size
+    })
+  }
+
+  private initializeForceRadial() {
+    // Like radial, but let forces refine
+    this.initializeRadial()
+  }
+
+  private initializeForceOrganic() {
+    // Like organic, but let forces refine
+    this.initializeOrganic()
   }
   
   private initializeHierarchical() {
@@ -690,6 +777,68 @@ class GraphLayoutEngine {
     })
   }
   
+  private initializeCentralized() {
+    const centerX = this.width / 2
+    const centerY = this.height / 2
+    const rootNodes = this.nodes.filter(n => !n.parentId)
+    const childrenByParent = new Map<string, GraphNode[]>()
+    this.nodes.forEach(n => {
+      if (n.parentId) {
+        const list = childrenByParent.get(n.parentId) || []
+        list.push(n)
+        childrenByParent.set(n.parentId, list)
+      }
+    })
+    
+    // Place roots in a circle near center
+    const rootRadius = Math.min(this.width, this.height) * 0.15
+    rootNodes.forEach((root, index) => {
+      const angle = (index * 2 * Math.PI) / Math.max(1, rootNodes.length)
+      root.x = centerX + Math.cos(angle) * rootRadius
+      root.y = centerY + Math.sin(angle) * rootRadius
+      root.vx = 0
+      root.vy = 0
+    })
+    
+    // Place children in rings around their parent
+    this.nodes.forEach(node => {
+      if (!node.parentId) return
+      const parent = this.nodes.find(n => n.id === node.parentId)
+      if (!parent || parent.x === undefined || parent.y === undefined) return
+      const siblings = childrenByParent.get(node.parentId) || []
+      const idx = siblings.indexOf(node)
+      const radius = 80 + (node.level || 1) * 50
+      const angle = (idx * 2 * Math.PI) / Math.max(1, siblings.length)
+      node.x = parent.x + Math.cos(angle) * radius
+      node.y = parent.y + Math.sin(angle) * radius
+      node.vx = 0
+      node.vy = 0
+    })
+  }
+  
+  private initializeNetwork() {
+    // Simple community layout: group by type in spaced clusters
+    const types: Array<GraphNode['type']> = ['database','schema','table','view','column']
+    const clusterRadius = Math.min(this.width, this.height) * 0.18
+    const centerX = this.width / 2
+    const centerY = this.height / 2
+    
+    types.forEach((t, ti) => {
+      const angle = (ti * 2 * Math.PI) / types.length
+      const clusterX = centerX + Math.cos(angle) * clusterRadius
+      const clusterY = centerY + Math.sin(angle) * clusterRadius
+      const group = this.nodes.filter(n => n.type === t)
+      group.forEach((node, i) => {
+        const nodeAngle = (i * 2 * Math.PI) / Math.max(1, group.length)
+        const nodeRadius = 40 + (node.level || 0) * 15
+        node.x = clusterX + Math.cos(nodeAngle) * nodeRadius
+        node.y = clusterY + Math.sin(nodeAngle) * nodeRadius
+        node.vx = 0
+        node.vy = 0
+      })
+    })
+  }
+  
   start() {
     if (this.isRunning) return
     this.isRunning = true
@@ -715,12 +864,12 @@ class GraphLayoutEngine {
     // Update 3D camera for dynamic space movement
     this.updateCamera(time)
     
-    // Run DRAMATIC 3D physics simulation for ALL algorithms
-    // ALL graph types now get large-scale 3D movement
-    this.simulateAdvanced3DForces()
-    
-    // Additional large-scale movement for non-force-directed layouts
-    if (this.algorithm !== 'force-directed') {
+    // Apply physics depending on layout type
+    if (this.algorithm.startsWith('force')) {
+      // Full physics only for force-directed
+      this.simulateAdvanced3DForces()
+    } else {
+      // Lightweight floating for other layouts to preserve their shape
       this.addAdvanced3DFloatingMovement()
     }
     
@@ -732,6 +881,21 @@ class GraphLayoutEngine {
     // ULTRA-OPTIMIZED continuous animation for MAXIMUM FPS
     const frameTime = performance.now() - startTime
     const targetFrameTime = 16.67 // 60 FPS target
+    
+    // Adaptive budgets and damping based on frame time
+    if (frameTime > targetFrameTime * 1.5) {
+      this.nodeBudget = Math.max(80, Math.floor(this.nodeBudget * 0.9))
+      this.connectionBudget = Math.max(80, Math.floor(this.connectionBudget * 0.9))
+      // Increase damping / reduce velocity slightly when slow
+      this.forceConfig.velocityDecay = Math.min(0.95, this.forceConfig.velocityDecay + 0.02)
+      this.forceConfig.maxVelocity = Math.max(0.8, this.forceConfig.maxVelocity - 0.05)
+    } else if (frameTime < targetFrameTime * 0.9) {
+      this.nodeBudget = Math.min(300, Math.floor(this.nodeBudget * 1.05))
+      this.connectionBudget = Math.min(300, Math.floor(this.connectionBudget * 1.05))
+      // Relax damping a bit when fast
+      this.forceConfig.velocityDecay = Math.max(0.85, this.forceConfig.velocityDecay - 0.01)
+      this.forceConfig.maxVelocity = Math.min(1.5, this.forceConfig.maxVelocity + 0.02)
+    }
     
     // Always use requestAnimationFrame for maximum performance
       this.animationId = requestAnimationFrame(this.tick)
@@ -760,8 +924,8 @@ class GraphLayoutEngine {
     const centerZ = this.space3D.centerZ
     const time = performance.now() * 0.0005 // Slower time for smoother movement
     
-    // Process ALL nodes for schema synchronization
-    const maxNodes = Math.min(this.nodes.length, 200) // Optimized limit
+    // Process nodes with adaptive budget for schema synchronization
+    const maxNodes = Math.min(this.nodes.length, this.nodeBudget)
     
     // Apply SCHEMA-AWARE 3D forces to ALL nodes
     for (let i = 0; i < maxNodes; i++) {
@@ -987,7 +1151,7 @@ class GraphLayoutEngine {
     
     // Process nodes in batches for maximum performance
     const batchSize = 15
-    const maxNodes = Math.min(this.nodes.length, 250)
+    const maxNodes = Math.min(this.nodes.length, this.nodeBudget)
     
     for (let batch = 0; batch < Math.ceil(maxNodes / batchSize); batch++) {
       const startIdx = batch * batchSize
@@ -1471,24 +1635,26 @@ class GraphRenderer {
     this.ctx.translate(this.panX, this.panY)
     this.ctx.scale(this.zoom, this.zoom)
     
-    // Ultra-optimized visible node filtering
+    // Ultra-optimized visible node filtering with caps
     const visibleNodes = this.getVisibleNodes(nodes)
     const visibleConnections = this.getVisibleConnections(connections)
     
     // Render connections first (behind nodes) - ultra-optimized for maximum FPS
     if (options.showConnections && visibleConnections.length > 0) {
-      this.renderConnections(visibleConnections.slice(0, 200), options.connectionOpacity || 0.6)
+      const maxConns = this.adaptiveFPS ? 200 : 400
+      this.renderConnections(visibleConnections.slice(0, maxConns), options.connectionOpacity || 0.6)
     }
     
     // Render nodes - ultra-optimized for maximum FPS
     if (visibleNodes.length > 0) {
-      this.renderNodes(visibleNodes.slice(0, 250), {
-      nodeSize: options.nodeSize || 1,
-      showLabels: options.showLabels || true,
-      hoveredNode: options.hoveredNode,
+      const maxNodes = this.adaptiveFPS ? 250 : 500
+      this.renderNodes(visibleNodes.slice(0, maxNodes), {
+        nodeSize: options.nodeSize || 1,
+        showLabels: options.showLabels !== false,
+        hoveredNode: options.hoveredNode,
         selectedNodes: options.selectedNodes || new Set(),
         highlightedNodes: options.highlightedNodes || new Set()
-    })
+      })
     }
     
     this.ctx.restore()
@@ -1562,7 +1728,9 @@ class GraphRenderer {
     
     // Ultra-optimized TRUE 3D rendering for maximum FPS with advanced effects
     nodes.forEach(node => {
-      if (!node.screenX || !node.screenY) return
+      const sx = (node.screenX !== undefined ? node.screenX : node.x)
+      const sy = (node.screenY !== undefined ? node.screenY : node.y)
+      if (sx === undefined || sy === undefined) return
       
       const size = this.calculateNodeSize(node, nodeSizeMultiplier)
       const color = this.getNodeColor(node, options.hoveredNode, options.selectedNodes)
@@ -1577,7 +1745,7 @@ class GraphRenderer {
       const centerX = this.width / 2
       const centerY = this.height / 2
       const distanceFromCenter = Math.sqrt(
-        Math.pow(node.screenX - centerX, 2) + Math.pow(node.screenY - centerY, 2)
+        Math.pow(sx - centerX, 2) + Math.pow(sy - centerY, 2)
       )
       const maxDistance = Math.sqrt(Math.pow(this.width / 2, 2) + Math.pow(this.height / 2, 2))
       const depthScale = (node.screenScale || 1) * (0.8 + (distanceFromCenter / maxDistance) * 0.4)
@@ -1603,8 +1771,8 @@ class GraphRenderer {
       
       // Enhanced TRUE 3D gradient with depth and pattern highlighting
       const gradient = this.ctx.createRadialGradient(
-        node.screenX - finalSize * 0.3, node.screenY - finalSize * 0.3, 0,
-        node.screenX, node.screenY, finalSize / 2
+        sx - finalSize * 0.3, sy - finalSize * 0.3, 0,
+        sx, sy, finalSize / 2
       )
       
       // Use pattern color if highlighted, otherwise use normal color
@@ -1634,7 +1802,7 @@ class GraphRenderer {
       // Render node with DRAMATIC TRUE 3D gradient
       this.ctx.fillStyle = gradient
       this.ctx.beginPath()
-      this.ctx.arc(node.screenX, node.screenY, finalSize / 2, 0, Math.PI * 2)
+      this.ctx.arc(sx, sy, finalSize / 2, 0, Math.PI * 2)
       this.ctx.fill()
       
       // Add DRAMATIC outer ring for fast-moving nodes or pattern highlighted nodes
@@ -1645,7 +1813,7 @@ class GraphRenderer {
         this.ctx.strokeStyle = ringColor
         this.ctx.lineWidth = isPatternHighlighted ? 3 : 2 * glowIntensity
         this.ctx.beginPath()
-        this.ctx.arc(node.screenX, node.screenY, finalSize / 2 + 2, 0, Math.PI * 2)
+        this.ctx.arc(sx, sy, finalSize / 2 + 2, 0, Math.PI * 2)
         this.ctx.stroke()
       }
       
@@ -1661,7 +1829,7 @@ class GraphRenderer {
         this.ctx.shadowColor = this.lightenColor(color, 0.3)
         this.ctx.shadowBlur = 4
         this.ctx.beginPath()
-        this.ctx.arc(node.screenX, node.screenY, finalSize / 2 + 2, 0, Math.PI * 2)
+        this.ctx.arc(sx, sy, finalSize / 2 + 2, 0, Math.PI * 2)
         this.ctx.stroke()
         this.ctx.shadowBlur = 0
       }
@@ -1673,14 +1841,14 @@ class GraphRenderer {
         this.ctx.shadowColor = 'rgba(245, 158, 11, 0.5)'
         this.ctx.shadowBlur = 6
         this.ctx.beginPath()
-        this.ctx.arc(node.screenX, node.screenY, finalSize / 2 + 3, 0, Math.PI * 2)
+        this.ctx.arc(sx, sy, finalSize / 2 + 3, 0, Math.PI * 2)
         this.ctx.stroke()
         this.ctx.shadowBlur = 0
       }
       
       // Render labels with LOD (only at high zoom for performance)
       if (options.showLabels && this.zoom >= 1.2) {
-        this.renderNodeLabel(node, finalSize)
+        this.renderNodeLabel({ ...node, screenX: sx as number, screenY: sy as number }, finalSize)
       }
     })
   }
@@ -1735,18 +1903,23 @@ class GraphRenderer {
   }
   
   private isNodeVisible(node: GraphNode): boolean {
-    if (!node.x || !node.y) return false
-    return node.x >= this.viewportBounds.left &&
-           node.x <= this.viewportBounds.right &&
-           node.y >= this.viewportBounds.top &&
-           node.y <= this.viewportBounds.bottom
+    const sx = (node.screenX !== undefined ? node.screenX : node.x)
+    const sy = (node.screenY !== undefined ? node.screenY : node.y)
+    if (sx === undefined || sy === undefined) return false
+    return sx >= this.viewportBounds.left &&
+           sx <= this.viewportBounds.right &&
+           sy >= this.viewportBounds.top &&
+           sy <= this.viewportBounds.bottom
   }
   
   private isConnectionVisible(conn: GraphConnection): boolean {
-    return (conn.fromX || 0) >= this.viewportBounds.left &&
-           (conn.fromX || 0) <= this.viewportBounds.right &&
-           (conn.fromY || 0) >= this.viewportBounds.top &&
-           (conn.fromY || 0) <= this.viewportBounds.bottom
+    const fx = conn.fromX || 0
+    const fy = conn.fromY || 0
+    const tx = conn.toX || 0
+    const ty = conn.toY || 0
+    const fromVisible = fx >= this.viewportBounds.left && fx <= this.viewportBounds.right && fy >= this.viewportBounds.top && fy <= this.viewportBounds.bottom
+    const toVisible = tx >= this.viewportBounds.left && tx <= this.viewportBounds.right && ty >= this.viewportBounds.top && ty <= this.viewportBounds.bottom
+    return fromVisible || toVisible
   }
   
   private calculateNodeSize(node: GraphNode, multiplier: number): number {
@@ -2219,7 +2392,7 @@ export function AdvancedGraphView({
     // 1. DATABASE → SCHEMA connections (CRITICAL for schema sync)
     schemaHierarchy.databases.forEach(database => {
       schemaHierarchy.schemas.forEach(schema => {
-        if (schema.parentId === database.id || schema.level === 1) {
+        if (schema.parentId === database.id) {
           conns.push({
             id: `db-${database.id}-schema-${schema.id}`,
             from: database.id,
@@ -2238,7 +2411,7 @@ export function AdvancedGraphView({
     // 2. SCHEMA → TABLE connections (CRITICAL for schema sync)
     schemaHierarchy.schemas.forEach(schema => {
       schemaHierarchy.tables.forEach(table => {
-        if (table.parentId === schema.id || table.level === schema.level + 1) {
+        if (table.parentId === schema.id) {
           conns.push({
             id: `schema-${schema.id}-table-${table.id}`,
             from: schema.id,
@@ -2257,7 +2430,7 @@ export function AdvancedGraphView({
     // 3. SCHEMA → VIEW connections (CRITICAL for schema sync)
     schemaHierarchy.schemas.forEach(schema => {
       schemaHierarchy.views.forEach(view => {
-        if (view.parentId === schema.id || view.level === schema.level + 1) {
+        if (view.parentId === schema.id) {
           conns.push({
             id: `schema-${schema.id}-view-${view.id}`,
             from: schema.id,
@@ -2276,7 +2449,7 @@ export function AdvancedGraphView({
     // 4. TABLE → COLUMN connections (CRITICAL for schema sync)
     schemaHierarchy.tables.forEach(table => {
       schemaHierarchy.columns.forEach(column => {
-        if (column.parentId === table.id || column.level === table.level + 1) {
+        if (column.parentId === table.id) {
           conns.push({
             id: `table-${table.id}-column-${column.id}`,
             from: table.id,
@@ -2427,16 +2600,20 @@ export function AdvancedGraphView({
       const currentNodes = layoutEngineRef.current?.getNodes() || visibleNodes
       const currentConnections = layoutEngineRef.current?.getConnections() || connections
       
-      // Update connection positions
+      // Update connection positions using projected coordinates when available
       const updatedConnections = currentConnections.map(conn => {
         const fromNode = currentNodes.find(n => n.id === conn.from)
         const toNode = currentNodes.find(n => n.id === conn.to)
+        const fromX = (fromNode?.screenX ?? fromNode?.x)
+        const fromY = (fromNode?.screenY ?? fromNode?.y)
+        const toX = (toNode?.screenX ?? toNode?.x)
+        const toY = (toNode?.screenY ?? toNode?.y)
         return {
           ...conn,
-          fromX: fromNode?.x,
-          fromY: fromNode?.y,
-          toX: toNode?.x,
-          toY: toNode?.y
+          fromX,
+          fromY,
+          toX,
+          toY
         }
       })
       
@@ -2697,8 +2874,8 @@ export function AdvancedGraphView({
 
   // Advanced control panel
   const renderAdvancedControlPanel = () => (
-    <div className="absolute top-4 left-4 right-4 z-30 flex items-center justify-between">
-      <div className="flex items-center gap-3">
+    <div className="absolute top-4 left-4 right-4 z-30 flex items-center justify-between pointer-events-none">
+      <div className="flex items-center gap-3 pointer-events-auto">
         <Badge variant="outline" className="bg-white/90 backdrop-blur-sm shadow-lg">
           <Network className="h-3 w-3 mr-1" />
           {selectedGraphType.charAt(0).toUpperCase() + selectedGraphType.slice(1)} Layout
@@ -2733,7 +2910,7 @@ export function AdvancedGraphView({
         </Badge>
       </div>
       
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 pointer-events-auto">
           {/* Enhanced Layout Algorithm Selector with Persistent State */}
           <Select value={selectedGraphType} onValueChange={(value: LayoutAlgorithm) => {
             setIsLayoutChanging(true)
@@ -2757,18 +2934,42 @@ export function AdvancedGraphView({
               setIsLayoutChanging(false)
             }
           }}>
-          <SelectTrigger className="w-48 bg-white/95 backdrop-blur-md shadow-xl border-2 border-blue-200 hover:border-blue-300 transition-all duration-200">
+          <SelectTrigger className="w-48 bg-white/80 backdrop-blur-md shadow-xl border-2 border-blue-200 hover:border-blue-300 transition-all duration-200">
             <div className="flex items-center gap-2">
               <Network className="h-4 w-4 text-blue-600" />
-            <SelectValue />
+            <SelectValue placeholder="Layout" />
               {isLayoutChanging && <Activity className="h-3 w-3 animate-spin text-blue-500" />}
             </div>
           </SelectTrigger>
-          <SelectContent className="bg-white/95 backdrop-blur-md shadow-2xl border-2 border-blue-200">
+          <SelectContent className="bg-white/90 backdrop-blur-md shadow-2xl border-2 border-blue-200">
             <SelectItem value="force-directed" className="hover:bg-blue-50 transition-colors">
               <div className="flex items-center gap-2">
                 <Circle className="h-3 w-3 text-blue-500" />
                 Force Directed
+              </div>
+            </SelectItem>
+            <SelectItem value="force-3d" className="hover:bg-blue-50 transition-colors">
+              <div className="flex items-center gap-2">
+                <Globe className="h-3 w-3 text-indigo-500" />
+                Force 3D
+              </div>
+            </SelectItem>
+            <SelectItem value="force-clustered" className="hover:bg-blue-50 transition-colors">
+              <div className="flex items-center gap-2">
+                <Hexagon className="h-3 w-3 text-purple-500" />
+                Force Clustered
+              </div>
+            </SelectItem>
+            <SelectItem value="force-radial" className="hover:bg-blue-50 transition-colors">
+              <div className="flex items-center gap-2">
+                <Target className="h-3 w-3 text-rose-500" />
+                Force Radial
+              </div>
+            </SelectItem>
+            <SelectItem value="force-organic" className="hover:bg-blue-50 transition-colors">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-3 w-3 text-pink-500" />
+                Force Organic
               </div>
             </SelectItem>
             <SelectItem value="hierarchical" className="hover:bg-blue-50 transition-colors">
@@ -2825,6 +3026,18 @@ export function AdvancedGraphView({
                 Concentric
               </div>
             </SelectItem>
+            <SelectItem value="centralized" className="hover:bg-blue-50 transition-colors">
+              <div className="flex items-center gap-2">
+                <Target className="h-3 w-3 text-blue-500" />
+                Centralized
+              </div>
+            </SelectItem>
+            <SelectItem value="network" className="hover:bg-blue-50 transition-colors">
+              <div className="flex items-center gap-2">
+                <Hexagon className="h-3 w-3 text-indigo-500" />
+                Network
+              </div>
+            </SelectItem>
           </SelectContent>
         </Select>
 
@@ -2835,7 +3048,7 @@ export function AdvancedGraphView({
                 variant="outline"
                 size="sm"
                 onClick={resetView}
-                className="bg-white/90 backdrop-blur-sm shadow-lg"
+                className="bg-white/80 backdrop-blur-sm shadow-lg"
               >
                 <RotateCcw className="h-4 w-4" />
               </Button>
@@ -2851,7 +3064,7 @@ export function AdvancedGraphView({
                 variant="outline"
                 size="sm"
                 onClick={fitToView}
-                className="bg-white/90 backdrop-blur-sm shadow-lg"
+                className="bg-white/80 backdrop-blur-sm shadow-lg"
               >
                 <Maximize2 className="h-4 w-4" />
               </Button>
@@ -2860,7 +3073,7 @@ export function AdvancedGraphView({
           </Tooltip>
         </TooltipProvider>
         
-        <div className="flex items-center gap-2 bg-white/90 backdrop-blur-sm rounded-lg px-3 py-1 shadow-lg">
+        <div className="flex items-center gap-2 bg-white/80 backdrop-blur-sm rounded-lg px-3 py-1 shadow-lg">
           <ZoomOut 
             className="h-4 w-4 cursor-pointer hover:text-blue-600" 
             onClick={() => setZoom(prev => Math.max(0.1, prev * 0.9))}
@@ -2878,7 +3091,7 @@ export function AdvancedGraphView({
           variant="outline"
           size="sm"
           onClick={toggleFullscreen}
-          className="bg-white/90 backdrop-blur-sm shadow-lg"
+          className="bg-white/80 backdrop-blur-sm shadow-lg"
         >
           {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
         </Button>
@@ -2887,7 +3100,7 @@ export function AdvancedGraphView({
           variant="outline"
           size="sm"
           onClick={() => setShowAdvancedControls(!showAdvancedControls)}
-          className="bg-white/90 backdrop-blur-sm shadow-lg"
+          className="bg-white/80 backdrop-blur-sm shadow-lg"
         >
           <Settings className="h-4 w-4" />
         </Button>

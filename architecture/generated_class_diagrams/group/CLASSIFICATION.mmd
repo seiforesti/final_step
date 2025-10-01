@@ -1,0 +1,405 @@
+classDiagram
+  class ClassificationRule {
+    +__tablename__: 
+    +id: Optional[int]
+    +framework_id: Optional[int]
+    +name: str
+    +description: Optional[str]
+    +rule_type: ClassificationRuleType
+    +pattern: str
+    +sensitivity_level: SensitivityLevel
+    +confidence_threshold: float
+    +is_active: bool
+    +priority: int
+    +scope: ClassificationScope
+    +scope_filter: Optional[str]
+    +case_sensitive: bool
+    +whole_word_only: bool
+    +negate_match: bool
+    +conditions: Optional[str]
+    +context_requirements: Optional[str]
+    +applies_to_scan_results: bool
+    +applies_to_catalog_items: bool
+    +compliance_requirement_id: Optional[int]
+    +racine_orchestrator_id: Optional[str]
+    +execution_count: int
+    +success_count: int
+    +false_positive_count: int
+    +last_executed: Optional[datetime]
+    +avg_execution_time_ms: Optional[float]
+    +version: str
+    +parent_rule_id: Optional[int]
+    +is_deprecated: bool
+    +deprecation_reason: Optional[str]
+    +created_at: datetime
+    +updated_at: datetime
+    +created_by: Optional[str]
+    +updated_by: Optional[str]
+    +framework: Optional[ClassificationFramework]
+    +compliance_requirement: Optional['ComplianceRequirement']
+    +parent_rule: Optional['ClassificationRule']
+    +child_rules: List['ClassificationRule']
+    +classification_results: List['ClassificationResult']
+    +rule_dictionaries: List['ClassificationRuleDictionary']
+    +racine_orchestrator: Optional['RacineOrchestrationMaster']
+  }
+  class ClassificationResult {
+    +__tablename__: 
+    +id: Optional[int]
+    +uuid: str
+    +entity_type: str
+    +entity_id: str
+    +entity_name: Optional[str]
+    +entity_path: Optional[str]
+    +rule_id: Optional[int]
+    +sensitivity_level: SensitivityLevel
+    +classification_method: ClassificationMethod
+    +confidence_score: float
+    +confidence_level: ClassificationConfidenceLevel
+    +data_source_id: Optional[int]
+    +scan_id: Optional[int]
+    +scan_result_id: Optional[int]
+    +catalog_item_id: Optional[int]
+    +matched_patterns: Optional[str]
+    +matched_values: Optional[str]
+    +context_data: Optional[str]
+    +sample_data: Optional[str]
+    +sample_size: Optional[int]
+    +total_records: Optional[int]
+    +match_percentage: Optional[float]
+    +is_validated: bool
+    +validation_status: str
+    +validation_notes: Optional[str]
+    +validation_date: Optional[datetime]
+    +validated_by: Optional[str]
+    +inherited_from_id: Optional[int]
+    +propagated_to: Optional[str]
+    +inheritance_depth: int
+    +is_override: bool
+    +override_reason: Optional[str]
+    +override_approved_by: Optional[str]
+    +override_approved_at: Optional[datetime]
+    +processing_time_ms: Optional[float]
+    +memory_usage_mb: Optional[float]
+    +status: ClassificationStatus
+    +effective_date: datetime
+    +expiry_date: Optional[datetime]
+    +compliance_checked: bool
+    +compliance_status: Optional[str]
+    +compliance_notes: Optional[str]
+    +version: str
+    +revision_number: int
+    +created_at: datetime
+    +updated_at: datetime
+    +created_by: Optional[str]
+    +updated_by: Optional[str]
+    +rule: Optional[ClassificationRule]
+    +data_source: Optional[DataSource]
+    +scan: Optional[Scan]
+    +scan_result: Optional[ScanResult]
+    +catalog_item: Optional[CatalogItem]
+    +inherited_from: Optional['ClassificationResult']
+    +child_results: List['ClassificationResult']
+    +audit_logs: List['ClassificationAuditLog']
+    +tags: List['ClassificationTag']
+  }
+  class ClassificationFramework {
+    +__tablename__: 
+    +id: Optional[int]
+    +name: str
+    +description: Optional[str]
+    +version: str
+    +is_default: bool
+    +is_active: bool
+    +applies_to_data_sources: bool
+    +applies_to_schemas: bool
+    +applies_to_tables: bool
+    +applies_to_columns: bool
+    +compliance_frameworks: Optional[str]
+    +regulatory_requirements: Optional[str]
+    +owner: Optional[str]
+    +steward: Optional[str]
+    +approval_required: bool
+    +created_at: datetime
+    +updated_at: datetime
+    +created_by: Optional[str]
+    +updated_by: Optional[str]
+    +classification_rules: List['ClassificationRule']
+    +classification_policies: List['ClassificationPolicy']
+  }
+  class ClassificationRuleDictionary {
+    +__tablename__: 
+    +id: Optional[int]
+    +rule_id: int
+    +dictionary_id: int
+    +is_primary: bool
+    +weight: float
+    +created_at: datetime
+    +created_by: Optional[str]
+    +rule: Optional[ClassificationRule]
+    +dictionary: Optional[ClassificationDictionary]
+  }
+  class CatalogItemClassification {
+    +__tablename__: 
+    +id: Optional[int]
+    +catalog_item_id: int
+    +classification_result_id: int
+    +is_primary_classification: bool
+    +business_context: Optional[str]
+    +usage_context: Optional[str]
+    +affects_lineage: bool
+    +affects_search: bool
+    +affects_recommendations: bool
+    +enhanced_description: Optional[str]
+    +business_glossary_terms: Optional[str]
+    +created_at: datetime
+    +updated_at: datetime
+    +catalog_item: Optional[CatalogItem]
+    +classification_result: Optional[ClassificationResult]
+  }
+  class ClassificationPolicy {
+    +__tablename__: 
+    +id: Optional[int]
+    +framework_id: int
+    +name: str
+    +description: Optional[str]
+    +priority: int
+    +is_mandatory: bool
+    +auto_apply: bool
+    +requires_approval: bool
+    +scope: ClassificationScope
+    +scope_filter: Optional[str]
+    +conditions: Optional[str]
+    +default_sensitivity: SensitivityLevel
+    +inheritance_rules: Optional[str]
+    +notification_rules: Optional[str]
+    +created_at: datetime
+    +updated_at: datetime
+    +created_by: Optional[str]
+    +updated_by: Optional[str]
+    +framework: Optional[ClassificationFramework]
+  }
+  class ClassificationTag {
+    +__tablename__: 
+    +id: Optional[int]
+    +classification_result_id: int
+    +tag_name: str
+    +tag_value: Optional[str]
+    +tag_category: Optional[str]
+    +tag_source: str
+    +confidence_score: Optional[float]
+    +relevance_score: Optional[float]
+    +is_system_tag: bool
+    +is_user_tag: bool
+    +created_at: datetime
+    +created_by: Optional[str]
+    +classification_result: Optional[ClassificationResult]
+  }
+  class ClassificationAuditLog {
+    +__tablename__: 
+    +id: Optional[int]
+    +uuid: str
+    +event_type: str
+    +event_category: str
+    +event_description: str
+    +target_type: str
+    +target_id: Optional[str]
+    +target_name: Optional[str]
+    +classification_result_id: Optional[int]
+    +old_values: Optional[str]
+    +new_values: Optional[str]
+    +event_data: Optional[str]
+    +user_id: Optional[str]
+    +user_role: Optional[str]
+    +session_id: Optional[str]
+    +ip_address: Optional[str]
+    +user_agent: Optional[str]
+    +system_version: Optional[str]
+    +api_version: Optional[str]
+    +request_id: Optional[str]
+    +correlation_id: Optional[str]
+    +risk_level: str
+    +compliance_impact: bool
+    +requires_notification: bool
+    +processing_time_ms: Optional[float]
+    +success: bool
+    +error_message: Optional[str]
+    +error_stack: Optional[str]
+    +created_at: datetime
+    +classification_result: Optional[ClassificationResult]
+  }
+  class ClassificationDictionary {
+    +__tablename__: 
+    +id: Optional[int]
+    +name: str
+    +description: Optional[str]
+    +language: str
+    +encoding: str
+    +is_case_sensitive: bool
+    +entries: str
+    +entry_count: int
+    +category: Optional[str]
+    +subcategory: Optional[str]
+    +tags: Optional[str]
+    +source_type: str
+    +source_reference: Optional[str]
+    +imported_from: Optional[str]
+    +validation_status: str
+    +validation_notes: Optional[str]
+    +quality_score: float
+    +usage_count: int
+    +last_used: Optional[datetime]
+    +version: str
+    +parent_dictionary_id: Optional[int]
+    +created_at: datetime
+    +updated_at: datetime
+    +created_by: Optional[str]
+    +updated_by: Optional[str]
+    +parent_dictionary: Optional['ClassificationDictionary']
+    +child_dictionaries: List['ClassificationDictionary']
+    +rule_dictionaries: List['ClassificationRuleDictionary']
+  }
+  class ClassificationAssignmentCreate {
+    +asset_type: str
+    +asset_id: str
+    +asset_name: str
+    +classification_id: int
+    +rule_id: Optional[str]
+    +source: ClassificationSource
+    +confidence_score: Optional[float]
+    +justification: Optional[str]
+    +evidence: Dict[str, Any]
+  }
+  class DataClassificationRuleCreate {
+    +name: str
+    +description: Optional[str]
+    +classification_id: int
+    +rule_type: str
+    +rule_pattern: Optional[str]
+    +rule_logic: Dict[str, Any]
+    +applies_to_schemas: List[str]
+    +applies_to_tables: List[str]
+    +applies_to_columns: List[str]
+    +priority: int
+    +confidence_threshold: float
+    +is_active: bool
+  }
+  class ClassificationAssignment {
+    +__tablename__: 
+    +id: Optional[int]
+    +assignment_id: str
+    +asset_type: str
+    +asset_id: str
+    +asset_name: str
+    +classification_id: int
+    +rule_id: Optional[str]
+    +source: ClassificationSource
+    +confidence_score: Optional[float]
+    +justification: Optional[str]
+    +evidence: Dict[str, Any]
+    +status: str
+    +approved_by: Optional[str]
+    +approval_date: Optional[datetime]
+    +effective_from: datetime
+    +effective_to: Optional[datetime]
+    +created_at: datetime
+    +created_by: str
+    +__table_args__: 
+  }
+  class ClassificationCreate {
+    +name: str
+    +display_name: str
+    +level: ClassificationLevel
+    +description: Optional[str]
+    +parent_id: Optional[int]
+    +compliance_frameworks: List[ComplianceFramework]
+    +data_handling_requirements: Optional[str]
+    +access_restrictions: List[str]
+    +retention_period_days: Optional[int]
+    +custom_properties: Dict[str, Any]
+  }
+  class ClassificationMetrics {
+    +__tablename__: 
+    +id: Optional[int]
+    +metric_type: str
+    +metric_name: str
+    +metric_category: str
+    +scope_type: str
+    +scope_id: Optional[str]
+    +metric_value: float
+    +metric_unit: Optional[str]
+    +benchmark_value: Optional[float]
+    +trend_direction: Optional[str]
+    +measurement_period_start: datetime
+    +measurement_period_end: datetime
+    +sample_size: Optional[int]
+    +details: Optional[str]
+    +created_at: datetime
+  }
+  class ClassificationException {
+    +__tablename__: 
+    +id: Optional[int]
+    +entity_type: str
+    +entity_id: str
+    +entity_path: Optional[str]
+    +exception_type: str
+    +reason: str
+    +sensitivity_level: Optional[SensitivityLevel]
+    +scope: ClassificationScope
+    +conditions: Optional[str]
+    +is_approved: bool
+    +approved_by: Optional[str]
+    +approved_at: Optional[datetime]
+    +approval_notes: Optional[str]
+    +is_active: bool
+    +effective_date: datetime
+    +expiry_date: Optional[datetime]
+    +created_at: datetime
+    +updated_at: datetime
+    +created_by: Optional[str]
+    +updated_by: Optional[str]
+  }
+  class DataClassificationRule {
+    +__tablename__: 
+    +id: Optional[int]
+    +rule_id: str
+    +name: str
+    +description: Optional[str]
+    +classification_id: int
+    +rule_type: str
+    +rule_pattern: Optional[str]
+    +rule_logic: Dict[str, Any]
+    +applies_to_schemas: Optional[str]
+    +applies_to_tables: Optional[str]
+    +applies_to_columns: Optional[str]
+    +exclude_patterns: Optional[str]
+    +priority: int
+    +confidence_threshold: float
+    +is_active: bool
+    +requires_approval: bool
+    +execution_order: int
+    +last_execution_time_ms: Optional[int]
+    +match_count: int
+    +created_at: datetime
+    +updated_at: datetime
+    +created_by: str
+    +updated_by: Optional[str]
+    +__table_args__: 
+  }
+  ClassificationRule "1" --> "0..*" ClassificationFramework
+  ClassificationRule "1" --> "0..*" ClassificationRuleDictionary
+  ClassificationRule "1" --> "0..*" ClassificationResult
+  ClassificationResult "1" --> "0..*" ClassificationAuditLog
+  ClassificationResult "1" --> "0..*" ClassificationTag
+  ClassificationFramework "1" --> "0..*" ClassificationPolicy
+  ClassificationRuleDictionary "1" --> "0..*" ClassificationDictionary
+  CatalogItemClassification "1" --> "0..*" ClassificationResult
+  ClassificationRule ..> ClassificationAssignmentCreate
+  ClassificationRule ..> DataClassificationRuleCreate
+  ClassificationRule ..> ClassificationAssignment
+  ClassificationRule ..> ClassificationCreate
+  ClassificationRule ..> ClassificationMetrics
+  ClassificationRule ..> ClassificationException
+  ClassificationRule ..> DataClassificationRule
+  classDef domain fill:#F8FAFF,stroke:#111827,color:#111827
+  class CatalogItemClassification,ClassificationAssignment,ClassificationAssignmentCreate,ClassificationAuditLog,ClassificationCreate,ClassificationDictionary,ClassificationException,ClassificationFramework,ClassificationMetrics,ClassificationPolicy,ClassificationResult,ClassificationRule,ClassificationRuleDictionary,ClassificationTag,DataClassificationRule,DataClassificationRuleCreate domain

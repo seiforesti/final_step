@@ -1,0 +1,134 @@
+classDiagram
+  class StageType {
+    +INITIALIZATION: 
+    +PREPARATION: 
+    +VALIDATION: 
+    +EXECUTION: 
+    +PROCESSING: 
+    +ANALYSIS: 
+    +REPORTING: 
+    +POST_PROCESSING: 
+    +APPROVAL: 
+    +NOTIFICATION: 
+    +CLEANUP: 
+    +FINALIZATION: 
+    +CUSTOM: 
+  }
+  class TagType {
+    +SYSTEM: 
+    +USER: 
+    +AUTOMATED: 
+    +COMPLIANCE: 
+  }
+  class AssetCriticality {
+    +MISSION_CRITICAL: 
+    +HIGH: 
+    +MEDIUM: 
+    +LOW: 
+    +EXPERIMENTAL: 
+  }
+  class TagScope {
+    +GLOBAL: 
+    +ORGANIZATION: 
+    +TEAM: 
+    +PERSONAL: 
+  }
+  class PipelineStageType {
+    +DATA_INGESTION: 
+    +DATA_TRANSFORMATION: 
+    +DATA_VALIDATION: 
+    +QUALITY_CHECK: 
+    +CLASSIFICATION: 
+    +COMPLIANCE_VALIDATION: 
+    +CATALOG_UPDATE: 
+    +SCAN_EXECUTION: 
+    +AI_PROCESSING: 
+    +NOTIFICATION: 
+    +CONDITIONAL_BRANCH: 
+    +PARALLEL_PROCESSING: 
+    +CUSTOM_OPERATION: 
+  }
+  class StageStatus {
+    +PENDING: 
+    +RUNNING: 
+    +COMPLETED: 
+    +FAILED: 
+    +SKIPPED: 
+    +CANCELLED: 
+    +WAITING: 
+    +RETRY: 
+    +ERROR: 
+    +TIMEOUT: 
+  }
+  class LineageType {
+    +TABLE_TO_TABLE: 
+    +COLUMN_TO_COLUMN: 
+    +VIEW_DEPENDENCY: 
+    +ETL_TRANSFORMATION: 
+    +API_CONSUMPTION: 
+    +REPORT_USAGE: 
+    +ML_TRAINING: 
+    +STREAM_PROCESSING: 
+    +CUSTOM_LOGIC: 
+  }
+  class LineageConfidence {
+    +VERIFIED: 
+    +HIGH: 
+    +MEDIUM: 
+    +LOW: 
+    +INFERRED: 
+  }
+  class AssetStatus {
+    +ACTIVE: 
+    +DEPRECATED: 
+    +ARCHIVED: 
+    +DRAFT: 
+    +UNDER_REVIEW: 
+    +QUARANTINED: 
+    +MIGRATING: 
+    +DELETED: 
+  }
+  class CatalogItemType {
+    +DATABASE: 
+    +SCHEMA: 
+    +TABLE: 
+    +VIEW: 
+    +COLUMN: 
+    +INDEX: 
+    +PROCEDURE: 
+    +FUNCTION: 
+  }
+  class LineageDirection {
+    +UPSTREAM: 
+    +DOWNSTREAM: 
+    +BIDIRECTIONAL: 
+  }
+  class AssetType {
+    +TABLE: 
+    +VIEW: 
+    +STORED_PROCEDURE: 
+    +FUNCTION: 
+    +DATASET: 
+    +FILE: 
+    +STREAM: 
+    +API: 
+    +REPORT: 
+    +DASHBOARD: 
+    +MODEL: 
+    +PIPELINE: 
+    +SCHEMA: 
+    +DATABASE: 
+  }
+  StageType ..> TagType
+  StageType ..> AssetCriticality
+  StageType ..> TagScope
+  StageType ..> PipelineStageType
+  StageType ..> StageStatus
+  StageType ..> LineageType
+  StageType ..> LineageConfidence
+  StageType ..> AssetStatus
+  StageType ..> CatalogItemType
+  StageType ..> LineageDirection
+  StageType ..> AssetType
+  classDef domain fill:#F8FAFF,stroke:#111827,color:#111827
+  class AssetCriticality,AssetStatus,AssetType,CatalogItemType,LineageConfidence,LineageDirection,LineageType,PipelineStageType,StageStatus,StageType,TagScope,TagType domain

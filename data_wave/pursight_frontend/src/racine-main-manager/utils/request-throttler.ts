@@ -240,7 +240,7 @@ export function getGlobalThrottlerStatus(): Record<string, any> {
 }
 
 // Clear queues on hot reload (if in development)
-if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+if (typeof window !== 'undefined' && import.meta.env.DEV) {
   // Listen for hot reload events
   const originalConsoleError = console.error;
   console.error = (...args) => {

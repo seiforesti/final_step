@@ -815,7 +815,7 @@ export const useMLIntelligence = create<MLIntelligenceState & MLIntelligenceActi
         startRealtimeMonitoring: () => {
           if (wsConnection) return; // Already connected
 
-          const wsUrl = `${process.env.REACT_APP_WS_URL || 'ws://localhost:8000'}/v2/ml/realtime`;
+          const wsUrl = `${import.meta.env.VITE_WS_URL || 'ws://localhost:8000'}/v2/ml/realtime`;
           wsConnection = new WebSocket(wsUrl);
 
           wsConnection.onopen = () => {

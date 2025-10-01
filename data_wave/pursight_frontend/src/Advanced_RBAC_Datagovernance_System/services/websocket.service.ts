@@ -65,9 +65,6 @@ export class WebSocketService {
     }
 
     this.authToken = authToken || this.getAuthToken();
-    if (!this.authToken) {
-      throw new Error('Authentication token required for WebSocket connection');
-    }
 
     return new Promise((resolve, reject) => {
       try {
@@ -554,13 +551,21 @@ export class WebSocketService {
    * Build WebSocket URL
    */
   private buildWebSocketUrl(): string {
+    // Prefer proxy path (matches data-sources behavior) so auth can be handled by gateway/cookies
+    if (typeof window !== 'undefined') {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const host = window.location.host;
+      // Default RBAC events proxy path; adjust if your backend expects a different mount
+      const proxyPath = '/proxy/rbac/permissions';
+      const url = `${protocol}//${host}${proxyPath}`;
+      // When using proxy path, we avoid query param tokens; gateway should attach cookies/headers
+      return url;
+    }
+
+    // Fallback to configured WS base (non-browser env)
     const baseUrl = (typeof window !== 'undefined' && (window as any).ENV?.NEXT_PUBLIC_WS_URL) || 'ws://localhost:8000';
     const wsUrl = new URL(WEBSOCKET_ENDPOINTS.RBAC_EVENTS, baseUrl);
-    
-    if (this.authToken) {
-      wsUrl.searchParams.append('token', this.authToken);
-    }
-    
+    if (this.authToken) wsUrl.searchParams.append('token', this.authToken);
     return wsUrl.toString();
   }
 
@@ -570,10 +575,14 @@ export class WebSocketService {
   private getAuthToken(): string | null {
     // Try to get token from various sources
     if (typeof window !== 'undefined') {
-      // Try localStorage
-      const token = localStorage.getItem('auth_token') || 
+      // Align with data-sources: prefer authToken, then session_token cookie; include other common keys
+      const token = localStorage.getItem('authToken') ||
+                   localStorage.getItem('auth_token') ||
+                   sessionStorage.getItem('session_token') ||
+                   sessionStorage.getItem('authToken') ||
                    sessionStorage.getItem('auth_token') ||
-                   this.getCookieValue('session_token');
+                   this.getCookieValue('session_token') ||
+                   this.getCookieValue('auth_token');
       return token;
     }
     return null;

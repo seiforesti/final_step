@@ -1,0 +1,28 @@
+%========= PART 3: Chapter 4 + Conclusion + Bibliography ========%
+\documentclass[]{./tpl/isipfe}
+\graphicspath{{./img/}}
+\pdfcompresslevel=0
+\pdfobjcompresslevel=0
+
+\input{./tpl/new_commands}
+
+\begin{document}
+    \input{global_config}
+    
+    \mainmatter
+        \setcounter{chapter}{3}
+        \input{chap_04}
+        \clearpage
+        
+        \input{conclusion}
+        \clearpage
+        
+        \printbibliography[heading=bibintoc]
+        
+        \input{annexes}
+        \clearpage
+
+    \backmatter
+        \input{./tpl/resume}
+    
+\end{document}

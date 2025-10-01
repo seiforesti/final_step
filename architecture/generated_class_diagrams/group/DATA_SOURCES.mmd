@@ -1,0 +1,232 @@
+classDiagram
+  class Resource {
+    +__tablename__: 
+    +id: Optional[int]
+    +name: str
+    +type: str
+    +parent_id: Optional[int]
+    +engine: Optional[str]
+    +details: Optional[str]
+    +parent: ClassVar[Any]
+    +children: ClassVar[Any]
+  }
+  class DataSourceClassificationSetting {
+    +__tablename__: 
+    +id: Optional[int]
+    +data_source_id: int
+    +auto_classify: bool
+    +classification_framework_id: Optional[int]
+    +default_sensitivity_level: SensitivityLevel
+    +classify_on_scan: bool
+    +classification_frequency: str
+    +inherit_schema_classification: bool
+    +inherit_table_classification: bool
+    +inherit_column_classification: bool
+    +batch_size: int
+    +max_parallel_jobs: int
+    +created_at: datetime
+    +updated_at: datetime
+    +created_by: Optional[str]
+    +updated_by: Optional[str]
+    +data_source: Optional[DataSource]
+    +classification_framework: Optional[ClassificationFramework]
+  }
+  class DataSourceVersion {
+    +__tablename__: 
+    +id: Optional[int]
+    +data_source_id: int
+    +version: str
+    +name: Optional[str]
+    +description: Optional[str]
+    +status: VersionStatus
+    +is_current: bool
+    +changes_summary: Optional[str]
+    +breaking_changes: bool
+    +configuration: Dict[str, Any]
+    +schema_snapshot: Dict[str, Any]
+    +parent_version_id: Optional[int]
+    +created_by: str
+    +created_at: datetime
+    +updated_at: datetime
+    +activated_at: Optional[datetime]
+    +archived_at: Optional[datetime]
+  }
+  class DataSourceVersionResponse {
+    +id: int
+    +data_source_id: int
+    +version: str
+    +name: Optional[str]
+    +description: Optional[str]
+    +status: VersionStatus
+    +is_current: bool
+    +changes_summary: Optional[str]
+    +breaking_changes: bool
+    +configuration: Dict[str, Any]
+    +schema_snapshot: Dict[str, Any]
+    +parent_version_id: Optional[int]
+    +created_by: str
+    +created_at: datetime
+    +updated_at: datetime
+    +activated_at: Optional[datetime]
+    +archived_at: Optional[datetime]
+    +changes: List[VersionChangeResponse]
+  }
+  class DataSourceStatsResponse {
+    +id: Optional[int]
+    +entity_stats: Dict[str, Any]
+    +size_stats: Dict[str, Any]
+    +last_scan_time: Optional[datetime]
+    +classification_stats: Optional[Dict[str, Any]]
+    +sensitivity_stats: Optional[Dict[str, Any]]
+    +compliance_stats: Optional[Dict[str, Any]]
+    +performance_stats: Optional[Dict[str, Any]]
+    +quality_stats: Optional[Dict[str, Any]]
+  }
+  class DataSourceHealthResponse {
+    +id: Optional[int]
+    +status: str
+    +last_checked: datetime
+    +latency_ms: Optional[int]
+    +error_message: Optional[str]
+    +recommendations: Optional[List[str]]
+    +issues: Optional[List[Dict[str, Any]]]
+  }
+  class RacineWorkspaceResource {
+    +__tablename__: 
+    +id: str
+    +workspace_id: str
+    +resource_type: str
+    +resource_id: str
+    +group_id: str
+    +resource_name: Optional[str]
+    +resource_description: Optional[str]
+    +resource_metadata: Dict[str, Any]
+    +access_level: ResourceAccessLevel
+    +is_shared: bool
+    +shared_with: List[str]
+    +sharing_permissions: Dict[str, Any]
+    +folder_path: Optional[str]
+    +tags: List[str]
+    +category: Optional[str]
+    +priority: int
+    +usage_count: int
+    +last_accessed: Optional[datetime]
+    +last_accessed_by: Optional[int]
+    +access_history: List[Dict[str, Any]]
+    +depends_on: List[str]
+    +dependents: List[str]
+    +related_resources: List[str]
+    +status: str
+    +sync_status: str
+    +last_sync: Optional[datetime]
+    +workspace_config: Dict[str, Any]
+    +display_settings: Dict[str, Any]
+    +comments: List[Dict[str, Any]]
+    +annotations: List[Dict[str, Any]]
+    +added_by: int
+    +added_at: datetime
+    +created_at: datetime
+    +updated_at: datetime
+    +workspace: 'RacineWorkspace'
+    +added_by_user: 'User'
+    +last_accessed_by_user: Optional['User']
+    +__table_args__: 
+  }
+  class DataSourceTag {
+    +__tablename__: 
+    +id: Optional[int]
+    +data_source_id: int
+    +tag_id: int
+    +assigned_by: str
+    +assigned_at: datetime
+    +context: Optional[str]
+    +confidence_score: Optional[float]
+    +auto_assigned: bool
+    +expires_at: Optional[datetime]
+  }
+  class DataSourceTagResponse {
+    +id: int
+    +data_source_id: int
+    +tag_id: int
+    +assigned_by: str
+    +assigned_at: datetime
+    +context: Optional[str]
+    +confidence_score: Optional[float]
+    +auto_assigned: bool
+    +expires_at: Optional[datetime]
+    +tag: TagResponse
+  }
+  class DataSource {
+    +__tablename__: 
+    +id: Optional[int]
+    +name: str
+    +description: Optional[str]
+    +source_type: DataSourceType
+    +location: DataSourceLocation
+    +host: str
+    +port: int
+    +username: str
+    +password_secret: str
+    +secret_manager_type: Optional[str]
+    +use_encryption: bool
+    +database_name: Optional[str]
+    +cloud_provider: Optional[CloudProvider]
+    +cloud_config: Optional[Dict[str, Any]]
+    +replica_config: Optional[Dict[str, Any]]
+    +ssl_config: Optional[Dict[str, str]]
+    +pool_size: Optional[int]
+    +max_overflow: Optional[int]
+    +pool_timeout: Optional[int]
+    +connection_properties: Optional[Dict[str, Any]]
+    +additional_properties: Optional[Dict[str, Any]]
+    +status: DataSourceStatus
+    +environment: Optional[Environment]
+    +criticality: Optional[Criticality]
+    +data_classification: Optional[DataClassification]
+    +tags: Optional[List[str]]
+    +owner: Optional[str]
+    +team: Optional[str]
+    +organization_id: Optional[int]
+    +racine_orchestrator_id: Optional[str]
+    +backup_enabled: bool
+    +monitoring_enabled: bool
+    +encryption_enabled: bool
+    +scan_frequency: Optional[ScanFrequency]
+    +health_score: Optional[int]
+    +compliance_score: Optional[int]
+    +entity_count: Optional[int]
+    +size_gb: Optional[float]
+    +avg_response_time: Optional[int]
+    +error_rate: Optional[float]
+    +uptime_percentage: Optional[float]
+    +connection_pool_size: Optional[int]
+    +active_connections: Optional[int]
+    +queries_per_second: Optional[int]
+    +storage_used_percentage: Optional[float]
+    +cost_per_month: Optional[float]
+    +last_scan: Optional[datetime]
+    +next_scan: Optional[datetime]
+    +last_backup: Optional[datetime]
+    +created_at: datetime
+    +updated_at: datetime
+    +created_by: Optional[str]
+    +updated_by: Optional[str]
+    +scans: List['Scan']
+    +scan_rule_sets: List['ScanRuleSet']
+    +discovery_history: List['DiscoveryHistory']
+    +compliance_rules: List['ComplianceRule']
+    +catalog_items: List['CatalogItem']
+    +integrations: List['Integration']
+    +organization: Optional['Organization']
+    +racine_orchestrator: Optional['RacineOrchestrationMaster']
+  }
+  DataSourceClassificationSetting "1" --> "0..*" DataSource
+  Resource ..> DataSourceVersion
+  Resource ..> DataSourceVersionResponse
+  Resource ..> DataSourceStatsResponse
+  Resource ..> DataSourceHealthResponse
+  Resource ..> RacineWorkspaceResource
+  Resource ..> DataSourceTag
+  Resource ..> DataSourceTagResponse
+  classDef domain fill:#F8FAFF,stroke:#111827,color:#111827
+  class DataSource,DataSourceClassificationSetting,DataSourceHealthResponse,DataSourceStatsResponse,DataSourceTag,DataSourceTagResponse,DataSourceVersion,DataSourceVersionResponse,RacineWorkspaceResource,Resource domain

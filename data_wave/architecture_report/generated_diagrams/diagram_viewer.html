@@ -1,0 +1,223 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏗️ Enterprise Class Diagram Architecture</title>
+    <script src="https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        .diagram-container {
+            text-align: left;
+            margin: 30px 0;
+            padding: 20px;
+            border: 2px solid #e74c3c;
+            border-radius: 10px;
+            background: #f8f9fa;
+            overflow: auto;
+        }
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin: 15px 0 5px 0;
+        }
+        .input, .button { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; }
+        .button.primary { background: #111827; color: #fff; border-color: #111827; cursor: pointer; }
+        .muted { color: #7f8c8d; font-size: 0.95em; }
+        textarea { width: 100%; height: 160px; border-radius: 10px; padding: 10px; border: 1px solid #ddd; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+        .instructions {
+            background: #e8f5e8;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 5px solid #27ae60;
+        }
+        .method-section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+        .method-title {
+            color: #e74c3c;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+        }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .link-button {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 5px;
+            transition: background 0.3s;
+        }
+        .link-button:hover {
+            background: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏗️ Enterprise Class Diagram Architecture</h1>
+        <p style="text-align: center; font-size: 1.2em; color: #7f8c8d;">
+            PurSight Data Governance Platform - 400+ Models System
+        </p>
+        
+        <div class="instructions">
+            <h3>🎯 Render Mermaid class diagrams directly</h3>
+            <p>You can paste Mermaid code, load a local <code>.mmd</code> file, or fetch from a URL and render below.</p>
+        </div>
+
+        <div class="method-section">
+            <div class="method-title">⚡ Quick actions</div>
+            <div class="controls">
+                <div>
+                    <div class="muted">Paste Mermaid code</div>
+                    <button class="button primary" id="renderFromPaste">Render from textarea</button>
+                </div>
+                <div>
+                    <div class="muted">Load local .mmd file</div>
+                    <input id="fileInput" type="file" accept=".mmd,.mermaid,text/plain" class="input" />
+                </div>
+                <div>
+                    <div class="muted">Fetch from URL (served)</div>
+                    <div style="display:flex; gap:6px;">
+                        <input id="urlInput" class="input" placeholder="e.g. /architecture/generated_class_diagrams/00_overview_flow.mmd" />
+                        <button class="button" id="fetchBtn">Fetch</button>
+                    </div>
+                </div>
+            </div>
+            <textarea id="pasteArea" placeholder="flowchart TB\n  A[ClassA] --> B[ClassB]"></textarea>
+            <div class="muted">Hint: If you served the repo root, try URL: <code>/architecture/generated_class_diagrams/00_overview_flow.mmd</code></div>
+        </div>
+        
+        <div class="method-section">
+            <div class="method-title">🌐 METHOD 1: Online Mermaid Editor (Recommended)</div>
+            <p>1. <a href="https://mermaid.live/" target="_blank" class="link-button">Open Mermaid Live Editor</a></p>
+            <p>2. Copy the Mermaid code from: <code>generated_diagrams/enterprise_class_diagram.mmd</code></p>
+            <p>3. Paste it into the editor and export as PNG/SVG/PDF</p>
+        </div>
+        
+        <div class="method-section">
+            <div class="method-title">🎨 METHOD 2: PlantUML Online</div>
+            <p>1. <a href="http://www.plantuml.com/plantuml/uml/" target="_blank" class="link-button">Open PlantUML Online</a></p>
+            <p>2. Copy the PlantUML code from: <code>PLANTUML_CLASS_DIAGRAM.puml</code></p>
+            <p>3. Paste it into the editor for automatic rendering</p>
+        </div>
+        
+        <div class="method-section">
+            <div class="method-title">💻 METHOD 3: Command Line Tools</div>
+            <p><strong>Mermaid CLI:</strong></p>
+            <p><code>npm install -g @mermaid-js/mermaid-cli</code></p>
+            <p><code>mmdc -i enterprise_class_diagram.mmd -o diagram.png</code></p>
+            
+            <p><strong>PlantUML CLI:</strong></p>
+            <p><code>java -jar plantuml.jar PLANTUML_CLASS_DIAGRAM.puml</code></p>
+        </div>
+        
+        <div class="method-section">
+            <div class="method-title">🔧 METHOD 4: VS Code Extensions</div>
+            <p>Install extensions:</p>
+            <ul>
+                <li><strong>Mermaid Preview</strong> by bierner.markdown-mermaid</li>
+                <li><strong>PlantUML</strong> by jebbs.plantuml</li>
+            </ul>
+            <p>Then preview the diagram files directly in VS Code</p>
+        </div>
+        
+        <div class="diagram-container" id="diagram">Paste or load Mermaid code, then render.</div>
+
+        <div class="instructions">
+            <h3>📊 Architecture Highlights:</h3>
+            <ul>
+                <li>🎯 <strong>7 Core Module Groups</strong> with master orchestration</li>
+                <li>🔐 <strong>Fort Cohesion & Faible Couplage</strong> design principles</li>
+                <li>🚫 <strong>Loop-Free Architecture</strong> with hierarchical dependencies</li>
+                <li>🤖 <strong>AI-First Approach</strong> with intelligent optimization</li>
+                <li>🏢 <strong>Enterprise-Ready</strong> with multi-tenant support</li>
+                <li>📈 <strong>400+ Models</strong> across all governance domains</li>
+            </ul>
+        </div>
+        
+        <div style="text-align: center; margin-top: 40px; color: #7f8c8d;">
+            <p>🏆 This architecture represents a piece of art engineering that balances complexity with maintainability</p>
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' });
+
+        const diag = document.getElementById('diagram');
+        const pasteArea = document.getElementById('pasteArea');
+        const fileInput = document.getElementById('fileInput');
+        const urlInput = document.getElementById('urlInput');
+
+        function render(code) {
+            diag.textContent = 'Rendering...';
+            mermaid.render('m1', code).then(({ svg }) => {
+                diag.innerHTML = svg;
+            }).catch(err => {
+                diag.innerHTML = `<pre style="color:#b91c1c; white-space:pre-wrap;">${String(err)}</pre><pre>${code.replace(/</g,'&lt;')}</pre>`;
+            });
+        }
+
+        document.getElementById('renderFromPaste').addEventListener('click', () => {
+            render(pasteArea.value);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const f = e.target.files && e.target.files[0];
+            if (!f) return;
+            const reader = new FileReader();
+            reader.onload = () => { pasteArea.value = reader.result; render(pasteArea.value); };
+            reader.readAsText(f, 'utf-8');
+        });
+
+        document.getElementById('fetchBtn').addEventListener('click', async () => {
+            const url = urlInput.value.trim();
+            if (!url) return;
+            try {
+                const resp = await fetch(url, { cache: 'no-store' });
+                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+                const text = await resp.text();
+                pasteArea.value = text;
+                render(text);
+            } catch (e) {
+                diag.innerHTML = `<div style='color:#b91c1c'>Failed to fetch: ${String(e)}</div>`;
+            }
+        });
+    </script>
+</body>
+</html>
+        

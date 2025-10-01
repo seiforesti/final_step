@@ -1,0 +1,469 @@
+@startuml section_04_api_architecture
+!theme aws-orange
+!define AWSPUML https://raw.githubusercontent.com/awslabs/aws-icons-for-plantuml/v18.0/dist
+!include AWSPUML/AWSCommon.puml
+!include AWSPUML/ApplicationIntegration/APIGateway.puml
+!include AWSPUML/Security/IAM.puml
+!include AWSPUML/Compute/Lambda.puml
+
+' Advanced Enterprise Styling
+skinparam backgroundColor #FAFBFC
+skinparam defaultFontName "Segoe UI"
+skinparam defaultFontSize 11
+skinparam dpi 300
+skinparam shadowing true
+skinparam roundCorner 15
+skinparam linetype ortho
+
+' API Domain Colors
+skinparam package {
+    BackgroundColor<<Auth>> #FFEBEE
+    BorderColor<<Auth>> #D32F2F
+    BackgroundColor<<AI_ML>> #E8F4FD
+    BorderColor<<AI_ML>> #1976D2
+    BackgroundColor<<Catalog>> #E8F5E8
+    BorderColor<<Catalog>> #388E3C
+    BackgroundColor<<Compliance>> #FFF3E0
+    BorderColor<<Compliance>> #F57C00
+    BackgroundColor<<Scan>> #FCE4EC
+    BorderColor<<Scan>> #C2185B
+    BackgroundColor<<Workflow>> #F1F8E9
+    BorderColor<<Workflow>> #689F38
+    BackgroundColor<<Analytics>> #F3E5F5
+    BorderColor<<Analytics>> #7B1FA2
+    BackgroundColor<<Integration>> #E3F2FD
+    BorderColor<<Integration>> #1565C0
+    BackgroundColor<<Gateway>> #F5F5F5
+    BorderColor<<Gateway>> #424242
+}
+
+skinparam class {
+    BackgroundColor #FFFFFF
+    BorderColor #E0E0E0
+    BorderThickness 2
+    FontColor #212121
+    HeaderBackgroundColor #F5F5F5
+    ArrowColor #424242
+    ArrowThickness 2
+}
+
+title <size:20><b>DataWave API Layer Architecture</b></size>
+subtitle <size:14><i>Enterprise RESTful APIs with Domain-Driven Design & Advanced Security</i></size>
+
+' API Gateway Layer
+package "🌐 **API Gateway Layer**" <<Gateway>> as APIGateway {
+    class "SmartProxyRouter" as SPR {
+        +route_requests()
+        +load_balance()
+        +rate_limit()
+        +circuit_break()
+        --
+        <b>Gateway Features:</b>
+        • Intelligent request routing
+        • Dynamic load balancing
+        • Rate limiting & throttling
+        • Circuit breaker patterns
+        • Request/response transformation
+    }
+    
+    class "APIGatewayController" as AGC {
+        +manage_endpoints()
+        +version_control()
+        +documentation()
+        +monitoring()
+        --
+        <b>Management:</b>
+        • OpenAPI 3.0 specifications
+        • Version management
+        • Documentation generation
+        • Performance monitoring
+    }
+    
+    class "SecurityGateway" as SG {
+        +authenticate()
+        +authorize()
+        +validate_tokens()
+        +audit_requests()
+        --
+        <b>Security:</b>
+        • OAuth 2.0/OIDC
+        • JWT token validation
+        • RBAC enforcement
+        • Comprehensive auditing
+    }
+}
+
+' Authentication & Authorization APIs
+package "🔐 **Authentication & Authorization APIs**" <<Auth>> as AuthAPIs {
+    class "AuthenticationRoutes" as AR {
+        +POST /auth/login
+        +POST /auth/logout
+        +POST /auth/refresh
+        +GET /auth/google
+        +GET /auth/microsoft
+        --
+        <b>Auth Endpoints:</b>
+        • OAuth 2.0 flows
+        • Multi-factor authentication
+        • Session management
+        • Token refresh
+        • Identity federation
+    }
+    
+    class "RBACRoutes" as RR {
+        +GET /rbac/roles
+        +POST /rbac/permissions
+        +PUT /rbac/policies
+        +GET /rbac/validate
+        --
+        <b>RBAC Features:</b>
+        • Dynamic role management
+        • Permission evaluation
+        • Policy enforcement
+        • Access validation
+    }
+    
+    class "AuditRoutes" as AuR {
+        +GET /audit/logs
+        +POST /audit/events
+        +GET /audit/reports
+        +GET /audit/compliance
+        --
+        <b>Audit Capabilities:</b>
+        • Security event logging
+        • Compliance reporting
+        • Access tracking
+        • Threat detection
+    }
+}
+
+' AI & Machine Learning APIs
+package "🤖 **AI & Machine Learning APIs**" <<AI_ML>> as AIAPIs {
+    class "AIModelRoutes" as AMR {
+        +GET /ai/models
+        +POST /ai/models/deploy
+        +PUT /ai/models/config
+        +GET /ai/models/status
+        --
+        <b>Model Management:</b>
+        • Model deployment
+        • Configuration management
+        • Performance monitoring
+        • Version control
+    }
+    
+    class "PredictionRoutes" as PR {
+        +POST /ai/predict
+        +POST /ai/batch-predict
+        +GET /ai/predictions/{id}
+        +WebSocket /ai/stream
+        --
+        <b>Inference Services:</b>
+        • Real-time predictions
+        • Batch processing
+        • Streaming inference
+        • Result tracking
+    }
+    
+    class "ExplainabilityRoutes" as ER {
+        +POST /ai/explain
+        +GET /ai/interpretability
+        +POST /ai/feature-importance
+        +GET /ai/model-insights
+        --
+        <b>AI Explainability:</b>
+        • Model interpretation
+        • Feature importance
+        • Decision transparency
+        • Bias detection
+    }
+}
+
+' Catalog Management APIs
+package "📚 **Catalog Management APIs**" <<Catalog>> as CatalogAPIs {
+    class "EnterpriseCatalogRoutes" as ECR {
+        +GET /catalog/assets
+        +POST /catalog/search
+        +PUT /catalog/assets/{id}
+        +WebSocket /catalog/live
+        --
+        <b>Catalog Features:</b>
+        • Semantic search (10M+ assets)
+        • Real-time streaming
+        • Metadata management
+        • Asset discovery
+    }
+    
+    class "LineageRoutes" as LR {
+        +GET /catalog/lineage/{id}
+        +POST /catalog/lineage/trace
+        +GET /catalog/impact-analysis
+        +GET /catalog/dependencies
+        --
+        <b>Lineage Tracking:</b>
+        • Data lineage visualization
+        • Impact analysis
+        • Dependency mapping
+        • Change propagation
+    }
+    
+    class "QualityRoutes" as QR {
+        +GET /catalog/quality/{id}
+        +POST /catalog/quality/assess
+        +GET /catalog/quality/rules
+        +POST /catalog/quality/profile
+        --
+        <b>Quality Assessment:</b>
+        • Data profiling
+        • Quality scoring
+        • Rule validation
+        • Improvement recommendations
+    }
+}
+
+' Compliance & Governance APIs
+package "⚖️ **Compliance & Governance APIs**" <<Compliance>> as ComplianceAPIs {
+    class "ComplianceFrameworkRoutes" as CFR {
+        +GET /compliance/frameworks
+        +POST /compliance/assess
+        +GET /compliance/gaps
+        +GET /compliance/evidence
+        --
+        <b>Framework Support:</b>
+        • GDPR, HIPAA, SOC2
+        • PCI DSS, ISO27001
+        • NIST, CCPA, SOX
+        • Custom frameworks
+    }
+    
+    class "ComplianceReportRoutes" as CRR {
+        +GET /compliance/reports
+        +POST /compliance/generate
+        +GET /compliance/dashboard
+        +GET /compliance/metrics
+        --
+        <b>Reporting:</b>
+        • Automated reporting
+        • Executive dashboards
+        • Compliance metrics
+        • Audit trails
+    }
+}
+
+' Scan & Discovery APIs
+package "🔍 **Scan & Discovery APIs**" <<Scan>> as ScanAPIs {
+    class "ScanOrchestrationRoutes" as SOR {
+        +POST /scan/execute
+        +GET /scan/status/{id}
+        +PUT /scan/schedule
+        +GET /scan/results
+        --
+        <b>Scan Orchestration:</b>
+        • 10,000+ concurrent scans
+        • Intelligent scheduling
+        • Resource optimization
+        • Real-time monitoring
+    }
+    
+    class "DataSourceRoutes" as DSR {
+        +GET /scan/datasources
+        +POST /scan/datasources
+        +PUT /scan/datasources/{id}
+        +POST /scan/test-connection
+        --
+        <b>Data Source Management:</b>
+        • Connection management
+        • Health monitoring
+        • Configuration validation
+        • Performance optimization
+    }
+    
+    class "ScanIntelligenceRoutes" as SIR {
+        +POST /scan/ai-optimize
+        +GET /scan/patterns
+        +POST /scan/predict-quality
+        +GET /scan/recommendations
+        --
+        <b>AI-Powered Scanning:</b>
+        • Intelligent optimization
+        • Pattern recognition
+        • Quality prediction
+        • Smart recommendations
+    }
+}
+
+' Workflow & Orchestration APIs
+package "⚙️ **Workflow & Orchestration APIs**" <<Workflow>> as WorkflowAPIs {
+    class "WorkflowRoutes" as WR {
+        +GET /workflow/designer
+        +POST /workflow/execute
+        +GET /workflow/status
+        +PUT /workflow/templates
+        --
+        <b>Workflow Management:</b>
+        • Visual workflow designer
+        • Template management
+        • Execution monitoring
+        • AI optimization
+    }
+    
+    class "RacineOrchestrationRoutes" as ROR {
+        +POST /racine/orchestrate
+        +GET /racine/workspaces
+        +PUT /racine/collaborate
+        +WebSocket /racine/realtime
+        --
+        <b>Racine Orchestration:</b>
+        • Master coordination
+        • Workspace management
+        • Real-time collaboration
+        • State synchronization
+    }
+}
+
+' Analytics & Reporting APIs
+package "📊 **Analytics & Reporting APIs**" <<Analytics>> as AnalyticsAPIs {
+    class "AdvancedAnalyticsRoutes" as AAR {
+        +POST /analytics/correlate
+        +GET /analytics/insights
+        +POST /analytics/predict
+        +GET /analytics/trends
+        --
+        <b>Analytics Capabilities:</b>
+        • Real-time correlation analysis
+        • Predictive insights
+        • Trend analysis
+        • Business intelligence
+    }
+    
+    class "RealtimeAnalyticsRoutes" as RAR {
+        +WebSocket /analytics/stream
+        +GET /analytics/metrics
+        +POST /analytics/alerts
+        +GET /analytics/dashboards
+        --
+        <b>Real-time Analytics:</b>
+        • Live data streaming
+        • Real-time metrics
+        • Intelligent alerting
+        • Interactive dashboards
+    }
+}
+
+' Integration & External APIs
+package "🔗 **Integration & External APIs**" <<Integration>> as IntegrationAPIs {
+    class "EnterpriseIntegrationRoutes" as EIR {
+        +POST /integration/connectors
+        +GET /integration/systems
+        +PUT /integration/mappings
+        +POST /integration/sync
+        --
+        <b>Enterprise Integration:</b>
+        • Cloud platform connectors
+        • System integration
+        • Data synchronization
+        • Mapping management
+    }
+    
+    class "WebhookRoutes" as WHR {
+        +POST /webhooks/register
+        +GET /webhooks/events
+        +PUT /webhooks/config
+        +POST /webhooks/test
+        --
+        <b>Webhook Management:</b>
+        • Event notifications
+        • Webhook registration
+        • Delivery tracking
+        • Configuration management
+    }
+}
+
+' API Gateway Relationships
+SPR --> SG : security validation
+SPR --> AGC : route management
+SG --> AR : authentication
+SG --> RR : authorization
+
+' Authentication Flow
+AR --> RR : role validation
+RR --> AuR : audit logging
+SG --> AMR : secure AI access
+SG --> ECR : secure catalog access
+
+' AI API Relationships
+AMR --> PR : model serving
+PR --> ER : explainability
+AMR --> SIR : AI optimization
+
+' Catalog API Relationships
+ECR --> LR : lineage tracking
+ECR --> QR : quality assessment
+QR --> CFR : compliance validation
+
+' Scan API Relationships
+SOR --> DSR : data source management
+SOR --> SIR : intelligent scanning
+SIR --> AMR : AI model integration
+
+' Workflow Relationships
+WR --> ROR : orchestration
+ROR --> SOR : scan workflows
+WR --> AAR : analytics workflows
+
+' Analytics Relationships
+AAR --> RAR : real-time streaming
+RAR --> WHR : event notifications
+
+' Integration Relationships
+EIR --> WHR : webhook integration
+EIR --> ECR : catalog integration
+WHR --> AuR : event auditing
+
+' Cross-Domain Integration
+note top of SPR : <b>API Gateway</b>\n94+ API endpoints\nSub-100ms response times\n99.99% availability
+
+note right of AR : <b>Enterprise Security</b>\nOAuth 2.0/OIDC\nMulti-factor authentication\nComprehensive RBAC
+
+note bottom of ECR : <b>Catalog Scale</b>\n10M+ assets\nReal-time streaming\nAI-powered search
+
+note left of SOR : <b>Scan Performance</b>\n10,000+ concurrent scans\nIntelligent scheduling\nAI optimization
+
+' Performance Annotations
+note as PerformanceNote
+<b>API Performance Characteristics:</b>
+• Authentication APIs: <50ms, 5K req/sec
+• AI/ML APIs: <200ms, 1K req/sec
+• Catalog APIs: <100ms, 10K req/sec
+• Scan APIs: <500ms, 500 req/sec
+• Compliance APIs: <150ms, 2K req/sec
+• Workflow APIs: <1s, 100 req/sec
+end note
+
+' Security Features
+note as SecurityNote
+<b>Security Features:</b>
+• JWT token validation
+• OAuth 2.0 integration
+• RBAC enforcement
+• API key management
+• mTLS for service-to-service
+• Comprehensive audit trails
+• Rate limiting & throttling
+• Circuit breaker patterns
+end note
+
+' Integration Patterns
+note as IntegrationNote
+<b>Integration Patterns:</b>
+• RESTful APIs with OpenAPI 3.0
+• WebSocket real-time communication
+• Server-Sent Events (SSE)
+• GraphQL subscriptions
+• Webhook notifications
+• Message queue integration
+• Event-driven architecture
+• Microservices communication
+end note
+
+@enduml

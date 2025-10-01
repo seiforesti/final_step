@@ -6,7 +6,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { toast, Toaster } from 'react-hot-toast';
-import { Shield, Users, UserCheck, Key, Lock, Database, Activity, FileText, Settings, Bell, Search, Filter, Download, Upload, RefreshCw, TrendingUp, BarChart3, PieChart, AlertTriangle, CheckCircle, Clock, Zap, Globe, Monitor, Smartphone, Cloud, Server, Cpu, HardDrive, Network, Eye, EyeOff, Maximize, Minimize, Grid, List, Layout, Sidebar, Menu, X, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Plus, Minus, Edit, Trash, Copy, Share, Star, Bookmark, Flag, Tag, Calendar, Timer, MapPin, Mail, Phone, User, UserPlus, UserMinus, UserX, Crown, Award, Target, Layers, GitBranch, Command as CommandIcon, Terminal, Code, Bug, Wrench, Gauge, Compass, Navigation, Map, Route, Waypoints } from 'lucide-react';
+import { Shield, Users, UserCheck, Key, Lock, Database, Activity, FileText, Settings, Bell, Search, Filter, Download, Upload, RefreshCw, TrendingUp, BarChart3, PieChart, AlertTriangle, CheckCircle, Clock, Zap, Globe, Monitor, Smartphone, Cloud, Server, Cpu, HardDrive, Network, Eye, EyeOff, Maximize, Minimize, Grid, List, Layout, Sidebar, Menu, X, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Plus, Minus, Edit, Trash, Copy, Share, Star, Bookmark, Flag, Tag, Calendar, Timer, MapPin, Mail, Phone, User as UserIcon, UserPlus, UserMinus, UserX, Crown, Award, Target, Layers, GitBranch, Command as CommandIcon, Terminal, Code, Bug, Wrench, Gauge, Compass, Navigation, Map, Route, Waypoints } from 'lucide-react';
 
 // UI Components
 import { Button } from '@/components/ui/button';
@@ -35,6 +35,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 // RBAC Hooks and Services
 import { useCurrentUser } from './hooks/useCurrentUser';
 import { useAuth } from './hooks/useAuth';
+import { AuthProvider } from './hooks/useAuth';
 import { useUsers } from './hooks/useUsers';
 import { useRoles } from './hooks/useRoles';
 import { usePermissions } from './hooks/usePermissions';
@@ -46,6 +47,7 @@ import { useAuditLogs } from './hooks/useAuditLogs';
 import { useRBACWebSocket } from './hooks/useRBACWebSocket';
 import { usePermissionCheck } from './hooks/usePermissionCheck';
 import { useRBACState } from './hooks/useRBACState';
+import { RBACStateProvider } from './hooks/useRBACState';
 
 // RBAC Components
 import { RBACLayout } from './components/layout/RBACLayout';
@@ -1601,7 +1603,7 @@ export const RBACSystemSPA: React.FC = () => {
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem>
-                          <User className="mr-2 h-4 w-4" />
+                          <UserIcon className="mr-2 h-4 w-4" />
                           <span>Profile</span>
                         </DropdownMenuItem>
                         <DropdownMenuItem>
@@ -1713,4 +1715,12 @@ export const RBACSystemSPA: React.FC = () => {
   );
 };
 
-export default RBACSystemSPA;
+const RBACSystemSPAWithProviders: React.FC = () => (
+  <AuthProvider>
+    <RBACStateProvider>
+      <RBACSystemSPA />
+    </RBACStateProvider>
+  </AuthProvider>
+);
+
+export default RBACSystemSPAWithProviders;

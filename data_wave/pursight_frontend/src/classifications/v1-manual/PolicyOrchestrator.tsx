@@ -61,35 +61,344 @@ import {
   TableRow 
 } from '@/components/ui/table';
 import { 
-  ScrollArea 
-} from '@/components/ui/scroll-area';
-import { 
   Progress 
 } from '@/components/ui/progress';
 import { 
-  Switch 
-} from '@/components/ui/switch';
-import { 
   Checkbox 
 } from '@/components/ui/checkbox';
-import { AlertTriangle, CheckCircle, XCircle, Play, Pause, StopCircle, Settings, Filter, Search, Download, Upload, Copy, Edit, Trash2, Plus, ChevronDown, ChevronRight, Eye, Code, Database, FileText, Activity, BarChart3, TrendingUp, Clock, Users, Shield, Zap, Brain, Target, Layers, GitBranch, History, TestTube, Workflow, MessageSquare, Bell, Calendar, MapPin, Link, ExternalLink, RefreshCw, Save, X, Check, Info, AlertCircle, Gauge, Network, Route, Timer, Sliders, Command, Cpu, MemoryStick, HardDrive, Wifi, Cloud, Server, Globe, Lock, Key, UserCheck, Building, Tag, Flag, Star, BookOpen, FileCheck, ClipboardList, Archive, FolderTree } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
-import { useClassificationState } from '../core/hooks/useClassificationState';
 import { 
-  ClassificationPolicy, 
-  PolicyRule, 
-  PolicyExecution, 
-  PolicyTemplate, 
-  PolicyWorkflow, 
-  PolicyMetrics, 
-  PolicyViolation, 
-  PolicyApproval, 
-  PolicyAudit,
-  ComplianceReport,
-  Classification,
-  ClassificationFramework,
-  RuleSet
-} from '../core/types';
+  AlertTriangle, 
+  CheckCircle, 
+  XCircle, 
+  Play, 
+  Pause, 
+  StopCircle, 
+  Settings, 
+  Filter, 
+  Search, 
+  Download, 
+  Edit, 
+  Trash2, 
+  Plus, 
+  Eye, 
+  FileText, 
+  Activity, 
+  BarChart3, 
+  TrendingUp, 
+  Clock, 
+  Users, 
+  Shield, 
+  Zap, 
+  Brain, 
+  Target, 
+  Workflow, 
+  MessageSquare, 
+  Bell, 
+  RefreshCw, 
+  Save, 
+  X, 
+  Check, 
+  Info, 
+  AlertCircle, 
+  Gauge, 
+  Network, 
+  Timer, 
+  Command, 
+  Cpu, 
+  MemoryStick, 
+  HardDrive, 
+  Cloud, 
+  Server, 
+  Globe, 
+  Lock, 
+  Key, 
+  UserCheck, 
+  Building, 
+  Tag, 
+  Flag, 
+  Star, 
+  BookOpen, 
+  FileCheck, 
+  ClipboardList, 
+  Archive, 
+  FolderTree 
+} from 'lucide-react';
+import { toast } from 'sonner';
+
+// Enterprise-grade types for policy orchestration
+interface ClassificationPolicy {
+  id: string;
+  name: string;
+  description: string;
+  type: 'DATA_CLASSIFICATION' | 'ACCESS_CONTROL' | 'RETENTION' | 'PRIVACY' | 'COMPLIANCE' | 'SECURITY' | 'POLICY';
+  status: 'ACTIVE' | 'INACTIVE' | 'DRAFT' | 'PENDING_APPROVAL' | 'SUSPENDED' | 'ARCHIVED';
+  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' | 'URGENT';
+  complianceFrameworks: string[];
+  rules: PolicyRule[];
+  workflow: PolicyWorkflow;
+  metrics: PolicyMetrics;
+  createdAt: string;
+  updatedAt: string;
+  createdBy: string;
+  version: number;
+  tags: string[];
+  scope: string[];
+  dataSources: string[];
+  sensitivityLevels: string[];
+  enforcementLevel: 'ADVISORY' | 'MANDATORY' | 'CRITICAL';
+  autoRemediation: boolean;
+  notificationSettings: NotificationSettings;
+  auditSettings: AuditSettings;
+  performanceSettings: PerformanceSettings;
+  policyType?: string;
+  metadata?: Record<string, any>;
+}
+
+interface PolicyRule {
+  id: string;
+  name: string;
+  description: string;
+  condition: string;
+  action: string;
+  priority: number;
+  enabled: boolean;
+  tags: string[];
+  metadata: Record<string, any>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface PolicyExecution {
+  id: string;
+  policyId: string;
+  status: 'PENDING' | 'RUNNING' | 'COMPLETED' | 'FAILED' | 'CANCELLED' | 'SUCCESS' | 'FAILURE';
+  startTime: string;
+  endTime?: string;
+  duration?: number;
+  results: ExecutionResult[];
+  metrics: ExecutionMetrics;
+  errors: ExecutionError[];
+  logs: ExecutionLog[];
+  executionTime?: number;
+}
+
+interface PolicyWorkflow {
+  id: string;
+  name: string;
+  description: string;
+  steps: WorkflowStep[];
+  triggers: WorkflowTrigger[];
+  conditions: WorkflowCondition[];
+  actions: WorkflowAction[];
+  metadata: Record<string, any>;
+  version: number;
+  status: 'ACTIVE' | 'INACTIVE' | 'DRAFT';
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface PolicyMetrics {
+  totalExecutions: number;
+  successfulExecutions: number;
+  failedExecutions: number;
+  averageExecutionTime: number;
+  complianceRate: number;
+  violationCount: number;
+  lastExecution?: string;
+  performanceScore: number;
+  resourceUtilization: number;
+  costImpact: number;
+  executionCount?: number;
+  effectivenessScore?: number;
+  lastExecutionTime?: string;
+  approvalRate?: number;
+  policyId?: string;
+}
+
+interface PolicyViolation {
+  id: string;
+  policyId: string;
+  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  description: string;
+  dataSource: string;
+  resource: string;
+  detectedAt: string;
+  status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'FALSE_POSITIVE';
+  assignedTo?: string;
+  resolution?: string;
+  metadata: Record<string, any>;
+}
+
+interface PolicyApproval {
+  id: string;
+  policyId: string;
+  requestedBy: string;
+  requestedAt: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  approver?: string;
+  approvedAt?: string;
+  comments?: string;
+  metadata: Record<string, any>;
+}
+
+interface PolicyAudit {
+  id: string;
+  policyId: string;
+  action: string;
+  performedBy: string;
+  performedAt: string;
+  details: string;
+  metadata: Record<string, any>;
+  timestamp?: string;
+  user?: string;
+}
+
+interface ComplianceReport {
+  id: string;
+  name: string;
+  type: string;
+  framework: string;
+  status: 'DRAFT' | 'PENDING' | 'APPROVED' | 'PUBLISHED';
+  generatedAt: string;
+  data: Record<string, any>;
+  findings: ComplianceFinding[];
+  recommendations: string[];
+  complianceScore?: number;
+}
+
+interface ClassificationFramework {
+  id: string;
+  name: string;
+  description: string;
+  version: string;
+  standards: string[];
+  policies: string[];
+  metadata: Record<string, any>;
+}
+
+interface RuleSet {
+  id: string;
+  name: string;
+  description: string;
+  rules: PolicyRule[];
+  version: number;
+  status: 'ACTIVE' | 'INACTIVE' | 'DRAFT';
+}
+
+// Additional interfaces for enterprise features
+interface NotificationSettings {
+  email: boolean;
+  slack: boolean;
+  webhook: boolean;
+  recipients: string[];
+  channels: string[];
+  frequency: 'IMMEDIATE' | 'DAILY' | 'WEEKLY' | 'MONTHLY';
+}
+
+interface AuditSettings {
+  enabled: boolean;
+  retentionDays: number;
+  logLevel: 'BASIC' | 'DETAILED' | 'COMPREHENSIVE';
+  includeMetadata: boolean;
+  realTimeLogging: boolean;
+}
+
+interface PerformanceSettings {
+  maxConcurrentExecutions: number;
+  timeoutSeconds: number;
+  retryAttempts: number;
+  resourceLimits: ResourceLimits;
+  optimizationEnabled: boolean;
+}
+
+interface ResourceLimits {
+  maxMemoryMB: number;
+  maxCpuPercent: number;
+  maxNetworkMB: number;
+}
+
+interface ExecutionResult {
+  id: string;
+  resourceId: string;
+  classification: string;
+  confidence: number;
+  metadata: Record<string, any>;
+  timestamp: string;
+}
+
+interface ExecutionMetrics {
+  totalResources: number;
+  classifiedResources: number;
+  unclassifiedResources: number;
+  averageConfidence: number;
+  processingTimeMs: number;
+  memoryUsageMB: number;
+  cpuUsagePercent: number;
+}
+
+interface ExecutionError {
+  id: string;
+  type: string;
+  message: string;
+  stackTrace?: string;
+  timestamp: string;
+  resourceId?: string;
+}
+
+interface ExecutionLog {
+  id: string;
+  level: 'DEBUG' | 'INFO' | 'WARN' | 'ERROR';
+  message: string;
+  timestamp: string;
+  metadata: Record<string, any>;
+}
+
+interface WorkflowStep {
+  id: string;
+  name: string;
+  type: 'TRIGGER' | 'CONDITION' | 'ACTION' | 'GATEWAY' | 'TIMER' | 'USER_TASK';
+  configuration: Record<string, any>;
+  position: { x: number; y: number };
+  connections: string[];
+}
+
+interface WorkflowTrigger {
+  id: string;
+  type: 'SCHEDULE' | 'EVENT' | 'MANUAL' | 'API';
+  configuration: Record<string, any>;
+  enabled: boolean;
+}
+
+interface WorkflowCondition {
+  id: string;
+  name: string;
+  expression: string;
+  type: 'BOOLEAN' | 'COMPARISON' | 'REGEX' | 'CUSTOM';
+  metadata: Record<string, any>;
+}
+
+interface WorkflowAction {
+  id: string;
+  name: string;
+  type: 'CLASSIFY' | 'NOTIFY' | 'APPROVE' | 'REJECT' | 'ESCALATE' | 'AUDIT' | 'REMEDIATE';
+  configuration: Record<string, any>;
+  metadata: Record<string, any>;
+}
+
+interface ComplianceFinding {
+  id: string;
+  type: string;
+  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  description: string;
+  recommendation: string;
+  status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED';
+  metadata: Record<string, any>;
+}
+
+// API Configuration
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const CLASSIFICATION_API = `${API_BASE_URL}/api/classifications`;
+const COMPLIANCE_API = `${API_BASE_URL}/compliance/rules`;
 
 interface PolicyOrchestratorProps {
   frameworkId?: string;
@@ -100,6 +409,13 @@ interface PolicyOrchestratorProps {
 }
 
 interface PolicyOrchestratorState {
+  // Core state
+  policies: ClassificationPolicy[];
+  frameworks: ClassificationFramework[];
+  ruleSets: RuleSet[];
+  executions: PolicyExecution[];
+  
+  // UI state
   selectedPolicy: ClassificationPolicy | null;
   selectedWorkflow: PolicyWorkflow | null;
   activeTab: string;
@@ -108,53 +424,293 @@ interface PolicyOrchestratorState {
   filterType: string;
   filterCompliance: string;
   showInactivePolicies: boolean;
+  
+  // Editing state
   editingPolicy: ClassificationPolicy | null;
   executingPolicy: ClassificationPolicy | null;
+  isCreatingPolicy: boolean;
+  isBulkExecuting: boolean;
+  selectedPolicyIds: Set<string>;
+  
+  // Data collections
   policyMetrics: Map<string, PolicyMetrics>;
   violations: PolicyViolation[];
   approvals: PolicyApproval[];
   auditLogs: PolicyAudit[];
   complianceReports: ComplianceReport[];
-  isCreatingPolicy: boolean;
-  isBulkExecuting: boolean;
-  selectedPolicyIds: Set<string>;
+  
+  // Workflow builder
   workflowBuilder: {
-    steps: any[];
-    conditions: any[];
-    actions: any[];
-    metadata: any;
+    steps: WorkflowStep[];
+    conditions: WorkflowCondition[];
+    actions: WorkflowAction[];
+    metadata: Record<string, any>;
   };
+  
+  // Performance metrics
   performanceMetrics: {
     executionTimes: number[];
     complianceRates: number[];
     violationCounts: number[];
     approvalRates: number[];
   };
+  
+  // Real-time status
   realTimeStatus: {
     activePolicies: number;
     pendingApprovals: number;
     activeViolations: number;
     complianceScore: number;
   };
+  
+  // Orchestration engine
   orchestrationEngine: {
     isRunning: boolean;
     queueSize: number;
     processingRate: number;
     errorRate: number;
   };
+  
+  // Governance framework
   governanceFramework: {
     regulations: string[];
     standards: string[];
     controls: string[];
     assessments: any[];
   };
+  
+  // Loading and error states
+  isLoading: boolean;
+  error: string | null;
+  lastUpdated: string;
 }
 
 const POLICY_TYPES = ['DATA_CLASSIFICATION', 'ACCESS_CONTROL', 'RETENTION', 'PRIVACY', 'COMPLIANCE', 'SECURITY'] as const;
 const POLICY_STATUSES = ['ACTIVE', 'INACTIVE', 'DRAFT', 'PENDING_APPROVAL', 'SUSPENDED', 'ARCHIVED'] as const;
 const COMPLIANCE_FRAMEWORKS = ['GDPR', 'CCPA', 'HIPAA', 'SOX', 'PCI_DSS', 'ISO_27001', 'NIST'] as const;
-const WORKFLOW_ACTIONS = ['CLASSIFY', 'APPROVE', 'REJECT', 'ESCALATE', 'NOTIFY', 'AUDIT', 'REMEDIATE'] as const;
-const PRIORITY_LEVELS = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL', 'URGENT'] as const;
+
+// Enterprise API Service
+class PolicyOrchestrationService {
+  constructor() {
+    // Initialize service
+  }
+
+  // Policy Management
+  async getPolicies(filters?: {
+    status?: string;
+    type?: string;
+    compliance?: string;
+    search?: string;
+  }): Promise<ClassificationPolicy[]> {
+    try {
+      const params = new URLSearchParams();
+      if (filters?.status) params.append('status', filters.status);
+      if (filters?.type) params.append('type', filters.type);
+      if (filters?.compliance) params.append('compliance', filters.compliance);
+      if (filters?.search) params.append('search', filters.search);
+
+      const response = await fetch(`${CLASSIFICATION_API}/policies?${params}`);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      
+      const data = await response.json();
+      return data.policies || [];
+    } catch (error) {
+      console.error('Error fetching policies:', error);
+      throw error;
+    }
+  }
+
+  async getPolicy(id: string): Promise<ClassificationPolicy> {
+    try {
+      const response = await fetch(`${CLASSIFICATION_API}/policies/${id}`);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching policy:', error);
+      throw error;
+    }
+  }
+
+  async createPolicy(policy: Partial<ClassificationPolicy>): Promise<ClassificationPolicy> {
+    try {
+      const response = await fetch(`${CLASSIFICATION_API}/policies`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(policy)
+      });
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      console.error('Error creating policy:', error);
+      throw error;
+    }
+  }
+
+  async updatePolicy(id: string, policy: Partial<ClassificationPolicy>): Promise<ClassificationPolicy> {
+    try {
+      const response = await fetch(`${CLASSIFICATION_API}/policies/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(policy)
+      });
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      console.error('Error updating policy:', error);
+      throw error;
+    }
+  }
+
+  async deletePolicy(id: string): Promise<void> {
+    try {
+      const response = await fetch(`${CLASSIFICATION_API}/policies/${id}`, {
+        method: 'DELETE'
+      });
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    } catch (error) {
+      console.error('Error deleting policy:', error);
+      throw error;
+    }
+  }
+
+  // Policy Execution
+  async executePolicy(id: string): Promise<PolicyExecution> {
+    try {
+      const response = await fetch(`${CLASSIFICATION_API}/policies/${id}/execute`, {
+        method: 'POST'
+      });
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      console.error('Error executing policy:', error);
+      throw error;
+    }
+  }
+
+  async getPolicyExecutions(policyId?: string): Promise<PolicyExecution[]> {
+    try {
+      const url = policyId 
+        ? `${CLASSIFICATION_API}/policies/${policyId}/executions`
+        : `${CLASSIFICATION_API}/executions`;
+      
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      
+      const data = await response.json();
+      return data.executions || [];
+    } catch (error) {
+      console.error('Error fetching executions:', error);
+      throw error;
+    }
+  }
+
+  // Compliance Management
+  async getComplianceRules(): Promise<any[]> {
+    try {
+      const response = await fetch(`${COMPLIANCE_API}/`);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      
+      const data = await response.json();
+      return data.rules || [];
+    } catch (error) {
+      console.error('Error fetching compliance rules:', error);
+      throw error;
+    }
+  }
+
+  // Violations and Approvals
+  async getViolations(): Promise<PolicyViolation[]> {
+    try {
+      const response = await fetch(`${CLASSIFICATION_API}/violations`);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      
+      const data = await response.json();
+      return data.violations || [];
+    } catch (error) {
+      console.error('Error fetching violations:', error);
+      throw error;
+    }
+  }
+
+  async getApprovals(): Promise<PolicyApproval[]> {
+    try {
+      const response = await fetch(`${CLASSIFICATION_API}/approvals`);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      
+      const data = await response.json();
+      return data.approvals || [];
+    } catch (error) {
+      console.error('Error fetching approvals:', error);
+      throw error;
+    }
+  }
+
+  // Audit and Reports
+  async getAuditLogs(policyId?: string): Promise<PolicyAudit[]> {
+    try {
+      const url = policyId 
+        ? `${CLASSIFICATION_API}/policies/${policyId}/audit`
+        : `${CLASSIFICATION_API}/audit`;
+      
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      
+      const data = await response.json();
+      return data.audit_logs || [];
+    } catch (error) {
+      console.error('Error fetching audit logs:', error);
+      throw error;
+    }
+  }
+
+  async getComplianceReports(): Promise<ComplianceReport[]> {
+    try {
+      const response = await fetch(`${CLASSIFICATION_API}/compliance-reports`);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      
+      const data = await response.json();
+      return data.reports || [];
+    } catch (error) {
+      console.error('Error fetching compliance reports:', error);
+      throw error;
+    }
+  }
+
+  // Metrics and Analytics
+  async getPolicyMetrics(policyId?: string): Promise<Map<string, PolicyMetrics>> {
+    try {
+      const url = policyId 
+        ? `${CLASSIFICATION_API}/policies/${policyId}/metrics`
+        : `${CLASSIFICATION_API}/metrics`;
+      
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      
+      const data = await response.json();
+      return new Map(Object.entries(data.metrics || {}));
+    } catch (error) {
+      console.error('Error fetching metrics:', error);
+      throw error;
+    }
+  }
+
+  // Real-time status
+  async getRealTimeStatus(): Promise<{
+    activePolicies: number;
+    pendingApprovals: number;
+    activeViolations: number;
+    complianceScore: number;
+  }> {
+    try {
+      const response = await fetch(`${CLASSIFICATION_API}/status`);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching real-time status:', error);
+      throw error;
+    }
+  }
+}
 
 export const PolicyOrchestrator: React.FC<PolicyOrchestratorProps> = ({
   frameworkId,
@@ -163,20 +719,17 @@ export const PolicyOrchestrator: React.FC<PolicyOrchestratorProps> = ({
   readonly = false,
   className = ''
 }) => {
-  const { toast } = useToast();
-  const { 
-    manualClassifications,
-    frameworks,
-    loadManualClassifications,
-    updateClassification,
-    deleteClassification,
-    isLoading,
-    error,
-    realTimeEvents
-  } = useClassificationState();
+  const apiService = useMemo(() => new PolicyOrchestrationService(), []);
 
   // Component state
   const [state, setState] = useState<PolicyOrchestratorState>({
+    // Core state
+    policies: [],
+    frameworks: [],
+    ruleSets: [],
+    executions: [],
+    
+    // UI state
     selectedPolicy: null,
     selectedWorkflow: null,
     activeTab: 'policies',
@@ -185,46 +738,65 @@ export const PolicyOrchestrator: React.FC<PolicyOrchestratorProps> = ({
     filterType: 'ALL',
     filterCompliance: 'ALL',
     showInactivePolicies: false,
+    
+    // Editing state
     editingPolicy: null,
     executingPolicy: null,
+    isCreatingPolicy: false,
+    isBulkExecuting: false,
+    selectedPolicyIds: new Set(),
+    
+    // Data collections
     policyMetrics: new Map(),
     violations: [],
     approvals: [],
     auditLogs: [],
     complianceReports: [],
-    isCreatingPolicy: false,
-    isBulkExecuting: false,
-    selectedPolicyIds: new Set(),
+    
+    // Workflow builder
     workflowBuilder: {
       steps: [],
       conditions: [],
       actions: [],
       metadata: {}
     },
+    
+    // Performance metrics
     performanceMetrics: {
       executionTimes: [],
       complianceRates: [],
       violationCounts: [],
       approvalRates: []
     },
+    
+    // Real-time status
     realTimeStatus: {
       activePolicies: 0,
       pendingApprovals: 0,
       activeViolations: 0,
       complianceScore: 0
     },
+    
+    // Orchestration engine
     orchestrationEngine: {
       isRunning: false,
       queueSize: 0,
       processingRate: 0,
       errorRate: 0
     },
+    
+    // Governance framework
     governanceFramework: {
       regulations: [],
       standards: [],
       controls: [],
       assessments: []
-    }
+    },
+    
+    // Loading and error states
+    isLoading: false,
+    error: null,
+    lastUpdated: new Date().toISOString()
   });
 
   // Refs for real-time updates
@@ -232,9 +804,179 @@ export const PolicyOrchestrator: React.FC<PolicyOrchestratorProps> = ({
   const metricsIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const orchestrationIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Data loading functions
+  const loadPolicies = useCallback(async () => {
+    try {
+      setState(prev => ({ ...prev, isLoading: true, error: null }));
+      
+      const policies = await apiService.getPolicies({
+        status: state.filterStatus !== 'ALL' ? state.filterStatus : undefined,
+        type: state.filterType !== 'ALL' ? state.filterType : undefined,
+        compliance: state.filterCompliance !== 'ALL' ? state.filterCompliance : undefined,
+        search: state.searchQuery || undefined
+      });
+      
+      setState(prev => ({ 
+        ...prev, 
+        policies,
+        isLoading: false,
+        lastUpdated: new Date().toISOString()
+      }));
+    } catch (error) {
+      console.error('Error loading policies:', error);
+      setState(prev => ({ 
+        ...prev, 
+        error: error instanceof Error ? error.message : 'Failed to load policies',
+        isLoading: false
+      }));
+      toast.error('Failed to load policies');
+    }
+  }, [apiService, state.filterStatus, state.filterType, state.filterCompliance, state.searchQuery]);
+
+  const loadExecutions = useCallback(async () => {
+    try {
+      const executions = await apiService.getPolicyExecutions();
+      setState(prev => ({ ...prev, executions }));
+    } catch (error) {
+      console.error('Error loading executions:', error);
+    }
+  }, [apiService]);
+
+  const loadViolations = useCallback(async () => {
+    try {
+      const violations = await apiService.getViolations();
+      setState(prev => ({ ...prev, violations }));
+    } catch (error) {
+      console.error('Error loading violations:', error);
+    }
+  }, [apiService]);
+
+  const loadApprovals = useCallback(async () => {
+    try {
+      const approvals = await apiService.getApprovals();
+      setState(prev => ({ ...prev, approvals }));
+    } catch (error) {
+      console.error('Error loading approvals:', error);
+    }
+  }, [apiService]);
+
+  const loadAuditLogs = useCallback(async () => {
+    try {
+      const auditLogs = await apiService.getAuditLogs();
+      setState(prev => ({ ...prev, auditLogs }));
+    } catch (error) {
+      console.error('Error loading audit logs:', error);
+    }
+  }, [apiService]);
+
+  const loadComplianceReports = useCallback(async () => {
+    try {
+      const complianceReports = await apiService.getComplianceReports();
+      setState(prev => ({ ...prev, complianceReports }));
+    } catch (error) {
+      console.error('Error loading compliance reports:', error);
+    }
+  }, [apiService]);
+
+  const loadMetrics = useCallback(async () => {
+    try {
+      const metrics = await apiService.getPolicyMetrics();
+      setState(prev => ({ ...prev, policyMetrics: metrics }));
+    } catch (error) {
+      console.error('Error loading metrics:', error);
+    }
+  }, [apiService]);
+
+  const loadRealTimeStatus = useCallback(async () => {
+    try {
+      const realTimeStatus = await apiService.getRealTimeStatus();
+      setState(prev => ({ ...prev, realTimeStatus }));
+    } catch (error) {
+      console.error('Error loading real-time status:', error);
+    }
+  }, [apiService]);
+
+  // Policy management functions
+  const createPolicy = useCallback(async (policyData: Partial<ClassificationPolicy>) => {
+    try {
+      setState(prev => ({ ...prev, isCreatingPolicy: true }));
+      
+      const newPolicy = await apiService.createPolicy(policyData);
+      
+      setState(prev => ({
+        ...prev,
+        policies: [...prev.policies, newPolicy],
+        isCreatingPolicy: false
+      }));
+      
+      toast.success('Policy created successfully');
+      onPolicyUpdate?.(newPolicy);
+    } catch (error) {
+      console.error('Error creating policy:', error);
+      setState(prev => ({ ...prev, isCreatingPolicy: false }));
+      toast.error('Failed to create policy');
+    }
+  }, [apiService, onPolicyUpdate]);
+
+  const updatePolicy = useCallback(async (id: string, policyData: Partial<ClassificationPolicy>) => {
+    try {
+      const updatedPolicy = await apiService.updatePolicy(id, policyData);
+      
+      setState(prev => ({
+        ...prev,
+        policies: prev.policies.map(p => p.id === id ? updatedPolicy : p),
+        selectedPolicy: prev.selectedPolicy?.id === id ? updatedPolicy : prev.selectedPolicy
+      }));
+      
+      toast.success('Policy updated successfully');
+      onPolicyUpdate?.(updatedPolicy);
+    } catch (error) {
+      console.error('Error updating policy:', error);
+      toast.error('Failed to update policy');
+    }
+  }, [apiService, onPolicyUpdate]);
+
+  const deletePolicy = useCallback(async (id: string) => {
+    try {
+      await apiService.deletePolicy(id);
+      
+      setState(prev => ({
+        ...prev,
+        policies: prev.policies.filter(p => p.id !== id),
+        selectedPolicy: prev.selectedPolicy?.id === id ? null : prev.selectedPolicy
+      }));
+      
+      toast.success('Policy deleted successfully');
+    } catch (error) {
+      console.error('Error deleting policy:', error);
+      toast.error('Failed to delete policy');
+    }
+  }, [apiService]);
+
+  const executePolicy = useCallback(async (id: string) => {
+    try {
+      setState(prev => ({ ...prev, executingPolicy: prev.policies.find(p => p.id === id) || null }));
+      
+      const execution = await apiService.executePolicy(id);
+      
+      setState(prev => ({
+        ...prev,
+        executions: [execution, ...prev.executions],
+        executingPolicy: null
+      }));
+      
+      toast.success('Policy execution started');
+      await loadExecutions();
+    } catch (error) {
+      console.error('Error executing policy:', error);
+      setState(prev => ({ ...prev, executingPolicy: null }));
+      toast.error('Failed to execute policy');
+    }
+  }, [apiService, loadExecutions]);
+
   // Memoized computed values
   const filteredPolicies = useMemo(() => {
-    const policies = manualClassifications.filter(c => c.type === 'POLICY') as ClassificationPolicy[];
+    let policies = state.policies;
     
     return policies.filter(policy => {
       const matchesSearch = !state.searchQuery || 
@@ -242,14 +984,14 @@ export const PolicyOrchestrator: React.FC<PolicyOrchestratorProps> = ({
         policy.description?.toLowerCase().includes(state.searchQuery.toLowerCase());
       
       const matchesStatus = state.filterStatus === 'ALL' || policy.status === state.filterStatus;
-      const matchesType = state.filterType === 'ALL' || policy.policyType === state.filterType;
+      const matchesType = state.filterType === 'ALL' || policy.type === state.filterType;
       const matchesCompliance = state.filterCompliance === 'ALL' || 
         policy.complianceFrameworks?.includes(state.filterCompliance);
       const matchesActive = state.showInactivePolicies || policy.status === 'ACTIVE';
 
       return matchesSearch && matchesStatus && matchesType && matchesCompliance && matchesActive;
     });
-  }, [manualClassifications, state.searchQuery, state.filterStatus, state.filterType, state.filterCompliance, state.showInactivePolicies]);
+  }, [state.policies, state.searchQuery, state.filterStatus, state.filterType, state.filterCompliance, state.showInactivePolicies]);
 
   const complianceOverview = useMemo(() => {
     const frameworks = new Map<string, { total: number; compliant: number; violations: number }>();
@@ -277,7 +1019,7 @@ export const PolicyOrchestrator: React.FC<PolicyOrchestratorProps> = ({
     if (metrics.length === 0) return null;
 
     return {
-      totalExecutions: metrics.reduce((sum, m) => sum + m.executionCount, 0),
+      totalExecutions: metrics.reduce((sum, m) => sum + m.totalExecutions, 0),
       averageComplianceRate: metrics.reduce((sum, m) => sum + m.complianceRate, 0) / metrics.length,
       totalViolations: metrics.reduce((sum, m) => sum + m.violationCount, 0),
       averageExecutionTime: metrics.reduce((sum, m) => sum + m.averageExecutionTime, 0) / metrics.length
@@ -296,9 +1038,9 @@ export const PolicyOrchestrator: React.FC<PolicyOrchestratorProps> = ({
     }
   }, [frameworkId]);
 
-  useEffect(() => {
-    handleRealTimeUpdate();
-  }, [realTimeEvents]);
+  // useEffect(() => {
+  //   handleRealTimeUpdate();
+  // }, [realTimeEvents]);
 
   // Core initialization and cleanup
   const initializePolicyOrchestrator = useCallback(async () => {
@@ -1473,7 +2215,7 @@ export const PolicyOrchestrator: React.FC<PolicyOrchestratorProps> = ({
                       </div>
                       <Button variant="outline" size="sm">
                         <Download className="h-4 w-4 mr-1" />
-                        ArrowDownTrayIcon
+                        Download
                       </Button>
                     </div>
                   ))}

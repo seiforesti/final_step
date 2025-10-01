@@ -20,7 +20,7 @@ import {
   ChevronRight, ChevronDown, Eye, Network, Activity, Brain, Maximize2,
   Minimize2, RotateCcw, ZoomIn, ZoomOut, Settings, X, Download, Camera,
   Layers, Filter, Search, Move, MousePointer, Hand, BarChart3, Zap,
-  Cpu, Memory, Clock, Palette, Grid, Compass, Target, Shuffle
+  Cpu, Clock, Palette, Grid, Compass, Target, Shuffle
 } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -383,11 +383,11 @@ const createAdvancedLayoutWorker = (): Worker => {
       hierarchicalLayout() {
         const { nodes, options } = this;
         const { levelSeparation = 150, nodeSeparation = 100 } = options;
-      
-      // Group nodes by level
+        
+        // Group nodes by level
         const levels = new Map();
-      nodes.forEach(node => {
-        const level = node.level || 0;
+        nodes.forEach(node => {
+          const level = node.level || 0;
           if (!levels.has(level)) levels.set(level, []);
           levels.get(level).push(node);
         });
@@ -412,7 +412,7 @@ const createAdvancedLayoutWorker = (): Worker => {
         const centerX = this.width / 2;
         const centerY = this.height / 2;
         
-      nodes.forEach((node, index) => {
+        nodes.forEach((node, index) => {
           const angle = startAngle + (index * 2 * Math.PI) / nodes.length;
           node.x = centerX + Math.cos(angle) * radius;
           node.y = centerY + Math.sin(angle) * radius;
@@ -455,11 +455,11 @@ const createAdvancedLayoutWorker = (): Worker => {
         const { nodes, options } = this;
         const { nodeSeparation = 120 } = options;
         
-            const cols = Math.ceil(Math.sqrt(nodes.length));
+        const cols = Math.ceil(Math.sqrt(nodes.length));
         
         nodes.forEach((node, index) => {
-            const col = index % cols;
-            const row = Math.floor(index / cols);
+          const col = index % cols;
+          const row = Math.floor(index / cols);
           node.x = 100 + col * nodeSeparation;
           node.y = 100 + row * nodeSeparation;
         });
@@ -701,7 +701,7 @@ export const AdvancedGraphView = forwardRef<any, AdvancedGraphViewProps>(({
     cpuUsage: 0,
     lastUpdate: Date.now()
   })
-  
+
   // Core state
   const [dimensions, setDimensions] = useState({ width: width || 0, height })
   const [processedNodes, setProcessedNodes] = useState<GraphNode[]>([])
@@ -762,11 +762,11 @@ export const AdvancedGraphView = forwardRef<any, AdvancedGraphViewProps>(({
 
   // Layout state
   const [layoutState, setLayoutState] = useState({
-    algorithm: viewMode,
+    algorithm: viewMode as 'force-directed' | 'hierarchical' | 'circular' | 'tree' | 'grid' | 'radial' | 'centralized' | 'network',
     isRunning: false,
     progress: 0,
     options: {
-      algorithm: viewMode,
+      algorithm: (viewMode as any) as 'force-directed' | 'hierarchical' | 'circular' | 'tree' | 'grid' | 'radial' | 'centralized' | 'network',
       iterations: 300,
       strength: 0.1,
       distance: 100,
@@ -793,7 +793,7 @@ export const AdvancedGraphView = forwardRef<any, AdvancedGraphViewProps>(({
     runLayout: (algorithm?: string, options?: LayoutOptions) => {
       setLayoutState(prev => ({
         ...prev,
-        algorithm: algorithm || prev.algorithm,
+        algorithm: (algorithm as any) || prev.algorithm,
         options: { ...prev.options, ...options }
       }))
     },
@@ -877,8 +877,8 @@ export const AdvancedGraphView = forwardRef<any, AdvancedGraphViewProps>(({
         if (containerRef.current) {
           const rect = containerRef.current.getBoundingClientRect()
           setDimensions({
-            width: width || rect.width,
-            height: rect.height
+            width: Math.max(0, width || rect.width),
+            height: Math.max(0, rect.height || height)
           })
         }
       }, 100)
@@ -1179,9 +1179,17 @@ export const AdvancedGraphView = forwardRef<any, AdvancedGraphViewProps>(({
   const renderGraph = useCallback(() => {
     const canvas = canvasRef.current
     const ctx = canvas?.getContext('2d')
-    if (!canvas || !ctx || dimensions.width === 0 || dimensions.height === 0) return
-    
-    const startTime = performance.now()
+    if (!canvas || !ctx) return
+    if (dimensions.width === 0 || dimensions.height === 0) {
+      // Try to read fresh size in case parent just mounted
+      const rect = containerRef.current?.getBoundingClientRect()
+      if (rect && rect.width > 0 && rect.height > 0) {
+        setDimensions({ width: rect.width, height: rect.height })
+      }
+      return
+    }
+
+    const startTime = window.performance?.now ? window.performance.now() : Date.now()
 
     // Set up high-DPI rendering
     const dpr = window.devicePixelRatio || 1
@@ -1190,7 +1198,7 @@ export const AdvancedGraphView = forwardRef<any, AdvancedGraphViewProps>(({
     canvas.style.width = `${dimensions.width}px`
     canvas.style.height = `${dimensions.height}px`
     ctx.scale(dpr, dpr)
-    
+
     // Clear canvas
     ctx.clearRect(0, 0, dimensions.width, dimensions.height)
     
@@ -1207,7 +1215,7 @@ export const AdvancedGraphView = forwardRef<any, AdvancedGraphViewProps>(({
     ctx.save()
     ctx.translate(viewport.x * viewport.zoom, viewport.y * viewport.zoom)
     ctx.scale(viewport.zoom, viewport.zoom)
-    
+
     // Draw connections first (behind nodes)
     if (showConnections) {
       drawConnections(ctx)
@@ -1227,7 +1235,8 @@ export const AdvancedGraphView = forwardRef<any, AdvancedGraphViewProps>(({
     drawOverlays(ctx)
 
     // Update performance metrics
-    const renderTime = performance.now() - startTime
+    const endTime = window.performance?.now ? window.performance.now() : Date.now()
+    const renderTime = endTime - startTime
     performanceMetrics.current.renderTime = renderTime
     performanceMetrics.current.visibleNodeCount = processedNodes.filter(isNodeVisible).length
 
@@ -1245,11 +1254,11 @@ export const AdvancedGraphView = forwardRef<any, AdvancedGraphViewProps>(({
 
     // Vertical lines
     for (let x = offsetX; x < dimensions.width; x += gridSize) {
-        ctx.beginPath()
+      ctx.beginPath()
       ctx.moveTo(x, 0)
       ctx.lineTo(x, dimensions.height)
-        ctx.stroke()
-      }
+      ctx.stroke()
+    }
 
     // Horizontal lines
     for (let y = offsetY; y < dimensions.height; y += gridSize) {
@@ -1605,7 +1614,7 @@ export const AdvancedGraphView = forwardRef<any, AdvancedGraphViewProps>(({
         maxY: Math.max(acc.maxY, node.y)
       }
     }, { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity })
-    
+
     if (!isFinite(bounds.minX)) return
 
     const boundsWidth = bounds.maxX - bounds.minX
@@ -2014,41 +2023,41 @@ export const AdvancedGraphView = forwardRef<any, AdvancedGraphViewProps>(({
   }, [selectAllNodes, resetView, fitToView, clearSelection])
 
   return (
-    <div className="relative w-full h-full bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-blue-950 dark:to-indigo-950 rounded-lg overflow-hidden">
+    <div className="relative w-full h-full min-w-0 min-h-0 bg-background rounded-lg overflow-hidden">
       {/* Advanced Control Panel */}
-    <div className="absolute top-4 left-4 right-4 z-30 flex items-center justify-between">
-      <div className="flex items-center gap-3">
-        <Badge variant="outline" className="bg-white/90 backdrop-blur-sm shadow-lg">
-          <Network className="h-3 w-3 mr-1" />
+      <div className="absolute top-4 left-4 right-4 z-30 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Badge variant="outline" className="bg-white/90 backdrop-blur-sm shadow-lg">
+            <Network className="h-3 w-3 mr-1" />
             {layoutState.algorithm.charAt(0).toUpperCase() + layoutState.algorithm.slice(1)} Layout
-        </Badge>
-        <Badge variant="outline" className="bg-white/90 backdrop-blur-sm shadow-lg">
+          </Badge>
+          <Badge variant="outline" className="bg-white/90 backdrop-blur-sm shadow-lg">
             <Layers className="h-3 w-3 mr-1" />
             {processedNodes.length} Nodes
-        </Badge>
+          </Badge>
           <Badge variant="outline" className="bg-white/90 backdrop-blur-sm shadow-lg">
             <Zap className="h-3 w-3 mr-1" />
             {processedConnections.length} Connections
           </Badge>
           {performance.enableClustering && (
-          <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200">
+            <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200">
               <Layers className="h-3 w-3 mr-1" />
               Clustered
             </Badge>
           )}
           {isLayouting && (
             <Badge variant="outline" className="bg-orange-50 text-orange-600 border-orange-200">
-            <Activity className="h-3 w-3 mr-1 animate-pulse" />
+              <Activity className="h-3 w-3 mr-1 animate-pulse" />
               Computing Layout
-          </Badge>
-        )}
-      </div>
-      
-      <div className="flex items-center gap-2">
+            </Badge>
+          )}
+        </div>
+        
+        <div className="flex items-center gap-2">
           {/* Layout Algorithm Selector */}
           <Select
             value={layoutState.algorithm}
-            onValueChange={(value) => setLayoutState(prev => ({ ...prev, algorithm: value }))}
+            onValueChange={(value) => setLayoutState(prev => ({ ...prev, algorithm: (value as any) }))}
           >
             <SelectTrigger className="w-40 bg-white/90 backdrop-blur-sm shadow-lg">
               <SelectValue />
@@ -2094,62 +2103,62 @@ export const AdvancedGraphView = forwardRef<any, AdvancedGraphViewProps>(({
           </Select>
           
           {/* View Controls */}
-        <TooltipProvider>
+          <TooltipProvider>
             <div className="flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-lg px-2 py-1 shadow-lg">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
                     variant="ghost"
-                size="sm"
-                onClick={resetView}
+                    size="sm"
+                    onClick={resetView}
                     className="h-8 w-8 p-0"
-              >
-                <RotateCcw className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Reset View</TooltipContent>
-          </Tooltip>
-        
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
+                  >
+                    <RotateCcw className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Reset View</TooltipContent>
+              </Tooltip>
+              
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
                     variant="ghost"
-                size="sm"
-                onClick={fitToView}
+                    size="sm"
+                    onClick={fitToView}
                     className="h-8 w-8 p-0"
-              >
-                <Maximize2 className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Fit to View</TooltipContent>
-          </Tooltip>
-        
+                  >
+                    <Maximize2 className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Fit to View</TooltipContent>
+              </Tooltip>
+              
               <div className="flex items-center gap-2 px-2">
-          <ZoomOut 
-            className="h-4 w-4 cursor-pointer hover:text-blue-600" 
+                <ZoomOut 
+                  className="h-4 w-4 cursor-pointer hover:text-blue-600" 
                   onClick={() => setViewport(prev => ({ 
                     ...prev, 
                     zoom: Math.max(prev.minZoom, prev.zoom * 0.8) 
                   }))}
-          />
-          <span className="text-xs font-medium min-w-[3rem] text-center">
+                />
+                <span className="text-xs font-medium min-w-[3rem] text-center">
                   {Math.round(viewport.zoom * 100)}%
-          </span>
-          <ZoomIn 
-            className="h-4 w-4 cursor-pointer hover:text-blue-600" 
+                </span>
+                <ZoomIn 
+                  className="h-4 w-4 cursor-pointer hover:text-blue-600" 
                   onClick={() => setViewport(prev => ({ 
                     ...prev, 
                     zoom: Math.min(prev.maxZoom, prev.zoom * 1.2) 
                   }))}
-          />
-        </div>
-        
+                />
+              </div>
+              
               {enableExport && (
                 <Tooltip>
                   <TooltipTrigger asChild>
-        <Button
+                    <Button
                       variant="ghost"
-          size="sm"
+                      size="sm"
                       onClick={() => exportCanvas('png')}
                       className="h-8 w-8 p-0"
                     >
@@ -2167,15 +2176,15 @@ export const AdvancedGraphView = forwardRef<any, AdvancedGraphViewProps>(({
                     size="sm"
                     onClick={() => setVisual(prev => ({ ...prev, showStats: !prev.showStats }))}
                     className="h-8 w-8 p-0"
-        >
-          <Settings className="h-4 w-4" />
-        </Button>
+                  >
+                    <Settings className="h-4 w-4" />
+                  </Button>
                 </TooltipTrigger>
                 <TooltipContent>Settings</TooltipContent>
               </Tooltip>
-      </div>
+            </div>
           </TooltipProvider>
-    </div>
+        </div>
       </div>
 
       {/* Advanced Settings Panel */}
@@ -2185,56 +2194,56 @@ export const AdvancedGraphView = forwardRef<any, AdvancedGraphViewProps>(({
             <CardHeader className="pb-3">
               <CardTitle className="text-sm flex items-center justify-between">
                 Advanced Graph Settings
-              <Button
-                variant="ghost"
-                size="sm"
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => setVisual(prev => ({ ...prev, showStats: false }))}
-                className="h-6 w-6 p-0"
-              >
-                <X className="h-4 w-4" />
-              </Button>
+                  className="h-6 w-6 p-0"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Visual Controls */}
-            <div className="space-y-3">
-              <div>
-                <Label className="text-xs font-medium">Node Size</Label>
-                <Slider
+              <div className="space-y-3">
+                <div>
+                  <Label className="text-xs font-medium">Node Size</Label>
+                  <Slider
                     value={[visual.nodeSize]}
                     onValueChange={([value]) => setVisual(prev => ({ ...prev, nodeSize: value }))}
-                  min={0.5}
-                  max={2}
-                  step={0.1}
-                  className="mt-2"
-                />
-              </div>
-              
-              <div>
-                <Label className="text-xs font-medium">Connection Opacity</Label>
-                <Slider
+                    min={0.5}
+                    max={2}
+                    step={0.1}
+                    className="mt-2"
+                  />
+                </div>
+                
+                <div>
+                  <Label className="text-xs font-medium">Connection Opacity</Label>
+                  <Slider
                     value={[visual.connectionOpacity]}
                     onValueChange={([value]) => setVisual(prev => ({ ...prev, connectionOpacity: value }))}
-                  min={0.1}
-                  max={1}
-                  step={0.1}
-                  className="mt-2"
-                />
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <Label className="text-xs font-medium">Show Labels</Label>
-                <Switch
-                  checked={showLabels}
+                    min={0.1}
+                    max={1}
+                    step={0.1}
+                    className="mt-2"
+                  />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs font-medium">Show Labels</Label>
+                  <Switch
+                    checked={showLabels}
                     onCheckedChange={(checked) => {
                       // This would need to be passed up to parent or managed differently
                     }}
-                />
-              </div>
-              
-              <div className="flex items-center justify-between">
+                  />
+                </div>
+                
+                <div className="flex items-center justify-between">
                   <Label className="text-xs font-medium">Show Grid</Label>
-                <Switch
+                  <Switch
                     checked={visual.showGrid}
                     onCheckedChange={(checked) => setVisual(prev => ({ ...prev, showGrid: checked }))}
                   />
@@ -2245,10 +2254,10 @@ export const AdvancedGraphView = forwardRef<any, AdvancedGraphViewProps>(({
                   <Switch
                     checked={performance.enableClustering}
                     onCheckedChange={(checked) => setPerformance(prev => ({ ...prev, enableClustering: checked }))}
-                />
+                  />
+                </div>
               </div>
-            </div>
-            
+              
               {/* Performance Metrics */}
               <div className="pt-3 border-t">
                 <Label className="text-xs font-medium mb-2 block">Performance</Label>
@@ -2288,7 +2297,7 @@ export const AdvancedGraphView = forwardRef<any, AdvancedGraphViewProps>(({
                   >
                     Dark
                   </Button>
-              </div>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -2317,8 +2326,8 @@ export const AdvancedGraphView = forwardRef<any, AdvancedGraphViewProps>(({
               <X className="h-4 w-4" />
             </Button>
           )}
-              </div>
-            </div>
+        </div>
+      </div>
 
       {/* Selection Info */}
       {interaction.selectedNodes.size > 0 && (
@@ -2336,7 +2345,7 @@ export const AdvancedGraphView = forwardRef<any, AdvancedGraphViewProps>(({
                 >
                   <X className="h-3 w-3" />
                 </Button>
-          </div>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -2365,9 +2374,9 @@ export const AdvancedGraphView = forwardRef<any, AdvancedGraphViewProps>(({
       <NodeLegend />
 
       {/* Main Canvas */}
-        <div
-          ref={containerRef}
-        className="w-full h-full cursor-grab active:cursor-grabbing"
+      <div
+        ref={containerRef}
+        className="w-full h-full min-w-0 cursor-grab active:cursor-grabbing"
         style={{ height: `${height}px` }}
       >
         <canvas
@@ -2381,7 +2390,7 @@ export const AdvancedGraphView = forwardRef<any, AdvancedGraphViewProps>(({
           onClick={handleClick}
           onDoubleClick={handleDoubleClick}
         />
-        </div>
+      </div>
     </div>
   )
 })

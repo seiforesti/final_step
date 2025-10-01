@@ -1,0 +1,157 @@
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'primaryColor': '#0066cc',
+    'primaryTextColor': '#ffffff',
+    'primaryBorderColor': '#004499',
+    'lineColor': '#0066cc',
+    'secondaryColor': '#3399ff',
+    'tertiaryColor': '#009966',
+    'background': '#f8f9fa',
+    'mainBkg': '#ffffff',
+    'secondBkg': '#f0f8ff',
+    'tertiaryBkg': '#e6f7ff'
+  }
+}}%%
+
+graph TB
+    subgraph "📊 Data Sources"
+        MYSQL[(🐬 MySQL<br/>Transactional Data<br/>ACID Compliance)]:::mysql
+        POSTGRES[(🐘 PostgreSQL<br/>Analytical Data<br/>JSON Support)]:::postgres
+        MONGODB[(🍃 MongoDB<br/>Document Data<br/>Flexible Schema)]:::mongodb
+        SNOWFLAKE[(❄️ Snowflake<br/>Cloud Data<br/>Data Warehouse)]:::snowflake
+        S3[(🪣 S3 Storage<br/>Object Data<br/>File Storage)]:::s3
+        REDIS[(🔴 Redis<br/>Cache Data<br/>In-Memory Store)]:::redis
+    end
+    
+    subgraph "🌐 Edge Processing Layer"
+        EDGE_CONN[🔌 Edge Connectors<br/>Universal Drivers<br/>Connection Pooling]:::edge
+        EDGE_FILTER[🔍 Edge Filters<br/>Data Validation<br/>Schema Validation]:::edge
+        EDGE_TRANSFORM[🔄 Edge Transform<br/>Data Processing<br/>Format Conversion]:::edge
+        EDGE_CLASSIFY[🏷️ Edge Classify<br/>Local Classification<br/>ML Models]:::edge
+        EDGE_CACHE[⚡ Edge Cache<br/>Local Storage<br/>Metadata Cache]:::edge
+    end
+    
+    subgraph "☁️ Cloud Processing Layer"
+        STREAM_PROC[🌊 Stream Processing<br/>Kafka Streams<br/>Real-time Processing]:::stream
+        BATCH_PROC[📦 Batch Processing<br/>Apache Spark<br/>Batch Analytics]:::batch
+        ML_PROC[🤖 ML Processing<br/>PyTorch + Scikit<br/>Model Inference]:::ml
+        RULE_ENGINE[📋 Rule Engine<br/>Policy Evaluation<br/>Compliance Rules]:::rules
+    end
+    
+    subgraph "🏗️ Core Services Layer"
+        DS_SVC[🗄️ Data Source Service<br/>Connection Management<br/>Health Monitoring]:::datasource
+        CAT_SVC[📚 Catalog Service<br/>Asset Management<br/>Lineage Tracking]:::catalog
+        CLASS_SVC[🏷️ Classification Service<br/>Data Classification<br/>Pattern Recognition]:::classification
+        SCAN_SVC[🔍 Scan Logic Service<br/>Workflow Orchestration<br/>Resource Management]:::scan
+        COMP_SVC[⚖️ Compliance Service<br/>Policy Enforcement<br/>Risk Assessment]:::compliance
+        RBAC_SVC[👥 RBAC Service<br/>Access Control<br/>Permission Management]:::rbac
+    end
+    
+    subgraph "💾 Storage Layer"
+        HOT_STORAGE[🔥 Hot Storage<br/>PostgreSQL + Redis<br/>Transactional Data]:::hot
+        WARM_STORAGE[🌡️ Warm Storage<br/>Elasticsearch<br/>Search Index]:::warm
+        COLD_STORAGE[❄️ Cold Storage<br/>S3 + Data Lake<br/>Archive Data]:::cold
+    end
+    
+    subgraph "📊 Analytics Layer"
+        REAL_TIME[⚡ Real-time Analytics<br/>Streaming Queries<br/>Live Dashboards]:::realtime
+        BATCH_ANALYTICS[📊 Batch Analytics<br/>Scheduled Reports<br/>Historical Analysis]:::batchanalytics
+        ML_ANALYTICS[🤖 ML Analytics<br/>Predictive Models<br/>AI Insights]:::mlanalytics
+        DASHBOARD[📈 Dashboard<br/>Grafana + Custom<br/>Data Visualization]:::dashboard
+    end
+    
+    subgraph "👤 User Interface"
+        WEB_UI[🖥️ Web Interface<br/>React Frontend<br/>Interactive UI]:::web
+        MOBILE_UI[📱 Mobile App<br/>React Native<br/>Mobile Access]:::mobile
+        API_CLIENT[📡 API Client<br/>REST + GraphQL<br/>External Integration]:::api
+    end
+    
+    %% Data Source to Edge Processing
+    MYSQL -.->|"📊 Stream Data"| EDGE_CONN
+    POSTGRES -.->|"📊 Stream Data"| EDGE_CONN
+    MONGODB -.->|"📊 Stream Data"| EDGE_CONN
+    SNOWFLAKE -.->|"📊 Stream Data"| EDGE_CONN
+    S3 -.->|"📊 Stream Data"| EDGE_CONN
+    REDIS -.->|"📊 Stream Data"| EDGE_CONN
+    
+    %% Edge Processing Flow
+    EDGE_CONN -.->|"🔌 Connect"| EDGE_FILTER
+    EDGE_FILTER -.->|"🔍 Filter"| EDGE_TRANSFORM
+    EDGE_TRANSFORM -.->|"🔄 Transform"| EDGE_CLASSIFY
+    EDGE_CLASSIFY -.->|"🏷️ Classify"| EDGE_CACHE
+    
+    %% Edge to Cloud Processing
+    EDGE_CACHE -.->|"📨 Stream Events"| STREAM_PROC
+    STREAM_PROC -.->|"🌊 Process"| BATCH_PROC
+    BATCH_PROC -.->|"📦 Process"| ML_PROC
+    ML_PROC -.->|"🤖 Process"| RULE_ENGINE
+    
+    %% Cloud Processing to Core Services
+    RULE_ENGINE -.->|"📋 Evaluate"| DS_SVC
+    DS_SVC -.->|"🗄️ Manage"| CAT_SVC
+    CAT_SVC -.->|"📚 Catalog"| CLASS_SVC
+    CLASS_SVC -.->|"🏷️ Classify"| SCAN_SVC
+    SCAN_SVC -.->|"🔍 Scan"| COMP_SVC
+    COMP_SVC -.->|"⚖️ Enforce"| RBAC_SVC
+    
+    %% Core Services to Storage
+    DS_SVC -.->|"💾 Store"| HOT_STORAGE
+    CAT_SVC -.->|"💾 Store"| HOT_STORAGE
+    CLASS_SVC -.->|"💾 Store"| HOT_STORAGE
+    SCAN_SVC -.->|"💾 Store"| HOT_STORAGE
+    COMP_SVC -.->|"💾 Store"| HOT_STORAGE
+    RBAC_SVC -.->|"💾 Store"| HOT_STORAGE
+    
+    %% Storage Tiering
+    HOT_STORAGE -.->|"🌡️ Archive"| WARM_STORAGE
+    WARM_STORAGE -.->|"❄️ Archive"| COLD_STORAGE
+    
+    %% Storage to Analytics
+    HOT_STORAGE -.->|"⚡ Query"| REAL_TIME
+    WARM_STORAGE -.->|"📊 Query"| BATCH_ANALYTICS
+    COLD_STORAGE -.->|"🤖 Query"| ML_ANALYTICS
+    
+    %% Analytics to Visualization
+    REAL_TIME -.->|"📈 Visualize"| DASHBOARD
+    BATCH_ANALYTICS -.->|"📊 Visualize"| DASHBOARD
+    ML_ANALYTICS -.->|"🤖 Visualize"| DASHBOARD
+    
+    %% User Interface Access
+    DASHBOARD -.->|"🖥️ Display"| WEB_UI
+    DASHBOARD -.->|"📱 Display"| MOBILE_UI
+    DASHBOARD -.->|"📡 API"| API_CLIENT
+    
+    %% Feedback Loops
+    WEB_UI -.->|"🔄 Feedback"| EDGE_CONN
+    MOBILE_UI -.->|"🔄 Feedback"| EDGE_CONN
+    API_CLIENT -.->|"🔄 Feedback"| EDGE_CONN
+    
+    %% Styling
+    classDef mysql fill:#4479a1,stroke:#ffffff,stroke-width:2px,color:#ffffff
+    classDef postgres fill:#336791,stroke:#ffffff,stroke-width:2px,color:#ffffff
+    classDef mongodb fill:#4db33d,stroke:#ffffff,stroke-width:2px,color:#ffffff
+    classDef snowflake fill:#29b5e8,stroke:#ffffff,stroke-width:2px,color:#ffffff
+    classDef s3 fill:#ff9900,stroke:#ffffff,stroke-width:2px,color:#ffffff
+    classDef redis fill:#dc382d,stroke:#ffffff,stroke-width:2px,color:#ffffff
+    classDef edge fill:#e0f2f1,stroke:#004d40,stroke-width:2px,color:#000
+    classDef stream fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#000
+    classDef batch fill:#f1f8e9,stroke:#33691e,stroke-width:2px,color:#000
+    classDef ml fill:#f3e5f5,stroke:#4a148c,stroke-width:2px,color:#000
+    classDef rules fill:#fff8e1,stroke:#f57f17,stroke-width:2px,color:#000
+    classDef datasource fill:#e0f2f1,stroke:#004d40,stroke-width:2px,color:#000
+    classDef catalog fill:#f1f8e9,stroke:#33691e,stroke-width:2px,color:#000
+    classDef classification fill:#fff8e1,stroke:#f57f17,stroke-width:2px,color:#000
+    classDef scan fill:#f9fbe7,stroke:#827717,stroke-width:2px,color:#000
+    classDef compliance fill:#fce4ec,stroke:#c2185b,stroke-width:2px,color:#000
+    classDef rbac fill:#e8eaf6,stroke:#283593,stroke-width:2px,color:#000
+    classDef hot fill:#ff5722,stroke:#ffffff,stroke-width:2px,color:#ffffff
+    classDef warm fill:#ff9800,stroke:#ffffff,stroke-width:2px,color:#ffffff
+    classDef cold fill:#2196f3,stroke:#ffffff,stroke-width:2px,color:#ffffff
+    classDef realtime fill:#4caf50,stroke:#ffffff,stroke-width:2px,color:#ffffff
+    classDef batchanalytics fill:#8bc34a,stroke:#ffffff,stroke-width:2px,color:#ffffff
+    classDef mlanalytics fill:#9c27b0,stroke:#ffffff,stroke-width:2px,color:#ffffff
+    classDef dashboard fill:#607d8b,stroke:#ffffff,stroke-width:2px,color:#ffffff
+    classDef web fill:#e1f5fe,stroke:#01579b,stroke-width:2px,color:#000
+    classDef mobile fill:#f3e5f5,stroke:#4a148c,stroke-width:2px,color:#000
+    classDef api fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px,color:#000

@@ -1,28 +1,6 @@
 "use client"
 
-/**
- * Production-Grade Advanced Validation Popup
- * Enterprise workflow automation with minimal design and advanced performance
- * 
- * Features:
- * - Minimal black/white/cold color design
- * - Advanced workflow automation management
- * - High-performance virtualization for large datasets
- * - Intelligent decision making and recommendations
- * - Professional cursor styles and interactions
- * - Smart state management with persistence
- * - Automated conflict resolution
- * - Real-time validation processing
- */
-
-import { useState, useEffect, useCallback, useMemo, useRef } from "react"
-import { 
-  X, Check, AlertCircle, RefreshCw, Brain, Zap, Shield, Target, Activity,
-  Database, Table, Columns, ChevronRight, ChevronDown, Search, Filter,
-  Play, Pause, Square, RotateCcw, Settings, BarChart3, Clock, Users,
-  ArrowRight, ArrowLeft, Maximize2, Minimize2, Copy, Download
-} from 'lucide-react'
-
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
@@ -30,1257 +8,773 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
-import { 
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import { 
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { WorkflowVisualizer } from "./workflow-visualizer"
+import { 
+  CheckCircle, 
+  AlertCircle, 
+  Clock, 
+  Play, 
+  Pause, 
+  RotateCcw, 
+  Settings, 
+  Zap, 
+  Brain, 
+  Shield, 
+  Target,
+  TrendingUp,
+  Activity,
+  Database,
+  FileText,
+  Users,
+  BarChart3,
+  ChevronRight,
+  ChevronDown,
+  Info,
+  X,
+  Check,
+  AlertTriangle,
+  Loader2,
+  Sparkles,
+  Wand2,
+  Rocket,
+  Star
+} from "lucide-react"
 
-// Enhanced validation item with workflow automation
-interface ValidationItem {
+// Import the original interfaces from the old popup
+export interface ValidationItem {
   id: string
-  item: {
-    database?: string
-    schema?: string
-    table?: string
-    column?: string
-    [key: string]: any
-  }
-  existing_catalog_item?: any
-  item_type: 'database' | 'schema' | 'table' | 'view' | 'column'
-  priority: number
-  conflict_type?: 'duplicate' | 'schema_mismatch' | 'permission' | 'dependency'
-  reason?: string
-  action?: 'catalog_immediately' | 'catalog_soon' | 'review_required' | 'skip'
+  displayId: string
+  name: string
+  type: string
+  schema?: string
+  table?: string
+  column?: string
+  item?: any
   confidence?: number
-  business_value?: 'low' | 'medium' | 'high' | 'critical'
-  automation_score?: number
-  estimated_time?: number
-  dependencies?: string[]
-  risk_level?: 'low' | 'medium' | 'high'
-  size_mb?: number
-  last_updated?: string
+  risk?: 'low' | 'medium' | 'high' | 'critical'
+  status?: 'pending' | 'validating' | 'validated' | 'failed'
+  conflicts?: string[]
+  recommendations?: string[]
 }
 
-// Enhanced validation result with automation insights
-interface ValidationResult {
-  total_selected: number
-  existing_items: ValidationItem[]
+export interface ValidationResult {
+  items: ValidationItem[]
+  auto_resolvable: ValidationItem[]
+  recommendations: ValidationItem[]
   new_items: ValidationItem[]
   conflicts: ValidationItem[]
-  recommendations: ValidationItem[]
-  critical_items: ValidationItem[]
-  business_value_score: number
-  automation_suggestions: {
-    auto_resolvable: ValidationItem[]
-    requires_review: ValidationItem[]
-    high_risk: ValidationItem[]
-    estimated_time_minutes: number
-    success_probability: number
-  }
-  validation_summary: {
-    existing_count: number
-    new_count: number
-    critical_count: number
-    recommendation_count: number
-    business_value: number
-    requires_user_decision: boolean
-    automation_coverage: number
-    risk_assessment: 'low' | 'medium' | 'high'
-  }
-  performance_metrics?: {
-    validation_time_ms: number
-    items_per_second: number
-    memory_usage_mb: number
+  metrics: {
+    total: number
+    autoResolvable: number
+    recommendations: number
+    newItems: number
+    conflicts: number
+    successRate: number
+    highRisk: number
+    mediumRisk: number
+    lowRisk: number
   }
 }
 
-// Workflow automation state
-interface WorkflowState {
+export interface WorkflowState {
   mode: 'manual' | 'semi_auto' | 'full_auto'
-  current_step: number
-  total_steps: number
-  is_running: boolean
-  is_paused: boolean
-  completed_items: string[]
-  failed_items: string[]
-  current_item?: ValidationItem
-  estimated_remaining_time: number
-  success_rate: number
+  status: 'idle' | 'running' | 'paused' | 'completed' | 'failed'
+  currentStep: number
+  totalSteps: number
+  progress: number
+  selectedItems: ValidationItem[]
+  processingItems: ValidationItem[]
+  completedItems: ValidationItem[]
+  failedItems: ValidationItem[]
 }
 
-// Advanced component props with workflow automation
-interface AdvancedValidationPopupProps {
+export interface AdvancedValidationOrchestratorProps {
   isOpen: boolean
   onClose: () => void
   validationResult: ValidationResult | null
   onConfirm: (action: 'replace' | 'add_new' | 'cancel', selectedItems: any[], workflowOptions?: any) => void
   onApplyRecommendations: (recommendations: any[], automationMode?: string) => void
-  onWorkflowUpdate?: (state: WorkflowState) => void
+  onCatalogItems?: (items: ValidationItem[]) => void
+  onStartWorkflow?: (mode: 'manual' | 'semi_auto' | 'full_auto') => void
+  onPauseWorkflow?: () => void
+  onResumeWorkflow?: () => void
+  onResetWorkflow?: () => void
+  workflowState?: WorkflowState
   isLoading?: boolean
-  enableWorkflowAutomation?: boolean
-  maxItemsToShow?: number
-  autoSelectRecommendations?: boolean
+  error?: string | null
 }
 
-export function AdvancedValidationPopup({
+export function AdvancedValidationOrchestrator({
   isOpen,
   onClose,
   validationResult,
   onConfirm,
   onApplyRecommendations,
-  onWorkflowUpdate,
+  onCatalogItems,
+  onStartWorkflow,
+  onPauseWorkflow,
+  onResumeWorkflow,
+  onResetWorkflow,
+  workflowState = {
+    mode: 'manual',
+    status: 'idle',
+    currentStep: 0,
+    totalSteps: 5,
+    progress: 0,
+    selectedItems: [],
+    processingItems: [],
+    completedItems: [],
+    failedItems: []
+  },
   isLoading = false,
-  enableWorkflowAutomation = true,
-  maxItemsToShow = 1000,
-  autoSelectRecommendations = true
-}: AdvancedValidationPopupProps) {
-  // Core state
-  const [selectedAction, setSelectedAction] = useState<'replace' | 'add_new' | 'cancel'>('add_new')
-  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set())
+  error = null
+}: AdvancedValidationOrchestratorProps) {
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [searchTerm, setSearchTerm] = useState('')
-  const [filterType, setFilterType] = useState<'all' | 'database' | 'schema' | 'table' | 'view' | 'column'>('all')
-  const [sortBy, setSortBy] = useState<'priority' | 'name' | 'type' | 'risk' | 'business_value'>('priority')
-  const [viewMode, setViewMode] = useState<'workflow' | 'list' | 'grid' | 'analytics'>('workflow')
+  const [filterType, setFilterType] = useState<string>('all')
+  const [sortBy, setSortBy] = useState<'name' | 'type' | 'risk' | 'confidence'>('name')
+  const [showWorkflowVisualizer, setShowWorkflowVisualizer] = useState(false)
+  const [workflowMode, setWorkflowMode] = useState<'manual' | 'semi_auto' | 'full_auto'>('manual')
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [processingProgress, setProcessingProgress] = useState(0)
+  const [showAdvancedFeatures, setShowAdvancedFeatures] = useState(true)
+  const [visualizerItems, setVisualizerItems] = useState<{
+    id: string; name: string; type: string; priority: number; item: any
+  }[]>([])
+  // Local workflow runner to drive the visualizer regardless of external workflowState
+  const [internalRunning, setInternalRunning] = useState(false)
+  const [internalStep, setInternalStep] = useState(0)
+  const stepTimerRef = useRef<number | null>(null)
   
-  // Workflow automation state
-  const [workflowState, setWorkflowState] = useState<WorkflowState>({
-    mode: 'semi_auto',
-    current_step: 0,
-    total_steps: 0,
-    is_running: false,
-    is_paused: false,
-    completed_items: [],
-    failed_items: [],
-    estimated_remaining_time: 0,
-    success_rate: 100
-  })
-  
-  // Performance state
-  const [performance, setPerformance] = useState({
-    isVirtualized: false,
-    visibleRange: { start: 0, end: 50 },
-    totalItems: 0,
-    renderTime: 0
-  })
-  
-  // Advanced UI state
-  const [uiState, setUiState] = useState({
-    isExpanded: false,
-    showAdvancedOptions: false,
-    showPerformanceMetrics: false,
-    activeTab: 'overview',
-    cursorMode: 'default' as 'default' | 'select' | 'action' | 'automation'
-  })
-  
-  // Processing state
-  const [processing, setProcessing] = useState({
-    isAnalyzing: false,
-    analysisProgress: 0,
-    analysisStatus: '',
-    autoResolving: false,
-    autoResolveProgress: 0
-  })
-
-  // Refs for performance optimization
-  const virtualListRef = useRef<HTMLDivElement>(null)
-  const itemRefs = useRef<Map<string, HTMLDivElement>>(new Map())
-  const performanceMetrics = useRef({
-    lastRender: 0,
-    renderCount: 0,
-    avgRenderTime: 0
-  })
-
-  // Initialize and reset state when popup opens
-  useEffect(() => {
-    if (isOpen && validationResult) {
-      // Reset core state
-      setSelectedAction('add_new')
-      setSelectedItems(new Set())
-      setSearchTerm('')
-      setFilterType('all')
-      setSortBy('priority')
-      
-      // Initialize workflow state
-      const totalItems = validationResult.total_selected
-      const autoResolvable = validationResult.automation_suggestions?.auto_resolvable?.length || 0
-      
-      setWorkflowState({
-        mode: 'semi_auto',
-        current_step: 0,
-        total_steps: totalItems,
-        is_running: false,
-        is_paused: false,
-        completed_items: [],
-        failed_items: [],
-        estimated_remaining_time: Math.ceil(totalItems * 2), // 2 seconds per item estimate
-        success_rate: validationResult.automation_suggestions?.success_probability || 95
-      })
-      
-      // Initialize performance tracking
-      setPerformance({
-        isVirtualized: totalItems > 100,
-        visibleRange: { start: 0, end: Math.min(50, totalItems) },
-        totalItems,
-        renderTime: 0
-      })
-      
-      // Reset processing state
-      setProcessing({
-        isAnalyzing: false,
-        analysisProgress: 0,
-        analysisStatus: '',
-        autoResolving: false,
-        autoResolveProgress: 0
-      })
-      
-      // Auto-select recommendations if enabled
-      if (autoSelectRecommendations && validationResult.recommendations?.length > 0) {
-        const recommendedIds = new Set(
-          validationResult.recommendations.map((_, index) => `rec_${index}`)
-        )
-        setSelectedItems(recommendedIds)
-      }
-      
-      // Notify parent of workflow initialization
-      onWorkflowUpdate?.(workflowState)
-    }
-  }, [isOpen, validationResult, autoSelectRecommendations, onWorkflowUpdate])
-
-  // Advanced item processing with virtualization
+  // Performance optimization: Memoize filtered and sorted items
   const processedItems = useMemo(() => {
     if (!validationResult) return []
     
-    const startTime = performance.now()
+    let items = [...validationResult.items]
     
-    // Combine all items with proper categorization
-    const allItems: (ValidationItem & { category: string, displayId: string })[] = []
-    
-    // Add recommendations (highest priority)
-    validationResult.recommendations?.forEach((item, index) => {
-      allItems.push({
-        ...item,
-        id: item.id || `rec_${index}`,
-        category: 'recommendation',
-        displayId: `rec_${index}`
-      })
-    })
-    
-    // Add critical items
-    validationResult.critical_items?.forEach((item, index) => {
-      allItems.push({
-        ...item,
-        id: item.id || `critical_${index}`,
-        category: 'critical',
-        displayId: `critical_${index}`
-      })
-    })
-    
-    // Add new items
-    validationResult.new_items?.forEach((item, index) => {
-      allItems.push({
-        ...item,
-        id: item.id || `new_${index}`,
-        category: 'new',
-        displayId: `new_${index}`
-      })
-    })
-    
-    // Add existing items
-    validationResult.existing_items?.forEach((item, index) => {
-      allItems.push({
-        ...item,
-        id: item.id || `existing_${index}`,
-        category: 'existing',
-        displayId: `existing_${index}`
-      })
-    })
-    
-    // Apply filtering
-    let filtered = allItems
-    
-    if (filterType !== 'all') {
-      filtered = filtered.filter(item => item.item_type === filterType)
-    }
-    
+    // Filter by search term
     if (searchTerm) {
-      const term = searchTerm.toLowerCase()
-      filtered = filtered.filter(item =>
-        item.item.table?.toLowerCase().includes(term) ||
-        item.item.schema?.toLowerCase().includes(term) ||
-        item.item.column?.toLowerCase().includes(term) ||
-        item.reason?.toLowerCase().includes(term)
+      items = items.filter(item => 
+        item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.schema?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.table?.toLowerCase().includes(searchTerm.toLowerCase())
       )
     }
     
-    // Apply sorting
-    filtered.sort((a, b) => {
+    // Filter by type
+    if (filterType !== 'all') {
+      items = items.filter(item => item.type === filterType)
+    }
+    
+    // Sort items
+    items.sort((a, b) => {
       switch (sortBy) {
-        case 'priority':
-          return (b.priority || 0) - (a.priority || 0)
         case 'name':
-          return (a.item.table || a.item.schema || '').localeCompare(b.item.table || b.item.schema || '')
+          return a.name.localeCompare(b.name)
         case 'type':
-          return a.item_type.localeCompare(b.item_type)
+          return a.type.localeCompare(b.type)
         case 'risk':
-          const riskOrder = { 'high': 3, 'medium': 2, 'low': 1 }
-          return (riskOrder[b.risk_level || 'low'] || 0) - (riskOrder[a.risk_level || 'low'] || 0)
-        case 'business_value':
-          const valueOrder = { 'critical': 4, 'high': 3, 'medium': 2, 'low': 1 }
-          return (valueOrder[b.business_value || 'low'] || 0) - (valueOrder[a.business_value || 'low'] || 0)
+          const riskOrder = { critical: 4, high: 3, medium: 2, low: 1 }
+          return (riskOrder[b.risk || 'low'] || 0) - (riskOrder[a.risk || 'low'] || 0)
+        case 'confidence':
+          return (b.confidence || 0) - (a.confidence || 0)
         default:
           return 0
       }
     })
     
-    // Limit items for performance
-    if (filtered.length > maxItemsToShow) {
-      filtered = filtered.slice(0, maxItemsToShow)
-    }
-    
-    // Update performance metrics
-    const renderTime = performance.now() - startTime
-    setPerformance(prev => ({ ...prev, renderTime, totalItems: filtered.length }))
-    
-    return filtered
-  }, [validationResult, filterType, searchTerm, sortBy, maxItemsToShow])
-
-  // Workflow automation functions
-  const startWorkflowAutomation = useCallback(async () => {
-    if (!validationResult?.automation_suggestions) return
-    
-    setWorkflowState(prev => ({ ...prev, is_running: true, is_paused: false }))
-    setProcessing(prev => ({ ...prev, autoResolving: true, autoResolveProgress: 0 }))
-    
-    const autoResolvableItems = validationResult.automation_suggestions.auto_resolvable
-    const totalSteps = autoResolvableItems.length
-    
-    for (let i = 0; i < autoResolvableItems.length; i++) {
-      if (workflowState.is_paused) break
-      
-      const item = autoResolvableItems[i]
-      setWorkflowState(prev => ({ 
-        ...prev, 
-        current_step: i + 1,
-        current_item: item,
-        estimated_remaining_time: (totalSteps - i - 1) * 2
-      }))
-      
-      setProcessing(prev => ({ 
-        ...prev, 
-        autoResolveProgress: ((i + 1) / totalSteps) * 100 
-      }))
-      
-      // Simulate processing time
-      await new Promise(resolve => setTimeout(resolve, 500))
-      
-      // Add to selected items
-      setSelectedItems(prev => new Set([...prev, item.id]))
-      
-      // Update completed items
-      setWorkflowState(prev => ({ 
-        ...prev, 
-        completed_items: [...prev.completed_items, item.id]
-      }))
-    }
-    
-    setWorkflowState(prev => ({ ...prev, is_running: false }))
-    setProcessing(prev => ({ ...prev, autoResolving: false, autoResolveProgress: 100 }))
-    
-    onWorkflowUpdate?.(workflowState)
-  }, [validationResult, workflowState.is_paused, onWorkflowUpdate])
-
-  const pauseWorkflow = useCallback(() => {
-    setWorkflowState(prev => ({ ...prev, is_paused: true }))
-  }, [])
-
-  const resumeWorkflow = useCallback(() => {
-    setWorkflowState(prev => ({ ...prev, is_paused: false }))
-    startWorkflowAutomation()
-  }, [startWorkflowAutomation])
-
-  const stopWorkflow = useCallback(() => {
-    setWorkflowState(prev => ({ 
-      ...prev, 
-      is_running: false, 
-      is_paused: false,
-      current_step: 0,
-      current_item: undefined
-    }))
-    setProcessing(prev => ({ ...prev, autoResolving: false, autoResolveProgress: 0 }))
-  }, [])
-
-  // Advanced selection management
-  const selectAllVisible = useCallback(() => {
-    const visibleIds = new Set(processedItems.map(item => item.displayId))
-    setSelectedItems(visibleIds)
-  }, [processedItems])
-
-  const selectNone = useCallback(() => {
-    setSelectedItems(new Set())
-  }, [])
-
-  const selectByCategory = useCallback((category: string) => {
-    const categoryIds = new Set(
-      processedItems
-        .filter(item => item.category === category)
-        .map(item => item.displayId)
-    )
-    setSelectedItems(categoryIds)
-  }, [processedItems])
-
-  const selectByAutomation = useCallback(() => {
-    if (!validationResult?.automation_suggestions) return
-    
-    const autoIds = new Set(
-      validationResult.automation_suggestions.auto_resolvable.map(item => item.id)
-    )
-    setSelectedItems(autoIds)
-  }, [validationResult])
-
-  // Performance optimization for large datasets
-  const visibleItems = useMemo(() => {
-    if (!performance.isVirtualized) return processedItems
-    
-    const { start, end } = performance.visibleRange
-    return processedItems.slice(start, end)
-  }, [processedItems, performance.isVirtualized, performance.visibleRange])
-
-  // Advanced item handlers
-  const handleItemToggle = useCallback((itemId: string) => {
-    setSelectedItems(prev => {
+    return items
+  }, [validationResult, searchTerm, filterType, sortBy])
+  
+  // Performance optimization: Memoize selected items
+  const selectedItems = useMemo(() => {
+    return processedItems.filter(item => selectedIds.has(item.displayId))
+  }, [processedItems, selectedIds])
+  
+  // Handle item selection
+  const handleItemSelect = useCallback((item: ValidationItem, selected: boolean) => {
+    setSelectedIds(prev => {
       const newSet = new Set(prev)
-      if (newSet.has(itemId)) {
-        newSet.delete(itemId)
+      if (selected) {
+        newSet.add(item.displayId)
       } else {
-        newSet.add(itemId)
+        newSet.delete(item.displayId)
       }
       return newSet
     })
   }, [])
+  
+  // Handle select all
+  const handleSelectAll = useCallback((selected: boolean) => {
+    if (selected) {
+      setSelectedIds(new Set(processedItems.map(item => item.displayId)))
+    } else {
+      setSelectedIds(new Set())
+    }
+  }, [processedItems])
+  
+  // Handle workflow start with advanced processing
+  const startWorkflow = useCallback((mode: 'manual' | 'semi_auto' | 'full_auto') => {
+    // Reset UI progress and open visualizer immediately
+    setIsProcessing(true)
+    setProcessingProgress(0)
+    setWorkflowMode(mode)
+    setShowWorkflowVisualizer(true)
 
-  // Intelligent conflict resolution
-  const resolveConflictsAutomatically = useCallback(async () => {
-    if (!validationResult?.conflicts) return
-    
-    setProcessing(prev => ({ ...prev, isAnalyzing: true, analysisProgress: 0 }))
-    
-    const conflicts = validationResult.conflicts
-    const resolved: string[] = []
-    
-    for (let i = 0; i < conflicts.length; i++) {
-      const conflict = conflicts[i]
-      setProcessing(prev => ({ 
-        ...prev, 
-        analysisProgress: ((i + 1) / conflicts.length) * 100,
-        analysisStatus: `Analyzing conflict ${i + 1}/${conflicts.length}: ${conflict.item.table || conflict.item.schema}`
-      }))
-      
-      // Intelligent resolution based on conflict type and business value
-      if (conflict.automation_score && conflict.automation_score > 80) {
-        resolved.push(conflict.id)
-        setSelectedItems(prev => new Set([...prev, conflict.displayId]))
+    // Ensure the visualizer has items even if none are selected or data still loading
+    const baseItems = selectedItems.length > 0
+      ? selectedItems
+      : (validationResult?.auto_resolvable?.length ? validationResult.auto_resolvable
+        : (validationResult?.recommendations?.length ? validationResult.recommendations
+          : (validationResult?.new_items?.length ? validationResult.new_items : [])))
+
+    const synthesized = baseItems.length > 0 ? baseItems.slice(0, 12) : Array.from({ length: 8 }).map((_, i) => ({
+      id: `synthetic-${i+1}`,
+      displayId: `synthetic-${i+1}`,
+      name: `field_${i+1}`,
+      type: i % 3 === 0 ? 'string' : (i % 3 === 1 ? 'number' : 'date'),
+      risk: (i % 4 === 0 ? 'high' : (i % 4 === 1 ? 'medium' : 'low')) as any,
+      item: { table: 'unknown', schema: 'unknown' }
+    }))
+
+    const mapped = synthesized.map((item: any) => ({
+      id: item.id,
+      name: item.name,
+      type: item.type,
+      priority: item.risk === 'critical' ? 4 : item.risk === 'high' ? 3 : item.risk === 'medium' ? 2 : 1,
+      item: item.item
+    }))
+    setVisualizerItems(mapped)
+
+    // Start visualizer run loop
+    setInternalRunning(true)
+    setInternalStep(0)
+    if (stepTimerRef.current) {
+      window.clearInterval(stepTimerRef.current)
+      stepTimerRef.current = null
+    }
+    // Advance steps smoothly for the visualizer badges while it animates time-based
+    stepTimerRef.current = window.setInterval(() => {
+      setInternalStep(prev => {
+        const next = Math.min(workflowState.totalSteps, prev + 1)
+        if (next >= workflowState.totalSteps) {
+          if (stepTimerRef.current) {
+            window.clearInterval(stepTimerRef.current)
+            stepTimerRef.current = null
+          }
+          // stop internal running shortly after reaching the end
+          setTimeout(() => setInternalRunning(false), 800)
+        }
+        return next
+      })
+    }, 900)
+
+    // Simulate header processing bar
+    const progressInterval = window.setInterval(() => {
+      setProcessingProgress(prev => {
+        if (prev >= 100) {
+          window.clearInterval(progressInterval)
+          setIsProcessing(false)
+          return 100
+        }
+        return prev + 10
+      })
+    }, 100)
+
+    if (onStartWorkflow) {
+      onStartWorkflow(mode)
+    }
+  }, [onStartWorkflow, workflowState.totalSteps, selectedItems, validationResult])
+
+  // Ensure timers are cleared on unmount/close
+  useEffect(() => {
+    return () => {
+      if (stepTimerRef.current) {
+        window.clearInterval(stepTimerRef.current)
+        stepTimerRef.current = null
       }
+    }
+  }, [])
+  
+  // Handle AI recommendations with advanced processing
+  const handleAIRecommendations = useCallback(() => {
+    if (validationResult?.recommendations) {
+      setIsProcessing(true)
+      setProcessingProgress(0)
       
-      await new Promise(resolve => setTimeout(resolve, 200))
+      // Simulate AI processing
+      const progressInterval = setInterval(() => {
+        setProcessingProgress(prev => {
+          if (prev >= 100) {
+            clearInterval(progressInterval)
+            setIsProcessing(false)
+            onApplyRecommendations(validationResult.recommendations, 'auto')
+            return 100
+          }
+          return prev + 15
+        })
+      }, 80)
     }
-    
-    setProcessing(prev => ({ 
-      ...prev, 
-      isAnalyzing: false, 
-      analysisStatus: `Resolved ${resolved.length}/${conflicts.length} conflicts automatically` 
-    }))
-  }, [validationResult])
-
-  // Advanced confirmation with workflow options
-  const handleAdvancedConfirm = useCallback(() => {
-    const itemsToProcess = Array.from(selectedItems).map(itemId => {
-      const item = processedItems.find(i => i.displayId === itemId)
-      return item?.item
-    }).filter(Boolean)
-
-    const workflowOptions = {
-      automation_mode: workflowState.mode,
-      batch_size: 10,
-      retry_failed: true,
-      validate_dependencies: true,
-      estimated_time: workflowState.estimated_remaining_time,
-      success_rate_threshold: 90
+  }, [validationResult, onApplyRecommendations])
+  
+  // Handle catalog selected items with advanced processing
+  const handleCatalogSelected = useCallback(() => {
+    if (selectedItems.length > 0) {
+      setIsProcessing(true)
+      setProcessingProgress(0)
+      
+      // Simulate catalog processing
+      const progressInterval = setInterval(() => {
+        setProcessingProgress(prev => {
+          if (prev >= 100) {
+            clearInterval(progressInterval)
+            setIsProcessing(false)
+            onConfirm('add_new', selectedItems)
+            return 100
+          }
+          return prev + 12
+        })
+      }, 90)
     }
-
-    onConfirm(selectedAction, itemsToProcess, workflowOptions)
-  }, [selectedItems, processedItems, selectedAction, workflowState, onConfirm])
-
-  // Enhanced AI recommendations with automation
-  const handleAdvancedRecommendations = useCallback(async () => {
-    if (!validationResult?.recommendations) return
-
-    setProcessing(prev => ({ 
-      ...prev, 
-      isAnalyzing: true, 
-      analysisProgress: 0,
-      analysisStatus: 'Initializing AI analysis...'
-    }))
-
-    // Simulate advanced AI processing
-    const steps = [
-      'Analyzing data patterns and relationships...',
-      'Calculating business impact scores...',
-      'Evaluating automation potential...',
-      'Optimizing selection strategy...',
-      'Preparing workflow automation...',
-      'Finalizing recommendations...'
-    ]
-
-    for (let i = 0; i < steps.length; i++) {
-      setProcessing(prev => ({ 
-        ...prev, 
-        analysisProgress: ((i + 1) / steps.length) * 100,
-        analysisStatus: steps[i]
-      }))
-      await new Promise(resolve => setTimeout(resolve, 600))
+  }, [selectedItems, onConfirm])
+  
+  // Performance optimization: Memoize item list rendering
+  const renderItemList = useCallback((items: ValidationItem[], title: string, emptyMessage: string) => {
+    if (items.length === 0) {
+      return (
+        <div className="text-center py-8 text-slate-500">
+          <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
+          <p className="text-sm">{emptyMessage}</p>
+        </div>
+      )
     }
-
-    // Auto-select based on AI analysis
-    const recommendedIds = new Set(
-      validationResult.recommendations.map((_, index) => `rec_${index}`)
-    )
-    setSelectedItems(recommendedIds)
-    
-    // Enable automation mode
-    setWorkflowState(prev => ({ ...prev, mode: 'semi_auto' }))
-    
-    setProcessing(prev => ({ 
-      ...prev, 
-      isAnalyzing: false,
-      analysisStatus: 'AI recommendations applied successfully'
-    }))
-
-    onApplyRecommendations(validationResult.recommendations, workflowState.mode)
-  }, [validationResult, workflowState.mode, onApplyRecommendations])
-
-  // Utility functions for minimal design
-  const getItemIcon = useCallback((itemType: string) => {
-    const iconClass = "h-4 w-4 text-slate-600"
-    switch (itemType) {
-      case 'database': return <Database className={iconClass} />
-      case 'schema': return <Database className={iconClass} />
-      case 'table': return <Table className={iconClass} />
-      case 'view': return <Table className={iconClass} />
-      case 'column': return <Columns className={iconClass} />
-      default: return <Database className={iconClass} />
-    }
-  }, [])
-
-  const getPriorityIndicator = useCallback((priority: number) => {
-    if (priority >= 8) return <div className="w-2 h-2 rounded-full bg-slate-900" />
-    if (priority >= 6) return <div className="w-2 h-2 rounded-full bg-slate-700" />
-    if (priority >= 4) return <div className="w-2 h-2 rounded-full bg-slate-500" />
-    return <div className="w-2 h-2 rounded-full bg-slate-300" />
-  }, [])
-
-  const getRiskIndicator = useCallback((riskLevel?: string) => {
-    switch (riskLevel) {
-      case 'high': return <div className="w-1 h-4 bg-slate-900 rounded-sm" />
-      case 'medium': return <div className="w-1 h-4 bg-slate-600 rounded-sm" />
-      case 'low': return <div className="w-1 h-4 bg-slate-300 rounded-sm" />
-      default: return <div className="w-1 h-4 bg-slate-200 rounded-sm" />
-    }
-  }, [])
-
-  const getBusinessValueBadge = useCallback((value?: string) => {
-    switch (value) {
-      case 'critical': return <Badge variant="outline" className="text-xs border-slate-900 text-slate-900">Critical</Badge>
-      case 'high': return <Badge variant="outline" className="text-xs border-slate-700 text-slate-700">High</Badge>
-      case 'medium': return <Badge variant="outline" className="text-xs border-slate-500 text-slate-500">Medium</Badge>
-      case 'low': return <Badge variant="outline" className="text-xs border-slate-300 text-slate-300">Low</Badge>
-      default: return <Badge variant="outline" className="text-xs border-slate-200 text-slate-200">Unknown</Badge>
-    }
-  }, [])
-
-  // Render optimized item list with virtualization
-  const renderItemList = useCallback(() => {
-    const items = visibleItems
     
     return (
-      <div className="space-y-1">
-        {items.map((item, index) => (
+      <div className="space-y-2">
+        {items.map((item) => (
           <div
             key={item.displayId}
-            ref={(el) => {
-              if (el) itemRefs.current.set(item.displayId, el)
-            }}
-            className={`
-              group flex items-center gap-3 p-3 border border-slate-200 rounded-sm
-              hover:border-slate-400 hover:bg-slate-50 transition-all duration-150
-              cursor-pointer select-none
-              ${selectedItems.has(item.displayId) ? 'border-slate-900 bg-slate-100' : ''}
-              ${uiState.cursorMode === 'select' ? 'cursor-crosshair' : ''}
-              ${uiState.cursorMode === 'action' ? 'cursor-pointer' : ''}
-              ${uiState.cursorMode === 'automation' ? 'cursor-progress' : ''}
-            `}
-            onClick={() => handleItemToggle(item.displayId)}
+            className={`flex items-center space-x-3 p-3 rounded-lg border transition-all duration-200 hover:shadow-sm ${
+              selectedIds.has(item.displayId)
+                ? 'bg-blue-50 border-blue-200 shadow-sm'
+                : 'bg-white border-slate-200 hover:border-slate-300'
+            }`}
           >
-            {/* Selection checkbox */}
             <Checkbox
-              checked={selectedItems.has(item.displayId)}
-              onCheckedChange={() => handleItemToggle(item.displayId)}
-              className="border-slate-400"
+              checked={selectedIds.has(item.displayId)}
+              onCheckedChange={(checked) => handleItemSelect(item, checked as boolean)}
+              className="flex-shrink-0"
             />
-            
-            {/* Priority indicator */}
-            {getPriorityIndicator(item.priority)}
-            
-            {/* Item icon */}
-            {getItemIcon(item.item_type)}
-            
-            {/* Item details */}
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <span className="font-medium text-slate-900 truncate">
-                  {item.item.table || item.item.schema || item.item.column || 'Unknown'}
-                </span>
-                {item.category === 'recommendation' && (
-                  <Brain className="h-3 w-3 text-slate-600" />
-                )}
-                {item.category === 'critical' && (
-                  <AlertCircle className="h-3 w-3 text-slate-900" />
-                )}
-              </div>
-              <div className="text-xs text-slate-600 truncate">
-                {item.item.schema && item.item.table ? `${item.item.schema}.${item.item.table}` : 
-                 item.item.schema || item.item.database || 'N/A'}
-              </div>
-            </div>
-            
-            {/* Business value */}
-            {getBusinessValueBadge(item.business_value)}
-            
-            {/* Risk indicator */}
-            {getRiskIndicator(item.risk_level)}
-            
-            {/* Automation score */}
-            {item.automation_score && (
-              <div className="text-xs text-slate-500 font-mono w-8 text-right">
-                {item.automation_score}%
-              </div>
-            )}
-            
-            {/* Action status */}
-            {workflowState.completed_items.includes(item.id) && (
-              <Check className="h-4 w-4 text-slate-600" />
-            )}
-            {workflowState.failed_items.includes(item.id) && (
-              <X className="h-4 w-4 text-slate-900" />
-            )}
-            {workflowState.current_item?.id === item.id && (
-              <Activity className="h-4 w-4 text-slate-600 animate-pulse" />
-            )}
-          </div>
-        ))}
-        
-        {/* Load more indicator for virtualization */}
-        {performance.isVirtualized && performance.visibleRange.end < processedItems.length && (
-          <div className="p-4 text-center">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPerformance(prev => ({
-                ...prev,
-                visibleRange: { ...prev.visibleRange, end: prev.visibleRange.end + 50 }
-              }))}
-              className="text-slate-600 border-slate-300 hover:border-slate-400"
-            >
-              Load More ({processedItems.length - performance.visibleRange.end} remaining)
-            </Button>
-          </div>
-        )}
-      </div>
-    )
-  }, [visibleItems, selectedItems, uiState.cursorMode, handleItemToggle, getPriorityIndicator, 
-      getItemIcon, getBusinessValueBadge, getRiskIndicator, workflowState, performance, processedItems])
-
-  if (!validationResult) return null
-
-  return (
-    <>
-      {/* Processing Overlay */}
-      {(processing.isAnalyzing || processing.autoResolving) && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="bg-white border border-slate-300 rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
-            <div className="text-center space-y-4">
-              <div className="w-12 h-12 mx-auto border-2 border-slate-300 border-t-slate-900 rounded-full animate-spin" />
-              
-              <div className="space-y-2">
-                <h3 className="font-semibold text-slate-900">
-                  {processing.isAnalyzing ? 'AI Analysis' : 'Workflow Automation'}
-                </h3>
-                <p className="text-sm text-slate-600">
-                  {processing.analysisStatus}
-                </p>
-                <Progress 
-                  value={processing.isAnalyzing ? processing.analysisProgress : processing.autoResolveProgress} 
-                  className="h-2 bg-slate-200"
-                />
-                <p className="text-xs text-slate-500 font-mono">
-                  {Math.round(processing.isAnalyzing ? processing.analysisProgress : processing.autoResolveProgress)}% Complete
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Main Validation Dialog */}
-      <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-7xl max-h-[95vh] overflow-hidden bg-white border border-slate-300">
-          <DialogHeader className="border-b border-slate-200 pb-4">
-            <DialogTitle className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 border border-slate-300 rounded-sm flex items-center justify-center">
-                  <Shield className="h-5 w-5 text-slate-700" />
-                </div>
-                <div>
-                  <span className="text-xl font-semibold text-slate-900">
-                    Validation & Workflow Center
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <span className="font-medium text-slate-900 truncate">
+                    {item.name}
                   </span>
-                  <p className="text-sm text-slate-600 mt-1">
-                    Enterprise automation for schema validation and cataloging
-                  </p>
+                  <Badge variant="outline" className="text-xs">
+                    {item.type}
+                  </Badge>
+                </div>
+                <div className="flex items-center space-x-2">
+                  {item.risk && (
+                    <Badge
+                      variant="outline"
+                      className={`text-xs ${
+                        item.risk === 'critical' ? 'border-red-500 text-red-600' :
+                        item.risk === 'high' ? 'border-orange-500 text-orange-600' :
+                        item.risk === 'medium' ? 'border-yellow-500 text-yellow-600' :
+                        'border-green-500 text-green-600'
+                      }`}
+                    >
+                      {item.risk}
+                    </Badge>
+                  )}
+                  {item.confidence && (
+                    <span className="text-xs text-slate-500">
+                      {Math.round(item.confidence)}%
+                    </span>
+                  )}
                 </div>
               </div>
-              
-              {/* Performance indicator */}
-              {uiState.showPerformanceMetrics && (
-                <div className="flex items-center gap-2 text-xs text-slate-500">
-                  <BarChart3 className="h-4 w-4" />
-                  <span>{performance.renderTime.toFixed(1)}ms</span>
-                  <span>|</span>
-                  <span>{performance.totalItems} items</span>
+              {(item.schema || item.table) && (
+                <div className="text-xs text-slate-500 mt-1">
+                  {item.schema && item.table ? `${item.schema}.${item.table}` : item.schema || item.table}
                 </div>
               )}
-            </DialogTitle>
-          </DialogHeader>
-
-          <div className="flex flex-col h-full space-y-4">
-            {/* Workflow Control Bar */}
-            <div className="flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-sm">
-              <div className="flex items-center gap-4">
-                {/* Workflow Mode Selector */}
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-medium text-slate-700">Mode:</span>
-                  <Select
-                    value={workflowState.mode}
-                    onValueChange={(value: any) => setWorkflowState(prev => ({ ...prev, mode: value }))}
-                  >
-                    <SelectTrigger className="w-32 h-8 text-xs border-slate-300">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="manual">Manual</SelectItem>
-                      <SelectItem value="semi_auto">Semi-Auto</SelectItem>
-                      <SelectItem value="full_auto">Full Auto</SelectItem>
-                    </SelectContent>
-                  </Select>
+            </div>
+          </div>
+        ))}
+      </div>
+    )
+  }, [selectedIds, handleItemSelect])
+  
+  // Show workflow visualizer when workflow is running
+  useEffect(() => {
+    if (workflowState.status === 'running' || workflowState.status === 'paused') {
+      setShowWorkflowVisualizer(true)
+    } else if (workflowState.status === 'completed' || workflowState.status === 'failed') {
+      // Keep visualizer open for a moment to show completion
+      setTimeout(() => {
+        setShowWorkflowVisualizer(false)
+      }, 3000)
+    }
+  }, [workflowState.status])
+  
+  // Progressive loading of validation result
+  useEffect(() => {
+    if (validationResult && validationResult.items.length > 0) {
+      // Progressive loading to avoid blocking the main thread
+      const loadItems = () => {
+        // Items are already loaded, just ensure UI updates
+        requestAnimationFrame(() => {
+          // Force re-render if needed
+        })
+      }
+      
+      requestAnimationFrame(loadItems)
+    }
+  }, [validationResult])
+  
+  if (!isOpen) return null
+  
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-7xl h-[90vh] p-0 z-[100]">
+        <DialogHeader className="px-6 py-4 border-b bg-gradient-to-r from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800 dark:border-slate-700">
+          <DialogTitle className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-2">
+                <Sparkles className="h-6 w-6 text-blue-600 animate-pulse" />
+                <Shield className="h-5 w-5 text-blue-600" />
+                <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  Advanced Validation Orchestrator
+                </span>
+              </div>
+              <Badge variant="outline" className="bg-blue-50 border-blue-200 text-blue-700">
+                <Rocket className="h-3 w-3 mr-1" />
+                Enterprise
+              </Badge>
+            </div>
+            <div className="flex items-center space-x-2">
+              {isProcessing && (
+                <div className="flex items-center space-x-2">
+                  <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                  <span className="text-sm text-blue-600">{processingProgress}%</span>
+                  <Progress value={processingProgress} className="w-20 h-2" />
+                </div>
+              )}
+              {isLoading && <Loader2 className="h-4 w-4 animate-spin text-blue-600" />}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowAdvancedFeatures(!showAdvancedFeatures)}
+                className="text-slate-600 hover:text-blue-600"
+              >
+                <Wand2 className="h-4 w-4" />
+              </Button>
+            </div>
+          </DialogTitle>
+        </DialogHeader>
+        
+        <div className="flex-1 overflow-hidden bg-white dark:bg-slate-900">
+          {showWorkflowVisualizer ? (
+            <WorkflowVisualizer
+              mode={workflowMode}
+              totalSteps={workflowState.totalSteps}
+              currentStep={internalStep}
+              running={internalRunning || workflowState.status === 'running'}
+              successRate={validationResult?.metrics.successRate || 0}
+              onExit={() => { setShowWorkflowVisualizer(false); setInternalRunning(false) }}
+              metrics={{
+                autoResolvable: validationResult?.metrics.autoResolvable || 0,
+                requiresReview: validationResult?.metrics.conflicts || 0,
+                highRisk: validationResult?.metrics.highRisk || 0
+              }}
+              selectedItems={(visualizerItems.length ? visualizerItems : selectedItems.map(item => ({
+                id: item.id,
+                name: item.name,
+                type: item.type,
+                priority: item.risk === 'critical' ? 4 : item.risk === 'high' ? 3 : item.risk === 'medium' ? 2 : 1,
+                item: item.item
+              })))}
+            />
+          ) : (
+            <div className="h-full flex flex-col">
+              {/* Header with controls */}
+              <div className="px-6 py-4 border-b bg-slate-50 dark:bg-slate-900 dark:border-slate-800">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-2">
+                      <Input
+                        placeholder="Search items..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-64 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200"
+                      />
+                      <Select value={filterType} onValueChange={setFilterType}>
+                        <SelectTrigger className="w-32 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Types</SelectItem>
+                          <SelectItem value="string">String</SelectItem>
+                          <SelectItem value="number">Number</SelectItem>
+                          <SelectItem value="date">Date</SelectItem>
+                          <SelectItem value="boolean">Boolean</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Select value={sortBy} onValueChange={(value) => setSortBy(value as 'name' | 'type' | 'risk' | 'confidence')}>
+                        <SelectTrigger className="w-32 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="name">Name</SelectItem>
+                          <SelectItem value="type">Type</SelectItem>
+                          <SelectItem value="risk">Risk</SelectItem>
+                          <SelectItem value="confidence">Confidence</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleSelectAll(true)}
+                      disabled={processedItems.length === 0}
+                    >
+                      Select All
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleSelectAll(false)}
+                      disabled={selectedIds.size === 0}
+                    >
+                      Clear All
+                    </Button>
+                  </div>
                 </div>
                 
-                {/* Workflow Controls */}
-                <div className="flex items-center gap-1">
-                  {!workflowState.is_running ? (
+                {/* Advanced Action buttons */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Button
+                            onClick={() => startWorkflow('manual')}
                             variant="outline"
                             size="sm"
-                            onClick={startWorkflowAutomation}
-                            className="h-8 px-3 border-slate-300 hover:border-slate-400"
+                            disabled={isProcessing}
+                            className="hover:bg-blue-50 hover:border-blue-300 transition-all duration-200"
                           >
-                            <Play className="h-3 w-3" />
+                            <Settings className="h-4 w-4 mr-2" />
+                            Manual Workflow
+                            <Star className="h-3 w-3 ml-1 text-yellow-500" />
                           </Button>
                         </TooltipTrigger>
-                        <TooltipContent>Start Automation</TooltipContent>
+                        <TooltipContent>
+                          <p>Manual workflow with full control</p>
+                        </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
-                  ) : workflowState.is_paused ? (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={resumeWorkflow}
-                      className="h-8 px-3 border-slate-300 hover:border-slate-400"
-                    >
-                      <Play className="h-3 w-3" />
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={pauseWorkflow}
-                      className="h-8 px-3 border-slate-300 hover:border-slate-400"
-                    >
-                      <Pause className="h-3 w-3" />
-                    </Button>
-                  )}
+                    
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            onClick={() => startWorkflow('semi_auto')}
+                            variant="outline"
+                            size="sm"
+                            disabled={isProcessing}
+                            className="hover:bg-orange-50 hover:border-orange-300 transition-all duration-200"
+                          >
+                            <Zap className="h-4 w-4 mr-2" />
+                            Semi-Auto Workflow
+                            <Sparkles className="h-3 w-3 ml-1 text-orange-500" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Automated workflow with manual oversight</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                    
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            onClick={() => startWorkflow('full_auto')}
+                            variant="default"
+                            size="sm"
+                            disabled={isProcessing}
+                            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+                          >
+                            <Rocket className="h-4 w-4 mr-2" />
+                            Full Auto Workflow
+                            <Wand2 className="h-3 w-3 ml-1" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Fully automated enterprise workflow</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
                   
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={stopWorkflow}
-                    className="h-8 px-3 border-slate-300 hover:border-slate-400"
-                  >
-                    <Square className="h-3 w-3" />
-                  </Button>
+                  <div className="flex items-center space-x-3">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            onClick={handleAIRecommendations}
+                            variant="outline"
+                            size="sm"
+                            disabled={!validationResult?.recommendations?.length || isProcessing}
+                            className="hover:bg-purple-50 hover:border-purple-300 transition-all duration-200"
+                          >
+                            <Brain className="h-4 w-4 mr-2" />
+                            AI Recommendations
+                            <Sparkles className="h-3 w-3 ml-1 text-purple-500" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Apply AI-powered recommendations</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                    
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            onClick={handleCatalogSelected}
+                            variant="default"
+                            size="sm"
+                            disabled={selectedItems.length === 0 || isProcessing}
+                            className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+                          >
+                            <Database className="h-4 w-4 mr-2" />
+                            Catalog Selected Items
+                            <Check className="h-3 w-3 ml-1" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Add selected items to data catalog</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
                 </div>
-                
-                {/* Progress indicator */}
-                {workflowState.is_running && (
-                  <div className="flex items-center gap-2">
-                    <Progress 
-                      value={(workflowState.current_step / workflowState.total_steps) * 100} 
-                      className="w-32 h-2 bg-slate-200"
-                    />
-                    <span className="text-xs text-slate-600 font-mono">
-                      {workflowState.current_step}/{workflowState.total_steps}
-                    </span>
+              </div>
+              
+              {/* Main content */}
+              <div className="flex-1 overflow-hidden">
+                {validationResult ? (
+                  <Tabs defaultValue="all" className="h-full flex flex-col">
+                    <TabsList className="px-6 py-2 bg-gradient-to-r from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800 dark:border-b dark:border-slate-800">
+                      <TabsTrigger value="all" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700">
+                        <Database className="h-4 w-4 mr-2" />
+                        All Items ({validationResult.items.length})
+                      </TabsTrigger>
+                      <TabsTrigger value="auto" className="data-[state=active]:bg-green-100 data-[state=active]:text-green-700">
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                        Auto Resolvable ({validationResult.auto_resolvable.length})
+                      </TabsTrigger>
+                      <TabsTrigger value="recommendations" className="data-[state=active]:bg-purple-100 data-[state=active]:text-purple-700">
+                        <Brain className="h-4 w-4 mr-2" />
+                        Recommendations ({validationResult.recommendations.length})
+                      </TabsTrigger>
+                      <TabsTrigger value="new" className="data-[state=active]:bg-orange-100 data-[state=active]:text-orange-700">
+                        <Sparkles className="h-4 w-4 mr-2" />
+                        New Items ({validationResult.new_items.length})
+                      </TabsTrigger>
+                      <TabsTrigger value="conflicts" className="data-[state=active]:bg-red-100 data-[state=active]:text-red-700">
+                        <AlertTriangle className="h-4 w-4 mr-2" />
+                        Conflicts ({validationResult.conflicts.length})
+                      </TabsTrigger>
+                    </TabsList>
+                    
+                    <div className="flex-1 overflow-hidden">
+                      <TabsContent value="all" className="h-full m-0">
+                        <ScrollArea className="h-full px-6 py-4">
+                          {renderItemList(processedItems, "All Items", "No items found")}
+                        </ScrollArea>
+                      </TabsContent>
+                      
+                      <TabsContent value="auto" className="h-full m-0">
+                        <ScrollArea className="h-full px-6 py-4">
+                          {renderItemList(validationResult.auto_resolvable, "Auto Resolvable", "No auto-resolvable items")}
+                        </ScrollArea>
+                      </TabsContent>
+                      
+                      <TabsContent value="recommendations" className="h-full m-0">
+                        <ScrollArea className="h-full px-6 py-4">
+                          {renderItemList(validationResult.recommendations, "AI Recommendations", "No recommendations available")}
+                        </ScrollArea>
+                      </TabsContent>
+                      
+                      <TabsContent value="new" className="h-full m-0">
+                        <ScrollArea className="h-full px-6 py-4">
+                          {renderItemList(validationResult.new_items, "New Items", "No new items detected")}
+                        </ScrollArea>
+                      </TabsContent>
+                      
+                      <TabsContent value="conflicts" className="h-full m-0">
+                        <ScrollArea className="h-full px-6 py-4">
+                          {renderItemList(validationResult.conflicts, "Conflicts", "No conflicts detected")}
+                        </ScrollArea>
+                      </TabsContent>
+                    </div>
+                  </Tabs>
+                ) : (
+                  <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
+                    <div className="text-center">
+                      <div className="relative">
+                        <Sparkles className="h-12 w-12 mx-auto mb-4 text-blue-500 animate-pulse" />
+                        <Loader2 className="h-8 w-8 animate-spin absolute top-2 left-1/2 transform -translate-x-1/2 text-blue-600" />
+                      </div>
+                      <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-200 mb-2">Loading Advanced Validation Results</h3>
+                      <p className="text-slate-500 dark:text-slate-400 mb-4">Processing enterprise-grade validation data...</p>
+                      <div className="flex items-center justify-center space-x-2">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
+                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                      </div>
+                      <div className="mt-6">
+                        <Button onClick={() => startWorkflow('full_auto')} size="sm" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+                          Quick Start Full Auto
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
-              
-              {/* Summary Stats */}
-              <div className="flex items-center gap-4 text-xs text-slate-600">
-                <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 rounded-full bg-slate-900" />
-                  <span>{validationResult.total_selected} Total</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Check className="h-3 w-3" />
-                  <span>{selectedItems.size} Selected</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Brain className="h-3 w-3" />
-                  <span>{validationResult.recommendations?.length || 0} AI</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Clock className="h-3 w-3" />
-                  <span>{workflowState.estimated_remaining_time}s Est.</span>
-                </div>
-              </div>
             </div>
-
-            {/* Advanced Toolbar */}
-            <div className="flex items-center justify-between p-4 border-b border-slate-200">
-              <div className="flex items-center gap-4">
-                {/* Search */}
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                  <Input
-                    placeholder="Search items..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 w-64 h-8 border-slate-300 focus:border-slate-500"
-                  />
-                </div>
-                
-                {/* Filter */}
-                <Select value={filterType} onValueChange={(value: any) => setFilterType(value)}>
-                  <SelectTrigger className="w-32 h-8 border-slate-300">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Types</SelectItem>
-                    <SelectItem value="database">Database</SelectItem>
-                    <SelectItem value="schema">Schema</SelectItem>
-                    <SelectItem value="table">Table</SelectItem>
-                    <SelectItem value="view">View</SelectItem>
-                    <SelectItem value="column">Column</SelectItem>
-                  </SelectContent>
-                </Select>
-                
-                {/* Sort */}
-                <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
-                  <SelectTrigger className="w-32 h-8 border-slate-300">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="priority">Priority</SelectItem>
-                    <SelectItem value="name">Name</SelectItem>
-                    <SelectItem value="type">Type</SelectItem>
-                    <SelectItem value="risk">Risk</SelectItem>
-                    <SelectItem value="business_value">Business Value</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              {/* Bulk Actions */}
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={selectAllVisible}
-                  className="h-8 px-3 border-slate-300 hover:border-slate-400"
-                >
-                  Select All
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={selectNone}
-                  className="h-8 px-3 border-slate-300 hover:border-slate-400"
-                >
-                  Select None
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={selectByAutomation}
-                  className="h-8 px-3 border-slate-300 hover:border-slate-400"
-                >
-                  <Brain className="h-3 w-3 mr-1" />
-                  AI Select
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={resolveConflictsAutomatically}
-                  className="h-8 px-3 border-slate-300 hover:border-slate-400"
-                >
-                  <Zap className="h-3 w-3 mr-1" />
-                  Auto Resolve
-                </Button>
-              </div>
-            </div>
-
-            {/* Main Content Area */}
-            <div className="flex-1 overflow-hidden">
-              <Tabs value={viewMode} onValueChange={(value: any) => setViewMode(value)} className="h-full">
-                <TabsList className="grid w-full grid-cols-4 bg-slate-100 border border-slate-200">
-                  <TabsTrigger value="workflow" className="text-slate-700 data-[state=active]:bg-white">
-                    <Target className="h-4 w-4 mr-1" />
-                    Workflow
-                  </TabsTrigger>
-                  <TabsTrigger value="list" className="text-slate-700 data-[state=active]:bg-white">
-                    <Database className="h-4 w-4 mr-1" />
-                    Items
-                  </TabsTrigger>
-                  <TabsTrigger value="analytics" className="text-slate-700 data-[state=active]:bg-white">
-                    <BarChart3 className="h-4 w-4 mr-1" />
-                    Analytics
-                  </TabsTrigger>
-                  <TabsTrigger value="grid" className="text-slate-700 data-[state=active]:bg-white">
-                    <Settings className="h-4 w-4 mr-1" />
-                    Advanced
-                  </TabsTrigger>
-                </TabsList>
-
-                {/* Workflow Tab */}
-                <TabsContent value="workflow" className="mt-4 h-full">
-                  <div className="grid grid-cols-3 gap-4 h-full">
-                    {/* Automation Pipeline */}
-                    <Card className="border-slate-200">
-                      <CardHeader className="pb-3">
-                        <CardTitle className="text-sm font-medium text-slate-900">Automation Pipeline</CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-3">
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="text-slate-600">Auto-Resolvable</span>
-                            <span className="font-mono text-slate-900">
-                              {validationResult.automation_suggestions?.auto_resolvable?.length || 0}
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="text-slate-600">Requires Review</span>
-                            <span className="font-mono text-slate-900">
-                              {validationResult.automation_suggestions?.requires_review?.length || 0}
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="text-slate-600">High Risk</span>
-                            <span className="font-mono text-slate-900">
-                              {validationResult.automation_suggestions?.high_risk?.length || 0}
-                            </span>
-                          </div>
-                        </div>
-                        
-                        <Separator className="bg-slate-200" />
-                        
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="text-slate-600">Success Rate</span>
-                            <span className="font-mono text-slate-900">
-                              {workflowState.success_rate}%
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="text-slate-600">Est. Time</span>
-                            <span className="font-mono text-slate-900">
-                              {Math.ceil(workflowState.estimated_remaining_time / 60)}m
-                            </span>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                    
-                    {/* Current Processing */}
-                    <Card className="border-slate-200">
-                      <CardHeader className="pb-3">
-                        <CardTitle className="text-sm font-medium text-slate-900">Current Processing</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        {workflowState.current_item ? (
-                          <div className="space-y-3">
-                            <div className="flex items-center gap-2">
-                              {getItemIcon(workflowState.current_item.item_type)}
-                              <span className="font-medium text-slate-900">
-                                {workflowState.current_item.item.table || workflowState.current_item.item.schema}
-                              </span>
-                            </div>
-                            <div className="text-xs text-slate-600">
-                              {workflowState.current_item.reason}
-                            </div>
-                            <Progress 
-                              value={(workflowState.current_step / workflowState.total_steps) * 100}
-                              className="h-2 bg-slate-200"
-                            />
-                          </div>
-                        ) : (
-                          <div className="text-xs text-slate-500 text-center py-4">
-                            No active processing
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                    
-                    {/* Quick Actions */}
-                    <Card className="border-slate-200">
-                      <CardHeader className="pb-3">
-                        <CardTitle className="text-sm font-medium text-slate-900">Quick Actions</CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={handleAdvancedRecommendations}
-                          disabled={processing.isAnalyzing}
-                          className="w-full justify-start border-slate-300 hover:border-slate-400"
-                        >
-                          <Brain className="h-4 w-4 mr-2" />
-                          AI Recommendations
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={resolveConflictsAutomatically}
-                          disabled={processing.isAnalyzing}
-                          className="w-full justify-start border-slate-300 hover:border-slate-400"
-                        >
-                          <Zap className="h-4 w-4 mr-2" />
-                          Auto Resolve Conflicts
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => selectByCategory('critical')}
-                          className="w-full justify-start border-slate-300 hover:border-slate-400"
-                        >
-                          <AlertCircle className="h-4 w-4 mr-2" />
-                          Select Critical
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </TabsContent>
-
-                {/* Items List Tab */}
-                <TabsContent value="list" className="mt-4 h-full">
-                  <ScrollArea className="h-96">
-                    {renderItemList()}
-                  </ScrollArea>
-                </TabsContent>
-
-                {/* Analytics Tab */}
-                <TabsContent value="analytics" className="mt-4 h-full">
-                  <div className="grid grid-cols-2 gap-4">
-                    <Card className="border-slate-200">
-                      <CardHeader className="pb-3">
-                        <CardTitle className="text-sm font-medium text-slate-900">Validation Summary</CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-3">
-                        <div className="grid grid-cols-2 gap-4 text-xs">
-                          <div className="text-center">
-                            <div className="text-2xl font-bold text-slate-900">{validationResult.validation_summary.new_count}</div>
-                            <div className="text-slate-600">New Items</div>
-                          </div>
-                          <div className="text-center">
-                            <div className="text-2xl font-bold text-slate-900">{validationResult.validation_summary.existing_count}</div>
-                            <div className="text-slate-600">Existing</div>
-                          </div>
-                          <div className="text-center">
-                            <div className="text-2xl font-bold text-slate-900">{validationResult.validation_summary.critical_count}</div>
-                            <div className="text-slate-600">Critical</div>
-                          </div>
-                          <div className="text-center">
-                            <div className="text-2xl font-bold text-slate-900">{validationResult.business_value_score}%</div>
-                            <div className="text-slate-600">Value Score</div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                    
-                    <Card className="border-slate-200">
-                      <CardHeader className="pb-3">
-                        <CardTitle className="text-sm font-medium text-slate-900">Automation Insights</CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-3">
-                        <div className="space-y-2 text-xs">
-                          <div className="flex justify-between">
-                            <span className="text-slate-600">Coverage:</span>
-                            <span className="font-mono text-slate-900">
-                              {validationResult.validation_summary.automation_coverage || 0}%
-                            </span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-slate-600">Risk Level:</span>
-                            <span className="font-mono text-slate-900 capitalize">
-                              {validationResult.validation_summary.risk_assessment || 'Unknown'}
-                            </span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-slate-600">Success Rate:</span>
-                            <span className="font-mono text-slate-900">
-                              {validationResult.automation_suggestions?.success_probability || 0}%
-                            </span>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </TabsContent>
-
-                {/* Advanced Settings Tab */}
-                <TabsContent value="grid" className="mt-4 h-full">
-                  <div className="space-y-4">
-                    <Card className="border-slate-200">
-                      <CardHeader className="pb-3">
-                        <CardTitle className="text-sm font-medium text-slate-900">Performance Settings</CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-slate-600">Virtualization</span>
-                          <Badge variant="outline" className="text-xs border-slate-300">
-                            {performance.isVirtualized ? 'Enabled' : 'Disabled'}
-                          </Badge>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-slate-600">Render Time</span>
-                          <Badge variant="outline" className="text-xs border-slate-300 font-mono">
-                            {performance.renderTime.toFixed(1)}ms
-                          </Badge>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-slate-600">Total Items</span>
-                          <Badge variant="outline" className="text-xs border-slate-300 font-mono">
-                            {performance.totalItems}
-                          </Badge>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </TabsContent>
-              </Tabs>
-            </div>
-
-            {/* Action Bar */}
-            <div className="flex items-center justify-between p-4 border-t border-slate-200 bg-slate-50">
-              <div className="flex items-center gap-4">
-                {/* Action Selection */}
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-medium text-slate-700">Action:</span>
-                  <div className="flex border border-slate-300 rounded-sm overflow-hidden">
-                    <Button
-                      variant={selectedAction === 'add_new' ? 'default' : 'ghost'}
-                      size="sm"
-                      onClick={() => setSelectedAction('add_new')}
-                      className={`h-8 px-3 rounded-none ${
-                        selectedAction === 'add_new' 
-                          ? 'bg-slate-900 text-white hover:bg-slate-800' 
-                          : 'text-slate-600 hover:text-slate-900'
-                      }`}
-                    >
-                      Add New
-                    </Button>
-                    <Button
-                      variant={selectedAction === 'replace' ? 'default' : 'ghost'}
-                      size="sm"
-                      onClick={() => setSelectedAction('replace')}
-                      className={`h-8 px-3 rounded-none ${
-                        selectedAction === 'replace' 
-                          ? 'bg-slate-900 text-white hover:bg-slate-800' 
-                          : 'text-slate-600 hover:text-slate-900'
-                      }`}
-                    >
-                      Replace
-                    </Button>
-                  </div>
-                </div>
-                
-                {/* Selection Summary */}
-                <div className="text-xs text-slate-600">
-                  {selectedItems.size} of {processedItems.length} items selected
-                </div>
-              </div>
-              
-              {/* Primary Actions */}
-              <div className="flex items-center gap-3">
-                <Button 
-                  variant="outline" 
-                  onClick={onClose}
-                  className="border-slate-300 hover:border-slate-400 text-slate-700"
-                >
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Cancel
-                </Button>
-                <Button 
-                  onClick={handleAdvancedConfirm}
-                  disabled={isLoading || selectedItems.size === 0}
-                  className="bg-slate-900 hover:bg-slate-800 text-white"
-                >
-                  {isLoading ? (
-                    <>
-                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      <ArrowRight className="h-4 w-4 mr-2" />
-                      Execute ({selectedItems.size})
-                    </>
-                  )}
-                </Button>
+          )}
+        </div>
+        
+        {error && (
+          <div className="px-6 py-4 bg-gradient-to-r from-red-50 to-pink-50 dark:from-rose-950 dark:to-rose-900 border-t border-red-200 dark:border-rose-800">
+            <div className="flex items-center space-x-3 text-red-600">
+              <AlertCircle className="h-5 w-5 animate-pulse" />
+              <div>
+                <h4 className="font-semibold">Validation Error</h4>
+                <p className="text-sm">{error}</p>
               </div>
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
-    </>
+        )}
+      </DialogContent>
+    </Dialog>
   )
 }
 
-export default AdvancedValidationPopup
+export default AdvancedValidationOrchestrator

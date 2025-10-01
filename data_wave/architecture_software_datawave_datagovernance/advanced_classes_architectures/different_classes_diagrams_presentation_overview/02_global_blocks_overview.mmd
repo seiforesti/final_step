@@ -1,0 +1,113 @@
+flowchart TB
+ subgraph AUTH_RBAC["AUTH / RBAC"]
+    direction TB
+        User["User"]
+        Role["Role"]
+        Permission["Permission"]
+  end
+ subgraph DATA_SOURCES["Data Sources"]
+    direction TB
+        DataSource["DataSource"]
+        Connector["Connector"]
+        SecretVault["CredentialVault"]
+  end
+ subgraph CATALOG["Catalog"]
+    direction TB
+        CatalogEntry["CatalogEntry"]
+        Glossary["BusinessGlossary"]
+        Lineage["Lineage"]
+  end
+ subgraph SCANS["Scans"]
+    direction TB
+        Scan["Scan"]
+        RuleSet["ScanRuleSet"]
+        ScanResult["ScanResult"]
+  end
+ subgraph CLASSIFICATION["Classification"]
+    direction TB
+        Classifier["ClassifierModel"]
+        ClassResult["ClassificationResult"]
+        PolicyTag["PolicyTag"]
+  end
+ subgraph COMPLIANCE["Compliance"]
+    direction TB
+        CompRule["ComplianceRule"]
+        Assessment["Assessment"]
+        Audit["AuditRecord"]
+  end
+ subgraph RACINE["Orchestration"]
+    direction TB
+        Orchestrator["RacineOrchestrationMaster"]
+        Workflow["WorkflowEngine"]
+        Scheduler["ExecutionPlanner"]
+  end
+    User --> Role
+    Role --> Permission
+    Connector --> DataSource
+    SecretVault --> DataSource
+    Glossary --> CatalogEntry
+    Lineage --> CatalogEntry
+    RuleSet --> Scan
+    Scan --> ScanResult
+    Classifier --> ClassResult
+    PolicyTag --> ClassResult
+    CompRule --> Assessment
+    Assessment --> Audit
+    Orchestrator --> Workflow & EventBus[("Event Bus")]
+    Workflow --> Scheduler
+    CoreHub["Core Orchestration Hub"] --> Orchestrator & EventBus
+    Org["Organization"] --> User & DataSource & CatalogEntry & Scan & Classifier & CompRule
+    User -. manages .-> Role
+    Role -. grants .-> Permission
+    Permission -. governs .-> DataSource & Scan & CatalogEntry & Classifier & CompRule
+    DataSource --> Scan & CatalogEntry & ClassResult & Assessment
+    ScanResult --> ClassResult & CatalogEntry & Audit
+    EventBus --> DataSource & Scan & CATALOG & COMPLIANCE & AUTH_RBAC
+
+     User:::auth
+     Role:::auth
+     Permission:::auth
+     DataSource:::sources
+     Connector:::sources
+     SecretVault:::sources
+     CatalogEntry:::catalog
+     Glossary:::catalog
+     Lineage:::catalog
+     Scan:::scans
+     RuleSet:::scans
+     ScanResult:::scans
+     Classifier:::classify
+     ClassResult:::classify
+     PolicyTag:::classify
+     CompRule:::compliance
+     Assessment:::compliance
+     Audit:::compliance
+     Orchestrator:::hub
+     Workflow:::hub
+     Scheduler:::hub
+     EventBus:::shared
+     EventBus:::shared
+     CoreHub:::hub
+     CoreHub:::shared
+     Org:::shared
+     Org:::shared
+    classDef hub fill:#111827,stroke:#111827,color:#ffffff
+    classDef shared fill:#e5e7eb,stroke:#374151,color:#111827
+    classDef auth fill:#dbeafe,stroke:#1e3a8a,color:#1e3a8a
+    classDef sources fill:#dcfce7,stroke:#065f46,color:#065f46
+    classDef catalog fill:#fde68a,stroke:#7c2d12,color:#7c2d12
+    classDef scans fill:#fee2e2,stroke:#7f1d1d,color:#7f1d1d
+    classDef classify fill:#e9d5ff,stroke:#4c1d95,color:#4c1d95
+    classDef compliance fill:#f3f4f6,stroke:#111827,color:#111827
+    style Orchestrator fill:#FF6D00
+    style Workflow fill:#FF6D00
+    style Scheduler fill:#FF6D00
+    style CATALOG fill:#FFF9C4
+    style COMPLIANCE fill:#C8E6C9
+    style AUTH_RBAC fill:#FFCDD2
+    style DATA_SOURCES fill:#FFD600
+    style CLASSIFICATION fill:#BBDEFB
+    style SCANS fill:#E1BEE7
+    style RACINE fill:#FFE0B2
+
+

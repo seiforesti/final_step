@@ -1,0 +1,1368 @@
+classDiagram
+%% Combined groups diagram (auto-generated)
+%% ===== CLASSIFICATION =====
+class DataClassification {
+    +PUBLIC: 
+    +INTERNAL: 
+    +CONFIDENTIAL: 
+    +RESTRICTED: 
+  }
+  class ClassificationRuleType {
+    +REGEX_PATTERN: 
+    +DICTIONARY_LOOKUP: 
+    +COLUMN_NAME_PATTERN: 
+    +TABLE_NAME_PATTERN: 
+    +DATA_TYPE_PATTERN: 
+    +VALUE_RANGE_PATTERN: 
+    +STATISTICAL_PATTERN: 
+    +METADATA_PATTERN: 
+    +COMPOSITE_PATTERN: 
+    +ML_INFERENCE: 
+    +AI_INFERENCE: 
+    +CUSTOM_FUNCTION: 
+  }
+  class ClassificationScope {
+    +GLOBAL: 
+    +DATA_SOURCE: 
+    +SCHEMA: 
+    +TABLE: 
+    +COLUMN: 
+    +CUSTOM: 
+  }
+  class ClassificationStatus {
+    +PENDING: 
+    +ACTIVE: 
+    +INACTIVE: 
+    +DEPRECATED: 
+    +FAILED: 
+    +UNDER_REVIEW: 
+    +APPROVED: 
+    +REJECTED: 
+  }
+  class ClassificationConfidenceLevel {
+    +VERY_LOW: 
+    +LOW: 
+    +MEDIUM: 
+    +HIGH: 
+    +VERY_HIGH: 
+    +CERTAIN: 
+  }
+  class ClassificationMethod {
+    +MANUAL: 
+    +AUTOMATED_RULE: 
+    +ML_PREDICTION: 
+    +AI_INFERENCE: 
+    +INHERITED: 
+    +POLICY_DRIVEN: 
+    +EXPERT_REVIEW: 
+  }
+  class ClassificationFramework {
+    +__tablename__: 
+    +id: Optional[int]
+    +name: str
+    +description: Optional[str]
+    +version: str
+    +is_default: bool
+    +is_active: bool
+    +applies_to_data_sources: bool
+    +applies_to_schemas: bool
+    +applies_to_tables: bool
+    +applies_to_columns: bool
+    +compliance_frameworks: Optional[str]
+    +regulatory_requirements: Optional[str]
+    +owner: Optional[str]
+    +steward: Optional[str]
+    +approval_required: bool
+    +created_at: datetime
+    +updated_at: datetime
+    +created_by: Optional[str]
+    +updated_by: Optional[str]
+    +classification_rules: List['ClassificationRule']
+    +classification_policies: List['ClassificationPolicy']
+  }
+  class ClassificationPolicy {
+    +__tablename__: 
+    +id: Optional[int]
+    +framework_id: int
+    +name: str
+    +description: Optional[str]
+    +priority: int
+    +is_mandatory: bool
+    +auto_apply: bool
+    +requires_approval: bool
+    +scope: ClassificationScope
+    +scope_filter: Optional[str]
+    +conditions: Optional[str]
+    +default_sensitivity: SensitivityLevel
+    +inheritance_rules: Optional[str]
+    +notification_rules: Optional[str]
+    +created_at: datetime
+    +updated_at: datetime
+    +created_by: Optional[str]
+    +updated_by: Optional[str]
+    +framework: Optional[ClassificationFramework]
+  }
+  class ClassificationRule {
+    +__tablename__: 
+    +id: Optional[int]
+    +framework_id: Optional[int]
+    +name: str
+    +description: Optional[str]
+    +rule_type: ClassificationRuleType
+    +pattern: str
+    +sensitivity_level: SensitivityLevel
+    +confidence_threshold: float
+    +is_active: bool
+    +priority: int
+    +scope: ClassificationScope
+    +scope_filter: Optional[str]
+    +case_sensitive: bool
+    +whole_word_only: bool
+    +negate_match: bool
+    +conditions: Optional[str]
+    +context_requirements: Optional[str]
+    +applies_to_scan_results: bool
+    +applies_to_catalog_items: bool
+    +compliance_requirement_id: Optional[int]
+    +racine_orchestrator_id: Optional[str]
+    +execution_count: int
+    +success_count: int
+    +false_positive_count: int
+    +last_executed: Optional[datetime]
+    +avg_execution_time_ms: Optional[float]
+    +version: str
+    +parent_rule_id: Optional[int]
+    +is_deprecated: bool
+    +deprecation_reason: Optional[str]
+    +created_at: datetime
+    +updated_at: datetime
+    +created_by: Optional[str]
+    +updated_by: Optional[str]
+    +framework: Optional[ClassificationFramework]
+    +compliance_requirement: Optional['ComplianceRequirement']
+    +parent_rule: Optional['ClassificationRule']
+    +child_rules: List['ClassificationRule']
+    +classification_results: List['ClassificationResult']
+    +rule_dictionaries: List['ClassificationRuleDictionary']
+    +racine_orchestrator: Optional['RacineOrchestrationMaster']
+  }
+  class ClassificationDictionary {
+    +__tablename__: 
+    +id: Optional[int]
+    +name: str
+    +description: Optional[str]
+    +language: str
+    +encoding: str
+    +is_case_sensitive: bool
+    +entries: str
+    +entry_count: int
+    +category: Optional[str]
+    +subcategory: Optional[str]
+    +tags: Optional[str]
+    +source_type: str
+    +source_reference: Optional[str]
+    +imported_from: Optional[str]
+    +validation_status: str
+    +validation_notes: Optional[str]
+    +quality_score: float
+    +usage_count: int
+    +last_used: Optional[datetime]
+    +version: str
+    +parent_dictionary_id: Optional[int]
+    +created_at: datetime
+    +updated_at: datetime
+    +created_by: Optional[str]
+    +updated_by: Optional[str]
+    +parent_dictionary: Optional['ClassificationDictionary']
+    +child_dictionaries: List['ClassificationDictionary']
+    +rule_dictionaries: List['ClassificationRuleDictionary']
+  }
+  class ClassificationRuleDictionary {
+    +__tablename__: 
+    +id: Optional[int]
+    +rule_id: int
+    +dictionary_id: int
+    +is_primary: bool
+    +weight: float
+    +created_at: datetime
+    +created_by: Optional[str]
+    +rule: Optional[ClassificationRule]
+    +dictionary: Optional[ClassificationDictionary]
+  }
+  class ClassificationResult {
+    +__tablename__: 
+    +id: Optional[int]
+    +uuid: str
+    +entity_type: str
+    +entity_id: str
+    +entity_name: Optional[str]
+    +entity_path: Optional[str]
+    +rule_id: Optional[int]
+    +sensitivity_level: SensitivityLevel
+    +classification_method: ClassificationMethod
+    +confidence_score: float
+    +confidence_level: ClassificationConfidenceLevel
+    +data_source_id: Optional[int]
+    +scan_id: Optional[int]
+    +scan_result_id: Optional[int]
+    +catalog_item_id: Optional[int]
+    +matched_patterns: Optional[str]
+    +matched_values: Optional[str]
+    +context_data: Optional[str]
+    +sample_data: Optional[str]
+    +sample_size: Optional[int]
+    +total_records: Optional[int]
+    +match_percentage: Optional[float]
+    +is_validated: bool
+    +validation_status: str
+    +validation_notes: Optional[str]
+    +validation_date: Optional[datetime]
+    +validated_by: Optional[str]
+    +inherited_from_id: Optional[int]
+    +propagated_to: Optional[str]
+    +inheritance_depth: int
+    +is_override: bool
+    +override_reason: Optional[str]
+    +override_approved_by: Optional[str]
+    +override_approved_at: Optional[datetime]
+    +processing_time_ms: Optional[float]
+    +memory_usage_mb: Optional[float]
+    +status: ClassificationStatus
+    +effective_date: datetime
+    +expiry_date: Optional[datetime]
+    +compliance_checked: bool
+    +compliance_status: Optional[str]
+    +compliance_notes: Optional[str]
+    +version: str
+    +revision_number: int
+    +created_at: datetime
+    +updated_at: datetime
+    +created_by: Optional[str]
+    +updated_by: Optional[str]
+    +rule: Optional[ClassificationRule]
+    +data_source: Optional[DataSource]
+    +scan: Optional[Scan]
+    +scan_result: Optional[ScanResult]
+    +catalog_item: Optional[CatalogItem]
+    +inherited_from: Optional['ClassificationResult']
+    +child_results: List['ClassificationResult']
+    +audit_logs: List['ClassificationAuditLog']
+    +tags: List['ClassificationTag']
+  }
+  class ClassificationAuditLog {
+    +__tablename__: 
+    +id: Optional[int]
+    +uuid: str
+    +event_type: str
+    +event_category: str
+    +event_description: str
+    +target_type: str
+    +target_id: Optional[str]
+    +target_name: Optional[str]
+    +classification_result_id: Optional[int]
+    +old_values: Optional[str]
+    +new_values: Optional[str]
+    +event_data: Optional[str]
+    +user_id: Optional[str]
+    +user_role: Optional[str]
+    +session_id: Optional[str]
+    +ip_address: Optional[str]
+    +user_agent: Optional[str]
+    +system_version: Optional[str]
+    +api_version: Optional[str]
+    +request_id: Optional[str]
+    +correlation_id: Optional[str]
+    +risk_level: str
+    +compliance_impact: bool
+    +requires_notification: bool
+    +processing_time_ms: Optional[float]
+    +success: bool
+    +error_message: Optional[str]
+    +error_stack: Optional[str]
+    +created_at: datetime
+    +classification_result: Optional[ClassificationResult]
+  }
+  class ClassificationTag {
+    +__tablename__: 
+    +id: Optional[int]
+    +classification_result_id: int
+    +tag_name: str
+    +tag_value: Optional[str]
+    +tag_category: Optional[str]
+    +tag_source: str
+    +confidence_score: Optional[float]
+    +relevance_score: Optional[float]
+    +is_system_tag: bool
+    +is_user_tag: bool
+    +created_at: datetime
+    +created_by: Optional[str]
+    +classification_result: Optional[ClassificationResult]
+  }
+  class ClassificationException {
+    +__tablename__: 
+    +id: Optional[int]
+    +entity_type: str
+    +entity_id: str
+    +entity_path: Optional[str]
+    +exception_type: str
+    +reason: str
+    +sensitivity_level: Optional[SensitivityLevel]
+    +scope: ClassificationScope
+    +conditions: Optional[str]
+    +is_approved: bool
+    +approved_by: Optional[str]
+    +approved_at: Optional[datetime]
+    +approval_notes: Optional[str]
+    +is_active: bool
+    +effective_date: datetime
+    +expiry_date: Optional[datetime]
+    +created_at: datetime
+    +updated_at: datetime
+    +created_by: Optional[str]
+    +updated_by: Optional[str]
+  }
+  class ClassificationMetrics {
+    +__tablename__: 
+    +id: Optional[int]
+    +metric_type: str
+    +metric_name: str
+    +metric_category: str
+    +scope_type: str
+    +scope_id: Optional[str]
+    +metric_value: float
+    +metric_unit: Optional[str]
+    +benchmark_value: Optional[float]
+    +trend_direction: Optional[str]
+    +measurement_period_start: datetime
+    +measurement_period_end: datetime
+    +sample_size: Optional[int]
+    +details: Optional[str]
+    +created_at: datetime
+  }
+  class CatalogItemClassification {
+    +__tablename__: 
+    +id: Optional[int]
+    +catalog_item_id: int
+    +classification_result_id: int
+    +is_primary_classification: bool
+    +business_context: Optional[str]
+    +usage_context: Optional[str]
+    +affects_lineage: bool
+    +affects_search: bool
+    +affects_recommendations: bool
+    +enhanced_description: Optional[str]
+    +business_glossary_terms: Optional[str]
+    +created_at: datetime
+    +updated_at: datetime
+    +catalog_item: Optional[CatalogItem]
+    +classification_result: Optional[ClassificationResult]
+  }
+  class ClassificationLevel {
+    +PUBLIC: 
+    +INTERNAL: 
+    +CONFIDENTIAL: 
+    +RESTRICTED: 
+    +CLASSIFIED: 
+  }
+  class DataClassificationRule {
+    +__tablename__: 
+    +id: Optional[int]
+    +rule_id: str
+    +name: str
+    +description: Optional[str]
+    +classification_id: int
+    +rule_type: str
+    +rule_pattern: Optional[str]
+    +rule_logic: Dict[str, Any]
+    +applies_to_schemas: Optional[str]
+    +applies_to_tables: Optional[str]
+    +applies_to_columns: Optional[str]
+    +exclude_patterns: Optional[str]
+    +priority: int
+    +confidence_threshold: float
+    +is_active: bool
+    +requires_approval: bool
+    +execution_order: int
+    +last_execution_time_ms: Optional[int]
+    +match_count: int
+    +created_at: datetime
+    +updated_at: datetime
+    +created_by: str
+    +updated_by: Optional[str]
+    +__table_args__: 
+  }
+  class ClassificationAssignment {
+    +__tablename__: 
+    +id: Optional[int]
+    +assignment_id: str
+    +asset_type: str
+    +asset_id: str
+    +asset_name: str
+    +classification_id: int
+    +rule_id: Optional[str]
+    +source: ClassificationSource
+    +confidence_score: Optional[float]
+    +justification: Optional[str]
+    +evidence: Dict[str, Any]
+    +status: str
+    +approved_by: Optional[str]
+    +approval_date: Optional[datetime]
+    +effective_from: datetime
+    +effective_to: Optional[datetime]
+    +created_at: datetime
+    +created_by: str
+    +__table_args__: 
+  }
+  class ClassificationCreate {
+    +name: str
+    +display_name: str
+    +level: ClassificationLevel
+    +description: Optional[str]
+    +parent_id: Optional[int]
+    +compliance_frameworks: List[ComplianceFramework]
+    +data_handling_requirements: Optional[str]
+    +access_restrictions: List[str]
+    +retention_period_days: Optional[int]
+    +custom_properties: Dict[str, Any]
+  }
+  class DataClassificationRuleCreate {
+    +name: str
+    +description: Optional[str]
+    +classification_id: int
+    +rule_type: str
+    +rule_pattern: Optional[str]
+    +rule_logic: Dict[str, Any]
+    +applies_to_schemas: List[str]
+    +applies_to_tables: List[str]
+    +applies_to_columns: List[str]
+    +priority: int
+    +confidence_threshold: float
+    +is_active: bool
+  }
+  class ClassificationAssignmentCreate {
+    +asset_type: str
+    +asset_id: str
+    +asset_name: str
+    +classification_id: int
+    +rule_id: Optional[str]
+    +source: ClassificationSource
+    +confidence_score: Optional[float]
+    +justification: Optional[str]
+    +evidence: Dict[str, Any]
+  }
+%% ===== COMPLIANCE =====
+class ComplianceReport {
+    +__tablename__: 
+    +id: Optional[int]
+    +name: str
+    +description: Optional[str]
+    +report_type: ReportType
+    +status: ReportStatus
+    +framework: Optional[str]
+    +data_source_ids: List[int]
+    +rule_ids: List[int]
+    +parameters: Dict[str, Any]
+    +filters: Dict[str, Any]
+    +file_format: str
+    +file_url: Optional[str]
+    +file_size: Optional[int]
+    +file_hash: Optional[str]
+    +template_id: Optional[str]
+    +generated_by: Optional[str]
+    +generated_at: Optional[datetime]
+    +generation_time_ms: Optional[int]
+    +schedule_config: Optional[Dict[str, Any]]
+    +next_run_at: Optional[datetime]
+    +last_run_at: Optional[datetime]
+    +recipients: List[str]
+    +distribution_method: str
+    +access_level: str
+    +retention_period_days: Optional[int]
+    +page_count: Optional[int]
+    +section_count: Optional[int]
+    +finding_count: Optional[int]
+    +compliance_score: Optional[float]
+    +report_metadata: Dict[str, Any]
+    +tags: List[str]
+    +created_at: datetime
+    +updated_at: datetime
+    +created_by: Optional[str]
+    +updated_by: Optional[str]
+    +version: int
+  }
+  class ComplianceReportTemplate {
+    +__tablename__: 
+    +id: Optional[int]
+    +name: str
+    +description: Optional[str]
+    +template_id: str
+    +framework: Optional[str]
+    +report_type: ReportType
+    +sections: List[Dict[str, Any]]
+    +file_formats: List[str]
+    +default_parameters: Dict[str, Any]
+    +template_content: Optional[str]
+    +css_styles: Optional[str]
+    +header_template: Optional[str]
+    +footer_template: Optional[str]
+    +category: Optional[str]
+    +complexity_level: str
+    +estimated_generation_time: Optional[int]
+    +created_at: datetime
+    +updated_at: datetime
+    +created_by: Optional[str]
+    +is_active: bool
+  }
+  class ComplianceWorkflow {
+    +__tablename__: 
+    +id: Optional[int]
+    +name: str
+    +description: Optional[str]
+    +workflow_type: WorkflowType
+    +status: WorkflowStatus
+    +rule_id: Optional[int]
+    +template_id: Optional[str]
+    +framework: Optional[str]
+    +steps: List[Dict[str, Any]]
+    +current_step: int
+    +total_steps: int
+    +assigned_to: Optional[str]
+    +assigned_team: Optional[str]
+    +due_date: Optional[datetime]
+    +priority: str
+    +triggers: List[Dict[str, Any]]
+    +conditions: Dict[str, Any]
+    +variables: Dict[str, Any]
+    +started_at: Optional[datetime]
+    +completed_at: Optional[datetime]
+    +estimated_completion: Optional[datetime]
+    +progress_percentage: int
+    +execution_results: Optional[Dict[str, Any]]
+    +error_message: Optional[str]
+    +execution_log: List[str]
+    +requires_approval: bool
+    +approved_by: Optional[str]
+    +approved_at: Optional[datetime]
+    +approval_notes: Optional[str]
+    +notification_config: Optional[Dict[str, Any]]
+    +workflow_metadata: Dict[str, Any]
+    +tags: List[str]
+    +created_at: datetime
+    +updated_at: datetime
+    +created_by: Optional[str]
+    +updated_by: Optional[str]
+    +rule: Optional[ComplianceRule]
+  }
+  class ComplianceWorkflowTemplate {
+    +__tablename__: 
+    +id: Optional[int]
+    +name: str
+    +description: Optional[str]
+    +template_id: str
+    +workflow_type: WorkflowType
+    +framework: Optional[str]
+    +steps_template: List[Dict[str, Any]]
+    +triggers_template: List[Dict[str, Any]]
+    +default_variables: Dict[str, Any]
+    +estimated_completion_hours: Optional[int]
+    +complexity_level: str
+    +required_roles: List[str]
+    +category: Optional[str]
+    +usage_count: int
+    +created_at: datetime
+    +updated_at: datetime
+    +created_by: Optional[str]
+    +is_active: bool
+  }
+  class ComplianceIntegration {
+    +__tablename__: 
+    +id: Optional[int]
+    +name: str
+    +description: Optional[str]
+    +integration_type: IntegrationType
+    +provider: str
+    +status: IntegrationStatus
+    +config: Dict[str, Any]
+    +credentials: Dict[str, Any]
+    +connection_settings: Dict[str, Any]
+    +sync_frequency: str
+    +last_synced_at: Optional[datetime]
+    +last_sync_status: Optional[str]
+    +next_sync_at: Optional[datetime]
+    +error_message: Optional[str]
+    +error_count: int
+    +last_error_at: Optional[datetime]
+    +retry_count: int
+    +max_retries: int
+    +sync_statistics: Dict[str, Any]
+    +average_sync_duration_ms: Optional[int]
+    +total_records_synced: int
+    +success_rate: float
+    +supported_frameworks: List[str]
+    +capabilities: List[str]
+    +data_mapping: Dict[str, Any]
+    +webhook_url: Optional[str]
+    +api_version: Optional[str]
+    +rate_limit: Optional[int]
+    +timeout_seconds: int
+    +encryption_enabled: bool
+    +authentication_method: Optional[str]
+    +certificate_info: Optional[Dict[str, Any]]
+    +integration_metadata: Dict[str, Any]
+    +tags: List[str]
+    +created_at: datetime
+    +updated_at: datetime
+    +created_by: Optional[str]
+    +updated_by: Optional[str]
+    +last_tested_at: Optional[datetime]
+  }
+  class ComplianceIntegrationLog {
+    +__tablename__: 
+    +id: Optional[int]
+    +integration_id: int
+    +operation: str
+    +status: str
+    +message: str
+    +details: Optional[Dict[str, Any]]
+    +duration_ms: Optional[int]
+    +records_processed: Optional[int]
+    +bytes_transferred: Optional[int]
+    +triggered_by: Optional[str]
+    +external_reference: Optional[str]
+    +created_at: datetime
+  }
+  class ComplianceAuditLog {
+    +__tablename__: 
+    +id: Optional[int]
+    +entity_type: str
+    +entity_id: int
+    +action: str
+    +user_id: Optional[str]
+    +user_email: Optional[str]
+    +session_id: Optional[str]
+    +ip_address: Optional[str]
+    +user_agent: Optional[str]
+    +old_values: Optional[Dict[str, Any]]
+    +new_values: Optional[Dict[str, Any]]
+    +changes: Optional[Dict[str, Any]]
+    +description: Optional[str]
+    +reason: Optional[str]
+    +impact_level: str
+    +system_version: Optional[str]
+    +request_id: Optional[str]
+    +correlation_id: Optional[str]
+    +audit_metadata: Dict[str, Any]
+    +created_at: datetime
+  }
+  class ComplianceRiskMatrix {
+    +__tablename__: 
+    +id: Optional[int]
+    +probability_levels: List[Dict[str, Any]]
+    +impact_levels: List[Dict[str, Any]]
+    +risk_matrix: List[List[int]]
+    +categories: List[Dict[str, Any]]
+    +version: str
+    +updated_by: Optional[str]
+    +created_at: datetime
+    +updated_at: datetime
+    +__table_args__: 
+  }
+  class ComplianceCertification {
+    +__tablename__: 
+    +id: Optional[int]
+    +entity_type: str
+    +entity_id: str
+    +certification_type: str
+    +issuer: str
+    +audit_firm: Optional[str]
+    +issued_date: Optional[date]
+    +expiry_date: Optional[date]
+    +assessment_period_start: Optional[date]
+    +assessment_period_end: Optional[date]
+    +next_assessment_date: Optional[date]
+    +status: str
+    +certificate_url: Optional[str]
+    +scope: Optional[str]
+    +compliance_frameworks: List[str]
+    +assessment_type: Optional[str]
+    +opinion: Optional[str]
+    +findings_count: Optional[int]
+    +exceptions_count: Optional[int]
+    +control_objectives: Optional[List[str]]
+    +tested_controls: Optional[List[str]]
+    +description: Optional[str]
+    +notes: Optional[str]
+    +is_active: bool
+    +created_at: datetime
+    +updated_at: Optional[datetime]
+    +created_by: Optional[str]
+    +updated_by: Optional[str]
+  }
+  class ComplianceWorkflowExecution {
+    +__tablename__: 
+    +id: Optional[int]
+    +execution_id: str
+    +workflow_id: int
+    +status: WorkflowStatus
+    +trigger_type: str
+    +triggered_by: Optional[str]
+    +started_at: datetime
+    +completed_at: Optional[datetime]
+    +duration_minutes: Optional[int]
+    +current_step: int
+    +steps_completed: int
+    +total_steps: int
+    +progress_percentage: float
+    +input_parameters: Optional[Dict[str, Any]]
+    +output_data: Optional[Dict[str, Any]]
+    +execution_log: List[str]
+    +error_message: Optional[str]
+    +error_details: Optional[Dict[str, Any]]
+    +retry_count: int
+    +execution_metadata: Dict[str, Any]
+    +created_at: datetime
+  }
+  class ComplianceFramework {
+    +GDPR: 
+    +CCPA: 
+    +HIPAA: 
+    +SOX: 
+    +PCI_DSS: 
+    +ISO_27001: 
+    +NIST: 
+    +SOC2: 
+    +CUSTOM: 
+  }
+  class ComplianceStatus {
+    +COMPLIANT: 
+    +NON_COMPLIANT: 
+    +PARTIALLY_COMPLIANT: 
+    +UNDER_REVIEW: 
+    +REMEDIATION_REQUIRED: 
+    +EXEMPT: 
+    +NOT_APPLICABLE: 
+  }
+  class ComplianceRequirement {
+    +__tablename__: 
+    +id: Optional[int]
+    +organization_id: Optional[int]
+    +data_source_id: int
+    +framework: ComplianceFramework
+    +requirement_id: str
+    +title: str
+    +description: str
+    +category: str
+    +status: ComplianceStatus
+    +compliance_percentage: float
+    +last_assessed: Optional[datetime]
+    +next_assessment: Optional[datetime]
+    +assessor: Optional[str]
+    +assessment_notes: Optional[str]
+    +evidence_files: List[str]
+    +documentation_links: List[str]
+    +risk_level: str
+    +impact_description: Optional[str]
+    +remediation_plan: Optional[str]
+    +remediation_deadline: Optional[datetime]
+    +remediation_owner: Optional[str]
+    +requirement_metadata: Dict[str, Any]
+    +created_at: datetime
+    +updated_at: datetime
+    +organization: Optional['Organization']
+  }
+  class ComplianceAssessment {
+    +__tablename__: 
+    +id: Optional[int]
+    +data_source_id: int
+    +framework: ComplianceFramework
+    +assessment_type: str
+    +title: str
+    +description: Optional[str]
+    +status: AssessmentStatus
+    +scheduled_date: Optional[datetime]
+    +started_date: Optional[datetime]
+    +completed_date: Optional[datetime]
+    +assessor: Optional[str]
+    +assessment_firm: Optional[str]
+    +overall_score: Optional[float]
+    +compliant_requirements: int
+    +non_compliant_requirements: int
+    +total_requirements: int
+    +findings: List[Dict[str, Any]]
+    +recommendations: List[str]
+    +report_file: Optional[str]
+    +certificate_file: Optional[str]
+    +assessment_metadata: Dict[str, Any]
+    +created_at: datetime
+    +updated_at: datetime
+  }
+  class ComplianceGap {
+    +__tablename__: 
+    +id: Optional[int]
+    +data_source_id: int
+    +requirement_id: int
+    +gap_title: str
+    +gap_description: str
+    +severity: str
+    +status: str
+    +remediation_plan: Optional[str]
+    +remediation_steps: List[str]
+    +assigned_to: Optional[str]
+    +due_date: Optional[datetime]
+    +progress_percentage: float
+    +last_updated_by: Optional[str]
+    +business_impact: Optional[str]
+    +technical_impact: Optional[str]
+    +gap_metadata: Dict[str, Any]
+    +created_at: datetime
+    +updated_at: datetime
+  }
+  class ComplianceEvidence {
+    +__tablename__: 
+    +id: Optional[int]
+    +data_source_id: int
+    +requirement_id: int
+    +title: str
+    +description: Optional[str]
+    +evidence_type: str
+    +file_path: Optional[str]
+    +file_name: Optional[str]
+    +file_size: Optional[int]
+    +file_hash: Optional[str]
+    +valid_from: Optional[datetime]
+    +valid_until: Optional[datetime]
+    +is_current: bool
+    +collected_by: Optional[str]
+    +collection_method: Optional[str]
+    +evidence_metadata: Dict[str, Any]
+    +created_at: datetime
+    +updated_at: datetime
+  }
+  class ComplianceRequirementResponse {
+    +id: int
+    +data_source_id: int
+    +framework: ComplianceFramework
+    +requirement_id: str
+    +title: str
+    +description: str
+    +category: str
+    +status: ComplianceStatus
+    +compliance_percentage: float
+    +last_assessed: Optional[datetime]
+    +next_assessment: Optional[datetime]
+    +assessor: Optional[str]
+    +assessment_notes: Optional[str]
+    +risk_level: str
+    +remediation_plan: Optional[str]
+    +remediation_deadline: Optional[datetime]
+    +remediation_owner: Optional[str]
+  }
+  class ComplianceAssessmentResponse {
+    +id: int
+    +data_source_id: int
+    +framework: ComplianceFramework
+    +assessment_type: str
+    +title: str
+    +status: AssessmentStatus
+    +scheduled_date: Optional[datetime]
+    +started_date: Optional[datetime]
+    +completed_date: Optional[datetime]
+    +assessor: Optional[str]
+    +overall_score: Optional[float]
+    +compliant_requirements: int
+    +non_compliant_requirements: int
+    +total_requirements: int
+    +findings: List[Dict[str, Any]]
+    +recommendations: List[str]
+  }
+  class ComplianceGapResponse {
+    +id: int
+    +data_source_id: int
+    +requirement_id: int
+    +gap_title: str
+    +gap_description: str
+    +severity: str
+    +status: str
+    +remediation_plan: Optional[str]
+    +assigned_to: Optional[str]
+    +due_date: Optional[datetime]
+    +progress_percentage: float
+    +business_impact: Optional[str]
+    +technical_impact: Optional[str]
+  }
+  class ComplianceStatusResponse {
+    +overall_score: float
+    +frameworks: List[Dict[str, Any]]
+    +requirements: List[ComplianceRequirementResponse]
+    +recent_assessments: List[ComplianceAssessmentResponse]
+    +gaps: List[ComplianceGapResponse]
+    +recommendations: List[str]
+    +next_assessment_due: Optional[datetime]
+  }
+  class ComplianceRequirementCreate {
+    +data_source_id: int
+    +framework: ComplianceFramework
+    +requirement_id: str
+    +title: str
+    +description: str
+    +category: str
+    +risk_level: str
+    +remediation_plan: Optional[str]
+    +remediation_deadline: Optional[datetime]
+    +requirement_metadata: Dict[str, Any]
+  }
+  class ComplianceAssessmentCreate {
+    +data_source_id: int
+    +framework: ComplianceFramework
+    +assessment_type: str
+    +title: str
+    +description: Optional[str]
+    +scheduled_date: Optional[datetime]
+    +assessor: Optional[str]
+  }
+  class ComplianceGapCreate {
+    +data_source_id: int
+    +requirement_id: int
+    +gap_title: str
+    +gap_description: str
+    +severity: str
+    +remediation_plan: Optional[str]
+    +assigned_to: Optional[str]
+    +due_date: Optional[datetime]
+  }
+  class ComplianceRequirementUpdate {
+    +status: Optional[ComplianceStatus]
+    +compliance_percentage: Optional[float]
+    +assessment_notes: Optional[str]
+    +remediation_plan: Optional[str]
+    +remediation_deadline: Optional[datetime]
+    +remediation_owner: Optional[str]
+  }
+  class ComplianceGapUpdate {
+    +status: Optional[str]
+    +remediation_plan: Optional[str]
+    +assigned_to: Optional[str]
+    +due_date: Optional[datetime]
+    +progress_percentage: Optional[float]
+  }
+  class ComplianceValidation {
+    +__tablename__: 
+    +id: Optional[int]
+    +data_source_id: int
+    +requirement_id: int
+    +validation_type: str
+    +validation_method: str
+    +validation_status: str
+    +validation_score: Optional[float]
+    +passed_checks: int
+    +failed_checks: int
+    +total_checks: int
+    +validation_details: List[Dict[str, Any]]
+    +error_messages: List[str]
+    +recommendations: List[str]
+    +validation_metadata: Dict[str, Any]
+    +created_at: datetime
+    +updated_at: datetime
+    +validated_by: Optional[str]
+    +validation_duration: Optional[int]
+  }
+  class ComplianceRuleType {
+    +REGULATORY: 
+    +INTERNAL: 
+    +SECURITY: 
+    +PRIVACY: 
+    +QUALITY: 
+    +ACCESS_CONTROL: 
+    +DATA_RETENTION: 
+    +ENCRYPTION: 
+    +AUDIT: 
+    +MONITORING: 
+    +CUSTOM: 
+  }
+  class ComplianceRuleSeverity {
+    +LOW: 
+    +MEDIUM: 
+    +HIGH: 
+    +CRITICAL: 
+  }
+  class ComplianceRuleStatus {
+    +DRAFT: 
+    +ACTIVE: 
+    +INACTIVE: 
+    +DEPRECATED: 
+    +UNDER_REVIEW: 
+  }
+  class ComplianceRuleScope {
+    +GLOBAL: 
+    +DATA_SOURCE: 
+    +SCHEMA: 
+    +TABLE: 
+    +COLUMN: 
+    +FIELD: 
+  }
+  class ComplianceRule {
+    +__tablename__: 
+    +id: Optional[int]
+    +name: str
+    +description: str
+    +rule_type: ComplianceRuleType
+    +severity: ComplianceRuleSeverity
+    +status: ComplianceRuleStatus
+    +scope: ComplianceRuleScope
+    +entity_types: List[str]
+    +scan_rule_set_id: Optional[int]
+    +custom_scan_rule_ids: List[int]
+    +organization_id: Optional[int]
+    +racine_orchestrator_id: Optional[str]
+    +condition: str
+    +rule_definition: Dict[str, Any]
+    +parameters: Dict[str, Any]
+    +scan_integration_config: Dict[str, Any]
+    +auto_scan_on_evaluation: bool
+    +scan_triggers: List[str]
+    +compliance_standard: Optional[str]
+    +reference: Optional[str]
+    +reference_link: Optional[str]
+    +remediation_steps: Optional[str]
+    +auto_remediation: bool
+    +remediation_workflow_id: Optional[int]
+    +data_source_filters: Dict[str, Any]
+    +applies_to_all_sources: bool
+    +source_type_filters: List[str]
+    +validation_frequency: str
+    +is_automated: bool
+    +last_evaluated_at: Optional[datetime]
+    +next_evaluation_at: Optional[datetime]
+    +performance_thresholds: Dict[str, Any]
+    +alert_conditions: Dict[str, Any]
+    +business_impact: str
+    +regulatory_requirement: bool
+    +tags: List[str]
+    +rule_metadata: Dict[str, Any]
+    +is_built_in: bool
+    +is_global: bool
+    +version: int
+    +created_at: datetime
+    +created_by: Optional[str]
+    +updated_at: datetime
+    +updated_by: Optional[str]
+    +pass_rate: float
+    +total_entities: int
+    +passing_entities: int
+    +failing_entities: int
+    +scan_rule_set: Optional['ScanRuleSet']
+    +data_sources: List['DataSource']
+    +evaluations: List['ComplianceRuleEvaluation']
+    +issues: List['ComplianceIssue']
+    +workflows: List['ComplianceWorkflow']
+    +organization: Optional['Organization']
+    +racine_orchestrator: Optional['RacineOrchestrationMaster']
+  }
+  class ComplianceRuleEvaluation {
+    +__tablename__: 
+    +id: Optional[int]
+    +rule_id: int
+    +evaluation_id: str
+    +status: RuleValidationStatus
+    +entity_count: Dict[str, int]
+    +compliance_score: float
+    +issues_found: int
+    +execution_time_ms: int
+    +entities_processed: int
+    +evaluation_context: Dict[str, Any]
+    +scan_results: Optional[Dict[str, Any]]
+    +performance_metrics: Optional[Dict[str, Any]]
+    +security_checks: Optional[Dict[str, Any]]
+    +evaluation_metadata: Dict[str, Any]
+    +evaluated_at: datetime
+    +rule: ComplianceRule
+  }
+  class ComplianceIssue {
+    +__tablename__: 
+    +id: Optional[int]
+    +rule_id: int
+    +title: str
+    +description: str
+    +severity: ComplianceRuleSeverity
+    +status: str
+    +data_source_id: Optional[int]
+    +entity_type: Optional[str]
+    +entity_name: Optional[str]
+    +remediation_plan: Optional[str]
+    +remediation_steps: List[str]
+    +assigned_to: Optional[str]
+    +due_date: Optional[datetime]
+    +progress_percentage: int
+    +last_updated_by: Optional[str]
+    +business_impact: Optional[str]
+    +technical_impact: Optional[str]
+    +cost_estimate: Optional[float]
+    +effort_estimate: Optional[str]
+    +priority: int
+    +dependencies: List[str]
+    +related_issues: List[int]
+    +issue_metadata: Dict[str, Any]
+    +created_at: datetime
+    +updated_at: datetime
+    +resolved_at: Optional[datetime]
+    +rule: ComplianceRule
+    +data_source: Optional['DataSource']
+  }
+  class ComplianceRuleResponse {
+    +id: int
+    +name: str
+    +description: str
+    +rule_type: ComplianceRuleType
+    +severity: ComplianceRuleSeverity
+    +status: ComplianceRuleStatus
+    +scope: ComplianceRuleScope
+    +condition: str
+    +compliance_standard: Optional[str]
+    +business_impact: str
+    +regulatory_requirement: bool
+    +tags: List[str]
+    +rule_metadata: Dict[str, Any]
+    +created_at: datetime
+    +updated_at: datetime
+    +created_by: Optional[str]
+    +updated_by: Optional[str]
+    +version: int
+    +pass_rate: float
+    +total_entities: int
+    +passing_entities: int
+    +failing_entities: int
+  }
+  class ComplianceRuleEvaluationResponse {
+    +id: int
+    +rule_id: int
+    +evaluation_id: str
+    +status: RuleValidationStatus
+    +entity_count: Dict[str, int]
+    +compliance_score: float
+    +issues_found: int
+    +execution_time_ms: int
+    +entities_processed: int
+    +evaluated_at: datetime
+    +evaluation_context: Dict[str, Any]
+    +evaluation_metadata: Dict[str, Any]
+  }
+  class ComplianceIssueResponse {
+    +id: int
+    +rule_id: int
+    +title: str
+    +description: str
+    +severity: ComplianceRuleSeverity
+    +status: str
+    +data_source_id: Optional[int]
+    +entity_type: Optional[str]
+    +entity_name: Optional[str]
+    +assigned_to: Optional[str]
+    +due_date: Optional[datetime]
+    +progress_percentage: int
+    +priority: int
+    +created_at: datetime
+    +updated_at: datetime
+    +resolved_at: Optional[datetime]
+  }
+  class ComplianceWorkflowResponse {
+    +id: int
+    +rule_id: Optional[int]
+    +name: str
+    +description: str
+    +workflow_type: str
+    +status: WorkflowStatus
+    +current_step: int
+    +assigned_to: Optional[str]
+    +due_date: Optional[datetime]
+    +priority: str
+    +created_at: datetime
+    +updated_at: datetime
+  }
+  class ComplianceRuleCreate {
+    +name: str
+    +description: str
+    +rule_type: ComplianceRuleType
+    +severity: ComplianceRuleSeverity
+    +scope: ComplianceRuleScope
+    +condition: str
+    +compliance_standard: Optional[str]
+    +business_impact: str
+    +regulatory_requirement: bool
+    +remediation_steps: Optional[str]
+    +auto_remediation: bool
+    +validation_frequency: str
+    +tags: List[str]
+    +rule_metadata: Dict[str, Any]
+    +scan_rule_set_id: Optional[int]
+    +custom_scan_rule_ids: List[int]
+    +auto_scan_on_evaluation: bool
+    +scan_triggers: List[str]
+  }
+  class ComplianceRuleUpdate {
+    +name: Optional[str]
+    +description: Optional[str]
+    +rule_type: Optional[ComplianceRuleType]
+    +severity: Optional[ComplianceRuleSeverity]
+    +status: Optional[ComplianceRuleStatus]
+    +scope: Optional[ComplianceRuleScope]
+    +condition: Optional[str]
+    +compliance_standard: Optional[str]
+    +business_impact: Optional[str]
+    +regulatory_requirement: Optional[bool]
+    +remediation_steps: Optional[str]
+    +auto_remediation: Optional[bool]
+    +validation_frequency: Optional[str]
+    +tags: Optional[List[str]]
+    +rule_metadata: Optional[Dict[str, Any]]
+  }
+  class ComplianceIssueCreate {
+    +rule_id: int
+    +title: str
+    +description: str
+    +severity: ComplianceRuleSeverity
+    +data_source_id: Optional[int]
+    +entity_type: Optional[str]
+    +entity_name: Optional[str]
+    +assigned_to: Optional[str]
+    +due_date: Optional[datetime]
+    +priority: int
+    +remediation_plan: Optional[str]
+  }
+  class ComplianceIssueUpdate {
+    +title: Optional[str]
+    +description: Optional[str]
+    +severity: Optional[ComplianceRuleSeverity]
+    +status: Optional[str]
+    +assigned_to: Optional[str]
+    +due_date: Optional[datetime]
+    +priority: Optional[int]
+    +progress_percentage: Optional[int]
+    +remediation_plan: Optional[str]
+  }
+  class ComplianceWorkflowCreate {
+    +rule_id: Optional[int]
+    +name: str
+    +description: str
+    +workflow_type: str
+    +steps: List[Dict[str, Any]]
+    +assigned_to: Optional[str]
+    +due_date: Optional[datetime]
+    +priority: str
+    +triggers: List[Dict[str, Any]]
+    +conditions: Dict[str, Any]
+  }
+  class ComplianceWorkflowUpdate {
+    +name: Optional[str]
+    +description: Optional[str]
+    +status: Optional[WorkflowStatus]
+    +assigned_to: Optional[str]
+    +due_date: Optional[datetime]
+    +priority: Optional[str]
+    +current_step: Optional[int]
+  }
+  class MLModelFramework {
+    +SCIKIT_LEARN: 
+    +TENSORFLOW: 
+    +PYTORCH: 
+    +XGBOOST: 
+    +LIGHTGBM: 
+    +CATBOOST: 
+    +KERAS: 
+    +HUGGINGFACE: 
+    +SPACY: 
+    +NLTK: 
+    +CUSTOM: 
+  }
+  class ComplianceFrameworkIntegration {
+    +__tablename__: 
+    +id: uuid.UUID
+    +integration_name: str
+    +framework: ComplianceFramework
+    +entity_type: str
+    +entity_id: str
+    +entity_name: Optional[str]
+    +scope_description: Optional[str]
+    +overall_status: ComplianceStatus
+    +compliance_score: float
+    +last_assessment_date: datetime
+    +next_assessment_due: datetime
+    +total_requirements: int
+    +compliant_requirements: int
+    +non_compliant_requirements: int
+    +partially_compliant_requirements: int
+    +requirements_status: Dict[str, Any]
+    +control_mappings: Dict[str, Any]
+    +evidence_links: List[Dict[str, Any]]
+    +risk_level: str
+    +potential_penalties: Optional[float]
+    +business_impact: Optional[str]
+    +reputation_risk: Optional[str]
+    +open_findings: int
+    +critical_findings: int
+    +remediation_plans: List[Dict[str, Any]]
+    +remediation_status: Dict[str, Any]
+    +implementation_deadline: Optional[datetime]
+    +certification_date: Optional[datetime]
+    +certification_expiry: Optional[datetime]
+    +assessor_name: Optional[str]
+    +assessment_methodology: Optional[str]
+    +assessment_scope: Optional[str]
+    +assessment_notes: Optional[str]
+    +compliance_report_url: Optional[str]
+    +documentation_links: List[str]
+    +audit_trail: List[Dict[str, Any]]
+    +external_system_id: Optional[str]
+    +external_system_name: Optional[str]
+    +sync_status: Optional[str]
+    +last_sync_date: Optional[datetime]
+    +alert_thresholds: Dict[str, Any]
+    +notification_settings: Dict[str, Any]
+    +escalation_rules: List[Dict[str, Any]]
+    +created_by: Optional[int]
+    +organization_id: Optional[int]
+    +business_unit: Optional[str]
+    +geography: Optional[str]
+    +version: str
+    +change_log: List[Dict[str, Any]]
+    +tags: List[str]
+    +compliance_metadata: Dict[str, Any]
+    +created_at: datetime
+    +updated_at: datetime
+    +organization: Optional['Organization']
+    +__table_args__: 
+  }
+  class ComplianceFrameworkIntegrationCreate {
+    +integration_name: str
+    +framework: ComplianceFramework
+    +entity_type: str
+    +entity_id: str
+    +entity_name: Optional[str]
+    +scope_description: Optional[str]
+    +total_requirements: int
+    +assessor_name: Optional[str]
+    +assessment_methodology: Optional[str]
+    +implementation_deadline: Optional[datetime]
+    +tags: List[str]
+  }
+  class ComplianceFrameworkIntegrationResponse {
+    +id: uuid.UUID
+    +integration_name: str
+    +framework: ComplianceFramework
+    +overall_status: ComplianceStatus
+    +compliance_score: float
+    +last_assessment_date: datetime
+    +next_assessment_due: datetime
+    +total_requirements: int
+    +compliant_requirements: int
+    +open_findings: int
+    +risk_level: str
+    +created_at: datetime
+  }
+  class ComplianceDashboard {
+    +overall_compliance_score: float
+    +framework_status: Dict[ComplianceFramework, ComplianceStatus]
+    +critical_findings: int
+    +upcoming_deadlines: List[Dict[str, Any]]
+    +risk_distribution: Dict[str, int]
+    +remediation_progress: Dict[str, Any]
+  }

@@ -1,0 +1,49 @@
+classDiagram
+  class ParticipantRole {
+    +OWNER: 
+    +ADMIN: 
+    +CONTRIBUTOR: 
+    +REVIEWER: 
+    +OBSERVER: 
+    +EXPERT: 
+    +GUEST: 
+  }
+  class CollaborationRole {
+    +VIEWER: 
+    +CONTRIBUTOR: 
+    +EDITOR: 
+    +ADMIN: 
+    +OWNER: 
+  }
+  class PermissionType {
+    +READ: 
+    +WRITE: 
+    +DELETE: 
+    +ADMIN: 
+    +EXECUTE: 
+  }
+  class RoleType {
+    +RULE_ARCHITECT: 
+    +RULE_DEVELOPER: 
+    +RULE_REVIEWER: 
+    +DOMAIN_EXPERT: 
+    +COMPLIANCE_OFFICER: 
+    +QA_ENGINEER: 
+    +PRODUCT_OWNER: 
+    +TEAM_LEAD: 
+    +GUEST_CONTRIBUTOR: 
+    +OBSERVER: 
+  }
+  class WorkspaceMemberRole {
+    +OWNER: 
+    +ADMIN: 
+    +MEMBER: 
+    +VIEWER: 
+    +CONTRIBUTOR: 
+  }
+  ParticipantRole ..> CollaborationRole
+  ParticipantRole ..> PermissionType
+  ParticipantRole ..> RoleType
+  ParticipantRole ..> WorkspaceMemberRole
+  classDef domain fill:#F8FAFF,stroke:#111827,color:#111827
+  class CollaborationRole,ParticipantRole,PermissionType,RoleType,WorkspaceMemberRole domain

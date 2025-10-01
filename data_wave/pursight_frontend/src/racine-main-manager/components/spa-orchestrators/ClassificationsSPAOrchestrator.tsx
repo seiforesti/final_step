@@ -79,9 +79,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 // Existing Classifications SPA Components - CRITICAL: Import without modification
 const ClassificationManager = lazy(() => 
-  import('../../../classifications/ClassificationsSPA').then(module => ({
-    default: module.default
-  }))
+  import('../../../classifications/ClassificationsSPA')
 );
 
 // Core Types

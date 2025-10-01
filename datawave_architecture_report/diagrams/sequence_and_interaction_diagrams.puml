@@ -1,0 +1,291 @@
+@startuml DataWave_Asset_Discovery_Sequence
+!theme aws-orange
+
+title DataWave Enterprise - Asset Discovery Sequence Flow
+
+skinparam backgroundColor #f8f9fa
+skinparam defaultFontName "Segoe UI"
+skinparam roundcorner 8
+skinparam shadowing true
+
+' Actor styling
+skinparam actor {
+    BackgroundColor #e3f2fd
+    BorderColor #1976d2
+}
+
+' Participant styling
+skinparam participant {
+    BackgroundColor #fff3e0
+    BorderColor #f57c00
+}
+
+actor "Data Governance\nAnalyst" as Analyst
+participant "Catalog UI" as UI
+participant "Smart Proxy\nRouter" as Proxy
+participant "Authentication\nGateway" as Auth
+participant "Catalog Service" as CatalogSvc
+participant "Asset Discovery\nEngine" as Discovery
+participant "AI Service" as AISvc
+participant "Quality Analyzer" as Quality
+participant "PostgreSQL\nCluster" as DB
+participant "Redis Cache" as Cache
+participant "Vector Database" as VectorDB
+
+== Authentication & Authorization ==
+Analyst -> UI: Initiate Asset Discovery
+UI -> Proxy: POST /api/catalog/discover
+Proxy -> Auth: Validate JWT Token
+Auth -> Auth: Check MFA Status
+Auth -> DB: Verify User Permissions
+DB --> Auth: User Role & Permissions
+Auth --> Proxy: Authentication Success
+note right of Auth: Multi-factor authentication\nwith role-based access
+
+== Data Source Connection ==
+Proxy -> CatalogSvc: Discover Assets Request
+CatalogSvc -> CatalogSvc: Validate Data Source Config
+CatalogSvc -> DB: Test Connection Parameters
+DB --> CatalogSvc: Connection Status
+alt Connection Successful
+    CatalogSvc -> Discovery: Initialize Discovery Process
+    Discovery -> Discovery: Configure Scan Parameters
+else Connection Failed
+    CatalogSvc --> Proxy: Connection Error
+    Proxy --> UI: Display Error Message
+end
+
+== Asset Discovery Process ==
+Discovery -> DB: Query Schema Metadata
+DB --> Discovery: Table/View Definitions
+Discovery -> Discovery: Extract Column Information
+Discovery -> AISvc: Generate Semantic Tags
+AISvc -> VectorDB: Store Embeddings
+VectorDB --> AISvc: Embedding Vectors
+AISvc --> Discovery: AI-Generated Metadata
+
+loop For Each Discovered Asset
+    Discovery -> Quality: Analyze Data Quality
+    Quality -> DB: Sample Data Analysis
+    DB --> Quality: Data Sample
+    Quality -> Quality: Calculate Quality Metrics
+    Quality --> Discovery: Quality Score & Metrics
+    
+    Discovery -> CatalogSvc: Create Asset Record
+    CatalogSvc -> DB: INSERT IntelligentDataAsset
+    DB --> CatalogSvc: Asset ID
+    
+    CatalogSvc -> Cache: Cache Asset Metadata
+    Cache --> CatalogSvc: Cache Confirmation
+end
+
+== Lineage Detection ==
+Discovery -> Discovery: Analyze Relationships
+Discovery -> DB: Detect Foreign Keys
+DB --> Discovery: Relationship Data
+Discovery -> AISvc: Infer Semantic Relationships
+AISvc --> Discovery: Lineage Suggestions
+Discovery -> CatalogSvc: Create Lineage Records
+CatalogSvc -> DB: INSERT LineageRelationship
+DB --> CatalogSvc: Lineage ID
+
+== Response Generation ==
+CatalogSvc -> Cache: Update Discovery Cache
+Cache --> CatalogSvc: Cache Updated
+CatalogSvc --> Proxy: Discovery Results
+Proxy --> UI: Asset Discovery Response
+UI -> UI: Render Asset Catalog
+UI --> Analyst: Display Discovered Assets
+
+note over Analyst, VectorDB: Complete asset discovery with\nAI-enhanced metadata and quality metrics
+
+@enduml
+
+@startuml DataWave_Scan_Execution_Sequence
+!theme aws-orange
+
+title DataWave Enterprise - Scan Execution Sequence Flow
+
+skinparam backgroundColor #f8f9fa
+skinparam defaultFontName "Segoe UI"
+skinparam roundcorner 8
+skinparam shadowing true
+
+actor "Compliance\nOfficer" as Officer
+participant "Scan UI" as UI
+participant "Smart Proxy\nRouter" as Proxy
+participant "Scan Orchestration\nService" as ScanSvc
+participant "Rule Engine" as RuleEngine
+participant "Scan Scheduler" as Scheduler
+participant "Performance\nMonitor" as PerfMonitor
+participant "AI Service" as AISvc
+participant "PostgreSQL\nCluster" as DB
+participant "Redis Cache" as Cache
+participant "Notification\nService" as NotificationSvc
+
+== Scan Configuration ==
+Officer -> UI: Configure Scan Rules
+UI -> Proxy: POST /api/scan/configure
+Proxy -> ScanSvc: Create Scan Configuration
+ScanSvc -> RuleEngine: Validate Rule Set
+RuleEngine -> RuleEngine: Parse Rule Patterns
+RuleEngine -> AISvc: Enhance Rules with AI
+AISvc --> RuleEngine: AI-Enhanced Patterns
+RuleEngine --> ScanSvc: Validated Rules
+ScanSvc -> DB: Save Scan Configuration
+DB --> ScanSvc: Configuration ID
+
+== Scan Scheduling ==
+ScanSvc -> Scheduler: Schedule Scan Execution
+Scheduler -> Cache: Check Scan Queue
+Cache --> Scheduler: Queue Status
+Scheduler -> DB: Create Scan Execution Record
+DB --> Scheduler: Execution ID
+Scheduler -> Cache: Update Execution Cache
+Cache --> Scheduler: Cache Updated
+
+== Scan Execution ==
+Scheduler -> ScanSvc: Trigger Scan Execution
+ScanSvc -> PerfMonitor: Start Performance Monitoring
+PerfMonitor -> Cache: Initialize Metrics
+Cache --> PerfMonitor: Metrics Session
+
+ScanSvc -> DB: Connect to Data Source
+DB --> ScanSvc: Connection Established
+ScanSvc -> RuleEngine: Execute Scan Rules
+
+loop For Each Data Batch
+    RuleEngine -> DB: Query Data Batch
+    DB --> RuleEngine: Data Records
+    RuleEngine -> RuleEngine: Apply Pattern Matching
+    RuleEngine -> AISvc: AI Pattern Recognition
+    AISvc --> RuleEngine: AI Match Results
+    
+    alt Matches Found
+        RuleEngine -> ScanSvc: Record Matches
+        ScanSvc -> DB: INSERT Scan Results
+        DB --> ScanSvc: Result ID
+    end
+    
+    PerfMonitor -> PerfMonitor: Update Metrics
+    PerfMonitor -> Cache: Store Performance Data
+    Cache --> PerfMonitor: Metrics Cached
+end
+
+== Error Handling ==
+alt Scan Error Occurs
+    RuleEngine -> ScanSvc: Report Error
+    ScanSvc -> DB: Log Error Details
+    DB --> ScanSvc: Error Logged
+    ScanSvc -> NotificationSvc: Send Error Alert
+    NotificationSvc --> Officer: Error Notification
+end
+
+== Scan Completion ==
+RuleEngine --> ScanSvc: Scan Complete
+ScanSvc -> PerfMonitor: Finalize Metrics
+PerfMonitor -> DB: Store Final Performance Data
+DB --> PerfMonitor: Metrics Stored
+PerfMonitor --> ScanSvc: Performance Report
+
+ScanSvc -> DB: Update Execution Status
+DB --> ScanSvc: Status Updated
+ScanSvc -> Cache: Update Scan Results Cache
+Cache --> ScanSvc: Cache Updated
+
+ScanSvc -> NotificationSvc: Send Completion Notification
+NotificationSvc --> Officer: Scan Complete Alert
+
+ScanSvc --> Proxy: Scan Results
+Proxy --> UI: Execution Summary
+UI --> Officer: Display Scan Results
+
+note over Officer, NotificationSvc: Comprehensive scan execution with\nreal-time monitoring and AI enhancement
+
+@enduml
+
+@startuml DataWave_Compliance_Assessment_Sequence
+!theme aws-orange
+
+title DataWave Enterprise - Compliance Assessment Sequence Flow
+
+skinparam backgroundColor #f8f9fa
+skinparam defaultFontName "Segoe UI"
+skinparam roundcorner 8
+skinparam shadowing true
+
+actor "Compliance\nAuditor" as Auditor
+participant "Compliance UI" as UI
+participant "Smart Proxy\nRouter" as Proxy
+participant "Compliance\nService" as CompSvc
+participant "Assessment\nEngine" as AssessmentEngine
+participant "Risk Calculator" as RiskCalc
+participant "AI Service" as AISvc
+participant "Audit Logger" as AuditLog
+participant "Report Generator" as ReportGen
+participant "PostgreSQL\nCluster" as DB
+participant "Redis Cache" as Cache
+
+== Assessment Initiation ==
+Auditor -> UI: Start Compliance Assessment
+UI -> Proxy: POST /api/compliance/assess
+Proxy -> CompSvc: Initialize Assessment
+CompSvc -> DB: Load Compliance Requirements
+DB --> CompSvc: Framework Requirements
+CompSvc -> AssessmentEngine: Configure Assessment
+AssessmentEngine -> Cache: Load Assessment Cache
+Cache --> AssessmentEngine: Cached Data
+
+== Data Collection ==
+AssessmentEngine -> DB: Query Asset Compliance Data
+DB --> AssessmentEngine: Asset Compliance Status
+AssessmentEngine -> DB: Query Scan Results
+DB --> AssessmentEngine: Scan Findings
+
+loop For Each Compliance Framework
+    AssessmentEngine -> AssessmentEngine: Evaluate Requirements
+    AssessmentEngine -> AISvc: AI-Powered Gap Analysis
+    AISvc -> AISvc: Analyze Compliance Patterns
+    AISvc --> AssessmentEngine: Gap Analysis Results
+    
+    AssessmentEngine -> RiskCalc: Calculate Risk Scores
+    RiskCalc -> RiskCalc: Apply Risk Algorithms
+    RiskCalc --> AssessmentEngine: Risk Assessment
+    
+    AssessmentEngine -> DB: Store Assessment Results
+    DB --> AssessmentEngine: Assessment ID
+end
+
+== Audit Trail Generation ==
+AssessmentEngine -> AuditLog: Log Assessment Actions
+AuditLog -> DB: INSERT Audit Records
+DB --> AuditLog: Audit Trail Created
+AuditLog --> AssessmentEngine: Audit Confirmation
+
+== Report Generation ==
+AssessmentEngine -> ReportGen: Generate Compliance Report
+ReportGen -> DB: Query Assessment Data
+DB --> ReportGen: Detailed Assessment Results
+ReportGen -> ReportGen: Format Report
+ReportGen -> AISvc: Generate Executive Summary
+AISvc --> ReportGen: AI-Generated Summary
+ReportGen --> AssessmentEngine: Compliance Report
+
+== Risk Remediation Planning ==
+AssessmentEngine -> RiskCalc: Generate Remediation Plan
+RiskCalc -> RiskCalc: Prioritize Risk Items
+RiskCalc -> AISvc: AI Remediation Suggestions
+AISvc --> RiskCalc: Remediation Recommendations
+RiskCalc --> AssessmentEngine: Remediation Plan
+
+== Response Delivery ==
+AssessmentEngine -> Cache: Cache Assessment Results
+Cache --> AssessmentEngine: Results Cached
+AssessmentEngine --> CompSvc: Assessment Complete
+CompSvc --> Proxy: Compliance Assessment Results
+Proxy --> UI: Assessment Report
+UI --> Auditor: Display Compliance Dashboard
+
+note over Auditor, Cache: Comprehensive compliance assessment\nwith AI-powered gap analysis and remediation
+
+@enduml

@@ -1,0 +1,81 @@
+%=== File containing Global Configuration of the report ===%
+%                                                          %
+% DataWave Data Governance Platform - PFE Report          %
+% Adapted from ISI LaTeX Template                         %
+%                                                          %
+%==========================================================%
+
+%=========== Configuration pour le rapport DataWave ==========%
+% global_config.tex file is designed to configure your        %
+% cover pages (main, back and black covers)                   %
+%=============================================================%
+
+%============= Config new columns type ==============%
+\newcolumntype{L}{>{\raggedright\arraybackslash}}
+\newcolumntype{R}{>{\raggedleft\arraybackslash}}
+\newcolumntype{C}{>{\centering\arraybackslash}}
+%==================================================%
+
+%========= Config the cover section ==========%
+
+\title{Plateforme DataWave de Gouvernance des Données d'Entreprise : Architecture Edge Computing et Intelligence Artificielle}
+
+\author{Seif Oresti}
+%%% Si binôme, décommenter et ajouter le second auteur
+%\setboolean{isBinomal}{true}
+%\secondAuthor{Prénom NOM}
+
+\diplomaName{Diplôme National d'Ingénieur en Sciences Appliquées et Technologiques}
+\speciality{Génie Logiciel et Systèmes d'Information}
+%\speciality{Génie des Télécommunications et Réseaux}
+%\speciality{Génie Informatique des Systèmes Industriels}
+
+%% Encadrant professionnel
+\proFramerName{Monsieur/Madame Prénom NOM}
+\proFramerSpeciality{Ingénieur R\&D / Architecte Solutions}
+
+%% Encadrant académique
+\academicFramerName{Monsieur/Madame Prénom NOM}
+\academicFramerSpeciality{Maître Assistant(e) / Professeur}
+
+%% Entreprise d'accueil
+\companyName{[Nom de l'Entreprise d'Accueil]}
+
+%% Année universitaire
+\collegeYear{2024 - 2025}
+
+%%%%%% Signatures section %%%%%%
+
+\proSignSentence{J'autorise l'étudiant à faire le dépôt de son rapport de stage en vue d'une soutenance.}
+
+\academicSignSentence{J'autorise l'étudiant à faire le dépôt de son rapport de stage en vue d'une soutenance.}
+
+%%% Résumé en Arabe (AR)
+\arabicAbstract{
+تقدم منصة \textLR{DataWave} حلاً ثورياً لحوكمة البيانات في المؤسسات من خلال معمارية \textLR{Edge Computing} المبتكرة والذكاء الاصطناعي المدمج. يدعم النظام أكثر من 15 نوعاً من قواعد البيانات (\textLR{PostgreSQL, MySQL, MongoDB, Snowflake, S3}) مع 10+ طرق مصادقة متقدمة (\textLR{OAuth 2.0, LDAP, Kerberos, SAML}). تتكون المنصة من 7 وحدات متكاملة: إدارة مصادر البيانات، الكتالوج، التصنيف الذكي، قواعد المسح، تنسيق المسح، الامتثال التنظيمي (\textLR{GDPR, HIPAA, SOX, PCI-DSS}), والتحكم في الوصول (\textLR{RBAC}). تحقق المنصة أداءً استثنائياً: زمن استجابة أقل من 100 مللي ثانية، معدل نقل يتجاوز 1000 طلب/ثانية، وتوفر 99.99\%. بفضل معمارية \textLR{Microservices} و\textLR{447} مكوناً في \textLR{Racine Manager}، تتفوق \textLR{DataWave} على الحلول الموجودة (\textLR{Azure Purview, Databricks}) بتكلفة أقل 60-80\% ومرونة أكبر.
+}
+
+\arabicAbstractKeywords{حوكمة البيانات، \textLR{Edge Computing}، الذكاء الاصطناعي، الامتثال التنظيمي، \textLR{DataWave}}
+
+%%% Résumé en Français (FR)
+\frenchAbstract{
+La plateforme DataWave propose une solution révolutionnaire de gouvernance des données d'entreprise basée sur une architecture edge computing innovante et l'intelligence artificielle intégrée. Le système supporte plus de 15 types de bases de données (PostgreSQL, MySQL, MongoDB, Snowflake, S3, Redis, Oracle, BigQuery, Redshift) avec 10+ méthodes d'authentification avancées (OAuth 2.0, LDAP, Kerberos, SAML, OpenID Connect). La plateforme comprend 7 modules intégrés : Data Source Management (connectivité universelle), Data Catalog (catalogage et traçabilité), Classification System (classification automatique intelligente), Scan Rule Sets (gestion des règles), Scan Logic (orchestration), Compliance System (conformité réglementaire GDPR, HIPAA, SOX, PCI-DSS, SOC2, CCPA), et RBAC (contrôle d'accès granulaire). DataWave démontre des performances exceptionnelles : latence API < 100ms, throughput > 1000 req/sec, disponibilité 99.99\%, et scalabilité horizontale illimitée. Avec une architecture microservices comprenant 59 modèles, 143 services, 80+ routes API backend, et 447 composants Racine Manager frontend, DataWave surpasse les solutions existantes (Azure Purview, Databricks Unity Catalog) avec une réduction de coûts de 60-80\% et une flexibilité maximale.
+}
+
+\frenchAbstractKeywords{Gouvernance des données, Edge Computing, Intelligence Artificielle, Conformité réglementaire, DataWave}
+
+%%% Résumé en Anglais (EN)
+\englishAbstract{
+The DataWave platform provides a revolutionary enterprise data governance solution based on innovative edge computing architecture and integrated artificial intelligence. The system supports 15+ database types (PostgreSQL, MySQL, MongoDB, Snowflake, S3, Redis, Oracle, BigQuery, Redshift) with 10+ advanced authentication methods (OAuth 2.0, LDAP, Kerberos, SAML, OpenID Connect). The platform comprises 7 integrated modules: Data Source Management (universal connectivity), Data Catalog (cataloging and lineage), Classification System (intelligent automatic classification), Scan Rule Sets (rule management), Scan Logic (orchestration), Compliance System (regulatory compliance GDPR, HIPAA, SOX, PCI-DSS, SOC2, CCPA), and RBAC (granular access control). DataWave demonstrates exceptional performance: API latency < 100ms, throughput > 1000 req/sec, 99.99\% availability, and unlimited horizontal scalability. With a microservices architecture including 59 models, 143 services, 80+ API routes in the backend, and 447 Racine Manager components in the frontend, DataWave surpasses existing solutions (Azure Purview, Databricks Unity Catalog) with 60-80\% cost reduction and maximum flexibility.
+}
+
+\englishAbstractKeywords{Data Governance, Edge Computing, Artificial Intelligence, Regulatory Compliance, DataWave}
+
+%% Adresse de l'entreprise (optionnel)
+\setboolean{wantToTypeCompanyAddress}{true}
+
+\companyEmail{contact@company.com}
+\companyTel{+216 XX XXX XXX}
+\companyFax{+216 XX XXX XXX}
+\companyAddressAR{العنوان بالعربية - المدينة - تونس}
+\companyAddressFR{Adresse de l'entreprise, Ville, Code Postal, Tunisie}

@@ -254,7 +254,7 @@ export const ContextAwareAssistant: React.FC<ContextAwareAssistantProps> = ({
       networkLatency: performanceMetrics?.networkLatency || 0,
       activeConnections: globalMetrics?.activeConnections || 0,
       concurrentUsers: globalMetrics?.concurrentUsers || 0,
-      systemVersion: process.env.NEXT_PUBLIC_APP_VERSION || '1.0.0',
+      systemVersion: import.meta.env.VITE_APP_VERSION || '1.0.0',
       deployment: (typeof window !== 'undefined' && (window as any).ENV?.NODE_ENV) || 'development'
     };
 

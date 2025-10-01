@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
-  CheckCircle2, XCircle, Clock, AlertTriangle, Users, User, FileText, MessageSquare,
+  CheckCircle2, XCircle, Clock, AlertTriangle, Users, User as UserIcon, FileText, MessageSquare,
   History, Settings, Filter, Search, RefreshCw, MoreHorizontal, Eye, ThumbsUp,
   ThumbsDown, Flag, Forward, Reply, Send, Calendar, Timer, Target, TrendingUp,
   TrendingDown, Shield, Key, Database, Workflow, GitBranch, Activity, BarChart3,

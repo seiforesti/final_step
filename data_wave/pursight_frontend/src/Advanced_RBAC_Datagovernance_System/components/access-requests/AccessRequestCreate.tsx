@@ -16,7 +16,7 @@ import {
   Search,
   Filter,
   Calendar,
-  User,
+  User as UserIcon,
   Users,
   Database,
   Key,
@@ -52,6 +52,7 @@ import {
   MessageSquare,
   BarChart3,
   TrendingUp,
+  TrendingDown,
   Activity,
   Lock,
   Unlock,
@@ -895,7 +896,7 @@ export const AccessRequestCreate: React.FC<AccessRequestCreateProps> = ({
           
           <div className="flex items-center space-x-4 text-sm text-muted-foreground">
             <div className="flex items-center space-x-1">
-              <User className="h-4 w-4" />
+              <UserIcon className="h-4 w-4" />
               <span>{currentUser?.email}</span>
             </div>
             <div className="flex items-center space-x-1">

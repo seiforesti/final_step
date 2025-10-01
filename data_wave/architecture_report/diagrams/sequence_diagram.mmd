@@ -1,0 +1,91 @@
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'primaryColor': '#0066cc',
+    'primaryTextColor': '#ffffff',
+    'primaryBorderColor': '#004499',
+    'lineColor': '#0066cc',
+    'secondaryColor': '#3399ff',
+    'tertiaryColor': '#009966',
+    'background': '#f8f9fa',
+    'mainBkg': '#ffffff',
+    'secondBkg': '#f0f8ff',
+    'tertiaryBkg': '#e6f7ff'
+  }
+}}%%
+
+sequenceDiagram
+    participant User as 👤 User
+    participant Frontend as 🖥️ React Frontend
+    participant Gateway as 🚪 API Gateway
+    participant Auth as 🔐 Auth Service
+    participant RBAC as 👥 RBAC Service
+    participant DS as 🗄️ Data Source Service
+    participant Edge as 🌐 Edge Computing
+    participant Catalog as 📚 Catalog Service
+    participant Classify as 🏷️ Classification Service
+    participant Rules as 📋 Rule Sets Service
+    participant Scan as 🔍 Scan Logic Service
+    participant Compliance as ⚖️ Compliance Service
+    participant AI as 🤖 AI/ML Service
+    participant DB as 💾 PostgreSQL
+    participant Cache as ⚡ Redis Cache
+    participant Queue as 📨 Kafka Queue
+    
+    User->>Frontend: 📱 Access Data Source
+    Frontend->>Gateway: 📡 API Request
+    Gateway->>Auth: 🔐 Authenticate User
+    Auth->>RBAC: 🛡️ Check Permissions
+    RBAC-->>Auth: ✅ Permission Granted
+    Auth-->>Gateway: ✅ Authentication Success
+    Gateway->>DS: 🗄️ Process Request
+    
+    DS->>Edge: 🚀 Deploy Edge Connector
+    Edge->>Edge: 🔌 Connect to Data Source
+    Edge->>Edge: 🔍 Discover Schema
+    Edge->>Edge: 📊 Extract Metadata
+    Edge->>Queue: 📨 Send Metadata Event
+    Queue->>Catalog: 📨 Process Event
+    Catalog->>Classify: 🏷️ Classify Data
+    Classify->>AI: 🤖 ML Processing
+    AI-->>Classify: ✅ Classification Result
+    Classify->>Rules: 📋 Apply Rules
+    Rules->>Scan: 🔍 Trigger Scan
+    Scan->>Compliance: ⚖️ Check Compliance
+    Compliance->>RBAC: 📝 Log Activity
+    RBAC->>DB: 💾 Store Audit Log
+    
+    Catalog->>DB: 💾 Store Asset Info
+    Classify->>DB: 💾 Store Classification
+    Scan->>DB: 💾 Store Scan Results
+    Compliance->>DB: 💾 Store Compliance Status
+    
+    Catalog->>Cache: ⚡ Cache Results
+    Classify->>Cache: ⚡ Cache Results
+    Scan->>Cache: ⚡ Cache Results
+    
+    DB-->>Compliance: 📊 Return Status
+    Compliance-->>Scan: ✅ Compliance Result
+    Scan-->>Classify: ✅ Scan Complete
+    Classify-->>Catalog: ✅ Classification Complete
+    Catalog-->>DS: ✅ Metadata Processed
+    DS-->>Gateway: 📡 Response
+    Gateway-->>Frontend: 📡 API Response
+    Frontend-->>User: 🖥️ Display Results
+    
+    Note over User,Queue: Real-time Data Processing Pipeline
+    
+    User->>Frontend: 🔄 Request Real-time Updates
+    Frontend->>Gateway: 📡 WebSocket Connection
+    Gateway->>Queue: 📨 Subscribe to Events
+    Queue->>Frontend: 📨 Real-time Updates
+    Frontend-->>User: 🔄 Live Data Updates
+    
+    Note over Edge,AI: Edge Computing Intelligence
+    
+    Edge->>AI: 🧠 Local AI Processing
+    AI-->>Edge: ✅ Local Classification
+    Edge->>Queue: 📨 Send Processed Data
+    Queue->>Catalog: 📨 Update Catalog
+    Catalog->>Cache: ⚡ Update Cache
+    Cache-->>Frontend: ⚡ Real-time Cache Update

@@ -1,0 +1,210 @@
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'primaryColor': '#0066cc',
+    'primaryTextColor': '#ffffff',
+    'primaryBorderColor': '#004499',
+    'lineColor': '#0066cc',
+    'secondaryColor': '#3399ff',
+    'tertiaryColor': '#009966',
+    'background': '#f8f9fa',
+    'mainBkg': '#ffffff',
+    'secondBkg': '#f0f8ff',
+    'tertiaryBkg': '#e6f7ff'
+  }
+}}%%
+
+graph TB
+    subgraph "🌐 Internet"
+        USER[👤 Users<br/>Web Browsers<br/>Mobile Apps]:::user
+        CDN[🌍 CDN<br/>Global Distribution<br/>Static Assets]:::cdn
+    end
+    
+    subgraph "☁️ Cloud Platform - AWS/Azure/GCP"
+        subgraph "🌐 Load Balancer Layer"
+            LB[⚖️ Load Balancer<br/>Application Gateway<br/>SSL Termination]:::lb
+            WAF[🛡️ WAF<br/>Web Application Firewall<br/>DDoS Protection]:::waf
+        end
+        
+        subgraph "☸️ Kubernetes Cluster"
+            subgraph "🌐 Frontend Namespace"
+                UI_POD[🖥️ UI Pod<br/>React Frontend<br/>Nginx + React]:::frontend
+                UI_SVC[🔗 UI Service<br/>ClusterIP<br/>Port 3000]:::service
+            end
+            
+            subgraph "🚪 API Namespace"
+                API_POD[📡 API Pod<br/>FastAPI Backend<br/>Python + Uvicorn]:::api
+                API_SVC[🔗 API Service<br/>ClusterIP<br/>Port 8000]:::service
+                GATEWAY_POD[🚪 Gateway Pod<br/>API Gateway<br/>Traefik + Auth]:::gateway
+            end
+            
+            subgraph "🏗️ Services Namespace"
+                DS_POD[🗄️ Data Source Pod<br/>Edge Computing<br/>Connection Manager]:::datasource
+                CAT_POD[📚 Catalog Pod<br/>Asset Management<br/>AI Discovery]:::catalog
+                CLASS_POD[🏷️ Classification Pod<br/>ML Classification<br/>Pattern Recognition]:::classification
+                RULE_POD[📋 Rule Sets Pod<br/>Rule Engine<br/>Template Manager]:::rules
+                SCAN_POD[🔍 Scan Logic Pod<br/>Workflow Engine<br/>Orchestrator]:::scan
+                COMP_POD[⚖️ Compliance Pod<br/>Policy Engine<br/>Risk Assessment]:::compliance
+                RBAC_POD[👥 RBAC Pod<br/>Access Control<br/>Permission Manager]:::rbac
+            end
+            
+            subgraph "🤖 AI/ML Namespace"
+                AI_POD[🧠 AI Pod<br/>Transformers<br/>NLP Processing]:::ai
+                ML_POD[📊 ML Pod<br/>Scikit-learn<br/>PyTorch Models]:::ml
+                NLP_POD[💬 NLP Pod<br/>SpaCy + NLTK<br/>Text Analysis]:::nlp
+            end
+            
+            subgraph "💾 Data Namespace"
+                PG_POD[🐘 PostgreSQL Pod<br/>Primary Database<br/>ACID Transactions]:::postgres
+                REDIS_POD[🔴 Redis Pod<br/>Cache + Session<br/>High Performance]:::redis
+                MONGO_POD[🍃 MongoDB Pod<br/>Document Store<br/>Flexible Schema]:::mongodb
+                ES_POD[🔍 Elasticsearch Pod<br/>Search Engine<br/>Full-Text Search]:::elasticsearch
+            end
+            
+            subgraph "📨 Infrastructure Namespace"
+                KAFKA_POD[📨 Kafka Pod<br/>Message Broker<br/>Event Streaming]:::kafka
+                PROM_POD[📊 Prometheus Pod<br/>Metrics Collection<br/>Time Series DB]:::prometheus
+                GRAF_POD[📈 Grafana Pod<br/>Visualization<br/>Dashboards]:::grafana
+                LOG_POD[📝 Logging Pod<br/>ELK Stack<br/>Centralized Logs]:::logging
+            end
+        end
+        
+        subgraph "🏢 On-Premises Data Centers"
+            subgraph "🌐 Edge Node 1 - MySQL"
+                EDGE1_CONN[🔌 Edge Connector<br/>MySQL Driver<br/>Connection Pool]:::edge
+                EDGE1_AI[🤖 Local AI<br/>Classification<br/>Pattern Recognition]:::edgeai
+                EDGE1_CACHE[⚡ Local Cache<br/>Redis<br/>Metadata Store]:::edgecache
+            end
+            
+            subgraph "🌐 Edge Node 2 - PostgreSQL"
+                EDGE2_CONN[🔌 Edge Connector<br/>PostgreSQL Driver<br/>PgBouncer Pool]:::edge
+                EDGE2_AI[🤖 Local AI<br/>Classification<br/>Pattern Recognition]:::edgeai
+                EDGE2_CACHE[⚡ Local Cache<br/>Redis<br/>Metadata Store]:::edgecache
+            end
+            
+            subgraph "🌐 Edge Node N - MongoDB"
+                EDGEN_CONN[🔌 Edge Connector<br/>MongoDB Driver<br/>Native Driver]:::edge
+                EDGEN_AI[🤖 Local AI<br/>Classification<br/>Pattern Recognition]:::edgeai
+                EDGEN_CACHE[⚡ Local Cache<br/>Redis<br/>Metadata Store]:::edgecache
+            end
+        end
+        
+        subgraph "🔐 Security Services"
+            VAULT[🗝️ Secret Vault<br/>Azure Key Vault<br/>AWS Secrets Manager]:::vault
+            CERT[🔒 Certificate Manager<br/>SSL/TLS Certs<br/>Auto Renewal]:::cert
+            MONITOR[📊 Security Monitor<br/>SIEM Integration<br/>Threat Detection]:::security
+        end
+    end
+    
+    %% External connections
+    USER --> CDN
+    CDN --> LB
+    LB --> WAF
+    WAF --> GATEWAY_POD
+    
+    %% Frontend connections
+    UI_POD --> UI_SVC
+    UI_SVC --> API_SVC
+    
+    %% API connections
+    API_POD --> API_SVC
+    GATEWAY_POD --> DS_POD
+    GATEWAY_POD --> CAT_POD
+    GATEWAY_POD --> CLASS_POD
+    GATEWAY_POD --> RULE_POD
+    GATEWAY_POD --> SCAN_POD
+    GATEWAY_POD --> COMP_POD
+    GATEWAY_POD --> RBAC_POD
+    
+    %% Service connections
+    DS_POD --> AI_POD
+    CAT_POD --> ML_POD
+    CLASS_POD --> NLP_POD
+    SCAN_POD --> AI_POD
+    
+    %% Data connections
+    DS_POD --> PG_POD
+    CAT_POD --> PG_POD
+    CLASS_POD --> PG_POD
+    RULE_POD --> PG_POD
+    SCAN_POD --> PG_POD
+    COMP_POD --> PG_POD
+    RBAC_POD --> PG_POD
+    
+    %% Caching connections
+    DS_POD --> REDIS_POD
+    CAT_POD --> REDIS_POD
+    SCAN_POD --> REDIS_POD
+    
+    %% Document store connections
+    DS_POD --> MONGO_POD
+    CAT_POD --> MONGO_POD
+    
+    %% Search connections
+    CAT_POD --> ES_POD
+    CLASS_POD --> ES_POD
+    
+    %% Message queue connections
+    KAFKA_POD --> DS_POD
+    KAFKA_POD --> CLASS_POD
+    KAFKA_POD --> COMP_POD
+    
+    %% Monitoring connections
+    PROM_POD --> API_POD
+    PROM_POD --> DS_POD
+    PROM_POD --> CAT_POD
+    GRAF_POD --> PROM_POD
+    
+    %% Edge computing connections
+    EDGE1_CONN --> EDGE1_AI
+    EDGE1_AI --> EDGE1_CACHE
+    EDGE1_CACHE --> KAFKA_POD
+    
+    EDGE2_CONN --> EDGE2_AI
+    EDGE2_AI --> EDGE2_CACHE
+    EDGE2_CACHE --> KAFKA_POD
+    
+    EDGEN_CONN --> EDGEN_AI
+    EDGEN_AI --> EDGEN_CACHE
+    EDGEN_CACHE --> KAFKA_POD
+    
+    %% Security connections
+    VAULT --> DS_POD
+    VAULT --> CAT_POD
+    VAULT --> RBAC_POD
+    CERT --> LB
+    MONITOR --> KAFKA_POD
+    
+    %% Styling
+    classDef user fill:#e3f2fd,stroke:#1976d2,stroke-width:2px,color:#000
+    classDef cdn fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#000
+    classDef lb fill:#e8f5e8,stroke:#388e3c,stroke-width:2px,color:#000
+    classDef waf fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
+    classDef frontend fill:#e1f5fe,stroke:#0277bd,stroke-width:2px,color:#000
+    classDef service fill:#f1f8e9,stroke:#689f38,stroke-width:2px,color:#000
+    classDef api fill:#fce4ec,stroke:#c2185b,stroke-width:2px,color:#000
+    classDef gateway fill:#e8eaf6,stroke:#3f51b5,stroke-width:2px,color:#000
+    classDef datasource fill:#e0f2f1,stroke:#00695c,stroke-width:2px,color:#000
+    classDef catalog fill:#f1f8e9,stroke:#558b2f,stroke-width:2px,color:#000
+    classDef classification fill:#fff8e1,stroke:#f9a825,stroke-width:2px,color:#000
+    classDef rules fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#000
+    classDef scan fill:#f9fbe7,stroke:#827717,stroke-width:2px,color:#000
+    classDef compliance fill:#fce4ec,stroke:#ad1457,stroke-width:2px,color:#000
+    classDef rbac fill:#e8eaf6,stroke:#303f9f,stroke-width:2px,color:#000
+    classDef ai fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#000
+    classDef ml fill:#e1f5fe,stroke:#0277bd,stroke-width:2px,color:#000
+    classDef nlp fill:#e8f5e8,stroke:#2e7d32,stroke-width:2px,color:#000
+    classDef postgres fill:#336791,stroke:#ffffff,stroke-width:2px,color:#ffffff
+    classDef redis fill:#dc382d,stroke:#ffffff,stroke-width:2px,color:#ffffff
+    classDef mongodb fill:#4db33d,stroke:#ffffff,stroke-width:2px,color:#ffffff
+    classDef elasticsearch fill:#f7df1e,stroke:#000000,stroke-width:2px,color:#000000
+    classDef kafka fill:#231f20,stroke:#ffffff,stroke-width:2px,color:#ffffff
+    classDef prometheus fill:#e6522c,stroke:#ffffff,stroke-width:2px,color:#ffffff
+    classDef grafana fill:#f46800,stroke:#ffffff,stroke-width:2px,color:#ffffff
+    classDef logging fill:#ff6b35,stroke:#ffffff,stroke-width:2px,color:#ffffff
+    classDef edge fill:#e0f2f1,stroke:#004d40,stroke-width:2px,color:#000
+    classDef edgeai fill:#f3e5f5,stroke:#4a148c,stroke-width:2px,color:#000
+    classDef edgecache fill:#dc382d,stroke:#ffffff,stroke-width:2px,color:#ffffff
+    classDef vault fill:#ff9800,stroke:#ffffff,stroke-width:2px,color:#ffffff
+    classDef cert fill:#4caf50,stroke:#ffffff,stroke-width:2px,color:#ffffff
+    classDef security fill:#f44336,stroke:#ffffff,stroke-width:2px,color:#ffffff

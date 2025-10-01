@@ -1,0 +1,2185 @@
+classDiagram
+  class RacineJobWorkflow {
+    +__tablename__: 
+    +id: 
+    +name: 
+    +description: 
+    +version: 
+    +status: 
+    +workflow_definition: 
+    +step_dependencies: 
+    +parallel_execution_config: 
+    +error_handling_config: 
+    +involved_groups: 
+    +group_specific_configs: 
+    +cross_group_dependencies: 
+    +resource_requirements: 
+    +trigger_type: 
+    +trigger_configuration: 
+    +schedule_expression: 
+    +schedule_timezone: 
+    +performance_targets: 
+    +optimization_hints: 
+    +resource_allocation: 
+    +is_template: 
+    +template_category: 
+    +template_tags: 
+    +parent_template_id: 
+    +previous_version_id: 
+    +next_version_id: 
+    +is_current_version: 
+    +deprecation_date: 
+    +access_level: 
+    +allowed_groups: 
+    +execution_permissions: 
+    +monitoring_config: 
+    +alerting_rules: 
+    +notification_settings: 
+    +orchestration_master_id: 
+    +created_at: 
+    +updated_at: 
+    +created_by: 
+    +updated_by: 
+    +creator: 
+    +updater: 
+    +orchestration_master: 
+    +parent_template: 
+    +previous_version: 
+    +next_version: 
+    +executions: 
+    +steps: 
+    +templates: 
+    +schedules: 
+  }
+  class ScanWorkflow {
+    +__tablename__: 
+    +id: Optional[int]
+    +workflow_id: str
+    +workflow_name: str
+    +template_id: Optional[str]
+    +workflow_type: WorkflowType
+    +priority: WorkflowPriority
+    +description: Optional[str]
+    +status: WorkflowStatus
+    +current_stage_id: Optional[str]
+    +progress_percentage: float
+    +scheduled_at: Optional[datetime]
+    +started_at: Optional[datetime]
+    +completed_at: Optional[datetime]
+    +timeout_at: Optional[datetime]
+    +parameters: Dict[str, Any]
+    +variables: Dict[str, Any]
+    +context: Dict[str, Any]
+    +output: Optional[Dict[str, Any]]
+    +error_message: Optional[str]
+    +stack_trace: Optional[str]
+    +created_at: datetime
+    +created_by: str
+    +executed_by: Optional[str]
+    +template: Optional[ScanWorkflowTemplate]
+    +stages: List['WorkflowStage']
+    +approvals: List['WorkflowApproval']
+    +triggers: List['WorkflowTrigger']
+  }
+  class Workflow {
+    +__tablename__: 
+    +id: Optional[int]
+    +name: str
+    +description: Optional[str]
+    +workflow_type: WorkflowType
+    +definition: Dict[str, Any]
+    +version: str
+    +is_template: bool
+    +created_by: str
+    +organization_id: Optional[int]
+    +team_id: Optional[str]
+    +status: WorkflowStatus
+    +is_enabled: bool
+    +is_deleted: bool
+    +trigger_type: TriggerType
+    +cron_expression: Optional[str]
+    +trigger_conditions: Dict[str, Any]
+    +supports_parallel_execution: bool
+    +max_concurrent_runs: int
+    +timeout_minutes: Optional[int]
+    +retry_policy: Dict[str, Any]
+    +error_handling_strategy: str
+    +failure_notification_enabled: bool
+    +auto_recovery_enabled: bool
+    +execution_priority: int
+    +resource_requirements: Dict[str, Any]
+    +performance_targets: Dict[str, Any]
+    +ai_optimization_enabled: bool
+    +auto_scaling_enabled: bool
+    +smart_scheduling: bool
+    +predictive_scaling: Dict[str, Any]
+    +governance_policies: List[str]
+    +compliance_requirements: List[str]
+    +audit_enabled: bool
+    +data_lineage_tracking: bool
+    +execution_count: int
+    +success_rate: Optional[float]
+    +average_duration_minutes: Optional[float]
+    +last_execution: Optional[datetime]
+    +next_execution: Optional[datetime]
+    +tags: List[str]
+    +workflow_metadata: Dict[str, Any]
+    +created_at: datetime
+    +updated_at: datetime
+    +organization: Optional['Organization']
+    +steps: List['WorkflowStep']
+    +executions: List['WorkflowExecution']
+    +dependencies: List['WorkflowDependency']
+    +depended_on_by: List['WorkflowDependency']
+  }
+  class RacineWorkflowTemplate {
+    +__tablename__: 
+    +id: 
+    +template_name: 
+    +template_description: 
+    +template_category: 
+    +template_version: 
+    +template_definition: 
+    +parameter_schema: 
+    +default_parameters: 
+    +validation_rules: 
+    +use_cases: 
+    +prerequisites: 
+    +expected_outcomes: 
+    +complexity_level: 
+    +supported_groups: 
+    +required_permissions: 
+    +group_specific_customizations: 
+    +usage_count: 
+    +success_rate: 
+    +average_execution_time: 
+    +user_ratings: 
+    +is_public: 
+    +is_verified: 
+    +deprecation_date: 
+    +replacement_template_id: 
+    +base_workflow_id: 
+    +created_at: 
+    +updated_at: 
+    +created_by: 
+    +creator: 
+    +base_workflow: 
+    +replacement_template: 
+    +created_workflows: 
+  }
+  class ScanOrchestrationJob {
+    +__tablename__: 
+    +id: Optional[int]
+    +orchestration_id: str
+    +name: str
+    +display_name: Optional[str]
+    +description: Optional[str]
+    +orchestration_strategy: ScanOrchestrationStrategy
+    +status: ScanOrchestrationStatus
+    +priority: ScanPriority
+    +enhanced_rule_set_id: Optional[int]
+    +racine_orchestrator_id: Optional[str]
+    +target_data_sources: List[int]
+    +target_schemas: List[str]
+    +target_tables: List[str]
+    +exclusion_patterns: List[str]
+    +max_concurrent_scans: int
+    +retry_count: int
+    +timeout_minutes: int
+    +failure_threshold: float
+    +resource_requirements: Dict[str, Any]
+    +resource_constraints: Dict[str, Any]
+    +allocated_resources: Dict[str, Any]
+    +resource_usage_tracking: List[Dict[str, Any]]
+    +ai_optimization_enabled: bool
+    +dynamic_scaling: bool
+    +predictive_resource_allocation: bool
+    +intelligent_error_recovery: bool
+    +adaptive_performance_tuning: bool
+    +workflow_definition: Dict[str, Any]
+    +conditional_execution: Dict[str, Any]
+    +dependency_mapping: Dict[str, List[str]]
+    +approval_workflow: Dict[str, Any]
+    +execution_plan: Dict[str, Any]
+    +current_step: Optional[str]
+    +progress_percentage: float
+    +estimated_completion: Optional[datetime]
+    +scheduled_start: Optional[datetime]
+    +actual_start: Optional[datetime]
+    +estimated_end: Optional[datetime]
+    +actual_end: Optional[datetime]
+    +total_duration: Optional[float]
+    +scans_planned: int
+    +scans_completed: int
+    +scans_failed: int
+    +scans_skipped: int
+    +total_records_processed: int
+    +total_data_size_gb: float
+    +accuracy_score: float
+    +completeness_score: float
+    +consistency_score: float
+    +error_rate: float
+    +business_value_score: float
+    +cost_actual: Optional[float]
+    +cost_estimated: Optional[float]
+    +roi_calculation: Dict[str, float]
+    +classification_results: Dict[str, Any]
+    +compliance_validations: Dict[str, Any]
+    +catalog_enrichments: Dict[str, Any]
+    +data_source_insights: Dict[str, Any]
+    +error_log: List[Dict[str, Any]]
+    +recovery_actions: List[Dict[str, Any]]
+    +failure_analysis: Dict[str, Any]
+    +notification_config: Dict[str, Any]
+    +alert_thresholds: Dict[str, float]
+    +stakeholder_notifications: List[Dict[str, Any]]
+    +audit_trail: List[Dict[str, Any]]
+    +compliance_checks: Dict[str, bool]
+    +security_validations: Dict[str, Any]
+    +created_by: str
+    +modified_by: Optional[str]
+    +organization_id: Optional[int]
+    +execution_context: Dict[str, Any]
+    +tags: List[str]
+    +created_at: datetime
+    +updated_at: datetime
+    +enhanced_rule_set: Optional[EnhancedScanRuleSet]
+    +racine_orchestrator: Optional['RacineOrchestrationMaster']
+    +workflow_executions: List['ScanWorkflowExecution']
+    +resource_allocations: List['ScanResourceAllocation']
+    +organization: Optional['Organization']
+    +__table_args__: 
+  }
+  class RacineWorkflowMetrics {
+    +__tablename__: 
+    +id: 
+    +metric_type: 
+    +metric_name: 
+    +metric_value: 
+    +metric_unit: 
+    +workflow_id: 
+    +execution_id: 
+    +step_id: 
+    +recorded_at: 
+    +time_window_start: 
+    +time_window_end: 
+    +metric_metadata: 
+    +tags: 
+    +workflow: 
+    +execution: 
+    +step: 
+  }
+  class ScanIntelligenceEngine {
+    +__tablename__: 
+    +id: Optional[int]
+    +engine_id: str
+    +engine_name: str
+    +intelligence_type: ScanIntelligenceType
+    +configuration: Dict[str, Any]
+    +optimization_strategy: OptimizationStrategy
+    +intelligence_scope: IntelligenceScope
+    +learning_mode: LearningMode
+    +status: str
+    +version: str
+    +last_trained: Optional[datetime]
+    +last_updated: Optional[datetime]
+    +accuracy_score: Optional[float]
+    +performance_score: Optional[float]
+    +efficiency_score: Optional[float]
+    +reliability_score: Optional[float]
+    +cpu_requirement: Optional[float]
+    +memory_requirement: Optional[float]
+    +storage_requirement: Optional[float]
+    +ai_models: List['ScanAIModel']
+    +optimization_records: List['ScanOptimizationRecord']
+    +created_at: datetime
+    +updated_at: Optional[datetime]
+    +created_by: str
+    +custom_properties: Optional[Dict[str, Any]]
+  }
+  class ScanAIModel {
+    +__tablename__: 
+    +id: Optional[int]
+    +model_id: str
+    +model_name: str
+    +model_type: AIModelType
+    +model_architecture: Dict[str, Any]
+    +hyperparameters: Dict[str, Any]
+    +training_config: Dict[str, Any]
+    +model_binary: Optional[bytes]
+    +model_path: Optional[str]
+    +model_checksum: Optional[str]
+    +training_dataset_id: Optional[str]
+    +validation_dataset_id: Optional[str]
+    +training_metrics: Dict[str, Any]
+    +validation_metrics: Dict[str, Any]
+    +status: ModelStatus
+    +version: str
+    +parent_model_id: Optional[str]
+    +inference_latency_ms: Optional[float]
+    +throughput_per_second: Optional[float]
+    +resource_utilization: Dict[str, Any]
+    +deployment_config: Dict[str, Any]
+    +scaling_config: Dict[str, Any]
+    +intelligence_engine_id: Optional[int]
+    +intelligence_engine: Optional[ScanIntelligenceEngine]
+    +predictions: List['ScanPrediction']
+    +created_at: datetime
+    +updated_at: Optional[datetime]
+    +deployed_at: Optional[datetime]
+    +custom_properties: Optional[Dict[str, Any]]
+  }
+  class Scan {
+    +__tablename__: 
+    +id: Optional[int]
+    +scan_id: str
+    +name: str
+    +description: Optional[str]
+    +data_source_id: int
+    +scan_rule_set_id: Optional[int]
+    +status: ScanStatus
+    +error_message: Optional[str]
+    +started_at: Optional[datetime]
+    +completed_at: Optional[datetime]
+    +created_at: datetime
+    +updated_at: datetime
+    +created_by: Optional[str]
+    +data_source: DataSource
+    +scan_rule_set: Optional[ScanRuleSet]
+    +scan_results: List['ScanResult']
+  }
+  class WorkflowStage {
+    +__tablename__: 
+    +id: Optional[int]
+    +stage_id: str
+    +workflow_id: str
+    +stage_name: str
+    +stage_type: StageType
+    +stage_order: int
+    +is_critical: bool
+    +status: StageStatus
+    +progress_percentage: float
+    +depends_on: Optional[str]
+    +can_run_parallel: bool
+    +preconditions: List[Dict[str, Any]]
+    +postconditions: List[Dict[str, Any]]
+    +parameters: Dict[str, Any]
+    +timeout_minutes: int
+    +retry_strategy: RetryStrategy
+    +max_retries: int
+    +started_at: Optional[datetime]
+    +completed_at: Optional[datetime]
+    +duration_seconds: Optional[int]
+    +output: Optional[Dict[str, Any]]
+    +error_message: Optional[str]
+    +workflow: Optional[ScanWorkflow]
+    +tasks: List['WorkflowTask']
+  }
+  class WorkflowDependency {
+    +__tablename__: 
+    +id: Optional[int]
+    +workflow_id: int
+    +depends_on_workflow_id: int
+    +dependency_type: str
+    +condition: Optional[str]
+    +wait_for_completion: bool
+    +timeout_minutes: Optional[int]
+    +created_at: datetime
+    +workflow: Optional['Workflow']
+    +depends_on_workflow: Optional['Workflow']
+  }
+  class RacineOrchestrationMaster {
+    +__tablename__: 
+    +id: str
+    +name: str
+    +description: Optional[str]
+    +orchestration_type: str
+    +status: OrchestrationStatus
+    +priority: OrchestrationPriority
+    +connected_groups: List[str]
+    +group_configurations: Dict[str, Any]
+    +cross_group_dependencies: Dict[str, List[str]]
+    +integration_mappings: Dict[str, Dict[str, Any]]
+    +performance_metrics: Dict[str, Any]
+    +health_status: SystemHealthStatus
+    +last_health_check: datetime
+    +resource_allocation: Dict[str, Any]
+    +optimization_settings: Dict[str, Any]
+    +total_executions: int
+    +successful_executions: int
+    +failed_executions: int
+    +average_execution_time: float
+    +error_count: int
+    +last_error: Optional[str]
+    +recovery_attempts: int
+    +recovery_settings: Dict[str, Any]
+    +security_context: Dict[str, Any]
+    +compliance_requirements: List[str]
+    +audit_settings: Dict[str, Any]
+    +tags: List[str]
+    +orchestration_metadata: Dict[str, Any]
+    +created_at: datetime
+    +updated_at: datetime
+    +created_by: int
+    +last_modified_by: Optional[int]
+    +managed_data_sources: List['DataSource']
+    +managed_scan_rules: List['IntelligentScanRule']
+    +managed_classifications: List['ClassificationRule']
+    +managed_compliance_rules: List['ComplianceRule']
+    +managed_catalog_assets: List['IntelligentDataAsset']
+    +managed_scan_jobs: List['ScanOrchestrationJob']
+    +creator: 'User'
+    +modifier: Optional['User']
+    +workflow_executions: List['RacineWorkflowExecution']
+    +system_health_records: List['RacineSystemHealth']
+    +integration_records: List['RacineCrossGroupIntegration']
+    +performance_records: List['RacinePerformanceMetrics']
+    +error_logs: List['RacineErrorLog']
+    +__table_args__: 
+  }
+  class RacineWorkflowAudit {
+    +__tablename__: 
+    +id: 
+    +event_type: 
+    +event_description: 
+    +event_data: 
+    +workflow_id: 
+    +execution_id: 
+    +user_id: 
+    +changes_made: 
+    +previous_values: 
+    +new_values: 
+    +ip_address: 
+    +user_agent: 
+    +session_id: 
+    +timestamp: 
+    +workflow: 
+    +execution: 
+    +user: 
+  }
+  class ScanResultClassification {
+    +__tablename__: 
+    +id: Optional[int]
+    +scan_result_id: int
+    +classification_result_id: int
+    +classification_triggered_by: str
+    +scan_iteration: int
+    +data_quality_score: Optional[float]
+    +completeness_score: Optional[float]
+    +consistency_score: Optional[float]
+    +created_at: datetime
+    +scan_result: Optional[ScanResult]
+    +classification_result: Optional[ClassificationResult]
+  }
+  class ScanWorkflowExecution {
+    +__tablename__: 
+    +id: Optional[int]
+    +execution_id: str
+    +orchestration_job_id: int
+    +step_name: str
+    +step_type: str
+    +step_order: int
+    +parent_step_id: Optional[int]
+    +step_config: Dict[str, Any]
+    +input_parameters: Dict[str, Any]
+    +expected_outputs: List[str]
+    +status: ScanWorkflowStatus
+    +progress_percentage: float
+    +retry_attempt: int
+    +max_retries: int
+    +queued_at: datetime
+    +started_at: Optional[datetime]
+    +completed_at: Optional[datetime]
+    +duration_seconds: Optional[float]
+    +cpu_usage_percent: Optional[float]
+    +memory_usage_mb: Optional[float]
+    +network_io_mb: Optional[float]
+    +storage_io_mb: Optional[float]
+    +exit_code: Optional[int]
+    +output_data: Dict[str, Any]
+    +generated_artifacts: List[str]
+    +performance_metrics: Dict[str, float]
+    +quality_score: float
+    +validation_results: Dict[str, Any]
+    +data_quality_checks: List[Dict[str, Any]]
+    +error_message: Optional[str]
+    +error_details: Dict[str, Any]
+    +warning_messages: List[str]
+    +recovery_actions_taken: List[str]
+    +dependency_requirements: List[str]
+    +execution_conditions: Dict[str, Any]
+    +conditional_skip_reason: Optional[str]
+    +business_impact: Dict[str, Any]
+    +cost_tracking: Dict[str, float]
+    +sla_compliance: bool
+    +data_source_interactions: List[Dict[str, Any]]
+    +external_system_calls: List[Dict[str, Any]]
+    +api_interactions: List[Dict[str, Any]]
+    +execution_log: List[Dict[str, Any]]
+    +security_context: Dict[str, Any]
+    +compliance_validations: Dict[str, bool]
+    +orchestration_job: Optional[ScanOrchestrationJob]
+    +parent_step: Optional['ScanWorkflowExecution']
+    +child_steps: List['ScanWorkflowExecution']
+    +__table_args__: 
+  }
+  class WorkflowTask {
+    +__tablename__: 
+    +id: Optional[int]
+    +task_id: str
+    +stage_id: str
+    +task_name: str
+    +task_type: TaskType
+    +task_order: int
+    +is_critical: bool
+    +status: TaskStatus
+    +progress_percentage: float
+    +parameters: Dict[str, Any]
+    +timeout_minutes: int
+    +retry_strategy: RetryStrategy
+    +max_retries: int
+    +execution_details: Dict[str, Any]
+    +resource_requirements: Dict[str, Any]
+    +started_at: Optional[datetime]
+    +completed_at: Optional[datetime]
+    +duration_seconds: Optional[int]
+    +output: Optional[Dict[str, Any]]
+    +error_message: Optional[str]
+    +stage: Optional[WorkflowStage]
+  }
+  class ScanResourceAllocation {
+    +__tablename__: 
+    +id: Optional[int]
+    +allocation_id: str
+    +orchestration_job_id: int
+    +resource_type: ResourceType
+    +resource_name: str
+    +resource_pool: str
+    +allocated_amount: float
+    +requested_amount: float
+    +max_allocation: Optional[float]
+    +allocation_unit: str
+    +allocation_status: str
+    +allocated_at: Optional[datetime]
+    +released_at: Optional[datetime]
+    +duration_minutes: Optional[float]
+    +actual_usage: float
+    +peak_usage: float
+    +average_usage: float
+    +usage_efficiency: float
+    +cost_per_unit: Optional[float]
+    +total_cost: Optional[float]
+    +budget_allocated: Optional[float]
+    +cost_optimization_score: float
+    +allocation_latency_ms: Optional[float]
+    +resource_contention_score: float
+    +availability_score: float
+    +reliability_score: float
+    +priority_level: int
+    +resource_constraints: Dict[str, Any]
+    +scaling_policy: Dict[str, Any]
+    +monitoring_config: Dict[str, Any]
+    +alert_thresholds: Dict[str, float]
+    +performance_history: List[Dict[str, Any]]
+    +environment: str
+    +region: Optional[str]
+    +availability_zone: Optional[str]
+    +cluster_info: Dict[str, Any]
+    +requested_by: str
+    +approved_by: Optional[str]
+    +audit_trail: List[Dict[str, Any]]
+    +created_at: datetime
+    +updated_at: datetime
+    +orchestration_job: Optional[ScanOrchestrationJob]
+    +__table_args__: 
+  }
+  class WorkflowExecution {
+    +__tablename__: 
+    +id: Optional[int]
+    +workflow_id: int
+    +execution_id: str
+    +status: WorkflowStatus
+    +trigger_type: TriggerType
+    +triggered_by: str
+    +trigger_data: Dict[str, Any]
+    +started_at: Optional[datetime]
+    +completed_at: Optional[datetime]
+    +duration_minutes: Optional[float]
+    +estimated_completion: Optional[datetime]
+    +total_steps: int
+    +completed_steps: int
+    +failed_steps: int
+    +skipped_steps: int
+    +progress_percentage: float
+    +cpu_usage_cores: Optional[float]
+    +memory_usage_mb: Optional[float]
+    +storage_usage_gb: Optional[float]
+    +cost_estimate: Optional[float]
+    +output_data: Dict[str, Any]
+    +artifacts_generated: List[Dict[str, Any]]
+    +data_products_created: List[str]
+    +error_message: Optional[str]
+    +error_details: Optional[Dict[str, Any]]
+    +retry_count: int
+    +quality_score: Optional[float]
+    +validation_results: Dict[str, Any]
+    +data_quality_checks: List[Dict[str, Any]]
+    +logs_location: Optional[str]
+    +metrics: Dict[str, Any]
+    +performance_metrics: Dict[str, Any]
+    +created_at: datetime
+    +updated_at: datetime
+    +workflow: Optional['Workflow']
+    +step_executions: List['StepExecution']
+  }
+  class ScanRuleSet {
+    +__tablename__: 
+    +id: Optional[int]
+    +name: str
+    +description: Optional[str]
+    +data_source_id: Optional[int]
+    +include_schemas: Optional[List[str]]
+    +exclude_schemas: Optional[List[str]]
+    +include_tables: Optional[List[str]]
+    +exclude_tables: Optional[List[str]]
+    +include_columns: Optional[List[str]]
+    +exclude_columns: Optional[List[str]]
+    +sample_data: bool
+    +sample_size: Optional[int]
+    +created_at: datetime
+    +updated_at: datetime
+    +data_source: Optional[DataSource]
+    +scans: List['Scan']
+    +compliance_rules: List['ComplianceRule']
+    +enhanced_extensions: List['EnhancedScanRuleSet']
+  }
+  class ScanPrediction {
+    +__tablename__: 
+    +id: Optional[int]
+    +prediction_id: str
+    +prediction_type: str
+    +target_scan_id: Optional[str]
+    +target_data_source_id: Optional[int]
+    +prediction_scope: IntelligenceScope
+    +input_features: Dict[str, Any]
+    +feature_vector: Optional[str]
+    +embedding_vector: Optional[str]
+    +prediction_value: Union[str, float, int, bool, Dict[str, Any]]
+    +confidence_score: float
+    +probability_distribution: Optional[Dict[str, float]]
+    +model_version: str
+    +inference_time_ms: float
+    +prediction_timestamp: datetime
+    +actual_value: Optional[Union[str, float, int, bool, Dict[str, Any]]]
+    +prediction_accuracy: Optional[float]
+    +feedback_score: Optional[float]
+    +ai_model_id: Optional[int]
+    +ai_model: Optional[ScanAIModel]
+    +created_at: datetime
+    +validated_at: Optional[datetime]
+    +custom_properties: Optional[Dict[str, Any]]
+  }
+  class ScanOptimizationRecord {
+    +__tablename__: 
+    +id: Optional[int]
+    +optimization_id: str
+    +optimization_type: str
+    +target_scan_id: Optional[str]
+    +target_system: str
+    +optimization_scope: IntelligenceScope
+    +original_configuration: Dict[str, Any]
+    +optimized_configuration: Dict[str, Any]
+    +optimization_strategy: OptimizationStrategy
+    +performance_before: Dict[str, float]
+    +performance_after: Dict[str, float]
+    +improvement_percentage: float
+    +resource_usage_before: Dict[str, float]
+    +resource_usage_after: Dict[str, float]
+    +resource_savings: Dict[str, float]
+    +cost_before: Optional[float]
+    +cost_after: Optional[float]
+    +cost_savings: Optional[float]
+    +applied_at: datetime
+    +rollback_possible: bool
+    +rollback_deadline: Optional[datetime]
+    +validation_status: str
+    +validation_results: Optional[Dict[str, Any]]
+    +user_acceptance: Optional[bool]
+    +intelligence_engine_id: Optional[int]
+    +intelligence_engine: Optional[ScanIntelligenceEngine]
+    +created_at: datetime
+    +created_by: str
+    +custom_properties: Optional[Dict[str, Any]]
+  }
+  class WorkflowStep {
+    +__tablename__: 
+    +id: Optional[int]
+    +workflow_id: int
+    +name: str
+    +description: Optional[str]
+    +action_type: ActionType
+    +step_order: int
+    +is_optional: bool
+    +is_parallel: bool
+    +configuration: Dict[str, Any]
+    +input_parameters: Dict[str, Any]
+    +output_parameters: Dict[str, Any]
+    +execution_condition: Optional[str]
+    +skip_condition: Optional[str]
+    +retry_condition: Optional[str]
+    +max_retries: int
+    +retry_delay_seconds: int
+    +timeout_minutes: Optional[int]
+    +on_failure_action: str
+    +cpu_requirement: Optional[float]
+    +memory_requirement_mb: Optional[int]
+    +gpu_requirement: bool
+    +custom_resources: Dict[str, Any]
+    +ai_assisted_configuration: bool
+    +auto_parameter_tuning: bool
+    +performance_optimization: Dict[str, Any]
+    +data_access_requirements: List[str]
+    +security_context: Dict[str, Any]
+    +encryption_required: bool
+    +created_at: datetime
+    +updated_at: datetime
+    +workflow: Optional['Workflow']
+    +executions: List['StepExecution']
+  }
+  class RacineWorkflowExecution {
+    +__tablename__: 
+    +id: str
+    +orchestration_id: str
+    +workflow_name: str
+    +workflow_definition: Dict[str, Any]
+    +status: WorkflowExecutionStatus
+    +current_step: int
+    +total_steps: int
+    +progress_percentage: float
+    +start_time: Optional[datetime]
+    +end_time: Optional[datetime]
+    +estimated_completion: Optional[datetime]
+    +duration_seconds: Optional[float]
+    +involved_groups: List[str]
+    +group_operations: Dict[str, Any]
+    +step_executions: List[Dict[str, Any]]
+    +data_source_results: Dict[str, Any]
+    +scan_rule_results: Dict[str, Any]
+    +classification_results: Dict[str, Any]
+    +compliance_results: Dict[str, Any]
+    +catalog_results: Dict[str, Any]
+    +scan_logic_results: Dict[str, Any]
+    +rbac_results: Dict[str, Any]
+    +parameters: Dict[str, Any]
+    +environment: str
+    +resource_requirements: Dict[str, Any]
+    +resource_usage: Dict[str, Any]
+    +errors: List[Dict[str, Any]]
+    +warnings: List[Dict[str, Any]]
+    +retry_attempts: int
+    +max_retries: int
+    +recovery_actions: List[Dict[str, Any]]
+    +execution_logs: List[Dict[str, Any]]
+    +performance_metrics: Dict[str, Any]
+    +system_metrics: Dict[str, Any]
+    +output_data: Dict[str, Any]
+    +generated_artifacts: List[str]
+    +execution_summary: Optional[str]
+    +triggered_by: int
+    +trigger_type: str
+    +trigger_context: Dict[str, Any]
+    +created_at: datetime
+    +updated_at: datetime
+    +orchestration_master: 'RacineOrchestrationMaster'
+    +triggered_by_user: 'User'
+    +__table_args__: 
+  }
+  class ScanWorkflowTemplate {
+    +__tablename__: 
+    +id: Optional[int]
+    +template_id: str
+    +template_name: str
+    +template_version: str
+    +workflow_type: WorkflowType
+    +description: str
+    +category: str
+    +stages: List[Dict[str, Any]]
+    +default_parameters: Dict[str, Any]
+    +variables: Dict[str, Any]
+    +timeout_minutes: int
+    +retry_strategy: RetryStrategy
+    +max_retries: int
+    +parallel_execution: bool
+    +tags: Optional[str]
+    +is_active: bool
+    +is_system_template: bool
+    +usage_count: int
+    +success_rate: float
+    +average_duration: int
+    +created_at: datetime
+    +updated_at: Optional[datetime]
+    +created_by: str
+    +workflows: List['ScanWorkflow']
+  }
+  class ScanPerformanceAlert {
+    +__tablename__: 
+    +id: Optional[int]
+    +alert_id: str
+    +alert_name: str
+    +metric_id: int
+    +severity: AlertSeverity
+    +alert_type: str
+    +message: str
+    +description: str
+    +threshold_value: float
+    +actual_value: float
+    +trigger_condition: str
+    +duration_seconds: int
+    +status: str
+    +acknowledged: bool
+    +acknowledged_by: Optional[str]
+    +acknowledged_at: Optional[datetime]
+    +resolved: bool
+    +resolved_by: Optional[str]
+    +resolved_at: Optional[datetime]
+    +resolution_notes: Optional[str]
+    +impact_assessment: Optional[str]
+    +affected_services: Optional[str]
+    +business_impact: Optional[str]
+    +escalation_level: int
+    +escalated_to: Optional[str]
+    +escalation_history: List[Dict[str, Any]]
+    +triggered_at: datetime
+    +first_detected_at: Optional[datetime]
+    +last_updated_at: Optional[datetime]
+    +tags: Optional[str]
+    +custom_properties: Optional[Dict[str, Any]]
+    +metric: Optional[ScanPerformanceMetric]
+  }
+  class WorkflowTrigger {
+    +__tablename__: 
+    +id: Optional[int]
+    +trigger_id: str
+    +workflow_id: str
+    +trigger_name: str
+    +trigger_type: TriggerType
+    +is_active: bool
+    +trigger_conditions: Dict[str, Any]
+    +schedule_expression: Optional[str]
+    +event_filters: Dict[str, Any]
+    +max_executions: Optional[int]
+    +execution_count: int
+    +cooldown_minutes: int
+    +valid_from: Optional[datetime]
+    +valid_until: Optional[datetime]
+    +last_triggered: Optional[datetime]
+    +next_trigger: Optional[datetime]
+    +created_at: datetime
+    +created_by: str
+    +workflow: Optional[ScanWorkflow]
+  }
+  class WorkflowApproval {
+    +__tablename__: 
+    +id: Optional[int]
+    +approval_id: str
+    +workflow_id: str
+    +stage_id: Optional[str]
+    +approval_type: ApprovalType
+    +approval_name: str
+    +description: str
+    +required_approvers: Optional[str]
+    +approved_by: Optional[str]
+    +rejected_by: Optional[str]
+    +status: ApprovalStatus
+    +required_approvals: int
+    +current_approvals: int
+    +requested_at: datetime
+    +due_date: Optional[datetime]
+    +completed_at: Optional[datetime]
+    +approval_criteria: Dict[str, Any]
+    +approval_notes: Optional[str]
+    +rejection_reason: Optional[str]
+    +escalation_enabled: bool
+    +escalation_after_minutes: Optional[int]
+    +escalated_to: Optional[str]
+    +escalated_at: Optional[datetime]
+    +workflow: Optional[ScanWorkflow]
+  }
+  class RacineWorkflowSchedule {
+    +__tablename__: 
+    +id: 
+    +schedule_name: 
+    +description: 
+    +is_active: 
+    +schedule_type: 
+    +schedule_expression: 
+    +timezone: 
+    +start_date: 
+    +end_date: 
+    +max_executions: 
+    +execution_count: 
+    +execution_conditions: 
+    +skip_conditions: 
+    +dependency_workflows: 
+    +event_sources: 
+    +event_filters: 
+    +webhook_configuration: 
+    +execution_parameters: 
+    +execution_environment: 
+    +concurrency_policy: 
+    +monitoring_enabled: 
+    +alert_on_failure: 
+    +alert_on_success: 
+    +notification_settings: 
+    +last_execution_time: 
+    +next_execution_time: 
+    +success_count: 
+    +failure_count: 
+    +average_execution_time: 
+    +workflow_id: 
+    +created_at: 
+    +updated_at: 
+    +created_by: 
+    +workflow: 
+    +creator: 
+  }
+  class ScanPerformanceMetric {
+    +__tablename__: 
+    +id: Optional[int]
+    +metric_id: str
+    +metric_name: str
+    +metric_type: PerformanceMetricType
+    +scope: MonitoringScope
+    +resource_id: str
+    +resource_type: ResourceType
+    +component: str
+    +current_value: float
+    +previous_value: Optional[float]
+    +min_value: Optional[float]
+    +max_value: Optional[float]
+    +average_value: Optional[float]
+    +warning_threshold: Optional[float]
+    +critical_threshold: Optional[float]
+    +target_value: Optional[float]
+    +status: PerformanceStatus
+    +trend: TrendDirection
+    +change_percentage: Optional[float]
+    +unit: str
+    +description: Optional[str]
+    +tags: List[str]
+    +measured_at: datetime
+    +created_at: datetime
+    +updated_at: Optional[datetime]
+    +performance_alerts: List['ScanPerformanceAlert']
+    +historical_data: List['PerformanceHistory']
+  }
+  class ScanResult {
+    +__tablename__: 
+    +id: Optional[int]
+    +scan_id: int
+    +schema_name: str
+    +table_name: str
+    +column_name: Optional[str]
+    +object_type: str
+    +classification_labels: Optional[List[str]]
+    +sensitivity_level: Optional[str]
+    +compliance_issues: Optional[List[Dict[str, Any]]]
+    +created_at: datetime
+    +updated_at: datetime
+    +data_type: Optional[str]
+    +nullable: Optional[bool]
+    +scan_metadata: Optional[Dict[str, Any]]
+    +scan: Scan
+  }
+  class RacineWorkflowStep {
+    +__tablename__: 
+    +id: 
+    +step_name: 
+    +step_type: 
+    +step_order: 
+    +description: 
+    +step_configuration: 
+    +input_mappings: 
+    +output_mappings: 
+    +environment_variables: 
+    +depends_on_steps: 
+    +conditional_logic: 
+    +parallel_group_id: 
+    +target_group: 
+    +target_service: 
+    +target_operation: 
+    +group_specific_config: 
+    +retry_policy: 
+    +timeout_seconds: 
+    +on_failure_action: 
+    +error_handling_steps: 
+    +expected_duration: 
+    +resource_requirements: 
+    +optimization_hints: 
+    +workflow_id: 
+    +created_at: 
+    +updated_at: 
+    +workflow: 
+    +step_executions: 
+  }
+  class ScanOrchestrationJobCreate {
+    +name: str
+    +display_name: Optional[str]
+    +description: Optional[str]
+    +orchestration_strategy: ScanOrchestrationStrategy
+    +priority: ScanPriority
+    +enhanced_rule_set_id: Optional[int]
+    +target_data_sources: List[int]
+    +max_concurrent_scans: Optional[int]
+    +timeout_minutes: Optional[int]
+    +ai_optimization_enabled: Optional[bool]
+    +notification_config: Optional[Dict[str, Any]]
+  }
+  class ComplianceWorkflowCreate {
+    +rule_id: Optional[int]
+    +name: str
+    +description: str
+    +workflow_type: str
+    +steps: List[Dict[str, Any]]
+    +assigned_to: Optional[str]
+    +due_date: Optional[datetime]
+    +priority: str
+    +triggers: List[Dict[str, Any]]
+    +conditions: Dict[str, Any]
+  }
+  class ComplianceWorkflowResponse {
+    +id: int
+    +rule_id: Optional[int]
+    +name: str
+    +description: str
+    +workflow_type: str
+    +status: WorkflowStatus
+    +current_step: int
+    +assigned_to: Optional[str]
+    +due_date: Optional[datetime]
+    +priority: str
+    +created_at: datetime
+    +updated_at: datetime
+  }
+  class WorkflowTemplateCreate {
+    +template_name: str
+    +workflow_type: WorkflowType
+    +description: str
+    +category: str
+    +stages: List[Dict[str, Any]]
+    +default_parameters: Optional[Dict[str, Any]]
+    +timeout_minutes: int
+    +retry_strategy: RetryStrategy
+    +max_retries: int
+    +tags: Optional[List[str]]
+  }
+  class StewardshipWorkflow {
+    +__tablename__: 
+    +id: Optional[int]
+    +center_id: int
+    +name: str
+    +description: Optional[str]
+    +workflow_type: str
+    +steps: List[Dict[str, Any]]
+    +triggers: List[Dict[str, Any]]
+    +business_rules: List[Dict[str, Any]]
+    +slas: List[Dict[str, Any]]
+    +status: str
+    +metrics: Dict[str, Any]
+    +created_at: datetime
+    +updated_at: datetime
+    +center: Optional['DataStewardshipCenter']
+  }
+  class OrchestrationExecution {
+    +__tablename__: 
+    +id: Optional[int]
+    +orchestration_id: str
+    +scan_request_id: Optional[str]
+    +user_id: Optional[str]
+    +data_source_id: Optional[int]
+    +started_at: datetime
+    +completed_at: Optional[datetime]
+    +status: str
+    +duration_seconds: Optional[float]
+    +rules_executed: Optional[int]
+    +findings_count: Optional[int]
+    +data_quality_score: Optional[float]
+    +cpu_usage_percent: Optional[float]
+    +memory_usage_mb: Optional[float]
+    +error_message: Optional[str]
+    +extra_metrics: Dict[str, Any]
+    +__table_args__: 
+  }
+  class WorkflowCreate {
+    +workflow_name: str
+    +template_id: Optional[str]
+    +workflow_type: WorkflowType
+    +priority: WorkflowPriority
+    +description: Optional[str]
+    +parameters: Optional[Dict[str, Any]]
+    +scheduled_at: Optional[datetime]
+  }
+  class OrchestrationPerformanceSnapshot {
+    +__tablename__: 
+    +id: UUID
+    +snapshot_id: str
+    +snapshot_name: str
+    +orchestration_id: Optional[UUID]
+    +cpu_utilization: Optional[float]
+    +memory_utilization: Optional[float]
+    +execution_time_seconds: Optional[float]
+    +success_rate: Optional[float]
+    +captured_at: datetime
+    +context: Dict[str, Any]
+    +created_by: str
+    +created_at: datetime
+  }
+  class ScanWorkflowExecutionDetail {
+    +__tablename__: 
+    +id: Optional[int]
+    +execution_id: str
+    +workflow_id: str
+    +execution_number: int
+    +trigger_type: TriggerType
+    +triggered_by: str
+    +current_status: WorkflowStatus
+    +execution_log: List[Dict[str, Any]]
+    +state_changes: List[Dict[str, Any]]
+    +total_stages: int
+    +completed_stages: int
+    +failed_stages: int
+    +skipped_stages: int
+    +cpu_usage_percent: Optional[float]
+    +memory_usage_mb: Optional[float]
+    +storage_usage_mb: Optional[float]
+    +network_usage_mb: Optional[float]
+    +started_at: Optional[datetime]
+    +completed_at: Optional[datetime]
+    +total_duration_seconds: Optional[int]
+    +final_output: Optional[Dict[str, Any]]
+    +error_details: Optional[Dict[str, Any]]
+    +success_rate: float
+    +quality_score: Optional[float]
+    +created_at: datetime
+  }
+  class ScanPerformanceAnalytics {
+    +orchestration_id: str
+    +total_scans: int
+    +success_rate: float
+    +average_duration: float
+    +resource_efficiency: float
+    +cost_effectiveness: float
+    +quality_score: float
+    +business_value: float
+    +performance_trends: Dict[str, List[float]]
+    +bottleneck_analysis: Dict[str, Any]
+    +optimization_recommendations: List[str]
+  }
+  class ScanPredictionCreate {
+    +prediction_type: str
+    +target_scan_id: Optional[str]
+    +input_features: Dict[str, Any]
+    +prediction_scope: IntelligenceScope
+  }
+  class WorkflowTemplate {
+    +__tablename__: 
+    +id: Optional[int]
+    +name: str
+    +description: str
+    +category: str
+    +template_definition: Dict[str, Any]
+    +parameters: Dict[str, Any]
+    +default_values: Dict[str, Any]
+    +workflow_type: WorkflowType
+    +complexity_level: str
+    +estimated_duration_minutes: Optional[int]
+    +required_permissions: List[str]
+    +usage_count: int
+    +rating: Optional[float]
+    +is_featured: bool
+    +is_verified: bool
+    +created_by: str
+    +maintained_by: Optional[str]
+    +contributors: List[str]
+    +version: str
+    +changelog: List[Dict[str, Any]]
+    +documentation: Optional[str]
+    +examples: List[Dict[str, Any]]
+    +best_practices: List[str]
+    +tags: List[str]
+    +created_at: datetime
+    +updated_at: datetime
+  }
+  class RacineCollaborationWorkflow {
+    +__tablename__: 
+    +id: 
+    +session_id: 
+    +workflow_type: 
+    +workflow_definition: 
+    +collaboration_rules: 
+    +approval_workflow: 
+    +task_assignments: 
+    +status: 
+    +created_at: 
+    +updated_at: 
+  }
+  class ScanPerformanceOptimization {
+    +__tablename__: 
+    +id: Optional[int]
+    +optimization_id: str
+    +recommendation_timestamp: datetime
+    +target_scan_id: Optional[str]
+    +target_component: str
+    +optimization_category: str
+    +baseline_metrics: Dict[str, float]
+    +performance_bottlenecks: Optional[str]
+    +resource_constraints: Dict[str, Any]
+    +recommended_changes: Dict[str, Any]
+    +expected_improvements: Dict[str, float]
+    +implementation_priority: str
+    +implementation_cost: Optional[float]
+    +expected_savings: Optional[float]
+    +roi_estimate: Optional[float]
+    +payback_period_days: Optional[int]
+    +implementation_steps: List[Dict[str, Any]]
+    +rollback_plan: Optional[Dict[str, Any]]
+    +testing_requirements: Optional[List[str]]
+    +implementation_risks: List[Dict[str, Any]]
+    +risk_mitigation: Optional[Dict[str, Any]]
+    +status: str
+    +implementation_progress: float
+    +completion_timestamp: Optional[datetime]
+    +actual_improvements: Optional[Dict[str, float]]
+    +improvement_variance: Optional[Dict[str, float]]
+    +created_at: datetime
+    +updated_at: Optional[datetime]
+    +approved_by: Optional[str]
+    +implemented_by: Optional[str]
+    +custom_properties: Optional[Dict[str, Any]]
+  }
+  class OrchestrationStep {
+    +__tablename__: 
+    +id: UUID
+    +step_id: str
+    +name: str
+    +description: Optional[str]
+    +step_type: str
+    +step_order: int
+    +status: str
+    +orchestration_id: UUID
+    +step_configuration: Dict[str, Any]
+    +created_by: str
+    +created_at: datetime
+    +updated_at: Optional[datetime]
+  }
+  class ScanCatalogEnrichment {
+    +__tablename__: 
+    +id: Optional[int]
+    +scan_result_id: int
+    +catalog_entry_id: int
+    +enrichment_type: str
+    +enrichment_data: Dict[str, Any]
+    +confidence_level: float
+    +quality_metrics: Dict[str, float]
+    +completeness_score: float
+    +accuracy_indicators: Dict[str, Any]
+    +business_glossary_terms: List[str]
+    +usage_patterns: Dict[str, Any]
+    +relationship_mappings: Dict[str, Any]
+    +enrichment_status: str
+    +validation_required: bool
+    +human_validated: bool
+    +enriched_at: datetime
+    +last_validated: Optional[datetime]
+    +__table_args__: 
+  }
+  class ScanPatternRecognition {
+    +__tablename__: 
+    +id: Optional[int]
+    +pattern_id: str
+    +discovery_timestamp: datetime
+    +pattern_scope: IntelligenceScope
+    +affected_scans: Optional[str]
+    +affected_data_sources: Optional[str]
+    +pattern_type: str
+    +pattern_name: str
+    +pattern_description: str
+    +pattern_signature: Dict[str, Any]
+    +frequency: str
+    +periodicity: Optional[timedelta]
+    +strength: float
+    +consistency: float
+    +pattern_features: Dict[str, Any]
+    +statistical_metrics: Dict[str, float]
+    +correlation_matrix: Optional[List[List[float]]]
+    +business_relevance: str
+    +actionable_insights: Optional[str]
+    +optimization_potential: Optional[float]
+    +evolution_tracking: Dict[str, Any]
+    +trend_analysis: Optional[Dict[str, Any]]
+    +validation_status: str
+    +validation_confidence: Optional[float]
+    +expert_review: Optional[Dict[str, Any]]
+    +created_at: datetime
+    +updated_at: Optional[datetime]
+    +validated_at: Optional[datetime]
+    +custom_properties: Optional[Dict[str, Any]]
+  }
+  class OrchestrationCreateRequest {
+    +name: str
+    +description: Optional[str]
+    +orchestration_type: str
+    +target_data_sources: List[str]
+    +orchestration_config: Dict[str, Any]
+    +created_by: str
+  }
+  class WorkflowMetrics {
+    +__tablename__: 
+    +id: Optional[int]
+    +workflow_id: int
+    +metric_date: datetime
+    +aggregation_period: str
+    +total_executions: int
+    +successful_executions: int
+    +failed_executions: int
+    +average_duration_minutes: Optional[float]
+    +success_rate: Optional[float]
+    +avg_cpu_usage: Optional[float]
+    +avg_memory_usage_mb: Optional[float]
+    +total_cost: Optional[float]
+    +efficiency_score: Optional[float]
+    +data_quality_score: Optional[float]
+    +sla_compliance: Optional[float]
+    +error_rate: Optional[float]
+    +data_products_created: int
+    +business_value_generated: Optional[float]
+    +time_saved_hours: Optional[float]
+    +created_at: datetime
+  }
+  class ScanClassificationIntegration {
+    +__tablename__: 
+    +id: Optional[int]
+    +scan_result_id: int
+    +classification_result_id: int
+    +integration_type: str
+    +confidence_score: float
+    +integration_status: str
+    +classification_mappings: Dict[str, Any]
+    +sensitivity_labels: List[str]
+    +compliance_tags: List[str]
+    +accuracy_score: float
+    +validation_status: str
+    +human_reviewed: bool
+    +integrated_at: datetime
+    +last_updated: datetime
+    +__table_args__: 
+  }
+  class WorkflowSchedule {
+    +__tablename__: 
+    +id: Optional[int]
+    +workflow_id: int
+    +name: str
+    +cron_expression: str
+    +timezone: str
+    +is_enabled: bool
+    +smart_scheduling_enabled: bool
+    +resource_optimization: bool
+    +load_balancing: bool
+    +optimal_execution_time: Dict[str, Any]
+    +max_concurrent_executions: int
+    +execution_window_start: Optional[datetime]
+    +execution_window_end: Optional[datetime]
+    +blackout_periods: List[Dict[str, Any]]
+    +last_execution: Optional[datetime]
+    +next_execution: Optional[datetime]
+    +execution_count: int
+    +failure_count: int
+    +alert_on_failure: bool
+    +alert_on_delay: bool
+    +max_delay_minutes: int
+    +notification_channels: List[str]
+    +created_at: datetime
+    +updated_at: datetime
+  }
+  class ReviewWorkflowEngine {
+    +__tablename__: 
+    +id: Optional[int]
+    +name: str
+    +config: Dict[str, Any]
+    +escalation_rules: List[Dict[str, Any]]
+    +analytics: Dict[str, Any]
+    +is_active: bool
+    +created_at: datetime
+    +updated_at: datetime
+    +review_types: List['ReviewTypeConfig']
+    +active_reviews: List['AssetReview']
+    +reviewers: List['Reviewer']
+  }
+  class ScanAIModelCreate {
+    +model_name: str
+    +model_type: AIModelType
+    +model_architecture: Dict[str, Any]
+    +hyperparameters: Dict[str, Any]
+    +training_config: Dict[str, Any]
+  }
+  class WorkflowCondition {
+    +__tablename__: 
+    +id: Optional[int]
+    +condition_id: str
+    +workflow_id: str
+    +stage_id: Optional[str]
+    +condition_name: str
+    +condition_type: str
+    +left_operand: str
+    +operator: ConditionOperator
+    +right_operand: str
+    +logical_operator: Optional[str]
+    +parent_condition_id: Optional[str]
+    +true_action: Dict[str, Any]
+    +false_action: Dict[str, Any]
+    +last_evaluated: Optional[datetime]
+    +last_result: Optional[bool]
+    +evaluation_count: int
+    +created_at: datetime
+    +created_by: str
+  }
+  class ScanComplianceIntegration {
+    +__tablename__: 
+    +id: Optional[int]
+    +scan_result_id: int
+    +compliance_rule_id: int
+    +compliance_status: str
+    +violation_severity: str
+    +risk_score: float
+    +validation_results: Dict[str, Any]
+    +remediation_actions: List[str]
+    +exception_granted: bool
+    +exception_reason: Optional[str]
+    +assessed_at: datetime
+    +assessed_by: Optional[str]
+    +review_required: bool
+    +__table_args__: 
+  }
+  class WorkflowExecuteRequest {
+    +workflow_id: str
+    +parameters: Optional[Dict[str, Any]]
+    +override_settings: Optional[Dict[str, Any]]
+    +force_execution: bool
+  }
+  class OrchestrationDependency {
+    +__tablename__: 
+    +id: UUID
+    +dependency_id: str
+    +dependency_name: str
+    +dependency_type: str
+    +dependency_category: str
+    +source_component_id: str
+    +source_component_type: str
+    +target_component_id: str
+    +target_component_type: str
+    +dependency_config: Dict[str, Any]
+    +dependency_rules: Optional[str]
+    +validation_conditions: Optional[str]
+    +dependency_strength: str
+    +priority_level: int
+    +criticality: str
+    +execution_order: int
+    +parallel_execution_allowed: bool
+    +timeout_seconds: Optional[int]
+    +status: str
+    +lifecycle_phase: str
+    +activation_status: str
+    +monitoring_enabled: bool
+    +validation_enabled: bool
+    +alert_on_violation: bool
+    +dependency_satisfaction_rate: Optional[float]
+    +average_resolution_time: Optional[float]
+    +violation_count: int
+    +tags: List[str]
+    +dependency_metadata: Dict[str, Any]
+    +created_by: str
+    +created_at: datetime
+    +updated_by: Optional[str]
+    +updated_at: Optional[datetime]
+  }
+  class ScanRuleTemplate {
+    +__tablename__: 
+    +id: str
+    +template_id: str
+    +template_name: str
+    +template_version: str
+    +template_category: str
+    +template_description: Optional[str]
+    +template_content: Dict[str, Any]
+    +template_schema: Dict[str, Any]
+    +template_parameters: List[Dict[str, Any]]
+    +quality_score: float
+    +certification_level: str
+    +validation_status: str
+    +review_count: int
+    +average_rating: float
+    +download_count: int
+    +usage_count: int
+    +popularity_score: float
+    +trending_score: float
+    +license_type: str
+    +pricing_tier: str
+    +revenue_generated: float
+    +business_impact: str
+    +author_id: str
+    +organization_id: str
+    +author_reputation: float
+    +organization_tier: str
+    +tags: List[str]
+    +supported_data_types: List[str]
+    +compliance_frameworks: List[str]
+    +created_at: datetime
+    +updated_at: datetime
+    +published_at: Optional[datetime]
+    +last_modified: Optional[datetime]
+  }
+  class ScanSchedule {
+    +__tablename__: 
+    +id: Optional[int]
+    +name: str
+    +description: Optional[str]
+    +data_source_id: int
+    +scan_rule_set_id: int
+    +cron_expression: str
+    +enabled: bool
+    +created_at: datetime
+    +updated_at: datetime
+    +last_run: Optional[datetime]
+    +next_run: Optional[datetime]
+  }
+  class ScanIntelligenceEngineResponse {
+    +engine_id: str
+    +engine_name: str
+    +intelligence_type: ScanIntelligenceType
+    +status: str
+    +version: str
+    +accuracy_score: Optional[float]
+    +performance_score: Optional[float]
+    +efficiency_score: Optional[float]
+    +created_at: datetime
+    +updated_at: Optional[datetime]
+  }
+  class ComplianceWorkflowUpdate {
+    +name: Optional[str]
+    +description: Optional[str]
+    +status: Optional[WorkflowStatus]
+    +assigned_to: Optional[str]
+    +due_date: Optional[datetime]
+    +priority: Optional[str]
+    +current_step: Optional[int]
+  }
+  class ScanOrchestrationJobResponse {
+    +id: int
+    +orchestration_id: str
+    +name: str
+    +display_name: Optional[str]
+    +orchestration_strategy: ScanOrchestrationStrategy
+    +status: ScanOrchestrationStatus
+    +priority: ScanPriority
+    +progress_percentage: float
+    +scans_planned: int
+    +scans_completed: int
+    +scans_failed: int
+    +accuracy_score: float
+    +business_value_score: float
+    +created_at: datetime
+    +actual_start: Optional[datetime]
+    +estimated_completion: Optional[datetime]
+    +created_by: str
+  }
+  class ScanAnomalyDetection {
+    +__tablename__: 
+    +id: Optional[int]
+    +anomaly_id: str
+    +detection_timestamp: datetime
+    +affected_scan_id: Optional[str]
+    +affected_data_source_id: Optional[int]
+    +anomaly_scope: IntelligenceScope
+    +anomaly_type: str
+    +anomaly_severity: str
+    +anomaly_score: float
+    +confidence_level: float
+    +baseline_metrics: Dict[str, float]
+    +anomalous_metrics: Dict[str, float]
+    +deviation_analysis: Dict[str, float]
+    +potential_causes: Optional[str]
+    +contributing_factors: Dict[str, Any]
+    +correlation_analysis: Optional[Dict[str, Any]]
+    +impact_level: str
+    +affected_operations: Optional[str]
+    +business_impact: Optional[Dict[str, Any]]
+    +status: str
+    +resolution_actions: Optional[List[str]]
+    +resolution_timestamp: Optional[datetime]
+    +alert_sent: bool
+    +notification_channels: Optional[str]
+    +assigned_to: Optional[str]
+    +created_at: datetime
+    +updated_at: Optional[datetime]
+    +custom_properties: Optional[Dict[str, Any]]
+  }
+  class ScanOrchestrationMaster {
+    +__tablename__: 
+    +id: UUID
+    +master_id: str
+    +name: str
+    +display_name: Optional[str]
+    +description: Optional[str]
+    +master_type: str
+    +category: str
+    +orchestration_strategy: str
+    +execution_mode: str
+    +priority_level: int
+    +complexity_score: Optional[float]
+    +target_data_sources: List[str]
+    +target_rule_sets: List[str]
+    +target_environments: List[str]
+    +scope_definition: Dict[str, Any]
+    +ai_optimization_enabled: bool
+    +machine_learning_enabled: bool
+    +adaptive_execution: bool
+    +real_time_monitoring: bool
+    +estimated_duration_minutes: Optional[int]
+    +max_concurrent_executions: Optional[int]
+    +resource_requirements: Dict[str, Any]
+    +timeout_configuration: Dict[str, Any]
+    +dependencies: List[str]
+    +prerequisite_orchestrations: List[str]
+    +dependent_orchestrations: List[str]
+    +compliance_frameworks: List[str]
+    +regulatory_requirements: List[str]
+    +audit_trail_required: bool
+    +data_retention_policy: Optional[str]
+    +status: str
+    +lifecycle_phase: str
+    +approval_status: str
+    +activation_status: str
+    +current_execution_id: Optional[str]
+    +execution_count: int
+    +last_executed: Optional[datetime]
+    +next_scheduled: Optional[datetime]
+    +success_rate: Optional[float]
+    +average_execution_time: Optional[float]
+    +performance_score: Optional[float]
+    +quality_metrics: Dict[str, Any]
+    +orchestration_config: Dict[str, Any]
+    +notification_config: Dict[str, Any]
+    +escalation_config: Dict[str, Any]
+    +tags: Optional[str]
+    +master_metadata: Dict[str, Any]
+    +created_by: str
+    +created_at: datetime
+    +updated_by: Optional[str]
+    +updated_at: Optional[datetime]
+  }
+  class ComplianceWorkflowExecution {
+    +__tablename__: 
+    +id: Optional[int]
+    +execution_id: str
+    +workflow_id: int
+    +status: WorkflowStatus
+    +trigger_type: str
+    +triggered_by: Optional[str]
+    +started_at: datetime
+    +completed_at: Optional[datetime]
+    +duration_minutes: Optional[int]
+    +current_step: int
+    +steps_completed: int
+    +total_steps: int
+    +progress_percentage: float
+    +input_parameters: Optional[Dict[str, Any]]
+    +output_data: Optional[Dict[str, Any]]
+    +execution_log: List[str]
+    +error_message: Optional[str]
+    +error_details: Optional[Dict[str, Any]]
+    +retry_count: int
+    +execution_metadata: Dict[str, Any]
+    +created_at: datetime
+  }
+  class ScanResourceOptimization {
+    +resource_type: ResourceType
+    +current_allocation: float
+    +recommended_allocation: float
+    +optimization_potential: float
+    +cost_impact: float
+    +performance_impact: float
+    +confidence_score: float
+    +implementation_effort: str
+    +expected_roi: float
+  }
+  class WorkflowExecutionResponse {
+    +execution_id: str
+    +workflow_id: str
+    +execution_number: int
+    +current_status: WorkflowStatus
+    +progress_percentage: float
+    +total_stages: int
+    +completed_stages: int
+    +started_at: Optional[datetime]
+    +estimated_completion: Optional[datetime]
+  }
+  class ScanRule {
+    +__tablename__: 
+    +id: Optional[int]
+    +rule_id: str
+    +name: str
+    +display_name: Optional[str]
+    +description: Optional[str]
+    +rule_type: str
+    +category: str
+    +subcategory: Optional[str]
+    +severity: str
+    +priority: int
+    +rule_expression: str
+    +rule_config: Dict[str, Any]
+    +validation_rules: Optional[List[str]]
+    +dependencies: Optional[List[str]]
+    +ai_enhanced: bool
+    +machine_learning_enabled: bool
+    +adaptive_thresholds: bool
+    +real_time_monitoring: bool
+    +estimated_execution_time: Optional[int]
+    +resource_requirements: Dict[str, Any]
+    +concurrency_limit: Optional[int]
+    +timeout_seconds: Optional[int]
+    +compliance_frameworks: Optional[List[str]]
+    +regulatory_requirements: Optional[List[str]]
+    +audit_trail_required: bool
+    +data_retention_policy: Optional[str]
+    +supported_data_sources: List[str]
+    +supported_formats: List[str]
+    +api_endpoints: Optional[Dict[str, str]]
+    +webhook_config: Optional[Dict[str, Any]]
+    +is_active: bool
+    +version: str
+    +status: str
+    +approval_status: str
+    +tags: Optional[List[str]]
+    +rule_metadata: Dict[str, Any]
+    +created_by: str
+    +created_at: datetime
+    +updated_by: Optional[str]
+    +updated_at: Optional[datetime]
+    +last_executed: Optional[datetime]
+    +execution_count: int
+    +success_rate: Optional[float]
+    +average_execution_time: Optional[float]
+    +false_positive_rate: Optional[float]
+    +accuracy_score: Optional[float]
+    +rule_set_id: Optional[int]
+    +parent_rule_id: Optional[int]
+  }
+  class OrchestrationResponse {
+    +id: UUID
+    +orchestration_id: str
+    +name: str
+    +description: Optional[str]
+    +orchestration_type: str
+    +status: str
+    +created_by: str
+    +created_at: datetime
+    +updated_at: Optional[datetime]
+  }
+  class OrchestrationStageExecution {
+    +__tablename__: 
+    +id: UUID
+    +execution_id: str
+    +stage_name: str
+    +stage_type: str
+    +stage_category: str
+    +stage_version: str
+    +orchestration_id: UUID
+    +stage_order: int
+    +stage_sequence: str
+    +stage_configuration: Dict[str, Any]
+    +execution_logic: str
+    +validation_rules: Optional[str]
+    +error_handling: Dict[str, Any]
+    +dependencies: Optional[str]
+    +prerequisite_stages: Optional[str]
+    +dependent_stages: Optional[str]
+    +conditional_execution: bool
+    +retry_enabled: bool
+    +rollback_enabled: bool
+    +parallel_execution: bool
+    +estimated_duration_seconds: Optional[int]
+    +timeout_seconds: Optional[int]
+    +resource_requirements: Dict[str, Any]
+    +concurrency_limit: Optional[int]
+    +status: str
+    +execution_phase: str
+    +completion_status: str
+    +current_execution_id: Optional[str]
+    +execution_count: int
+    +last_executed: Optional[datetime]
+    +last_successful: Optional[datetime]
+    +success_rate: Optional[float]
+    +average_execution_time: Optional[float]
+    +failure_count: int
+    +retry_count: int
+    +input_schema: Optional[Dict[str, Any]]
+    +output_schema: Optional[Dict[str, Any]]
+    +data_transformations: Optional[str]
+    +monitoring_enabled: bool
+    +alert_thresholds: Dict[str, Any]
+    +notification_triggers: Optional[str]
+    +tags: Optional[str]
+    +stage_metadata: Dict[str, Any]
+    +created_by: str
+    +created_at: datetime
+    +updated_by: Optional[str]
+    +updated_at: Optional[datetime]
+  }
+  class ScanIntelligenceEngineCreate {
+    +engine_name: str
+    +intelligence_type: ScanIntelligenceType
+    +configuration: Dict[str, Any]
+    +optimization_strategy: OptimizationStrategy
+    +intelligence_scope: IntelligenceScope
+    +learning_mode: LearningMode
+  }
+  class ScanOptimizationRequest {
+    +optimization_type: str
+    +target_scan_id: Optional[str]
+    +optimization_scope: IntelligenceScope
+    +optimization_strategy: OptimizationStrategy
+  }
+  class ApprovalWorkflow {
+    +__tablename__: 
+    +id: Optional[int]
+    +workflow_id: str
+    +rule_id: int
+    +review_id: Optional[str]
+    +workflow_name: str
+    +workflow_description: Optional[str]
+    +workflow_type: str
+    +approval_stages: List[Dict[str, Any]]
+    +current_stage: int
+    +total_stages: int
+    +status: WorkflowStatus
+    +overall_decision: Optional[str]
+    +initiator: str
+    +approvers: Dict[str, Dict[str, Any]]
+    +current_approvers: List[str]
+    +completed_approvals: Dict[str, Dict[str, Any]]
+    +requires_unanimous: bool
+    +allows_delegation: bool
+    +auto_escalation_enabled: bool
+    +escalation_rules: Dict[str, Any]
+    +sla_hours: Optional[int]
+    +stage_deadlines: Dict[str, datetime]
+    +escalation_schedule: Dict[str, Any]
+    +stage_decisions: Dict[str, Dict[str, Any]]
+    +decision_history: List[Dict[str, Any]]
+    +rejection_reasons: List[str]
+    +business_justification: Optional[str]
+    +risk_assessment: Dict[str, Any]
+    +compliance_requirements: List[str]
+    +regulatory_impact: Optional[str]
+    +created_at: datetime
+    +started_at: Optional[datetime]
+    +completed_at: Optional[datetime]
+    +updated_at: datetime
+    +total_duration_hours: Optional[float]
+    +stage_durations: Dict[str, float]
+    +efficiency_score: Optional[float]
+    +notification_settings: Dict[str, Any]
+    +communication_log: List[Dict[str, Any]]
+    +review: Optional[RuleReview]
+    +__table_args__: 
+  }
+  class ComplianceWorkflow {
+    +__tablename__: 
+    +id: Optional[int]
+    +name: str
+    +description: Optional[str]
+    +workflow_type: WorkflowType
+    +status: WorkflowStatus
+    +rule_id: Optional[int]
+    +template_id: Optional[str]
+    +framework: Optional[str]
+    +steps: List[Dict[str, Any]]
+    +current_step: int
+    +total_steps: int
+    +assigned_to: Optional[str]
+    +assigned_team: Optional[str]
+    +due_date: Optional[datetime]
+    +priority: str
+    +triggers: List[Dict[str, Any]]
+    +conditions: Dict[str, Any]
+    +variables: Dict[str, Any]
+    +started_at: Optional[datetime]
+    +completed_at: Optional[datetime]
+    +estimated_completion: Optional[datetime]
+    +progress_percentage: int
+    +execution_results: Optional[Dict[str, Any]]
+    +error_message: Optional[str]
+    +execution_log: List[str]
+    +requires_approval: bool
+    +approved_by: Optional[str]
+    +approved_at: Optional[datetime]
+    +approval_notes: Optional[str]
+    +notification_config: Optional[Dict[str, Any]]
+    +workflow_metadata: Dict[str, Any]
+    +tags: List[str]
+    +created_at: datetime
+    +updated_at: datetime
+    +created_by: Optional[str]
+    +updated_by: Optional[str]
+    +rule: Optional[ComplianceRule]
+  }
+  class ScanOrchestration {
+    +__tablename__: 
+    +id: UUID
+    +orchestration_id: str
+    +name: str
+    +description: Optional[str]
+    +orchestration_type: str
+    +status: str
+    +priority_level: int
+    +target_data_sources: List[str]
+    +orchestration_config: Dict[str, Any]
+    +created_by: str
+    +created_at: datetime
+    +updated_at: Optional[datetime]
+  }
+  class WorkflowResponse {
+    +workflow_id: str
+    +workflow_name: str
+    +workflow_type: WorkflowType
+    +status: WorkflowStatus
+    +priority: WorkflowPriority
+    +progress_percentage: float
+    +created_at: datetime
+    +started_at: Optional[datetime]
+    +completed_at: Optional[datetime]
+  }
+  class OrchestrationPipeline {
+    +__tablename__: 
+    +id: UUID
+    +pipeline_name: str
+    +pipeline_type: str
+    +pipeline_version: str
+    +description: Optional[str]
+    +pipeline_config: Dict[str, Any]
+    +workflow_steps: List[str]
+    +dependencies: Dict[str, List[str]]
+    +max_concurrent_executions: int
+    +timeout_seconds: int
+    +retry_policy: Dict[str, Any]
+    +required_cpu_cores: float
+    +required_memory_gb: float
+    +required_storage_gb: float
+    +required_network_bandwidth_mbps: float
+    +is_active: bool
+    +execution_status: str
+    +last_execution_at: Optional[datetime]
+    +next_scheduled_execution: Optional[datetime]
+    +total_executions: int
+    +successful_executions: int
+    +failed_executions: int
+    +average_execution_time_seconds: Optional[float]
+    +success_rate_percentage: Optional[float]
+    +monitoring_enabled: bool
+    +alerting_enabled: bool
+    +alert_thresholds: Dict[str, Any]
+    +security_level: str
+    +compliance_requirements: List[str]
+    +access_control: Dict[str, Any]
+    +created_at: datetime
+    +updated_at: datetime
+    +activated_at: Optional[datetime]
+    +deactivated_at: Optional[datetime]
+  }
+  class ScanAnomalyAlert {
+    +anomaly_id: str
+    +anomaly_type: str
+    +anomaly_severity: str
+    +anomaly_score: float
+    +affected_scan_id: Optional[str]
+    +detection_timestamp: datetime
+    +potential_causes: List[str]
+    +recommended_actions: List[str]
+  }
+  class ComplianceWorkflowTemplate {
+    +__tablename__: 
+    +id: Optional[int]
+    +name: str
+    +description: Optional[str]
+    +template_id: str
+    +workflow_type: WorkflowType
+    +framework: Optional[str]
+    +steps_template: List[Dict[str, Any]]
+    +triggers_template: List[Dict[str, Any]]
+    +default_variables: Dict[str, Any]
+    +estimated_completion_hours: Optional[int]
+    +complexity_level: str
+    +required_roles: List[str]
+    +category: Optional[str]
+    +usage_count: int
+    +created_at: datetime
+    +updated_at: datetime
+    +created_by: Optional[str]
+    +is_active: bool
+  }
+  class OrchestrationAnalytics {
+    +total_executions: int
+    +success_rate: float
+    +average_execution_time: float
+    +resource_utilization: Dict[str, float]
+  }
+  class ScanWorkflowExecutionResponse {
+    +id: int
+    +execution_id: str
+    +step_name: str
+    +step_type: str
+    +step_order: int
+    +status: ScanWorkflowStatus
+    +progress_percentage: float
+    +retry_attempt: int
+    +duration_seconds: Optional[float]
+    +quality_score: float
+    +sla_compliance: bool
+    +queued_at: datetime
+    +started_at: Optional[datetime]
+    +completed_at: Optional[datetime]
+  }
+  class ScanExecution {
+    +__tablename__: 
+    +id: Optional[int]
+    +execution_id: str
+    +scan_id: Optional[str]
+    +rule_id: int
+    +rule_set_id: Optional[int]
+    +orchestration_job_id: Optional[int]
+    +data_source_id: Optional[int]
+    +environment: str
+    +execution_context: Dict[str, Any]
+    +status: str
+    +phase: str
+    +progress_percentage: float
+    +scheduled_at: Optional[datetime]
+    +queued_at: Optional[datetime]
+    +started_at: Optional[datetime]
+    +completed_at: Optional[datetime]
+    +duration_seconds: Optional[float]
+    +timeout_seconds: Optional[int]
+    +cpu_usage: Optional[float]
+    +memory_usage: Optional[float]
+    +network_io: Optional[float]
+    +storage_io: Optional[float]
+    +resource_metrics: Dict[str, Any]
+    +result_status: str
+    +result_summary: Optional[str]
+    +result_details: Optional[Dict[str, Any]]
+    +output_files: Optional[List[str]]
+    +artifacts: Optional[Dict[str, Any]]
+    +error_message: Optional[str]
+    +error_code: Optional[str]
+    +error_details: Optional[Dict[str, Any]]
+    +retry_count: int
+    +max_retries: int
+    +retry_delay_seconds: Optional[int]
+    +quality_score: Optional[float]
+    +validation_results: Optional[Dict[str, Any]]
+    +compliance_status: Optional[str]
+    +sla_compliance: Optional[bool]
+    +alerts_triggered: Optional[List[str]]
+    +notification_sent: bool
+    +escalation_level: Optional[str]
+    +audit_trail: Optional[Dict[str, Any]]
+    +compliance_frameworks: Optional[List[str]]
+    +regulatory_requirements: Optional[List[str]]
+    +tags: Optional[List[str]]
+    +execution_metadata: Dict[str, Any]
+    +created_by: str
+    +created_at: datetime
+    +updated_at: Optional[datetime]
+    +performance_metrics: Optional[Dict[str, Any]]
+    +bottleneck_analysis: Optional[Dict[str, Any]]
+    +optimization_recommendations: Optional[List[str]]
+  }
+  RacineJobWorkflow "1" --> "0..*" RacineWorkflowSchedule
+  RacineJobWorkflow "1" --> "0..*" RacineWorkflowStep
+  RacineJobWorkflow "1" --> "0..*" RacineWorkflowTemplate
+  RacineJobWorkflow "1" --> "0..*" RacineOrchestrationMaster
+  ScanWorkflow "1" --> "0..*" ScanWorkflowTemplate
+  ScanWorkflow "1" --> "0..*" WorkflowApproval
+  ScanWorkflow "1" --> "0..*" WorkflowTrigger
+  Workflow "1" --> "0..*" WorkflowExecution
+  Workflow "1" --> "0..*" WorkflowStep
+  ScanWorkflow "1" --> "0..*" WorkflowStage
+  Workflow "1" --> "0..*" WorkflowDependency
+  ScanOrchestrationJob "1" --> "0..*" ScanResourceAllocation
+  ScanOrchestrationJob "1" --> "0..*" ScanWorkflowExecution
+  ScanOrchestrationJob "1" --> "0..*" RacineOrchestrationMaster
+  RacineOrchestrationMaster "1" --> "0..*" RacineWorkflowExecution
+  Scan "1" --> "0..*" ScanRuleSet
+  ScanAIModel "1" --> "0..*" ScanPrediction
+  ScanIntelligenceEngine "1" --> "0..*" ScanOptimizationRecord
+  WorkflowStage "1" --> "0..*" WorkflowTask
+  RacineWorkflowMetrics "1" --> "0..*" RacineWorkflowStep
+  Scan "1" --> "0..*" ScanResult
+  ScanAIModel "1" --> "0..*" ScanIntelligenceEngine
+  ScanPerformanceAlert "1" --> "0..*" ScanPerformanceMetric
+  ScanResultClassification "1" --> "0..*" ScanResult
+  RacineWorkflowAudit "1" --> "0..*" RacineJobWorkflow
+  RacineJobWorkflow ..> ScanOrchestrationJobCreate
+  RacineJobWorkflow ..> ComplianceWorkflowCreate
+  RacineJobWorkflow ..> ComplianceWorkflowResponse
+  RacineJobWorkflow ..> WorkflowTemplateCreate
+  RacineJobWorkflow ..> StewardshipWorkflow
+  RacineJobWorkflow ..> OrchestrationExecution
+  RacineJobWorkflow ..> WorkflowCreate
+  RacineJobWorkflow ..> OrchestrationPerformanceSnapshot
+  RacineJobWorkflow ..> ScanWorkflowExecutionDetail
+  RacineJobWorkflow ..> ScanPerformanceAnalytics
+  RacineJobWorkflow ..> ScanPredictionCreate
+  RacineJobWorkflow ..> WorkflowTemplate
+  RacineJobWorkflow ..> RacineCollaborationWorkflow
+  RacineJobWorkflow ..> ScanPerformanceOptimization
+  RacineJobWorkflow ..> OrchestrationStep
+  RacineJobWorkflow ..> ScanCatalogEnrichment
+  RacineJobWorkflow ..> ScanPatternRecognition
+  RacineJobWorkflow ..> OrchestrationCreateRequest
+  RacineJobWorkflow ..> WorkflowMetrics
+  RacineJobWorkflow ..> ScanClassificationIntegration
+  RacineJobWorkflow ..> WorkflowSchedule
+  RacineJobWorkflow ..> ReviewWorkflowEngine
+  RacineJobWorkflow ..> ScanAIModelCreate
+  RacineJobWorkflow ..> WorkflowCondition
+  RacineJobWorkflow ..> ScanComplianceIntegration
+  RacineJobWorkflow ..> WorkflowExecuteRequest
+  RacineJobWorkflow ..> OrchestrationDependency
+  RacineJobWorkflow ..> ScanRuleTemplate
+  RacineJobWorkflow ..> ScanSchedule
+  RacineJobWorkflow ..> ScanIntelligenceEngineResponse
+  RacineJobWorkflow ..> ComplianceWorkflowUpdate
+  RacineJobWorkflow ..> ScanOrchestrationJobResponse
+  RacineJobWorkflow ..> ScanAnomalyDetection
+  RacineJobWorkflow ..> ScanOrchestrationMaster
+  RacineJobWorkflow ..> ComplianceWorkflowExecution
+  RacineJobWorkflow ..> ScanResourceOptimization
+  RacineJobWorkflow ..> WorkflowExecutionResponse
+  RacineJobWorkflow ..> ScanRule
+  RacineJobWorkflow ..> OrchestrationResponse
+  RacineJobWorkflow ..> OrchestrationStageExecution
+  RacineJobWorkflow ..> ScanIntelligenceEngineCreate
+  RacineJobWorkflow ..> ScanOptimizationRequest
+  RacineJobWorkflow ..> ApprovalWorkflow
+  RacineJobWorkflow ..> ComplianceWorkflow
+  RacineJobWorkflow ..> ScanOrchestration
+  RacineJobWorkflow ..> WorkflowResponse
+  RacineJobWorkflow ..> OrchestrationPipeline
+  RacineJobWorkflow ..> ScanAnomalyAlert
+  RacineJobWorkflow ..> ComplianceWorkflowTemplate
+  RacineJobWorkflow ..> OrchestrationAnalytics
+  RacineJobWorkflow ..> ScanWorkflowExecutionResponse
+  RacineJobWorkflow ..> ScanExecution
+  classDef domain fill:#F8FAFF,stroke:#111827,color:#111827
+  class ApprovalWorkflow,ComplianceWorkflow,ComplianceWorkflowCreate,ComplianceWorkflowExecution,ComplianceWorkflowResponse,ComplianceWorkflowTemplate,ComplianceWorkflowUpdate,OrchestrationAnalytics,OrchestrationCreateRequest,OrchestrationDependency,OrchestrationExecution,OrchestrationPerformanceSnapshot,OrchestrationPipeline,OrchestrationResponse,OrchestrationStageExecution,OrchestrationStep,RacineCollaborationWorkflow,RacineJobWorkflow,RacineOrchestrationMaster,RacineWorkflowAudit,RacineWorkflowExecution,RacineWorkflowMetrics,RacineWorkflowSchedule,RacineWorkflowStep,RacineWorkflowTemplate,ReviewWorkflowEngine,Scan,ScanAIModel,ScanAIModelCreate,ScanAnomalyAlert,ScanAnomalyDetection,ScanCatalogEnrichment,ScanClassificationIntegration,ScanComplianceIntegration,ScanExecution,ScanIntelligenceEngine,ScanIntelligenceEngineCreate,ScanIntelligenceEngineResponse,ScanOptimizationRecord,ScanOptimizationRequest,ScanOrchestration,ScanOrchestrationJob,ScanOrchestrationJobCreate,ScanOrchestrationJobResponse,ScanOrchestrationMaster,ScanPatternRecognition,ScanPerformanceAlert,ScanPerformanceAnalytics,ScanPerformanceMetric,ScanPerformanceOptimization,ScanPrediction,ScanPredictionCreate,ScanResourceAllocation,ScanResourceOptimization,ScanResult,ScanResultClassification,ScanRule,ScanRuleSet,ScanRuleTemplate,ScanSchedule,ScanWorkflow,ScanWorkflowExecution,ScanWorkflowExecutionDetail,ScanWorkflowExecutionResponse,ScanWorkflowTemplate,StewardshipWorkflow,Workflow,WorkflowApproval,WorkflowCondition,WorkflowCreate,WorkflowDependency,WorkflowExecuteRequest,WorkflowExecution,WorkflowExecutionResponse,WorkflowMetrics,WorkflowResponse,WorkflowSchedule,WorkflowStage,WorkflowStep,WorkflowTask,WorkflowTemplate,WorkflowTemplateCreate,WorkflowTrigger domain

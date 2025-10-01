@@ -1,0 +1,587 @@
+@startuml DataWave_Deployment_Architecture
+!theme aws-orange
+
+title DataWave Enterprise - Deployment Architecture
+
+skinparam backgroundColor #f8f9fa
+skinparam defaultFontName "Segoe UI"
+skinparam roundcorner 10
+skinparam shadowing true
+
+' Node styling
+skinparam node {
+    BackgroundColor #e8f5e8
+    BorderColor #4caf50
+    FontSize 12
+    FontStyle bold
+}
+
+' Component styling in deployment
+skinparam component {
+    BackgroundColor #fff3e0
+    BorderColor #f57c00
+    FontSize 10
+}
+
+' Production Environment
+node "Production Kubernetes Cluster" as ProdK8s {
+    
+    node "Frontend Tier" as FrontendTier {
+        component "Next.js App\n(3 replicas)" as NextJS
+        component "Nginx Ingress\nController" as Nginx
+        component "CDN\n(CloudFlare)" as CDN
+    }
+    
+    node "API Gateway Tier" as APITier {
+        component "Smart Proxy Router\n(3 replicas)" as Proxy
+        component "Authentication Gateway\n(2 replicas)" as AuthGW
+        component "Rate Limiter\n(2 replicas)" as RateLimit
+    }
+    
+    node "Service Tier" as ServiceTier {
+        component "Catalog Service\n(5 replicas)" as CatalogSvc
+        component "Scan Orchestration\n(3 replicas)" as ScanSvc
+        component "AI/ML Service\n(2 replicas)" as AISvc
+        component "Compliance Service\n(2 replicas)" as CompSvc
+        component "Racine Orchestrator\n(3 replicas)" as RacineSvc
+    }
+    
+    node "Background Services" as BackgroundTier {
+        component "Scan Scheduler\n(2 replicas)" as Scheduler
+        component "Performance Monitor\n(1 replica)" as PerfMonitor
+        component "Notification Service\n(2 replicas)" as NotificationSvc
+        component "Audit Logger\n(2 replicas)" as AuditLog
+    }
+}
+
+' Database Tier
+node "Database Cluster" as DBCluster {
+    node "PostgreSQL Primary" as PGPrimary {
+        component "PostgreSQL 15\n(Primary)" as PG1
+        component "Connection Pool\n(PgBouncer)" as PgBouncer1
+    }
+    
+    node "PostgreSQL Replica 1" as PGReplica1 {
+        component "PostgreSQL 15\n(Read Replica)" as PG2
+        component "Connection Pool\n(PgBouncer)" as PgBouncer2
+    }
+    
+    node "PostgreSQL Replica 2" as PGReplica2 {
+        component "PostgreSQL 15\n(Read Replica)" as PG3
+        component "Connection Pool\n(PgBouncer)" as PgBouncer3
+    }
+}
+
+' Cache and Vector Storage
+node "Cache & Vector Tier" as CacheTier {
+    node "Redis Cluster" as RedisCluster {
+        component "Redis Master\n(Session Store)" as RedisMaster
+        component "Redis Replica 1\n(Query Cache)" as RedisReplica1
+        component "Redis Replica 2\n(Pub/Sub)" as RedisReplica2
+    }
+    
+    node "Vector Database" as VectorTier {
+        component "Pinecone\n(Embeddings)" as Pinecone
+        component "Weaviate\n(Knowledge Graph)" as Weaviate
+    }
+}
+
+' External Systems
+cloud "Cloud Providers" as CloudProviders {
+    component "AWS Services" as AWS
+    component "Azure Resources" as Azure
+    component "GCP Integration" as GCP
+}
+
+cloud "Enterprise Systems" as EnterpriseSys {
+    component "Active Directory" as AD
+    component "LDAP Server" as LDAP
+    component "SAML/SSO Provider" as SAML
+}
+
+' Monitoring & Observability
+node "Observability Stack" as ObservabilityStack {
+    component "Prometheus\n(Metrics)" as Prometheus
+    component "Grafana\n(Dashboards)" as Grafana
+    component "Jaeger\n(Tracing)" as Jaeger
+    component "ELK Stack\n(Logging)" as ELK
+}
+
+' Network connections
+CDN --> Nginx : "HTTPS/443"
+Nginx --> NextJS : "HTTP/3000"
+NextJS --> Proxy : "HTTP/8080"
+
+Proxy --> AuthGW : "HTTP/8081"
+Proxy --> RateLimit : "HTTP/8082"
+Proxy --> CatalogSvc : "HTTP/8001"
+Proxy --> ScanSvc : "HTTP/8002"
+Proxy --> AISvc : "HTTP/8003"
+Proxy --> CompSvc : "HTTP/8004"
+Proxy --> RacineSvc : "HTTP/8005"
+
+CatalogSvc --> PgBouncer1 : "PostgreSQL/5432"
+ScanSvc --> PgBouncer2 : "PostgreSQL/5432"
+AISvc --> Pinecone : "HTTPS/443"
+CompSvc --> PgBouncer3 : "PostgreSQL/5432"
+RacineSvc --> RedisMaster : "Redis/6379"
+
+Scheduler --> RedisReplica1 : "Redis/6379"
+PerfMonitor --> Prometheus : "HTTP/9090"
+NotificationSvc --> RedisReplica2 : "Redis/6379"
+AuditLog --> PgBouncer1 : "PostgreSQL/5432"
+
+AuthGW --> AD : "LDAPS/636"
+AuthGW --> SAML : "HTTPS/443"
+
+AISvc --> AWS : "HTTPS/443"
+CatalogSvc --> Azure : "HTTPS/443"
+ScanSvc --> GCP : "HTTPS/443"
+
+' Monitoring connections
+ProdK8s --> Prometheus : "Metrics Collection"
+DBCluster --> Prometheus : "DB Metrics"
+CacheTier --> Prometheus : "Cache Metrics"
+Prometheus --> Grafana : "Visualization"
+ProdK8s --> Jaeger : "Distributed Tracing"
+ProdK8s --> ELK : "Application Logs"
+
+note top of ProdK8s : "Auto-scaling enabled\nHorizontal Pod Autoscaler\nResource limits enforced"
+note top of DBCluster : "High availability setup\nAutomatic failover\nDaily backups"
+note top of CacheTier : "Redis Sentinel for HA\nData persistence enabled\nCluster mode"
+
+@enduml
+
+@startuml DataWave_Use_Case_Diagram
+!theme aws-orange
+
+title DataWave Enterprise - Use Case Diagram
+
+skinparam backgroundColor #f8f9fa
+skinparam defaultFontName "Segoe UI"
+skinparam roundcorner 8
+skinparam shadowing true
+
+' Actor styling
+skinparam actor {
+    BackgroundColor #e3f2fd
+    BorderColor #1976d2
+}
+
+' Use case styling
+skinparam usecase {
+    BackgroundColor #fff3e0
+    BorderColor #f57c00
+}
+
+' System boundary
+rectangle "DataWave Enterprise Data Governance Platform" {
+    
+    ' Data Discovery & Cataloging
+    package "Data Discovery & Cataloging" {
+        usecase "Discover Data Assets" as UC1
+        usecase "Generate Asset Metadata" as UC2
+        usecase "Analyze Data Quality" as UC3
+        usecase "Track Data Lineage" as UC4
+        usecase "Classify Data Sensitivity" as UC5
+    }
+    
+    ' Scanning & Monitoring
+    package "Scanning & Monitoring" {
+        usecase "Configure Scan Rules" as UC6
+        usecase "Execute Data Scans" as UC7
+        usecase "Monitor Scan Performance" as UC8
+        usecase "Handle Scan Errors" as UC9
+        usecase "Schedule Automated Scans" as UC10
+    }
+    
+    ' Compliance Management
+    package "Compliance Management" {
+        usecase "Assess Compliance Status" as UC11
+        usecase "Generate Compliance Reports" as UC12
+        usecase "Track Remediation Plans" as UC13
+        usecase "Manage Risk Assessments" as UC14
+        usecase "Audit Data Access" as UC15
+    }
+    
+    ' AI/ML Operations
+    package "AI/ML Operations" {
+        usecase "Configure AI Models" as UC16
+        usecase "Generate Predictions" as UC17
+        usecase "Train ML Models" as UC18
+        usecase "Monitor Model Performance" as UC19
+        usecase "Optimize Hyperparameters" as UC20
+    }
+    
+    ' User & Access Management
+    package "User & Access Management" {
+        usecase "Authenticate Users" as UC21
+        usecase "Manage User Roles" as UC22
+        usecase "Control Data Access" as UC23
+        usecase "Enable Multi-Factor Auth" as UC24
+        usecase "Integrate with SSO" as UC25
+    }
+    
+    ' Workflow Orchestration
+    package "Workflow Orchestration" {
+        usecase "Create Orchestrations" as UC26
+        usecase "Execute Workflows" as UC27
+        usecase "Manage Workspaces" as UC28
+        usecase "Collaborate on Projects" as UC29
+        usecase "Monitor Executions" as UC30
+    }
+}
+
+' Actors
+actor "Data Governance Analyst" as DGA
+actor "Compliance Officer" as CO
+actor "Data Scientist" as DS
+actor "System Administrator" as SA
+actor "Business User" as BU
+actor "Auditor" as AUD
+
+' External Systems
+actor "Cloud Provider" as CP
+actor "Enterprise Directory" as ED
+actor "Legacy System" as LS
+
+' Primary Actor Relationships
+DGA --> UC1 : "Initiates"
+DGA --> UC2 : "Reviews"
+DGA --> UC3 : "Analyzes"
+DGA --> UC4 : "Tracks"
+DGA --> UC5 : "Classifies"
+
+CO --> UC6 : "Configures"
+CO --> UC7 : "Executes"
+CO --> UC11 : "Initiates"
+CO --> UC12 : "Generates"
+CO --> UC13 : "Manages"
+CO --> UC14 : "Conducts"
+
+DS --> UC16 : "Configures"
+DS --> UC17 : "Requests"
+DS --> UC18 : "Initiates"
+DS --> UC19 : "Monitors"
+DS --> UC20 : "Optimizes"
+
+SA --> UC21 : "Manages"
+SA --> UC22 : "Administers"
+SA --> UC23 : "Controls"
+SA --> UC24 : "Configures"
+SA --> UC25 : "Integrates"
+
+BU --> UC26 : "Creates"
+BU --> UC27 : "Executes"
+BU --> UC28 : "Manages"
+BU --> UC29 : "Participates"
+
+AUD --> UC15 : "Reviews"
+AUD --> UC12 : "Requests"
+AUD --> UC14 : "Validates"
+
+' Secondary Actor Relationships
+UC7 --> CP : "Connects to"
+UC21 --> ED : "Authenticates with"
+UC1 --> LS : "Discovers from"
+
+' Use Case Dependencies
+UC1 ..> UC2 : "<<includes>>"
+UC2 ..> UC3 : "<<includes>>"
+UC3 ..> UC4 : "<<extends>>"
+UC6 ..> UC7 : "<<includes>>"
+UC7 ..> UC8 : "<<includes>>"
+UC11 ..> UC12 : "<<includes>>"
+UC16 ..> UC17 : "<<includes>>"
+UC17 ..> UC19 : "<<extends>>"
+UC21 ..> UC22 : "<<extends>>"
+UC26 ..> UC27 : "<<includes>>"
+
+note top of DGA : "Primary user for data\ndiscovery and cataloging"
+note top of CO : "Responsible for compliance\nand regulatory adherence"
+note top of DS : "Uses AI/ML capabilities\nfor advanced analytics"
+
+@enduml
+
+@startuml DataWave_State_Diagram
+!theme aws-orange
+
+title DataWave Enterprise - Asset Lifecycle State Diagram
+
+skinparam backgroundColor #f8f9fa
+skinparam defaultFontName "Segoe UI"
+skinparam roundcorner 8
+skinparam shadowing true
+
+' State styling
+skinparam state {
+    BackgroundColor #e8f5e8
+    BorderColor #4caf50
+    FontSize 12
+}
+
+[*] --> Discovered : Asset Discovery\nInitiated
+
+state Discovered {
+    Discovered : Asset found in data source
+    Discovered : Basic metadata extracted
+    Discovered : Assigned unique identifier
+}
+
+Discovered --> Analyzing : Quality Analysis\nTriggered
+
+state Analyzing {
+    Analyzing : Data profiling in progress
+    Analyzing : Quality metrics calculation
+    Analyzing : AI enhancement processing
+    
+    state "Quality Assessment" as QA {
+        QA : Completeness check
+        QA : Accuracy validation
+        QA : Consistency analysis
+    }
+    
+    state "AI Processing" as AI {
+        AI : Semantic tag generation
+        AI : Description enhancement
+        AI : Embedding creation
+    }
+}
+
+Analyzing --> Cataloged : Analysis Complete\n[Quality Score > 0.7]
+Analyzing --> PendingReview : Analysis Complete\n[Quality Score <= 0.7]
+
+state PendingReview {
+    PendingReview : Requires manual review
+    PendingReview : Quality issues identified
+    PendingReview : Awaiting analyst approval
+}
+
+PendingReview --> Cataloged : Manual Approval\nReceived
+PendingReview --> Rejected : Quality Issues\nNot Resolved
+
+state Cataloged {
+    Cataloged : Available in catalog
+    Cataloged : Metadata complete
+    Cataloged : Lineage tracked
+    Cataloged : Compliance assessed
+    
+    state "Active Monitoring" as AM {
+        AM : Scheduled scans running
+        AM : Quality monitoring active
+        AM : Usage tracking enabled
+    }
+}
+
+Cataloged --> Scanning : Compliance Scan\nScheduled
+
+state Scanning {
+    Scanning : Rule-based scanning
+    Scanning : Pattern matching
+    Scanning : AI-enhanced detection
+    
+    state "Scan Execution" as SE {
+        SE : Data sampling
+        SE : Pattern application
+        SE : Result recording
+    }
+}
+
+Scanning --> Compliant : Scan Passed\n[No Issues Found]
+Scanning --> NonCompliant : Scan Failed\n[Issues Detected]
+Scanning --> ScanError : Technical Error\nOccurred
+
+state Compliant {
+    Compliant : Compliance verified
+    Compliant : Risk assessment low
+    Compliant : Audit trail updated
+}
+
+state NonCompliant {
+    NonCompliant : Compliance issues found
+    NonCompliant : Risk assessment high
+    NonCompliant : Remediation required
+    
+    state "Remediation Planning" as RP {
+        RP : Issue prioritization
+        RP : Action plan creation
+        RP : Timeline establishment
+    }
+}
+
+state ScanError {
+    ScanError : Technical failure occurred
+    ScanError : Error logged and reported
+    ScanError : Retry scheduled
+}
+
+Compliant --> Scanning : Next Scheduled\nScan
+NonCompliant --> Remediation : Remediation Plan\nApproved
+
+state Remediation {
+    Remediation : Corrective actions taken
+    Remediation : Progress monitored
+    Remediation : Validation pending
+}
+
+Remediation --> Scanning : Remediation\nComplete
+ScanError --> Scanning : Retry Scan\nAfter Delay
+
+Cataloged --> Deprecated : Asset Marked\nfor Deprecation
+
+state Deprecated {
+    Deprecated : No longer actively used
+    Deprecated : Scheduled for archival
+    Deprecated : Access restricted
+}
+
+Deprecated --> Archived : Archival Period\nExpired
+
+state Archived {
+    Archived : Moved to archive storage
+    Archived : Metadata preserved
+    Archived : Limited access only
+}
+
+Rejected --> [*] : Asset Removed\nfrom System
+Archived --> [*] : Retention Period\nExpired
+
+' Concurrent states for monitoring
+Cataloged |||| MonitoringActive : Parallel monitoring
+
+state MonitoringActive {
+    state "Performance Monitoring" as PM {
+        PM : Query performance tracking
+        PM : Usage pattern analysis
+        PM : Resource utilization
+    }
+    
+    state "Security Monitoring" as SM {
+        SM : Access pattern analysis
+        SM : Anomaly detection
+        SM : Threat assessment
+    }
+}
+
+note top of Discovered : "Initial state after\nasset discovery"
+note top of Cataloged : "Primary operational state\nwith active monitoring"
+note top of NonCompliant : "Requires immediate\nattention and remediation"
+
+@enduml
+
+@startuml DataWave_Activity_Diagram
+!theme aws-orange
+
+title DataWave Enterprise - Compliance Assessment Activity Flow
+
+skinparam backgroundColor #f8f9fa
+skinparam defaultFontName "Segoe UI"
+skinparam roundcorner 8
+skinparam shadowing true
+
+' Activity styling
+skinparam activity {
+    BackgroundColor #fff3e0
+    BorderColor #f57c00
+    FontSize 11
+}
+
+start
+
+:Compliance Officer initiates assessment;
+
+:Load compliance framework requirements;
+note right: GDPR, HIPAA, SOC2, etc.
+
+:Query asset inventory for assessment scope;
+
+fork
+    :Collect data source metadata;
+fork again
+    :Retrieve scan execution results;
+fork again
+    :Gather user access logs;
+end fork
+
+:Consolidate assessment data;
+
+:Initialize AI-powered gap analysis;
+
+partition "Framework Assessment Loop" {
+    repeat
+        :Select next compliance framework;
+        
+        :Evaluate framework requirements;
+        
+        fork
+            :Calculate compliance percentage;
+        fork again
+            :Identify gaps and violations;
+        fork again
+            :Assess risk levels;
+        end fork
+        
+        :Generate framework assessment report;
+        
+        if (Critical violations found?) then (yes)
+            :Flag for immediate attention;
+            :Create urgent remediation task;
+        else (no)
+            :Continue assessment;
+        endif
+        
+    repeat while (More frameworks to assess?) is (yes)
+    -> no;
+}
+
+:Aggregate all framework results;
+
+:Calculate overall compliance score;
+
+if (Overall score < 70%?) then (yes)
+    :Generate high-priority alert;
+    
+    partition "Remediation Planning" {
+        :Prioritize violations by risk level;
+        
+        :Generate AI-powered remediation suggestions;
+        
+        :Create remediation timeline;
+        
+        :Assign remediation owners;
+        
+        :Set up monitoring alerts;
+    }
+else (no)
+    :Generate standard compliance report;
+endif
+
+fork
+    :Store assessment results in database;
+fork again
+    :Update compliance dashboard;
+fork again
+    :Send notifications to stakeholders;
+fork again
+    :Create audit trail entries;
+end fork
+
+:Generate executive summary;
+
+:Format final compliance report;
+
+if (Automated distribution enabled?) then (yes)
+    :Distribute report automatically;
+else (no)
+    :Queue for manual review;
+endif
+
+:Schedule next assessment cycle;
+
+:Update compliance monitoring rules;
+
+stop
+
+note top : "Comprehensive compliance assessment\nwith AI-powered analysis and\nautomated remediation planning"
+
+@enduml

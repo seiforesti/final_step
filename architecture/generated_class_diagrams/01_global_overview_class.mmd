@@ -1,0 +1,84 @@
+classDiagram
+%% High-level global overview (no detailed members)
+%% Emphasizes: Fort Cohésion (within groups) & Faible Couplage (across groups)
+%% Acyclic, central connectors only
+
+%% Group representative classes (one per domain)
+class CoreOrchestrationHub
+class MetadataCore
+class AuthRbacDomain
+class DataSourcesDomain
+class CatalogDomain
+class ScansDomain
+class ClassificationDomain
+class ComplianceDomain
+
+%% Optional shared bus/connectors
+class EventBus
+class AuditTrail
+
+%% Styling for groups
+classDef hub fill:#111827,stroke:#111827,color:#ffffff
+classDef core fill:#fef3c7,stroke:#111827,color:#111827
+classDef auth fill:#dbeafe,stroke:#0f172a,color:#0f172a
+classDef sources fill:#dcfce7,stroke:#064e3b,color:#064e3b
+classDef catalog fill:#fde68a,stroke:#7c2d12,color:#7c2d12
+classDef scans fill:#fee2e2,stroke:#7f1d1d,color:#7f1d1d
+classDef classify fill:#e9d5ff,stroke:#4c1d95,color:#4c1d95
+classDef compliance fill:#f3f4f6,stroke:#111827,color:#111827
+classDef bus fill:#e5e7eb,stroke:#374151,color:#111827
+
+
+
+%% Apply styles
+class CoreOrchestrationHub hub
+class MetadataCore core
+class AuthRbacDomain auth
+class DataSourcesDomain sources
+class CatalogDomain catalog
+class ScansDomain scans
+class ClassificationDomain classify
+class ComplianceDomain compliance
+class EventBus bus
+class AuditTrail bus
+
+%% Minimal, acyclic links via central hub and metadata core to demonstrate low coupling
+%% Hub-centric orchestration
+CoreOrchestrationHub --> DataSourcesDomain
+CoreOrchestrationHub --> ScansDomain
+CoreOrchestrationHub --> ClassificationDomain
+CoreOrchestrationHub --> CatalogDomain
+CoreOrchestrationHub --> ComplianceDomain
+CoreOrchestrationHub --> AuthRbacDomain
+
+%% Metadata is read/shared but not the orchestrator; edge from domains to metadata to keep direction unified
+DataSourcesDomain --> MetadataCore
+ScansDomain --> MetadataCore
+ClassificationDomain --> MetadataCore
+CatalogDomain --> MetadataCore
+ComplianceDomain --> MetadataCore
+AuthRbacDomain --> MetadataCore
+
+%% Event bus fan-out from hub only (avoid peer-to-peer edges)
+CoreOrchestrationHub --> EventBus
+EventBus --> DataSourcesDomain
+EventBus --> ScansDomain
+EventBus --> ClassificationDomain
+EventBus --> CatalogDomain
+EventBus --> ComplianceDomain
+EventBus --> AuthRbacDomain
+
+%% Centralized audit to avoid cross-links
+CoreOrchestrationHub --> AuditTrail
+DataSourcesDomain --> AuditTrail
+ScansDomain --> AuditTrail
+ClassificationDomain --> AuditTrail
+CatalogDomain --> AuditTrail
+ComplianceDomain --> AuditTrail
+AuthRbacDomain --> AuditTrail
+
+%% Notes for presentation
+%% - Strong cohesion: each Domain encapsulates its internal classes (shown separately per group)
+%% - Loose coupling: only Hub/Bus/Metadata/Audit provide cross-domain interactions
+%% - Acyclic: all arrows flow outward to Hub/Bus and into Metadata/Audit (no cycles)
+

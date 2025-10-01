@@ -1,0 +1,695 @@
+\chapter{Section 2: Data Layer Architecture \& Schema Design}
+
+\section{Introduction}
+
+The DataWave platform implements a sophisticated data layer architecture with 59 specialized model files totaling over 1.2 million lines of code. This section provides comprehensive analysis of the database schema design, entity relationships, data modeling patterns, and advanced architectural decisions that enable enterprise-scale data governance operations.
+
+\section{Data Architecture Overview}
+
+\subsection{Model Distribution Analysis}
+
+The data layer consists of 59 model files organized into specialized domains:
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|l|r|r|l|}
+\hline
+\textbf{Model Category} & \textbf{Files} & \textbf{Size (bytes)} & \textbf{Key Models} \\
+\hline
+Advanced Catalog & 1 & 57,460 & IntelligentDataAsset, LineageGraph \\
+Scan Logic & 3 & 172,214 & EnhancedScanRuleSet, ScanExecution \\
+AI/ML Intelligence & 2 & 68,084 & AIModelConfiguration, MLPrediction \\
+Compliance & 3 & 48,632 & ComplianceRequirement, Assessment \\
+Authentication & 1 & 15,328 & User, Role, Permission \\
+Racine Orchestration & 9 & 270,359 & RacineOrchestrationMaster \\
+Classification & 1 & 26,936 & ClassificationRule, Result \\
+Data Lineage & 1 & 18,822 & LineageNode, Relationship \\
+Quality Management & 1 & 24,210 & QualityRule, Assessment \\
+Analytics & 1 & 12,596 & AnalyticsMetric, Dashboard \\
+\hline
+\textbf{Total} & \textbf{59} & \textbf{1,200,000+} & \textbf{200+ Models} \\
+\hline
+\end{tabular}
+\caption{Data Model Distribution by Domain}
+\end{table}
+
+\subsection{Database Technology Stack}
+
+\begin{itemize}
+    \item \textbf{Primary Database}: PostgreSQL 14+ with advanced indexing
+    \item \textbf{ORM Framework}: SQLModel with Pydantic integration
+    \item \textbf{Schema Management}: Alembic migrations with versioning
+    \item \textbf{Connection Pooling}: Advanced pool management with auto-scaling
+    \item \textbf{Caching Layer}: Redis for distributed caching and sessions
+    \item \textbf{Search Engine}: Elasticsearch for full-text search capabilities
+\end{itemize}
+
+\section{Core Domain Models Analysis}
+
+\subsection{Advanced Catalog Domain Models}
+
+The Advanced Catalog domain implements the most sophisticated data models in the system:
+
+\subsubsection{IntelligentDataAsset Model}
+\begin{lstlisting}[language=Python, caption=IntelligentDataAsset Core Structure]
+class IntelligentDataAsset(SQLModel, table=True):
+    """Advanced data asset with AI-powered discovery and quality management"""
+    __tablename__ = "intelligent_data_assets"
+    
+    # Primary identification
+    id: Optional[int] = Field(default=None, primary_key=True)
+    asset_uuid: str = Field(index=True, unique=True)
+    qualified_name: str = Field(index=True, unique=True)
+    display_name: str = Field(max_length=255)
+    
+    # Asset Classification
+    asset_type: AssetType = Field(index=True)
+    asset_status: AssetStatus = Field(default=AssetStatus.ACTIVE)
+    asset_criticality: AssetCriticality = Field(default=AssetCriticality.MEDIUM)
+    data_sensitivity: DataSensitivity = Field(default=DataSensitivity.INTERNAL)
+    
+    # AI-Enhanced Metadata
+    ai_generated_description: Optional[str] = Field(sa_column=Column(Text))
+    semantic_tags: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    ai_confidence_score: float = Field(default=0.0, ge=0.0, le=1.0)
+    semantic_embedding: Optional[List[float]] = Field(default=None, sa_column=Column(JSON))
+    
+    # Data Quality Metrics
+    quality_score: float = Field(default=0.0, ge=0.0, le=1.0, index=True)
+    completeness: float = Field(default=0.0, ge=0.0, le=1.0)
+    accuracy: float = Field(default=0.0, ge=0.0, le=1.0)
+    consistency: float = Field(default=0.0, ge=0.0, le=1.0)
+\end{lstlisting}
+
+\subsubsection{Advanced Enumeration System}
+
+The catalog domain implements 13 sophisticated enumerations:
+
+\begin{itemize}
+    \item \textbf{AssetType}: 15 asset types (table, view, dataset, stream, API, etc.)
+    \item \textbf{AssetStatus}: 8 lifecycle states (active, deprecated, archived, etc.)
+    \item \textbf{DataQuality}: 6 quality levels with percentage ranges
+    \item \textbf{LineageDirection}: 3 directional relationships
+    \item \textbf{LineageType}: 10 relationship types (transformation, aggregation, etc.)
+    \item \textbf{DiscoveryMethod}: 8 discovery mechanisms including AI detection
+    \item \textbf{AssetCriticality}: 5 business criticality levels
+    \item \textbf{DataSensitivity}: 5 security classifications
+    \item \textbf{UsageFrequency}: 8 usage patterns from real-time to rarely
+\end{itemize}
+
+\subsection{Scan Logic Domain Models}
+
+The scan logic domain contains 3 major model files with sophisticated scanning capabilities:
+
+\subsubsection{DataSource Model Architecture}
+\begin{lstlisting}[language=Python, caption=DataSource Model Structure]
+class DataSource(SQLModel, table=True):
+    """Enterprise data source with comprehensive metadata"""
+    __tablename__ = "datasource"
+    
+    id: Optional[int] = Field(default=None, primary_key=True)
+    name: str = Field(index=True, unique=True)
+    description: Optional[str] = None
+    
+    # Source Configuration
+    source_type: DataSourceType = Field(index=True)
+    cloud_provider: Optional[CloudProvider] = None
+    environment: Environment = Field(default=Environment.PRODUCTION)
+    location: DataSourceLocation = Field(default=DataSourceLocation.CLOUD)
+    
+    # Connection Details
+    host: str
+    port: int
+    database_name: Optional[str] = None
+    username: str
+    encrypted_password: str
+    
+    # Status and Health
+    status: DataSourceStatus = Field(default=DataSourceStatus.ACTIVE)
+    last_connection_test: Optional[datetime] = None
+    connection_test_result: Optional[str] = None
+    
+    # Scanning Configuration
+    scan_frequency: ScanFrequency = Field(default=ScanFrequency.DAILY)
+    auto_discovery_enabled: bool = Field(default=True)
+    
+    # Classification and Compliance
+    data_classification: DataClassification = Field(default=DataClassification.INTERNAL)
+    criticality: Criticality = Field(default=Criticality.MEDIUM)
+\end{lstlisting}
+
+\subsubsection{Advanced Scan Rule Models}
+
+The system implements sophisticated scan rule models with AI integration:
+
+\begin{itemize}
+    \item \textbf{EnhancedScanRuleSet}: 64,674 bytes of advanced rule definitions
+    \item \textbf{IntelligentScanRule}: AI-powered pattern matching
+    \item \textbf{RuleExecutionHistory}: Comprehensive audit trails
+    \item \textbf{ScanPerformanceMetrics}: Real-time performance monitoring
+\end{itemize}
+
+\subsection{AI/ML Intelligence Domain Models}
+
+The AI/ML domain implements cutting-edge model architecture:
+
+\subsubsection{AI Model Configuration}
+\begin{lstlisting}[language=Python, caption=Advanced AI Model Types]
+class AIModelType(str, Enum):
+    """Advanced AI Model Types for Enterprise Classification"""
+    # Large Language Models
+    GPT_4_TURBO = "gpt_4_turbo"
+    CLAUDE_OPUS = "claude_opus"
+    GEMINI_PRO = "gemini_pro"
+    LLAMA_3 = "llama_3"
+    
+    # Specialized Models
+    CUSTOM_LLM = "custom_llm"
+    FINE_TUNED_GPT = "fine_tuned_gpt"
+    DOMAIN_SPECIFIC = "domain_specific"
+    
+    # Multi-Modal Models
+    MULTIMODAL = "multimodal"
+    VISION_LANGUAGE = "vision_language"
+    
+    # Reasoning and Planning
+    REASONING_ENGINE = "reasoning_engine"
+    PLANNING_AGENT = "planning_agent"
+    CHAIN_OF_THOUGHT = "chain_of_thought"
+    
+    # Specialized Enterprise AI
+    EXPERT_SYSTEM = "expert_system"
+    KNOWLEDGE_GRAPH_AI = "knowledge_graph_ai"
+    REINFORCEMENT_LEARNING_AI = "reinforcement_learning_ai"
+\end{lstlisting}
+
+\subsubsection{AI Task Types}
+
+The system supports 17 different AI task types:
+\begin{itemize}
+    \item Text classification and sentiment analysis
+    \item Named entity recognition and information extraction
+    \item Document understanding and summarization
+    \item Code analysis and pattern recognition
+    \item Reasoning, planning, and decision making
+    \item Knowledge synthesis and anomaly detection
+    \item Predictive analysis and conversational AI
+\end{itemize}
+
+\subsection{Compliance Domain Models}
+
+The compliance domain implements comprehensive regulatory framework support:
+
+\subsubsection{Compliance Framework Support}
+\begin{lstlisting}[language=Python, caption=Compliance Framework Enumeration]
+class ComplianceFramework(str, Enum):
+    SOC2 = "soc2"
+    GDPR = "gdpr"
+    HIPAA = "hipaa"
+    PCI_DSS = "pci_dss"
+    ISO27001 = "iso27001"
+    NIST = "nist"
+    CCPA = "ccpa"
+    SOX = "sox"
+    CUSTOM = "custom"
+\end{lstlisting}
+
+\subsubsection{ComplianceRequirement Model}
+The compliance requirement model provides comprehensive tracking:
+\begin{itemize}
+    \item Framework-specific requirement tracking
+    \item Risk assessment and impact analysis
+    \item Evidence collection and documentation
+    \item Remediation planning and tracking
+    \item Multi-tenant organization support
+\end{itemize}
+
+\subsection{Authentication \& Authorization Models}
+
+The auth domain implements sophisticated RBAC architecture:
+
+\subsubsection{User Model Enhancement}
+\begin{lstlisting}[language=Python, caption=Enhanced User Model]
+class User(SQLModel, table=True):
+    """Enhanced user model with enterprise features"""
+    __tablename__ = "users"
+    
+    id: Optional[int] = Field(default=None, primary_key=True)
+    email: str = Field(index=True, nullable=False, unique=True)
+    
+    # Security Features
+    mfa_enabled: bool = Field(default=False)
+    mfa_secret: Optional[str] = Field(default=None)
+    role: str = Field(default="user", nullable=False)
+    
+    # Enhanced Profile
+    first_name: Optional[str] = Field(default=None)
+    last_name: Optional[str] = Field(default=None)
+    department: Optional[str] = Field(default=None)
+    region: Optional[str] = Field(default=None)
+    
+    # OAuth Integration
+    oauth_provider: Optional[str] = Field(default=None)
+    oauth_id: Optional[str] = Field(default=None)
+    
+    # Organization Support
+    organization_id: Optional[int] = Field(default=None, foreign_key="organizations.id")
+    
+    # Racine Integration
+    created_orchestrations: ClassVar[Any] = relationship("RacineOrchestrationMaster")
+    owned_workspaces: ClassVar[Any] = relationship("RacineWorkspace")
+\end{lstlisting}
+
+\section{Racine Orchestration Models}
+
+The Racine domain represents the most complex model architecture with 9 specialized files:
+
+\subsection{Model File Distribution}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|l|r|l|}
+\hline
+\textbf{Model File} & \textbf{Size (bytes)} & \textbf{Primary Purpose} \\
+\hline
+racine\_orchestration\_models.py & 40,411 & Core orchestration logic \\
+racine\_collaboration\_models.py & 37,277 & Team collaboration features \\
+racine\_workspace\_models.py & 34,859 & Workspace management \\
+racine\_integration\_models.py & 32,385 & Cross-system integration \\
+racine\_pipeline\_models.py & 27,930 & Data pipeline orchestration \\
+racine\_ai\_models.py & 27,080 & AI/ML integration \\
+racine\_dashboard\_models.py & 25,700 & Analytics dashboards \\
+racine\_activity\_models.py & 23,075 & Activity tracking \\
+racine\_workflow\_models.py & 21,732 & Workflow automation \\
+\hline
+\textbf{Total} & \textbf{270,449} & \textbf{9 Model Files} \\
+\hline
+\end{tabular}
+\caption{Racine Model File Distribution}
+\end{table}
+
+\subsection{RacineOrchestrationMaster Architecture}
+
+The core orchestration model implements enterprise-grade workflow management:
+
+\begin{itemize}
+    \item \textbf{Multi-tenant Architecture}: Organization-level isolation
+    \item \textbf{Workflow Orchestration}: Complex workflow state management
+    \item \textbf{Cross-Group Integration}: Inter-system communication
+    \item \textbf{Real-time Collaboration}: Live collaboration features
+    \item \textbf{Advanced Analytics}: Performance metrics and insights
+    \item \textbf{AI Integration}: Intelligent workflow optimization
+\end{itemize}
+
+\section{Database Schema Design Patterns}
+
+\subsection{Indexing Strategy}
+
+The system implements a comprehensive indexing strategy:
+
+\subsubsection{Primary Indexes}
+\begin{itemize}
+    \item \textbf{Unique Indexes}: asset\_uuid, qualified\_name, email
+    \item \textbf{Composite Indexes}: (organization\_id, status), (asset\_type, quality\_score)
+    \item \textbf{Partial Indexes}: Active records only for performance
+    \item \textbf{Expression Indexes}: Lower case email, full-text search
+\end{itemize}
+
+\subsubsection{Advanced Indexing Techniques}
+\begin{lstlisting}[language=SQL, caption=Advanced Index Examples]
+-- Composite index for catalog queries
+CREATE INDEX idx_catalog_composite ON intelligent_data_assets 
+(asset_type, quality_score DESC, discovered_at DESC);
+
+-- Partial index for active assets only
+CREATE INDEX idx_active_assets ON intelligent_data_assets (asset_uuid) 
+WHERE asset_status = 'active';
+
+-- GIN index for JSON columns
+CREATE INDEX idx_semantic_tags ON intelligent_data_assets 
+USING GIN (semantic_tags);
+
+-- Expression index for case-insensitive search
+CREATE INDEX idx_display_name_lower ON intelligent_data_assets 
+(LOWER(display_name));
+\end{lstlisting}
+
+\subsection{Constraint Management}
+
+\subsubsection{Data Integrity Constraints}
+\begin{itemize}
+    \item \textbf{Check Constraints}: Quality scores between 0.0 and 1.0
+    \item \textbf{Foreign Key Constraints}: Referential integrity across domains
+    \item \textbf{Unique Constraints}: Prevent duplicate assets and users
+    \item \textbf{Not Null Constraints}: Essential field validation
+\end{itemize}
+
+\subsubsection{Advanced Constraint Examples}
+\begin{lstlisting}[language=SQL, caption=Advanced Constraint Examples]
+-- Quality score validation
+ALTER TABLE intelligent_data_assets 
+ADD CONSTRAINT chk_quality_score 
+CHECK (quality_score >= 0.0 AND quality_score <= 1.0);
+
+-- Asset status validation
+ALTER TABLE intelligent_data_assets 
+ADD CONSTRAINT chk_asset_status 
+CHECK (asset_status IN ('active', 'deprecated', 'archived', 'draft'));
+
+-- Unique qualified name per organization
+ALTER TABLE intelligent_data_assets 
+ADD CONSTRAINT uq_qualified_name_org 
+UNIQUE (qualified_name, organization_id);
+\end{lstlisting}
+
+\subsection{Partitioning Strategy}
+
+\subsubsection{Table Partitioning}
+Large tables implement partitioning for performance:
+
+\begin{itemize}
+    \item \textbf{Time-based Partitioning}: Audit logs by month
+    \item \textbf{Hash Partitioning}: User data by organization
+    \item \textbf{Range Partitioning}: Quality metrics by score ranges
+    \item \textbf{List Partitioning}: Assets by type categories
+\end{itemize}
+
+\subsubsection{Partition Example}
+\begin{lstlisting}[language=SQL, caption=Time-based Partitioning Example]
+-- Create partitioned audit log table
+CREATE TABLE audit_logs (
+    id SERIAL,
+    event_timestamp TIMESTAMP NOT NULL,
+    user_id INTEGER,
+    action VARCHAR(100),
+    details JSONB
+) PARTITION BY RANGE (event_timestamp);
+
+-- Create monthly partitions
+CREATE TABLE audit_logs_2024_01 PARTITION OF audit_logs
+FOR VALUES FROM ('2024-01-01') TO ('2024-02-01');
+
+CREATE TABLE audit_logs_2024_02 PARTITION OF audit_logs
+FOR VALUES FROM ('2024-02-01') TO ('2024-03-01');
+\end{lstlisting}
+
+\section{Data Relationships \& Foreign Keys}
+
+\subsection{Cross-Domain Relationships}
+
+The system implements sophisticated cross-domain relationships:
+
+\subsubsection{Primary Relationship Patterns}
+\begin{itemize}
+    \item \textbf{One-to-Many}: User to Assets, Organization to Users
+    \item \textbf{Many-to-Many}: Users to Roles, Assets to Tags
+    \item \textbf{Self-Referencing}: Lineage relationships, Role inheritance
+    \item \textbf{Polymorphic}: Generic audit trails, notification targets
+\end{itemize}
+
+\subsubsection{Relationship Mapping}
+\begin{lstlisting}[language=Python, caption=Advanced Relationship Mapping]
+# One-to-Many: Organization to Assets
+organization: Optional["Organization"] = Relationship(back_populates="assets")
+
+# Many-to-Many: Assets to Tags
+tags: List["Tag"] = Relationship(
+    back_populates="assets",
+    link_model=AssetTag,
+    sa_relationship_kwargs={"lazy": "selectin"}
+)
+
+# Self-Referencing: Lineage relationships
+upstream_assets: List["IntelligentDataAsset"] = Relationship(
+    back_populates="downstream_assets",
+    link_model=LineageRelationship,
+    sa_relationship_kwargs={
+        "primaryjoin": "IntelligentDataAsset.id == LineageRelationship.downstream_id",
+        "secondaryjoin": "IntelligentDataAsset.id == LineageRelationship.upstream_id"
+    }
+)
+\end{lstlisting}
+
+\subsection{Referential Integrity}
+
+\subsubsection{Cascade Strategies}
+\begin{itemize}
+    \item \textbf{CASCADE}: Delete related audit logs when user is deleted
+    \item \textbf{SET NULL}: Set asset owner to null when user is deleted
+    \item \textbf{RESTRICT}: Prevent deletion of referenced organizations
+    \item \textbf{SET DEFAULT}: Set default values for optional relationships
+\end{itemize}
+
+\section{JSON \& JSONB Usage}
+
+\subsection{JSON Column Strategy}
+
+The system extensively uses JSON columns for flexible metadata storage:
+
+\subsubsection{JSON Column Usage}
+\begin{itemize}
+    \item \textbf{columns\_info}: Dynamic column metadata
+    \item \textbf{schema\_definition}: Flexible schema storage
+    \item \textbf{semantic\_tags}: AI-generated tag arrays
+    \item \textbf{configuration\_metadata}: Service configurations
+    \item \textbf{audit\_details}: Flexible audit information
+\end{itemize}
+
+\subsubsection{JSONB Optimization}
+\begin{lstlisting}[language=SQL, caption=JSONB Query Optimization]
+-- GIN index for JSONB columns
+CREATE INDEX idx_metadata_gin ON intelligent_data_assets 
+USING GIN (schema_definition);
+
+-- Query JSONB data efficiently
+SELECT * FROM intelligent_data_assets 
+WHERE schema_definition @> '{"type": "table"}';
+
+-- Extract specific JSON values
+SELECT 
+    display_name,
+    schema_definition->>'type' as asset_type,
+    jsonb_array_length(semantic_tags) as tag_count
+FROM intelligent_data_assets;
+\end{lstlisting}
+
+\section{Data Migration \& Versioning}
+
+\subsection{Alembic Migration Strategy}
+
+The system uses Alembic for database schema migrations:
+
+\subsubsection{Migration Categories}
+\begin{itemize}
+    \item \textbf{Schema Changes}: Table and column modifications
+    \item \textbf{Data Migrations}: Data transformation and cleanup
+    \item \textbf{Index Management}: Index creation and optimization
+    \item \textbf{Constraint Updates}: Integrity constraint modifications
+\end{itemize}
+
+\subsubsection{Migration Example}
+\begin{lstlisting}[language=Python, caption=Alembic Migration Example]
+"""Add AI confidence scoring to catalog assets
+
+Revision ID: abc123def456
+Revises: def456ghi789
+Create Date: 2024-01-15 10:30:00.000000
+"""
+
+from alembic import op
+import sqlalchemy as sa
+from sqlalchemy.dialects import postgresql
+
+def upgrade():
+    # Add AI confidence score column
+    op.add_column('intelligent_data_assets', 
+        sa.Column('ai_confidence_score', sa.Float(), nullable=True))
+    
+    # Add check constraint for score range
+    op.create_check_constraint(
+        'chk_ai_confidence_score',
+        'intelligent_data_assets',
+        'ai_confidence_score >= 0.0 AND ai_confidence_score <= 1.0'
+    )
+    
+    # Create index for performance
+    op.create_index('idx_ai_confidence', 'intelligent_data_assets', 
+                   ['ai_confidence_score'])
+
+def downgrade():
+    op.drop_index('idx_ai_confidence')
+    op.drop_constraint('chk_ai_confidence_score', 'intelligent_data_assets')
+    op.drop_column('intelligent_data_assets', 'ai_confidence_score')
+\end{lstlisting}
+
+\subsection{Version Control Strategy}
+
+\subsubsection{Schema Versioning}
+\begin{itemize}
+    \item \textbf{Semantic Versioning}: Major.Minor.Patch format
+    \item \textbf{Backward Compatibility}: Maintain compatibility across versions
+    \item \textbf{Migration Testing}: Comprehensive migration testing
+    \item \textbf{Rollback Procedures}: Safe rollback mechanisms
+\end{itemize}
+
+\section{Performance Optimization}
+
+\subsection{Query Optimization}
+
+\subsubsection{Query Performance Strategies}
+\begin{itemize}
+    \item \textbf{Eager Loading}: Reduce N+1 query problems
+    \item \textbf{Query Batching}: Batch related queries
+    \item \textbf{Selective Loading}: Load only required columns
+    \item \textbf{Connection Pooling}: Efficient connection management
+\end{itemize}
+
+\subsubsection{SQLModel Optimization}
+\begin{lstlisting}[language=Python, caption=SQLModel Query Optimization]
+# Eager loading with selectin
+class IntelligentDataAsset(SQLModel, table=True):
+    tags: List["Tag"] = Relationship(
+        sa_relationship_kwargs={"lazy": "selectin"}
+    )
+
+# Selective column loading
+def get_asset_summary(session: Session, asset_id: int):
+    return session.exec(
+        select(
+            IntelligentDataAsset.id,
+            IntelligentDataAsset.display_name,
+            IntelligentDataAsset.quality_score
+        ).where(IntelligentDataAsset.id == asset_id)
+    ).first()
+
+# Batch loading for multiple assets
+def get_assets_with_tags(session: Session, asset_ids: List[int]):
+    return session.exec(
+        select(IntelligentDataAsset)
+        .options(selectinload(IntelligentDataAsset.tags))
+        .where(IntelligentDataAsset.id.in_(asset_ids))
+    ).all()
+\end{lstlisting}
+
+\subsection{Caching Strategy}
+
+\subsubsection{Multi-Level Caching}
+\begin{itemize}
+    \item \textbf{Query Result Cache}: Cache frequent query results
+    \item \textbf{Object Cache}: Cache model instances
+    \item \textbf{Metadata Cache}: Cache schema and configuration
+    \item \textbf{Session Cache}: Cache user session data
+\end{itemize}
+
+\section{Data Security \& Encryption}
+
+\subsection{Encryption Strategy}
+
+\subsubsection{Data Encryption}
+\begin{itemize}
+    \item \textbf{Column-Level Encryption}: Sensitive data encryption
+    \item \textbf{Transparent Data Encryption}: Database-level encryption
+    \item \textbf{Key Management}: Secure key storage and rotation
+    \item \textbf{Encryption at Rest}: File system encryption
+\end{itemize}
+
+\subsubsection{Sensitive Data Handling}
+\begin{lstlisting}[language=Python, caption=Sensitive Data Encryption]
+from cryptography.fernet import Fernet
+
+class User(SQLModel, table=True):
+    # Encrypted password storage
+    hashed_password: Optional[str] = Field(default=None)
+    
+    # Encrypted MFA secret
+    mfa_secret: Optional[str] = Field(default=None)
+    
+    # Encrypted connection strings
+    encrypted_password: str = Field(description="Encrypted database password")
+    
+    @classmethod
+    def encrypt_sensitive_data(cls, data: str, key: bytes) -> str:
+        """Encrypt sensitive data using Fernet encryption"""
+        f = Fernet(key)
+        return f.encrypt(data.encode()).decode()
+    
+    @classmethod
+    def decrypt_sensitive_data(cls, encrypted_data: str, key: bytes) -> str:
+        """Decrypt sensitive data using Fernet encryption"""
+        f = Fernet(key)
+        return f.decrypt(encrypted_data.encode()).decode()
+\end{lstlisting}
+
+\section{Data Governance \& Compliance}
+
+\subsection{Audit Trail Implementation}
+
+\subsubsection{Comprehensive Audit Logging}
+\begin{itemize}
+    \item \textbf{Data Access Logging}: Track all data access operations
+    \item \textbf{Modification Tracking}: Record all data modifications
+    \item \textbf{User Activity Logging}: Track user actions and sessions
+    \item \textbf{System Event Logging}: Record system-level events
+\end{itemize}
+
+\subsubsection{Audit Model Implementation}
+\begin{lstlisting}[language=Python, caption=Audit Trail Model]
+class AuditLog(SQLModel, table=True):
+    """Comprehensive audit logging for compliance"""
+    __tablename__ = "audit_logs"
+    
+    id: Optional[int] = Field(default=None, primary_key=True)
+    
+    # Event Information
+    event_timestamp: datetime = Field(default_factory=datetime.utcnow, index=True)
+    event_type: str = Field(index=True)  # CREATE, READ, UPDATE, DELETE
+    table_name: str = Field(index=True)
+    record_id: str = Field(index=True)
+    
+    # User Information
+    user_id: Optional[int] = Field(foreign_key="users.id", index=True)
+    user_email: Optional[str] = Field(index=True)
+    session_id: Optional[str] = Field(index=True)
+    
+    # Change Details
+    old_values: Optional[Dict[str, Any]] = Field(sa_column=Column(JSONB))
+    new_values: Optional[Dict[str, Any]] = Field(sa_column=Column(JSONB))
+    changed_fields: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    
+    # Context Information
+    ip_address: Optional[str] = Field(index=True)
+    user_agent: Optional[str] = None
+    request_id: Optional[str] = Field(index=True)
+    
+    # Compliance Information
+    compliance_framework: Optional[str] = Field(index=True)
+    retention_period: Optional[int] = Field(default=2555)  # 7 years in days
+\end{lstlisting}
+
+\section{Future Data Architecture Evolution}
+
+\subsection{Planned Enhancements}
+
+\subsubsection{Advanced Features}
+\begin{itemize}
+    \item \textbf{Graph Database Integration}: Neo4j for complex lineage
+    \item \textbf{Time-Series Data}: InfluxDB for metrics and monitoring
+    \item \textbf{Vector Database}: Pinecone for semantic search
+    \item \textbf{Data Lake Integration}: Delta Lake for big data processing
+    \item \textbf{Real-time Streaming}: Apache Kafka for event streaming
+\end{itemize}
+
+\subsubsection{Scalability Improvements}
+\begin{itemize}
+    \item \textbf{Horizontal Sharding}: Database sharding strategies
+    \item \textbf{Read Replicas}: Multiple read-only replicas
+    \item \textbf{Connection Pooling}: Advanced pooling mechanisms
+    \item \textbf{Query Optimization}: AI-powered query optimization
+    \item \textbf{Caching Enhancement}: Multi-tier caching strategies
+\end{itemize}
+
+\section{Conclusion}
+
+The DataWave data layer architecture represents a sophisticated implementation of enterprise-grade data management with 59 specialized models, comprehensive relationships, and advanced optimization strategies. The architecture successfully balances flexibility with performance, providing a solid foundation for scalable data governance operations while maintaining strict compliance and security requirements.
+
+The extensive use of SQLModel with Pydantic integration, combined with PostgreSQL's advanced features, creates a robust and maintainable data layer that can evolve with changing business requirements while preserving data integrity and performance.

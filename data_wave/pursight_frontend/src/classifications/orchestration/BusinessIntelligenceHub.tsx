@@ -7,29 +7,20 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
 import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Slider } from '@/components/ui/slider';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import {
-  AreaChart, Area, BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
-  ComposedChart, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
-  Legend, ResponsiveContainer, ScatterChart, Scatter, RadarChart, PolarGrid,
-  PolarAngleAxis, PolarRadiusAxis, Radar, Treemap, FunnelChart, Funnel,
-  LabelList, Sankey
+  PieChart, Pie, Cell,
+  ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
+  Legend, ResponsiveContainer, RadarChart, PolarGrid,
+  PolarAngleAxis, PolarRadiusAxis, Radar
 } from 'recharts';
-import { BarChart3, TrendingUp, Activity, DollarSign, Users, Target, Award, Clock, Database, Monitor, Cpu, AlertTriangle, CheckCircle, XCircle, Info, Settings, Search, Filter, Download, Upload, RefreshCw, Play, Pause, Square, MoreVertical, Eye, Edit, Trash2, Plus, Minus, ArrowUp, ArrowDown, ArrowRight, Calendar, Globe, Shield, Lock, Unlock, Star, Heart, Bookmark, Share, MessageSquare, Bell, Mail, Phone, Video, Mic, Camera, Image, File, Folder, Archive, Tag, Flag, Map, Navigation, Compass, Route, Layers, Grid, List, Table, Kanban, Timeline, Chart, PieChart as PieChartIcon, LineChart as LineChartIcon, Building, Briefcase, Calculator, CreditCard, FileText, Presentation, Lightbulb, Zap, Brain, Network, Bot } from 'lucide-react';
+import { BarChart3, TrendingUp, Activity, DollarSign, Users, Target, Award, Clock, Database, AlertTriangle, CheckCircle, XCircle, Info, Settings, Search, Filter, Download, Plus, ArrowUp, ArrowDown, ArrowRight, Calendar, Share, Table, PieChart as PieChartIcon, FileText, Presentation, Lightbulb, Brain, RefreshCw, Edit, Bot, Eye, MoreVertical } from 'lucide-react';
 
-// Import custom hooks and utilities
-import { useClassificationState } from '../core/hooks/useClassificationState';
-import { useAIIntelligence } from '../core/hooks/useAIIntelligence';
-import { aiApi } from '../core/api/aiApi';
-import { websocketApi } from '../core/api/websocketApi';
+// Import custom hooks and utilities - Mock implementations for now
+// import { useClassificationState } from '../core/hooks/useClassificationState';
+// import { useAIIntelligence } from '../core/hooks/useAIIntelligence';
+// import { aiApi } from '../core/api/aiApi';
+// import { websocketApi } from '../core/api/websocketApi';
 
 // TypeScript Interfaces for Business Intelligence Hub
 interface BusinessIntelligenceState {
@@ -64,6 +55,119 @@ interface BusinessIntelligenceState {
   sortOrder: BISortOrder;
 }
 
+// Additional missing interfaces
+interface BIForecast {
+  id: string;
+  name: string;
+  type: string;
+  value: number;
+  confidence: number;
+  timestamp: Date;
+}
+
+interface BIBenchmark {
+  id: string;
+  name: string;
+  type: string;
+  value: number;
+  category: string;
+  timestamp: Date;
+}
+
+interface BIAlert {
+  id: string;
+  name: string;
+  type: string;
+  severity: string;
+  message: string;
+  timestamp: Date;
+}
+
+interface BIDataset {
+  id: string;
+  name: string;
+  type: string;
+  size: number;
+  format: string;
+  source: string;
+}
+
+interface BIVisualization {
+  id: string;
+  name: string;
+  type: string;
+  data: any;
+  configuration: any;
+}
+
+interface BIGovernance {
+  enabled: boolean;
+  policies: string[];
+  rules: string[];
+  compliance: string[];
+}
+
+interface BISecurity {
+  enabled: boolean;
+  authentication: string[];
+  authorization: string[];
+  encryption: string[];
+}
+
+interface BICollaboration {
+  enabled: boolean;
+  teams: string[];
+  projects: string[];
+  sharing: string[];
+}
+
+interface BIAutomation {
+  enabled: boolean;
+  workflows: string[];
+  triggers: string[];
+  actions: string[];
+}
+
+interface BIIntegration {
+  enabled: boolean;
+  apis: string[];
+  connectors: string[];
+  protocols: string[];
+}
+
+interface BIPerformance {
+  enabled: boolean;
+  metrics: string[];
+  optimization: string[];
+  monitoring: string[];
+}
+
+interface BIQuality {
+  enabled: boolean;
+  standards: string[];
+  testing: string[];
+  validation: string[];
+}
+
+interface BICompliance {
+  enabled: boolean;
+  standards: string[];
+  regulations: string[];
+  audits: string[];
+}
+
+interface BIFilter {
+  dashboards: string[];
+  reports: string[];
+  kpis: string[];
+  insights: string[];
+  dateRange: {
+    start: Date;
+    end: Date;
+  };
+  search: string;
+}
+
 interface BIDashboard {
   id: string;
   name: string;
@@ -87,6 +191,69 @@ interface BIDashboard {
   updatedBy: string;
   tags: string[];
   labels: { [key: string]: string };
+}
+
+// Dashboard-related interfaces
+interface DashboardWidget {
+  id: string;
+  name: string;
+  type: string;
+  position: { x: number; y: number; w: number; h: number };
+  configuration: { [key: string]: any };
+}
+
+interface DashboardLayout {
+  type: string;
+  columns: number;
+  rows: number;
+  grid: string[][];
+}
+
+interface DashboardFilter {
+  id: string;
+  name: string;
+  type: string;
+  field: string;
+  operator: string;
+  value: any;
+}
+
+interface DashboardPermissions {
+  read: string[];
+  write: string[];
+  admin: string[];
+}
+
+interface DashboardSharing {
+  enabled: boolean;
+  public: boolean;
+  users: string[];
+  groups: string[];
+}
+
+interface DashboardAutomation {
+  enabled: boolean;
+  refresh: number;
+  alerts: string[];
+  exports: string[];
+}
+
+interface DashboardPerformance {
+  loadTime: number;
+  renderTime: number;
+  memoryUsage: number;
+}
+
+interface DashboardUsage {
+  views: number;
+  users: string[];
+  lastAccessed: Date;
+}
+
+interface DashboardFeedback {
+  rating: number;
+  comments: string[];
+  suggestions: string[];
 }
 
 interface BIReport {
@@ -117,6 +284,88 @@ interface BIReport {
   labels: { [key: string]: string };
 }
 
+// Report-related interfaces
+interface ReportSchedule {
+  enabled: boolean;
+  frequency: string;
+  time: string;
+  timezone: string;
+  days: string[];
+}
+
+interface ReportRecipient {
+  id: string;
+  name: string;
+  email: string;
+  type: string;
+  preferences: { [key: string]: any };
+}
+
+interface ReportParameter {
+  id: string;
+  name: string;
+  type: string;
+  required: boolean;
+  defaultValue: any;
+  options: any[];
+}
+
+interface ReportData {
+  sources: string[];
+  queries: string[];
+  filters: string[];
+  aggregations: string[];
+}
+
+interface ReportVisualization {
+  type: string;
+  configuration: { [key: string]: any };
+  charts: string[];
+  tables: string[];
+}
+
+interface ReportAutomation {
+  enabled: boolean;
+  triggers: string[];
+  actions: string[];
+  conditions: string[];
+}
+
+interface ReportDelivery {
+  methods: string[];
+  formats: string[];
+  destinations: string[];
+  encryption: boolean;
+}
+
+interface ReportSecurity {
+  enabled: boolean;
+  authentication: string[];
+  authorization: string[];
+  encryption: string[];
+}
+
+interface ReportAudit {
+  enabled: boolean;
+  logging: boolean;
+  tracking: string[];
+  retention: number;
+}
+
+interface ReportPerformance {
+  generationTime: number;
+  size: number;
+  compression: boolean;
+  optimization: string[];
+}
+
+interface ReportQuality {
+  accuracy: number;
+  completeness: number;
+  consistency: number;
+  timeliness: number;
+}
+
 interface BIMetrics {
   revenue: RevenueMetrics;
   cost: CostMetrics;
@@ -134,6 +383,119 @@ interface BIMetrics {
   competitive: CompetitiveMetrics;
   strategic: StrategicMetrics;
   sustainability: SustainabilityMetrics;
+}
+
+// Metrics-related interfaces
+interface RevenueMetrics {
+  total: number;
+  recurring: number;
+  growth: number;
+  forecast: number;
+}
+
+interface CostMetrics {
+  total: number;
+  operational: number;
+  capital: number;
+  reduction: number;
+}
+
+interface EfficiencyMetrics {
+  overall: number;
+  process: number;
+  resource: number;
+  time: number;
+}
+
+interface QualityMetrics {
+  overall: number;
+  product: number;
+  service: number;
+  customer: number;
+}
+
+interface CustomerMetrics {
+  satisfaction: number;
+  retention: number;
+  acquisition: number;
+  lifetime: number;
+}
+
+interface OperationalMetrics {
+  uptime: number;
+  throughput: number;
+  latency: number;
+  error: number;
+}
+
+interface FinancialMetrics {
+  profit: number;
+  margin: number;
+  roi: number;
+  cashflow: number;
+}
+
+interface PerformanceMetrics {
+  speed: number;
+  accuracy: number;
+  reliability: number;
+  scalability: number;
+}
+
+interface GrowthMetrics {
+  revenue: number;
+  customer: number;
+  market: number;
+  employee: number;
+}
+
+interface RiskMetrics {
+  overall: number;
+  financial: number;
+  operational: number;
+  compliance: number;
+}
+
+interface ComplianceMetrics {
+  overall: number;
+  regulatory: number;
+  internal: number;
+  audit: number;
+}
+
+interface InnovationMetrics {
+  overall: number;
+  rnd: number;
+  patents: number;
+  products: number;
+}
+
+interface MarketMetrics {
+  share: number;
+  position: number;
+  penetration: number;
+  expansion: number;
+}
+
+interface CompetitiveMetrics {
+  position: number;
+  advantage: number;
+  differentiation: number;
+  pricing: number;
+}
+
+interface StrategicMetrics {
+  alignment: number;
+  execution: number;
+  achievement: number;
+  progress: number;
+}
+
+interface SustainabilityMetrics {
+  environmental: number;
+  social: number;
+  governance: number;
+  overall: number;
 }
 
 interface BIKeyPerformanceIndicator {
@@ -166,6 +528,83 @@ interface BIKeyPerformanceIndicator {
   labels: { [key: string]: string };
 }
 
+// KPI-related interfaces
+interface KPIThreshold {
+  warning: number;
+  critical: number;
+  excellent: number;
+}
+
+interface KPITrend {
+  direction: string;
+  change: number;
+  period: string;
+}
+
+interface KPISource {
+  system: string;
+  table: string;
+  field: string;
+  query: string;
+}
+
+interface KPICalculation {
+  formula: string;
+  parameters: string[];
+  dependencies: string[];
+}
+
+interface KPIVisualization {
+  type: string;
+  configuration: { [key: string]: any };
+  colors: string[];
+}
+
+interface KPIAlert {
+  id: string;
+  type: string;
+  condition: string;
+  message: string;
+  enabled: boolean;
+}
+
+interface KPIHistory {
+  date: Date;
+  value: number;
+  target: number;
+  status: string;
+}
+
+interface KPIBenchmark {
+  name: string;
+  value: number;
+  source: string;
+  category: string;
+}
+
+interface KPIForecast {
+  date: Date;
+  value: number;
+  confidence: number;
+  method: string;
+}
+
+interface KPIInsight {
+  id: string;
+  type: string;
+  description: string;
+  confidence: number;
+  timestamp: Date;
+}
+
+interface KPIAction {
+  id: string;
+  type: string;
+  description: string;
+  priority: number;
+  status: string;
+}
+
 interface BIAnalytics {
   descriptive: DescriptiveAnalytics;
   diagnostic: DiagnosticAnalytics;
@@ -183,6 +622,119 @@ interface BIAnalytics {
   edge: EdgeAnalytics;
   augmented: AugmentedAnalytics;
   automated: AutomatedAnalytics;
+}
+
+// Analytics-related interfaces
+interface DescriptiveAnalytics {
+  enabled: boolean;
+  reports: string[];
+  dashboards: string[];
+  metrics: string[];
+}
+
+interface DiagnosticAnalytics {
+  enabled: boolean;
+  tools: string[];
+  methods: string[];
+  insights: string[];
+}
+
+interface PredictiveAnalytics {
+  enabled: boolean;
+  models: string[];
+  algorithms: string[];
+  forecasts: string[];
+}
+
+interface PrescriptiveAnalytics {
+  enabled: boolean;
+  recommendations: string[];
+  optimizations: string[];
+  actions: string[];
+}
+
+interface CognitiveAnalytics {
+  enabled: boolean;
+  ai: string[];
+  ml: string[];
+  nlp: string[];
+}
+
+interface RealTimeAnalytics {
+  enabled: boolean;
+  streaming: string[];
+  processing: string[];
+  visualization: string[];
+}
+
+interface StreamingAnalytics {
+  enabled: boolean;
+  sources: string[];
+  processing: string[];
+  outputs: string[];
+}
+
+interface BatchAnalytics {
+  enabled: boolean;
+  schedules: string[];
+  processes: string[];
+  outputs: string[];
+}
+
+interface InteractiveAnalytics {
+  enabled: boolean;
+  tools: string[];
+  interfaces: string[];
+  capabilities: string[];
+}
+
+interface SelfServiceAnalytics {
+  enabled: boolean;
+  users: string[];
+  tools: string[];
+  data: string[];
+}
+
+interface EmbeddedAnalytics {
+  enabled: boolean;
+  applications: string[];
+  apis: string[];
+  widgets: string[];
+}
+
+interface MobileAnalytics {
+  enabled: boolean;
+  apps: string[];
+  features: string[];
+  platforms: string[];
+}
+
+interface CloudAnalytics {
+  enabled: boolean;
+  providers: string[];
+  services: string[];
+  regions: string[];
+}
+
+interface EdgeAnalytics {
+  enabled: boolean;
+  devices: string[];
+  processing: string[];
+  connectivity: string[];
+}
+
+interface AugmentedAnalytics {
+  enabled: boolean;
+  ai: string[];
+  automation: string[];
+  insights: string[];
+}
+
+interface AutomatedAnalytics {
+  enabled: boolean;
+  workflows: string[];
+  triggers: string[];
+  actions: string[];
 }
 
 interface BIInsight {
@@ -212,6 +764,84 @@ interface BIInsight {
   labels: { [key: string]: string };
 }
 
+// Insight-related interfaces
+interface InsightImpact {
+  financial: number;
+  operational: number;
+  strategic: number;
+  risk: number;
+}
+
+interface InsightRecommendation {
+  id: string;
+  type: string;
+  description: string;
+  priority: number;
+  effort: number;
+  impact: number;
+}
+
+interface InsightEvidence {
+  id: string;
+  type: string;
+  source: string;
+  data: any;
+  confidence: number;
+}
+
+interface InsightSource {
+  system: string;
+  data: string;
+  method: string;
+  timestamp: Date;
+}
+
+interface InsightMethod {
+  algorithm: string;
+  parameters: { [key: string]: any };
+  validation: string[];
+}
+
+interface InsightValidation {
+  enabled: boolean;
+  methods: string[];
+  results: { [key: string]: any };
+}
+
+interface InsightAutomation {
+  enabled: boolean;
+  triggers: string[];
+  actions: string[];
+  workflows: string[];
+}
+
+interface InsightCollaboration {
+  enabled: boolean;
+  teams: string[];
+  sharing: string[];
+  feedback: string[];
+}
+
+interface InsightTracking {
+  enabled: boolean;
+  metrics: string[];
+  events: string[];
+  analytics: string[];
+}
+
+interface InsightLifecycle {
+  stage: string;
+  transitions: string[];
+  approvals: string[];
+}
+
+interface InsightMetadata {
+  version: string;
+  author: string;
+  documentation: string;
+  examples: string[];
+}
+
 interface BITimeRange {
   start: Date;
   end: Date;
@@ -220,6 +850,21 @@ interface BITimeRange {
   timezone: string;
   comparison: TimeComparison;
   aggregation: TimeAggregation;
+}
+
+// Time-related interfaces
+interface TimeComparison {
+  enabled: boolean;
+  period: string;
+  baseline: string;
+  metrics: string[];
+}
+
+interface TimeAggregation {
+  enabled: boolean;
+  method: string;
+  granularity: string;
+  functions: string[];
 }
 
 // Additional type definitions
@@ -243,14 +888,14 @@ type BIViewMode = 'dashboard' | 'report' | 'analytics' | 'insights' | 'kpis' | '
 type BISortOrder = 'name' | 'created' | 'updated' | 'priority' | 'status' | 'performance';
 
 // Constants
-const DASHBOARD_TYPES = [
-  { value: 'executive', label: 'Executive Dashboard', icon: Building },
-  { value: 'operational', label: 'Operational Dashboard', icon: Monitor },
-  { value: 'analytical', label: 'Analytical Dashboard', icon: BarChart3 },
-  { value: 'tactical', label: 'Tactical Dashboard', icon: Target },
-  { value: 'strategic', label: 'Strategic Dashboard', icon: Lightbulb },
-  { value: 'custom', label: 'Custom Dashboard', icon: Settings }
-] as const;
+// const DASHBOARD_TYPES = [
+//   { value: 'executive', label: 'Executive Dashboard', icon: Building },
+//   { value: 'operational', label: 'Operational Dashboard', icon: Monitor },
+//   { value: 'analytical', label: 'Analytical Dashboard', icon: BarChart3 },
+//   { value: 'tactical', label: 'Tactical Dashboard', icon: Target },
+//   { value: 'strategic', label: 'Strategic Dashboard', icon: Lightbulb },
+//   { value: 'custom', label: 'Custom Dashboard', icon: Settings }
+// ] as const;
 
 const REPORT_TYPES = [
   { value: 'standard', label: 'Standard Report', icon: FileText },
@@ -569,9 +1214,9 @@ export const BusinessIntelligenceHub: React.FC = () => {
     sortOrder: 'updated'
   });
 
-  // Custom hooks
-  const { classifications, updateClassification } = useClassificationState();
-  const { aiModels, aiAgents, startIntelligence, stopIntelligence } = useAIIntelligence();
+  // Custom hooks - Mock implementations for now
+  // const { classifications, updateClassification } = useClassificationState();
+  // const { aiModels, aiAgents, startIntelligence, stopIntelligence } = useAIIntelligence();
 
   // Refs for performance optimization
   const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -614,17 +1259,25 @@ export const BusinessIntelligenceHub: React.FC = () => {
   // WebSocket initialization
   const initializeWebSocket = useCallback(() => {
     try {
-      websocketRef.current = websocketApi.connect('business-intelligence');
+      // Mock WebSocket connection for now
+      console.log('Initializing WebSocket connection for business-intelligence');
       
-      websocketRef.current.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        handleRealTimeUpdate(data);
-      };
-
-      websocketRef.current.onerror = (error) => {
-        console.error('WebSocket error:', error);
-        setState(prev => ({ ...prev, error: 'Real-time connection failed' }));
-      };
+      // Simulate WebSocket connection
+      const mockWebSocket = {
+        onmessage: (event: any) => {
+          const data = JSON.parse(event.data);
+          handleRealTimeUpdate(data);
+        },
+        onerror: (error: any) => {
+          console.error('WebSocket error:', error);
+          setState(prev => ({ ...prev, error: 'Real-time connection failed' }));
+        },
+        close: () => {
+          console.log('WebSocket connection closed');
+        }
+      } as WebSocket;
+      
+      websocketRef.current = mockWebSocket;
     } catch (error) {
       console.error('Failed to initialize WebSocket:', error);
     }
@@ -635,11 +1288,12 @@ export const BusinessIntelligenceHub: React.FC = () => {
     setState(prev => ({ ...prev, isLoading: true, error: null }));
     
     try {
+      // Mock API calls for now - will be replaced with real implementation
       const [dashboardsData, reportsData, kpisData, insightsData] = await Promise.all([
-        aiApi.getBIDashboards(),
-        aiApi.getBIReports(),
-        aiApi.getBIKPIs(),
-        aiApi.getBIInsights()
+        Promise.resolve([]),
+        Promise.resolve([]),
+        Promise.resolve(generateKPIs()),
+        Promise.resolve(generateInsights())
       ]);
 
       setState(prev => ({
@@ -668,30 +1322,85 @@ export const BusinessIntelligenceHub: React.FC = () => {
     }));
   }, []);
 
-  const handleCreateDashboard = useCallback(async (type: DashboardType) => {
-    setState(prev => ({ ...prev, isLoading: true }));
-    
-    try {
-      const dashboard = await aiApi.createBIDashboard({ type });
-      setState(prev => ({
-        ...prev,
-        dashboards: [...prev.dashboards, dashboard],
-        isLoading: false
-      }));
-    } catch (error) {
-      setState(prev => ({
-        ...prev,
-        error: error instanceof Error ? error.message : 'Failed to create dashboard',
-        isLoading: false
-      }));
-    }
-  }, []);
+  // const handleCreateDashboard = useCallback(async (type: DashboardType) => {
+  //   setState(prev => ({ ...prev, isLoading: true }));
+  //   
+  //   try {
+  //     // Mock API call for now
+  //     console.log('Creating dashboard:', type);
+  //     const dashboard = {
+  //       id: `dashboard-${Date.now()}`,
+  //       name: `${type} Dashboard`,
+  //       description: `A ${type} dashboard`,
+  //       type,
+  //       category: 'overview' as DashboardCategory,
+  //       status: 'active' as DashboardStatus,
+  //       widgets: [],
+  //       layout: {} as DashboardLayout,
+  //       filters: [],
+  //       permissions: {} as DashboardPermissions,
+  //       sharing: {} as DashboardSharing,
+  //       automation: {} as DashboardAutomation,
+  //       performance: {} as DashboardPerformance,
+  //       usage: {} as DashboardUsage,
+  //       feedback: {} as DashboardFeedback,
+  //       version: 1,
+  //       created: new Date(),
+  //       updated: new Date(),
+  //       createdBy: 'admin',
+  //       updatedBy: 'admin',
+  //       tags: [type],
+  //       labels: { type, status: 'active' }
+  //     };
+  //     
+  //     setState(prev => ({
+  //       ...prev,
+  //       dashboards: [...prev.dashboards, dashboard],
+  //       isLoading: false
+  //     }));
+  //   } catch (error) {
+  //     setState(prev => ({
+  //       ...prev,
+  //       error: error instanceof Error ? error.message : 'Failed to create dashboard',
+  //       isLoading: false
+  //     }));
+  //   }
+  // }, []);
 
   const handleGenerateReport = useCallback(async (type: ReportType) => {
     setState(prev => ({ ...prev, isLoading: true }));
     
     try {
-      const report = await aiApi.generateBIReport({ type });
+      // Mock API call for now
+      console.log('Generating report:', type);
+      const report = {
+        id: `report-${Date.now()}`,
+        name: `${type} Report`,
+        description: `A ${type} report`,
+        type,
+        category: 'financial' as ReportCategory,
+        status: 'generating' as ReportStatus,
+        format: 'pdf' as ReportFormat,
+        schedule: {} as ReportSchedule,
+        recipients: [],
+        parameters: [],
+        data: {} as ReportData,
+        visualization: {} as ReportVisualization,
+        automation: {} as ReportAutomation,
+        delivery: {} as ReportDelivery,
+        security: {} as ReportSecurity,
+        audit: {} as ReportAudit,
+        performance: {} as ReportPerformance,
+        quality: {} as ReportQuality,
+        version: 1,
+        created: new Date(),
+        updated: new Date(),
+        createdBy: 'admin',
+        updatedBy: 'admin',
+        tags: [type],
+        labels: { type, status: 'generating' }
+      };
+      
       setState(prev => ({
         ...prev,
         reports: [...prev.reports, report],
@@ -710,11 +1419,14 @@ export const BusinessIntelligenceHub: React.FC = () => {
     setState(prev => ({ ...prev, isLoading: true }));
     
     try {
-      const exportData = await aiApi.exportBIData({
+      // Mock API call for now
+      console.log('Exporting data:', format);
+      const exportData = JSON.stringify({
         format,
         timeRange: state.selectedTimeRange,
         kpis: state.kpis.map(kpi => kpi.id),
-        insights: state.insights.map(insight => insight.id)
+        insights: state.insights.map(insight => insight.id),
+        timestamp: new Date().toISOString()
       });
 
       // Trigger download
@@ -913,7 +1625,7 @@ export const BusinessIntelligenceHub: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {customerMetrics.map((metric, index) => (
+              {customerMetrics.map((metric) => (
                 <div key={metric.name} className="flex items-center justify-between p-3 border rounded-lg">
                   <div className="flex items-center space-x-3">
                     {getTrendIcon(metric.trend)}
@@ -1415,7 +2127,7 @@ export const BusinessIntelligenceHub: React.FC = () => {
             onClick={handleRefreshData}
             disabled={state.isLoading}
           >
-            <Refresh className={`h-4 w-4 ${state.isLoading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-4 w-4 ${state.isLoading ? 'animate-spin' : ''}`} />
           </Button>
 
           <Button variant="outline" size="sm">

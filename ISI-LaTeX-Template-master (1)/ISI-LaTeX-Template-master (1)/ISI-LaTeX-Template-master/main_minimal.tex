@@ -1,0 +1,52 @@
+%========= MINIMAL FAST COMPILE VERSION ========%
+\documentclass[]{./tpl/isipfe}
+\graphicspath{{./img/}}
+
+% Speed optimizations
+\pdfcompresslevel=0
+\pdfobjcompresslevel=0
+\usepackage[draft]{graphicx} % Skip image processing
+
+\input{./tpl/new_commands}
+
+\begin{document}
+    \input{global_config}
+    
+    \frontmatter
+        % Simplified front matter
+        \begin{center}
+        \Large\textbf{DataWave PFE Report}\\
+        \large Seif Oresti\\
+        2024-2025
+        \end{center}
+        \clearpage
+        
+        \tableofcontents
+        \clearpage
+    
+    \mainmatter
+        \input{introduction}
+        \clearpage
+        
+        \input{chap_01}
+        \clearpage
+        
+        \input{chap_02}
+        \clearpage
+        
+        % Split Chapter 3 into original parts
+        \chapter{Réalisation et Implémentation}
+        \input{chap_03_part1}
+        \clearpage
+        \input{chap_03_part2}
+        \clearpage
+        \input{chap_03_part3}
+        \clearpage
+        
+        \input{chap_04}
+        \clearpage
+        
+        \input{conclusion}
+        \clearpage
+
+\end{document}

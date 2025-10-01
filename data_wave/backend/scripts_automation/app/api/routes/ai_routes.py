@@ -19,7 +19,7 @@ from ...db_session import get_session
 from sqlmodel import Session
 from ...services.ai_service import EnterpriseAIService
 from ...services.advanced_ai_service import AdvancedAIService
-from ...api.security.rbac import get_current_user, require_permission
+from ...api.security.rbac import get_current_user, require_permission, require_permissions
 from ...models.ai_models import (
     AIModelConfiguration, AIConversation, AIMessage, AIPrediction,
     AIFeedback, AIExperiment, AIExperimentRun, AIKnowledgeBase,
@@ -634,9 +634,7 @@ async def get_ai_model_configs(
                     "model_type": config.model_type,
                     "provider": config.provider,
                     "status": config.status,
-                    "explainability_level": config.explainability_level,
-                    "created_at": config.created_at,
-                    "current_performance": getattr(config, 'current_performance', {})
+                    "explainability_level": config.explainability_level
                 }
                 for config in configs
             ],

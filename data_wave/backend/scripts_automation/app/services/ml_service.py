@@ -46,11 +46,9 @@ try:
 except ImportError:
     XGBOOST_AVAILABLE = False
 
-try:
-    import lightgbm as lgb
-    LIGHTGBM_AVAILABLE = True
-except ImportError:
-    LIGHTGBM_AVAILABLE = False
+# LightGBM disabled due to compatibility issues with Dask
+LIGHTGBM_AVAILABLE = False
+lgb = None
 
 try:
     import catboost as cb
@@ -146,11 +144,7 @@ class EnterpriseMLService:
     ) -> Tuple[List[MLModelConfiguration], int]:
         """Get ML model configurations with advanced filtering"""
         try:
-            query = select(MLModelConfiguration).options(
-                selectinload(MLModelConfiguration.classification_framework),
-                selectinload(MLModelConfiguration.training_jobs),
-                selectinload(MLModelConfiguration.experiments)
-            )
+            query = select(MLModelConfiguration)
             
             # Apply filters
             if filters:
@@ -175,7 +169,22 @@ class EnterpriseMLService:
             count_query = select(func.count(MLModelConfiguration.id))
             if filters:
                 # Apply same filters to count query
-                count_query = count_query.where(query.whereclause)
+                if filters.get("model_type"):
+                    count_query = count_query.where(MLModelConfiguration.model_type == filters["model_type"])
+                if filters.get("framework"):
+                    count_query = count_query.where(MLModelConfiguration.framework == filters["framework"])
+                if filters.get("status"):
+                    count_query = count_query.where(MLModelConfiguration.status == filters["status"])
+                if filters.get("is_active") is not None:
+                    count_query = count_query.where(MLModelConfiguration.is_active == filters["is_active"])
+                if filters.get("search_query"):
+                    search = f"%{filters['search_query']}%"
+                    count_query = count_query.where(
+                        or_(
+                            MLModelConfiguration.name.ilike(search),
+                            MLModelConfiguration.description.ilike(search)
+                        )
+                    )
             
             total_count = await session.scalar(count_query)
             
@@ -185,14 +194,10 @@ class EnterpriseMLService:
                 query = query.offset(offset).limit(pagination.get("size", 10))
             
             # Apply sorting
-            query = query.order_by(desc(MLModelConfiguration.updated_at))
+            query = query.order_by(desc(MLModelConfiguration.id))
             
             result = await session.execute(query)
             configs = result.scalars().all()
-            
-            # Enrich with performance metrics
-            for config in configs:
-                config.current_performance = await self._get_model_performance_summary(session, config.id)
             
             return configs, total_count
             
@@ -1347,7 +1352,10 @@ class EnterpriseMLService:
                 model = xgb.XGBClassifier(**training_parameters)
             
             elif framework == MLModelFramework.LIGHTGBM and LIGHTGBM_AVAILABLE:
-                model = lgb.LGBMClassifier(**training_parameters)
+                if LIGHTGBM_AVAILABLE:
+                    model = lgb.LGBMClassifier(**training_parameters)
+                else:
+                    raise ValueError("LightGBM is not available")
             
             elif framework == MLModelFramework.CATBOOST and CATBOOST_AVAILABLE:
                 model = cb.CatBoostClassifier(**training_parameters)
@@ -1693,4 +1701,51 @@ class EnterpriseMLService:
                 "distributed_training": True,
                 "memory_optimization": True,
                 "recommended_batch_size": 256
+            }
+    
+    async def _get_model_performance_summary(self, session: AsyncSession, model_id: int) -> Dict[str, Any]:
+        """Get model performance summary for display"""
+        try:
+            # Get recent predictions for the model
+            recent_predictions_query = select(MLPrediction).where(
+                MLPrediction.model_config_id == model_id
+            ).order_by(desc(MLPrediction.id)).limit(100)
+            
+            result = await session.execute(recent_predictions_query)
+            recent_predictions = result.scalars().all()
+            
+            if not recent_predictions:
+                return {
+                    "total_predictions": 0,
+                    "average_confidence": 0.0,
+                    "average_latency_ms": 0.0,
+                    "success_rate": 0.0
+                }
+            
+            # Calculate performance metrics
+            total_predictions = len(recent_predictions)
+            confidence_scores = [pred.confidence_score for pred in recent_predictions if pred.confidence_score is not None]
+            latencies = [pred.inference_time_ms for pred in recent_predictions if pred.inference_time_ms is not None]
+            
+            average_confidence = sum(confidence_scores) / len(confidence_scores) if confidence_scores else 0.0
+            average_latency = sum(latencies) / len(latencies) if latencies else 0.0
+            
+            # Calculate success rate (predictions with confidence > 0.5)
+            successful_predictions = len([pred for pred in recent_predictions if pred.confidence_score and pred.confidence_score > 0.5])
+            success_rate = successful_predictions / total_predictions if total_predictions > 0 else 0.0
+            
+            return {
+                "total_predictions": total_predictions,
+                "average_confidence": round(average_confidence, 3),
+                "average_latency_ms": round(average_latency, 2),
+                "success_rate": round(success_rate, 3)
+            }
+            
+        except Exception as e:
+            logger.warning(f"Error getting model performance summary for model {model_id}: {str(e)}")
+            return {
+                "total_predictions": 0,
+                "average_confidence": 0.0,
+                "average_latency_ms": 0.0,
+                "success_rate": 0.0
             }

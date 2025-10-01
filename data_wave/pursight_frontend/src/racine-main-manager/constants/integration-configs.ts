@@ -583,7 +583,7 @@ export const getIntegrationGroupsByPriority = () => {
 };
 
 export const buildIntegrationApiUrl = (endpoint: string, params?: Record<string, string>) => {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/proxy';
+  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/proxy';
   let url = `${baseUrl}${endpoint}`;
   
   if (params) {

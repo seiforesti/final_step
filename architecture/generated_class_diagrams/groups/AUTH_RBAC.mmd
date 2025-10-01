@@ -1,0 +1,277 @@
+classDiagram
+  class Role {
+    +__tablename__: 
+    +id: Optional[int]
+    +name: str
+    +description: Optional[str]
+    +users: ClassVar[Any]
+    +permissions: ClassVar[Any]
+    +parents: ClassVar[Any]
+    +children: ClassVar[Any]
+  }
+  class RacineCollaborationSession {
+    +__tablename__: 
+    +id: 
+    +session_name: 
+    +name: 
+    +session_type: 
+    +collaboration_type: 
+    +scope: 
+    +status: 
+    +description: 
+    +scheduled_start: 
+    +actual_start: 
+    +scheduled_end: 
+    +actual_end: 
+    +duration_minutes: 
+    +session_config: 
+    +recording_enabled: 
+    +transcription_enabled: 
+    +screen_sharing_enabled: 
+    +expected_participants: 
+    +actual_participants: 
+    +presence_data: 
+    +attendance_summary: 
+    +agenda: 
+    +activities: 
+    +decisions_made: 
+    +action_items: 
+    +group_representatives: 
+    +cross_group_discussions: 
+    +coordination_outcomes: 
+    +session_notes: 
+    +recordings: 
+    +transcriptions: 
+    +artifacts_created: 
+    +quality_rating: 
+    +participant_feedback: 
+    +effectiveness_score: 
+    +follow_up_actions: 
+    +next_session_planned: 
+    +next_session_date: 
+    +collaboration_id: 
+    +facilitator_id: 
+    +created_at: 
+    +updated_at: 
+    +collaboration: 
+    +facilitator: 
+  }
+  class User {
+    +__tablename__: 
+    +id: Optional[int]
+    +email: str
+    +hashed_password: Optional[str]
+    +is_active: bool
+    +is_verified: bool
+    +created_at: datetime
+    +mfa_enabled: bool
+    +mfa_secret: Optional[str]
+    +role: str
+    +first_name: Optional[str]
+    +last_name: Optional[str]
+    +display_name: Optional[str]
+    +profile_picture_url: Optional[str]
+    +birthday: Optional[str]
+    +phone_number: Optional[str]
+    +department: Optional[str]
+    +region: Optional[str]
+    +oauth_provider: Optional[str]
+    +oauth_id: Optional[str]
+    +last_login: Optional[datetime]
+    +timezone: Optional[str]
+    +sessions: ClassVar[Any]
+    +roles: ClassVar[Any]
+    +groups: ClassVar[Any]
+    +organization_id: Optional[int]
+    +organization: ClassVar[Any]
+    +created_orchestrations: ClassVar[Any]
+    +modified_orchestrations: ClassVar[Any]
+    +triggered_workflow_executions: ClassVar[Any]
+    +created_integrations: ClassVar[Any]
+    +owned_workspaces: ClassVar[Any]
+    +workspace_memberships: ClassVar[Any]
+    +sent_workspace_invitations: ClassVar[Any]
+    +added_workspace_resources: ClassVar[Any]
+    +last_accessed_workspace_resources: ClassVar[Any]
+    +api_keys: ClassVar[Any]
+  }
+  class Permission {
+    +__tablename__: 
+    +id: Optional[int]
+    +action: str
+    +resource: str
+    +conditions: Optional[str]
+    +roles: ClassVar[Any]
+  }
+  class Session {
+    +__tablename__: 
+    +id: Optional[int]
+    +user_id: int
+    +session_token: str
+    +created_at: datetime
+    +expires_at: datetime
+    +user: ClassVar[Any]
+  }
+  class UserFavorite {
+    +id: Optional[int]
+    +user_id: str
+    +data_source_id: int
+    +created_at: datetime
+  }
+  class RolePermission {
+    +__tablename__: 
+    +id: Optional[int]
+    +role_id: int
+    +permission_id: int
+  }
+  class GroupRole {
+    +__tablename__: 
+    +id: Optional[int]
+    +group_id: int
+    +role_id: int
+    +resource_type: Optional[str]
+    +resource_id: Optional[str]
+    +assigned_at: datetime
+  }
+  class SessionParticipant {
+    +__tablename__: 
+    +id: Optional[int]
+    +session_id: int
+    +user_id: str
+    +role: str
+    +joined_at: datetime
+    +left_at: Optional[datetime]
+    +is_active: bool
+    +last_activity: datetime
+    +contributions_count: int
+    +time_spent_minutes: int
+    +can_edit: bool
+    +can_share: bool
+    +can_record: bool
+    +participant_metadata: Dict[str, Any]
+  }
+  class CollaborationSession {
+    +__tablename__: 
+    +id: Optional[int]
+    +session_id: str
+    +workspace_id: int
+    +session_name: str
+    +session_type: str
+    +description: Optional[str]
+    +status: str
+    +started_at: datetime
+    +ended_at: Optional[datetime]
+    +last_activity: datetime
+    +session_config: Dict[str, Any]
+    +max_participants: Optional[int]
+    +is_private: bool
+    +active_documents: List[str]
+    +current_activities: List[str]
+    +session_metadata: Dict[str, Any]
+    +created_at: datetime
+    +updated_at: datetime
+  }
+  class UserGroup {
+    +__tablename__: 
+    +id: Optional[int]
+    +user_id: int
+    +group_id: int
+  }
+  class DataSourcePermission {
+    +__tablename__: 
+    +id: Optional[int]
+    +data_source_id: int
+    +user_id: Optional[str]
+    +role_id: Optional[str]
+    +permission_type: PermissionType
+    +access_level: AccessLevel
+    +granted_by: str
+    +granted_at: datetime
+    +expires_at: Optional[datetime]
+    +conditions: Dict[str, Any]
+    +created_at: datetime
+    +updated_at: datetime
+  }
+  class ResourceRole {
+    +__tablename__: 
+    +id: Optional[int]
+    +user_id: int
+    +role_id: int
+    +resource_type: str
+    +resource_id: int
+    +assigned_at: datetime
+  }
+  class UserRole {
+    +__tablename__: 
+    +id: Optional[int]
+    +user_id: int
+    +role_id: int
+  }
+  class RoleInheritance {
+    +__tablename__: 
+    +id: Optional[int]
+    +parent_role_id: int
+    +child_role_id: int
+  }
+  class RbacAuditLog {
+    +__tablename__: 
+    +id: Optional[int]
+    +action: str
+    +performed_by: str
+    +target_user: Optional[str]
+    +resource_type: Optional[str]
+    +resource_id: Optional[str]
+    +role: Optional[str]
+    +status: Optional[str]
+    +note: Optional[str]
+    +timestamp: datetime
+    +entity_type: Optional[str]
+    +entity_id: Optional[str]
+    +before_state: Optional[str]
+    +after_state: Optional[str]
+    +correlation_id: Optional[str]
+    +actor_ip: Optional[str]
+    +actor_device: Optional[str]
+    +api_client: Optional[str]
+    +extra_metadata: Optional[str]
+  }
+  class UserWorkspace {
+    +id: Optional[int]
+    +name: str
+    +description: Optional[str]
+    +data_source_id: int
+    +user_id: str
+    +created_at: datetime
+    +updated_at: datetime
+  }
+  class DataSourcePermissionResponse {
+    +id: int
+    +data_source_id: int
+    +user_id: Optional[str]
+    +role_id: Optional[str]
+    +permission_type: PermissionType
+    +access_level: AccessLevel
+    +granted_by: str
+    +granted_at: datetime
+    +expires_at: Optional[datetime]
+    +conditions: Dict[str, Any]
+  }
+  Role "1" --> "0..*" Permission
+  Role "1" --> "0..*" User
+  User "1" --> "0..*" Session
+  RacineCollaborationSession "1" --> "0..*" User
+  Role ..> UserFavorite
+  Role ..> RolePermission
+  Role ..> GroupRole
+  Role ..> SessionParticipant
+  Role ..> CollaborationSession
+  Role ..> UserGroup
+  Role ..> DataSourcePermission
+  Role ..> ResourceRole
+  Role ..> UserRole
+  Role ..> RoleInheritance
+  Role ..> RbacAuditLog
+  Role ..> UserWorkspace
+  Role ..> DataSourcePermissionResponse
+  classDef domain fill:#F8FAFF,stroke:#111827,color:#111827
+  class CollaborationSession,DataSourcePermission,DataSourcePermissionResponse,GroupRole,Permission,RacineCollaborationSession,RbacAuditLog,ResourceRole,Role,RoleInheritance,RolePermission,Session,SessionParticipant,User,UserFavorite,UserGroup,UserRole,UserWorkspace domain

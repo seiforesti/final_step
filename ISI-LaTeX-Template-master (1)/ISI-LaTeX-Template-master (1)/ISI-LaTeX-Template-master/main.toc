@@ -1,0 +1,241 @@
+\babel@toc {french}{}\relax 
+\babel@toc {french}{}\relax 
+\select@language {french}
+\select@language {french}
+\select@language {french}
+\select@language {french}
+\select@language {french}
+\select@language {french}
+\select@language {french}
+\contentsline {chapter}{Introduction générale}{1}{chapter*.9}%
+\select@language {french}
+\contentsline {chapter}{\numberline {\textLR {1}}\bgroup \beginL \latintext Contexte Général et État de l'Art\endL \egroup }{5}{chapter.1}%
+\contentsline {section}{\numberline {\filterminitoc {1.}1}Présentation de l'Organisme d'Accueil}{7}{section.1.1}%
+\contentsline {subsection}{\numberline {\if@rl \I {1.1.1}\else \textLR {1.1.1}\fi }Historique et Mission}{7}{subsection.1.1.1}%
+\contentsline {subsection}{\numberline {\if@rl \I {2.1.1}\else \textLR {1.1.2}\fi }Domaines d'Activité et Expertise}{7}{subsection.1.1.2}%
+\contentsline {subsection}{\numberline {\if@rl \I {3.1.1}\else \textLR {1.1.3}\fi }Organisation et Structure}{8}{subsection.1.1.3}%
+\contentsline {section}{\numberline {\filterminitoc {1.}2}Problématique de la Gouvernance des Données}{8}{section.1.2}%
+\contentsline {subsection}{\numberline {\if@rl \I {1.2.1}\else \textLR {1.2.1}\fi }Contexte et Enjeux Critiques}{8}{subsection.1.2.1}%
+\contentsline {subsection}{\numberline {\if@rl \I {2.2.1}\else \textLR {1.2.2}\fi }Défis Critiques des Entreprises Modernes}{10}{subsection.1.2.2}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {2.2.1}\else \textLR {1.2.2}\fi .1}Complexité d'Intégration Multi-Sources}{10}{subsubsection.1.2.2.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {2.2.1}\else \textLR {1.2.2}\fi .2}Défis de la Classification et Protection des Données}{12}{subsubsection.1.2.2.2}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {2.2.1}\else \textLR {1.2.2}\fi .3}Fragmentation de l'Orchestration et de la Traçabilité}{12}{subsubsection.1.2.2.3}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {2.2.1}\else \textLR {1.2.2}\fi .4}Conformité Réglementaire}{12}{subsubsection.1.2.2.4}%
+\contentsline {subsection}{\numberline {\if@rl \I {3.2.1}\else \textLR {1.2.3}\fi }Besoins Critiques Identifiés et Exigences Techniques}{12}{subsection.1.2.3}%
+\contentsline {section}{\numberline {\filterminitoc {1.}3}Étude des Solutions Existantes}{14}{section.1.3}%
+\contentsline {subsection}{\numberline {\if@rl \I {1.3.1}\else \textLR {1.3.1}\fi }Microsoft Azure Purview}{14}{subsection.1.3.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {1.3.1}\else \textLR {1.3.1}\fi .1}Architecture et Fonctionnalités}{14}{subsubsection.1.3.1.1}%
+\contentsline {paragraph}{Processus de Connexion et Extraction des Métadonnées}{14}{paragraph*.17}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {1.3.1}\else \textLR {1.3.1}\fi .2}Limitations Identifiées}{15}{subsubsection.1.3.1.2}%
+\contentsline {subsection}{\numberline {\if@rl \I {2.3.1}\else \textLR {1.3.2}\fi }Databricks Unity Catalog}{17}{subsection.1.3.2}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {2.3.1}\else \textLR {1.3.2}\fi .1}Limitations Identifiées}{17}{subsubsection.1.3.2.1}%
+\contentsline {subsection}{\numberline {\if@rl \I {3.3.1}\else \textLR {1.3.3}\fi }Autres Solutions}{18}{subsection.1.3.3}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {3.3.1}\else \textLR {1.3.3}\fi .1}Collibra}{18}{subsubsection.1.3.3.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {3.3.1}\else \textLR {1.3.3}\fi .2}Alation}{18}{subsubsection.1.3.3.2}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {3.3.1}\else \textLR {1.3.3}\fi .3}Informatica}{18}{subsubsection.1.3.3.3}%
+\contentsline {subsection}{\numberline {\if@rl \I {4.3.1}\else \textLR {1.3.4}\fi }Analyse Comparative}{18}{subsection.1.3.4}%
+\contentsline {section}{\numberline {\filterminitoc {1.}4}Positionnement et Innovation de DataWave}{18}{section.1.4}%
+\contentsline {subsection}{\numberline {\if@rl \I {1.4.1}\else \textLR {1.4.1}\fi }Connectivité Universelle et Architecture Distribuée}{19}{subsection.1.4.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {1.4.1}\else \textLR {1.4.1}\fi .1}Support Multi-Bases de Données Natif}{19}{subsubsection.1.4.1.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {1.4.1}\else \textLR {1.4.1}\fi .2}Architecture Edge Computing Distribuée}{19}{subsubsection.1.4.1.2}%
+\contentsline {subsection}{\numberline {\if@rl \I {2.4.1}\else \textLR {1.4.2}\fi }Intelligence Artificielle et Automatisation Avancée}{20}{subsection.1.4.2}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {2.4.1}\else \textLR {1.4.2}\fi .1}Système de Classification Intelligent}{20}{subsubsection.1.4.2.1}%
+\contentsline {subsection}{\numberline {\if@rl \I {3.4.1}\else \textLR {1.4.3}\fi }Architecture Modulaire Intégrée}{20}{subsection.1.4.3}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {3.4.1}\else \textLR {1.4.3}\fi .1}Sept Modules de Gouvernance Interconnectés}{20}{subsubsection.1.4.3.1}%
+\contentsline {subsection}{\numberline {\if@rl \I {4.4.1}\else \textLR {1.4.4}\fi }Performance et Scalabilité Enterprise}{20}{subsection.1.4.4}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {4.4.1}\else \textLR {1.4.4}\fi .1}Performance et Scalabilité Supérieures}{20}{subsubsection.1.4.4.1}%
+\contentsline {subsection}{\numberline {\if@rl \I {5.4.1}\else \textLR {1.4.5}\fi }Valeur Ajoutée et Différenciation}{21}{subsection.1.4.5}%
+\contentsline {subsection}{\numberline {\if@rl \I {6.4.1}\else \textLR {1.4.6}\fi }Vision et Roadmap}{21}{subsection.1.4.6}%
+\select@language {french}
+\contentsline {chapter}{\numberline {\textLR {2}}\bgroup \beginL \latintext Analyse et Conception du Système\endL \egroup }{24}{chapter.2}%
+\contentsline {section}{\numberline {\filterminitoc {2.}1}Identification des Acteurs}{26}{section.2.1}%
+\contentsline {subsection}{\numberline {\if@rl \I {1.1.2}\else \textLR {2.1.1}\fi }Acteurs Principaux}{26}{subsection.2.1.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {1.1.2}\else \textLR {2.1.1}\fi .1}Data Steward (Gestionnaire de Données)}{26}{subsubsection.2.1.1.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {1.1.2}\else \textLR {2.1.1}\fi .2}Data Engineer (Ingénieur de Données)}{26}{subsubsection.2.1.1.2}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {1.1.2}\else \textLR {2.1.1}\fi .3}Compliance Officer (Responsable Conformité)}{27}{subsubsection.2.1.1.3}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {1.1.2}\else \textLR {2.1.1}\fi .4}Data Analyst (Analyste de Données)}{27}{subsubsection.2.1.1.4}%
+\contentsline {subsection}{\numberline {\if@rl \I {2.1.2}\else \textLR {2.1.2}\fi }Acteurs Secondaires}{27}{subsection.2.1.2}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {2.1.2}\else \textLR {2.1.2}\fi .1}Administrateur Système}{27}{subsubsection.2.1.2.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {2.1.2}\else \textLR {2.1.2}\fi .2}Security Officer (Responsable Sécurité)}{27}{subsubsection.2.1.2.2}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {2.1.2}\else \textLR {2.1.2}\fi .3}Business User (Utilisateur Métier)}{27}{subsubsection.2.1.2.3}%
+\contentsline {subsection}{\numberline {\if@rl \I {3.1.2}\else \textLR {2.1.3}\fi }Diagramme des Acteurs}{27}{subsection.2.1.3}%
+\contentsline {section}{\numberline {\filterminitoc {2.}2}Analyse des Besoins}{28}{section.2.2}%
+\contentsline {subsection}{\numberline {\if@rl \I {1.2.2}\else \textLR {2.2.1}\fi }Besoins Fonctionnels}{28}{subsection.2.2.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {1.2.2}\else \textLR {2.2.1}\fi .1}Gestion Universelle des Sources de Données}{28}{subsubsection.2.2.1.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {1.2.2}\else \textLR {2.2.1}\fi .2}Découverte et Catalogage Automatique}{29}{subsubsection.2.2.1.2}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {1.2.2}\else \textLR {2.2.1}\fi .3}Classification Intelligente des Données}{29}{subsubsection.2.2.1.3}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {1.2.2}\else \textLR {2.2.1}\fi .4}Règles de Scan Configurables}{29}{subsubsection.2.2.1.4}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {1.2.2}\else \textLR {2.2.1}\fi .5}Orchestration des Scans}{30}{subsubsection.2.2.1.5}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {1.2.2}\else \textLR {2.2.1}\fi .6}Conformité Réglementaire}{30}{subsubsection.2.2.1.6}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {1.2.2}\else \textLR {2.2.1}\fi .7}Contrôle d'Accès Granulaire}{30}{subsubsection.2.2.1.7}%
+\contentsline {subsection}{\numberline {\if@rl \I {2.2.2}\else \textLR {2.2.2}\fi }Besoins Non-Fonctionnels}{30}{subsection.2.2.2}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {2.2.2}\else \textLR {2.2.2}\fi .1}Performance}{30}{subsubsection.2.2.2.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {2.2.2}\else \textLR {2.2.2}\fi .2}Scalabilité}{31}{subsubsection.2.2.2.2}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {2.2.2}\else \textLR {2.2.2}\fi .3}Sécurité}{31}{subsubsection.2.2.2.3}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {2.2.2}\else \textLR {2.2.2}\fi .4}Disponibilité}{32}{subsubsection.2.2.2.4}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {2.2.2}\else \textLR {2.2.2}\fi .5}Maintenabilité}{32}{subsubsection.2.2.2.5}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {2.2.2}\else \textLR {2.2.2}\fi .6}Interopérabilité}{32}{subsubsection.2.2.2.6}%
+\contentsline {section}{\numberline {\filterminitoc {2.}3}Architecture Globale du Système}{32}{section.2.3}%
+\contentsline {subsection}{\numberline {\if@rl \I {1.3.2}\else \textLR {2.3.1}\fi }Vue d'Ensemble de l'Architecture}{32}{subsection.2.3.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {1.3.2}\else \textLR {2.3.1}\fi .1}Architecture Microservices}{33}{subsubsection.2.3.1.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {1.3.2}\else \textLR {2.3.1}\fi .2}Séparation Frontend/Backend}{33}{subsubsection.2.3.1.2}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {1.3.2}\else \textLR {2.3.1}\fi .3}Architecture Edge Computing Révolutionnaire}{34}{subsubsection.2.3.1.3}%
+\contentsline {subsection}{\numberline {\if@rl \I {2.3.2}\else \textLR {2.3.2}\fi }Les 7 Modules de Gouvernance}{35}{subsection.2.3.2}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {2.3.2}\else \textLR {2.3.2}\fi .1}Module 1 : Data Source Management (Fondation)}{35}{subsubsection.2.3.2.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {2.3.2}\else \textLR {2.3.2}\fi .2}Module 2 : Data Catalog System (Intelligence)}{36}{subsubsection.2.3.2.2}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {2.3.2}\else \textLR {2.3.2}\fi .3}Module 3 : Classification System (Automatisation)}{36}{subsubsection.2.3.2.3}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {2.3.2}\else \textLR {2.3.2}\fi .4}Module 4 : Scan Rule Sets (Définition)}{36}{subsubsection.2.3.2.4}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {2.3.2}\else \textLR {2.3.2}\fi .5}Module 5 : Scan Logic (Exécution)}{37}{subsubsection.2.3.2.5}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {2.3.2}\else \textLR {2.3.2}\fi .6}Module 6 : Compliance System (Gouvernance)}{37}{subsubsection.2.3.2.6}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {2.3.2}\else \textLR {2.3.2}\fi .7}Module 7 : RBAC/Access Control (Sécurité)}{37}{subsubsection.2.3.2.7}%
+\contentsline {subsection}{\numberline {\if@rl \I {3.3.2}\else \textLR {2.3.3}\fi }Intégration et Orchestration : Racine Main Manager}{39}{subsection.2.3.3}%
+\select@language {french}
+\contentsline {chapter}{\numberline {\textLR {3}}\bgroup \beginL \latintext Réalisation et Implémentation\endL \egroup }{40}{chapter.3}%
+\contentsline {section}{\numberline {\filterminitoc {3.}1}Module Data Source Management : Connectivité Universelle}{43}{section.3.1}%
+\contentsline {subsection}{\numberline {\if@rl \I {1.1.3}\else \textLR {3.1.1}\fi }Architecture de Connectivité Universelle}{43}{subsection.3.1.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {1.1.3}\else \textLR {3.1.1}\fi .1}Support Multi-Bases de Données}{43}{subsubsection.3.1.1.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {1.1.3}\else \textLR {3.1.1}\fi .2}Gestion Avancée des Connexions avec PgBouncer}{43}{subsubsection.3.1.1.2}%
+\contentsline {subsection}{\numberline {\if@rl \I {2.1.3}\else \textLR {3.1.2}\fi }Découverte Intelligente de Schémas}{45}{subsection.3.1.2}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {2.1.3}\else \textLR {3.1.2}\fi .1}Stratégies de Découverte Adaptatives}{45}{subsubsection.3.1.2.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {2.1.3}\else \textLR {3.1.2}\fi .2}Enrichissement par Intelligence Artificielle}{46}{subsubsection.3.1.2.2}%
+\contentsline {subsection}{\numberline {\if@rl \I {3.1.3}\else \textLR {3.1.3}\fi }Sécurité et Authentification Multi-Méthodes}{46}{subsection.3.1.3}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {3.1.3}\else \textLR {3.1.3}\fi .1}Méthodes d'Authentification Supportées}{46}{subsubsection.3.1.3.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {3.1.3}\else \textLR {3.1.3}\fi .2}Chiffrement SSL/TLS Complet}{46}{subsubsection.3.1.3.2}%
+\contentsline {subsection}{\numberline {\if@rl \I {4.1.3}\else \textLR {3.1.4}\fi }Health Monitoring et Failover Automatique}{46}{subsection.3.1.4}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {4.1.3}\else \textLR {3.1.4}\fi .1}Monitoring en Temps Réel}{47}{subsubsection.3.1.4.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {4.1.3}\else \textLR {3.1.4}\fi .2}Failover Automatique}{48}{subsubsection.3.1.4.2}%
+\contentsline {subsection}{\numberline {\if@rl \I {5.1.3}\else \textLR {3.1.5}\fi }Interfaces et Fonctionnalités}{48}{subsection.3.1.5}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {5.1.3}\else \textLR {3.1.5}\fi .1}Interface de Gestion des Sources}{48}{subsubsection.3.1.5.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {5.1.3}\else \textLR {3.1.5}\fi .2}Configuration d'une Source PostgreSQL}{49}{subsubsection.3.1.5.2}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {5.1.3}\else \textLR {3.1.5}\fi .3}Test de Connexion et Health Monitoring}{50}{subsubsection.3.1.5.3}%
+\contentsline {section}{\numberline {\filterminitoc {3.}2}Module Data Catalog : Intelligence et Traçabilité}{50}{section.3.2}%
+\contentsline {subsection}{\numberline {\if@rl \I {1.2.3}\else \textLR {3.2.1}\fi }Catalogage Automatique des Assets}{50}{subsection.3.2.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {1.2.3}\else \textLR {3.2.1}\fi .1}Synchronisation en Temps Réel}{51}{subsubsection.3.2.1.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {1.2.3}\else \textLR {3.2.1}\fi .2}Métadonnées Enrichies}{51}{subsubsection.3.2.1.2}%
+\contentsline {subsection}{\numberline {\if@rl \I {2.2.3}\else \textLR {3.2.2}\fi }Data Lineage : Traçabilité Complète}{51}{subsection.3.2.2}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {2.2.3}\else \textLR {3.2.2}\fi .1}Lineage au Niveau Colonne}{51}{subsubsection.3.2.2.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {2.2.3}\else \textLR {3.2.2}\fi .2}Visualisation Interactive du Lineage}{52}{subsubsection.3.2.2.2}%
+\contentsline {section}{\numberline {\filterminitoc {3.}3}Module Classification System : Intelligence Automatique}{53}{section.3.3}%
+\contentsline {subsection}{\numberline {\if@rl \I {1.3.3}\else \textLR {3.3.1}\fi }Classification Multi-Niveaux}{53}{subsection.3.3.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {1.3.3}\else \textLR {3.3.1}\fi .1}Trois Approches Complémentaires}{53}{subsubsection.3.3.1.1}%
+\contentsline {subsection}{\numberline {\if@rl \I {2.3.3}\else \textLR {3.3.2}\fi }Gestion de la Sensibilité des Données}{54}{subsection.3.3.2}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {2.3.3}\else \textLR {3.3.2}\fi .1}Catégories de Sensibilité}{54}{subsubsection.3.3.2.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {2.3.3}\else \textLR {3.3.2}\fi .2}Héritage Hiérarchique}{55}{subsubsection.3.3.2.2}%
+\contentsline {subsection}{\numberline {\if@rl \I {3.3.3}\else \textLR {3.3.3}\fi }Moteur de Patterns Avancé}{56}{subsection.3.3.3}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {3.3.3}\else \textLR {3.3.3}\fi .1}Types de Patterns Supportés}{56}{subsubsection.3.3.3.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {3.3.3}\else \textLR {3.3.3}\fi .2}Scoring de Confiance}{56}{subsubsection.3.3.3.2}%
+\contentsline {subsection}{\numberline {\if@rl \I {4.3.3}\else \textLR {3.3.4}\fi }Apprentissage Continu}{57}{subsection.3.3.4}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {4.3.3}\else \textLR {3.3.4}\fi .1}Feedback Loop}{57}{subsubsection.3.3.4.1}%
+\contentsline {subsection}{\numberline {\if@rl \I {5.3.3}\else \textLR {3.3.5}\fi }Interfaces et Résultats}{58}{subsection.3.3.5}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {5.3.3}\else \textLR {3.3.5}\fi .1}Interface de Gestion des Règles}{58}{subsubsection.3.3.5.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {5.3.3}\else \textLR {3.3.5}\fi .2}Configuration d'une Règle PII}{58}{subsubsection.3.3.5.2}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {5.3.3}\else \textLR {3.3.5}\fi .3}Résultats de Classification}{58}{subsubsection.3.3.5.3}%
+\contentsline {section}{\numberline {\filterminitoc {3.}4}Module Scan Rule Sets : Gestion Intelligente des Règles}{60}{section.3.4}%
+\contentsline {subsection}{\numberline {\if@rl \I {1.4.3}\else \textLR {3.4.1}\fi }Moteur de Règles Intelligent}{60}{subsection.3.4.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {1.4.3}\else \textLR {3.4.1}\fi .1}Cycle de Vie Complet}{60}{subsubsection.3.4.1.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {1.4.3}\else \textLR {3.4.1}\fi .2}Versioning et Audit Trail}{61}{subsubsection.3.4.1.2}%
+\contentsline {subsection}{\numberline {\if@rl \I {2.4.3}\else \textLR {3.4.2}\fi }Optimisation et Performance}{61}{subsection.3.4.2}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {2.4.3}\else \textLR {3.4.2}\fi .1}Stratégies d'Optimisation}{61}{subsubsection.3.4.2.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {2.4.3}\else \textLR {3.4.2}\fi .2}Stratégies d'Exécution}{62}{subsubsection.3.4.2.2}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {2.4.3}\else \textLR {3.4.2}\fi .3}Caching Multi-Niveaux}{62}{subsubsection.3.4.2.3}%
+\contentsline {subsection}{\numberline {\if@rl \I {3.4.3}\else \textLR {3.4.3}\fi }Bibliothèque de Patterns}{63}{subsection.3.4.3}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {3.4.3}\else \textLR {3.4.3}\fi .1}Templates Pré-Construits}{63}{subsubsection.3.4.3.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {3.4.3}\else \textLR {3.4.3}\fi .2}Analytics d'Utilisation}{63}{subsubsection.3.4.3.2}%
+\contentsline {subsection}{\numberline {\if@rl \I {4.4.3}\else \textLR {3.4.4}\fi }Interfaces et Configuration}{63}{subsection.3.4.4}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {4.4.3}\else \textLR {3.4.4}\fi .1}Interface de Création de Règle}{63}{subsubsection.3.4.4.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {4.4.3}\else \textLR {3.4.4}\fi .2}Configuration Avancée}{65}{subsubsection.3.4.4.2}%
+\contentsline {section}{\numberline {\filterminitoc {3.}5}Module Scan Logic : Orchestration Distribuée}{66}{section.3.5}%
+\contentsline {subsection}{\numberline {\if@rl \I {1.5.3}\else \textLR {3.5.1}\fi }Workflow Engine Multi-Étapes}{66}{subsection.3.5.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {1.5.3}\else \textLR {3.5.1}\fi .1}Architecture du Workflow Engine}{67}{subsubsection.3.5.1.1}%
+\contentsline {subsection}{\numberline {\if@rl \I {2.5.3}\else \textLR {3.5.2}\fi }Orchestration Distribuée sur Edge Nodes}{67}{subsection.3.5.2}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {2.5.3}\else \textLR {3.5.2}\fi .1}Architecture Distribuée}{68}{subsubsection.3.5.2.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {2.5.3}\else \textLR {3.5.2}\fi .2}Allocation Dynamique de Ressources}{68}{subsubsection.3.5.2.2}%
+\contentsline {subsection}{\numberline {\if@rl \I {3.5.3}\else \textLR {3.5.3}\fi }Monitoring en Temps Réel}{70}{subsection.3.5.3}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {3.5.3}\else \textLR {3.5.3}\fi .1}Dashboard de Monitoring}{70}{subsubsection.3.5.3.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {3.5.3}\else \textLR {3.5.3}\fi .2}Progression des Scans}{71}{subsubsection.3.5.3.2}%
+\contentsline {subsection}{\numberline {\if@rl \I {4.5.3}\else \textLR {3.5.4}\fi }Alerting et Gestion des Erreurs}{71}{subsection.3.5.4}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {4.5.3}\else \textLR {3.5.4}\fi .1}Système d'Alerting}{71}{subsubsection.3.5.4.1}%
+\contentsline {section}{\numberline {\filterminitoc {3.}6}Module Compliance System : Conformité Automatisée}{73}{section.3.6}%
+\contentsline {subsection}{\numberline {\if@rl \I {1.6.3}\else \textLR {3.6.1}\fi }Support Multi-Frameworks}{73}{subsection.3.6.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {1.6.3}\else \textLR {3.6.1}\fi .1}Frameworks Supportés}{73}{subsubsection.3.6.1.1}%
+\contentsline {subsection}{\numberline {\if@rl \I {2.6.3}\else \textLR {3.6.2}\fi }Évaluation Automatique}{74}{subsection.3.6.2}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {2.6.3}\else \textLR {3.6.2}\fi .1}Scopes de Règles}{74}{subsubsection.3.6.2.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {2.6.3}\else \textLR {3.6.2}\fi .2}Processus d'Évaluation}{74}{subsubsection.3.6.2.2}%
+\contentsline {subsection}{\numberline {\if@rl \I {3.6.3}\else \textLR {3.6.3}\fi }Gestion des Issues et Remédiation}{75}{subsection.3.6.3}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {3.6.3}\else \textLR {3.6.3}\fi .1}Détection et Priorisation}{75}{subsubsection.3.6.3.1}%
+\contentsline {subsection}{\numberline {\if@rl \I {4.6.3}\else \textLR {3.6.4}\fi }Reporting et Audit}{75}{subsection.3.6.4}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {4.6.3}\else \textLR {3.6.4}\fi .1}Dashboard de Conformité}{77}{subsubsection.3.6.4.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {4.6.3}\else \textLR {3.6.4}\fi .2}Rapports d'Audit}{77}{subsubsection.3.6.4.2}%
+\contentsline {section}{\numberline {\filterminitoc {3.}7}Module RBAC : Sécurité et Contrôle d'Accès}{78}{section.3.7}%
+\contentsline {subsection}{\numberline {\if@rl \I {1.7.3}\else \textLR {3.7.1}\fi }Contrôle d'Accès Granulaire}{78}{subsection.3.7.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {1.7.3}\else \textLR {3.7.1}\fi .1}Architecture RBAC}{79}{subsubsection.3.7.1.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {1.7.3}\else \textLR {3.7.1}\fi .2}ABAC (Attribute-Based Access Control)}{79}{subsubsection.3.7.1.2}%
+\contentsline {subsection}{\numberline {\if@rl \I {2.7.3}\else \textLR {3.7.2}\fi }Multi-Tenancy et Isolation}{79}{subsection.3.7.2}%
+\contentsline {subsection}{\numberline {\if@rl \I {3.7.3}\else \textLR {3.7.3}\fi }Audit et Traçabilité}{80}{subsection.3.7.3}%
+\select@language {french}
+\contentsline {chapter}{\numberline {\textLR {4}}\bgroup \beginL \latintext Tests, Déploiement et Résultats\endL \egroup }{82}{chapter.4}%
+\contentsline {section}{\numberline {\filterminitoc {4.}1}Stratégie de Tests}{84}{section.4.1}%
+\contentsline {subsection}{\numberline {\if@rl \I {1.1.4}\else \textLR {4.1.1}\fi }Tests Unitaires}{84}{subsection.4.1.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {1.1.4}\else \textLR {4.1.1}\fi .1}Couverture de Tests}{84}{subsubsection.4.1.1.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {1.1.4}\else \textLR {4.1.1}\fi .2}Framework de Tests}{84}{subsubsection.4.1.1.2}%
+\contentsline {subsection}{\numberline {\if@rl \I {2.1.4}\else \textLR {4.1.2}\fi }Tests d'Intégration}{85}{subsection.4.1.2}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {2.1.4}\else \textLR {4.1.2}\fi .1}Tests d'Intégration API}{85}{subsubsection.4.1.2.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {2.1.4}\else \textLR {4.1.2}\fi .2}Tests d'Intégration Base de Données}{85}{subsubsection.4.1.2.2}%
+\contentsline {subsection}{\numberline {\if@rl \I {3.1.4}\else \textLR {4.1.3}\fi }Tests de Performance}{85}{subsection.4.1.3}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {3.1.4}\else \textLR {4.1.3}\fi .1}Tests de Charge}{85}{subsubsection.4.1.3.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {3.1.4}\else \textLR {4.1.3}\fi .2}Tests de Stress}{86}{subsubsection.4.1.3.2}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {3.1.4}\else \textLR {4.1.3}\fi .3}Benchmarking}{86}{subsubsection.4.1.3.3}%
+\contentsline {subsection}{\numberline {\if@rl \I {4.1.4}\else \textLR {4.1.4}\fi }Tests de Sécurité}{86}{subsection.4.1.4}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {4.1.4}\else \textLR {4.1.4}\fi .1}Tests de Pénétration}{86}{subsubsection.4.1.4.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {4.1.4}\else \textLR {4.1.4}\fi .2}Tests de Conformité Sécurité}{87}{subsubsection.4.1.4.2}%
+\contentsline {subsection}{\numberline {\if@rl \I {5.1.4}\else \textLR {4.1.5}\fi }Tests d'Acceptation Utilisateur}{88}{subsection.4.1.5}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {5.1.4}\else \textLR {4.1.5}\fi .1}Clients Pilotes}{88}{subsubsection.4.1.5.1}%
+\contentsline {section}{\numberline {\filterminitoc {4.}2}Infrastructure et Déploiement}{88}{section.4.2}%
+\contentsline {subsection}{\numberline {\if@rl \I {1.2.4}\else \textLR {4.2.1}\fi }Architecture de Déploiement}{88}{subsection.4.2.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {1.2.4}\else \textLR {4.2.1}\fi .1}Architecture Kubernetes}{88}{subsubsection.4.2.1.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {1.2.4}\else \textLR {4.2.1}\fi .2}Configuration des Ressources}{89}{subsubsection.4.2.1.2}%
+\contentsline {subsection}{\numberline {\if@rl \I {2.2.4}\else \textLR {4.2.2}\fi }Configuration Production}{89}{subsection.4.2.2}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {2.2.4}\else \textLR {4.2.2}\fi .1}Base de Données PostgreSQL}{89}{subsubsection.4.2.2.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {2.2.4}\else \textLR {4.2.2}\fi .2}Cache Redis}{90}{subsubsection.4.2.2.2}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {2.2.4}\else \textLR {4.2.2}\fi .3}Message Queue Kafka}{90}{subsubsection.4.2.2.3}%
+\contentsline {subsection}{\numberline {\if@rl \I {3.2.4}\else \textLR {4.2.3}\fi }Monitoring et Observabilité}{90}{subsection.4.2.3}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {3.2.4}\else \textLR {4.2.3}\fi .1}Stack de Monitoring}{90}{subsubsection.4.2.3.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {3.2.4}\else \textLR {4.2.3}\fi .2}Métriques Monitorées}{90}{subsubsection.4.2.3.2}%
+\contentsline {subsection}{\numberline {\if@rl \I {4.2.4}\else \textLR {4.2.4}\fi }Haute Disponibilité et Disaster Recovery}{91}{subsection.4.2.4}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {4.2.4}\else \textLR {4.2.4}\fi .1}Stratégie de Haute Disponibilité}{91}{subsubsection.4.2.4.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {4.2.4}\else \textLR {4.2.4}\fi .2}Plan de Disaster Recovery}{91}{subsubsection.4.2.4.2}%
+\contentsline {section}{\numberline {\filterminitoc {4.}3}Résultats et Performances}{92}{section.4.3}%
+\contentsline {subsection}{\numberline {\if@rl \I {1.3.4}\else \textLR {4.3.1}\fi }Métriques de Performance en Production}{92}{subsection.4.3.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {1.3.4}\else \textLR {4.3.1}\fi .1}Performance API}{92}{subsubsection.4.3.1.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {1.3.4}\else \textLR {4.3.1}\fi .2}Performance de Découverte et Scanning}{92}{subsubsection.4.3.1.2}%
+\contentsline {subsection}{\numberline {\if@rl \I {2.3.4}\else \textLR {4.3.2}\fi }Scalabilité Démontrée}{93}{subsection.4.3.2}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {2.3.4}\else \textLR {4.3.2}\fi .1}Test de Scalabilité Horizontale}{93}{subsubsection.4.3.2.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {2.3.4}\else \textLR {4.3.2}\fi .2}Capacité Maximale Testée}{93}{subsubsection.4.3.2.2}%
+\contentsline {subsection}{\numberline {\if@rl \I {3.3.4}\else \textLR {4.3.3}\fi }Résultats de Classification}{94}{subsection.4.3.3}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {3.3.4}\else \textLR {4.3.3}\fi .1}Précision de Classification}{94}{subsubsection.4.3.3.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {3.3.4}\else \textLR {4.3.3}\fi .2}Évolution de la Précision}{94}{subsubsection.4.3.3.2}%
+\contentsline {subsection}{\numberline {\if@rl \I {4.3.4}\else \textLR {4.3.4}\fi }Conformité et Gouvernance}{95}{subsection.4.3.4}%
+\contentsline {section}{\numberline {\filterminitoc {4.}4}Analyse Comparative}{95}{section.4.4}%
+\contentsline {subsection}{\numberline {\if@rl \I {1.4.4}\else \textLR {4.4.1}\fi }Comparaison avec Microsoft Azure Purview}{95}{subsection.4.4.1}%
+\contentsline {subsection}{\numberline {\if@rl \I {2.4.4}\else \textLR {4.4.2}\fi }Comparaison avec Databricks Unity Catalog}{96}{subsection.4.4.2}%
+\contentsline {subsection}{\numberline {\if@rl \I {3.4.4}\else \textLR {4.4.3}\fi }Comparaison Globale}{96}{subsection.4.4.3}%
+\contentsline {subsection}{\numberline {\if@rl \I {4.4.4}\else \textLR {4.4.4}\fi }ROI et Valeur Métier}{97}{subsection.4.4.4}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {4.4.4}\else \textLR {4.4.4}\fi .1}Analyse de ROI}{97}{subsubsection.4.4.4.1}%
+\contentsline {section}{\numberline {\filterminitoc {4.}5}Retours Utilisateurs et Validation}{98}{section.4.5}%
+\contentsline {subsection}{\numberline {\if@rl \I {1.5.4}\else \textLR {4.5.1}\fi }Cas d'Usage Validés}{98}{subsection.4.5.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {1.5.4}\else \textLR {4.5.1}\fi .1}Secteur Finance (Client A)}{98}{subsubsection.4.5.1.1}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {1.5.4}\else \textLR {4.5.1}\fi .2}Secteur Santé (Client B)}{98}{subsubsection.4.5.1.2}%
+\contentsline {subsubsection}{\numberline {\if@rl \I {1.5.4}\else \textLR {4.5.1}\fi .3}Secteur E-commerce (Client C)}{98}{subsubsection.4.5.1.3}%
+\contentsline {subsection}{\numberline {\if@rl \I {2.5.4}\else \textLR {4.5.2}\fi }Feedback et Améliorations}{99}{subsection.4.5.2}%
+\select@language {french}
+\contentsline {chapter}{Conclusion générale}{100}{chapter*.113}%
+\select@language {french}
+\contentsline {chapter}{Annexes}{105}{chapter*.114}%
+\contentsline {section}{Annexe 1.~Exemple d'annexe}{105}{section*.115}%
+\contentsline {section}{Annexe 2.~Entreprise}{106}{table.5.1}%
+\babel@toc {arabic}{}\relax 
+\babel@toc {french}{}\relax 
+\babel@toc {english}{}\relax 
+\babel@toc {french}{}\relax 
+\babel@toc {arabic}{}\relax 
+\babel@toc {french}{}\relax 

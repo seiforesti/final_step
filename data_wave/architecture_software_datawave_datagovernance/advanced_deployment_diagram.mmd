@@ -1,0 +1,246 @@
+graph TB
+    %% External Users and Systems
+    subgraph "External Layer"
+        EU[External Users]
+        API_CLIENTS[API Clients]
+        THIRD_PARTY[Third Party Systems]
+        DATA_SOURCES_EXT[External Data Sources]
+    end
+
+    %% Load Balancer and CDN
+    subgraph "Edge Layer"
+        CDN[CDN / CloudFlare]
+        LB[Load Balancer<br/>NGINX/HAProxy]
+        WAF[Web Application Firewall]
+        SSL[SSL Termination]
+    end
+
+    %% Frontend Deployment
+    subgraph "Frontend Tier"
+        subgraph "Next.js Application Cluster"
+            NEXT1[Next.js App Instance 1<br/>Port: 3000]
+            NEXT2[Next.js App Instance 2<br/>Port: 3001]
+            NEXT3[Next.js App Instance 3<br/>Port: 3002]
+        end
+        
+        subgraph "Static Assets"
+            STATIC[Static File Server<br/>Images, CSS, JS]
+            ASSETS_CDN[Assets CDN]
+        end
+    end
+
+    %% API Gateway and Microservices
+    subgraph "API Gateway Layer"
+        API_GW[API Gateway<br/>Kong/Zuul]
+        AUTH_SVC[Authentication Service<br/>OAuth 2.0 / JWT]
+        RATE_LIMIT[Rate Limiting]
+        API_CACHE[API Response Cache<br/>Redis]
+    end
+
+    %% Backend Microservices
+    subgraph "Backend Services Tier"
+        subgraph "Core Services Cluster"
+            SCAN_SVC1[Scan Service 1<br/>Port: 8001]
+            SCAN_SVC2[Scan Service 2<br/>Port: 8002]
+            DISCOVERY_SVC1[Discovery Service 1<br/>Port: 8003]
+            DISCOVERY_SVC2[Discovery Service 2<br/>Port: 8004]
+        end
+        
+        subgraph "Data Processing Cluster"
+            CATALOG_SVC[Catalog Service<br/>Port: 8005]
+            CLASSIFICATION_SVC[Classification Service<br/>Port: 8006]
+            COMPLIANCE_SVC[Compliance Service<br/>Port: 8007]
+            ANALYTICS_SVC[Analytics Service<br/>Port: 8008]
+        end
+        
+        subgraph "AI/ML Services Cluster"
+            AI_SVC[AI Processing Service<br/>Port: 8009]
+            ML_SVC[ML Model Service<br/>Port: 8010]
+            NLP_SVC[NLP Service<br/>Port: 8011]
+            PATTERN_SVC[Pattern Recognition<br/>Port: 8012]
+        end
+    end
+
+    %% Message Queue and Event Streaming
+    subgraph "Message Layer"
+        KAFKA[Apache Kafka Cluster<br/>Event Streaming]
+        RABBITMQ[RabbitMQ<br/>Task Queue]
+        REDIS_QUEUE[Redis Queue<br/>Job Processing]
+    end
+
+    %% Database Layer
+    subgraph "Database Tier"
+        subgraph "Primary Databases"
+            POSTGRES_MASTER[PostgreSQL Master<br/>Port: 5432<br/>Main Application DB]
+            POSTGRES_SLAVE1[PostgreSQL Slave 1<br/>Read Replica]
+            POSTGRES_SLAVE2[PostgreSQL Slave 2<br/>Read Replica]
+        end
+        
+        subgraph "Specialized Databases"
+            MONGODB[MongoDB Cluster<br/>Document Storage<br/>Scan Results & Metadata]
+            ELASTICSEARCH[Elasticsearch Cluster<br/>Search & Analytics<br/>Log Aggregation]
+            NEO4J[Neo4j Graph DB<br/>Data Lineage<br/>Relationships]
+        end
+        
+        subgraph "Cache Layer"
+            REDIS_CACHE[Redis Cache Cluster<br/>Session & Application Cache]
+            MEMCACHED[Memcached<br/>Query Result Cache]
+        end
+    end
+
+    %% Storage Layer
+    subgraph "Storage Tier"
+        subgraph "Object Storage"
+            S3[AWS S3 / MinIO<br/>File Storage<br/>Backup & Archives]
+            BLOB[Azure Blob Storage<br/>Large File Storage]
+        end
+        
+        subgraph "Network Storage"
+            NFS[NFS Shared Storage<br/>Configuration Files]
+            BACKUP_STORAGE[Backup Storage<br/>Database Backups]
+        end
+    end
+
+    %% Monitoring and Observability
+    subgraph "Observability Layer"
+        subgraph "Monitoring Stack"
+            PROMETHEUS[Prometheus<br/>Metrics Collection]
+            GRAFANA[Grafana<br/>Dashboards & Visualization]
+            ALERTMANAGER[Alert Manager<br/>Notification System]
+        end
+        
+        subgraph "Logging Stack"
+            FLUENTD[Fluentd<br/>Log Collection]
+            KIBANA[Kibana<br/>Log Analysis & Visualization]
+            JAEGER[Jaeger<br/>Distributed Tracing]
+        end
+    end
+
+    %% Security Layer
+    subgraph "Security Tier"
+        VAULT[HashiCorp Vault<br/>Secrets Management]
+        LDAP[LDAP/Active Directory<br/>User Management]
+        SECURITY_SCANNER[Security Scanner<br/>Vulnerability Assessment]
+        BACKUP_SVC[Backup Service<br/>Automated Backups]
+    end
+
+    %% Container Orchestration
+    subgraph "Container Platform"
+        subgraph "Kubernetes Cluster"
+            K8S_MASTER[Kubernetes Master<br/>Control Plane]
+            K8S_NODE1[Worker Node 1<br/>Frontend Pods]
+            K8S_NODE2[Worker Node 2<br/>Backend Pods]
+            K8S_NODE3[Worker Node 3<br/>Database Pods]
+        end
+        
+        subgraph "Container Registry"
+            DOCKER_REGISTRY[Docker Registry<br/>Container Images]
+            HELM[Helm Charts<br/>Deployment Templates]
+        end
+    end
+
+    %% CI/CD Pipeline
+    subgraph "DevOps Layer"
+        subgraph "CI/CD Pipeline"
+            GITLAB[GitLab CI/CD<br/>Source Control & Pipeline]
+            JENKINS[Jenkins<br/>Build Automation]
+            SONARQUBE[SonarQube<br/>Code Quality]
+            NEXUS[Nexus Repository<br/>Artifact Storage]
+        end
+    end
+
+    %% Network Connections
+    EU --> CDN
+    API_CLIENTS --> CDN
+    THIRD_PARTY --> API_GW
+    
+    CDN --> LB
+    LB --> WAF
+    WAF --> SSL
+    SSL --> NEXT1
+    SSL --> NEXT2
+    SSL --> NEXT3
+    
+    NEXT1 --> API_GW
+    NEXT2 --> API_GW
+    NEXT3 --> API_GW
+    
+    API_GW --> AUTH_SVC
+    API_GW --> RATE_LIMIT
+    API_GW --> API_CACHE
+    
+    API_GW --> SCAN_SVC1
+    API_GW --> SCAN_SVC2
+    API_GW --> DISCOVERY_SVC1
+    API_GW --> DISCOVERY_SVC2
+    API_GW --> CATALOG_SVC
+    API_GW --> CLASSIFICATION_SVC
+    API_GW --> COMPLIANCE_SVC
+    API_GW --> ANALYTICS_SVC
+    API_GW --> AI_SVC
+    API_GW --> ML_SVC
+    
+    SCAN_SVC1 --> KAFKA
+    SCAN_SVC2 --> KAFKA
+    DISCOVERY_SVC1 --> RABBITMQ
+    DISCOVERY_SVC2 --> RABBITMQ
+    
+    CATALOG_SVC --> POSTGRES_MASTER
+    CLASSIFICATION_SVC --> MONGODB
+    COMPLIANCE_SVC --> POSTGRES_MASTER
+    ANALYTICS_SVC --> ELASTICSEARCH
+    
+    AI_SVC --> REDIS_QUEUE
+    ML_SVC --> REDIS_QUEUE
+    NLP_SVC --> MONGODB
+    PATTERN_SVC --> NEO4J
+    
+    POSTGRES_MASTER --> POSTGRES_SLAVE1
+    POSTGRES_MASTER --> POSTGRES_SLAVE2
+    
+    SCAN_SVC1 --> REDIS_CACHE
+    SCAN_SVC2 --> REDIS_CACHE
+    DISCOVERY_SVC1 --> MEMCACHED
+    DISCOVERY_SVC2 --> MEMCACHED
+    
+    BACKUP_SVC --> S3
+    BACKUP_SVC --> BACKUP_STORAGE
+    
+    PROMETHEUS --> GRAFANA
+    PROMETHEUS --> ALERTMANAGER
+    FLUENTD --> ELASTICSEARCH
+    ELASTICSEARCH --> KIBANA
+    
+    AUTH_SVC --> VAULT
+    AUTH_SVC --> LDAP
+    
+    K8S_MASTER --> K8S_NODE1
+    K8S_MASTER --> K8S_NODE2
+    K8S_MASTER --> K8S_NODE3
+    
+    GITLAB --> JENKINS
+    JENKINS --> SONARQUBE
+    JENKINS --> DOCKER_REGISTRY
+    JENKINS --> K8S_MASTER
+    
+    DATA_SOURCES_EXT --> DISCOVERY_SVC1
+    DATA_SOURCES_EXT --> DISCOVERY_SVC2
+
+    %% Styling
+    classDef frontend fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef backend fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef database fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
+    classDef cache fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef security fill:#ffebee,stroke:#b71c1c,stroke-width:2px
+    classDef monitoring fill:#f1f8e9,stroke:#33691e,stroke-width:2px
+    classDef infrastructure fill:#fafafa,stroke:#424242,stroke-width:2px
+    classDef external fill:#e0f2f1,stroke:#00695c,stroke-width:2px
+
+    class NEXT1,NEXT2,NEXT3,STATIC,ASSETS_CDN frontend
+    class SCAN_SVC1,SCAN_SVC2,DISCOVERY_SVC1,DISCOVERY_SVC2,CATALOG_SVC,CLASSIFICATION_SVC,COMPLIANCE_SVC,ANALYTICS_SVC,AI_SVC,ML_SVC,NLP_SVC,PATTERN_SVC backend
+    class POSTGRES_MASTER,POSTGRES_SLAVE1,POSTGRES_SLAVE2,MONGODB,ELASTICSEARCH,NEO4J database
+    class REDIS_CACHE,MEMCACHED,API_CACHE,REDIS_QUEUE cache
+    class VAULT,LDAP,SECURITY_SCANNER,AUTH_SVC,WAF,SSL security
+    class PROMETHEUS,GRAFANA,ALERTMANAGER,FLUENTD,KIBANA,JAEGER monitoring
+    class K8S_MASTER,K8S_NODE1,K8S_NODE2,K8S_NODE3,DOCKER_REGISTRY,HELM,LB,CDN infrastructure
+    class EU,API_CLIENTS,THIRD_PARTY,DATA_SOURCES_EXT external
